@@ -1,0 +1,14 @@
+id: id
+date: _dt
+string: _t
+text: _t
+symbol: _s
+integer: _i
+long: _l
+boolean: _b
+float: _f
+double: _d
+facet: _facet
+display: _display
+sort: _sort
+unstemmed_search: _unstem_search

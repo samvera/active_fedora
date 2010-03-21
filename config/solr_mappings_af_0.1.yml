@@ -1,0 +1,16 @@
+id: id
+date: _date
+string: _field
+text: _field
+symbol: _field
+integer: _field
+long: _field
+boolean: _field
+float: _field
+double: _field
+facet: _facet
+display: _display
+sort: _sort
+unstemmed_search: _unstem_search
+
+

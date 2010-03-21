@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wrapper xmlns:foxml="info:fedora/fedora-system:def/foxml#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/definitions/1/0/foxml1-1.xsd">
+
+  <foxml:datastream ID='dublin_core' STATE='A' CONTROL_GROUP='X' VERSIONABLE='true'>
+    <foxml:datastreamVersion SIZE='1726' ID='dublin_core.0' MIMETYPE='text/xml' LABEL='' CREATED='2009-01-15T17:55:49.277Z'>
+      <foxml:xmlContent>
+        <dc xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:dcterms='http://purl.org/dc/terms/'>
+          <dcterms:type xsi:type='DCMITYPE'>sound</dcterms:type>
+          <dcterms:medium>medium</dcterms:medium>
+          <dcterms:rights>rights</dcterms:rights>
+          <dcterms:language>English</dcterms:language>
+          <dcterms:temporal>tmp</dcterms:temporal>
+          <dcterms:subject>kw1</dcterms:subject>
+          <dcterms:subject>kw2</dcterms:subject>
+          <dcterms:creator>creator</dcterms:creator>
+          <dcterms:title>title</dcterms:title>
+          <dcterms:extent>extent</dcterms:extent>
+          <dcterms:format>audio/x-wav</dcterms:format>
+          <dcterms:subject xsi:type='LCSH'>sh1</dcterms:subject>
+          <dcterms:subject xsi:type='LCSH'>sh2</dcterms:subject>
+          <dcterms:spatial>sp1</dcterms:spatial>
+          <dcterms:spatial>sp2</dcterms:spatial>
+          <dcterms:publisher>jwa</dcterms:publisher>
+          <dcterms:alternative>alt</dcterms:alternative>
+          <dcterms:description>desc</dcterms:description>
+          <dcterms:date>datestr</dcterms:date>
+        </dc>
+      </foxml:xmlContent>
+    </foxml:datastreamVersion>
+  </foxml:datastream>
+</wrapper>

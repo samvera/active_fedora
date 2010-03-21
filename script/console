@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+# File: script/console
+irb = RUBY_PLATFORM =~ /(:?mswin|mingw)/ ? 'irb.bat' : 'irb'
+
+libs =  " -r irb/completion"
+libs << " -r #{File.dirname(__FILE__) + '/../spec/spec_helper'}"
+#libs << " -r rubygems"
+# libs << " -r #{File.dirname(__FILE__) + '/../lib/active_fedora.rb'}"
+
+# Perhaps use a console_lib to store any extra methods I may want available in the cosole
+# libs << " -r #{File.dirname(__FILE__) + '/../lib/console_lib/console_logger.rb'}"
+# libs <<  " -r #{File.dirname(__FILE__) + '/../lib/afed-regem.rb'}"
+# puts "Loading afed-regem gem"
+exec "#{irb} #{libs} --simple-prompt"
+

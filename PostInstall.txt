@@ -1,0 +1,3 @@
+
+For more information on ActiveFedora, see http://bitbucket.org/mediashelf/active_fedora/
+

@@ -1,0 +1,16 @@
+development:
+  fedora:
+    url: http://fedoraAdmin:fedoraAdmin@127.0.0.1:8080/fedora
+  solr:
+    url: http://127.0.0.1:8080/solr
+test:
+  fedora:
+    url: http://fedoraAdmin:fedoraAdmin@127.0.0.1:8080/fedora
+  solr:
+    url: http://127.0.0.1:8080/solr
+production:
+  fedora:
+    url: http://fedoraAdmin:fedoraAdmin@127.0.0.1:8080/fedora
+  solr:
+    url: http://sulwebappdev1.stanford.edu:8100/salt_solr
+    
