@@ -335,7 +335,7 @@ module ActiveFedora
         doc.elements.each("//foxml:datastream[@ID='#{name}']") do |el|
           # datastreams remain marked as new if the foxml doesn't have an entry for that datastream
           ds.new_object = false
-          proto.datastreams[name]=ds.class.from_xml(ds, el)
+          proto.datastreams[name]=ds.class.from_xml(ds, el)          
         end
       end
       proto.inner_object.new_object = false
@@ -492,8 +492,14 @@ module ActiveFedora
     def configure_defined_datastreams
       if self.class.ds_specs
         self.class.ds_specs.each do |name,ar|
+          if self.datastreams.has_key?(name)
+            attributes = self.datastreams[name].attributes
+          else
+            attributes = {}
+          end
           ds = ar.first.new(:dsid=>name)
           ar.last.call(ds)
+          ds.attributes.merge!(attributes)
           self.add_datastream(ds)
         end
       end

@@ -90,7 +90,7 @@ describe ActiveFedora::Base do
     it "should delete object from repository and index" do
       @test_object.expects(:pid).returns("foo")
       ActiveFedora::SolrService.instance.conn.expects(:delete).with("foo")      
-      Fedora::Repository.any_instance.stubs(:delete).with(@test_object.inner_object)
+      Fedora::Repository.instance.stubs(:delete).with(@test_object.inner_object)
       @test_object.delete
     end
 

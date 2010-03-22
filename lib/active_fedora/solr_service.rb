@@ -1,6 +1,8 @@
 require 'solr'
+require "active_fedora/solr_mapper"
 module ActiveFedora 
   class SolrService
+      
     @@mappings = {}
     attr_reader :conn
         
@@ -25,7 +27,7 @@ module ActiveFedora
       end
       results = []
       solr_result.hits.each do |hit|
-        model_value = hit["active_fedora_model_s"].first
+        model_value = hit[ActiveFedora::SolrMapper.solr_name("active_fedora_model", :symbol)].first
         if model_value.include?("::")
           classname = eval(model_value)
         else

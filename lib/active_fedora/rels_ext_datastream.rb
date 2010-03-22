@@ -3,6 +3,8 @@ module ActiveFedora
   class RelsExtDatastream < Datastream
     
     include ActiveFedora::SemanticNode
+    include ActiveFedora::SolrMapper
+    
     
     def initialize(attrs=nil)
       super
@@ -43,7 +45,7 @@ module ActiveFedora
         if subject == :self || subject == "info:fedora/#{self.pid}"
           predicates.each_pair do |predicate, values|
             values.each do |val|
-              solr_doc << Solr::Field.new("#{predicate}_s" => val)
+              solr_doc << Solr::Field.new(solr_name(predicate, :symbol) => val)
             end
           end
         end

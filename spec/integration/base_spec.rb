@@ -2,6 +2,10 @@ require File.join( File.dirname(__FILE__), "../spec_helper" )
 
 describe ActiveFedora::Base do
   
+  before(:all) do
+    ActiveFedora::SolrService.register(ActiveFedora.solr_config[:url])
+  end
+  
   before(:each) do
     @test_object = ActiveFedora::Base.new
     @test_object.save
