@@ -495,11 +495,11 @@ module ActiveFedora
           if self.datastreams.has_key?(name)
             attributes = self.datastreams[name].attributes
           else
-            attributes = {}
+            attributes = {:label=>""}
           end
           ds = ar.first.new(:dsid=>name)
           ar.last.call(ds)
-          ds.attributes.merge!(attributes)
+          ds.attributes = attributes.merge(ds.attributes)
           self.add_datastream(ds)
         end
       end
