@@ -2,9 +2,6 @@ require File.join( File.dirname(__FILE__), "../spec_helper" )
 
 require 'active_fedora'
 
-include ActiveFedora
-
-
 describe ActiveFedora::SolrService do
   describe "#reify_solr_results" do
     before(:all) do
@@ -20,8 +17,8 @@ describe ActiveFedora::SolrService do
       @foo_object.delete
     end
     it "should return an array of objects that are of the class stored in active_fedora_model_s" do
-      query = "id\:#{SolrService.escape_uri_for_query(@test_object.pid)} OR id\:#{SolrService.escape_uri_for_query(@foo_object.pid)}"
-      solr_result = SolrService.instance.conn.query(query)
+      query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@test_object.pid)} OR id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
+      solr_result = ActiveFedora::SolrService.instance.conn.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result)
       result.length.should == 2
       result.each do |r|

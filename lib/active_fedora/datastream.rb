@@ -94,7 +94,6 @@ module ActiveFedora
         object_xml = Fedora::FedoraObject.object_xml(self.pid).gsub("\n     ","")
         datastream_xml = REXML::Document.new(object_xml).root.elements["foxml:datastream[@ID='#{self.dsid}']"]
         
-        puts datastream_xml.length
         if datastream_xml.length > 3
           datastream_xml.elements.each do |el|
             puts el.inspect

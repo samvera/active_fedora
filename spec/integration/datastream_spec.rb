@@ -8,7 +8,6 @@ describe ActiveFedora::Datastream do
   
   before(:each) do
     @test_object = ActiveFedora::Base.new
-    puts @test_object.inspect
     @test_object.save
   end
   

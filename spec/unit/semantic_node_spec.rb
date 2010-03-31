@@ -237,9 +237,6 @@ describe ActiveFedora::SemanticNode do
         local_node = SpecNode.new
         local_node.add_relationship(@test_relationship1)
         result = local_node.containers_ids
-        puts local_node.relationships.inspect
-        #puts local_node.outbound_relationships.inspect
-        puts local_node.internal_uri
         result.should be_instance_of(Array)
         result.should include("demo:10")
       end

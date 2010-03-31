@@ -313,7 +313,6 @@ describe ActiveFedora::Base do
       @test_object.expects(:create_date).returns("cDate")
       @test_object.expects(:modified_date).returns("mDate")
       solr_doc = @test_object.to_solr
-      puts solr_doc.inspect
       solr_doc[:system_create_dt].should eql("cDate")
       solr_doc[:system_modified_dt].should eql("mDate")
       solr_doc[:id].should eql(@test_object.pid)

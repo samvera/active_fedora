@@ -174,7 +174,6 @@ describe ActiveFedora::Base do
     @test_history.save
     
     @solr_result = OralHistory.find_by_solr(@test_history.pid).hits[0]
-    puts @solr_result.inspect 
     @properties_sample_values.each_pair do |field, value|
       (@solr_result["#{field.to_s}_t"] || @solr_result["#{field.to_s}_dt"]).should == [value] 
     end
@@ -197,11 +196,18 @@ describe ActiveFedora::Base do
     
   end
   
+  it "should support #find_by_solr" do
+    solr_result = OralHistory.find(:all)
+    solr_result.should_not be_nil
+  end
+  
   describe '#new' do
     it "should support custom pids" do
       oh = OralHistory.new(:pid=>"uuid:blah-blah-blah")
       oh.pid.should == "uuid:blah-blah-blah"
     end
   end
+  
+
   
 end

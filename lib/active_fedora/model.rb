@@ -56,7 +56,7 @@ module ActiveFedora
       def find(args)
         if args == :all
           escaped_class_name = self.name.gsub(/(:)/, '\\:')
-          q = "#{solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}"
+          q = "#{SolrMapper.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}"
         elsif args.class == String
           escaped_id = args.gsub(/(:)/, '\\:')
           q = "#{SOLR_DOCUMENT_ID}:#{escaped_id}"
@@ -89,7 +89,7 @@ module ActiveFedora
       def find_by_solr(query, args={})
         if query == :all
           escaped_class_name = self.name.gsub(/(:)/, '\\:')
-          SolrService.instance.conn.query("#{solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}", args)
+          SolrService.instance.conn.query("#{SolrMapper.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}", args)
         elsif query.class == String
           escaped_id = query.gsub(/(:)/, '\\:')          
           SolrService.instance.conn.query("#{SOLR_DOCUMENT_ID}:#{escaped_id}", args)
