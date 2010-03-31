@@ -10,6 +10,8 @@ rescue LoadError
   require 'spec'
 end
 
+ENV["RAILS_ENV"] ||= 'test'
+RAILS_ENV = ENV["RAILS_ENV"]
 
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 Dir[File.join(File.dirname(__FILE__)+'/../lib/')+'**/*.rb'].each{|x| require x}

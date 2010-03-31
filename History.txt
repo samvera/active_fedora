@@ -1,3 +1,7 @@
+1.1.2 
+
+Testing: Updated RSpec tests to run against localhost:8983 with Fedora 3.3 (instead of localhost:8080 with Fedora 3.2).  This means you can use a copy of hydra-jetty from http://github.com/hydraproject/hydra-jetty
+
 1.1.1 2010-03-22
 
 Bug: .load_objects wipes out datastream attributes from model-defined datastreams (ie. label and mimeType)

@@ -68,7 +68,7 @@ describe Fedora::FedoraObject do
     it "should not set :label if it is not there in the object_xml" do
       object_rexml = REXML::Document.new(@test_object.object_xml)
       # The label node will be missing from the FOXML because label was never set.
-      object_rexml.root.elements["//foxml:property[@NAME='info:fedora/fedora-system:def/model#label']"].should == nil
+      object_rexml.root.elements["//foxml:property[@NAME='info:fedora/fedora-system:def/model#label']"].attributes["VALUE"].should == ""
       properties = @test_object.properties_from_fedora     
       properties[:label].should == nil 
     end

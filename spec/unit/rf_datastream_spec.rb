@@ -18,7 +18,7 @@ describe Fedora::Datastream do
   it "should provide .url" do
     @test_datastream.should respond_to(:url)
     @test_datastream.expects(:pid).returns("_foo_")
-    @test_datastream.url.should == 'http://localhost:8080/fedora/objects/_foo_/datastreams/'
+    @test_datastream.url.should == 'http://localhost:8983/fedora/objects/_foo_/datastreams/'
   end
   
   describe ".url" do

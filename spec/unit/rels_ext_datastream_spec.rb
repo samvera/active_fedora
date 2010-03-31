@@ -55,7 +55,6 @@ describe ActiveFedora::RelsExtDatastream do
   
   describe "#from_xml" do
     before(:all) do
-      ActiveFedora::SolrService.register
       @test_obj = ActiveFedora::Base.new
       @test_obj.add_relationship(:is_member_of, "demo:10")
       @test_obj.add_relationship(:is_part_of, "demo:11")
