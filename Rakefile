@@ -14,6 +14,8 @@ begin
     gem.email = "matt.zumwalt@yourmediashelf.com"
     gem.homepage = "http://yourmediashelf.com/activefedora"
     gem.authors = ["Matt Zumwalt", "McClain Looney"]
+    gem.rubyforge_project = 'rubyfedora'
+    
     gem.add_dependency('solr-ruby', '>= 0.0.6')
     gem.add_dependency('xml-simple', '>= 1.0.12')
     gem.add_dependency('mime-types', '>= 1.16')
