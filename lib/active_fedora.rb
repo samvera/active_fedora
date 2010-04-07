@@ -40,7 +40,8 @@ module ActiveFedora #:nodoc:
       if defined?(RAILS_ROOT)
         config_path = "#{RAILS_ROOT}/config/fedora.yml"
       else
-        raise "Don't know where to look for fedora.yml.  You should either set RAILS_ROOT or pass the path to fedora.yml as an argument to ActiveFedora.init"
+        config_path = File.join(File.dirname(__FILE__), "..", "config", "fedora.yml")
+        logger.info "Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml as an argument to ActiveFedora.init or set RAILS_ROOT and put fedora.yml into \#{RAILS_ROOT}/config."
       end
     end
     

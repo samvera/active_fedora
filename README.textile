@@ -1,37 +1,23 @@
-== Getting Help
+h2. Description
+
+RubyFedora and ActiveFedora provide a set of Ruby gems for creating and managing objects in the Fedora Repository Architecture (http://fedora-commons.org).
+
+h2. Getting Help
 
 * http://yourmediashelf.com/activefedora
 * Project Homepage: <http://yourmediashelf.com/activefedora>
 * Further documentation is available at <http://projects.mediashelf.us/show/active-fedora>
 * Community Discussions & Mailing List are located at <http://groups.google.com/group/active-fedora>
 
-= active-fedora gem
+h2. Installation
 
-* http://rubyforge.org/projects/rubyfedora/
+The gem is hosted on gemcutter.
 
-== DESCRIPTION:
+<pre>gem install active-fedora</pre>
 
-RubyFedora and ActiveFedora provide a set of Ruby gems for creating and managing objects in the Fedora Repository Architecture (http://fedora-commons.org).
+h2. LICENSE:
 
-
-== FEATURES/PROBLEMS:
-
-
-== SYNOPSIS:
-
-  See usage documentation on the wiki: http://projects.mediashelf.us/wiki/active-fedora/Documentation
-
-== REQUIREMENTS:
-
-* ruby-fedora
-
-== INSTALL:
-
-sudo gem install active-fedora
-
-== LICENSE:
-
-Copyright (c) 2009 Matt Zumwalt
+Copyright (c) 2009-2010 Matt Zumwalt
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License (LGPL) as 
