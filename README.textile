@@ -15,6 +15,10 @@ The gem is hosted on gemcutter.
 
 <pre>gem install active-fedora</pre>
 
+h2. Getting Started
+
+The "ActiveFedora Console Tour":http://projects.mediashelf.us/wiki/active-fedora/Getting_Started gives you a brief tour through ActiveFedora's features on the command line.
+
 h2. LICENSE:
 
 Copyright (c) 2009-2010 Matt Zumwalt
