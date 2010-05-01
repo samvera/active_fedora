@@ -2,6 +2,7 @@ require File.join( File.dirname(__FILE__), "../spec_helper" )
 
 require 'active_fedora'
 require 'xmlsimple'
+require 'nokogiri'
 
 describe ActiveFedora::QualifiedDublinCoreDatastream do
 
@@ -44,8 +45,10 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
     tmpl.expects(:publisher_append).with('jwa')
     tmpl.expects(:description_append).with('desc')
 
-    sample = File.join(File.dirname(__FILE__), '../samples/oh_qdc.xml')
-    z = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(tmpl, REXML::Document.new(File.open(sample)).root.elements.first)
+    sample_xml = fixture('oh_qdc.xml')
+    sample_ds_xml = Nokogiri::XML::Document.parse(sample_xml).xpath('//foxml:datastream').first
+    
+    z = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(tmpl, sample_ds_xml)
     z.should === tmpl
   end
 
@@ -59,10 +62,10 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   end
 
   it "should have identity in and out" do
-    sample = File.join(File.dirname(__FILE__), '../samples/oh_qdc.xml')
+    sample = fixture('oh_qdc.xml')
     tmpl = OralHistorySampleModel.new.datastreams['dublin_core']
-    z = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(tmpl, REXML::Document.new(File.open(sample)).root.elements.first)
-    y = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(tmpl, REXML::Document.new(z.to_dc_xml))
+    z = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(tmpl, Nokogiri::XML::Document.parse(sample).root.children.first)
+    y = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(tmpl, Nokogiri::XML::Document.parse(z.to_dc_xml))
     y.to_dc_xml.should == z.to_dc_xml
   end
 
@@ -77,8 +80,8 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
 
 
   it "should parse dcterms and dcelements from xml" do
-    doc = REXML::Document.new(File.open(File.dirname(__FILE__)+'/../fixtures/changeme155.xml'), :force_array=>true)
-    stream = doc.elements['//foxml:datastream[@ID=\'dublin_core\']']
+    doc = Nokogiri::XML::Document.parse(File.open( File.dirname(__FILE__)+'/../fixtures/changeme155.xml') )
+    stream = doc.xpath('//foxml:datastream[@ID=\'dublin_core\']')
     n = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(ActiveFedora::QualifiedDublinCoreDatastream.new, stream)
     n.spatial_values.should == ["Boston [7013445]", "Dorchester [7013575]", "Roxbury [7015002]"] 
     n.title_values.should ==  ["Oral history with Frances Addelson, 1997 November 14"]
@@ -134,7 +137,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
 
 
     #
-    # I think the fields should just be tracked as a REXML::Document internally.  Too much BS otherwise.
+    # I think the fields should just be tracked as a Nokogiri::XML::Document internally.  Too much BS otherwise.
     #
 
 
@@ -158,7 +161,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
 
     it "should use specified :xml_node if it is available in the field Hash" do
       @test_ds.stubs(:fields).returns({:myfieldname => {:values => ["sample spatial coverage"], :xml_node => "nodename" }})
-      REXML::Document.new(@test_ds.to_dc_xml).elements['./dc/dcterms:nodename'].text.should ==  'sample spatial coverage'
+      Nokogiri::XML::Document.parse(@test_ds.to_dc_xml).xpath('./dc/dcterms:nodename').text.should ==  'sample spatial coverage'
     end
 
     it "should use specified :xml_node if it was specified when .field was called" do

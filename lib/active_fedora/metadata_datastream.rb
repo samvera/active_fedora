@@ -53,9 +53,12 @@ module ActiveFedora
       end
       return xml.to_s
     end
-    def self.from_xml(tmpl, el) # :nodoc:
-      el.elements.each("./foxml:datastreamVersion[last()]/foxml:xmlContent/fields/node()")do |f|
-          tmpl.send("#{f.name}_append", f.text)
+    
+    # @tmpl ActiveFedora::MetadataDatastream
+    # @node Nokogiri::XML::Node
+    def self.from_xml(tmpl, node) # :nodoc:
+      node.xpath("./foxml:datastreamVersion[last()]/foxml:xmlContent/fields/node()").each do |f|
+          tmpl.send("#{f.name}_append", f.text) unless f.class == Nokogiri::XML::Text
       end
       tmpl.send(:dirty=, false)
       tmpl

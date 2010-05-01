@@ -26,21 +26,23 @@ module ActiveFedora
       self.blob = self.to_dc_xml
     end
     
-   def self.from_xml(tmpl, el) # :nodoc:
+    # @tmpl ActiveFedora::Datastream
+    # @node Nokogiri::XML::Node
+    def self.from_xml(tmpl, node) # :nodoc:
      tmpl.fields.each do |z|
        fname = z.first
        fspec = z.last
-       node = "dcterms:#{fspec[:xml_node] ? fspec[:xml_node] : fname}"
+       node_name = "dcterms:#{fspec[:xml_node] ? fspec[:xml_node] : fname}"
        attr_modifier= "[@xsi:type='#{fspec[:encoding]}']" if fspec[:encoding]
-       query = "./foxml:datastreamVersion[last()]/foxml:xmlContent/dc/#{node}#{attr_modifier}"
-       el.elements.each(query) do |f|
+       query = "./foxml:datastreamVersion[last()]/foxml:xmlContent/dc/#{node_name}#{attr_modifier}"
+       node.xpath(query, {"foxml"=>"info:fedora/fedora-system:def/foxml#", "dcterms"=>'http://purl.org/dc/terms/', "xsi"=>'http://www.w3.org/2001/XMLSchema-instance'}).each do |f|
           tmpl.send("#{fname}_append", f.text)
         end
 
      end
      tmpl.instance_variable_set(:@dirty, false)
      tmpl
-   end
+    end
 
    #Render self as a Fedora DC xml document.
    def to_dc_xml

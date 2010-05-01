@@ -1,6 +1,7 @@
 require 'util/class_level_inheritable_attributes'
 require 'active_fedora/model'
 require 'active_fedora/semantic_node'
+require 'nokogiri'
 
 SOLR_DOCUMENT_ID = "id" unless defined?(SOLR_DOCUMENT_ID)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
@@ -328,18 +329,33 @@ module ActiveFedora
 
 
     def self.deserialize(doc) #:nodoc:
-      pid = doc.elements['/foxml:digitalObject'].attributes['PID']
+      if doc.instance_of?(REXML::Document)
+        pid = doc.elements['/foxml:digitalObject'].attributes['PID']
       
-      proto = self.new(:pid=>pid, :new_object=>false)
-      proto.datastreams.each do |name,ds|
-        doc.elements.each("//foxml:datastream[@ID='#{name}']") do |el|
-          # datastreams remain marked as new if the foxml doesn't have an entry for that datastream
-          ds.new_object = false
-          proto.datastreams[name]=ds.class.from_xml(ds, el)          
+        proto = self.new(:pid=>pid, :new_object=>false)
+        proto.datastreams.each do |name,ds|
+          doc.elements.each("//foxml:datastream[@ID='#{name}']") do |el|
+            # datastreams remain marked as new if the foxml doesn't have an entry for that datastream
+            ds.new_object = false
+            proto.datastreams[name]=ds.class.from_xml(ds, el)          
+          end
         end
+        proto.inner_object.new_object = false
+        return proto
+      elsif doc.instance_of?(Nokogiri::XML::Document)
+        pid = doc.xpath('/foxml:digitalObject').first["PID"]
+      
+        proto = self.new(:pid=>pid, :new_object=>false)
+        proto.datastreams.each do |name,ds|
+          doc.xpath("//foxml:datastream[@ID='#{name}']").each do |node|
+            # datastreams remain marked as new if the foxml doesn't have an entry for that datastream
+            ds.new_object = false
+            proto.datastreams[name]=ds.class.from_xml(ds, node)          
+          end
+        end
+        proto.inner_object.new_object = false
+        return proto
       end
-      proto.inner_object.new_object = false
-      return proto
     end
 
     #Return a hash of all available metadata fields for all 

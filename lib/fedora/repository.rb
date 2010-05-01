@@ -4,6 +4,7 @@ require 'fedora/connection'
 require 'fedora/formats'
 require 'fedora/fedora_object'
 require 'fedora/datastream'
+require "nokogiri"
 
 module Fedora
   NAMESPACE = "fedora:info/"
@@ -98,7 +99,8 @@ module Fedora
     end
     def find_model(pid, klazz)
       obj = self.find_objects("pid=#{pid}").first
-      doc = REXML::Document.new(obj.object_xml, :ignore_whitespace_nodes=>:all)
+      #doc = REXML::Document.new(obj.object_xml, :ignore_whitespace_nodes=>:all)
+      doc = Nokogiri::XML::Document.parse(obj.object_xml)     
       klazz.deserialize(doc)
     end
     

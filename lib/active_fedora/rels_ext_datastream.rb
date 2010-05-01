@@ -28,12 +28,13 @@ module ActiveFedora
       EOL
     end
     
-    # Expects a RelsExtDatastream and a REXML Element as inputs.
-    def self.from_xml(tmpl, el) 
-      #puts el.elements["./foxml:datastreamVersion[last()]/foxml:xmlContent/rdf:RDF/rdf:Description/"]
-      el.elements.each("./foxml:datastreamVersion[last()]/foxml:xmlContent/rdf:RDF/rdf:Description/*") do |f|
-          #puts "Element" + f.inspect
-          r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>ActiveFedora::SemanticNode::PREDICATE_MAPPINGS.invert[f.name], :object=>f.attributes["rdf:resource"])
+    # @tmpl ActiveFedora::MetadataDatastream
+    # @node Nokogiri::XML::Node
+    def self.from_xml(tmpl, node) 
+      # node.xpath("./foxml:datastreamVersion[last()]/foxml:xmlContent/rdf:RDF/rdf:Description/*").each do |f|
+      node.xpath("./foxml:datastreamVersion[last()]/foxml:xmlContent/rdf:RDF/rdf:Description/*", {"rdf"=>"http://www.w3.org/1999/02/22-rdf-syntax-ns#", "foxml"=>"info:fedora/fedora-system:def/foxml#"}).each do |f|
+          r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>ActiveFedora::SemanticNode::PREDICATE_MAPPINGS.invert[f.name], :object=>f["resource"])
+          puts "adding #{r.inspect} to template"
           tmpl.add_relationship(r)
       end
       tmpl.send(:dirty=, false)

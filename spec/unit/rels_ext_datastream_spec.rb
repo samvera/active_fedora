@@ -2,6 +2,7 @@ require File.join( File.dirname(__FILE__), "../spec_helper" )
 
 require 'active_fedora'
 require "rexml/document"
+require "nokogiri"
 require 'ftools'
 
 describe ActiveFedora::RelsExtDatastream do
@@ -12,7 +13,7 @@ describe ActiveFedora::RelsExtDatastream do
     @test_relationship2 = ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_part_of, :object => "demo:11")  
     @test_relationship3 = ActiveFedora::Relationship.new(:subject => @pid, :predicate => :has_part, :object => "demo:12")  
   
-    @sample_xml = REXML::Document.new(@sample_xml_string)
+    @sample_xml = Nokogiri::XML::Document.parse(@sample_xml_string)
   end
   
   before(:each) do
@@ -65,8 +66,8 @@ describe ActiveFedora::RelsExtDatastream do
     end
     it "should load RELS-EXT relationships into relationships hash" do
       @test_obj.relationships.should == {:self=>{:is_member_of=>["info:fedora/demo:10"], :is_part_of=>["info:fedora/demo:11"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"]}}
-      doc = REXML::Document.new(@test_obj.inner_object.object_xml)
-      el = doc.elements["/foxml:digitalObject//foxml:datastream[@ID='RELS-EXT']"]
+      doc = Nokogiri::XML::Document.parse(@test_obj.inner_object.object_xml)
+      el = doc.xpath("/foxml:digitalObject//foxml:datastream[@ID='RELS-EXT']").first
       new_ds = ActiveFedora::RelsExtDatastream.new
       new_ds.relationships.should == {:self=>{}}
       ActiveFedora::RelsExtDatastream.from_xml(new_ds,el)

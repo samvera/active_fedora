@@ -3,6 +3,7 @@ require 'active_fedora'
 require 'active_fedora/base'
 require 'active_fedora/metadata_datastream'
 require 'ruby-debug'
+require 'nokogiri'
 
 # Load Sample OralHistory Model
 require File.join( File.dirname(__FILE__), "..","samples","oral_history_sample_model" )
@@ -28,7 +29,7 @@ describe ActiveFedora::Base do
       #mocko = mock("object")
       #ActiveFedora::Base.expects(:new).returns(mocko)
       @test_object.datastreams["sensitive_passages"].delete
-      doc = REXML::Document.new(@test_object.inner_object.object_xml, :ignore_whitespace_nodes=>:all)
+      doc = Nokogiri::XML::Document.parse(@test_object.inner_object.object_xml)
       result = OralHistorySampleModel.deserialize(doc)
       result.new_object?.should be_false
       result.datastreams_in_memory.should have_key("dublin_core")

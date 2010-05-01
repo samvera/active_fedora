@@ -1,7 +1,7 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
 
 require 'active_fedora'
-require "rexml/document"
+require "nokogiri"
 require 'ftools'
 
 describe ActiveFedora::Datastream do
@@ -27,7 +27,7 @@ describe ActiveFedora::Datastream do
         </foxml:datastreamVersion>
       </foxml:datastream>
     EOF
-    n = ActiveFedora::Datastream.from_xml(ActiveFedora::Datastream.new, REXML::Document.new(xml).elements.first)
+    n = ActiveFedora::Datastream.from_xml(ActiveFedora::Datastream.new, Nokogiri::XML::Document.parse(xml).root)
     n.control_group.should == 'M'
 
   end

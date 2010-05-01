@@ -70,12 +70,15 @@ module ActiveFedora
     def before_save # :nodoc:
       #check_concurrency
     end
-    def self.from_xml(tmpl, el)
-      el.elements.each("foxml:xmlContent/fields") do |f|
-        tmpl.send("#{f.name}_append", f.text)
+    
+    # @tmpl ActiveFedora::Datastream
+    # @node Nokogiri::XML::Node
+    def self.from_xml(tmpl, node)
+      node.xpath("foxml:xmlContent/fields").each do |f|
+        # tmpl.send("#{f.name}_append", f.content)
       end
       tmpl.instance_variable_set(:@dirty, false)
-      tmpl.control_group= el.attributes['CONTROL_GROUP']
+      tmpl.control_group= node['CONTROL_GROUP']
       tmpl
     end
     
