@@ -97,6 +97,7 @@ module Fedora
       
       convert_xml(connection.get("#{fedora_url.path}/objects?#{params.to_fedora_query}#{includes}"))
     end
+    
     def find_model(pid, klazz)
       obj = self.find_objects("pid=#{pid}").first
       #doc = REXML::Document.new(obj.object_xml, :ignore_whitespace_nodes=>:all)

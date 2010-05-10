@@ -5,17 +5,17 @@
 
 Gem::Specification.new do |s|
   s.name = %q{active-fedora}
-  s.version = "1.1.3"
+  s.version = "1.1.4"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2010-04-07}
+  s.date = %q{2010-05-04}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
     "LICENSE",
      "README.rdoc",
-     "README.txt"
+     "README.textile"
   ]
   s.files = [
     ".document",
@@ -176,7 +176,7 @@ Gem::Specification.new do |s|
      "Manifest.txt",
      "PostInstall.txt",
      "README.rdoc",
-     "README.txt",
+     "README.textile",
      "Rakefile",
      "VERSION",
      "active-fedora.gemspec",
@@ -217,6 +217,7 @@ Gem::Specification.new do |s|
      "spec/fixtures/changeme155.xml",
      "spec/fixtures/dino.jpg",
      "spec/fixtures/minivan.jpg",
+     "spec/fixtures/oh_qdc.xml",
      "spec/fixtures/test_12.foxml.xml",
      "spec/integration/base_file_management_spec.rb",
      "spec/integration/base_loader_spec.rb",
@@ -237,7 +238,6 @@ Gem::Specification.new do |s|
      "spec/samples/models/oral_history.rb",
      "spec/samples/models/seminar.rb",
      "spec/samples/models/seminar_audio_file.rb",
-     "spec/samples/oh_qdc.xml",
      "spec/samples/oral_history_sample.xml",
      "spec/samples/oral_history_sample_model.rb",
      "spec/samples/oral_history_xml.xml",
