@@ -5,9 +5,9 @@
 
 Gem::Specification.new do |s|
   s.name = %q{active-fedora}
-  s.version = "1.1.4.pre3"
+  s.version = "1.1.4"
 
-  s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
+  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
   s.date = %q{2010-05-15}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
@@ -191,7 +191,9 @@ Gem::Specification.new do |s|
      "lib/active_fedora/datastream.rb",
      "lib/active_fedora/fedora_object.rb",
      "lib/active_fedora/metadata_datastream.rb",
+     "lib/active_fedora/metadata_datastream_helper.rb",
      "lib/active_fedora/model.rb",
+     "lib/active_fedora/nokogiri_datastream.rb",
      "lib/active_fedora/property.rb",
      "lib/active_fedora/qualified_dublin_core_datastream.rb",
      "lib/active_fedora/relationship.rb",

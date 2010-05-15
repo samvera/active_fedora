@@ -391,7 +391,10 @@ module ActiveFedora
       return xml.to_s
     end
 
-    #Return a Solr::Document version of this object.
+    # Return a Solr::Document version of this object.
+    # @solr_doc (optional) Solr::Document to insert the fields into
+    # @opts (optional) Hash
+    # If opts[:model_only] == true, the base object metadata and the RELS-EXT datastream will be omitted.  This is mainly to support shelver, which calls .to_solr for each model an object subscribes to. 
     def to_solr(solr_doc = Solr::Document.new, opts={})
       unless opts[:model_only]
         solr_doc << {SOLR_DOCUMENT_ID.to_sym => pid, solr_name(:system_create, :date) => self.create_date, solr_name(:system_modified, :date) => self.modified_date, solr_name(:active_fedora_model, :symbol) => self.class.inspect}
