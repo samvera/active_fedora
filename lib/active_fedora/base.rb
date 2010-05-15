@@ -392,10 +392,12 @@ module ActiveFedora
     end
 
     #Return a Solr::Document version of this object.
-    def to_solr(solr_doc = Solr::Document.new)
-      solr_doc << {SOLR_DOCUMENT_ID.to_sym => pid, solr_name(:system_create, :date) => self.create_date, solr_name(:system_modified, :date) => self.modified_date, solr_name(:active_fedora_model, :symbol) => self.class.inspect}
+    def to_solr(solr_doc = Solr::Document.new, opts={})
+      unless opts[:model_only]
+        solr_doc << {SOLR_DOCUMENT_ID.to_sym => pid, solr_name(:system_create, :date) => self.create_date, solr_name(:system_modified, :date) => self.modified_date, solr_name(:active_fedora_model, :symbol) => self.class.inspect}
+      end
       datastreams.each_value do |ds|
-        solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::RelsExtDatastream)
+        solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ( ds.kind_of?(ActiveFedora::RelsExtDatastream) && !opts[:model_only] )
       end
       return solr_doc
     end
