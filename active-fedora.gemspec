@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{active-fedora}
-  s.version = "1.1.4"
+  s.version = "1.1.4.pre2"
 
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
+  s.required_rubygems_version = Gem::Requirement.new("> 1.3.1") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2010-05-04}
+  s.date = %q{2010-05-15}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
@@ -312,6 +312,8 @@ Gem::Specification.new do |s|
      "spec/unit/inheritance_spec.rb",
      "spec/unit/metadata_datastream_spec.rb",
      "spec/unit/model_spec.rb",
+     "spec/unit/mods_datastream_spec.rb",
+     "spec/unit/nokogiri_datastream_spec.rb",
      "spec/unit/property_spec.rb",
      "spec/unit/qualified_dublin_core_datastream_spec.rb",
      "spec/unit/relationship_spec.rb",
