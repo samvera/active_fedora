@@ -285,8 +285,8 @@ describe ActiveFedora::Base do
     it "should call .to_xml on all MetadataDatastreams and return the resulting document" do
       mock1 = mock("ds1", :to_xml)
       mock2 = mock("ds2", :to_xml)
-      mock1.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
-      mock2.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
+      mock1.expects(:included_modules).returns( [ActiveFedora::MetadataDatastreamHelper] )
+      mock2.expects(:included_modules).returns( [ActiveFedora::MetadataDatastreamHelper] )
 
       @test_object.expects(:datastreams).returns({:ds1 => mock1, :ds2 => mock2})
       @test_object.to_xml

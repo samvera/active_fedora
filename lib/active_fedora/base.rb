@@ -371,15 +371,22 @@ module ActiveFedora
     end
     
     #Returns the xml version of this object as a string.
-    def to_xml(xml=REXML::Document.new("<xml><fields/><content/></xml>"))
-      fields_xml = xml.root.elements['fields']
-      {:id => pid, :system_create_date => self.create_date, :system_modified_date => self.modified_date, :active_fedora_model => self.class.inspect}.each_pair do |attribute_name, value|
-        el = REXML::Element.new(attribute_name.to_s)
-        el.text = value
-        fields_xml << el
+    def to_xml(xml=Nokogiri::XML::Document.parse("<xml><fields/><content/></xml>"))
+      fields_xml = xml.xpath('//fields').first
+      builder = Nokogiri::XML::Builder.with(fields_xml) do |fields_xml|
+        fields_xml.id_ pid
+        fields_xml.system_create_date self.create_date
+        fields_xml.system_modified_date self.modified_date
+        fields_xml.active_fedora_model self.class.inspect
       end
+      
+      # {:id => pid, :system_create_date => self.create_date, :system_modified_date => self.modified_date, :active_fedora_model => self.class.inspect}.each_pair do |attribute_name, value|
+      #   el = REXML::Element.new(attribute_name.to_s)
+      #   el.text = value
+      #   fields_xml << el
+      # end
       datastreams.each_value do |ds|        
-        ds.to_xml(fields_xml) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::RelsExtDatastream)
+        ds.to_xml(fields_xml) if ds.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.kind_of?(ActiveFedora::RelsExtDatastream)
       end
       return xml.to_s
     end
