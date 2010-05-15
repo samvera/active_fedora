@@ -10,12 +10,12 @@ describe ActiveFedora::SemanticNode do
       has_relationship "collection_members", :has_collection_member
     end
     @node = SpecNode.new
-    class SpecModel < ActiveFedora::Base
+    class SNSpecModel < ActiveFedora::Base
       has_relationship("parts", :is_part_of, :inbound => true)
       has_relationship("containers", :is_member_of)
     end
     
-    @test_object = SpecModel.new
+    @test_object = SNSpecModel.new
     @test_object.save
     
     @part1 = ActiveFedora::Base.new()
@@ -43,7 +43,7 @@ describe ActiveFedora::SemanticNode do
     @container2.delete
     @test_object.delete
     
-    Object.send(:remove_const, :SpecModel)
+    Object.send(:remove_const, :SNSpecModel)
 
   end
   
