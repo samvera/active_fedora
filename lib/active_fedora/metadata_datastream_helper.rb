@@ -58,23 +58,40 @@ module ActiveFedora::MetadataDatastreamHelper
     return solr_doc
   end
   
-  def to_xml(xml = Nokogiri::XML::Document.new("<fields />")) #:nodoc:
-    fields.each_pair do |field,field_info|
-      el = REXML::Element.new("#{field.to_s}")
-        if field_info[:element_attrs]
-          field_info[:element_attrs].each{|k,v| el.add_attribute(k.to_s, v.to_s)}
-        end
-      field_info[:values].each do |val|
-        el = el.clone
-        el.text = val.to_s
-        if xml.class == REXML::Document
-          xml.root.elements.add(el)
-        else
-          xml.add(el)
+  def to_xml(xml = Nokogiri::XML::Document.parse("<fields />")) #:nodoc:
+    if xml.instance_of?(Nokogiri::XML::Document)
+      xml_insertion_point = xml.root
+    else
+      xml_insertion_point = xml
+    end
+    
+    builder = Nokogiri::XML::Builder.with(xml_insertion_point) do |xml|
+      fields.each_pair do |field,field_info|
+        element_attrs = field_info[:element_attrs].nil? ? {} : field_info[:element_attrs]
+        field_info[:values].each do |val|
+          builder_arg = "xml.#{field}(val, element_attrs)"
+          puts builder_arg.inspect
+          eval(builder_arg)
         end
       end
     end
-    return xml.to_s
+    
+    # fields.each_pair do |field,field_info|
+    #       el = REXML::Element.new("#{field.to_s}")
+    #         if field_info[:element_attrs]
+    #           field_info[:element_attrs].each{|k,v| el.add_attribute(k.to_s, v.to_s)}
+    #         end
+    #       field_info[:values].each do |val|
+    #         el = el.clone
+    #         el.text = val.to_s
+    #         if xml.class == REXML::Document
+    #           xml.root.elements.add(el)
+    #         else
+    #           xml.add(el)
+    #         end
+    #       end
+    #     end
+    return builder.to_xml
   end
   
 

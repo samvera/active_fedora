@@ -54,33 +54,29 @@ describe ActiveFedora::MetadataDatastream do
     end
     it 'should output the fields hash as XML' do
       @test_ds.expects(:fields).returns(@sample_fields)
-      #sample_rexml = REXML::Document.new(sample_xml)
-      #returned_rexml = REXML::Document.new(@test_ds.to_dc_xml)
-      #returned_rexml.to_s.should == sample_rexml.to_s
       returned_xml = XmlSimple.xml_in(@test_ds.to_xml)
       returned_xml.should == @sample_xml
     end
     
-    it 'should accept an optional REXML Document as an argument and insert its fields into that' do
-      @test_ds.expects(:fields).returns(@sample_fields)
-      rexml = REXML::Document.new("<test_rexml/>")
-      rexml.root.elements.expects(:add).times(5)
-      result = @test_ds.to_xml(rexml)
+    it 'should accept an optional Nokogiri::XML Document as an argument and insert its fields into that (mocked test)' do
+      doc = Nokogiri::XML::Document.parse("<test_rexml/>")
+      Nokogiri::XML::Builder.expects(:with).with(doc.root).returns(doc.root)      
+      result = @test_ds.to_xml(doc)
     end
-    it 'should accept an optional REXML Document as an argument and insert its fields into that' do
+    
+    it 'should accept an optional Nokogiri::XML Document as an argument and insert its fields into that (functional test)' do
       @test_ds.expects(:fields).returns(@sample_fields)
-      rexml = REXML::Document.new("<test_rexml/>")
-      result = @test_ds.to_xml(rexml)
-      XmlSimple.xml_in(rexml.to_s).should == @sample_xml
+      doc = Nokogiri::XML::Document.parse("<test_rexml/>")
+      result = @test_ds.to_xml(doc)
+      XmlSimple.xml_in(doc.to_s).should == @sample_xml
       XmlSimple.xml_in(result).should == @sample_xml
     end
     
-    it 'should add to root of REXML::Documents, but add directly to the elements if a REXML::Element is passed in' do
-      @test_ds.expects(:fields).returns(@sample_fields).times(2)
-      doc = REXML::Document.new("<test_document/>")
-      el = REXML::Element.new("<test_element/>")
-      doc.root.elements.expects(:add).times(5)
-      el.expects(:add).times(5)
+    it 'should add to root of Nokogiri::XML::Documents, but add directly to the elements if a REXML::Element is passed in' do
+      doc = Nokogiri::XML::Document.parse("<test_document/>")
+      el = Nokogiri::XML::Node.new("test_element", Nokogiri::XML::Document.new)
+      Nokogiri::XML::Builder.expects(:with).with(doc.root).returns(doc.root)
+      Nokogiri::XML::Builder.expects(:with).with(el).returns(el)
       @test_ds.to_xml(doc)
       @test_ds.to_xml(el)
     end
@@ -131,7 +127,8 @@ describe ActiveFedora::MetadataDatastream do
       sds = SpecDatastream.new
       sds.mycomplicated_field_values='foo'
       sds.fields[:mycomplicated_field][:element_attrs].should == {:foo=>:bar, :baz=>:bat}
-      sds.to_xml.should == '<fields><mycomplicated_field baz=\'bat\' foo=\'bar\'>foo</mycomplicated_field></fields>'
+      expected_xml = '<fields><mycomplicated_field baz=\'bat\' foo=\'bar\'>foo</mycomplicated_field></fields>'
+      XmlSimple.xml_in(sds.to_xml).should == XmlSimple.xml_in(expected_xml)
     end
     
     it "should add getters and setters and appenders with field name" do
