@@ -20,6 +20,7 @@ begin
     gem.add_dependency('xml-simple', '>= 1.0.12')
     gem.add_dependency('mime-types', '>= 1.16')
     gem.add_dependency('multipart-post')
+    gem.add_dependency('nokogiri')
 
     gem.add_development_dependency "rspec", ">= 1.2.9"
     gem.add_development_dependency "mocha", ">= 1.2.9"
