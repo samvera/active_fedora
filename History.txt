@@ -1,3 +1,7 @@
+1.1.5
+
+Feature: Base.save triggers Solrizer if you've required the gem in your app 
+
 1.1.2 
 
 Bug: Model.find_by_solr fails when you pass it an argument of :all
