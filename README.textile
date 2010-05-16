@@ -19,6 +19,25 @@ h2. Getting Started
 
 The "ActiveFedora Console Tour":http://projects.mediashelf.us/wiki/active-fedora/Getting_Started gives you a brief tour through ActiveFedora's features on the command line.
 
+h2. Testing
+
+In order to run the RSpec tests, you need to have a copy of hydra-jetty running.  To do this, download a working copy of hydra-jetty, cd into its root and run 
+<pre>java -jar start.jar</pre>
+
+Then open a new terminal and import fedora's demo objects.
+
+<pre>
+export FEDORA_HOME=/path/to/hydra/jetty/fedora/default
+$FEDORA_HOME/client/bin/fedora-ingest-demos.sh localhost 8983 fedoraAdmin fedoraAdmin http
+<pre>
+  
+Now you're ready to run 
+
+<pre>
+cd /wherever/active_fedora/is
+rake spec
+</pre>
+
 h2. LICENSE:
 
 Copyright (c) 2009-2010 Matt Zumwalt
