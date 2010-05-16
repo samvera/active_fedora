@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{active-fedora}
-  s.version = "1.1.4"
+  s.version = "1.1.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2010-05-15}
+  s.date = %q{2010-05-16}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
@@ -208,6 +208,9 @@ Gem::Specification.new do |s|
      "lib/fedora/formats.rb",
      "lib/fedora/generic_search.rb",
      "lib/fedora/repository.rb",
+     "lib/hydra.rb",
+     "lib/hydra_libs/mods_datastream.rb",
+     "lib/hydra_libs/opinionated_mods_document.rb",
      "lib/ruby-fedora.rb",
      "lib/util/class_level_inheritable_attributes.rb",
      "script/console",
@@ -259,6 +262,8 @@ Gem::Specification.new do |s|
      "spec/unit/inheritance_spec.rb",
      "spec/unit/metadata_datastream_spec.rb",
      "spec/unit/model_spec.rb",
+     "spec/unit/mods_datastream_spec.rb",
+     "spec/unit/nokogiri_datastream_spec.rb",
      "spec/unit/property_spec.rb",
      "spec/unit/qualified_dublin_core_datastream_spec.rb",
      "spec/unit/relationship_spec.rb",
@@ -314,6 +319,8 @@ Gem::Specification.new do |s|
      "spec/unit/inheritance_spec.rb",
      "spec/unit/metadata_datastream_spec.rb",
      "spec/unit/model_spec.rb",
+     "spec/unit/mods_datastream_spec.rb",
+     "spec/unit/nokogiri_datastream_spec.rb",
      "spec/unit/property_spec.rb",
      "spec/unit/qualified_dublin_core_datastream_spec.rb",
      "spec/unit/relationship_spec.rb",
@@ -335,6 +342,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<xml-simple>, [">= 1.0.12"])
       s.add_runtime_dependency(%q<mime-types>, [">= 1.16"])
       s.add_runtime_dependency(%q<multipart-post>, [">= 0"])
+      s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_development_dependency(%q<mocha>, [">= 1.2.9"])
       s.add_development_dependency(%q<ruby-debug>, [">= 0"])
@@ -343,6 +351,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<xml-simple>, [">= 1.0.12"])
       s.add_dependency(%q<mime-types>, [">= 1.16"])
       s.add_dependency(%q<multipart-post>, [">= 0"])
+      s.add_dependency(%q<nokogiri>, [">= 0"])
       s.add_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_dependency(%q<mocha>, [">= 1.2.9"])
       s.add_dependency(%q<ruby-debug>, [">= 0"])
@@ -352,6 +361,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<xml-simple>, [">= 1.0.12"])
     s.add_dependency(%q<mime-types>, [">= 1.16"])
     s.add_dependency(%q<multipart-post>, [">= 0"])
+    s.add_dependency(%q<nokogiri>, [">= 0"])
     s.add_dependency(%q<rspec>, [">= 1.2.9"])
     s.add_dependency(%q<mocha>, [">= 1.2.9"])
     s.add_dependency(%q<ruby-debug>, [">= 0"])
