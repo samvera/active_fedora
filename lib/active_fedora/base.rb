@@ -86,6 +86,10 @@ module ActiveFedora
       end
       @new_object = false
       self.update_index if @metadata_is_dirty == true && ENABLE_SOLR_UPDATES
+      if defined?( Solrizer::Solrizer ) 
+        solrizer = Solrizer::Solrizer.new
+        solrizer.solrize( self )
+      end
       @metadata_is_dirty == false
       return result
     end
