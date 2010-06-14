@@ -12,7 +12,10 @@ describe ActiveFedora::Base do
   end
   
   after(:each) do
-    @test_object.delete
+    begin
+      @test_object.delete
+    rescue
+    end
   end
   
   
@@ -195,6 +198,16 @@ describe ActiveFedora::Base do
     it "should return nil before saving and a W3C date after saving" do       
       @test_object.modified_date.should_not be_nil
     end  
+  end
+  
+  describe "delete" do
+    
+    it "should delete the object from Fedora and Solr" do
+      ActiveFedora::Base.find_by_solr(@test_object.pid).hits.first["id"].should == @test_object.pid
+      @test_object.delete
+      ActiveFedora::Base.find_by_solr(@test_object.pid).hits.should be_empty
+    end
+    
   end
 
 end

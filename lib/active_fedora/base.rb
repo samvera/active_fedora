@@ -105,8 +105,7 @@ module ActiveFedora
     #the underlying inner_object.
     def delete
       Fedora::Repository.instance.delete(@inner_object)
-      escaped_pid = self.pid.gsub(/(:)/, '\\:')
-      SolrService.instance.conn.delete(escaped_pid) if ENABLE_SOLR_UPDATES 
+      SolrService.instance.conn.delete(self.pid) if ENABLE_SOLR_UPDATES 
     end
 
 

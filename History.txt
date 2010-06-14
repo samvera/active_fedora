@@ -1,3 +1,7 @@
+1.1.6
+
+Bug #959: Base.delete fails to delete objects from Solr even when ENABLE_SOLR_UPDATES == true
+
 1.1.5
 
 Feature: Base.save triggers Solrizer if you've required the gem in your app 
