@@ -47,6 +47,10 @@ require File.join( File.dirname(__FILE__),  "../spec_helper" )
 #    curl -i http://localhost:8080/fedora/objects/nextPID.xml -u fedoraAdmin:fedoraAdmin
  
 describe Fedora::Repository, "constructor" do
+  after(:all) do
+    Fedora::Repository.register(ActiveFedora.fedora_config[:url])
+  end
+  
   it "should accept URL as string" do
     fedora_url = "http://fedoraAdmin:fedoraAdmin@127.0.0.1:8080/fedora"
     repository = Fedora::Repository.register(fedora_url)

@@ -5,6 +5,10 @@ require 'active_fedora/solr_service'
 include ActiveFedora
 
 describe ActiveFedora::SolrService do
+  after(:all) do
+    ActiveFedora::SolrService.register(ActiveFedora.solr_config[:url])
+  end
+  
   it "should take a narg constructor and configure for localhost" do
     mconn = mock('conn')
     Solr::Connection.expects(:new).with('http://localhost:8080/solr', {:autocommit=>:on}).returns(mconn)
