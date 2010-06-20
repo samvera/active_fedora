@@ -12,16 +12,6 @@ module ActiveFedora::MetadataDatastreamHelper
       @@classFields
     end
     
-    # @tmpl ActiveFedora::MetadataDatastream
-    # @node Nokogiri::XML::Node
-    def from_xml(tmpl, node) # :nodoc:
-      node.xpath("./foxml:datastreamVersion[last()]/foxml:xmlContent/fields/node()").each do |f|
-          tmpl.send("#{f.name}_append", f.text) unless f.class == Nokogiri::XML::Text
-      end
-      tmpl.send(:dirty=, false)
-      tmpl
-    end
-    
   end
   
   def self.included(klass)

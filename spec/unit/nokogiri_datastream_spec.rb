@@ -15,7 +15,7 @@ describe ActiveFedora::NokogiriDatastream do
   end
   
   before(:each) do
-    @test_ds = ActiveFedora::NokogiriDatastream.new
+    @test_ds = ActiveFedora::NokogiriDatastream.new(:blob=>"<test_xml/>")
   end
   
   after(:each) do
@@ -25,6 +25,10 @@ describe ActiveFedora::NokogiriDatastream do
     it 'should provide #new' do
       ActiveFedora::NokogiriDatastream.should respond_to(:new)
       @test_ds.ng_xml.should be_instance_of(Nokogiri::XML::Document)
+    end
+    it 'should load xml from blob if provided' do
+      test_ds1 = ActiveFedora::NokogiriDatastream.new(:blob=>"<xml><foo/></xml>")
+      test_ds1.ng_xml.to_xml.should == "<?xml version=\"1.0\"?>\n<xml>\n  <foo/>\n</xml>\n"
     end
   end
   
@@ -49,33 +53,35 @@ describe ActiveFedora::NokogiriDatastream do
     it "should provide .to_xml" do
       @test_ds.should respond_to(:to_xml)
     end
-    it 'should output the fields hash as XML' do
-      @test_ds.expects(:fields).returns(@sample_fields)
-      returned_xml = XmlSimple.xml_in(@test_ds.to_xml)
-      returned_xml.should == @sample_xml
+    
+    it "should ng_xml.to_xml" do
+      @test_ds.ng_xml.expects(:to_xml).returns("xml")
+      @test_ds.to_xml.should == "xml"       
     end
     
-    it 'should accept an optional REXML Document as an argument and insert its fields into that' do
-      @test_ds.expects(:fields).returns(@sample_fields)
-      rexml = REXML::Document.new("<test_rexml/>")
-      rexml.root.elements.expects(:add).times(5)
-      result = @test_ds.to_xml(rexml)
-    end
-    it 'should accept an optional REXML Document as an argument and insert its fields into that' do
-      @test_ds.expects(:fields).returns(@sample_fields)
-      rexml = REXML::Document.new("<test_rexml/>")
-      result = @test_ds.to_xml(rexml)
-      XmlSimple.xml_in(rexml.to_s).should == @sample_xml
-      XmlSimple.xml_in(result).should == @sample_xml
-    end
-    
-    it 'should add to root of REXML::Documents, but add directly to the elements if a REXML::Element is passed in' do
-      @test_ds.expects(:fields).returns(@sample_fields).times(2)
-      doc = REXML::Document.new("<test_document/>")
-      el = REXML::Element.new("<test_element/>")
-      doc.root.elements.expects(:add).times(5)
-      el.expects(:add).times(5)
+    it 'should accept an optional Nokogiri::XML Document as an argument and insert its fields into that (mocked test)' do
+      doc = Nokogiri::XML::Document.parse("<test_document/>")
+      doc.root.expects(:add_child).with(@test_ds.ng_xml.root)
       @test_ds.to_xml(doc)
+    end
+    
+    it 'should accept an optional Nokogiri::XML Document as an argument and insert its fields into that (functional test)' do
+      expected_result = XmlSimple.xml_in("<test_document><foo/><test_xml/></test_document>")
+      doc = Nokogiri::XML::Document.parse("<test_document><foo/></test_document>")
+      result = @test_ds.to_xml(doc)
+      XmlSimple.xml_in(doc.to_s).should == expected_result
+      XmlSimple.xml_in(result).should == expected_result
+    end
+    
+    it 'should add to root of Nokogiri::XML::Documents, but add directly to the elements if a Nokogiri::XML::Node is passed in' do
+      mock_new_node = mock("new node")
+      mock_new_node.stubs(:to_xml).returns("foo")
+      
+      doc = Nokogiri::XML::Document.parse("<test_document/>")
+      el = Nokogiri::XML::Node.new("test_element", Nokogiri::XML::Document.new)
+      doc.root.expects(:add_child).with(@test_ds.ng_xml.root).returns(mock_new_node)
+      el.expects(:add_child).with(@test_ds.ng_xml.root).returns(mock_new_node)
+      @test_ds.to_xml(doc).should 
       @test_ds.to_xml(el)
     end
     
@@ -92,118 +98,6 @@ describe ActiveFedora::NokogiriDatastream do
     end
   end
   
-  describe '#field' do
-    
-    before(:each) do
-      class SpecDatastream < ActiveFedora::MetadataDatastream
-        def initialize
-        super
-        field :publisher, :string
-        field :coverage, :text
-        field :creation_date, :date
-        field :mydate, :date
-        field :mycomplicated_field, :string, :multiple=>false, :encoding=>'LCSH', :element_attrs=>{:foo=>:bar, :baz=>:bat}
-        end
-      end
-    end
-    
-    after(:each) do
-      Object.send(:remove_const, :SpecDatastream)
-    end
-    
-    
-    describe ".values" do
-      it "should call ng_xml.values_for(field_name) OR call corresponding lookup method and build an array of values by calling .value on each node in the set"
-    end
-
-    describe ".values<<" do
-      it "should call corresponding builder method"
-    end
-  
-    describe ".values=" do
-      it "should wipe out any existing nodes, use the corresponding builder, and insert new node(s) as the replacement"
-    end
-    
-    it 'should add corresponding field to the @fields hash and set the field :type ' do
-      sds = SpecDatastream.new
-      sds.fields.should_not have_key(:bio)
-      sds.field :bio, :text
-      sds.fields.should have_key(:bio)
-      sds.fields[:bio].should have_key(:type)
-      sds.fields[:bio][:type].should == :text
-      sds.fields[:mycomplicated_field][:element_attrs].should == {:foo=>:bar, :baz=>:bat}
-    end
-    
-    # it "should insert custom element attrs into the xml stream" do
-    #   sds = SpecDatastream.new
-    #   sds.mycomplicated_field_values='foo'
-    #   sds.fields[:mycomplicated_field][:element_attrs].should == {:foo=>:bar, :baz=>:bat}
-    #   sds.to_xml.should == '<fields><mycomplicated_field baz=\'bat\' foo=\'bar\'>foo</mycomplicated_field></fields>'
-    # end
-    
-    it "should add getters and setters and appenders with field name" do
-      local_test_ds = SpecDatastream.new
-      local_test_ds.should respond_to(:publisher_values)
-      local_test_ds.should respond_to(:publisher_append)
-      local_test_ds.should respond_to(:publisher_values=)
-      local_test_ds.publisher_values.class.should == Array
-      local_test_ds.should respond_to(:coverage_values)
-      local_test_ds.should respond_to(:coverage_values=)
-      local_test_ds.should respond_to(:coverage_append)
-      local_test_ds.should respond_to(:creation_date_values)
-      local_test_ds.should respond_to(:creation_date_append)
-      local_test_ds.should respond_to(:creation_date_values=)
-      local_test_ds.should respond_to(:mydate_values)
-      local_test_ds.should respond_to(:mydate_append)
-      local_test_ds.should respond_to(:mydate_values=)
-    end
-    
-    it "should track field values at instance level, not at class level" do
-      local_test_ds1 = SpecDatastream.new
-      local_test_ds2 = SpecDatastream.new
-      local_test_ds1.publisher_values = ["publisher1", "publisher2"]
-      local_test_ds2.publisher_values = ["publisherA", "publisherB"]
-      
-      local_test_ds2.publisher_values.should == ["publisherA", "publisherB"]      
-      local_test_ds1.publisher_values.should == ["publisher1", "publisher2"]
-    end
-    
-    it "should allow you to add field values using <<" do
-      local_test_ds1 = SpecDatastream.new
-      local_test_ds1.publisher_values << "publisher1"
-      local_test_ds1.publisher_values.should == ["publisher1"] 
-    end
-    
-    it "should create setter that always turns non-arrays into arrays" do
-      local_test_ds = SpecDatastream.new
-      local_test_ds.publisher_values = "Foo"
-      local_test_ds.publisher_values.should == ["Foo"]
-    end
-    
-    it "should create setter that sets datastream.dirty? to true" do
-      local_test_ds = SpecDatastream.new
-      local_test_ds.should_not be_dirty
-      local_test_ds.publisher_values = "Foo"
-      local_test_ds.should be_dirty
-      
-      # Note: If you use << to append values, the datastream will not be marked as dirty!
-      #local_test_ds.dirty = false
-      
-      #local_test_ds.should_not be_dirty
-      #local_test_ds.publisher_values << "Foo"
-      #local_test_ds.should be_dirty      
-    end
-    
-    it "should add any extra opts to the field hash" do
-      local_test_ds = SpecDatastream.new
-      local_test_ds.field "myfield", :string, :foo => "foo", :bar => "bar"      
-      local_test_ds.fields[:myfield].should have_key(:foo)
-      local_test_ds.fields[:myfield][:foo].should == "foo"
-      local_test_ds.fields[:myfield].should have_key(:bar)
-      local_test_ds.fields[:myfield][:bar].should == "bar"      
-    end
-    
-  end
   
   describe ".to_solr" do
     

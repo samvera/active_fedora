@@ -1,5 +1,6 @@
 require 'solr'
 require "active_fedora/solr_mapper"
+require "yaml"
 module ActiveFedora 
   class SolrService
       

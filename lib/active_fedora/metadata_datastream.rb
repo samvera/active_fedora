@@ -38,15 +38,15 @@ module ActiveFedora
     #   return xml.to_s
     # end
     # 
-    # # @tmpl ActiveFedora::MetadataDatastream
-    # # @node Nokogiri::XML::Node
-    # def self.from_xml(tmpl, node) # :nodoc:
-    #   node.xpath("./foxml:datastreamVersion[last()]/foxml:xmlContent/fields/node()").each do |f|
-    #       tmpl.send("#{f.name}_append", f.text) unless f.class == Nokogiri::XML::Text
-    #   end
-    #   tmpl.send(:dirty=, false)
-    #   tmpl
-    # end
+    # @tmpl ActiveFedora::MetadataDatastream
+    # @node Nokogiri::XML::Node
+    def self.from_xml(tmpl, node) # :nodoc:
+      node.xpath("./foxml:datastreamVersion[last()]/foxml:xmlContent/fields/node()").each do |f|
+          tmpl.send("#{f.name}_append", f.text) unless f.class == Nokogiri::XML::Text
+      end
+      tmpl.send(:dirty=, false)
+      tmpl
+    end
     
     # This method generates the various accessor and mutator methods on self for the datastream metadata attributes.
     # each field will have the 3 magic methods:
