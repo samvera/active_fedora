@@ -1,6 +1,5 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
 
-
 describe ActiveFedora::NokogiriDatastream do
   
   before(:all) do
@@ -117,36 +116,7 @@ describe ActiveFedora::NokogiriDatastream do
       doc = Solr::Document.new
       @test_ds.to_solr(doc).should equal(doc)
     end
-    
-    it "should iterate through @fields hash" do
-      @test_ds.expects(:fields).returns(@sample_fields)
-      solr_doc =  @test_ds.to_solr
-      
-      solr_doc[:publisher_t].should == "publisher1"
-      solr_doc[:coverage_t].should == "coverage1"
-      solr_doc[:creation_date_dt].should == "fake-date"
-      solr_doc[:mydate_dt].should == "fake-date"
-      
-      solr_doc[:empty_field_t].should be_nil
-    end
-    
-    it "should allow multiple values for a single field"
-    
-    it 'should append create keys in format field_name + _ + field_type' do
-      @test_ds.stubs(:fields).returns(@sample_fields)
-      
-      #should have these
-            
-      @test_ds.to_solr[:publisher_t].should_not be_nil
-      @test_ds.to_solr[:coverage_t].should_not be_nil
-      @test_ds.to_solr[:creation_date_dt].should_not be_nil
-      
-      #should NOT have these
-      @test_ds.to_solr[:narrator].should be_nil
-      @test_ds.to_solr[:title].should be_nil
-      @test_ds.to_solr[:empty_field].should be_nil
-      
-    end
+
     
     it "should use Solr mappings to generate field names" do
       ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
@@ -168,26 +138,84 @@ describe ActiveFedora::NokogiriDatastream do
       ActiveFedora::SolrService.load_mappings
     end
     
-    it 'should append _dt to dates' do
-      @test_ds.expects(:fields).returns(@sample_fields).at_least_once
-      
-      #should have these
-      
-      @test_ds.to_solr[:creation_date_dt].should_not be_nil
-      @test_ds.to_solr[:mydate_dt].should_not be_nil
-      
-      #should NOT have these
-      
-      @test_ds.to_solr[:mydate].should be_nil
-      @test_ds.to_solr[:creation_date_date].should be_nil
-    end
-    
   end
   
-  describe '.fields' do
-    it "should return a Hash" do
-      @test_ds.fields.should be_instance_of(Hash)
+  describe ".solrize_accessor" do
+    before(:all) do
+      class AccessorizedDs < ActiveFedora::NokogiriDatastream
+        
+        root_property :mods, "mods", "http://www.loc.gov/mods/v3", :attributes=>["id", "version"], :schema=>"http://www.loc.gov/standards/mods/v3/mods-3-2.xsd"          
+        
+        accessor :title_info, :relative_xpath=>'oxns:titleInfo', :children=>[
+          {:main_title=>{:relative_xpath=>'oxns:title'}},         
+          {:language =>{:relative_xpath=>{:attribute=>"lang"} }}
+          ] 
+        accessor :abstract
+        accessor :topic_tag, :relative_xpath=>'oxns:subject/oxns:topic'
+        accessor :person, :relative_xpath=>'oxns:name[@type="personal"]',  :children=>[
+          {:last_name=>{:relative_xpath=>'oxns:namePart[@type="family"]'}}, 
+          {:first_name=>{:relative_xpath=>'oxns:namePart[@type="given"]'}}, 
+          {:institution=>{:relative_xpath=>'oxns:affiliation'}}, 
+          {:role=>{:children=>[
+            {:text=>{:relative_xpath=>'oxns:roleTerm[@type="text"]'}},
+            {:code=>{:relative_xpath=>'oxns:roleTerm[@type="code"]'}}
+          ]}}
+        ]
+      end
     end
+    
+    before(:each) do
+      file = fixture(File.join("mods_articles", "hydrangea_article1.xml"))
+      @accessorized_ds = AccessorizedDs.new(:blob=>file)
+    end
+    
+    it "should perform a lookup and iterate over nodes in the result set calling solrize_node then calling solrize_accessor on any of the children, adding accessor_name & node index to parents array" do
+      mock_title_info_set = ["TI1", "TI2"]
+      mock_main_title_set = ["main title"]
+      mock_language_set = ["language"]
+      
+      solr_doc = Solr::Document.new
+      
+      AccessorizedDs.expects(:accessor_xpath).with( :title_info ).returns("title_info_xpath")
+      @accessorized_ds.expects(:lookup).with( "title_info_xpath" ).returns(mock_title_info_set)
+      
+      mock_title_info_set.each do |tin| 
+        node_index = mock_title_info_set.index(tin)
+        @accessorized_ds.expects(:solrize_node).with(tin, [:title_info], solr_doc) 
+        
+        # Couldn't mock the recursive calls to solrize_accessor without preventing the initial one, so was forced to mock out the whole recursive stack.
+        # @accessorized_ds.expects(:solrize_accessor).with(:main_title, AccessorizedDs.accessors[:title_info][:children][:main_title], :parents=>[{:title_info=>node_index}])      
+        # @accessorized_ds.expects(:solrize_accessor).with(:language, AccessorizedDs.accessors[:title_info][:children][:language], :parents=>[{:title_info=>node_index}])
+          AccessorizedDs.expects(:accessor_xpath).with( {:title_info=>node_index}, :main_title ).returns("title_info_main_title_xpath")
+          AccessorizedDs.expects(:accessor_xpath).with( {:title_info=>node_index}, :language ).returns("title_info_language_xpath")
+          @accessorized_ds.expects(:lookup).with( "title_info_main_title_xpath" ).returns(mock_main_title_set)
+          @accessorized_ds.expects(:lookup).with( "title_info_language_xpath" ).returns(mock_language_set)
+          @accessorized_ds.expects(:solrize_node).with("main title", [{:title_info=>node_index}, :main_title], solr_doc) 
+          @accessorized_ds.expects(:solrize_node).with("language", [{:title_info=>node_index}, :language], solr_doc) 
+
+      end
+      
+      @accessorized_ds.solrize_accessor(:title_info, AccessorizedDs.accessors[:title_info], :solr_doc=>solr_doc)
+      
+    end
+    
+    it "should not call solrize_accessor once it reaches an accessor with no children accessors set" do
+      pending "not sure how to test for this"
+      @accessorized_ds.solrize_accessor(:text, AccessorizedDs.accessor_info( [{:person=>1}, :last_name] ), :parents=>[{:person=>1}])
+    end
+    
+    it "should use values form parents array when requesting accessor_xpath and when generating solr field names" do
+      parents_array = [{:person=>0}, {:role=>1}]
+      AccessorizedDs.accessors[:person][:children][:role][:children][:text]
+      
+      # This should catch the "submitter" roleTerm from the second role node within the first person node and put it into a solr field called "person_0_role_2_text_0_t" and a solr field called "person_role_text_t"
+      @accessorized_ds.solrize_accessor(:text, AccessorizedDs.accessor_info( *parents_array + [:text] ), :parents=>parents_array)
+      
+    end
+  end
+  
+  describe ".solrize_node" do
+    it "should create a solr field containing node.text"
   end
   
 end
