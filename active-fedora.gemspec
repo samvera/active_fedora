@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{active-fedora}
-  s.version = "1.1.6"
+  s.version = "1.1.7"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2010-06-14}
+  s.date = %q{2010-06-21}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
@@ -209,7 +209,7 @@ Gem::Specification.new do |s|
      "lib/fedora/generic_search.rb",
      "lib/fedora/repository.rb",
      "lib/hydra.rb",
-     "lib/hydra_libs/mods_datastream.rb",
+     "lib/hydra_libs/mods_article.rb",
      "lib/hydra_libs/opinionated_mods_document.rb",
      "lib/ruby-fedora.rb",
      "lib/util/class_level_inheritable_attributes.rb",
@@ -222,6 +222,7 @@ Gem::Specification.new do |s|
      "spec/fixtures/changeme155.xml",
      "spec/fixtures/dino.jpg",
      "spec/fixtures/minivan.jpg",
+     "spec/fixtures/mods_articles/hydrangea_article1.xml",
      "spec/fixtures/oh_qdc.xml",
      "spec/fixtures/test_12.foxml.xml",
      "spec/integration/base_file_management_spec.rb",
@@ -262,7 +263,6 @@ Gem::Specification.new do |s|
      "spec/unit/inheritance_spec.rb",
      "spec/unit/metadata_datastream_spec.rb",
      "spec/unit/model_spec.rb",
-     "spec/unit/mods_datastream_spec.rb",
      "spec/unit/nokogiri_datastream_spec.rb",
      "spec/unit/property_spec.rb",
      "spec/unit/qualified_dublin_core_datastream_spec.rb",
@@ -281,7 +281,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{rubyfedora}
-  s.rubygems_version = %q{1.3.6}
+  s.rubygems_version = %q{1.3.7}
   s.summary = %q{A convenience libary for manipulating MODS (Metadata Object Description Schema) documents.}
   s.test_files = [
     "spec/integration/base_file_management_spec.rb",
@@ -319,7 +319,6 @@ Gem::Specification.new do |s|
      "spec/unit/inheritance_spec.rb",
      "spec/unit/metadata_datastream_spec.rb",
      "spec/unit/model_spec.rb",
-     "spec/unit/mods_datastream_spec.rb",
      "spec/unit/nokogiri_datastream_spec.rb",
      "spec/unit/property_spec.rb",
      "spec/unit/qualified_dublin_core_datastream_spec.rb",
@@ -337,12 +336,14 @@ Gem::Specification.new do |s|
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
     s.specification_version = 3
 
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
+    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<solr-ruby>, [">= 0.0.6"])
       s.add_runtime_dependency(%q<xml-simple>, [">= 1.0.12"])
       s.add_runtime_dependency(%q<mime-types>, [">= 1.16"])
       s.add_runtime_dependency(%q<multipart-post>, [">= 0"])
       s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
+      s.add_runtime_dependency(%q<om>, [">= 0.1.4"])
+      s.add_runtime_dependency(%q<yaml>, [">= 0"])
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_development_dependency(%q<mocha>, [">= 1.2.9"])
       s.add_development_dependency(%q<ruby-debug>, [">= 0"])
@@ -352,6 +353,8 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<mime-types>, [">= 1.16"])
       s.add_dependency(%q<multipart-post>, [">= 0"])
       s.add_dependency(%q<nokogiri>, [">= 0"])
+      s.add_dependency(%q<om>, [">= 0.1.4"])
+      s.add_dependency(%q<yaml>, [">= 0"])
       s.add_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_dependency(%q<mocha>, [">= 1.2.9"])
       s.add_dependency(%q<ruby-debug>, [">= 0"])
@@ -362,6 +365,8 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<mime-types>, [">= 1.16"])
     s.add_dependency(%q<multipart-post>, [">= 0"])
     s.add_dependency(%q<nokogiri>, [">= 0"])
+    s.add_dependency(%q<om>, [">= 0.1.4"])
+    s.add_dependency(%q<yaml>, [">= 0"])
     s.add_dependency(%q<rspec>, [">= 1.2.9"])
     s.add_dependency(%q<mocha>, [">= 1.2.9"])
     s.add_dependency(%q<ruby-debug>, [">= 0"])

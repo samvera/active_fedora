@@ -105,7 +105,15 @@ describe ActiveFedora::NokogiriDatastream do
       ActiveFedora::SolrService.load_mappings
     end
     
-    it "should iterate through the class fields, calling .values on each and appending the values to the solr doc"
+    it "should iterate through the class accessors, calling .solrize_accessor on each and passing in the solr doc" do
+      mock_accessors = {:accessor1=>:accessor1_info, :accessor2=>:accessor2_info}
+      ActiveFedora::NokogiriDatastream.stubs(:accessors).returns(mock_accessors)
+      doc = Solr::Document.new
+      mock_accessors.each_pair do |k,v|
+        @test_ds.expects(:solrize_accessor).with(k, v, :solr_doc=>doc)
+      end
+      @test_ds.to_solr(doc)
+    end
     
     it "should provide .to_solr and return a SolrDocument" do
       @test_ds.should respond_to(:to_solr)
@@ -115,27 +123,6 @@ describe ActiveFedora::NokogiriDatastream do
     it "should optionally allow you to provide the Solr::Document to add fields to and return that document when done" do
       doc = Solr::Document.new
       @test_ds.to_solr(doc).should equal(doc)
-    end
-
-    
-    it "should use Solr mappings to generate field names" do
-      ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
-      @test_ds.stubs(:fields).returns(@sample_fields)
-      solr_doc =  @test_ds.to_solr
-      
-      #should have these
-            
-      solr_doc[:publisher_field].should == "publisher1"
-      solr_doc[:coverage_field].should == "coverage1"
-      solr_doc[:creation_date_date].should == "fake-date"
-      solr_doc[:mydate_date].should == "fake-date"
-      
-      solr_doc[:publisher_t].should be_nil
-      solr_doc[:coverage_t].should be_nil
-      solr_doc[:creation_date_dt].should be_nil
-      
-      # Reload default mappings
-      ActiveFedora::SolrService.load_mappings
     end
     
   end
@@ -192,7 +179,6 @@ describe ActiveFedora::NokogiriDatastream do
           @accessorized_ds.expects(:lookup).with( "title_info_language_xpath" ).returns(mock_language_set)
           @accessorized_ds.expects(:solrize_node).with("main title", [{:title_info=>node_index}, :main_title], solr_doc) 
           @accessorized_ds.expects(:solrize_node).with("language", [{:title_info=>node_index}, :language], solr_doc) 
-
       end
       
       @accessorized_ds.solrize_accessor(:title_info, AccessorizedDs.accessors[:title_info], :solr_doc=>solr_doc)
@@ -210,12 +196,30 @@ describe ActiveFedora::NokogiriDatastream do
       
       # This should catch the "submitter" roleTerm from the second role node within the first person node and put it into a solr field called "person_0_role_2_text_0_t" and a solr field called "person_role_text_t"
       @accessorized_ds.solrize_accessor(:text, AccessorizedDs.accessor_info( *parents_array + [:text] ), :parents=>parents_array)
+    end
+    
+    it "should use Solr mappings to generate field names" do
+
+      solr_doc =  @accessorized_ds.to_solr
+      #should have these
+            
+      solr_doc[:abstract_t].should == "ABSTRACT"
+      solr_doc[:title_info_1_language_t].should == "finnish"
+      solr_doc[:person_1_role_0_text_t].should == "teacher"
+      # solr_doc[:mydate_date].should == "fake-date"
+      # 
+      # solr_doc[:publisher_t].should be_nil
+      # solr_doc[:coverage_t].should be_nil
+      # solr_doc[:creation_date_dt].should be_nil
+      # solr_doc.should == ""
       
     end
   end
   
   describe ".solrize_node" do
     it "should create a solr field containing node.text"
+    it "should create hierarchical field entries if parents is not empty"
+    it "should only create one node if parents is empty"
   end
   
 end

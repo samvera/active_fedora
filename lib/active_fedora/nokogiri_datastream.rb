@@ -16,12 +16,10 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
   end
   
   def to_solr(solr_doc = Solr::Document.new) # :nodoc:
-    fields.each do |field_key, field_info|
-      if field_info.has_key?(:values) && !field_info[:values].nil?
-        field_symbol = generate_solr_symbol(field_key, field_info[:type])
-        field_info[:values].each do |val|             
-          solr_doc << Solr::Field.new(field_symbol => val)
-        end
+    
+    unless self.class.accessors.nil?
+      self.class.accessors.each_pair do |accessor_name,accessor_info|
+        solrize_accessor(accessor_name, accessor_info, :solr_doc=>solr_doc)
       end
     end
 
@@ -57,14 +55,16 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
   end
   
   def solrize_node(node, accessor_pointer, solr_doc = Solr::Document.new)
-    generic_field_name_base = self.class.accessor_generic_name(accessor_pointer)
+    generic_field_name_base = self.class.accessor_generic_name(*accessor_pointer)
     generic_field_name = generate_solr_symbol(generic_field_name_base, :text)
     
-    hierarchical_field_name_base = self.class.accessor_hierarchical_name(accessor_pointer)
-    hierarchical_field_name = generate_solr_symbol(hierarchical_field_name_base, :text)
-    
     solr_doc << Solr::Field.new(generic_field_name => node.text)
-    solr_doc << Solr::Field.new(hierarchical_field_name => node.text)
+    
+    if accessor_pointer.length > 1
+      hierarchical_field_name_base = self.class.accessor_hierarchical_name(*accessor_pointer)
+      hierarchical_field_name = generate_solr_symbol(hierarchical_field_name_base, :text)
+      solr_doc << Solr::Field.new(hierarchical_field_name => node.text)
+    end
   end
 
 end
