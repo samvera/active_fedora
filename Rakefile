@@ -22,7 +22,7 @@ begin
     gem.add_dependency('multipart-post')
     gem.add_dependency('nokogiri')
     gem.add_dependency('om', '>= 0.1.4')
-    gem.add_dependency('yaml')
+    # gem.add_dependency('yaml')
 
     gem.add_development_dependency "rspec", ">= 1.2.9"
     gem.add_development_dependency "mocha", ">= 1.2.9"

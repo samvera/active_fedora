@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2010-06-21}
+  s.date = %q{2010-06-22}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
@@ -209,8 +209,8 @@ Gem::Specification.new do |s|
      "lib/fedora/generic_search.rb",
      "lib/fedora/repository.rb",
      "lib/hydra.rb",
-     "lib/hydra_libs/mods_article.rb",
-     "lib/hydra_libs/opinionated_mods_document.rb",
+     "lib/hydra/mods_article.rb",
+     "lib/hydra/opinionated_mods_document.rb",
      "lib/ruby-fedora.rb",
      "lib/util/class_level_inheritable_attributes.rb",
      "script/console",
@@ -343,7 +343,6 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<multipart-post>, [">= 0"])
       s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
       s.add_runtime_dependency(%q<om>, [">= 0.1.4"])
-      s.add_runtime_dependency(%q<yaml>, [">= 0"])
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_development_dependency(%q<mocha>, [">= 1.2.9"])
       s.add_development_dependency(%q<ruby-debug>, [">= 0"])
@@ -354,7 +353,6 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<multipart-post>, [">= 0"])
       s.add_dependency(%q<nokogiri>, [">= 0"])
       s.add_dependency(%q<om>, [">= 0.1.4"])
-      s.add_dependency(%q<yaml>, [">= 0"])
       s.add_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_dependency(%q<mocha>, [">= 1.2.9"])
       s.add_dependency(%q<ruby-debug>, [">= 0"])
@@ -366,7 +364,6 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<multipart-post>, [">= 0"])
     s.add_dependency(%q<nokogiri>, [">= 0"])
     s.add_dependency(%q<om>, [">= 0.1.4"])
-    s.add_dependency(%q<yaml>, [">= 0"])
     s.add_dependency(%q<rspec>, [">= 1.2.9"])
     s.add_dependency(%q<mocha>, [">= 1.2.9"])
     s.add_dependency(%q<ruby-debug>, [">= 0"])
