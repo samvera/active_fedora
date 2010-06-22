@@ -1,2 +1,2 @@
-# module Hydra;end
-require "hydra_libs/mods_datastream"
+module Hydra;end
+require "hydra/mods_article"

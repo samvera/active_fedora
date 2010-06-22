@@ -1,3 +1,4 @@
+module Hydra
 class ModsArticle < ActiveFedora::NokogiriDatastream       
   
     # have to call this in order to set namespace & schema
@@ -44,4 +45,5 @@ class ModsArticle < ActiveFedora::NokogiriDatastream
         ]}}
     ]    
   
+end
 end

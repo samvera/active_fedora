@@ -529,7 +529,10 @@ module ActiveFedora
             attributes = {:label=>""}
           end
           ds = ar.first.new(:dsid=>name)
-          ar.last.call(ds)
+          # If you called has_metadata with a block, pass the block into the Datastream class
+          if ar.last.class == Proc
+            ar.last.call(ds)
+          end
           ds.attributes = attributes.merge(ds.attributes)
           self.add_datastream(ds)
         end

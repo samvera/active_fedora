@@ -1,6 +1,7 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
 
 require 'rexml/document'
+require "hydra"
 
 include ActiveFedora
 
@@ -29,6 +30,12 @@ describe ActiveFedora::Base do
           m.field "series", :string
           m.field "location", :string
         end
+        
+        # has_metadata :name=>"arbitrary_xml", :type=> ActiveFedora::NokogiriDatastream do |m|
+        #   m.root_property :myxml, "my_xml", "http://www.example.gov/schema/v3"
+        # end
+        
+        has_metadata :name=>"mods_article", :type=> Hydra::ModsArticle 
         
         has_metadata :name => "dublin_core", :type => ActiveFedora::QualifiedDublinCoreDatastream do |m|
           # Default :multiple => true

@@ -65,22 +65,6 @@ module ActiveFedora::MetadataDatastreamHelper
         end
       end
     end
-    
-    # fields.each_pair do |field,field_info|
-    #       el = REXML::Element.new("#{field.to_s}")
-    #         if field_info[:element_attrs]
-    #           field_info[:element_attrs].each{|k,v| el.add_attribute(k.to_s, v.to_s)}
-    #         end
-    #       field_info[:values].each do |val|
-    #         el = el.clone
-    #         el.text = val.to_s
-    #         if xml.class == REXML::Document
-    #           xml.root.elements.add(el)
-    #         else
-    #           xml.add(el)
-    #         end
-    #       end
-    #     end
     return builder.to_xml
   end
   

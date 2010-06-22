@@ -15,6 +15,28 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     self.class.from_xml(blob, self)
   end
   
+  def to_xml(xml = self.ng_xml)
+    ng_xml = self.ng_xml
+    if ng_xml.root.nil? && self.class.respond_to?(:root_property_ref) && !self.class.root_property_ref.nil?
+      ng_xml = self.class.generate(self.class.root_property_ref, "")
+      if xml.root.nil?
+        xml = ng_xml
+      end
+    end
+
+    unless xml == ng_xml || ng_xml.root.nil?
+      if xml.kind_of?(Nokogiri::XML::Document)
+          xml.root.add_child(ng_xml.root)
+      elsif xml.kind_of?(Nokogiri::XML::Node)
+          xml.add_child(ng_xml.root)
+      else
+          raise "You can only pass instances of Nokogiri::XML::Node into this method.  You passed in #{xml}"
+      end
+    end
+    
+    return xml.to_xml {|config| config.no_declaration}
+  end
+  
   def to_solr(solr_doc = Solr::Document.new) # :nodoc:
     
     unless self.class.accessors.nil?

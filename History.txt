@@ -1,3 +1,9 @@
+1.1.7 
+
+Nokogiri Datastream support
+You now have the option of calling has_metadata without passing in a block
+
+
 1.1.6
 
 Bug #959: Base.delete fails to delete objects from Solr even when ENABLE_SOLR_UPDATES == true
