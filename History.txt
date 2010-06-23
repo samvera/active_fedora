@@ -1,6 +1,6 @@
 1.1.7 
 
-Nokogiri Datastream support
+Nokogiri Datastream support using Nokogiri and OM::XML.  Includes indexing of xml contents into solr based on accessors declared using OM::XML:Accessor module.
 You now have the option of calling has_metadata without passing in a block
 
 
