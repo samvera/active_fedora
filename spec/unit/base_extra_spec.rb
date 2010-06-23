@@ -66,12 +66,15 @@ describe ActiveFedora::Base do
       mock1 = mock("ds1", :to_solr)
       mock2 = mock("ds2", :to_solr)
       mock3 = mock("RELS-EXT", :to_solr)
+      
+      mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
+      mock_datastreams.values.each {|ds| ds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)}
       mock1.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
       mock2.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
       mock3.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(false)
       mock3.expects(:kind_of?).with(ActiveFedora::RelsExtDatastream).returns(true)
 
-      @test_object.expects(:datastreams).returns({:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3})
+      @test_object.expects(:datastreams).returns(mock_datastreams)
       @test_object.update_index
     end
 

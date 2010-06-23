@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{active-fedora}
-  s.version = "1.1.7"
+  s.version = "1.1.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
@@ -343,7 +343,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<mime-types>, [">= 1.16"])
       s.add_runtime_dependency(%q<multipart-post>, [">= 0"])
       s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
-      s.add_runtime_dependency(%q<om>, [">= 0.1.4"])
+      s.add_runtime_dependency(%q<om>, [">= 0.1.5"])
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_development_dependency(%q<mocha>, [">= 1.2.9"])
       s.add_development_dependency(%q<ruby-debug>, [">= 0"])
@@ -353,7 +353,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<mime-types>, [">= 1.16"])
       s.add_dependency(%q<multipart-post>, [">= 0"])
       s.add_dependency(%q<nokogiri>, [">= 0"])
-      s.add_dependency(%q<om>, [">= 0.1.4"])
+      s.add_dependency(%q<om>, [">= 0.1.5"])
       s.add_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_dependency(%q<mocha>, [">= 1.2.9"])
       s.add_dependency(%q<ruby-debug>, [">= 0"])
@@ -364,7 +364,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<mime-types>, [">= 1.16"])
     s.add_dependency(%q<multipart-post>, [">= 0"])
     s.add_dependency(%q<nokogiri>, [">= 0"])
-    s.add_dependency(%q<om>, [">= 0.1.4"])
+    s.add_dependency(%q<om>, [">= 0.1.5"])
     s.add_dependency(%q<rspec>, [">= 1.2.9"])
     s.add_dependency(%q<mocha>, [">= 1.2.9"])
     s.add_dependency(%q<ruby-debug>, [">= 0"])

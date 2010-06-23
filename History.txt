@@ -1,3 +1,7 @@
+1.1.8
+
+solrizer fix to ensure that Nokogiri Datastreams are included in Base.to_solr
+
 1.1.7 
 
 Nokogiri Datastream support using Nokogiri and OM::XML.  Includes indexing of xml contents into solr based on accessors declared using OM::XML:Accessor module.

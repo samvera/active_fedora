@@ -355,13 +355,16 @@ describe ActiveFedora::Base do
       solr_doc[:active_fedora_model_field].should eql(@test_object.class.inspect)
     end
     
-    it "should call .to_solr on all MetadataDatastreams and pass the resulting document to solr" do
+    it "should call .to_solr on all MetadataDatastreams and NokogiriDatastreams, passing the resulting document to solr" do
       mock1 = mock("ds1", :to_solr)
       mock2 = mock("ds2", :to_solr)
+      ngds = mock("ngds", :to_solr)
       mock1.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
       mock2.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
-
-      @test_object.expects(:datastreams).returns({:ds1 => mock1, :ds2 => mock2})
+      ngds.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(false)
+      ngds.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
+      
+      @test_object.expects(:datastreams).returns({:ds1 => mock1, :ds2 => mock2, :ngds => ngds})
       @test_object.to_solr
     end
     it "should call .to_solr on the RELS-EXT datastream if it is dirty" do
