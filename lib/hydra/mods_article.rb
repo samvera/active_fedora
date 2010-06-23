@@ -36,7 +36,7 @@ class ModsArticle < ActiveFedora::NokogiriDatastream
         {:publisher=>{:relative_xpath=>'oxns:originInfo/oxns:publisher'}},
         {:issn=>{:relative_xpath=>'oxns:identifier[@type="issn"]'}}, 
         {:date_issued=>{:relative_xpath=>'oxns:originInfo/oxns:dateIssued'}},
-        {:issue => {:relative_xpath=>"oxns:part", :children=>[
+        {:issue => {:relative_xpath=>"oxns:part", :children=>[          
           {:volume=>{:relative_xpath=>'oxns:detail[@type="volume"]'}},
           {:level=>{:relative_xpath=>'oxns:detail[@type="level"]'}},
           {:start_page=>{:relative_xpath=>'oxns:extent[@unit="pages"]/oxns:start'}},

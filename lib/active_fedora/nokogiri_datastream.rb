@@ -15,6 +15,7 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     self.class.from_xml(blob, self)
   end
   
+  
   def to_xml(xml = self.ng_xml)
     ng_xml = self.ng_xml
     if ng_xml.root.nil? && self.class.respond_to?(:root_property_ref) && !self.class.root_property_ref.nil?

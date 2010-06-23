@@ -31,6 +31,20 @@ describe ActiveFedora::NokogiriDatastream do
     end
   end
   
+  describe '#from_xml' do
+    it "should work when a template datastream is passed in" do
+      mods_xml = Nokogiri::XML::Document.parse( fixture(File.join("mods_articles", "hydrangea_article1.xml")) )
+      tmpl = Hydra::ModsArticle.new
+      Hydra::ModsArticle.from_xml(mods_xml,tmpl).ng_xml.root.to_xml.should == mods_xml.root.to_xml
+    end
+    it "should work when foxml datastream xml is passed in" do
+      pending "at least for now, just updated Base.deserialize to feed in the xml content rather than the foxml datstream xml.  Possibly we can update MetadataDatstream to assume the same and leave it at that? -MZ 23-06-2010"
+      hydrangea_article_foxml = Nokogiri::XML::Document.parse( fixture("hydrangea_fixture_mods_article1.foxml.xml") )
+      ds_xml = hydrangea_article_foxml.at_xpath("//foxml:datastream[@ID='descMetadata']")
+      Hydra::ModsArticle.from_xml(ds_xml).ng_xml.to_xml.should == hydrangea_article_foxml.at_xpath("//foxml:datastream[@ID='descMetadata']/foxml:datastreamVersion[last()]/foxml:xmlContent").first_element_child.to_xml
+    end
+  end
+  
 
   it 'should provide .fields' do
     @test_ds.should respond_to(:fields)
