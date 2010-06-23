@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2010-06-22}
+  s.date = %q{2010-06-23}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
@@ -221,6 +221,7 @@ Gem::Specification.new do |s|
      "solr/config/solrconfig-1.5.xml",
      "spec/fixtures/changeme155.xml",
      "spec/fixtures/dino.jpg",
+     "spec/fixtures/hydrangea_fixture_mods_article1.foxml.xml",
      "spec/fixtures/minivan.jpg",
      "spec/fixtures/mods_articles/hydrangea_article1.xml",
      "spec/fixtures/oh_qdc.xml",
