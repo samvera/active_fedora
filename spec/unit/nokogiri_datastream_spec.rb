@@ -31,6 +31,74 @@ describe ActiveFedora::NokogiriDatastream do
     end
   end
   
+  describe ".update_attributes" do
+    
+    before(:each) do
+      @mods_ds = Hydra::ModsArticle.new(:blob=>fixture(File.join("mods_articles","hydrangea_article1.xml")))
+    end
+    
+    it "should apply submitted hash to corresponding datastream field values" do
+      result = @mods_ds.update_attributes( {[{":person"=>"0"}, "role"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"} })
+      result.should == {"person_0_role"=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}}
+      # xpath = ds.class.accessor_xpath(*field_key)
+      # result = ds.property_values(xpath)
+      
+      @mods_ds.property_values('oxns:name[@type="personal" and position()=1]/oxns:role/oxns:roleTerm').should == ["role1","role2","role3"]
+    end
+    it "should support single-value arguments (as opposed to a hash of values with array indexes as keys)" do
+      # In other words, { "fubar"=>"dork" } should have the same effect as { "fubar"=>{"0"=>"dork"} }
+      result = @mods_ds.update_attributes( { [{":person"=>"0"}, "role"]=>"the role" } )
+      result.should == {"person_0_role"=>{"0"=>"the role"}}
+      @mods_ds.property_values('oxns:name[@type="personal" and position()=1]/oxns:role/oxns:roleTerm').should == ["the role"]
+    end
+    it "should do nothing if field key is a string (must be an array or symbol).  Will not accept xpath queries!" do
+      xml_before = @mods_ds.to_xml
+      @mods_ds.update_attributes( { "fubar"=>"the role" } ).should == {}
+      @mods_ds.to_xml.should == xml_before
+    end
+    it "should do nothing if there is no accessor corresponding to the given field key" do
+      xml_before = @mods_ds.to_xml
+      @mods_ds.update_attributes( { [{"fubar"=>"0"}]=>"the role" } ).should == {}
+      @mods_ds.to_xml.should == xml_before
+    end
+    it "should destringify the field key/lookup pointer" do
+      @mods_ds.expects(:update_properties).with( { [{:person=>0}, :role]=>"the role" } ).times(3)
+      @mods_ds.update_attributes( { [{":person"=>"0"}, "role"]=>"the role" } )
+      @mods_ds.update_attributes( { [{"person"=>"0"}, "role"]=>"the role" } )
+      @mods_ds.update_attributes( { [{:person=>0}, :role]=>"the role" } )
+    end
+  end
+  
+  describe ".get_values" do
+    
+    before(:each) do
+      @mods_ds = Hydra::ModsArticle.new(:blob=>fixture(File.join("mods_articles","hydrangea_article1.xml")))
+    end
+    
+    it "should call lookup with field_name and return the text values from each resulting node" do
+      @mods_ds.expects(:property_values).with("--my xpath--").returns(["value1", "value2"])
+      @mods_ds.get_values(@resource, "ds1", "--my xpath--").should == ["value1", "value2"]
+    end
+    it "should assume that field_name that are strings are xpath queries" do
+      ActiveFedora::NokogiriDatastream.expects(:accessor_xpath).never
+      @mods_ds.expects(:property_values).with("--my xpath--").returns(["abstract1", "abstract2"])
+      @mods_ds.get_values("--my xpath--").should == ["abstract1", "abstract2"]
+    end
+    it "should assume field_names that are symbols or arrays are pointers to accessors declared in this datastreams model" do
+      ActiveFedora::NokogiriDatastream.expects(:accessor_xpath).with(:abstract).returns("--abstract xpath--")
+      ActiveFedora::NokogiriDatastream.expects(:accessor_xpath).with(*[{:person=>1}]).returns("--person xpath--")
+      ActiveFedora::NokogiriDatastream.expects(:accessor_xpath).with(*[{:person=>1},{:role=>1},:text]).returns("--person role text xpath--")     
+      
+      @mods_ds.expects(:property_values).with("--abstract xpath--").returns(["abstract1", "abstract2"])
+      @mods_ds.expects(:property_values).with("--person xpath--").returns(["person1", "person2"])
+      @mods_ds.expects(:property_values).with("--person role text xpath--").returns(["text1"])
+      
+      @mods_ds.get_values(:abstract).should == ["abstract1", "abstract2"]
+      @mods_ds.get_values([{:person=>1}]).should == ["person1", "person2"]
+      @mods_ds.get_values([{:person=>1},{:role=>1},:text]).should == ["text1"]
+    end
+  end
+  
   describe '#from_xml' do
     it "should work when a template datastream is passed in" do
       mods_xml = Nokogiri::XML::Document.parse( fixture(File.join("mods_articles", "hydrangea_article1.xml")) )

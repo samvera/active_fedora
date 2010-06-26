@@ -15,7 +15,6 @@ describe ActiveFedora::MetadataDatastream do
                       :empty_field => {:values => {}}
                       } 
     @sample_xml = XmlSimple.xml_in("<fields><coverage>coverage1</coverage><coverage>coverage2</coverage><creation_date>fake-date</creation_date><mydate>fake-date</mydate><publisher>publisher1</publisher></fields>")
-    
   end
   
   before(:each) do
@@ -45,6 +44,115 @@ describe ActiveFedora::MetadataDatastream do
       @test_ds.expects(:to_xml).returns("fake xml")
       @test_ds.expects(:blob=).with("fake xml")
       @test_ds.save
+    end
+  end
+  
+  describe ".update_attributes" do
+    
+    before(:each) do
+      @test_ds.field "fubar", :string
+      @test_ds.field "swank", :text
+    end
+    
+    it "should apply submitted hash to corresponding datastream field values" do
+      att= {"fubar"=>{"-1"=>"mork", "0"=>"york"}}
+      @test_ds.update_indexed_attributes(att)
+      @test_ds.fubar_values.should == ['mork', 'york']
+      @test_ds.fubar_values.should == ['mork', 'york']
+
+      att= {"fubar"=>{"0"=>"zork", "1"=>"tork", "2"=>'mangle'}}
+      @test_ds.update_indexed_attributes(att)
+      @test_ds.fubar_values.should == ['zork', 'tork', 'mangle']
+
+      att= {"fubar"=>{"0"=>"hork", "1"=>"tork", '-1'=>'dang'}}
+      result = @test_ds.update_indexed_attributes(att)
+      result.should == {"fubar"=>{"0"=>"hork", "1"=>"tork", '3'=>'dang'}}
+      @test_ds.fubar_values.should == ['hork', 'tork', 'mangle', 'dang']
+    end
+    
+    it "should support single-value arguments (as opposed to a hash of values with array indexes as keys)" do
+      # In other words, { "fubar"=>"dork" } should have the same effect as { "fubar"=>{"0"=>"dork"} }
+      
+      result = @test_ds.update_attributes( { "fubar"=>"dork" } )
+      result.should == {"fubar"=>{"0"=>"dork"}}
+      ds.fubar_values.should == ["dork"]
+    end
+    
+    it "should work for text fields" do 
+      att= {"swank"=>{"-1"=>"mork", "1"=>"york"}}
+      result = @test_ds.update_indexed_attributes(att)
+      result.should == {"swank"=>{"1"=>"york", "0"=>"mork"}}
+      @test_ds.swank_values.should == ['mork', 'york']
+      att= {"swank"=>{"-1"=>"dork"}}
+      result2 = @test_ds.update_indexed_attributes(att)
+      result2.should == {"swank"=>{"2"=>"dork"}}
+      @test_ds.swank_values.should == ['mork', 'york', 'dork']
+    end
+    
+    it "should do nothing if there is no accessor corresponding to the given field key" do
+      xml_before = @test_ds.to_xml
+      @test_ds.update_attributes( { "style"=>"the style" } ).should == {}
+      @test_ds.to_xml.should == xml_before
+    end
+    
+    it "should return the new index of any added values" do
+      @test_ds.swank_values = ["my_val1","my_val2"]
+      result = @test_ds.update_indexed_attributes "swank"=>{"-1"=>"mork"}
+      result.should == {"swank"=>{"2"=>"mork"}}
+    end
+    
+    it "should return accurate response when multiple values have been added in a single run" do
+      pending
+      att= {"swank"=>{"-1"=>"mork", "0"=>"york"}}
+      @test_ds.update_indexed_attributes(att).should == {"swank"=>{"0"=>"york", "1"=>"mork"}}
+    end
+    
+    it "should deal gracefully with adding new values at explicitly declared indexes" do
+      @test_ds.fubar_values = ["all", "for", "the"]
+      att = {"fubar"=>{"3"=>'glory'}}
+      result = @test_ds.update_indexed_attributes(att)
+      result.should == {"fubar"=>{"3"=>"glory"}}
+      @test_ds.fubar_values.should == ["all", "for", "the", "glory"]
+      
+      @test_ds.fubar_values = []
+      result = @test_ds.update_indexed_attributes(att)
+      result.should == {"fubar"=>{"0"=>"glory"}}
+      @test_ds.fubar_values.should == ["glory"]
+    end
+    
+    it "should allow deleting of values and should delete values so that to_xml does not return emtpy nodes" do
+      att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
+      @test_ds.update_indexed_attributes(att)
+      @test_ds.fubar_values.should == ['mork', 'york', 'mangle']
+      rexml = REXML::Document.new(@test_ds.to_xml)
+      #puts rexml.root.elements.each {|el| el.to_s}
+      #puts rexml.root.elements.to_a.inspect
+      rexml.root.elements.to_a.length.should == 3
+      @test_ds.update_indexed_attributes({"fubar"=>{"1"=>""}})
+      @test_ds.fubar_values.should == ['mork', 'mangle']
+      rexml = REXML::Document.new(@test_ds.to_xml)
+      rexml.root.elements.to_a.length.should == 2
+      @test_ds.update_indexed_attributes({"fubar"=>{"0"=>:delete}})
+      @test_ds.fubar_values.should == ['mangle']
+      rexml = REXML::Document.new(@test_ds.to_xml)
+      rexml.root.elements.to_a.length.should == 1
+      
+      @test_ds.fubar_values = ["val1", nil, "val2"]
+      @test_ds.update_indexed_attributes({"fubar"=>{"1"=>""}})
+      @test_ds.fubar_values.should == ["val1", "val2"]
+    end
+    
+  end
+  
+  describe ".get_values" do
+    it "should call the _values method corresponding to the field_name" do
+      @test_ds.expects(:abstract_values).returns(["val1", "val2"])
+      @test_ds.get_values(:abstract).should == ["val1", "val2"]
+    end
+    it "should return a default value if one is supplied" do
+      @test_ds.stubs(:abstract_values).returns([])
+      @test_ds.get_values(:abstract, "default value").should == ["default value"]
+      @test_ds.get_values(:abstract, nil).should == nil
     end
   end
   

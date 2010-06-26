@@ -411,6 +411,20 @@ describe ActiveFedora::Base do
     f.pid.should == 'numbnuts:1'
 
   end
+  
+  describe "update_datastream_attributes" do
+    it "should look up any datastreams specified as keys in the given hash and call update_attributes on the datastream" do
+      ds_values_hash = {
+        "descMetadata"=>{ [{:person=>0}, :role]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"} },
+        "properties"=>{ "notes"=>"foo" }
+      }
+      m = FooHistory.new
+      m.datastreams['descMetadata'].expects(:update_attributes).with( ds_values_hash['descMetadata'] )
+      m.datastreams['properties'].expects(:update_attributes).with( ds_values_hash['properties'] )
+      m.update_datastream_attributes( ds_values_hash )
+    end
+  end
+  
   describe "update_attributes" do
     it "should be able to handle ds's without fields field" do
       class Moo < ActiveFedora::Base;end
@@ -474,88 +488,8 @@ describe ActiveFedora::Base do
   end
   
   describe "update_indexed_attributes" do
-    it "should work for text fields" do 
-      att= {"swank"=>{"-1"=>"mork", "1"=>"york"}}
-      n = FooHistory.new
-      result = n.update_indexed_attributes(att)
-      result.should == {"swank"=>{"1"=>"york", "0"=>"mork"}}
-      n.datastreams["someData"].swank_values.should == ['mork', 'york']
-      n.datastreams["someData"].swank_values.should == ['mork', 'york']
-      att= {"swank"=>{"-1"=>"dork"}}
-      result2 = n.update_indexed_attributes(att)
-      result2.should == {"swank"=>{"2"=>"dork"}}
-      n.datastreams["someData"].swank_values.should == ['mork', 'york', 'dork']
+    it "should call .update_indexed_attributes on all metadata datastreams & nokogiri datastreams" do
     end
-    
-    it "should return the new index of any added values" do
-      n = FooHistory.new
-      n.datastreams["someData"].swank_values = ["my_val1","my_val2"]
-      result = n.update_indexed_attributes "swank"=>{"-1"=>"mork"}
-      result.should == {"swank"=>{"2"=>"mork"}}
-    end
-    
-    it "should return accurate response when multiple values have been added in a single run" do
-      pending
-      att= {"swank"=>{"-1"=>"mork", "0"=>"york"}}
-      n = FooHistory.new
-      n.update_indexed_attributes(att).should == {"swank"=>{"0"=>"york", "1"=>"mork"}}
-    end
-
-    it "should apply submitted hash to corresponding datastream values" do
-      att= {"fubar"=>{"-1"=>"mork", "0"=>"york"}}
-      n = FooHistory.new
-      n.update_indexed_attributes(att)
-      n.datastreams["someData"].fubar_values.should == ['mork', 'york']
-      n.datastreams["someData"].fubar_values.should == ['mork', 'york']
-
-      att= {"fubar"=>{"0"=>"zork", "1"=>"tork", "2"=>'mangle'}}
-      n.update_indexed_attributes(att)
-      n.datastreams["someData"].fubar_values.should == ['zork', 'tork', 'mangle']
-
-      att= {"fubar"=>{"0"=>"hork", "1"=>"tork", '-1'=>'dang'}}
-      result = n.update_indexed_attributes(att)
-      result.should == {"fubar"=>{"0"=>"hork", "1"=>"tork", '3'=>'dang'}}
-      n.datastreams["someData"].fubar_values.should == ['hork', 'tork', 'mangle', 'dang']
-
-      #really? should it hit all matching datastreams?
-      n.datastreams["withText"].fubar_values.should == ['hork', 'tork', 'mangle', 'dang']
-    end
-    
-    it "should deal gracefully with adding new values at explicitly declared indexes" do
-      n = FooHistory.new
-      n.datastreams["someData"].fubar_values = ["all", "for", "the"]
-      att = {"fubar"=>{"3"=>'glory'}}
-      result = n.update_indexed_attributes(att)
-      result.should == {"fubar"=>{"3"=>"glory"}}
-      n.datastreams["someData"].fubar_values.should == ["all", "for", "the", "glory"]
-      
-      n.datastreams["withText"].fubar_values.should == ["glory"]
-    end
-    
-    it "should allow deleting of values and should delete values so that to_xml does not return emtpy nodes" do
-      att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
-      n = FooHistory.new
-      n.update_indexed_attributes(att)
-      n.datastreams["someData"].fubar_values.should == ['mork', 'york', 'mangle']
-      rexml = REXML::Document.new(n.datastreams["someData"].to_xml)
-      #puts rexml.root.elements.each {|el| el.to_s}
-      #puts rexml.root.elements.to_a.inspect
-      rexml.root.elements.to_a.length.should == 3
-      n.update_indexed_attributes({"fubar"=>{"1"=>""}})
-      n.datastreams["someData"].fubar_values.should == ['mork', 'mangle']
-      rexml = REXML::Document.new(n.datastreams["someData"].to_xml)
-      rexml.root.elements.to_a.length.should == 2
-      n.update_indexed_attributes({"fubar"=>{"0"=>:delete}})
-      n.datastreams["someData"].fubar_values.should == ['mangle']
-      rexml = REXML::Document.new(n.datastreams["someData"].to_xml)
-      rexml.root.elements.to_a.length.should == 1
-      
-      n.datastreams["someData"].fubar_values = ["val1", nil, "val2"]
-      n.update_indexed_attributes({"fubar"=>{"1"=>""}})
-      n.datastreams["someData"].fubar_values.should == ["val1", "val2"]
-    end
-    
-    
     it "should take a :datastreams argument" do 
       att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
       m = FooHistory.new
