@@ -5,7 +5,8 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     
   include ActiveFedora::MetadataDatastreamHelper
   include OM::XML
-    
+  extend(OM::XML::Container::ClassMethods)
+  
   attr_accessor :ng_xml
   
   #constructor, calls up to ActiveFedora::Datastream's constructor
