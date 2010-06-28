@@ -150,7 +150,11 @@ describe ActiveFedora::NokogiriDatastream do
         accessor :title_info, :relative_xpath=>'oxns:titleInfo', :children=>[
           {:main_title=>{:relative_xpath=>'oxns:title'}},         
           {:language =>{:relative_xpath=>{:attribute=>"lang"} }}
-          ] 
+          ]
+        accessor :finnish_title_info, :relative_xpath=>'oxns:titleInfo[@lang="finnish"]', :children=>[
+          {:main_title=>{:relative_xpath=>'oxns:title'}},
+          {:language =>{:relative_xpath=>{:attribute=>"lang"} }}
+        ]
         accessor :abstract
         accessor :topic_tag, :relative_xpath=>'oxns:subject/oxns:topic'
         accessor :person, :relative_xpath=>'oxns:name[@type="personal"]',  :children=>[
@@ -220,6 +224,10 @@ describe ActiveFedora::NokogiriDatastream do
       solr_doc[:abstract_t].should == "ABSTRACT"
       solr_doc[:title_info_1_language_t].should == "finnish"
       solr_doc[:person_1_role_0_text_t].should == "teacher"
+
+      solr_doc[:finnish_title_info_language_t].should == "finnish"
+      solr_doc[:finnish_title_info_main_title_t].should == "Artikkelin otsikko Hydrangea artiklan 1"
+
       # solr_doc[:mydate_date].should == "fake-date"
       # 
       # solr_doc[:publisher_t].should be_nil
