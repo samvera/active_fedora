@@ -423,9 +423,27 @@ describe ActiveFedora::Base do
       m.datastreams['properties'].expects(:update_attributes).with( ds_values_hash['properties'] )
       m.update_datastream_attributes( ds_values_hash )
     end
+    it "should look up any datastreams specified as keys in the given hash and call update_attributes on the datastream" do
+      ds_values_hash = {
+        "nonexistentDatastream"=>{ "notes"=>"foo" }
+      }
+      m = FooHistory.new
+      xml_before = m.to_xml
+      m.update_datastream_attributes( ds_values_hash ).should == {}
+      m.to_xmlshould == xml_before
+    end
   end
   
   describe "update_attributes" do
+
+    it "should call .update_attributes on all metadata datastreams & nokogiri datastreams" do
+      m = FooHistory.new
+      att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
+      
+      m.datastreams_in_memory.each_value {|ds| ds.expects(:update_attributes)}
+      m.update_indexed_attributes(att)
+    end
+    
     it "should be able to handle ds's without fields field" do
       class Moo < ActiveFedora::Base;end
       m = Moo.new
@@ -488,12 +506,16 @@ describe ActiveFedora::Base do
   end
   
   describe "update_indexed_attributes" do
-    it "should call .update_indexed_attributes on all metadata datastreams & nokogiri datastreams" do
+    it "should call .update_attributes on all metadata datastreams & nokogiri datastreams" do
+      m = FooHistory.new
+      att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
+      
+      m.datastreams_in_memory.each_value {|ds| ds.expects(:update_attributes)}
+      m.update_indexed_attributes(att)
     end
     it "should take a :datastreams argument" do 
       att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
       m = FooHistory.new
-
       m.update_indexed_attributes(att, :datastreams=>"withText")
       m.should_not be_nil
       m.datastreams['someData'].fubar_values.should == []

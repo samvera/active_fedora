@@ -4,40 +4,97 @@ module ActiveFedora
     
     include ActiveFedora::MetadataDatastreamHelper
 
-    self.xml_model = ActiveFedora::MetadataDatastream
+    # .to_solr and .to_xml (among other things) are provided by ActiveFedora::MetadataDatastream
+    self.xml_model = ActiveFedora::MetadataDatastream    
+
+    # An ActiveRecord-ism to udpate metadata values.
+    #
+    # The passed in hash must look like this : 
+    #   {:name=>{"0"=>"a","1"=>"b"}}
+    #
+    # This will attempt to set the values for any field named fubar in the datastream. 
+    # If there is no field by that name, it returns an empty hash and doesn't change the object at all.
+    # If there is a field by that name, it will set the values for field of name :name having the value [a,b]
+    # and it returns a hash with the field name, value index, and the value as it was set.    
+    #
+    # An index of -1 will insert a new value. any existing value at the relevant index 
+    # will be overwritten.
+    #
+    # As in update_attributes, this overwrites _all_ available fields by default.
+    #
+    # Example Usage:
+    #
+    # ds.update_attributes({:myfield=>{"0"=>"a","1"=>"b"},:myotherfield=>{"-1"=>"c"}})
+    #
+    def update_indexed_attributes(params={}, opts={})
+      # remove any fields from params that this datastream doesn't recognize
+      params.delete_if {|field_name,new_values| !self.fields.include?(field_name.to_sym) }
+      
+      result = params.dup
+      params.each do |field_name,new_values|
+        field_accessor_method = "#{field_name}_values"
+        
+        if new_values.kind_of?(Hash)
+            result[field_name] = new_values.dup
+      
+            current_values = instance_eval(field_accessor_method)
+        
+            # current_values = get_values(field_name) # for some reason this leaves current_values unset?
+                
+            new_values.delete_if do |y,z| 
+              if current_values[y.to_i] and y.to_i > -1
+                current_values[y.to_i]=z
+                true
+              else
+                false
+              end
+            end 
+        
+            new_values.each do |y,z| 
+              current_values<<z #just append everything left
+              if y == "-1"
+                new_array_index = current_values.length - 1
+                result[field_name][new_array_index.to_s] = params[field_name]["-1"]
+              end
+            end
+            current_values.delete_if {|x| x == :delete || x == "" || x == nil}
+            #set_value(field_name, current_values)
+            instance_eval("#{field_accessor_method}=(current_values)") #write it back to the ds
+            result[field_name].delete("-1")
+        else
+          values = instance_eval("#{field_name}_values=(new_values)")
+          result[field_name] = {"0"=>values}           
+        end
+      end
+      return result
+    end
     
-    # def to_solr(solr_doc = Solr::Document.new) # :nodoc:
-    #   fields.each do |field_key, field_info|
-    #     if field_info.has_key?(:values) && !field_info[:values].nil?
-    #       field_symbol = generate_solr_symbol(field_key, field_info[:type])
-    #       field_info[:values].each do |val|             
-    #         solr_doc << Solr::Field.new(field_symbol => val)
-    #       end
-    #     end
-    #   end
-    # 
-    #   return solr_doc
-    # end
-    # 
-    # def to_xml(xml = REXML::Document.new("<fields />")) #:nodoc:
-    #   fields.each_pair do |field,field_info|
-    #     el = REXML::Element.new("#{field.to_s}")
-    #       if field_info[:element_attrs]
-    #         field_info[:element_attrs].each{|k,v| el.add_attribute(k.to_s, v.to_s)}
-    #       end
-    #     field_info[:values].each do |val|
-    #       el = el.clone
-    #       el.text = val.to_s
-    #       if xml.class == REXML::Document
-    #         xml.root.elements.add(el)
-    #       else
-    #         xml.add(el)
-    #       end
-    #     end
-    #   end
-    #   return xml.to_s
-    # end
-    # 
+    
+    def get_values(field_name, default=[])
+      field_accessor_method = "#{field_name}_values"
+      if respond_to? field_accessor_method
+        values = instance_eval(field_accessor_method)
+      else
+        values = []
+      end
+      if values.empty?
+        if default.nil?
+          return default
+        else
+          return default
+        end
+      else
+        return values
+      end
+    end
+    
+    def set_value(field_name, values)
+      field_accessor_method = "#{field_name}_values="
+      if respond_to? field_accessor_method
+        values = instance_eval("#{field_name}_values=(values)")
+      end
+    end
+    
     # @tmpl ActiveFedora::MetadataDatastream
     # @node Nokogiri::XML::Node
     def self.from_xml(tmpl, node) # :nodoc:

@@ -396,7 +396,7 @@ module ActiveFedora
       #   fields_xml << el
       # end
       datastreams.each_value do |ds|        
-        ds.to_xml(fields_xml) if ds.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.kind_of?(ActiveFedora::RelsExtDatastream)
+        ds.to_xml(fields_xml) if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.kind_of?(ActiveFedora::RelsExtDatastream)
       end
       return xml.to_s
     end
