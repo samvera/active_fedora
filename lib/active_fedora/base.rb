@@ -499,6 +499,14 @@ module ActiveFedora
       return result
     end
     
+    def get_values_from_datastream(dsid,field_key,default=[])
+      if datastreams_in_memory.include?(dsid)
+        return datastreams_in_memory[dsid].get_values(field_key,default)
+      else
+        return nil
+      end
+    end
+    
     def self.pids_from_uris(uris) 
       if uris.class == String
         return uris.gsub("info:fedora/", "")

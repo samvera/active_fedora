@@ -411,6 +411,14 @@ describe ActiveFedora::Base do
 
   end
   
+  describe "get_values_from_datastream" do
+    it "should look up the named datastream and call get_values with the given pointer/field_name" do
+      mock_ds = mock("Datastream", :get_values=>["value1", "value2"])
+      @test_object.stubs(:datastreams_in_memory).returns({"ds1"=>mock_ds})
+      @test_object.get_values_from_datastream("ds1", "--my xpath--").should == ["value1", "value2"]
+    end
+  end
+  
   describe "update_datastream_attributes" do
     it "should look up any datastreams specified as keys in the given hash and call update_attributes on the datastream" do
       mock_desc_metadata = mock("descMetadata")
