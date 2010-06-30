@@ -43,13 +43,13 @@ describe ActiveFedora::NokogiriDatastream do
       # xpath = ds.class.accessor_xpath(*field_key)
       # result = ds.property_values(xpath)
       
-      @mods_ds.property_values('oxns:name[@type="personal" and position()=1]/oxns:role/oxns:roleTerm').should == ["role1","role2","role3"]
+      @mods_ds.property_values('//oxns:name[@type="personal"][1]/oxns:role').should == ["role1","role2","role3"]
     end
     it "should support single-value arguments (as opposed to a hash of values with array indexes as keys)" do
       # In other words, { "fubar"=>"dork" } should have the same effect as { "fubar"=>{"0"=>"dork"} }
       result = @mods_ds.update_indexed_attributes( { [{":person"=>"0"}, "role"]=>"the role" } )
       result.should == {"person_0_role"=>{"0"=>"the role"}}
-      @mods_ds.property_values('oxns:name[@type="personal" and position()=1]/oxns:role/oxns:roleTerm').should == ["the role"]
+      @mods_ds.property_values('//oxns:name[@type="personal"][1]/oxns:role').first.should == "the role"
     end
     it "should do nothing if field key is a string (must be an array or symbol).  Will not accept xpath queries!" do
       xml_before = @mods_ds.to_xml
@@ -61,6 +61,74 @@ describe ActiveFedora::NokogiriDatastream do
       @mods_ds.update_indexed_attributes( { [{"fubar"=>"0"}]=>"the role" } ).should == {}
       @mods_ds.to_xml.should == xml_before
     end
+    
+    ### Examples copied over form metadata_datastream_spec
+    
+    # it "should support single-value arguments (as opposed to a hash of values with array indexes as keys)" do
+    #   # In other words, { "fubar"=>"dork" } should have the same effect as { "fubar"=>{"0"=>"dork"} }
+    #   pending "this should be working, but for some reason, the updates don't stick"
+    #   result = @test_ds.update_indexed_attributes( { "fubar"=>"dork" } )
+    #   result.should == {"fubar"=>{"0"=>"dork"}}
+    #   @test_ds.fubar_values.should == ["dork"]
+    # end
+    # 
+    it "should work for text fields" do 
+      att= {[{"person"=>"0"},"description"]=>{"-1"=>"mork", "1"=>"york"}}
+      result = @mods_ds.update_indexed_attributes(att)
+      result.should == {"person_0_description"=>{"0"=>"mork","1"=>"york"}}
+      @mods_ds.get_values([{:person=>0},:description]).should == ['mork', 'york']
+      att= {[{"person"=>"0"},"description"]=>{"-1"=>"dork"}}
+      result2 = @mods_ds.update_indexed_attributes(att)
+      result2.should == {"person_0_description"=>{"2"=>"dork"}}
+      @mods_ds.get_values([{:person=>0},:description]).should == ['mork', 'york', 'dork']
+    end
+    
+    it "should return the new index of any added values" do
+      @mods_ds.get_values([{:title_info=>0},:main_title]).should == ["ARTICLE TITLE HYDRANGEA ARTICLE 1", "TITLE OF HOST JOURNAL"]
+      result = @mods_ds.update_indexed_attributes [{"title_info"=>"0"},"main_title"]=>{"-1"=>"mork"}
+      result.should == {"title_info_0_main_title"=>{"2"=>"mork"}}
+    end
+    # 
+    # it "should return accurate response when multiple values have been added in a single run" do
+    #   pending
+    #   att= {"swank"=>{"-1"=>"mork", "0"=>"york"}}
+    #   @test_ds.update_indexed_attributes(att).should == {"swank"=>{"0"=>"york", "1"=>"mork"}}
+    # end
+    
+    # it "should deal gracefully with adding new values at explicitly declared indexes" do
+    #   @mods_ds.update_indexed_attributes([:journal, :title]=>["all", "for", "the"]
+    #   att = {"fubar"=>{"3"=>'glory'}}
+    #   result = @test_ds.update_indexed_attributes(att)
+    #   result.should == {"fubar"=>{"3"=>"glory"}}
+    #   @test_ds.fubar_values.should == ["all", "for", "the", "glory"]
+    #   
+    #   @test_ds.fubar_values = []
+    #   result = @test_ds.update_indexed_attributes(att)
+    #   result.should == {"fubar"=>{"0"=>"glory"}}
+    #   @test_ds.fubar_values.should == ["glory"]
+    # end
+    # 
+    # it "should allow deleting of values and should delete values so that to_xml does not return emtpy nodes" do
+    #   att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
+    #   @test_ds.update_indexed_attributes(att)
+    #   @test_ds.fubar_values.should == ['mork', 'york', 'mangle']
+    #   rexml = REXML::Document.new(@test_ds.to_xml)
+    #   #puts rexml.root.elements.each {|el| el.to_s}
+    #   #puts rexml.root.elements.to_a.inspect
+    #   rexml.root.elements.to_a.length.should == 3
+    #   @test_ds.update_indexed_attributes({"fubar"=>{"1"=>""}})
+    #   @test_ds.fubar_values.should == ['mork', 'mangle']
+    #   rexml = REXML::Document.new(@test_ds.to_xml)
+    #   rexml.root.elements.to_a.length.should == 2
+    #   @test_ds.update_indexed_attributes({"fubar"=>{"0"=>:delete}})
+    #   @test_ds.fubar_values.should == ['mangle']
+    #   rexml = REXML::Document.new(@test_ds.to_xml)
+    #   rexml.root.elements.to_a.length.should == 1
+    #   
+    #   @test_ds.fubar_values = ["val1", nil, "val2"]
+    #   @test_ds.update_indexed_attributes({"fubar"=>{"1"=>""}})
+    #   @test_ds.fubar_values.should == ["val1", "val2"]
+    # end
   end
   
   describe ".get_values" do

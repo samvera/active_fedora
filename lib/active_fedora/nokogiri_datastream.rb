@@ -91,21 +91,21 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     end
   end
   
-  def update_indexed_attributes(params={}, opts={})
+  def update_indexed_attributes(params={}, opts={})    
     # remove any fields from params that this datastream doesn't recognize    
     params.delete_if do |field_key,new_values| 
       if field_key.kind_of?(String)
         true
       else
-        self.class.accessor_xpath(*field_key).nil?
+        self.class.accessor_xpath(*OM.destringify(field_key) ).nil?
       end
     end
-    result = params.dup
-    update_properties( params )
+    result = update_properties( params )
+    return result
   end
   
   def get_values(field_key,default=[])
-    property_values(field_key)
+    property_values(*field_key)
   end
 
 end
