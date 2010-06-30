@@ -172,7 +172,7 @@ module ActiveFedora
     def metadata_streams
       results = []
       datastreams.each_value do |ds|
-        if ds.kind_of?(ActiveFedora::MetadataDatastream) 
+        if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream)
           results<<ds
         end
       end
@@ -395,7 +395,8 @@ module ActiveFedora
       #   el.text = value
       #   fields_xml << el
       # end
-      datastreams.each_value do |ds|        
+      
+      datastreams.each_value do |ds|  
         ds.to_xml(fields_xml) if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.kind_of?(ActiveFedora::RelsExtDatastream)
       end
       return xml.to_s
@@ -437,24 +438,20 @@ module ActiveFedora
     # or
     #  m.update_attributes({:fubar=>'baz'}, :datastreams=>["my_ds", "my_other_ds"])
     def update_attributes(params={}, opts={})
-      params.each do |k,v|
-        if v == :delete || v == "" || v == nil
-          v = []
+      result = {}
+      if opts[:datastreams]
+        ds_array = []
+        opts[:datastreams].each do |dsname|
+          ds_array << datastreams[dsname]
         end
-        if opts[:datastreams]
-          ds_array = []
-          opts[:datastreams].each do |dsname|
-            ds_array << datastreams[dsname]
-          end
-        else
-          ds_array = datastreams.values
-        end
-        ds_array.each do |d|
-          if d.fields[k.to_sym]
-            d.send("#{k}_values=", v)
-          end
-        end
+      else
+        ds_array = metadata_streams
       end
+      ds_array.each do |d|
+        ds_result = d.update_attributes(params,opts)
+        result[d.dsid] = ds_result
+      end
+      return result
     end
 
     # A convenience method  for updating indexed attributes.  The passed in hash
@@ -481,36 +478,23 @@ module ActiveFedora
           ds_array << datastreams[dsname]
         end
       else
-        ds_array = datastreams.values
+        ds_array = metadata_streams
       end
+      result = {}
+      ds_array.each do |d|
+        result[d.dsid] = d.update_indexed_attributes(params,opts)
+      end
+      return result
+    end
+    
+    def update_datastream_attributes(params={}, opts={})
       result = params.dup
-      params.each do |key,value|
-        result[key] = value.dup
-        ds_array.each do |dstream|
-          if dstream.fields[key.to_sym]
-            aname="#{key}_values"
-            curval = dstream.send("#{aname}")
-            cpv=value.dup#copy this, we'll need the original for the next ds
-            cpv.delete_if do |y,z| 
-              if curval[y.to_i] and y.to_i > -1
-                curval[y.to_i]=z
-                true
-              else
-                false
-              end
-            end 
-            cpv.each do |y,z| 
-              curval<<z #just append everything left
-              if y == "-1"
-                new_array_index = curval.length - 1
-                result[key][new_array_index.to_s] = params[key]["-1"]
-              end
-            end
-            curval.delete_if {|x| x == :delete || x == "" || x == nil}
-            dstream.send("#{aname}=", curval) #write it back to the ds
-          end
+      params.each_pair do |dsid, ds_params| 
+        if datastreams_in_memory.include?(dsid)
+          result[dsid] = datastreams_in_memory[dsid].update_attributes(ds_params)
+        else
+          result.delete(dsid)
         end
-        result[key].delete("-1")
       end
       return result
     end

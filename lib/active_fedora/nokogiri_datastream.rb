@@ -90,5 +90,22 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
       solr_doc << Solr::Field.new(hierarchical_field_name => node.text)
     end
   end
+  
+  def update_indexed_attributes(params={}, opts={})
+    # remove any fields from params that this datastream doesn't recognize    
+    params.delete_if do |field_key,new_values| 
+      if field_key.kind_of?(String)
+        true
+      else
+        self.class.accessor_xpath(*field_key).nil?
+      end
+    end
+    result = params.dup
+    update_properties( params )
+  end
+  
+  def get_values(field_key,default=[])
+    property_values(field_key)
+  end
 
 end

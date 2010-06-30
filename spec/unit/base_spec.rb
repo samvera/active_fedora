@@ -283,12 +283,11 @@ describe ActiveFedora::Base do
     end
 
     it "should call .to_xml on all MetadataDatastreams and return the resulting document" do
-      mock1 = mock("ds1", :to_xml)
-      mock2 = mock("ds2", :to_xml)
-      mock1.expects(:included_modules).returns( [ActiveFedora::MetadataDatastreamHelper] )
-      mock2.expects(:included_modules).returns( [ActiveFedora::MetadataDatastreamHelper] )
+      ds1 = ActiveFedora::MetadataDatastream.new
+      ds2 = ActiveFedora::MetadataDatastream.new
+      [ds1,ds2].each {|ds| ds.expects(:to_xml)}
 
-      @test_object.expects(:datastreams).returns({:ds1 => mock1, :ds2 => mock2})
+      @test_object.expects(:datastreams).returns({:ds1 => ds1, :ds2 => ds2})
       @test_object.to_xml
     end
   end
@@ -414,23 +413,28 @@ describe ActiveFedora::Base do
   
   describe "update_datastream_attributes" do
     it "should look up any datastreams specified as keys in the given hash and call update_attributes on the datastream" do
+      mock_desc_metadata = mock("descMetadata")
+      mock_properties = mock("properties")
+      mock_ds_hash = {'descMetadata'=>mock_desc_metadata, 'properties'=>mock_properties}
+      
       ds_values_hash = {
         "descMetadata"=>{ [{:person=>0}, :role]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"} },
         "properties"=>{ "notes"=>"foo" }
       }
       m = FooHistory.new
-      m.datastreams['descMetadata'].expects(:update_attributes).with( ds_values_hash['descMetadata'] )
-      m.datastreams['properties'].expects(:update_attributes).with( ds_values_hash['properties'] )
+      m.stubs(:datastreams_in_memory).returns(mock_ds_hash)
+      mock_desc_metadata.expects(:update_attributes).with( ds_values_hash['descMetadata'] )
+      mock_properties.expects(:update_attributes).with( ds_values_hash['properties'] )
       m.update_datastream_attributes( ds_values_hash )
     end
-    it "should look up any datastreams specified as keys in the given hash and call update_attributes on the datastream" do
+    it "should not do anything and should return an empty hash if the specified datastream does not exist" do
       ds_values_hash = {
         "nonexistentDatastream"=>{ "notes"=>"foo" }
       }
       m = FooHistory.new
-      xml_before = m.to_xml
+      untouched_xml = m.to_xml
       m.update_datastream_attributes( ds_values_hash ).should == {}
-      m.to_xmlshould == xml_before
+      m.to_xml.should == untouched_xml
     end
   end
   
@@ -440,18 +444,10 @@ describe ActiveFedora::Base do
       m = FooHistory.new
       att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
       
-      m.datastreams_in_memory.each_value {|ds| ds.expects(:update_attributes)}
-      m.update_indexed_attributes(att)
+      m.metadata_streams.each {|ds| ds.expects(:update_attributes)}
+      m.update_attributes(att)
     end
     
-    it "should be able to handle ds's without fields field" do
-      class Moo < ActiveFedora::Base;end
-      m = Moo.new
-      ds = mock('ds')
-      m.expects(:datastreams).returns({ :ds1=>ds})
-      ds.expects(:fields).returns(Hash.new)
-      m.update_attributes(:foo=>'bar')
-    end
     it "should be able to update attr on text fields" do
       m = FooHistory.new
       m.should_not be_nil
@@ -506,11 +502,11 @@ describe ActiveFedora::Base do
   end
   
   describe "update_indexed_attributes" do
-    it "should call .update_attributes on all metadata datastreams & nokogiri datastreams" do
+    it "should call .update_indexed_attributes on all metadata datastreams & nokogiri datastreams" do
       m = FooHistory.new
       att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
       
-      m.datastreams_in_memory.each_value {|ds| ds.expects(:update_attributes)}
+      m.datastreams_in_memory.each_value {|ds| ds.expects(:update_indexed_attributes)}
       m.update_indexed_attributes(att)
     end
     it "should take a :datastreams argument" do 

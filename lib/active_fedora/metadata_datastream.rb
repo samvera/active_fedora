@@ -7,6 +7,21 @@ module ActiveFedora
     # .to_solr and .to_xml (among other things) are provided by ActiveFedora::MetadataDatastream
     self.xml_model = ActiveFedora::MetadataDatastream    
 
+    def update_attributes(params={},opts={})
+      result = params.dup
+      params.each do |k,v|
+        if v == :delete || v == "" || v == nil
+          v = []
+        end
+        if self.fields.has_key?(k.to_sym)
+          result[k] = set_value(k, v)
+        else
+          result.delete(k)
+        end
+      end
+      return result
+    end
+    
     # An ActiveRecord-ism to udpate metadata values.
     #
     # The passed in hash must look like this : 
@@ -51,16 +66,15 @@ module ActiveFedora
             end 
         
             new_values.each do |y,z| 
+              result[field_name].delete(y)
               current_values<<z #just append everything left
-              if y == "-1"
-                new_array_index = current_values.length - 1
-                result[field_name][new_array_index.to_s] = params[field_name]["-1"]
-              end
+              new_array_index = current_values.length - 1
+              result[field_name][new_array_index.to_s] = z
             end
             current_values.delete_if {|x| x == :delete || x == "" || x == nil}
             #set_value(field_name, current_values)
             instance_eval("#{field_accessor_method}=(current_values)") #write it back to the ds
-            result[field_name].delete("-1")
+            # result[field_name].delete("-1")
         else
           values = instance_eval("#{field_name}_values=(new_values)")
           result[field_name] = {"0"=>values}           
@@ -73,7 +87,7 @@ module ActiveFedora
     def get_values(field_name, default=[])
       field_accessor_method = "#{field_name}_values"
       if respond_to? field_accessor_method
-        values = instance_eval(field_accessor_method)
+        values = self.send(field_accessor_method)
       else
         values = []
       end
@@ -91,7 +105,8 @@ module ActiveFedora
     def set_value(field_name, values)
       field_accessor_method = "#{field_name}_values="
       if respond_to? field_accessor_method
-        values = instance_eval("#{field_name}_values=(values)")
+        values = self.send(field_accessor_method, values)
+        return self.send("#{field_name}_values")
       end
     end
     

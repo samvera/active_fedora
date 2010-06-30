@@ -14,17 +14,24 @@ describe ActiveFedora::Base do
   describe ".metadata_streams" do
     it "should return all of the datastreams from the object that are kinds of MetadataDatastreams " do
       mock_mds1 = mock("metadata ds")
-      mock_mds1.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
       mock_mds2 = mock("metadata ds")
-      mock_mds2.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
       mock_fds = mock("file ds")
       mock_fds.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(false)
-      @test_object.expects(:datastreams).returns({:foo => mock_mds1, :bar => mock_mds2, :baz => mock_fds})
+      mock_ngds = mock("nokogiri ds")
+      mock_ngds.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(false)
+      mock_ngds.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
+      
+      
+      [mock_mds1,mock_mds2].each {|ds| ds.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true) }
+      [mock_mds1,mock_mds2,mock_fds].each {|ds| ds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false) }
+      
+      @test_object.expects(:datastreams).returns({:foo => mock_mds1, :bar => mock_mds2, :baz => mock_fds, :bork=>mock_ngds})
       
       result = @test_object.metadata_streams
-      result.length.should == 2
+      result.length.should == 3
       result.should include(mock_mds1)
       result.should include(mock_mds2)
+      result.should include(mock_ngds)
     end
   end
   

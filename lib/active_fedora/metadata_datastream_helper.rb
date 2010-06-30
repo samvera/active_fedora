@@ -49,7 +49,9 @@ module ActiveFedora::MetadataDatastreamHelper
   end
   
   def to_xml(xml = Nokogiri::XML::Document.parse("<fields />")) #:nodoc:
-    if xml.instance_of?(Nokogiri::XML::Document)
+    if xml.instance_of?(Nokogiri::XML::Builder)
+      xml_insertion_point = xml.doc.root 
+    elsif xml.instance_of?(Nokogiri::XML::Document) 
       xml_insertion_point = xml.root
     else
       xml_insertion_point = xml
