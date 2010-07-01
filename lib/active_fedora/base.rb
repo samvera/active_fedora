@@ -549,10 +549,11 @@ module ActiveFedora
     
     # Pushes the object and all of its new or dirty datastreams into Fedora
     def update
-      result = Fedora::Repository.instance.save(@inner_object)
+      result = Fedora::Repository.instance.save(@inner_object)      
       datastreams_in_memory.each do |k,ds|
         if ds.dirty? || ds.new_object? 
-          if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.instance_of?(ActiveFedora::RelsExtDatastream)
+          if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.instance_of?(ActiveFedora::RelsExtDatastream)
+          # if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ds.instance_of?(ActiveFedora::RelsExtDatastream)
             @metadata_is_dirty = true
           end
           result = ds.save

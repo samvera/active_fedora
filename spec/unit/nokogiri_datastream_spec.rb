@@ -129,6 +129,12 @@ describe ActiveFedora::NokogiriDatastream do
     #   @test_ds.update_indexed_attributes({"fubar"=>{"1"=>""}})
     #   @test_ds.fubar_values.should == ["val1", "val2"]
     # end
+    
+    it "should set @dirty to true" do
+      @mods_ds.get_values([{:title_info=>0},:main_title]).should == ["ARTICLE TITLE HYDRANGEA ARTICLE 1", "TITLE OF HOST JOURNAL"]
+      @mods_ds.update_indexed_attributes [{"title_info"=>"0"},"main_title"]=>{"-1"=>"mork"}
+      @mods_ds.dirty?.should be_true
+    end
   end
   
   describe ".get_values" do
@@ -173,6 +179,11 @@ describe ActiveFedora::NokogiriDatastream do
       hydrangea_article_foxml = Nokogiri::XML::Document.parse( fixture("hydrangea_fixture_mods_article1.foxml.xml") )
       ds_xml = hydrangea_article_foxml.at_xpath("//foxml:datastream[@ID='descMetadata']")
       Hydra::ModsArticle.from_xml(ds_xml).ng_xml.to_xml.should == hydrangea_article_foxml.at_xpath("//foxml:datastream[@ID='descMetadata']/foxml:datastreamVersion[last()]/foxml:xmlContent").first_element_child.to_xml
+    end
+    it "should set @dirty to false" do
+      hydrangea_article_foxml = Nokogiri::XML::Document.parse( fixture("hydrangea_fixture_mods_article1.foxml.xml") )
+      ds_xml = hydrangea_article_foxml.at_xpath("//foxml:datastream[@ID='descMetadata']")
+      Hydra::ModsArticle.from_xml(ds_xml).dirty?.should be_false
     end
   end
   

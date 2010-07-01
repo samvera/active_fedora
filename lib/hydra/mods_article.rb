@@ -7,7 +7,7 @@ class ModsArticle < ActiveFedora::NokogiriDatastream
     property :title_info, :path=>"titleInfo", 
                 :convenience_methods => {
                   :main_title => {:path=>"title"},
-                  :language => {:path=>"@lang"},                    
+                  :language => {:path=>{:attribute=>"lang"}},                    
                 }
     property :abstract, :path=>"abstract"
     property :topic_tag, :path=>'subject',:default_content_path => "topic"
