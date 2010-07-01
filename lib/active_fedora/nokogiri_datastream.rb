@@ -24,7 +24,7 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
       tmpl.ng_xml = xml
     else
       tmpl.ng_xml = Nokogiri::XML::Document.parse(xml)
-    end
+    end    
     tmpl.send(:dirty=, false)
     return tmpl
   end

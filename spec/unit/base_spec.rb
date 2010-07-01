@@ -231,11 +231,14 @@ describe ActiveFedora::Base do
     end
     it "should update solr index with all metadata if any MetadataDatastreams have changed" do
       Fedora::Repository.instance.stubs(:save)
-      mock1 = mock("ds1", :dirty? => true, :save => true, :kind_of? => ActiveFedora::MetadataDatastream)
+      dirty_ds = ActiveFedora::MetadataDatastream.new
+      dirty_ds.expects(:dirty?).returns(true)
+      dirty_ds.expects(:save).returns(true)
       mock2 = mock("ds2", :dirty? => false, :new_object? => false)
-      @test_object.stubs(:datastreams_in_memory).returns({:ds1 => mock1, :ds2 => mock2})
+      @test_object.stubs(:datastreams_in_memory).returns({:ds1 => dirty_ds, :ds2 => mock2})
       @test_object.expects(:update_index)
       @test_object.expects(:refresh)
+      
       @test_object.save
     end
     it "should NOT update solr index if no MetadataDatastreams have changed" do
@@ -246,18 +249,20 @@ describe ActiveFedora::Base do
       @test_object.expects(:update_index).never
       @test_object.expects(:refresh)
       @test_object.instance_variable_set(:@new_object, false)
+      
       @test_object.save
     end
     it "should update solr index if RELS-EXT datastream has changed" do
       Fedora::Repository.instance.stubs(:save)
-      mock1 = mock("RELS-EXT", :dirty? => true, :save => true)
-      mock1.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(false)
-      mock1.expects(:instance_of?).with(ActiveFedora::RelsExtDatastream).returns(true)
-      mock2 = mock("ds2", :dirty? => false, :new_object? => false)
-      @test_object.stubs(:datastreams_in_memory).returns({"RELS-EXT" => mock1, :ds2 => mock2})
+      rels_ext = ActiveFedora::RelsExtDatastream.new
+      rels_ext.expects(:dirty?).returns(true)
+      rels_ext.expects(:save).returns(true)
+      clean_ds = mock("ds2", :dirty? => false, :new_object? => false)
+      @test_object.stubs(:datastreams_in_memory).returns({"RELS-EXT" => rels_ext, :clean_ds => clean_ds})
       @test_object.instance_variable_set(:@new_object, false)
       @test_object.expects(:refresh)
       @test_object.expects(:update_index)
+      
       @test_object.save
     end
   end

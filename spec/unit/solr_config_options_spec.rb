@@ -81,9 +81,11 @@ describe ActiveFedora do
     
     it "should prevent Base.save from calling update_index if false" do
       Fedora::Repository.instance.stubs(:save)
-      mock1 = mock("ds1", :dirty? => true, :save => true, :kind_of? => ActiveFedora::MetadataDatastream)
+      dirty_ds = ActiveFedora::MetadataDatastream.new
+      dirty_ds.expects(:dirty?).returns(true)
+      dirty_ds.expects(:save).returns(true)
       @test_object.instance_variable_set(:@metadata_is_dirty, true)
-      @test_object.stubs(:datastreams_in_memory).returns({:ds1 => mock1})
+      @test_object.stubs(:datastreams_in_memory).returns({:ds1 => dirty_ds})
       @test_object.expects(:update_index).never
       @test_object.expects(:refresh)
       @test_object.save

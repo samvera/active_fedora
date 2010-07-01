@@ -356,8 +356,9 @@ module ActiveFedora
             # Nokogiri Datstreams use a new syntax for .from_xml (tmpl is optional!) and expects the actual xml content rather than the foxml datstream xml
             # NB: Base.deserialize, or a separately named method, should set any other info from the foxml if necessary though by this point it's all been grabbed elsewhere... 
             if ds.kind_of?(ActiveFedora::NokogiriDatastream) 
-              node = node.search('./foxml:datastreamVersion[last()]/foxml:xmlContent/*').first
-              proto.datastreams[name]=ds.class.from_xml(node, ds)
+              xml_content = Fedora::Repository.instance.fetch_custom(pid, "datastreams/#{name}/content")
+              # node = node.search('./foxml:datastreamVersion[last()]/foxml:xmlContent/*').first
+              proto.datastreams[name]=ds.class.from_xml(xml_content, ds)
             else
               proto.datastreams[name]=ds.class.from_xml(ds, node)          
             end
