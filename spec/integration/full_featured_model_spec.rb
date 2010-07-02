@@ -1,5 +1,4 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
-
 require 'rexml/document'
 require "hydra"
 
@@ -35,7 +34,7 @@ describe ActiveFedora::Base do
         #   m.root_property :myxml, "my_xml", "http://www.example.gov/schema/v3"
         # end
         
-        has_metadata :name=>"mods_article", :type=> Hydra::ModsArticle 
+        has_metadata :name=>"mods_article", :type=> Hydra::SampleModsDatastream 
         
         has_metadata :name => "dublin_core", :type => ActiveFedora::QualifiedDublinCoreDatastream do |m|
           # Default :multiple => true
