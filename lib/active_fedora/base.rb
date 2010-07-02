@@ -86,10 +86,6 @@ module ActiveFedora
       end
       @new_object = false
       self.update_index if @metadata_is_dirty == true && ENABLE_SOLR_UPDATES
-      if defined?( Solrizer::Solrizer ) 
-        solrizer = Solrizer::Solrizer.new
-        solrizer.solrize( self )
-      end
       @metadata_is_dirty == false
       return result
     end
@@ -420,7 +416,12 @@ module ActiveFedora
 
     # Updates Solr index with self.
     def update_index
-      SolrService.instance.conn.update(self.to_solr)
+      if defined?( Solrizer::Solrizer ) 
+        solrizer = Solrizer::Solrizer.new
+        solrizer.solrize( self )
+      else
+        SolrService.instance.conn.update(self.to_solr)
+      end
     end
 
     # An ActiveRecord-ism to udpate metadata values.

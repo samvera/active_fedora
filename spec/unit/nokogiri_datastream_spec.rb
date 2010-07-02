@@ -29,6 +29,16 @@ describe ActiveFedora::NokogiriDatastream do
       test_ds1 = ActiveFedora::NokogiriDatastream.new(:blob=>"<xml><foo/></xml>")
       test_ds1.ng_xml.to_xml.should == "<?xml version=\"1.0\"?>\n<xml>\n  <foo/>\n</xml>\n"
     end
+    it "should initialize from #xml_template if no xml is provided" do
+      ActiveFedora::NokogiriDatastream.expects(:xml_template).returns("fake template")
+      ActiveFedora::NokogiriDatastream.new.ng_xml.should == "fake template"
+    end
+  end
+  
+  describe '#xml_template' do
+    it "should return an empty xml document" do
+      ActiveFedora::NokogiriDatastream.xml_template.to_xml.should == "<?xml version=\"1.0\"?>\n<xml/>\n"
+    end
   end
   
   describe ".update_indexed_attributes" do

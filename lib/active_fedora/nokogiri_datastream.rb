@@ -20,13 +20,19 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
   # @tmpl ActiveFedora::MetadataDatastream
   # Careful! If you call this from a constructor, be sure to provide something 'ie. self' as the @tmpl. Otherwise, you will get an infinite loop!
   def self.from_xml(xml, tmpl=self.new) # :nodoc:
-    if xml.kind_of? Nokogiri::XML::Node
+    if xml.nil?
+      tmpl.ng_xml = self.xml_template
+    elsif xml.kind_of? Nokogiri::XML::Node || xml.kind_of?(Nokogiri::XML::Document)
       tmpl.ng_xml = xml
     else
       tmpl.ng_xml = Nokogiri::XML::Document.parse(xml)
     end    
     tmpl.send(:dirty=, false)
     return tmpl
+  end
+  
+  def self.xml_template
+    Nokogiri::XML::Document.parse("<xml/>")
   end
   
   # class << self

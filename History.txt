@@ -1,3 +1,8 @@
+1.1.11
+
+* fix to update_index preventing double-metadata
+* now nokogiri datastreams initialize with default template.
+
 1.1.8
 
 solrizer fix to ensure that Nokogiri Datastreams are included in Base.to_solr
