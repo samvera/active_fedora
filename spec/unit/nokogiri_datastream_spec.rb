@@ -71,9 +71,7 @@ describe ActiveFedora::NokogiriDatastream do
       @mods_ds.update_indexed_attributes( { [{"fubar"=>"0"}]=>"the role" } ).should == {}
       @mods_ds.to_xml.should == xml_before
     end
-    it "should work with textile content" do
-      @mods_ds.update_indexed_attributes( {"abstract"=>{"0"=>"h2. Myfoo\n\n* bar\n* baz\n\n*bold!*"}} ).should == "foo"
-    end
+    
     ### Examples copied over form metadata_datastream_spec
     
     # it "should support single-value arguments (as opposed to a hash of values with array indexes as keys)" do

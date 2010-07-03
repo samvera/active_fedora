@@ -422,11 +422,6 @@ describe ActiveFedora::Base do
       @test_object.stubs(:datastreams_in_memory).returns({"ds1"=>mock_ds})
       @test_object.get_values_from_datastream("ds1", "--my xpath--").should == ["value1", "value2"]
     end
-    it "should return the default value if the result is empty" do
-      mock_ds = mock("Datastream", :get_values=>[])
-      @test_object.stubs(:datastreams_in_memory).returns({"ds1"=>mock_ds})
-      @test_object.get_values_from_datastream("ds1", "--my xpath--", "my default").should == ["my default"]
-    end
   end
   
   describe "update_datastream_attributes" do
