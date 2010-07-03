@@ -21,7 +21,7 @@ begin
     gem.add_dependency('mime-types', '>= 1.16')
     gem.add_dependency('multipart-post')
     gem.add_dependency('nokogiri')
-    gem.add_dependency('om', '>= 0.1.7')
+    gem.add_dependency('om', '>= 0.1.9')
     # gem.add_dependency('yaml')
 
     gem.add_development_dependency "rspec", ">= 1.2.9"

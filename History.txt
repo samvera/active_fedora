@@ -1,3 +1,7 @@
+1.1.12
+
+* Minor fix to Base.get_values_from_datstream (wasn't returning default values when necessary)
+
 1.1.11
 
 * fix to update_index preventing double-metadata
