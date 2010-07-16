@@ -79,6 +79,7 @@ module ActiveFedora
           values = instance_eval("#{field_name}_values=(new_values)")
           result[field_name] = {"0"=>values}           
         end
+        self.dirty = true
       end
       return result
     end

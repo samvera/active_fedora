@@ -54,7 +54,9 @@ describe ActiveFedora::MetadataDatastream do
       @test_ds.field "swank", :text
     end
     
-    it "should apply submitted hash to corresponding datastream field values" do
+    it "should apply submitted hash to corresponding datastream field values and mark the object dirty" do
+      @test_ds.should_not be_dirty
+      
       att= {"fubar"=>{"-1"=>"mork", "0"=>"york"}}
       @test_ds.update_indexed_attributes(att)
       @test_ds.fubar_values.should == ['mork', 'york']
@@ -68,6 +70,8 @@ describe ActiveFedora::MetadataDatastream do
       result = @test_ds.update_indexed_attributes(att)
       result.should == {"fubar"=>{"0"=>"hork", "1"=>"tork", '3'=>'dang'}}
       @test_ds.fubar_values.should == ['hork', 'tork', 'mangle', 'dang']
+      
+      @test_ds.should be_dirty
     end
     
     it "should support single-value arguments (as opposed to a hash of values with array indexes as keys)" do

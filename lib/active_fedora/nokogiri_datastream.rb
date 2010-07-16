@@ -136,8 +136,11 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
         self.class.accessor_xpath(*OM.destringify(field_key) ).nil?
       end
     end
-    result = update_properties( params )
-    self.dirty = true
+    result = {}
+    unless params.empty?
+      result = update_properties( params )
+      self.dirty = true
+    end
     return result
   end
   

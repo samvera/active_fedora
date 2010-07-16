@@ -1,3 +1,7 @@
+1.1.13
+
+MetadataDatastream.update_indexed_attributes was no longer marking the object dirty when triggered.  Resulted in changed datastreams not saving.  Fixed now.
+
 1.1.12
 
 * Minor fix to Base.get_values_from_datstream (wasn't returning default values when necessary)
