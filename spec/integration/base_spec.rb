@@ -1,5 +1,12 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
 
+class MockAFBaseRelationship < ActiveFedora::Base
+  has_relationship "testing", :has_part, :type=>MockAFBaseRelationship
+  has_relationship "testing2", :has_member, :type=>MockAFBaseRelationship
+  has_relationship "testing_inbound", :has_part, :type=>MockAFBaseRelationship, :inbound=>true
+  has_relationship "testing_inbound2", :has_member, :type=>MockAFBaseRelationship, :inbound=>true
+end
+
 describe ActiveFedora::Base do
   
   before(:all) do
@@ -207,7 +214,397 @@ describe ActiveFedora::Base do
       @test_object.delete
       ActiveFedora::Base.find_by_solr(@test_object.pid).hits.should be_empty
     end
+
+    describe '#delete' do
+      it 'if inbound relationships exist should remove relationships from those inbound targets as well when deleting this object' do
+        @test_object2 = MockAFBaseRelationship.new
+        @test_object2.new_object = true
+        @test_object2.save
+        @test_object3 = MockAFBaseRelationship.new
+        @test_object3.new_object = true
+        @test_object3.save
+        @test_object4 = MockAFBaseRelationship.new
+        @test_object4.new_object = true
+        @test_object4.save
+        @test_object5 = MockAFBaseRelationship.new
+        @test_object5.new_object = true
+        @test_object5.save
+        #append to named relationship 'testing'
+        @test_object2.add_named_relationship("testing",@test_object3)
+        @test_object2.add_named_relationship("testing2",@test_object4)
+        @test_object5.add_named_relationship("testing",@test_object2)
+        @test_object5.add_named_relationship("testing2",@test_object3)
+        @test_object2.save
+        @test_object5.save
+        r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object2)
+        r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
+        r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
+        r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
+        model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseRelationship))
+        #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
+        @test_object2.named_relationships(false).should == {:self=>{"testing"=>[r3.object],
+                                                              "testing2"=>[r4.object]},
+                                                            :inbound=>{"testing_inbound"=>[r5.object],"testing_inbound2"=>[]}}
+        @test_object3.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                           :inbound=>{"testing_inbound"=>[r2.object],
+                                                                      "testing_inbound2"=>[r5.object]}}
+        @test_object4.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                            :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[r2.object]}}
+        @test_object5.named_relationships(false).should == {:self=>{"testing"=>[r2.object],
+                                                                    "testing2"=>[r3.object]},
+                                                            :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[]}}
+        @test_object2.delete
+        #need to reload since removed from rels_ext in memory
+        @test_object5 = MockAFBaseRelationship.load_instance(@test_object5.pid)
+      
+        #check any test_object2 inbound rels gone from source
+        @test_object3.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                            :inbound=>{"testing_inbound"=>[],
+                                                                       "testing_inbound2"=>[r5.object]}}
+        @test_object4.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                            :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[]}}
+        @test_object5.named_relationships(false).should == {:self=>{"testing"=>[],
+                                                                  "testing2"=>[r3.object]},
+                                                            :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[]}}
+   
+    end
+  end
     
+  end
+
+  describe '#remove_relationship' do
+    it 'should remove a relationship from an object after a save' do
+      @test_object2 = ActiveFedora::Base.new
+      @test_object.add_relationship(:has_part,@test_object2)
+      @test_object.save
+      @pid = @test_object.pid
+      begin
+        @test_object = ActiveFedora::Base.load_instance(@pid)
+      rescue => e
+        puts "#{e.message}\n#{e.backtrace}"
+        raise e
+      end
+      #use dummy relationships just to get correct formatting for expected objects
+      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object2)
+      model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(ActiveFedora::Base))
+      @test_object.relationships.should == {:self=>{:has_model=>[model_rel.object],
+                                                    :has_part=>[r.object]}}
+      @test_object.remove_relationship(:has_part,@test_object2)
+      @test_object.save
+      @test_object = ActiveFedora::Base.load_instance(@pid)
+      @test_object.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
+    end
+  end
+
+  describe '#relationships' do
+    it 'should return internal relationships with no parameters and include inbound if false passed in' do
+      @test_object2 = MockAFBaseRelationship.new
+      @test_object2.new_object = true
+      @test_object2.save
+      @test_object3 = MockAFBaseRelationship.new
+      @test_object3.new_object = true
+      @test_object3.save
+      @test_object4 = MockAFBaseRelationship.new
+      @test_object4.new_object = true
+      @test_object4.save
+      @test_object5 = MockAFBaseRelationship.new
+      @test_object5.new_object = true
+      @test_object5.save
+      #append to named relationship 'testing'
+      @test_object2.testing_append(@test_object3)
+      @test_object2.testing2_append(@test_object4)
+      @test_object5.testing_append(@test_object2)
+      @test_object5.testing2_append(@test_object3)
+      @test_object2.save
+      @test_object5.save
+      r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object2)
+      r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
+      r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
+      r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
+      model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseRelationship))
+      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
+      @test_object2.relationships(false).should == {:self=>{:has_model=>[model_rel.object],
+                                                            :has_part=>[r3.object],
+                                                            :has_member=>[r4.object]},
+                                                    :inbound=>{:has_part=>[r5.object]}}
+      @test_object3.relationships(false).should == {:self=>{:has_model=>[model_rel.object]},
+                                                    :inbound=>{:has_part=>[r2.object],
+                                                               :has_member=>[r5.object]}}
+      @test_object4.relationships(false).should == {:self=>{:has_model=>[model_rel.object]},
+                                                    :inbound=>{:has_member=>[r2.object]}}
+      @test_object5.relationships(false).should == {:self=>{:has_model=>[model_rel.object],
+                                                            :has_part=>[r2.object],
+                                                            :has_member=>[r3.object]},
+                                                    :inbound=>{}}
+      #all inbound should now be empty if no parameter supplied to relationships
+      @test_object2.relationships.should == {:self=>{:has_model=>[model_rel.object],
+                                                            :has_part=>[r3.object],
+                                                            :has_member=>[r4.object]}}
+      @test_object3.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
+      @test_object4.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
+      @test_object5.relationships.should == {:self=>{:has_model=>[model_rel.object],
+                                                            :has_part=>[r2.object],
+                                                            :has_member=>[r3.object]}}
+    end
+  end
+  
+  describe '#inbound_relationships' do
+    it 'should return a hash of inbound relationships' do
+      @test_object2 = MockAFBaseRelationship.new
+      @test_object2.new_object = true
+      @test_object2.save
+      @test_object3 = MockAFBaseRelationship.new
+      @test_object3.new_object = true
+      @test_object3.save
+      @test_object4 = MockAFBaseRelationship.new
+      @test_object4.new_object = true
+      @test_object4.save
+      @test_object5 = MockAFBaseRelationship.new
+      @test_object5.new_object = true
+      @test_object5.save
+      #append to named relationship 'testing'
+      @test_object2.testing_append(@test_object3)
+      @test_object2.testing2_append(@test_object4)
+      @test_object5.testing_append(@test_object2)
+      @test_object5.testing2_append(@test_object3)
+      @test_object2.save
+      @test_object5.save
+      r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object2)
+      r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
+      r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
+      r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
+      model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseRelationship))
+      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
+      @test_object2.inbound_relationships.should == {:has_part=>[r5.object]}
+      @test_object3.inbound_relationships.should == {:has_part=>[r2.object],:has_member=>[r5.object]}
+      @test_object4.inbound_relationships.should == {:has_member=>[r2.object]}
+      @test_object5.inbound_relationships.should == {}
+    end
+  end
+  
+  describe '#named_inbound_relationships' do
+    it 'should return a hash of inbound relationship names to array of objects' do
+      @test_object2 = MockAFBaseRelationship.new
+      @test_object2.new_object = true
+      @test_object2.save
+      @test_object3 = MockAFBaseRelationship.new
+      @test_object3.new_object = true
+      @test_object3.save
+      @test_object4 = MockAFBaseRelationship.new
+      @test_object4.new_object = true
+      @test_object4.save
+      @test_object5 = MockAFBaseRelationship.new
+      @test_object5.new_object = true
+      @test_object5.save
+      #append to named relationship 'testing'
+      @test_object2.testing_append(@test_object3)
+      @test_object2.testing2_append(@test_object4)
+      @test_object5.testing_append(@test_object2)
+      @test_object5.testing2_append(@test_object3)
+      @test_object2.save
+      @test_object5.save
+      r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object2)
+      r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
+      r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
+      r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
+      model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseRelationship))
+      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
+      @test_object2.named_inbound_relationships.should == {"testing_inbound"=>[r5.object],"testing_inbound2"=>[]}
+      @test_object3.named_inbound_relationships.should == {"testing_inbound"=>[r2.object],"testing_inbound2"=>[r5.object]}
+      @test_object4.named_inbound_relationships.should == {"testing_inbound"=>[],"testing_inbound2"=>[r2.object]}
+      @test_object5.named_inbound_relationships.should == {"testing_inbound"=>[],"testing_inbound2"=>[]}
+    end
+  end
+  
+  describe '#named_relationships' do
+    it '' do
+      @test_object2 = MockAFBaseRelationship.new
+      @test_object2.new_object = true
+      @test_object2.save
+      @test_object3 = MockAFBaseRelationship.new
+      @test_object3.new_object = true
+      @test_object3.save
+      @test_object4 = MockAFBaseRelationship.new
+      @test_object4.new_object = true
+      @test_object4.save
+      @test_object5 = MockAFBaseRelationship.new
+      @test_object5.new_object = true
+      @test_object5.save
+      #append to named relationship 'testing'
+      @test_object2.testing_append(@test_object3)
+      @test_object2.testing2_append(@test_object4)
+      @test_object5.testing_append(@test_object2)
+      @test_object5.testing2_append(@test_object3)
+      @test_object2.save
+      @test_object5.save
+      r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object2)
+      r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
+      r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
+      r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
+      model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseRelationship))
+      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
+      @test_object2.named_relationships(false).should == {:self=>{"testing"=>[r3.object],
+                                                            "testing2"=>[r4.object]},
+                                                    :inbound=>{"testing_inbound"=>[r5.object],"testing_inbound2"=>[]}}
+      @test_object3.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                    :inbound=>{"testing_inbound"=>[r2.object],
+                                                               "testing_inbound2"=>[r5.object]}}
+      @test_object4.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                    :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[r2.object]}}
+      @test_object5.named_relationships(false).should == {:self=>{"testing"=>[r2.object],
+                                                                  "testing2"=>[r3.object]},
+                                                          :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[]}}
+      #all inbound should now be empty if no parameter supplied to relationships
+      @test_object2.named_relationships.should == {:self=>{"testing"=>[r3.object],
+                                                            "testing2"=>[r4.object]}}
+      @test_object3.named_relationships.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      @test_object4.named_relationships.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      @test_object5.named_relationships.should == {:self=>{"testing"=>[r2.object],
+                                                           "testing2"=>[r3.object]}}
+    end
+  end
+  
+  describe '#add_named_relationship' do
+    it 'should add a named relationship to an object' do
+      @test_object2 = MockAFBaseRelationship.new
+      @test_object2.new_object = true
+      @test_object2.save
+      @test_object3 = MockAFBaseRelationship.new
+      @test_object3.new_object = true
+      @test_object3.save
+      @test_object4 = MockAFBaseRelationship.new
+      @test_object4.new_object = true
+      @test_object4.save
+      @test_object5 = MockAFBaseRelationship.new
+      @test_object5.new_object = true
+      @test_object5.save
+      #append to named relationship 'testing'
+      @test_object2.add_named_relationship("testing",@test_object3)
+      @test_object2.add_named_relationship("testing2",@test_object4)
+      @test_object5.add_named_relationship("testing",@test_object2)
+      @test_object5.add_named_relationship("testing2",@test_object3)
+      @test_object2.save
+      @test_object5.save
+      r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object2)
+      r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
+      r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
+      r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
+      model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseRelationship))
+      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
+      @test_object2.named_relationships(false).should == {:self=>{"testing"=>[r3.object],
+                                                            "testing2"=>[r4.object]},
+                                                    :inbound=>{"testing_inbound"=>[r5.object],"testing_inbound2"=>[]}}
+      @test_object3.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                    :inbound=>{"testing_inbound"=>[r2.object],
+                                                               "testing_inbound2"=>[r5.object]}}
+      @test_object4.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                    :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[r2.object]}}
+      @test_object5.named_relationships(false).should == {:self=>{"testing"=>[r2.object],
+                                                                  "testing2"=>[r3.object]},
+                                                          :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[]}}
+    end
+  end
+  
+  describe '#remove_named_relationship' do
+    it 'should remove an existing relationship from an object' do
+      @test_object2 = MockAFBaseRelationship.new
+      @test_object2.new_object = true
+      @test_object2.save
+      @test_object3 = MockAFBaseRelationship.new
+      @test_object3.new_object = true
+      @test_object3.save
+      @test_object4 = MockAFBaseRelationship.new
+      @test_object4.new_object = true
+      @test_object4.save
+      @test_object5 = MockAFBaseRelationship.new
+      @test_object5.new_object = true
+      @test_object5.save
+      #append to named relationship 'testing'
+      @test_object2.add_named_relationship("testing",@test_object3)
+      @test_object2.add_named_relationship("testing2",@test_object4)
+      @test_object5.add_named_relationship("testing",@test_object2)
+      @test_object5.add_named_relationship("testing2",@test_object3)
+      @test_object2.save
+      @test_object5.save
+      r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object2)
+      r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
+      r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
+      r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
+      model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseRelationship))
+      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
+      @test_object2.named_relationships(false).should == {:self=>{"testing"=>[r3.object],
+                                                            "testing2"=>[r4.object]},
+                                                    :inbound=>{"testing_inbound"=>[r5.object],"testing_inbound2"=>[]}}
+      @test_object3.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                    :inbound=>{"testing_inbound"=>[r2.object],
+                                                               "testing_inbound2"=>[r5.object]}}
+      @test_object4.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                    :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[r2.object]}}
+      @test_object5.named_relationships(false).should == {:self=>{"testing"=>[r2.object],
+                                                                  "testing2"=>[r3.object]},
+                                                          :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[]}}
+      @test_object2.remove_named_relationship("testing",@test_object3)
+      @test_object2.save
+      #check now removed for both outbound and inbound
+      @test_object2.named_relationships(false).should == {:self=>{"testing"=>[],
+                                                            "testing2"=>[r4.object]},
+                                                    :inbound=>{"testing_inbound"=>[r5.object],"testing_inbound2"=>[]}}
+      @test_object3.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                    :inbound=>{"testing_inbound"=>[],
+                                                               "testing_inbound2"=>[r5.object]}}
+      @test_object4.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                    :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[r2.object]}}
+      @test_object5.named_relationships(false).should == {:self=>{"testing"=>[r2.object],
+                                                                  "testing2"=>[r3.object]},
+                                                          :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[]}}
+   
+    end
+  end
+
+  describe '#named_relationship' do
+    it 'should find relationships based on name passed in for inbound or outbound' do
+      @test_object2 = MockAFBaseRelationship.new
+      @test_object2.new_object = true
+      @test_object2.save
+      @test_object3 = MockAFBaseRelationship.new
+      @test_object3.new_object = true
+      @test_object3.save
+      @test_object4 = MockAFBaseRelationship.new
+      @test_object4.new_object = true
+      @test_object4.save
+      @test_object5 = MockAFBaseRelationship.new
+      @test_object5.new_object = true
+      @test_object5.save
+      #append to named relationship 'testing'
+      @test_object2.add_named_relationship("testing",@test_object3)
+      @test_object2.add_named_relationship("testing2",@test_object4)
+      @test_object5.add_named_relationship("testing",@test_object2)
+      @test_object5.add_named_relationship("testing2",@test_object3)
+      @test_object2.save
+      @test_object5.save
+      r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object2)
+      r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
+      r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
+      r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
+      model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseRelationship))
+      @test_object2.named_relationship("testing").should == [r3.object]
+      @test_object2.named_relationship("testing2").should == [r4.object]
+      @test_object2.named_relationship("testing_inbound").should == [r5.object]
+      @test_object2.named_relationship("testing_inbound2").should == []
+      @test_object3.named_relationship("testing").should == []
+      @test_object3.named_relationship("testing2").should == []
+      @test_object3.named_relationship("testing_inbound").should == [r2.object]
+      @test_object3.named_relationship("testing_inbound2").should == [r5.object]
+      @test_object4.named_relationship("testing").should == []
+      @test_object4.named_relationship("testing2").should == []
+      @test_object4.named_relationship("testing_inbound").should == []
+      @test_object4.named_relationship("testing_inbound2").should == [r2.object]
+      @test_object5.named_relationship("testing").should == [r2.object]
+      @test_object5.named_relationship("testing2").should == [r3.object]
+      @test_object5.named_relationship("testing_inbound").should == []
+      @test_object5.named_relationship("testing_inbound2").should == []
+      
+    end
   end
 
 end

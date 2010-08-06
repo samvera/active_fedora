@@ -98,10 +98,26 @@ module ActiveFedora
     end
 
     #Deletes a Base object, also deletes the info indexed in Solr, and 
-    #the underlying inner_object.
+    #the underlying inner_object.  If this object is held in any relationships (ie inbound relationships
+    #outside of this object it will remove it from those items rels-ext as well
     def delete
+      inbound_relationships(:objects).each_pair do |predicate, objects|
+        objects.each do |obj|
+          if obj.respond_to?(:remove_relationship)
+            obj.remove_relationship(predicate,self)
+            obj.save
+          end 
+        end
+      end
+
       Fedora::Repository.instance.delete(@inner_object)
-      SolrService.instance.conn.delete(self.pid) if ENABLE_SOLR_UPDATES 
+      if ENABLE_SOLR_UPDATES
+        ActiveFedora::SolrService.instance.conn.delete(pid) 
+        if defined?( Solrizer::Solrizer ) 
+          solrizer = Solrizer::Solrizer.new
+          solrizer.solrize_delete(pid)
+        end
+      end
     end
 
 
@@ -255,20 +271,31 @@ module ActiveFedora
     # @returns Hash of relationships, as defined by SemanticNode
     # Rely on rels_ext datastream to track relationships array
     # Overrides accessor for relationships array used by SemanticNode.
-    def relationships
-      return rels_ext.relationships
+    # If outbound_only is false, inbound relationships will be included.
+    def relationships(outbound_only=true)
+      outbound_only ? rels_ext.relationships : rels_ext.relationships.merge(:inbound=>inbound_relationships)
     end
 
     # Add a Rels-Ext relationship to the Object.
     # @param predicate
     # @param object Either a string URI or an object that responds to .pid 
     def add_relationship(predicate, obj)
-      #predicate = ActiveFedora::RelsExtDatastream.predicate_lookup(predicate)
       r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj)
-      rels_ext.add_relationship(r)
+      unless relationship_exists?(r.subject, r.predicate, r.object)
+        rels_ext.add_relationship(r)
+        #need to call here to indicate update of named_relationships
+        @relationships_are_dirty = true
+        rels_ext.dirty = true
+      end
+    end
+    
+    def remove_relationship(predicate, obj)
+      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj)
+      rels_ext.remove_relationship(r)
+      #need to call here to indicate update of named_relationships
+      @relationships_are_dirty = true
       rels_ext.dirty = true
     end
-
 
     def inner_object # :nodoc
       @inner_object

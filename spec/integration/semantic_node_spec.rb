@@ -90,6 +90,5 @@ describe ActiveFedora::SemanticNode do
         id.should satisfy {|id| id == @container1.pid || @container2.pid}
       end  
     end
-  end
-  
+  end  
 end
