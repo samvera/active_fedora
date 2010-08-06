@@ -19,10 +19,16 @@ class FooHistory < ActiveFedora::Base
   end 
 end
 
+@@last_pid = 0  
+
 describe ActiveFedora::Base do
+  
+  def increment_pid
+    @@last_pid += 1    
+  end
 
   before(:each) do
-    Fedora::Repository.instance.stubs(:nextid).returns("_nextid_")
+    Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
     @test_object = ActiveFedora::Base.new
     @test_object.new_object = true
   end
@@ -141,6 +147,7 @@ describe ActiveFedora::Base do
       mock_relationship = mock("relationship")
       mock_rels_ext = mock("rels-ext", :add_relationship)
       mock_rels_ext.expects(:dirty=).with(true)
+      @test_object.expects(:relationship_exists?).returns(false).once()
       @test_object.expects(:rels_ext).returns(mock_rels_ext).times(2) 
       @test_object.add_relationship("predicate", "object")
     end
@@ -149,6 +156,7 @@ describe ActiveFedora::Base do
       mock_ds = mock("Rels-Ext")
       mock_ds.expects(:add_relationship).times(2)
       mock_ds.expects(:dirty=).with(true).times(2)
+      @test_object.expects(:relationship_exists?).returns(false).times(2)
       @test_object.datastreams["RELS-EXT"] = mock_ds
       test_relationships = [ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "info:fedora/demo:5"), 
         ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "info:fedora/demo:10")]
@@ -156,7 +164,42 @@ describe ActiveFedora::Base do
         @test_object.add_relationship(rel.predicate, rel.object)
       end
     end
-
+    
+    it 'should add a relationship to an object only if it does not exist already' do
+      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
+      @test_object3 = ActiveFedora::Base.new
+      @test_object.add_relationship(:has_part,@test_object3)
+      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
+      @test_object.relationships.should == {:self=>{:has_part=>[r.object]}}
+      #try adding again and make sure not there twice
+      @test_object.add_relationship(:has_part,@test_object3)
+      @test_object.relationships.should == {:self=>{:has_part=>[r.object]}}
+    end
+  end
+  
+  it 'should provide #remove_relationship' do
+    @test_object.should respond_to(:remove_relationship)
+  end
+  
+  describe '#remove_relationship' do
+    it 'should remove a relationship from the relationships hash' do
+      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
+      @test_object3 = ActiveFedora::Base.new
+      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
+      @test_object4 = ActiveFedora::Base.new
+      @test_object.add_relationship(:has_part,@test_object3)
+      @test_object.add_relationship(:has_part,@test_object4)
+      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
+      r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
+      #check both are there
+      @test_object.relationships.should == {:self=>{:has_part=>[r.object,r2.object]}}
+      @test_object.remove_relationship(:has_part,@test_object3)
+      #check only one item removed
+      @test_object.relationships.should == {:self=>{:has_part=>[r2.object]}}
+      @test_object.remove_relationship(:has_part,@test_object4)
+      #check last item removed and predicate removed since now emtpy
+      @test_object.relationships.should == {:self=>{}}
+    end
   end
 
   it 'should provide #relationships' do
@@ -279,7 +322,7 @@ describe ActiveFedora::Base do
       solr_doc = @test_object.to_solr
       solr_doc[:system_create_dt].should eql("cDate")
       solr_doc[:system_modified_dt].should eql("mDate")
-      solr_doc[:id].should eql(@test_object.pid)
+      solr_doc[:id].should eql("#{@test_object.pid}")
     end
 
     it "should add self.class as the :active_fedora_model" do
@@ -319,7 +362,7 @@ describe ActiveFedora::Base do
       solr_doc = @test_object.to_solr
       solr_doc[:system_create_dt].should eql("cDate")
       solr_doc[:system_modified_dt].should eql("mDate")
-      solr_doc[:id].should eql(@test_object.pid)
+      solr_doc[:id].should eql("#{@test_object.pid}")
     end
 
     it "should omit base metadata and RELS-EXT if :model_only==true" do
@@ -345,7 +388,7 @@ describe ActiveFedora::Base do
       solr_doc = @test_object.to_solr
       solr_doc[:system_create_dt].should eql(cdate)
       solr_doc[:system_modified_dt].should eql(mdate)
-      solr_doc[:id].should eql(@test_object.pid)
+      solr_doc[:id].should eql("#{@test_object.pid}")
       solr_doc[:active_fedora_model_s].should eql(@test_object.class.inspect)
       
       ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
@@ -355,7 +398,7 @@ describe ActiveFedora::Base do
       end
       solr_doc[:system_create_date].should eql(cdate)
       solr_doc[:system_modified_date].should eql(mdate)
-      solr_doc[:id].should eql(@test_object.pid)
+      solr_doc[:id].should eql("#{@test_object.pid}")
       solr_doc[:active_fedora_model_field].should eql(@test_object.class.inspect)
     end
     
@@ -557,6 +600,54 @@ describe ActiveFedora::Base do
     FooHistory.solr_search("pid: foobar", {:ding=>:dang}).should == {:baz=>:bif}
   end
 
+  it 'should provide #named_relationships' do
+    @test_object.should respond_to(:named_relationships)
+  end
+  
+  describe '#named_relationships' do
+    
+    class MockNamedRelationships < ActiveFedora::Base
+      has_relationship "testing", :has_part, :type=>ActiveFedora::Base
+      has_relationship "testing2", :has_member, :type=>ActiveFedora::Base
+      has_relationship "testing_inbound", :has_part, :type=>ActiveFedora::Base, :inbound=>true
+    end
+    
+    it 'should return current named relationships' do
+      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
+      @test_object2 = MockNamedRelationships.new
+      @test_object2.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(MockNamedRelationships))
+      @test_object.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(ActiveFedora::Base))
+      #should return expected named relationships
+      @test_object2.named_relationships
+      @test_object2.named_relationships.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:dummy,:object=>@test_object})
+      @test_object2.add_named_relationship("testing",@test_object)
+      @test_object2.named_relationships.should == {:self=>{"testing"=>[r.object],"testing2"=>[]}}
+    end 
+  end
 
-
+  
+  describe '#create_named_relationship_methods' do
+    class MockCreateNamedRelationshipMethodsBase < ActiveFedora::Base
+      register_named_relationship :self, "testing", :is_part_of, :type=>ActiveFedora::Base
+      create_named_relationship_methods "testing"
+    end
+      
+    it 'should append and remove using helper methods for each outbound relationship' do
+      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
+      @test_object2 = MockCreateNamedRelationshipMethodsBase.new 
+      @test_object2.should respond_to(:testing_append)
+      @test_object2.should respond_to(:testing_remove)
+      #test executing each one to make sure code added is correct
+      r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(ActiveFedora::Base)})
+      @test_object.add_relationship(r.predicate,r.object)
+      @test_object2.add_relationship(r.predicate,r.object)
+      @test_object2.testing_append(@test_object)
+      #create relationship to access generate_uri method for an object
+      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object)
+      @test_object2.named_relationships.should == {:self=>{"testing"=>[r.object]}}
+      @test_object2.testing_remove(@test_object)
+      @test_object2.named_relationships.should == {:self=>{"testing"=>[]}}
+    end
+  end
 end
