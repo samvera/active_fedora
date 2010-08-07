@@ -43,9 +43,16 @@ cd /wherever/active_fedora/is
 rake spec
 </pre>
 
+h2. Acknowledgements
+
+Creator: Matt Zumwalt ("MediaShelf":http://yourmediashelf.com)
+
+Developers: 
+McClain Looney & Eddie Shin ("MediaShelf":http://yourmediashelf.com), Rick Johnson (Notre Dame)
+
 h2. LICENSE:
 
-Copyright (c) 2009-2010 Matt Zumwalt
+Copyright (c) 2009-2010 Matt Zumwalt & MediaShelf, LLC
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License (LGPL) as 
