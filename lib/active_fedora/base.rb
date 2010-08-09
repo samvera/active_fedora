@@ -30,10 +30,12 @@ module ActiveFedora
   # This class is really a facade for a basic Fedora::FedoraObject, which is stored internally.
   class Base
     include MediaShelfClassLevelInheritableAttributes
-    ms_inheritable_attributes  :ds_specs
+    ms_inheritable_attributes  :ds_specs, :class_named_datastreams_desc
     include Model
     include SemanticNode
     include SolrMapper
+    
+     attr_accessor :named_datastreams_desc
 
     has_relationship "collection_members", :has_collection_member
     
@@ -262,7 +264,213 @@ module ActiveFedora
     def collection_members_remove()
       # will rely on SemanticNode.remove_relationship once it is implemented
     end
+    
+    #
+    # Named Datastreams management
+    #
+    def datastream_names
+      named_datastreams_desc.keys
+    end
+    
+    def add_named_file_datastream(name, file, opts={})
+      opts.merge!({:blob=>file,:controlGroup=>'M'})
+      add_named_datastream(name,opts)
+    end
 
+    # Creates a datastream with values 
+    def add_named_datastream(name,opts={})
+      
+      unless named_datastreams_desc.has_key?(name) && named_datastreams_desc[name].has_key?(:type) 
+        raise "Failed to add datastream. Named datastream #{name} not defined for object #{pid}." 
+      end
+      opts.merge!(named_datastreams_desc[name])
+        
+      label = opts.has_key?(:label) ? opts[:label] : ""
+
+      #only do these steps for managed datastreams
+      unless (opts.has_key?(:controlGroup)&&opts[:controlGroup]!="M")
+        if opts.has_key?(:file)
+          opts.merge!({:blob => opts[:file]}) 
+          opts.delete(:file)
+        end
+        
+        raise "You must define parameter blob for this managed datastream to load for #{pid}" unless opts.has_key?(:blob)
+        
+        #if no explicit label and is a file use original file name for label
+        if !opts.has_key?(:label)&&opts[:blob].respond_to?(:original_filename)
+          label = opts[:blob].original_filename
+        end
+        
+        if opts[:blob].respond_to?(:content_type)&&!opts[:blob].content_type.nil? && !opts.has_key?(:content_type)
+          opts.merge!({:content_type=>opts[:blob].content_type})
+        end
+     
+        raise "The blob must respond to content_type or the hash must have :content_type property set" unless opts.has_key?(:content_type)
+        
+        #throw error for mimeType mismatch
+        if named_datastreams_desc[name].has_key?(:mimeType) && !named_datastreams_desc[name][:mimeType].eql?(opts[:content_type])
+          raise "Content type mismatch for add datastream #{name} to #{pid}.  Expected: #{named_datastreams_desc[name][:mimeType]}, Actual: #{opts[:content_type]}"
+        end
+      else 
+        label = opts[:dsLocation] if (opts.has_key?(:dsLocation)) 
+      end
+      
+      opts.merge!(:dsLabel => label)
+      
+      #make sure both dsid and dsID populated if a dsid is supplied
+      opts.merge!(:dsid=>opts[:dsID]) if opts.has_key?(:dsID)
+      opts.merge!(:dsID=>opts[:dsid]) if opts.has_key?(:dsid)
+      
+      ds = create_datastream(named_datastreams_desc[name][:type],opts)
+      #Must be of type datastream
+      assert_kind_of 'datastream',  ds, ActiveFedora::Datastream
+      #make sure dsid is nil so that it uses the prefix for mapping purposes
+      #check dsid works for the prefix if it is set
+      if !ds.dsid.nil? && opts.has_key?(:prefix)
+        raise "dsid supplied does not conform to pattern #{opts[:prefix]}[number]" unless ds.dsid =~ /#{opts[:prefix]}[0-9]/
+      end
+      
+      add_datastream(ds,opts)
+    end
+
+    ########################################################################
+    ### TODO: Currently requires you to update file if a managed datastream
+    ##        but could change to allow metadata only updates as well
+    ########################################################################
+    def update_named_datastream(name, opts={})
+      #check that dsid provided matches existing datastream with that name
+      raise "You must define parameter dsid for datastream to update for #{pid}" unless opts.include?(:dsid)
+      raise "Datastream with name #{name} and dsid #{opts[:dsid]} does not exist for #{pid}" unless self.send("#{name}_ids").include?(opts[:dsid])
+      add_named_datastream(name,opts)
+    end
+    
+    def assert_kind_of(n, o,t)
+      raise "Assertion failure: #{n}: #{o} is not of type #{t}" unless o.kind_of?(t)
+    end
+    
+    def is_named_datastream?(name)
+      named_datastreams_desc.has_key?(name)
+    end
+
+    def named_datastreams
+      ds_values = {}
+      self.class.named_datastreams_desc.keys.each do |name|
+        ds_values.merge!({name=>self.send("#{name}")})
+      end
+      return ds_values
+    end
+    
+    def named_datastreams_attributes
+      ds_values = {}
+      self.class.named_datastreams_desc.keys.each do |name|
+        ds_array = self.send("#{name}")
+        result_hash = {}
+        ds_array.each do |ds|
+          result_hash[ds.dsid]=ds.attributes
+        end
+        ds_values.merge!({name=>result_hash})
+      end
+      return ds_values
+    end
+    
+    def named_datastreams_ids
+      dsids = {}
+      self.class.named_datastreams_desc.keys.each do |name|
+        dsid_array = self.send("#{name}_ids")
+        dsids[name] = dsid_array
+      end
+      return dsids
+    end 
+    
+    def datastreams_attributes
+      ds_values = {}
+      self.datastreams.each_pair do |dsid,ds|
+        ds_values.merge!({dsid=>ds.attributes})
+      end
+      return ds_values
+    end
+    
+    def named_datastreams_desc
+      @named_datastreams_desc ||= named_datastreams_desc_from_class
+    end
+    
+    def named_datastreams_desc_from_class
+      self.class.named_datastreams_desc
+    end
+    
+    def create_datastream(type,opts={})
+      type.to_s.split('::').inject(Kernel) {|scope, const_name| 
+      scope.const_get(const_name)}.new(opts)
+    end
+
+    def self.has_datastream(args)
+      unless args.has_key?(:name)
+        return false
+      end
+      unless args.has_key?(:prefix)
+        args.merge!({:prefix=>args[:name].to_s.upcase})
+      end
+      unless named_datastreams_desc.has_key?(args[:name]) 
+        named_datastreams_desc[args[:name]] = {} 
+      end
+          
+      args.merge!({:mimeType=>args[:mime_type]}) if args.has_key?(:mime_type)
+      
+      unless named_datastreams_desc[args[:name]].has_key?(:type) 
+        #default to type ActiveFedora::Datastream
+        args.merge!({:type => "ActiveFedora::Datastream"})
+      end
+      named_datastreams_desc[args[:name]]= args   
+      create_named_datastream_finders(args[:name],args[:prefix])
+      create_named_datastream_update_methods(args[:name])
+    end
+        
+    def self.create_named_datastream_update_methods(name)
+      append_file_method_name = "#{name.to_s.downcase}_file_append"
+      append_method_name = "#{name.to_s.downcase}_append"
+      #remove_method_name = "#{name.to_s.downcase}_remove"
+      self.send(:define_method,:"#{append_file_method_name}") do |*args| 
+        file,opts = *args
+        opts ||= {}
+        add_named_file_datastream(name,file,opts)
+      end
+      
+      self.send(:define_method,:"#{append_method_name}") do |*args| 
+        opts = *args
+        opts ||= {}
+        #call add_named_datastream instead of add_file_named_datastream in case not managed datastream
+        add_named_datastream(name,opts)
+      end
+    end 
+        
+    def self.create_named_datastream_finders(name, prefix)
+      class_eval <<-END
+      def #{name}(opts={})
+        id_array = []
+        keys = datastreams.keys
+        id_array = keys.select {|v| v =~ /#{prefix}\d*/}
+        if opts[:response_format] == :id_array
+          return id_array
+        else
+          named_ds = []
+          id_array.each do |name|
+            if datastreams.has_key?(name)
+              named_ds.push(datastreams[name])
+            end
+          end
+          return named_ds
+        end
+      end
+      def #{name}_ids
+        #{name}(:response_format => :id_array)
+      end
+      END
+    end
+        
+    # named datastreams desc are tracked as a hash of structure {name => args}}
+    def self.named_datastreams_desc
+      @class_named_datastreams_desc ||= {}
+    end
 
     # 
     # Relationships Management

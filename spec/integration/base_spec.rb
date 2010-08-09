@@ -7,6 +7,11 @@ class MockAFBaseRelationship < ActiveFedora::Base
   has_relationship "testing_inbound2", :has_member, :type=>MockAFBaseRelationship, :inbound=>true
 end
 
+class MockAFBaseDatastream < ActiveFedora::Base
+  has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+  has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
+end
+
 describe ActiveFedora::Base do
   
   before(:all) do
@@ -20,7 +25,23 @@ describe ActiveFedora::Base do
   
   after(:each) do
     begin
-      @test_object.delete
+    @test_object.delete
+    rescue
+    end
+    begin
+    @test_object2.delete
+    rescue
+    end
+    begin
+    @test_object3.delete
+    rescue
+    end
+    begin
+    @test_object4.delete
+    rescue
+    end
+    begin
+    @test_object5.delete
     rescue
     end
   end
@@ -604,6 +625,143 @@ describe ActiveFedora::Base do
       @test_object5.named_relationship("testing_inbound").should == []
       @test_object5.named_relationship("testing_inbound2").should == []
       
+    end
+  end
+  
+  #
+  # Named datastream specs
+  #
+  describe '#add_named_datastream' do
+    it 'should add a datastream with the given name to the object in fedora' do
+      @test_object2 = MockAFBaseDatastream.new
+      @test_object2.new_object = true
+      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
+      f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
+      f2.stubs(:original_filename).returns("dino.jpg")
+      f.stubs(:content_type).returns("image/jpeg")
+      @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f, :label=>"testDS"})
+      @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2})
+      ds = @test_object2.thumbnail.first
+      ds2 = @test_object2.high.first
+      @test_object2.save
+      @test_object2 = MockAFBaseDatastream.load_instance(@test_object2.pid)
+      @test_object2.named_datastreams.keys.size.should == 2
+      @test_object2.named_datastreams.keys.include?("thumbnail").should == true
+      @test_object2.named_datastreams.keys.include?("high").should == true
+      @test_object2.named_datastreams["thumbnail"].size.should == 1
+      @test_object2.named_datastreams["high"].size.should == 1
+      @test_object2.named_datastreams["thumbnail"].first.attributes.should == {"label"=>ds.label,"dsid"=>ds.dsid,
+                                                                                 "mimeType"=>ds.attributes[:mimeType],
+                                                                                 :controlGroup=>ds.attributes[:controlGroup],
+                                                                                 :pid=>ds.pid, :dsID=>ds.dsid, :dsLabel=>ds.attributes[:dsLabel]}
+      @test_object2.named_datastreams["high"].first.attributes.should == {"label"=>ds2.label,"dsid"=>ds2.dsid,
+                                                                                 "mimeType"=>ds2.attributes[:mimeType],
+                                                                                 :controlGroup=>ds2.attributes[:controlGroup],
+                                                                                 :pid=>ds2.pid, :dsID=>ds2.dsid, :dsLabel=>ds2.attributes[:dsLabel]}
+    end
+  end
+  
+  describe '#add_named_file_datastream' do
+    it 'should add a file datastream with the given name to the object in fedora' do
+      @test_object2 = MockAFBaseDatastream.new
+      @test_object2.new_object = true
+      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
+      f.stubs(:content_type).returns("image/jpeg")
+      @test_object2.add_named_file_datastream("thumbnail",f)
+      ds = @test_object2.thumbnail.first
+      @test_object2.save
+      @test_object2 = MockAFBaseDatastream.load_instance(@test_object2.pid)
+      @test_object2.named_datastreams["thumbnail"].size.should == 1
+      @test_object2.named_datastreams["thumbnail"].first.attributes.should == {"label"=>ds.label,"dsid"=>ds.dsid,
+                                                                                 "mimeType"=>ds.attributes[:mimeType],
+                                                                                 :controlGroup=>ds.attributes[:controlGroup],
+                                                                                 :pid=>ds.pid, :dsID=>ds.dsid, :dsLabel=>ds.attributes[:dsLabel]}
+    end
+  end
+  
+  describe '#update_named_datastream' do
+    it 'should update a named datastream to have a new file' do
+      @test_object2 = MockAFBaseDatastream.new
+      @test_object2.new_object = true
+      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
+      f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
+      f.stubs(:content_type).returns("image/jpeg")
+      f.stubs(:original_filename).returns("minivan.jpg")
+      f2.stubs(:content_type).returns("image/jpeg")
+      f2.stubs(:original_filename).returns("dino.jpg")
+      #check raise exception if dsid not supplied
+      @test_object2.add_named_datastream("thumbnail",{:file=>f})
+      @test_object2.save
+      @test_object2 = MockAFBaseDatastream.load_instance(@test_object2.pid)
+      
+      @test_object2.thumbnail.size.should == 1
+      @test_object2.thumbnail_ids == ["THUMB1"]
+      ds = @test_object2.thumbnail.first
+      ds.attributes.should == {"mimeType"=>"image/jpeg", 
+                               :controlGroup=>"M", "dsid"=>"THUMB1", 
+                               :pid=>@test_object2.pid, :dsID=>"THUMB1", 
+                               "label"=>"minivan.jpg",:dsLabel=>"minivan.jpg"}
+      expected_content = ""
+      f.each {|line|
+        expected_content << line
+      }
+      raise "Datastream content mismatch on save of datastream" unless ds.content == expected_content
+      @test_object2.update_named_datastream("thumbnail",{:file=>f2,:dsid=>"THUMB1"})
+      @test_object2.save
+      @test_object2 = MockAFBaseDatastream.load_instance(@test_object2.pid)
+      @test_object2.thumbnail.size.should == 1
+      @test_object2.thumbnail_ids == ["THUMB1"]
+      ds = @test_object2.thumbnail.first
+      ds.attributes.should == {"mimeType"=>"image/jpeg", 
+                               :controlGroup=>"M", "dsid"=>"THUMB1", 
+                               :pid=>@test_object2.pid, :dsID=>"THUMB1", 
+                               "label"=>"dino.jpg", :dsLabel=>"dino.jpg"}
+      expected_content = ""
+      f2.each {|line|
+        expected_content << line
+      }
+      raise "Datastream content mismatch after update of datastream" unless ds.content == expected_content
+    end
+  end
+  
+  describe '#named_datastreams_attributes' do
+    it 'should return a hash of name to hash of dsid to attribute hashes for each named datastream' do
+      @test_object2 = MockAFBaseDatastream.new
+      @test_object2.new_object = true
+      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
+      f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
+      f2.stubs(:original_filename).returns("dino.jpg")
+      f.stubs(:content_type).returns("image/jpeg")
+      @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f, :label=>"testDS"})
+      @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2})
+      ds = @test_object2.thumbnail.first
+      ds2 = @test_object2.high.first
+      @test_object2.save
+      @test_object2 = MockAFBaseDatastream.load_instance(@test_object2.pid)
+      @test_object2.named_datastreams_attributes.should == {"thumbnail"=>{"THUMB1"=>{"label"=>ds.label,"dsid"=>ds.dsid,
+                                                                                 "mimeType"=>ds.attributes[:mimeType],
+                                                                                 :controlGroup=>ds.attributes[:controlGroup],
+                                                                                 :pid=>ds.pid, :dsID=>ds.dsid, :dsLabel=>ds.attributes[:dsLabel]}},
+                                                            "high"=>{"HIGH1"=>{"label"=>ds2.label,"dsid"=>ds2.dsid,
+                                                                                 "mimeType"=>ds2.attributes[:mimeType],
+                                                                                 :controlGroup=>ds2.attributes[:controlGroup],
+                                                                                 :pid=>ds2.pid, :dsID=>ds2.dsid, :dsLabel=>ds2.attributes[:dsLabel]}}}
+    end
+  end
+  
+  describe '#named_datastreams_ids' do
+    it 'should return a hash of datastream name to an array of dsids' do
+      @test_object2 = MockAFBaseDatastream.new
+      @test_object2.new_object = true
+      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
+      f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
+      f2.stubs(:original_filename).returns("dino.jpg")
+      f.stubs(:content_type).returns("image/jpeg")
+      @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f, :label=>"testDS"})
+      @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f2})
+      @test_object2.save
+      @test_object2 = MockAFBaseDatastream.load_instance(@test_object2.pid)
+      @test_object2.named_datastreams_ids.should == {"high"=>[], "thumbnail"=>["THUMB1", "THUMB2"]}
     end
   end
 

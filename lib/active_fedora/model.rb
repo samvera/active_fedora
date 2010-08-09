@@ -96,6 +96,108 @@ module ActiveFedora
         end
       end
 
+      # Find all ActiveFedora objects for this model that match arguments
+      # passed in by querying Solr.  Like find_by_solr this returns a solr result.
+      #
+      # query_fields   a hash of object field names and values to filter on
+      # opts           specifies options for the solr query
+      #
+      #   options may include:
+      # 
+      #   :sort             => array of hash with one hash per sort by field... defaults to [{system_create=>:descending}]
+      #   :default_field, :rows, :filter_queries, :debug_query,
+      #   :explain_other, :facets, :highlighting, :mlt,
+      #   :operator         => :or / :and
+      #   :start            => defaults to 0
+      #   :field_list       => array, defaults to ["*", "score"]
+      #
+      def find_by_fields_by_solr(query_fields,opts={})
+        #create solr_args from fields passed in, needs to be comma separated list of form field1=value1,field2=value2,...
+        escaped_class_name = self.name.gsub(/(:)/, '\\:')
+        query = "#{ActiveFedora::SolrMapper.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}" 
+        
+        query_fields.each_pair do |key,value|
+          unless value.nil?
+            solr_key = key
+            #convert to symbol if need be
+            key = key.to_sym if !class_fields.has_key?(key)&&class_fields.has_key?(key.to_sym)
+            #do necessary mapping with suffix in most cases, otherwise ignore as a solr field key that activefedora does not know about
+            if class_fields.has_key?(key) && class_fields[key].has_key?(:type)
+              type = class_fields[key][:type]
+              type = :string unless type.kind_of?(Symbol)
+              solr_key = ActiveFedora::SolrMapper.solr_name(key,type)
+            end
+            
+            escaped_value = value.gsub(/(:)/, '\\:')
+            #escaped_value = escaped_value.gsub(/ /, '\\ ')
+            key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
+            query = key.to_s.eql?(SOLR_DOCUMENT_ID) ? "#{query} AND #{key}:#{escaped_value}" : "#{query} AND #{solr_key}:#{escaped_value}"  
+          end
+        end
+      
+        query_opts = {}
+        opts.each do |key,value|
+          key = key.to_sym
+          query_opts[key] = value
+        end
+      
+        #set default sort to created date ascending
+        unless query_opts.include?(:sort)
+          query_opts.merge!({:sort=>[ActiveFedora::SolrMapper.solr_name(:system_create,:date)=>:ascending]}) 
+        else
+          #need to convert to solr names for all fields
+          sort_array =[]
+        
+          opts[:sort].collect do |sort|
+            sort_direction = :ascending
+            if sort.respond_to?(:keys)
+              key = sort.keys[0]
+              sort_direction = sort[key]
+              sort_direction =~ /^desc/ ? sort_direction = :descending : :ascending
+            else
+              key = sort.to_s
+            end
+            field_name = key
+            
+            if key.to_s =~ /^system_create/
+              field_name = :system_create_date
+              key = :system_create
+            elsif key.to_s =~ /^system_mod/  
+              field_name = :system_modified_date
+              key = :system_modified
+            end
+         
+            solr_name = field_name 
+            if class_fields.include?(field_name.to_sym)
+              solr_name = ActiveFedora::SolrMapper.solr_name(key,class_fields[field_name.to_sym][:type])
+            end
+            sort_array.push({solr_name=>sort_direction})
+          end
+        
+          query_opts[:sort] = sort_array
+        end
+
+        puts "Querying solr for #{self.name} objects with query: '#{query}'"
+    	results = ActiveFedora::SolrService.instance.conn.query(query,query_opts)
+    	#objects = []
+        #  results.hits.each do |hit|
+        #    puts "get object for #{hit[SOLR_DOCUMENT_ID]}"
+        #    obj = Fedora::Repository.instance.find_model(hit[SOLR_DOCUMENT_ID], self)
+        #    obj.inner_object.new_object = false
+        #    objects.push(obj)
+        #end
+        #objects
+        #ActiveFedora::SolrService.reify_solr_results(results)
+      end
+    
+      def class_fields
+        #create dummy object that is empty by passing in fake pid
+        object = self.new({:pid=>'FAKE'})
+        fields = object.fields
+        #reset id to nothing
+        fields[:id][:values] = []
+        return fields
+      end
 
       #wrapper around instance_variable_set, sets @name to value
       def attribute_set(name, value)
