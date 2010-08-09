@@ -151,25 +151,18 @@ module ActiveFedora
     
     def named_relationships(outbound_only=true)
       #make sure to update if relationships have been updated
-      #puts "\r\n\r\n\r\n\r\n\r\nCheck if Relationships are dirty\r\n\r\n\r\n\r\n"
       if @relationships_are_dirty == true
-        puts "\r\n\r\n\r\n\r\n\r\nStart Relationships are dirty\r\n\r\n\r\n\r\n"
         @named_relationships = named_relationships_from_class()
         @relationships_are_dirty = false
-        puts "\r\n\r\n\r\n\r\n\r\nDone Relationships are dirty\r\n\r\n\r\n\r\n"
       end
       
       #this will get called normally on first fetch if relationships are not dirty
-      puts "\r\n\r\n\r\n\r\n\r\ninitialize if necessary\r\n\r\n\r\n\r\n"
       @named_relationships ||= named_relationships_from_class()
-      puts "\r\n\r\n\r\ndone initialize if necessary \r\n\r\n\r\n\r\n"
-      #@named_relationships = named_relationships_from_class()
       outbound_only ? @named_relationships : @named_relationships.merge(:inbound=>named_inbound_relationships)      
     end
     
     def named_relationships_from_class()
       rels = {}
-      puts "\r\n\r\n\r\n inside named_relationships_from_class\r\n\r\n\r\n\r\n"
       named_relationship_predicates.each_pair do |subj, names|
         if relationships.has_key?(subj)
           rels[subj] = {}
