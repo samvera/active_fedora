@@ -230,6 +230,7 @@ describe ActiveFedora::SemanticNode do
       SpecNode.create_inbound_relationship_finders("containers", :is_member_of, :inbound => true)  
       local_node.should respond_to(:containers_ids)
       local_node.should respond_to(:containers)
+      local_node.should respond_to(:containers_from_solr)
     end
     
     it "resulting finder should search against solr and use Model#load_instance to build an array of objects" do
@@ -291,7 +292,8 @@ describe ActiveFedora::SemanticNode do
       local_node.should_not respond_to(:containers)
       SpecNode.create_outbound_relationship_finders("containers", :is_member_of)  
       local_node.should respond_to(:containers_ids)
-      local_node.should respond_to(:containers)      
+      local_node.should respond_to(:containers)  
+      local_node.should respond_to(:containers_from_solr)  
     end
     
     describe " resulting finder" do

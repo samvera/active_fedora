@@ -3,7 +3,7 @@ module ActiveFedora
     include MediaShelfClassLevelInheritableAttributes
     ms_inheritable_attributes  :class_relationships, :internal_uri, :class_named_relationships_desc
     
-    attr_accessor :internal_uri, :named_relationship_desc, :relationships_are_dirty
+    attr_accessor :internal_uri, :named_relationship_desc, :relationships_are_dirty, :load_from_solr
     
     PREDICATE_MAPPINGS = Hash[:is_member_of => "isMemberOf",
                           :has_member => "hasMember",
@@ -95,7 +95,7 @@ module ActiveFedora
     def inbound_relationships(response_format=:uri)
       rel_values = {}
       inbound_named_relationship_predicates.each_pair do |name,predicate|
-        objects = self.send("#{name}")
+        objects = self.send("#{name}",{:response_format=>response_format})
         items = []
         objects.each do |object|
           if (response_format == :uri)    
@@ -433,6 +433,8 @@ module ActiveFedora
                 id_array << hit[SOLR_DOCUMENT_ID]
               end
               return id_array
+            elsif opts[:response_format] == :load_from_solr || self.load_from_solr
+              return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
             else
               return ActiveFedora::SolrService.reify_solr_results(solr_result)
             end
@@ -440,7 +442,10 @@ module ActiveFedora
         end
         def #{name}_ids
           #{name}(:response_format => :id_array)
-        end 
+        end
+        def #{name}_from_solr
+          #{name}(:response_format => :load_from_solr)
+        end
         END
       end
     
@@ -460,6 +465,8 @@ module ActiveFedora
             solr_result = SolrService.instance.conn.query(query)
             if opts[:response_format] == :solr
               return solr_result
+            elsif opts[:response_format] == :load_from_solr || self.load_from_solr
+              return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
             else
               return ActiveFedora::SolrService.reify_solr_results(solr_result)
             end
@@ -467,6 +474,9 @@ module ActiveFedora
         end
         def #{name}_ids
           #{name}(:response_format => :id_array)
+        end
+        def #{name}_from_solr
+          #{name}(:response_format => :load_from_solr)
         end
         END
       end

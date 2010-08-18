@@ -12,6 +12,26 @@ class MockAFBaseDatastream < ActiveFedora::Base
   has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
 end
 
+class MockAFBaseFromSolr < ActiveFedora::Base
+  has_relationship "testing", :has_part, :type=>MockAFBaseFromSolr
+  has_relationship "testing2", :has_member, :type=>MockAFBaseFromSolr
+  has_relationship "testing_inbound", :has_part, :type=>MockAFBaseFromSolr, :inbound=>true
+  has_relationship "testing_inbound2", :has_member, :type=>MockAFBaseFromSolr, :inbound=>true
+  
+  has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|
+    m.field "holding_id", :string
+  end
+  
+  has_metadata :name => "descMetadata", :type => ActiveFedora::QualifiedDublinCoreDatastream do |m|
+    m.field "created", :date, :xml_node => "created"
+    m.field "language", :string, :xml_node => "language"
+    m.field "creator", :string, :xml_node => "creator"
+    # Created remaining fields
+    m.field "geography", :string, :xml_node => "geography"
+    m.field "title", :string, :xml_node => "title"
+  end
+end
+
 describe ActiveFedora::Base do
   
   before(:all) do
@@ -764,5 +784,185 @@ describe ActiveFedora::Base do
       @test_object2.named_datastreams_ids.should == {"high"=>[], "thumbnail"=>["THUMB1", "THUMB2"]}
     end
   end
+  
+  describe '#load_instance_from_solr' do
+    it 'should populate an instance of an ActiveFedora::Base object using solr instead of Fedora' do
+      
+      @test_object2 = MockAFBaseFromSolr.new
+      @test_object2.new_object = true
+      attributes = {"holding_id"=>{0=>"Holding 1"},
+                    "language"=>{0=>"Italian"},
+                    "creator"=>{0=>"Linguist, A."},
+                    "geography"=>{0=>"Italy"},
+                    "title"=>{0=>"Italian and Spanish: A Comparison of Common Phrases"}}
+      @test_object2.update_indexed_attributes(attributes)
+      @test_object2.save
+      @test_object3 = MockAFBaseFromSolr.new
+      @test_object3.new_object = true
+      attributes = {"holding_id"=>{0=>"Holding 2"},
+                    "language"=>{0=>"Spanish;Latin"},
+                    "creator"=>{0=>"Linguist, A."},
+                    "geography"=>{0=>"Spain"},
+                    "title"=>{0=>"A study of the evolution of Spanish from Latin"}}
+      @test_object3.update_indexed_attributes(attributes)
+      @test_object3.save
+      @test_object4 = MockAFBaseFromSolr.new
+      attributes = {"holding_id"=>{0=>"Holding 3"},
+                    "language"=>{0=>"Spanish;Latin"},
+                    "creator"=>{0=>"Linguist, A."},
+                    "geography"=>{0=>"Spain"},
+                    "title"=>{0=>"An obscure look into early nomadic tribes of Spain"}}
+      @test_object4.update_indexed_attributes(attributes)
+      @test_object4.new_object = true
+      @test_object4.save
+      @test_object5 = MockAFBaseFromSolr.new
+      @test_object5.new_object = true
+      @test_object5.save
+      
+      #append to named relationship 'testing'
+      @test_object2.testing_append(@test_object3)
+      @test_object2.testing2_append(@test_object4)
+      @test_object5.testing_append(@test_object2)
+      @test_object5.testing2_append(@test_object3)
+      @test_object2.save
+      @test_object5.save
+      r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object2)
+      r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
+      r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
+      r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
+      model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseFromSolr))
+      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
+      test_from_solr_object2 = MockAFBaseFromSolr.load_instance_from_solr(@test_object2.pid)
+      test_from_solr_object3 = MockAFBaseFromSolr.load_instance_from_solr(@test_object3.pid)
+      test_from_solr_object4 = MockAFBaseFromSolr.load_instance_from_solr(@test_object4.pid)
+      test_from_solr_object5 = MockAFBaseFromSolr.load_instance_from_solr(@test_object5.pid)
+      
+      # need to check pid, system create and system modify
+      test_from_solr_object2.pid.should == @test_object2.pid
+      test_from_solr_object3.pid.should == @test_object3.pid
+      test_from_solr_object4.pid.should == @test_object4.pid
+      test_from_solr_object5.pid.should == @test_object5.pid
+      
+      Time.parse(test_from_solr_object2.create_date).should == Time.parse(@test_object2.create_date)
+      Time.parse(test_from_solr_object3.create_date).should == Time.parse(@test_object3.create_date)
+      Time.parse(test_from_solr_object4.create_date).should == Time.parse(@test_object4.create_date)
+      Time.parse(test_from_solr_object5.create_date).should == Time.parse(@test_object5.create_date)
+      
+      Time.parse(test_from_solr_object2.modified_date).should == Time.parse(@test_object2.modified_date)
+      Time.parse(test_from_solr_object3.modified_date).should == Time.parse(@test_object3.modified_date)
+      Time.parse(test_from_solr_object4.modified_date).should == Time.parse(@test_object4.modified_date)
+      Time.parse(test_from_solr_object5.modified_date).should == Time.parse(@test_object5.modified_date)
+
+      # need to test outbound and inbound relationships
+      test_from_solr_object2.relationships(false).should == {:self=>{:has_model=>[model_rel.object],
+                                                            :has_part=>[r3.object],
+                                                            :has_member=>[r4.object]},
+                                                    :inbound=>{:has_part=>[r5.object]}}
+      test_from_solr_object2.named_relationships(false).should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]},
+                                                                   :inbound=>{"testing_inbound"=>[r5.object],"testing_inbound2"=>[]}}                                              
+      test_from_solr_object3.relationships(false).should == {:self=>{:has_model=>[model_rel.object]},
+                                                   :inbound=>{:has_part=>[r2.object],
+                                                               :has_member=>[r5.object]}}
+      test_from_solr_object3.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                                   :inbound=>{"testing_inbound"=>[r2.object],"testing_inbound2"=>[r5.object]}}                                                                  
+      test_from_solr_object4.relationships(false).should == {:self=>{:has_model=>[model_rel.object]},
+                                                    :inbound=>{:has_member=>[r2.object]}}
+      test_from_solr_object4.named_relationships(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
+                                                                   :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[r2.object]}}                                                      
+      test_from_solr_object5.relationships(false).should == {:self=>{:has_model=>[model_rel.object],
+                                                            :has_part=>[r2.object],
+                                                            :has_member=>[r3.object]},
+                                                    :inbound=>{}}
+      test_from_solr_object5.named_relationships(false).should == {:self=>{"testing"=>[r2.object],"testing2"=>[r3.object]},
+                                                                   :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[]}}                                                     
+      #all inbound should now be empty if no parameter supplied to relationships
+      test_from_solr_object2.relationships.should == {:self=>{:has_part=>[r3.object],:has_member=>[r4.object],:has_model=>[model_rel.object]}}
+      test_from_solr_object2.named_relationships.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]}}
+      test_from_solr_object3.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
+      test_from_solr_object3.named_relationships.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      test_from_solr_object4.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
+      test_from_solr_object4.named_relationships.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      test_from_solr_object5.relationships.should == {:self=>{:has_model=>[model_rel.object],
+                                                             :has_part=>[r2.object],
+                                                             :has_member=>[r3.object]}}
+      test_from_solr_object5.named_relationships.should == {:self=>{"testing"=>[r2.object],"testing2"=>[r3.object]}}
+      # need to check metadata
+      test_from_solr_object2.fields[:language][:values].should == ["Italian"]
+      test_from_solr_object2.fields[:creator][:values].should == ["Linguist, A."]
+      test_from_solr_object2.fields[:geography][:values].should == ["Italy"]
+      test_from_solr_object2.fields[:title][:values].should == ["Italian and Spanish: A Comparison of Common Phrases"]
+      test_from_solr_object2.fields[:holding_id][:values].should == ["Holding 1"]
+      
+      test_from_solr_object3.fields[:language][:values].should == ["Spanish;Latin"]
+      test_from_solr_object3.fields[:creator][:values].should == ["Linguist, A."]
+      test_from_solr_object3.fields[:geography][:values].should == ["Spain"]
+      test_from_solr_object3.fields[:title][:values].should == ["A study of the evolution of Spanish from Latin"]
+      test_from_solr_object3.fields[:holding_id][:values].should == ["Holding 2"]
+      
+      test_from_solr_object4.fields[:language][:values].should == ["Spanish;Latin"]
+      test_from_solr_object4.fields[:creator][:values].should == ["Linguist, A."]
+      test_from_solr_object4.fields[:geography][:values].should == ["Spain"]
+      test_from_solr_object4.fields[:title][:values].should == ["An obscure look into early nomadic tribes of Spain"]
+      test_from_solr_object4.fields[:holding_id][:values].should == ["Holding 3"]
+
+      #need to check system modified and system created values correct
+      # need to implement for nokogiri datastream as well
+      #false.should == true
+    end
+  end
+  
+  describe 'load_from_solr using relationship finders'
+    it 'resulting finder should accept :load_from_solr as :response_format and return object instantiated using load_instance_from_solr' do
+#      solr_result = mock("solr result")
+#      SpecNode.create_inbound_relationship_finders("constituents", :is_constituent_of, :inbound => true)
+#      local_node = SpecNode.new
+#      mock_repo = mock("repo")
+#      mock_repo.expects(:find_model).never
+#      SpecNode.expects(:load_instance_from_solr).times(1)
+#      local_node.expects(:internal_uri).returns("info:fedora/test:sample_pid")
+#      ActiveFedora::SolrService.instance.conn.expects(:query).with("is_constituent_of_s:info\\:fedora/test\\:sample_pid").returns(solr_result)
+#      local_node.constituents(:response_format => :solr).should equal(solr_result)
+    end
+    
+    it 'when an object is loaded via solr instead of fedora it should automatically load objects from finders from solr as well' do
+      @test_object2 = MockAFBaseFromSolr.new
+      @test_object2.save
+      @test_object3 = MockAFBaseFromSolr.new
+      @test_object3.save
+      @test_object2.testing_append(@test_object3)
+      @test_object2.save
+      
+      test_object2_from_solr = MockAFBaseFromSolr.load_instance_from_solr(@test_object2.pid)
+      test_object3_from_solr = MockAFBaseFromSolr.load_instance_from_solr(@test_object3.pid)
+      MockAFBaseFromSolr.expects(:load_instance_from_solr).times(4)
+      test_object2_from_solr.testing({:response_format=>:load_from_solr})
+      test_object3_from_solr.testing_inbound({:response_format=>:load_from_solr})
+      test_object2_from_solr.testing
+      test_object3_from_solr.testing_inbound
+    end
+  
+    it 'when a load_from_solr is not set it should not call load_instance_from_solr for finders unless passing option in' do
+      @test_object2 = MockAFBaseFromSolr.new
+      @test_object2.save
+      @test_object3 = MockAFBaseFromSolr.new
+      @test_object3.save
+      @test_object2.testing_append(@test_object3)
+      @test_object2.save
+      
+      MockAFBaseFromSolr.expects(:load_instance_from_solr).never()
+      @test_object2.testing
+      @test_object3.testing_inbound
+      
+      #now try calling with option
+      MockAFBaseFromSolr.expects(:load_instance_from_solr).twice()
+      @test_object2.testing({:response_format=>:load_from_solr})
+      @test_object3.testing_inbound({:response_format=>:load_from_solr})
+      
+      #now call other finder method
+      MockAFBaseFromSolr.expects(:load_instance_from_solr).twice()
+      @test_object2.testing_from_solr
+      @test_object3.testing_inbound_from_solr
+      
+    end
 
 end

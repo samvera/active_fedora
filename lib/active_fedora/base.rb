@@ -648,6 +648,27 @@ module ActiveFedora
       end
       return solr_doc
     end
+    
+    def self.load_instance_from_solr(pid)
+      result = find_by_solr(pid)
+      raise "Object #{pid} not found in solr" if result.nil?
+      solr_doc = result.hits.first
+      #double check pid and id in record match
+      raise "Object #{pid} not found in Solr" unless !result.nil? && pid == solr_doc[SOLR_DOCUMENT_ID]
+
+      obj = self.new({:pid=>solr_doc[SOLR_DOCUMENT_ID],:create_date=>solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)],:modified_date=>solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date)]})
+      obj.new_object = false
+      #set by default to load any dependent relationship objects from solr as well
+      obj.load_from_solr = true
+      #need to call rels_ext once so it exists when iterating over datastreams
+      obj.rels_ext
+      obj.datastreams.each_value do |ds|
+        if ds.respond_to? (:from_solr)
+          ds.from_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ( ds.kind_of?(ActiveFedora::RelsExtDatastream))
+        end
+      end
+      obj
+    end
 
     # Updates Solr index with self.
     def update_index

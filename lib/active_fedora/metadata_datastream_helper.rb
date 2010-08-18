@@ -48,6 +48,20 @@ module ActiveFedora::MetadataDatastreamHelper
     return solr_doc
   end
   
+  def from_solr(solr_doc)
+    fields.each do |field_key, field_info|
+      field_symbol = generate_solr_symbol(field_key, field_info[:type])
+      value = (solr_doc[field_symbol].nil? ? solr_doc[field_symbol.to_s]: solr_doc[field_symbol]) 
+      unless value.nil?
+        if value.is_a? Array
+          update_attributes({field_key=>value})
+        else
+          update_indexed_attributes({field_key=>{0=>value}})
+        end
+      end
+    end
+  end
+  
   def to_xml(xml = Nokogiri::XML::Document.parse("<fields />")) #:nodoc:
     if xml.instance_of?(Nokogiri::XML::Builder)
       xml_insertion_point = xml.doc.root 

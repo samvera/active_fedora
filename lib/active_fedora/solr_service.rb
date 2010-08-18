@@ -22,7 +22,7 @@ module ActiveFedora
       Thread.current[:solr_service]
     end
     
-    def self.reify_solr_results(solr_result)
+    def self.reify_solr_results(solr_result,opts={})
       unless solr_result.is_a?(Solr::Response::Standard)
         raise ArgumentError.new("Only solr responses (Solr::Response::Standard) are allowed. You provided a #{solr_result.class}")
       end
@@ -34,7 +34,11 @@ module ActiveFedora
         else
           classname = Kernel.const_get(model_value)
         end
-        results << Fedora::Repository.instance.find_model(hit[SOLR_DOCUMENT_ID], classname)
+        if opts[:load_from_solr]
+          results << classname.load_instance_from_solr(hit[SOLR_DOCUMENT_ID])
+        else
+          results << Fedora::Repository.instance.find_model(hit[SOLR_DOCUMENT_ID], classname)
+        end
       end
       return results
     end
