@@ -188,7 +188,7 @@ module Fedora
     def http
       http             = Net::HTTP.new(@site.host, @site.port)
       http.use_ssl     = @site.is_a?(URI::HTTPS)
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl?
       http
     end
 
