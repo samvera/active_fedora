@@ -52,5 +52,25 @@ module ActiveFedora
       end
       return solr_doc
     end
+    
+    def from_solr(solr_doc)
+      #cycle through all possible predicates
+      PREDICATE_MAPPINGS.keys.each do |predicate|
+        predicate_symbol = ActiveFedora::SolrMapper.solr_name(predicate, :symbol)
+        value = (solr_doc[predicate_symbol].nil? ? solr_doc[predicate_symbol.to_s]: solr_doc[predicate_symbol]) 
+        unless value.nil? 
+          if value.is_a? Array
+            value.each do |obj|
+              r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj)
+              add_relationship(r)
+            end
+          else
+            r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>value)
+            add_relationship(r)
+          end
+        end
+      end
+      @load_from_solr = true
+    end
   end
 end
