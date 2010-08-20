@@ -655,8 +655,10 @@ module ActiveFedora
       solr_doc = result.hits.first
       #double check pid and id in record match
       raise "Object #{pid} not found in Solr" unless !result.nil? && pid == solr_doc[SOLR_DOCUMENT_ID]
-
-      obj = self.new({:pid=>solr_doc[SOLR_DOCUMENT_ID],:create_date=>solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)],:modified_date=>solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date)]})
+      
+      create_date = solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date).to_s] : solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)]
+      modified_date = solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date).to_s] : solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date)]
+      obj = self.new({:pid=>solr_doc[SOLR_DOCUMENT_ID],:create_date=>create_date,:modified_date=>modified_date})
       obj.new_object = false
       #set by default to load any dependent relationship objects from solr as well
       obj.load_from_solr = true
