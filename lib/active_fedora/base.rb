@@ -646,16 +646,36 @@ module ActiveFedora
         # solr_doc = ds.to_solr(solr_doc) if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) ||( ds.kind_of?(ActiveFedora::RelsExtDatastream) || ( ds.kind_of?(ActiveFedora::QualifiedDublinCoreDatastream) && !opts[:model_only] )
         solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ( ds.kind_of?(ActiveFedora::RelsExtDatastream) && !opts[:model_only] )
       end
+      begin
+        logger.info("PID: '#{pid}' solr_doc put into solr: #{solr_doc.inspect}")
+      rescue
+        logger.info("Error encountered trying to output solr_doc details for pid: #{pid}")
+      end
       return solr_doc
     end
     
-    def self.load_instance_from_solr(pid)
-      result = find_by_solr(pid)
-      raise "Object #{pid} not found in solr" if result.nil?
-      solr_doc = result.hits.first
-      #double check pid and id in record match
-      raise "Object #{pid} not found in Solr" unless !result.nil? && pid == solr_doc[SOLR_DOCUMENT_ID]
-      
+    ###########################################################################################################
+    #
+    # This method is comparable to load_instance except it populates an object from Solr instead of Fedora.
+    # It is most useful for objects used in read-only displays in order to speed up loading time.  If only
+    # a pid is passed in it will attempt to load a solr document and then populate an ActiveFedora::Base object
+    # based on the solr doc including any metadata datastreams and relationships.
+    # 
+    # solr_doc is an optional parameter and if a value is passed it will not query solr again and just use the
+    # one passed to populate the object.
+    #
+    ###########################################################################################################
+    def self.load_instance_from_solr(pid,solr_doc=nil)
+      if solr_doc.nil?
+        result = find_by_solr(pid)
+        raise "Object #{pid} not found in solr" if result.nil?
+        solr_doc = result.hits.first
+        #double check pid and id in record match
+        raise "Object #{pid} not found in Solr" unless !result.nil? && !solr_doc.nil? && pid == solr_doc[SOLR_DOCUMENT_ID]
+      else
+       raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
+     end
+     
       create_date = solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date).to_s] : solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)]
       modified_date = solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date).to_s] : solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date)]
       obj = self.new({:pid=>solr_doc[SOLR_DOCUMENT_ID],:create_date=>create_date,:modified_date=>modified_date})
@@ -675,9 +695,11 @@ module ActiveFedora
     # Updates Solr index with self.
     def update_index
       if defined?( Solrizer::Solrizer ) 
+        #logger.info("Trying to solrize pid: #{pid}")
         solrizer = Solrizer::Solrizer.new
         solrizer.solrize( self )
       else
+        #logger.info("Trying to update solr for pid: #{pid}")
         SolrService.instance.conn.update(self.to_solr)
       end
     end
@@ -779,6 +801,10 @@ module ActiveFedora
       end
     end
     
+    def logger      
+      @logger ||= defined?(RAILS_DEFAULT_LOGGER) ? RAILS_DEFAULT_LOGGER : Logger.new(STDOUT)
+    end
+    
     private
     def configure_defined_datastreams
       if self.class.ds_specs
@@ -822,7 +848,6 @@ module ActiveFedora
       refresh
       return result
     end
-
 
   end
 end
