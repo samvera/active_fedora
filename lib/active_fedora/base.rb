@@ -647,7 +647,7 @@ module ActiveFedora
         solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ( ds.kind_of?(ActiveFedora::RelsExtDatastream) && !opts[:model_only] )
       end
       begin
-        logger.info("PID: '#{pid}' solr_doc put into solr: #{solr_doc.inspect}")
+        #logger.info("PID: '#{pid}' solr_doc put into solr: #{solr_doc.inspect}")
       rescue
         logger.info("Error encountered trying to output solr_doc details for pid: #{pid}")
       end
