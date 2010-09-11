@@ -30,10 +30,12 @@ module ActiveFedora
   # This class is really a facade for a basic Fedora::FedoraObject, which is stored internally.
   class Base
     include MediaShelfClassLevelInheritableAttributes
-    ms_inheritable_attributes  :ds_specs
+    ms_inheritable_attributes  :ds_specs, :class_named_datastreams_desc
     include Model
     include SemanticNode
     include SolrMapper
+    
+     attr_accessor :named_datastreams_desc
 
     has_relationship "collection_members", :has_collection_member
     
@@ -98,10 +100,26 @@ module ActiveFedora
     end
 
     #Deletes a Base object, also deletes the info indexed in Solr, and 
-    #the underlying inner_object.
+    #the underlying inner_object.  If this object is held in any relationships (ie inbound relationships
+    #outside of this object it will remove it from those items rels-ext as well
     def delete
+      inbound_relationships(:objects).each_pair do |predicate, objects|
+        objects.each do |obj|
+          if obj.respond_to?(:remove_relationship)
+            obj.remove_relationship(predicate,self)
+            obj.save
+          end 
+        end
+      end
+
       Fedora::Repository.instance.delete(@inner_object)
-      SolrService.instance.conn.delete(self.pid) if ENABLE_SOLR_UPDATES 
+      if ENABLE_SOLR_UPDATES
+        ActiveFedora::SolrService.instance.conn.delete(pid) 
+        if defined?( Solrizer::Solrizer ) 
+          solrizer = Solrizer::Solrizer.new
+          solrizer.solrize_delete(pid)
+        end
+      end
     end
 
 
@@ -246,7 +264,213 @@ module ActiveFedora
     def collection_members_remove()
       # will rely on SemanticNode.remove_relationship once it is implemented
     end
+    
+    #
+    # Named Datastreams management
+    #
+    def datastream_names
+      named_datastreams_desc.keys
+    end
+    
+    def add_named_file_datastream(name, file, opts={})
+      opts.merge!({:blob=>file,:controlGroup=>'M'})
+      add_named_datastream(name,opts)
+    end
 
+    # Creates a datastream with values 
+    def add_named_datastream(name,opts={})
+      
+      unless named_datastreams_desc.has_key?(name) && named_datastreams_desc[name].has_key?(:type) 
+        raise "Failed to add datastream. Named datastream #{name} not defined for object #{pid}." 
+      end
+      opts.merge!(named_datastreams_desc[name])
+        
+      label = opts.has_key?(:label) ? opts[:label] : ""
+
+      #only do these steps for managed datastreams
+      unless (opts.has_key?(:controlGroup)&&opts[:controlGroup]!="M")
+        if opts.has_key?(:file)
+          opts.merge!({:blob => opts[:file]}) 
+          opts.delete(:file)
+        end
+        
+        raise "You must define parameter blob for this managed datastream to load for #{pid}" unless opts.has_key?(:blob)
+        
+        #if no explicit label and is a file use original file name for label
+        if !opts.has_key?(:label)&&opts[:blob].respond_to?(:original_filename)
+          label = opts[:blob].original_filename
+        end
+        
+        if opts[:blob].respond_to?(:content_type)&&!opts[:blob].content_type.nil? && !opts.has_key?(:content_type)
+          opts.merge!({:content_type=>opts[:blob].content_type})
+        end
+     
+        raise "The blob must respond to content_type or the hash must have :content_type property set" unless opts.has_key?(:content_type)
+        
+        #throw error for mimeType mismatch
+        if named_datastreams_desc[name].has_key?(:mimeType) && !named_datastreams_desc[name][:mimeType].eql?(opts[:content_type])
+          raise "Content type mismatch for add datastream #{name} to #{pid}.  Expected: #{named_datastreams_desc[name][:mimeType]}, Actual: #{opts[:content_type]}"
+        end
+      else 
+        label = opts[:dsLocation] if (opts.has_key?(:dsLocation)) 
+      end
+      
+      opts.merge!(:dsLabel => label)
+      
+      #make sure both dsid and dsID populated if a dsid is supplied
+      opts.merge!(:dsid=>opts[:dsID]) if opts.has_key?(:dsID)
+      opts.merge!(:dsID=>opts[:dsid]) if opts.has_key?(:dsid)
+      
+      ds = create_datastream(named_datastreams_desc[name][:type],opts)
+      #Must be of type datastream
+      assert_kind_of 'datastream',  ds, ActiveFedora::Datastream
+      #make sure dsid is nil so that it uses the prefix for mapping purposes
+      #check dsid works for the prefix if it is set
+      if !ds.dsid.nil? && opts.has_key?(:prefix)
+        raise "dsid supplied does not conform to pattern #{opts[:prefix]}[number]" unless ds.dsid =~ /#{opts[:prefix]}[0-9]/
+      end
+      
+      add_datastream(ds,opts)
+    end
+
+    ########################################################################
+    ### TODO: Currently requires you to update file if a managed datastream
+    ##        but could change to allow metadata only updates as well
+    ########################################################################
+    def update_named_datastream(name, opts={})
+      #check that dsid provided matches existing datastream with that name
+      raise "You must define parameter dsid for datastream to update for #{pid}" unless opts.include?(:dsid)
+      raise "Datastream with name #{name} and dsid #{opts[:dsid]} does not exist for #{pid}" unless self.send("#{name}_ids").include?(opts[:dsid])
+      add_named_datastream(name,opts)
+    end
+    
+    def assert_kind_of(n, o,t)
+      raise "Assertion failure: #{n}: #{o} is not of type #{t}" unless o.kind_of?(t)
+    end
+    
+    def is_named_datastream?(name)
+      named_datastreams_desc.has_key?(name)
+    end
+
+    def named_datastreams
+      ds_values = {}
+      self.class.named_datastreams_desc.keys.each do |name|
+        ds_values.merge!({name=>self.send("#{name}")})
+      end
+      return ds_values
+    end
+    
+    def named_datastreams_attributes
+      ds_values = {}
+      self.class.named_datastreams_desc.keys.each do |name|
+        ds_array = self.send("#{name}")
+        result_hash = {}
+        ds_array.each do |ds|
+          result_hash[ds.dsid]=ds.attributes
+        end
+        ds_values.merge!({name=>result_hash})
+      end
+      return ds_values
+    end
+    
+    def named_datastreams_ids
+      dsids = {}
+      self.class.named_datastreams_desc.keys.each do |name|
+        dsid_array = self.send("#{name}_ids")
+        dsids[name] = dsid_array
+      end
+      return dsids
+    end 
+    
+    def datastreams_attributes
+      ds_values = {}
+      self.datastreams.each_pair do |dsid,ds|
+        ds_values.merge!({dsid=>ds.attributes})
+      end
+      return ds_values
+    end
+    
+    def named_datastreams_desc
+      @named_datastreams_desc ||= named_datastreams_desc_from_class
+    end
+    
+    def named_datastreams_desc_from_class
+      self.class.named_datastreams_desc
+    end
+    
+    def create_datastream(type,opts={})
+      type.to_s.split('::').inject(Kernel) {|scope, const_name| 
+      scope.const_get(const_name)}.new(opts)
+    end
+
+    def self.has_datastream(args)
+      unless args.has_key?(:name)
+        return false
+      end
+      unless args.has_key?(:prefix)
+        args.merge!({:prefix=>args[:name].to_s.upcase})
+      end
+      unless named_datastreams_desc.has_key?(args[:name]) 
+        named_datastreams_desc[args[:name]] = {} 
+      end
+          
+      args.merge!({:mimeType=>args[:mime_type]}) if args.has_key?(:mime_type)
+      
+      unless named_datastreams_desc[args[:name]].has_key?(:type) 
+        #default to type ActiveFedora::Datastream
+        args.merge!({:type => "ActiveFedora::Datastream"})
+      end
+      named_datastreams_desc[args[:name]]= args   
+      create_named_datastream_finders(args[:name],args[:prefix])
+      create_named_datastream_update_methods(args[:name])
+    end
+        
+    def self.create_named_datastream_update_methods(name)
+      append_file_method_name = "#{name.to_s.downcase}_file_append"
+      append_method_name = "#{name.to_s.downcase}_append"
+      #remove_method_name = "#{name.to_s.downcase}_remove"
+      self.send(:define_method,:"#{append_file_method_name}") do |*args| 
+        file,opts = *args
+        opts ||= {}
+        add_named_file_datastream(name,file,opts)
+      end
+      
+      self.send(:define_method,:"#{append_method_name}") do |*args| 
+        opts = *args
+        opts ||= {}
+        #call add_named_datastream instead of add_file_named_datastream in case not managed datastream
+        add_named_datastream(name,opts)
+      end
+    end 
+        
+    def self.create_named_datastream_finders(name, prefix)
+      class_eval <<-END
+      def #{name}(opts={})
+        id_array = []
+        keys = datastreams.keys
+        id_array = keys.select {|v| v =~ /#{prefix}\d*/}
+        if opts[:response_format] == :id_array
+          return id_array
+        else
+          named_ds = []
+          id_array.each do |name|
+            if datastreams.has_key?(name)
+              named_ds.push(datastreams[name])
+            end
+          end
+          return named_ds
+        end
+      end
+      def #{name}_ids
+        #{name}(:response_format => :id_array)
+      end
+      END
+    end
+        
+    # named datastreams desc are tracked as a hash of structure {name => args}}
+    def self.named_datastreams_desc
+      @class_named_datastreams_desc ||= {}
+    end
 
     # 
     # Relationships Management
@@ -255,20 +479,31 @@ module ActiveFedora
     # @returns Hash of relationships, as defined by SemanticNode
     # Rely on rels_ext datastream to track relationships array
     # Overrides accessor for relationships array used by SemanticNode.
-    def relationships
-      return rels_ext.relationships
+    # If outbound_only is false, inbound relationships will be included.
+    def relationships(outbound_only=true)
+      outbound_only ? rels_ext.relationships : rels_ext.relationships.merge(:inbound=>inbound_relationships)
     end
 
     # Add a Rels-Ext relationship to the Object.
     # @param predicate
     # @param object Either a string URI or an object that responds to .pid 
     def add_relationship(predicate, obj)
-      #predicate = ActiveFedora::RelsExtDatastream.predicate_lookup(predicate)
       r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj)
-      rels_ext.add_relationship(r)
+      unless relationship_exists?(r.subject, r.predicate, r.object)
+        rels_ext.add_relationship(r)
+        #need to call here to indicate update of named_relationships
+        @relationships_are_dirty = true
+        rels_ext.dirty = true
+      end
+    end
+    
+    def remove_relationship(predicate, obj)
+      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj)
+      rels_ext.remove_relationship(r)
+      #need to call here to indicate update of named_relationships
+      @relationships_are_dirty = true
       rels_ext.dirty = true
     end
-
 
     def inner_object # :nodoc
       @inner_object
@@ -411,15 +646,60 @@ module ActiveFedora
         # solr_doc = ds.to_solr(solr_doc) if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) ||( ds.kind_of?(ActiveFedora::RelsExtDatastream) || ( ds.kind_of?(ActiveFedora::QualifiedDublinCoreDatastream) && !opts[:model_only] )
         solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ( ds.kind_of?(ActiveFedora::RelsExtDatastream) && !opts[:model_only] )
       end
+      begin
+        #logger.info("PID: '#{pid}' solr_doc put into solr: #{solr_doc.inspect}")
+      rescue
+        logger.info("Error encountered trying to output solr_doc details for pid: #{pid}")
+      end
       return solr_doc
+    end
+    
+    ###########################################################################################################
+    #
+    # This method is comparable to load_instance except it populates an object from Solr instead of Fedora.
+    # It is most useful for objects used in read-only displays in order to speed up loading time.  If only
+    # a pid is passed in it will attempt to load a solr document and then populate an ActiveFedora::Base object
+    # based on the solr doc including any metadata datastreams and relationships.
+    # 
+    # solr_doc is an optional parameter and if a value is passed it will not query solr again and just use the
+    # one passed to populate the object.
+    #
+    ###########################################################################################################
+    def self.load_instance_from_solr(pid,solr_doc=nil)
+      if solr_doc.nil?
+        result = find_by_solr(pid)
+        raise "Object #{pid} not found in solr" if result.nil?
+        solr_doc = result.hits.first
+        #double check pid and id in record match
+        raise "Object #{pid} not found in Solr" unless !result.nil? && !solr_doc.nil? && pid == solr_doc[SOLR_DOCUMENT_ID]
+      else
+       raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
+     end
+     
+      create_date = solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date).to_s] : solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)]
+      modified_date = solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date).to_s] : solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date)]
+      obj = self.new({:pid=>solr_doc[SOLR_DOCUMENT_ID],:create_date=>create_date,:modified_date=>modified_date})
+      obj.new_object = false
+      #set by default to load any dependent relationship objects from solr as well
+      obj.load_from_solr = true
+      #need to call rels_ext once so it exists when iterating over datastreams
+      obj.rels_ext
+      obj.datastreams.each_value do |ds|
+        if ds.respond_to? (:from_solr)
+          ds.from_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ( ds.kind_of?(ActiveFedora::RelsExtDatastream))
+        end
+      end
+      obj
     end
 
     # Updates Solr index with self.
     def update_index
       if defined?( Solrizer::Solrizer ) 
+        #logger.info("Trying to solrize pid: #{pid}")
         solrizer = Solrizer::Solrizer.new
         solrizer.solrize( self )
       else
+        #logger.info("Trying to update solr for pid: #{pid}")
         SolrService.instance.conn.update(self.to_solr)
       end
     end
@@ -521,6 +801,10 @@ module ActiveFedora
       end
     end
     
+    def logger      
+      @logger ||= defined?(RAILS_DEFAULT_LOGGER) ? RAILS_DEFAULT_LOGGER : Logger.new(STDOUT)
+    end
+    
     private
     def configure_defined_datastreams
       if self.class.ds_specs
@@ -564,7 +848,6 @@ module ActiveFedora
       refresh
       return result
     end
-
 
   end
 end

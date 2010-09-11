@@ -4,6 +4,13 @@ require 'active_fedora'
 require "rexml/document"
 require 'ftools'
 
+class MockAFRelsSolr < ActiveFedora::Base
+  has_relationship "testing", :has_part, :type=>MockAFRelsSolr
+  has_relationship "testing2", :has_member, :type=>MockAFRelsSolr
+  has_relationship "testing_inbound", :has_part, :type=>MockAFRelsSolr, :inbound=>true
+  has_relationship "testing_inbound2", :has_member, :type=>MockAFRelsSolr, :inbound=>true
+end
+
 describe ActiveFedora::RelsExtDatastream do
   
   before(:all) do
@@ -29,7 +36,26 @@ describe ActiveFedora::RelsExtDatastream do
   end
   
   after(:each) do
+    begin
     @test_object.delete
+    rescue
+    end
+    begin
+    @test_object2.delete
+    rescue
+    end
+    begin
+    @test_object3.delete
+    rescue
+    end
+    begin
+    @test_object4.delete
+    rescue
+    end
+    begin
+    @test_object5.delete
+    rescue
+    end
   end
   
   
@@ -63,5 +89,64 @@ describe ActiveFedora::RelsExtDatastream do
     # make sure that _something_ was actually added to the object's relationships hash
     @test_object.relationships[:self].should have_key(:is_member_of)
     ActiveFedora::Base.load_instance(@test_object.pid).relationships.should == @test_object.relationships
+  end
+  
+  describe '#from_solr' do
+    
+    it "should respond_to from_solr" do
+      @test_datastream.respond_to?(:from_solr).should be_true
+    end
+    
+    it 'should populate the relationships hash based on data in solr only for any possible fedora predicates' do
+      @test_object2 = MockAFRelsSolr.new
+      @test_object2.new_object = true
+      @test_object2.save
+      @test_object3 = MockAFRelsSolr.new
+      @test_object3.new_object = true
+      @test_object3.save
+      @test_object4 = MockAFRelsSolr.new
+      @test_object4.new_object = true
+      @test_object4.save
+      @test_object5 = MockAFRelsSolr.new
+      @test_object5.new_object = true
+      @test_object5.save
+      #append to named relationship 'testing'
+      @test_object2.testing_append(@test_object3)
+      @test_object2.testing2_append(@test_object4)
+      @test_object5.testing_append(@test_object2)
+      @test_object5.testing2_append(@test_object3)
+      @test_object2.save
+      @test_object5.save
+      r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object2)
+      r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
+      r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
+      r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
+      model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFRelsSolr))
+      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
+      #get solr doc for @test_object2
+      solr_doc = MockAFRelsSolr.find_by_solr(@test_object2.pid).hits.first
+      test_from_solr_object2 = MockAFRelsSolr.new
+      test_from_solr_object2.rels_ext.from_solr(solr_doc)
+      solr_doc = MockAFRelsSolr.find_by_solr(@test_object3.pid).hits.first
+      test_from_solr_object3 = MockAFRelsSolr.new
+      test_from_solr_object3.rels_ext.from_solr(solr_doc)
+      solr_doc = MockAFRelsSolr.find_by_solr(@test_object4.pid).hits.first
+      test_from_solr_object4 = MockAFRelsSolr.new
+      test_from_solr_object4.rels_ext.from_solr(solr_doc)
+      solr_doc = MockAFRelsSolr.find_by_solr(@test_object5.pid).hits.first
+      test_from_solr_object5 = MockAFRelsSolr.new
+      test_from_solr_object5.rels_ext.from_solr(solr_doc)
+      
+      test_from_solr_object2.relationships.should == {:self=>{:has_part=>[r3.object],:has_member=>[r4.object],:has_model=>[model_rel.object]}}
+      test_from_solr_object2.named_relationships.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]}}
+      test_from_solr_object3.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
+      test_from_solr_object3.named_relationships.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      test_from_solr_object4.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
+      test_from_solr_object4.named_relationships.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      test_from_solr_object5.relationships.should == {:self=>{:has_model=>[model_rel.object],
+                                                             :has_part=>[r2.object],
+                                                             :has_member=>[r3.object]}}
+      test_from_solr_object5.named_relationships.should == {:self=>{"testing"=>[r2.object],"testing2"=>[r3.object]}}
+    end
   end
 end

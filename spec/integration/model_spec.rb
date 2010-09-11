@@ -15,12 +15,12 @@ describe ActiveFedora::Model do
   before(:each) do 
     module SpecModel
       
-      class Basic < ActiveFedora::Base
+      class BasicInt < ActiveFedora::Base
         #include ActiveFedora::Model
       end
       
     end
-    @test_instance = SpecModel::Basic.new
+    @test_instance = SpecModel::BasicInt.new
     @test_instance.save
     
   end
@@ -33,10 +33,10 @@ describe ActiveFedora::Model do
   describe '#find' do
     it "should return an array of instances of the calling Class" do
       pending
-      result = SpecModel::Basic.find(:all)
+      result = SpecModel::BasicInt.find(:all)
       result.should be_instance_of(Array)
       result.each do |obj|
-        obj.class.should == SpecModel::Basic
+        obj.class.should == SpecModel::BasicInt
       end
     end
   end
@@ -44,9 +44,9 @@ describe ActiveFedora::Model do
   describe '#find_model' do
     
     it "should return an object of the given Model whose inner object is nil" do
-      #result = SpecModel::Basic.find_model(@test_instance.pid, SpecModel::Basic)
-      result = Fedora::Repository.instance.find_model(@test_instance.pid, SpecModel::Basic)
-      result.class.should == SpecModel::Basic
+      #result = SpecModel::BasicInt.find_model(@test_instance.pid, SpecModel::BasicInt)
+      result = Fedora::Repository.instance.find_model(@test_instance.pid, SpecModel::BasicInt)
+      result.class.should == SpecModel::BasicInt
       result.inner_object.new_object?.should be_false
     end
   end

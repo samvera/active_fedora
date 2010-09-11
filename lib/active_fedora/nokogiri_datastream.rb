@@ -86,6 +86,11 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     return solr_doc
   end
   
+  #overriding this method just so metadatahelper method does not get called
+  def from_solr(solr_doc)
+    #do nothing for now 
+  end
+  
   def solrize_accessor(accessor_name, accessor_info, opts={})
     solr_doc = opts.fetch(:solr_doc, Solr::Document.new)
     parents = opts.fetch(:parents, [])
@@ -129,7 +134,9 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
   
   def update_indexed_attributes(params={}, opts={})    
     # remove any fields from params that this datastream doesn't recognize    
-    params.delete_if do |field_key,new_values| 
+    #make sure to make a copy of params so not to modify hash that might be passed to other methods
+    current_params = params.clone
+    current_params.delete_if do |field_key,new_values| 
       if field_key.kind_of?(String)
         true
       else
@@ -137,8 +144,8 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
       end
     end
     result = {}
-    unless params.empty?
-      result = update_properties( params )
+    unless current_params.empty?
+      result = update_properties( current_params )
       self.dirty = true
     end
     return result
