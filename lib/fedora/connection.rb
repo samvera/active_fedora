@@ -186,9 +186,13 @@ module Fedora
     # Creates new Net::HTTP instance for communication with
     # remote service and resources.
     def http
-      http             = Net::HTTP.new(@site.host, @site.port)
-      http.use_ssl     = @site.is_a?(URI::HTTPS)
-      http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl?
+      http = Net::HTTP.new(@site.host, @site.port)
+      if(@site.is_a?(URI::HTTPS) && !SSL_CLIENT_CERT_FILE.nil? && !SSL_CLIENT_KEY_FILE.nil? && !SSL_CLIENT_KEY_PASS.nil?)
+        http.use_ssl = true
+        http.cert = OpenSSL::X509::Certificate.new( File.read(SSL_CLIENT_CERT_FILE) )
+        http.key = OpenSSL::PKey::RSA.new( File.read(SSL_CLIENT_KEY_FILE), SSL_CLIENT_KEY_PASS )
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      end
       http
     end
 
