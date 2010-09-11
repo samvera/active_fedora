@@ -59,7 +59,7 @@ describe ActiveFedora::NokogiriDatastream do
       # In other words, { "fubar"=>"dork" } should have the same effect as { "fubar"=>{"0"=>"dork"} }
       result = @mods_ds.update_indexed_attributes( { [{":person"=>"0"}, "role"]=>"the role" } )
       result.should == {"person_0_role"=>{"0"=>"the role"}}
-      @mods_ds.property_values('//oxns:name[@type="personal"][1]/oxns:role').first.should == "the role"
+      @mods_ds.term_values('//oxns:name[@type="personal"][1]/oxns:role').first.should == "the role"
     end
     it "should do nothing if field key is a string (must be an array or symbol).  Will not accept xpath queries!" do
       xml_before = @mods_ds.to_xml
@@ -119,24 +119,36 @@ describe ActiveFedora::NokogiriDatastream do
     # end
     # 
     # it "should allow deleting of values and should delete values so that to_xml does not return emtpy nodes" do
-    #   att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
-    #   @test_ds.update_indexed_attributes(att)
-    #   @test_ds.fubar_values.should == ['mork', 'york', 'mangle']
+    #   att= {[{"person"=>"0"},"description"]=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}} 
+    #   @mods_ds.update_indexed_attributes(att)
+    #   @mods_ds.fubar_values.should == ['mork', 'york', 'mangle']
     #   rexml = REXML::Document.new(@test_ds.to_xml)
     #   #puts rexml.root.elements.each {|el| el.to_s}
     #   #puts rexml.root.elements.to_a.inspect
     #   rexml.root.elements.to_a.length.should == 3
-    #   @test_ds.update_indexed_attributes({"fubar"=>{"1"=>""}})
-    #   @test_ds.fubar_values.should == ['mork', 'mangle']
+    #   @mods_ds.update_indexed_attributes({[{"person"=>"0"},"description"]=>{"1"=>""}})
+    #   @mods_ds.fubar_values.should == ['mork', 'mangle']
     #   rexml = REXML::Document.new(@test_ds.to_xml)
     #   rexml.root.elements.to_a.length.should == 2
-    #   @test_ds.update_indexed_attributes({"fubar"=>{"0"=>:delete}})
-    #   @test_ds.fubar_values.should == ['mangle']
+    #   @mods_ds.update_indexed_attributes({[{"person"=>"0"},"description"]=>{"0"=>:delete}})
+    #   @mods_ds.fubar_values.should == ['mangle']
     #   rexml = REXML::Document.new(@test_ds.to_xml)
     #   rexml.root.elements.to_a.length.should == 1
-    #   
+    # end
+    it "should allow deleting of values and should delete values so that to_xml does not return emtpy nodes" do
+      att= {[{"person"=>"0"},"description"]=>{"0"=>"york", "1"=>"mangle","2"=>"mork"}}
+      @mods_ds.update_indexed_attributes(att)
+      @mods_ds.get_values([{"person"=>"0"},"description"]).should == ['york', 'mangle', 'mork']
+      
+      @mods_ds.update_indexed_attributes({[{"person"=>"0"},"description"]=>{"1"=>""}})
+      @mods_ds.get_values([{"person"=>"0"},"description"]).should == ['york', 'mork']
+      
+      @mods_ds.update_indexed_attributes({[{"person"=>"0"},"description"]=>{"0"=>:delete}})
+      @mods_ds.get_values([{"person"=>"0"},"description"]).should == ['mork']
+    end
+    # it "should delete values so that to_xml does not return emtpy nodes" do
     #   @test_ds.fubar_values = ["val1", nil, "val2"]
-    #   @test_ds.update_indexed_attributes({"fubar"=>{"1"=>""}})
+    #   @test_ds.update_indexed_attributes({{[{"person"=>"0"},"description"]=>{"1"=>""}})
     #   @test_ds.fubar_values.should == ["val1", "val2"]
     # end
     
@@ -154,12 +166,12 @@ describe ActiveFedora::NokogiriDatastream do
     end
     
     it "should call lookup with field_name and return the text values from each resulting node" do
-      @mods_ds.expects(:property_values).with("--my xpath--").returns(["value1", "value2"])
+      @mods_ds.expects(:term_values).with("--my xpath--").returns(["value1", "value2"])
       @mods_ds.get_values("--my xpath--").should == ["value1", "value2"]
     end
-    it "should assume that field_name that are strings are xpath queries" do
+    it "should assume that field_names that are strings are xpath queries" do
       ActiveFedora::NokogiriDatastream.expects(:accessor_xpath).never
-      @mods_ds.expects(:property_values).with("--my xpath--").returns(["abstract1", "abstract2"])
+      @mods_ds.expects(:term_values).with("--my xpath--").returns(["abstract1", "abstract2"])
       @mods_ds.get_values("--my xpath--").should == ["abstract1", "abstract2"]
     end
     it "should assume field_names that are symbols or arrays are pointers to accessors declared in this datastreams model" do
@@ -294,36 +306,40 @@ describe ActiveFedora::NokogiriDatastream do
   end
   
   describe ".solrize_accessor" do
-    before(:all) do
-      class AccessorizedDs < ActiveFedora::NokogiriDatastream
-        
-        root_property :mods, "mods", "http://www.loc.gov/mods/v3", :attributes=>["id", "version"], :schema=>"http://www.loc.gov/standards/mods/v3/mods-3-2.xsd"          
-        
-        accessor :title_info, :relative_xpath=>'oxns:titleInfo', :children=>[
-          {:main_title=>{:relative_xpath=>'oxns:title'}},         
-          {:language =>{:relative_xpath=>{:attribute=>"lang"} }}
-          ]
-        accessor :finnish_title_info, :relative_xpath=>'oxns:titleInfo[@lang="finnish"]', :children=>[
-          {:main_title=>{:relative_xpath=>'oxns:title'}},         
-          {:language =>{:relative_xpath=>{:attribute=>"lang"} }}
-          ] 
-        accessor :abstract
-        accessor :topic_tag, :relative_xpath=>'oxns:subject/oxns:topic'
-        accessor :person, :relative_xpath=>'oxns:name[@type="personal"]',  :children=>[
-          {:last_name=>{:relative_xpath=>'oxns:namePart[@type="family"]'}}, 
-          {:first_name=>{:relative_xpath=>'oxns:namePart[@type="given"]'}}, 
-          {:institution=>{:relative_xpath=>'oxns:affiliation'}}, 
-          {:role=>{:children=>[
-            {:text=>{:relative_xpath=>'oxns:roleTerm[@type="text"]'}},
-            {:code=>{:relative_xpath=>'oxns:roleTerm[@type="code"]'}}
-          ]}}
-        ]
-      end
-    end
+    # before(:all) do
+    #   class AccessorizedDs < ActiveFedora::NokogiriDatastream
+    #     
+    #     root_property :mods, "mods", "http://www.loc.gov/mods/v3", :attributes=>["id", "version"], :schema=>"http://www.loc.gov/standards/mods/v3/mods-3-2.xsd"          
+    #     
+    #     accessor :title_info, :relative_xpath=>'oxns:titleInfo', :children=>[
+    #       {:main_title=>{:relative_xpath=>'oxns:title'}},         
+    #       {:language =>{:relative_xpath=>{:attribute=>"lang"} }}
+    #       ]
+    #     accessor :finnish_title_info, :relative_xpath=>'oxns:titleInfo[@lang="finnish"]', :children=>[
+    #       {:main_title=>{:relative_xpath=>'oxns:title'}},         
+    #       {:language =>{:relative_xpath=>{:attribute=>"lang"} }}
+    #       ] 
+    #     accessor :abstract
+    #     accessor :topic_tag, :relative_xpath=>'oxns:subject/oxns:topic'
+    #     accessor :person, :relative_xpath=>'oxns:name[@type="personal"]',  :children=>[
+    #       {:last_name=>{:relative_xpath=>'oxns:namePart[@type="family"]'}}, 
+    #       {:first_name=>{:relative_xpath=>'oxns:namePart[@type="given"]'}}, 
+    #       {:institution=>{:relative_xpath=>'oxns:affiliation'}}, 
+    #       {:role=>{:children=>[
+    #         {:text=>{:relative_xpath=>'oxns:roleTerm[@type="text"]'}},
+    #         {:code=>{:relative_xpath=>'oxns:roleTerm[@type="code"]'}}
+    #       ]}}
+    #     ]
+    #   end
+    # end
+    # 
+    # before(:each) do
+    #   file = fixture(File.join("mods_articles", "hydrangea_article1.xml"))
+    #   @mods_ds = AccessorizedDs.new(:blob=>file)
+    # end
     
     before(:each) do
-      file = fixture(File.join("mods_articles", "hydrangea_article1.xml"))
-      @accessorized_ds = AccessorizedDs.new(:blob=>file)
+      @mods_ds = Hydra::SampleModsDatastream.new(:blob=>fixture(File.join("mods_articles","hydrangea_article1.xml")))
     end
     
     it "should perform a lookup and iterate over nodes in the result set calling solrize_node then calling solrize_accessor on any of the children, adding accessor_name & node index to parents array" do
@@ -334,30 +350,30 @@ describe ActiveFedora::NokogiriDatastream do
       solr_doc = Solr::Document.new
       
       AccessorizedDs.expects(:accessor_xpath).with( :title_info ).returns("title_info_xpath")
-      @accessorized_ds.expects(:lookup).with( "title_info_xpath" ).returns(mock_title_info_set)
+      @mods_ds.expects(:lookup).with( "title_info_xpath" ).returns(mock_title_info_set)
       
       mock_title_info_set.each do |tin| 
         node_index = mock_title_info_set.index(tin)
-        @accessorized_ds.expects(:solrize_node).with(tin, [:title_info], solr_doc) 
+        @mods_ds.expects(:solrize_node).with(tin, [:title_info], solr_doc) 
         
         # Couldn't mock the recursive calls to solrize_accessor without preventing the initial one, so was forced to mock out the whole recursive stack.
-        # @accessorized_ds.expects(:solrize_accessor).with(:main_title, AccessorizedDs.accessors[:title_info][:children][:main_title], :parents=>[{:title_info=>node_index}])      
-        # @accessorized_ds.expects(:solrize_accessor).with(:language, AccessorizedDs.accessors[:title_info][:children][:language], :parents=>[{:title_info=>node_index}])
+        # @mods_ds.expects(:solrize_accessor).with(:main_title, AccessorizedDs.accessors[:title_info][:children][:main_title], :parents=>[{:title_info=>node_index}])      
+        # @mods_ds.expects(:solrize_accessor).with(:language, AccessorizedDs.accessors[:title_info][:children][:language], :parents=>[{:title_info=>node_index}])
           AccessorizedDs.expects(:accessor_xpath).with( {:title_info=>node_index}, :main_title ).returns("title_info_main_title_xpath")
           AccessorizedDs.expects(:accessor_xpath).with( {:title_info=>node_index}, :language ).returns("title_info_language_xpath")
-          @accessorized_ds.expects(:lookup).with( "title_info_main_title_xpath" ).returns(mock_main_title_set)
-          @accessorized_ds.expects(:lookup).with( "title_info_language_xpath" ).returns(mock_language_set)
-          @accessorized_ds.expects(:solrize_node).with("main title", [{:title_info=>node_index}, :main_title], solr_doc) 
-          @accessorized_ds.expects(:solrize_node).with("language", [{:title_info=>node_index}, :language], solr_doc) 
+          @mods_ds.expects(:lookup).with( "title_info_main_title_xpath" ).returns(mock_main_title_set)
+          @mods_ds.expects(:lookup).with( "title_info_language_xpath" ).returns(mock_language_set)
+          @mods_ds.expects(:solrize_node).with("main title", [{:title_info=>node_index}, :main_title], solr_doc) 
+          @mods_ds.expects(:solrize_node).with("language", [{:title_info=>node_index}, :language], solr_doc) 
       end
       
-      @accessorized_ds.solrize_accessor(:title_info, AccessorizedDs.accessors[:title_info], :solr_doc=>solr_doc)
+      @mods_ds.solrize_accessor(:title_info, AccessorizedDs.accessors[:title_info], :solr_doc=>solr_doc)
       
     end
     
     it "should not call solrize_accessor once it reaches an accessor with no children accessors set" do
       pending "not sure how to test for this"
-      @accessorized_ds.solrize_accessor(:text, AccessorizedDs.accessor_info( [{:person=>1}, :last_name] ), :parents=>[{:person=>1}])
+      @mods_ds.solrize_accessor(:text, AccessorizedDs.accessor_info( [{:person=>1}, :last_name] ), :parents=>[{:person=>1}])
     end
     
     it "should use values form parents array when requesting accessor_xpath and when generating solr field names" do
@@ -365,12 +381,12 @@ describe ActiveFedora::NokogiriDatastream do
       AccessorizedDs.accessors[:person][:children][:role][:children][:text]
       
       # This should catch the "submitter" roleTerm from the second role node within the first person node and put it into a solr field called "person_0_role_2_text_0_t" and a solr field called "person_role_text_t"
-      @accessorized_ds.solrize_accessor(:text, AccessorizedDs.accessor_info( *parents_array + [:text] ), :parents=>parents_array)
+      @mods_ds.solrize_accessor(:text, AccessorizedDs.accessor_info( *parents_array + [:text] ), :parents=>parents_array)
     end
     
     it "should use Solr mappings to generate field names" do
 
-      solr_doc =  @accessorized_ds.to_solr
+      solr_doc =  @mods_ds.to_solr
       #should have these
       
       solr_doc[:abstract_t].should == "ABSTRACT"

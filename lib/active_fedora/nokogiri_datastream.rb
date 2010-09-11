@@ -4,7 +4,7 @@ require  "om"
 class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     
   include ActiveFedora::MetadataDatastreamHelper
-  include OM::XML
+  include OM::XML::Document
   # extend(OM::XML::Container::ClassMethods)
   
   attr_accessor :ng_xml
@@ -128,24 +128,28 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
   end
   
   def update_indexed_attributes(params={}, opts={})    
+    if self.class.terminology.nil?
+      raise "No terminology is set for this NokogiriDatastream class.  Cannot perform update_indexed_attributes"
+    end
     # remove any fields from params that this datastream doesn't recognize    
-    params.delete_if do |field_key,new_values| 
-      if field_key.kind_of?(String)
+    params.delete_if do |term_pointer,new_values| 
+      if term_pointer.kind_of?(String)
         true
       else
-        self.class.accessor_xpath(*OM.destringify(field_key) ).nil?
+        !self.class.terminology.has_term?(*OM.destringify(term_pointer))
+        # self.class.accessor_xpath(*OM.destringify(field_key) ).nil?
       end
     end
     result = {}
     unless params.empty?
-      result = update_properties( params )
+      result = update_values( params )
       self.dirty = true
     end
     return result
   end
   
   def get_values(field_key,default=[])
-    property_values(*field_key)
+    term_values(*field_key)
   end
 
 end
