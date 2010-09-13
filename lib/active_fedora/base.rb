@@ -1,6 +1,7 @@
 require 'util/class_level_inheritable_attributes'
 require 'active_fedora/model'
 require 'active_fedora/semantic_node'
+require 'solrizer/field_name_mapper'
 require 'nokogiri'
 
 SOLR_DOCUMENT_ID = "id" unless defined?(SOLR_DOCUMENT_ID)
@@ -33,7 +34,7 @@ module ActiveFedora
     ms_inheritable_attributes  :ds_specs
     include Model
     include SemanticNode
-    include SolrMapper
+    include Solrizer::FieldNameMapper
 
     has_relationship "collection_members", :has_collection_member
     

@@ -1,9 +1,10 @@
+require 'solrizer/field_name_mapper'
 
 module ActiveFedora
   class RelsExtDatastream < Datastream
     
     include ActiveFedora::SemanticNode
-    include ActiveFedora::SolrMapper
+    include Solrizer::FieldNameMapper
     
     
     def initialize(attrs=nil)

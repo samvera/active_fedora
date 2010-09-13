@@ -1,3 +1,5 @@
+require 'solrizer/field_name_mapper'
+
 #this class represents a MetadataDatastream, a special case of ActiveFedora::Datastream
 module ActiveFedora::MetadataDatastreamHelper 
   
@@ -16,7 +18,7 @@ module ActiveFedora::MetadataDatastreamHelper
   
   def self.included(klass)
     klass.extend(ClassMethods)
-    klass.send(:include, ActiveFedora::SolrMapper)
+    klass.send(:include, Solrizer::FieldNameMapper)
   end
   
   #constructor, calls up to ActiveFedora::Datastream's constructor
@@ -71,10 +73,10 @@ module ActiveFedora::MetadataDatastreamHelper
   end
   
 
-  protected
-
-  def generate_solr_symbol(field_name, field_type) # :nodoc:
-    solr_name(field_name, field_type)
-  end
+  # protected
+  # 
+  # def generate_solr_symbol(field_name, field_type) # :nodoc:
+  #   solr_name(field_name, field_type)
+  # end
 
 end
