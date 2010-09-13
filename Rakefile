@@ -1,5 +1,4 @@
 require 'rake/clean'
-require 'lib/active_fedora'#to get VERSION
 require 'rubygems'
 load 'tasks/rspec.rake'
 $: << 'lib'

@@ -64,7 +64,7 @@ module ActiveFedora
     end
     
     # (re)load solr field name mappings
-    def load_mappings( config_path=nil )
+    def self.load_mappings( config_path=nil )
       Solrizer::FieldNameMapper.load_mappings(config_path)
     end
     
