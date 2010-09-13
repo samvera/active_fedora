@@ -56,7 +56,7 @@ module ActiveFedora
       def find(args)
         if args == :all
           escaped_class_name = self.name.gsub(/(:)/, '\\:')
-          q = "#{SolrMapper.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}"
+          q = "#{Solrizer::FieldNameMapper.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}"
         elsif args.class == String
           escaped_id = args.gsub(/(:)/, '\\:')
           q = "#{SOLR_DOCUMENT_ID}:#{escaped_id}"

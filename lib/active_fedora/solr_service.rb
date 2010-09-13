@@ -68,6 +68,7 @@ module ActiveFedora
       Solrizer::FieldNameMapper.load_mappings(config_path)
     end
     
-  class SolrNotInitialized < StandardError;end
+  
 end #SolrService
+class SolrNotInitialized < StandardError;end
 end #ActiveFedora
