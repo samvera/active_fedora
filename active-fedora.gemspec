@@ -5,16 +5,15 @@
 
 Gem::Specification.new do |s|
   s.name = %q{active-fedora}
-  s.version = "1.1.13"
+  s.version = "1.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2010-07-17}
+  s.date = %q{2010-09-13}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
     "LICENSE",
-     "README.rdoc",
      "README.textile"
   ]
   s.files = [
@@ -175,7 +174,6 @@ Gem::Specification.new do |s|
      "License.txt",
      "Manifest.txt",
      "PostInstall.txt",
-     "README.rdoc",
      "README.textile",
      "Rakefile",
      "VERSION",
@@ -199,7 +197,6 @@ Gem::Specification.new do |s|
      "lib/active_fedora/relationship.rb",
      "lib/active_fedora/rels_ext_datastream.rb",
      "lib/active_fedora/semantic_node.rb",
-     "lib/active_fedora/solr_mapper.rb",
      "lib/active_fedora/solr_service.rb",
      "lib/fedora/base.rb",
      "lib/fedora/connection.rb",
@@ -274,7 +271,6 @@ Gem::Specification.new do |s|
      "spec/unit/rf_datastream_spec.rb",
      "spec/unit/semantic_node_spec.rb",
      "spec/unit/solr_config_options_spec.rb",
-     "spec/unit/solr_mapper_spec.rb",
      "spec/unit/solr_service_spec.rb",
      "tasks/hoe.rake",
      "tasks/rspec.rake"
@@ -331,7 +327,6 @@ Gem::Specification.new do |s|
      "spec/unit/rf_datastream_spec.rb",
      "spec/unit/semantic_node_spec.rb",
      "spec/unit/solr_config_options_spec.rb",
-     "spec/unit/solr_mapper_spec.rb",
      "spec/unit/solr_service_spec.rb"
   ]
 
@@ -345,9 +340,10 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<mime-types>, [">= 1.16"])
       s.add_runtime_dependency(%q<multipart-post>, [">= 0"])
       s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
-      s.add_runtime_dependency(%q<om>, [">= 0.1.9"])
+      s.add_runtime_dependency(%q<om>, [">= 1.0"])
+      s.add_runtime_dependency(%q<solrizer>, [">= 0.1.4"])
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
-      s.add_development_dependency(%q<mocha>, [">= 1.2.9"])
+      s.add_development_dependency(%q<mocha>, [">= 0.9.8"])
       s.add_development_dependency(%q<ruby-debug>, [">= 0"])
     else
       s.add_dependency(%q<solr-ruby>, [">= 0.0.6"])
@@ -355,9 +351,10 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<mime-types>, [">= 1.16"])
       s.add_dependency(%q<multipart-post>, [">= 0"])
       s.add_dependency(%q<nokogiri>, [">= 0"])
-      s.add_dependency(%q<om>, [">= 0.1.9"])
+      s.add_dependency(%q<om>, [">= 1.0"])
+      s.add_dependency(%q<solrizer>, [">= 0.1.4"])
       s.add_dependency(%q<rspec>, [">= 1.2.9"])
-      s.add_dependency(%q<mocha>, [">= 1.2.9"])
+      s.add_dependency(%q<mocha>, [">= 0.9.8"])
       s.add_dependency(%q<ruby-debug>, [">= 0"])
     end
   else
@@ -366,9 +363,10 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<mime-types>, [">= 1.16"])
     s.add_dependency(%q<multipart-post>, [">= 0"])
     s.add_dependency(%q<nokogiri>, [">= 0"])
-    s.add_dependency(%q<om>, [">= 0.1.9"])
+    s.add_dependency(%q<om>, [">= 1.0"])
+    s.add_dependency(%q<solrizer>, [">= 0.1.4"])
     s.add_dependency(%q<rspec>, [">= 1.2.9"])
-    s.add_dependency(%q<mocha>, [">= 1.2.9"])
+    s.add_dependency(%q<mocha>, [">= 0.9.8"])
     s.add_dependency(%q<ruby-debug>, [">= 0"])
   end
 end
