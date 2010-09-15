@@ -1,3 +1,5 @@
+require 'solrizer/field_name_mapper'
+
 #this class represents a MetadataDatastream, a special case of ActiveFedora::Datastream
 module ActiveFedora::MetadataDatastreamHelper 
   
@@ -16,7 +18,7 @@ module ActiveFedora::MetadataDatastreamHelper
   
   def self.included(klass)
     klass.extend(ClassMethods)
-    klass.send(:include, ActiveFedora::SolrMapper)
+    klass.send(:include, Solrizer::FieldNameMapper)
   end
   
   #constructor, calls up to ActiveFedora::Datastream's constructor
@@ -38,7 +40,7 @@ module ActiveFedora::MetadataDatastreamHelper
   def to_solr(solr_doc = Solr::Document.new) # :nodoc:
     fields.each do |field_key, field_info|
       if field_info.has_key?(:values) && !field_info[:values].nil?
-        field_symbol = generate_solr_symbol(field_key, field_info[:type])
+        field_symbol = solr_name(field_key, field_info[:type])
         field_info[:values].each do |val|             
           solr_doc << Solr::Field.new(field_symbol => val)
         end
@@ -50,7 +52,7 @@ module ActiveFedora::MetadataDatastreamHelper
   
   def from_solr(solr_doc)
     fields.each do |field_key, field_info|
-      field_symbol = generate_solr_symbol(field_key, field_info[:type])
+      field_symbol = Solrizer::FieldNameMapper.solr_name(field_key, field_info[:type])
       value = (solr_doc[field_symbol].nil? ? solr_doc[field_symbol.to_s]: solr_doc[field_symbol]) 
       unless value.nil?
         if value.is_a? Array
@@ -85,10 +87,10 @@ module ActiveFedora::MetadataDatastreamHelper
   end
   
 
-  protected
-
-  def generate_solr_symbol(field_name, field_type) # :nodoc:
-    solr_name(field_name, field_type)
-  end
+  # protected
+  # 
+  # def generate_solr_symbol(field_name, field_type) # :nodoc:
+  #   solr_name(field_name, field_type)
+  # end
 
 end

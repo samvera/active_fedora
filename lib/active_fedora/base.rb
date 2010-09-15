@@ -1,6 +1,7 @@
 require 'util/class_level_inheritable_attributes'
 require 'active_fedora/model'
 require 'active_fedora/semantic_node'
+require 'solrizer/field_name_mapper'
 require 'nokogiri'
 
 SOLR_DOCUMENT_ID = "id" unless defined?(SOLR_DOCUMENT_ID)
@@ -33,9 +34,10 @@ module ActiveFedora
     ms_inheritable_attributes  :ds_specs, :class_named_datastreams_desc
     include Model
     include SemanticNode
-    include SolrMapper
+    include Solrizer::FieldNameMapper
+     
+    attr_accessor :named_datastreams_desc
     
-     attr_accessor :named_datastreams_desc
 
     has_relationship "collection_members", :has_collection_member
     
@@ -676,8 +678,8 @@ module ActiveFedora
        raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
      end
      
-      create_date = solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date).to_s] : solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)]
-      modified_date = solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date).to_s] : solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date)]
+      create_date = solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date)].nil? ? solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date).to_s] : solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date)]
+      modified_date = solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date)].nil? ? solr_doc[Solrizer::FieldNameMapper.solr_name(:system_modified, :date).to_s] : solr_doc[Solrizer::FieldNameMapper.solr_name(:system_modified, :date)]
       obj = self.new({:pid=>solr_doc[SOLR_DOCUMENT_ID],:create_date=>create_date,:modified_date=>modified_date})
       obj.new_object = false
       #set by default to load any dependent relationship objects from solr as well
