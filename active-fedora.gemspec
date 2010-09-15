@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2010-09-14}
+  s.date = %q{2010-09-15}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
@@ -224,6 +224,7 @@ Gem::Specification.new do |s|
      "spec/fixtures/test_12.foxml.xml",
      "spec/hydrangea_fixture_mods_article1.foxml.xml",
      "spec/integration/base_file_management_spec.rb",
+     "spec/integration/base_find_by_fields_spec.rb",
      "spec/integration/base_loader_spec.rb",
      "spec/integration/base_spec.rb",
      "spec/integration/bug_spec.rb",
@@ -231,6 +232,7 @@ Gem::Specification.new do |s|
      "spec/integration/datastreams_crud_spec.rb",
      "spec/integration/fedora_object_spec.rb",
      "spec/integration/full_featured_model_spec.rb",
+     "spec/integration/metadata_datastream_helper_spec.rb",
      "spec/integration/model_spec.rb",
      "spec/integration/mods_article_integration_spec.rb",
      "spec/integration/rels_ext_datastream_spec.rb",
@@ -253,6 +255,7 @@ Gem::Specification.new do |s|
      "spec/unit/base_datastream_management_spec.rb",
      "spec/unit/base_extra_spec.rb",
      "spec/unit/base_file_management_spec.rb",
+     "spec/unit/base_named_datastream_spec.rb",
      "spec/unit/base_spec.rb",
      "spec/unit/connection_spec.rb",
      "spec/unit/content_model_spec.rb",
@@ -283,6 +286,7 @@ Gem::Specification.new do |s|
   s.summary = %q{A convenience libary for manipulating MODS (Metadata Object Description Schema) documents.}
   s.test_files = [
     "spec/integration/base_file_management_spec.rb",
+     "spec/integration/base_find_by_fields_spec.rb",
      "spec/integration/base_loader_spec.rb",
      "spec/integration/base_spec.rb",
      "spec/integration/bug_spec.rb",
@@ -290,6 +294,7 @@ Gem::Specification.new do |s|
      "spec/integration/datastreams_crud_spec.rb",
      "spec/integration/fedora_object_spec.rb",
      "spec/integration/full_featured_model_spec.rb",
+     "spec/integration/metadata_datastream_helper_spec.rb",
      "spec/integration/model_spec.rb",
      "spec/integration/mods_article_integration_spec.rb",
      "spec/integration/rels_ext_datastream_spec.rb",
@@ -309,6 +314,7 @@ Gem::Specification.new do |s|
      "spec/unit/base_datastream_management_spec.rb",
      "spec/unit/base_extra_spec.rb",
      "spec/unit/base_file_management_spec.rb",
+     "spec/unit/base_named_datastream_spec.rb",
      "spec/unit/base_spec.rb",
      "spec/unit/connection_spec.rb",
      "spec/unit/content_model_spec.rb",
