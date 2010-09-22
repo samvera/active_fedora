@@ -45,6 +45,8 @@ describe ActiveFedora::SemanticNode do
     @test_relationship1 = ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "demo:10")  
     @test_relationship2 = ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_part_of, :object => "demo:11")  
     @test_relationship3 = ActiveFedora::Relationship.new(:subject => @pid, :predicate => :has_part, :object => "demo:12")
+    @test_cmodel_relationship1 = ActiveFedora::Relationship.new(:subject => @pid, :predicate => :has_model, :object => "afmodel:SampleModel")
+    @test_cmodel_relationship2 = ActiveFedora::Relationship.new(:subject => @pid, :predicate => "hasModel", :object => "afmodel:OtherModel")
   end
   
   after(:each) do
@@ -419,6 +421,8 @@ describe ActiveFedora::SemanticNode do
           <isMemberOf rdf:resource='info:fedora/demo:10' xmlns='info:fedora/fedora-system:def/relations-external#'/>
           <isPartOf rdf:resource='info:fedora/demo:11' xmlns='info:fedora/fedora-system:def/relations-external#'/>
           <hasPart rdf:resource='info:fedora/demo:12' xmlns='info:fedora/fedora-system:def/relations-external#'/>
+          <hasModel rdf:resource='info:fedora/afmodel:OtherModel' xmlns='info:fedora/fedora-system:def/model#'/>
+          <hasModel rdf:resource='info:fedora/afmodel:SampleModel' xmlns='info:fedora/fedora-system:def/model#'/>
         </rdf:Description>
       </rdf:RDF>
       EOS
@@ -428,6 +432,8 @@ describe ActiveFedora::SemanticNode do
       @node.add_relationship(@test_relationship1)
       @node.add_relationship(@test_relationship2)
       @node.add_relationship(@test_relationship3)
+      @node.add_relationship(@test_cmodel_relationship1)
+      @node.add_relationship(@test_cmodel_relationship2)
       @node.internal_uri = @uri
       returned_xml = XmlSimple.xml_in(@node.to_rels_ext(@pid))
       returned_xml.should == XmlSimple.xml_in(@sample_rels_ext_xml)
