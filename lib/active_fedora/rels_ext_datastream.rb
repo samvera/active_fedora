@@ -1,9 +1,10 @@
+require 'solrizer/field_name_mapper'
 
 module ActiveFedora
   class RelsExtDatastream < Datastream
     
     include ActiveFedora::SemanticNode
-    include ActiveFedora::SolrMapper
+    include Solrizer::FieldNameMapper
     
     
     def initialize(attrs=nil)
@@ -56,7 +57,7 @@ module ActiveFedora
     def from_solr(solr_doc)
       #cycle through all possible predicates
       PREDICATE_MAPPINGS.keys.each do |predicate|
-        predicate_symbol = ActiveFedora::SolrMapper.solr_name(predicate, :symbol)
+        predicate_symbol = Solrizer::FieldNameMapper.solr_name(predicate, :symbol)
         value = (solr_doc[predicate_symbol].nil? ? solr_doc[predicate_symbol.to_s]: solr_doc[predicate_symbol]) 
         unless value.nil? 
           if value.is_a? Array

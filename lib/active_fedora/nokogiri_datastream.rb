@@ -1,10 +1,14 @@
 require "nokogiri"
 require  "om"
+require "solrizer/xml"
+
 #this class represents a MetadataDatastream, a special case of ActiveFedora::Datastream
 class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     
   include ActiveFedora::MetadataDatastreamHelper
-  include OM::XML
+  include OM::XML::Document
+  include Solrizer::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
+  
   # extend(OM::XML::Container::ClassMethods)
   
   attr_accessor :ng_xml
@@ -75,17 +79,6 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     return xml.to_xml {|config| config.no_declaration}
   end
   
-  def to_solr(solr_doc = Solr::Document.new) # :nodoc:
-    
-    unless self.class.accessors.nil?
-      self.class.accessors.each_pair do |accessor_name,accessor_info|
-        solrize_accessor(accessor_name, accessor_info, :solr_doc=>solr_doc)
-      end
-    end
-
-    return solr_doc
-  end
-  
   #overriding this method just so metadatahelper method does not get called
   def from_solr(solr_doc)
     #do nothing for now 
@@ -121,38 +114,43 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
   
   def solrize_node(node, accessor_pointer, solr_doc = Solr::Document.new)
     generic_field_name_base = self.class.accessor_generic_name(*accessor_pointer)
-    generic_field_name = generate_solr_symbol(generic_field_name_base, :text)
+    generic_field_name = solr_name(generic_field_name_base, :text)
     
     solr_doc << Solr::Field.new(generic_field_name => node.text)
     
     if accessor_pointer.length > 1
       hierarchical_field_name_base = self.class.accessor_hierarchical_name(*accessor_pointer)
-      hierarchical_field_name = generate_solr_symbol(hierarchical_field_name_base, :text)
+      hierarchical_field_name = solr_name(hierarchical_field_name_base, :text)
       solr_doc << Solr::Field.new(hierarchical_field_name => node.text)
     end
   end
   
   def update_indexed_attributes(params={}, opts={})    
+    if self.class.terminology.nil?
+      raise "No terminology is set for this NokogiriDatastream class.  Cannot perform update_indexed_attributes"
+    end
     # remove any fields from params that this datastream doesn't recognize    
     #make sure to make a copy of params so not to modify hash that might be passed to other methods
     current_params = params.clone
-    current_params.delete_if do |field_key,new_values| 
-      if field_key.kind_of?(String)
+    current_params.delete_if do |term_pointer,new_values| 
+      if term_pointer.kind_of?(String)
         true
       else
-        self.class.accessor_xpath(*OM.destringify(field_key) ).nil?
+        !self.class.terminology.has_term?(*OM.destringify(term_pointer))
       end
     end
+
     result = {}
     unless current_params.empty?
-      result = update_properties( current_params )
+      result = update_values( current_params )
       self.dirty = true
     end
+    
     return result
   end
   
   def get_values(field_key,default=[])
-    property_values(*field_key)
+    term_values(*field_key)
   end
 
 end
