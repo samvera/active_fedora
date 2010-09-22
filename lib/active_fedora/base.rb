@@ -117,10 +117,10 @@ module ActiveFedora
       Fedora::Repository.instance.delete(@inner_object)
       if ENABLE_SOLR_UPDATES
         ActiveFedora::SolrService.instance.conn.delete(pid) 
-        if defined?( Solrizer::Solrizer ) 
-          solrizer = Solrizer::Solrizer.new
-          solrizer.solrize_delete(pid)
-        end
+        # if defined?( Solrizer::Solrizer ) 
+        #   solrizer = Solrizer::Solrizer.new
+        #   solrizer.solrize_delete(pid)
+        # end
       end
     end
 
