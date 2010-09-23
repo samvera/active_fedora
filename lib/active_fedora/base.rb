@@ -40,6 +40,9 @@ module ActiveFedora
     
 
     has_relationship "collection_members", :has_collection_member
+    has_relationship "part_of", :is_part_of
+    has_relationship "parts_inbound", :is_part_of, :inbound=>true
+    has_relationship "parts_outbound", :has_part
     
 
     # Has this object been saved?
@@ -252,11 +255,30 @@ module ActiveFedora
     end
     
     def file_objects
-      collection_members
+      cm_array = collection_members
+      parts_array = parts
+      unless cm_array.empty?
+        logger.warn "This object has collection member assertions.  hasCollectionMember will no longer be used to track file_object relationships after active_fedora 1.3.  Use isPartOf assertions in the RELS-EXT of child objects instead."
+      end
+      ary = cm_array+parts_array
+      return ary.uniq
     end
     
     def file_objects_append(obj)
-      collection_members_append(obj)
+      # collection_members_append(obj)
+      unless obj.kind_of? ActiveFedora::Base
+        begin
+          obj = ActiveFedora::Base.load_instance(obj)
+        rescue "You must provide either an ActiveFedora object or a valid pid to add it as a file object.  You submitted #{obj.inspect}"
+        end
+      end
+      obj.add_relationship(:is_part_of, self)
+    end
+    
+    # returns an array of all objects that either point to this object with isPartOf or are pointed at by this object using hasPart
+    def parts
+      parts_array = parts_inbound + parts_outbound
+      return parts_array.uniq
     end
     
     def collection_members_append(obj)
