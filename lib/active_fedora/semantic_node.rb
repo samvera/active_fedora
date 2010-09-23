@@ -342,8 +342,15 @@ module ActiveFedora
       # puts "=> and whose outbound relationships are #{self.outbound_relationships.inspect}"
       self.outbound_relationships.each do |predicate, targets_array|
         targets_array.each do |target|
-          # puts ". #{predicate} #{target}"
-          xml.root.elements["rdf:Description"].add_element(self.class.predicate_lookup(predicate), {"xmlns" => "info:fedora/fedora-system:def/relations-external#", "rdf:resource"=>target})
+          xmlns=String.new
+          case predicate
+          when :has_model, "hasModel", :hasModel
+            xmlns="info:fedora/fedora-system:def/model#"
+          else
+            xmlns="info:fedora/fedora-system:def/relations-external#"
+          end
+          # puts ". #{predicate} #{target} #{xmlns}"
+          xml.root.elements["rdf:Description"].add_element(self.class.predicate_lookup(predicate), {"xmlns" => "#{xmlns}", "rdf:resource"=>target})
         end
       end
       xml.to_s

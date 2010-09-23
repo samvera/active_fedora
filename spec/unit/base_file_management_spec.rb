@@ -1,5 +1,4 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
-require "active_fedora"
 
 # Some tentative extensions to ActiveFedora::Base
 
@@ -16,19 +15,35 @@ describe ActiveFedora::Base do
     it "should be a supported method" do
       @base.should respond_to("file_objects")
     end
-    it "should wrap .collection_members" do
-      @base.expects(:collection_members)
+    it "should wrap .collection_members and .parts" do
+      @base.expects(:collection_members).returns([])
+      @base.expects(:parts).returns(["Foo"])
       @base.file_objects
-    end
-    describe "_append" do
-      it "should wrap collection_members_append" do
-        mocko = mock("object")
-        @base.expects(:collection_members_append).with(mocko)
-        @base.file_objects_append(mocko)
-      end
     end
     describe "_remove" do
       it "should wrap collection_members_remove"
+    end
+  end
+  
+  describe ".file_objects_append" do
+    it "should make the file object being appended assert isPartOf pointing back at the current object" do
+      mock_child = ActiveFedora::Base.new
+      mock_child.expects(:add_relationship).with(:is_part_of, @base)
+      @base.file_objects_append(mock_child)
+    end
+    it "should load the file object being appended if only a pid is provided" do
+      mock_child = mock("object")
+      mock_child.expects(:add_relationship).with(:is_part_of, @base)
+      ActiveFedora::Base.expects(:load_instance).with("_PID_").returns(mock_child)
+      @base.file_objects_append("_PID_")
+    end
+  end
+  
+  describe ".parts" do
+    it "should search for both (outbound) has_part and (inbound) is_part_of relationships, removing duplicates" do
+      @base.expects(:parts_outbound).returns(["A", "B"])
+      @base.expects(:parts_inbound).returns(["B", "C"])
+      @base.parts.should == ["B", "C", "A"]
     end
   end
   

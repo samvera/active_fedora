@@ -1,6 +1,7 @@
 require 'util/class_level_inheritable_attributes'
 require 'active_fedora/model'
 require 'active_fedora/semantic_node'
+require 'solrizer/field_name_mapper'
 require 'nokogiri'
 
 SOLR_DOCUMENT_ID = "id" unless defined?(SOLR_DOCUMENT_ID)
@@ -33,11 +34,15 @@ module ActiveFedora
     ms_inheritable_attributes  :ds_specs, :class_named_datastreams_desc
     include Model
     include SemanticNode
-    include SolrMapper
+    include Solrizer::FieldNameMapper
+     
+    attr_accessor :named_datastreams_desc
     
-     attr_accessor :named_datastreams_desc
 
     has_relationship "collection_members", :has_collection_member
+    has_relationship "part_of", :is_part_of
+    has_relationship "parts_inbound", :is_part_of, :inbound=>true
+    has_relationship "parts_outbound", :has_part
     
 
     # Has this object been saved?
@@ -115,10 +120,10 @@ module ActiveFedora
       Fedora::Repository.instance.delete(@inner_object)
       if ENABLE_SOLR_UPDATES
         ActiveFedora::SolrService.instance.conn.delete(pid) 
-        if defined?( Solrizer::Solrizer ) 
-          solrizer = Solrizer::Solrizer.new
-          solrizer.solrize_delete(pid)
-        end
+        # if defined?( Solrizer::Solrizer ) 
+        #   solrizer = Solrizer::Solrizer.new
+        #   solrizer.solrize_delete(pid)
+        # end
       end
     end
 
@@ -250,11 +255,30 @@ module ActiveFedora
     end
     
     def file_objects
-      collection_members
+      cm_array = collection_members
+      parts_array = parts
+      unless cm_array.empty?
+        logger.warn "This object has collection member assertions.  hasCollectionMember will no longer be used to track file_object relationships after active_fedora 1.3.  Use isPartOf assertions in the RELS-EXT of child objects instead."
+      end
+      ary = cm_array+parts_array
+      return ary.uniq
     end
     
     def file_objects_append(obj)
-      collection_members_append(obj)
+      # collection_members_append(obj)
+      unless obj.kind_of? ActiveFedora::Base
+        begin
+          obj = ActiveFedora::Base.load_instance(obj)
+        rescue "You must provide either an ActiveFedora object or a valid pid to add it as a file object.  You submitted #{obj.inspect}"
+        end
+      end
+      obj.add_relationship(:is_part_of, self)
+    end
+    
+    # returns an array of all objects that either point to this object with isPartOf or are pointed at by this object using hasPart
+    def parts
+      parts_array = parts_inbound + parts_outbound
+      return parts_array.uniq
     end
     
     def collection_members_append(obj)
@@ -676,8 +700,13 @@ module ActiveFedora
        raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
      end
      
+<<<<<<< HEAD:lib/active_fedora/base.rb
       create_date = solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date).to_s] : solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)]
       modified_date = solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date).to_s] : solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date)]
+=======
+      create_date = solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date)].nil? ? solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date).to_s] : solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date)]
+      modified_date = solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date)].nil? ? solr_doc[Solrizer::FieldNameMapper.solr_name(:system_modified, :date).to_s] : solr_doc[Solrizer::FieldNameMapper.solr_name(:system_modified, :date)]
+>>>>>>> upstream/master:lib/active_fedora/base.rb
       obj = self.new({:pid=>solr_doc[SOLR_DOCUMENT_ID],:create_date=>create_date,:modified_date=>modified_date})
       obj.new_object = false
       #set by default to load any dependent relationship objects from solr as well
