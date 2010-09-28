@@ -54,6 +54,15 @@ module ActiveFedora
       return solr_doc
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # This is utilized by ActiveFedora::Base.load_instance_from_solr to load 
+    # the relationships hash using the Solr document passed in instead of from the RELS-EXT datastream
+    # in Fedora.  Utilizes Solrizer::FieldNameMapper.solr_name to map solr key to
+    # relationship predicate. 
+    #
+    # ====Warning
+    #  Solr must be synchronized with RELS-EXT data in Fedora.
     def from_solr(solr_doc)
       #cycle through all possible predicates
       PREDICATE_MAPPINGS.keys.each do |predicate|

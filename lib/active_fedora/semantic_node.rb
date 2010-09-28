@@ -63,19 +63,34 @@ module ActiveFedora
       end
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Internal method that ensures a relationship subject such as :self and :inbound
+    # exist within the named_relationships_desc hash tracking named relationships metadata. 
+    # This method just calls the class method counterpart of this method.
     def register_named_subject(subject)
       self.class.register_named_subject(subject)
     end
   
+    # ** EXPERIMENTAL **
+    # 
+    # Internal method that adds relationship name and predicate pair to either an outbound (:self)
+    # or inbound (:inbound) relationship types.  This method just calls the class method counterpart of this method.
     def register_named_relationship(subject, name, predicate, opts)
       self.class.register_named_relationship(subject, name, predicate, opts)
     end
-    
+
+    # ** EXPERIMENTAL **
+    # 
+    # Remove the given ActiveFedora::Relationship from this object
     def remove_relationship(relationship)
       @relationships_are_dirty = true
       unregister_triple(relationship.subject, relationship.predicate, relationship.object)
     end
 
+    # ** EXPERIMENTAL **
+    # 
+    # Remove the subject, predicate, and object triple from the relationships hash
     def unregister_triple(subject, predicate, object)
       if relationship_exists?(subject, predicate, object)
         relationships[subject][predicate].delete_if {|curObj| curObj == object}
@@ -85,6 +100,9 @@ module ActiveFedora
       end     
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Returns true if a relationship exists for the given subject, predicate, and object triple
     def relationship_exists?(subject, predicate, object)
       outbound_only = (subject != :inbound)
       #cache the call in case it is retrieving inbound as well, don't want to hit solr too many times
@@ -138,6 +156,9 @@ module ActiveFedora
       return rels
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Return array of objects for a given relationship name
     def named_relationship(name)
       rels = nil
       if inbound_relationship_names.include?(name)
@@ -149,6 +170,13 @@ module ActiveFedora
       return rels
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Gets the named relationships hash of subject=>name=>object_array
+    # It has an optional parameter of outbound_only that defaults true.
+    # If false it will include inbound relationships in the results.
+    # Also, it will only reload outbound relationships if the relationships hash has changed
+    # since the last time this method was called.
     def named_relationships(outbound_only=true)
       #make sure to update if relationships have been updated
       if @relationships_are_dirty == true
@@ -161,6 +189,10 @@ module ActiveFedora
       outbound_only ? @named_relationships : @named_relationships.merge(:inbound=>named_inbound_relationships)      
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Gets named relationships from the class using the current relationships hash
+    # and relationship name,predicate pairs.
     def named_relationships_from_class()
       rels = {}
       named_relationship_predicates.each_pair do |subj, names|
@@ -174,6 +206,11 @@ module ActiveFedora
       return rels
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Return hash of named_relationships defined within other objects' RELS-EXT
+    # It returns a hash of relationship name to arrays of objects.  It requeries
+    # solr each time this method is called.
     def named_inbound_relationships
       rels = {}
       if named_relationships_desc.has_key?(:inbound)&&!named_relationships_desc[:inbound].empty?()
@@ -188,18 +225,30 @@ module ActiveFedora
       return rels
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Return hash of outbound relationship names and predicate pairs
     def outbound_named_relationship_predicates
       named_relationship_predicates.has_key?(:self) ? named_relationship_predicates[:self] : {}
     end
 
+    # ** EXPERIMENTAL **
+    # 
+    # Return hash of inbound relationship names and predicate pairs
     def inbound_named_relationship_predicates
       named_relationship_predicates.has_key?(:inbound) ? named_relationship_predicates[:inbound] : {}
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Return hash of relationship names and predicate pairs
     def named_relationship_predicates
       @named_relationship_predicates ||= named_relationship_predicates_from_class
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Return hash of relationship names and predicate pairs from class
     def named_relationship_predicates_from_class
       rels = {}
       named_relationships_desc.each_pair do |subj, names|
@@ -211,6 +260,9 @@ module ActiveFedora
       return rels
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Return array all relationship names
     def relationship_names
       names = []
       named_relationships_desc.each_key do |subject|
@@ -219,18 +271,34 @@ module ActiveFedora
         names
     end
 
+    # ** EXPERIMENTAL **
+    # 
+    # Return array of relationship names for all named inbound relationships (coming from other objects' RELS-EXT and Solr)
     def inbound_relationship_names
         named_relationships_desc.has_key?(:inbound) ? named_relationships_desc[:inbound].keys : []
     end
 
+    # ** EXPERIMENTAL **
+    # 
+    # Return array of relationship names for all named outbound relationships (coming from this object's RELS-EXT)
     def outbound_relationship_names
         named_relationships_desc.has_key?(:self) ? named_relationships_desc[:self].keys : []
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Return hash of named_relationships defined within this object's RELS-EXT
+    # It returns a hash of relationship name to arrays of objects
     def named_outbound_relationships
         named_relationships_desc.has_key?(:self) ? named_relationships[:self] : {}
     end
   
+    # ** EXPERIMENTAL **
+    # 
+    # Returns true if the given relationship name is a named relationship
+    # ====Parameters
+    #  name: Name of relationship
+    #  outbound_only:  If false checks inbound relationships as well (defaults to true)
     def is_named_relationship?(name, outbound_only=true)
       if outbound_only
         outbound_relationship_names.include?(name)
@@ -239,14 +307,30 @@ module ActiveFedora
       end
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Return hash that stores named relationship metadata defined by has_relationship calls
+    # ====Example
+    # For the following relationship
+    #
+    #  has_relationship "audio_records", :has_part, :type=>AudioRecord
+    # Results in the following returned by named_relationships_desc
+    #  {:self=>{"audio_records"=>{:type=>AudioRecord, :singular=>nil, :predicate=>:has_part, :inbound=>false}}}
     def named_relationships_desc
       @named_relationships_desc ||= named_relationships_desc_from_class
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Get class instance variable named_relationships_desc that holds has_relationship metadata
     def named_relationships_desc_from_class
       self.class.named_relationships_desc
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Return the value of :type for the relationship for name passed in.
+    # It defaults to ActiveFedora::Base.
     def named_relationship_type(name)
       if is_named_relationship?(name,true)
         subject = outbound_relationship_names.include?(name)? :self : :inbound
@@ -257,6 +341,10 @@ module ActiveFedora
       return nil  
     end
 
+    # ** EXPERIMENTAL **
+    # 
+    # Add an outbound relationship for given named relationship
+    # See ActiveFedora::SemanticNode::ClassMethods.has_relationship
     def add_named_relationship(name, object)
       if is_named_relationship?(name,true)
         if named_relationships_desc[:self][name].has_key?(:type)
@@ -273,6 +361,9 @@ module ActiveFedora
       end
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Remove an object from the named relationship
     def remove_named_relationship(name, object)
       if is_named_relationship?(name,true)
         remove_relationship(outbound_named_relationship_predicates[name],object)
@@ -281,23 +372,25 @@ module ActiveFedora
       end
     end
     
+    # ** EXPERIMENTAL **
+    # 
+    # Throws an assertion error if kind_of_model? returns false for object and model_class
+    # ====Parameters
+    #  name: Name of object (just label for output)
+    #  object: The object to test
+    #  model_class: The model class used to in kind_of_model? check on object
     def assert_kind_of_model(name, object, model_class)
       raise "Assertion failure: #{name}: #{object.pid} does not have model #{model_class}, it has model #{relationships[:self][:has_model]}" unless object.kind_of_model?(model_class)
     end
     
-    ############################################################################
-    # Checks that this class is either of type passed in or a child of that type.
-    # It also makes sure that this object was created as the same type by
-    # checking that hasmodel and the class match.  This would not match
-    # if someone called load_instance on a Fedora Object that was created
-    # via a different model class than the one that was recreated from Fedora.
-    # This is a side-effect of ActiveFedora's behavior that will try to create
-    # the object type specified with the pid given whether it is actually that
-    # object type or not.
-    #
-    # If hasmodel does not match than this will return false indicated it does not
-    # have the correct model.
-    ############################################################################
+    # ** EXPERIMENTAL **
+    # 
+    # Checks that this object is matches the model class passed in.
+    # It requires two steps to pass to return true
+    #   1. It has a hasModel relationship of the same model
+    #   2. kind_of? returns true for the model passed in
+    # This method can most often be used to detect if an object from Fedora that was created
+    # with a different model was then used to populate this object.
     def kind_of_model?(model_class)
       if self.kind_of?(model_class)
         #check has model and class match
@@ -357,25 +450,41 @@ module ActiveFedora
     end
     
     module ClassMethods
-      
-    # Anticipates usage of a relationship in classes that include this module
-    # Creates a key in the @relationships array for the predicate provided.  Assumes
-    # :self as the subject of the relationship unless :inbound => true, in which case the 
-    # predicate is registered under @relationships[:inbound][#{predicate}]
-    #
-    # TODO:
-    # Custom Methods:
-    # A custom finder method will be appended based on the relationship name.
-    # ie. 
-    # class Foo
-    #   relationship "container", :is_member_of  
-    # end
-    # foo = Foo.new
-    # foo.parts
-    #
-    # Special Predicate Short Hand:
-    # These symbols map to the uris of corresponding Fedora RDF predicates
-    # :is_member_of, :has_member, :is_part_of, :has_part  
+    
+      # Allows for a relationship to be treated like any other attribute of a model class. You define
+      # named relationships in your model class using this method.  You then have access to several
+      # helper methods to list, append, and remove objects from the list of relationships. 
+      # ====Examples to define two relationships 
+      #  class AudioRecord < ActiveFedora::Base
+      #
+      #   has_relationship "oral_history", :has_part, :inbound=>true, :type=>OralHistory
+      #   has_relationship "similar_audio", :has_part, :type=>AudioRecord
+      #
+      # The first two parameters are required:
+      #   name: relationship name
+      #   predicate: predicate for the relationship
+      #   opts:
+      #     possible parameters  
+      #       :inbound => if true loads an external relationship via Solr (defaults to false)
+      #       :type => The type of model to use when instantiated an object from the pid in this relationship (defaults to ActiveFedora::Base)
+      #
+      # If inbound is true it expects the relationship to be defined by another object's RELS-EXT
+      # and to load that relationship from Solr.  Otherwise, if inbound is true the relationship is stored in
+      # this object's RELS-EXT datastream
+      #
+      # Word of caution - The same predicate may not be used twice for two inbound or two outbound relationships.  However, it may be used twice if one is inbound
+      # and one is outbound as shown in the example above.  A full list of possible predicates are defined by PREDICATE_MAPPINGS
+      #
+      # For the oral_history relationship in the example above the following helper methods are created:
+      #  oral_history: returns array of OralHistory objects that have this AudioRecord with predicate :has_part 
+      #  oral_history_ids: Return array of pids for OralHistory objects that have this AudioRecord with predicate :has_part
+      # 
+      # For the outbound relationship "similar_audio" there are two additional methods to append and remove objects from that relationship
+      # since it is managed internally:
+      #  similar_audio: Return array of AudioRecord objects that have been added to similar_audio relationship
+      #  similar_audio_ids:  Return array of AudioRecord object pids that have been added to similar_audio relationship
+      #  similar_audio_append: Add an AudioRecord object to the similar_audio relationship
+      #  similar_audio_remove: Remove an AudioRecord from the similar_audio relationship
       def has_relationship(name, predicate, opts = {})
         opts = {:singular => nil, :inbound => false}.merge(opts)
         if opts[:inbound] == true
@@ -392,7 +501,13 @@ module ActiveFedora
         end
       end
       
-      #allow duplicate has_relationship calls with same name and predicate
+      # ** EXPERIMENTAL **
+      # 
+      # Check to make sure a subject,name, and predicate triple does not already exist
+      # with the same subject but different name.
+      # This method is used to ensure conflicting has_relationship calls are not made because
+      # predicates cannot be reused across relationship names.  Otherwise, the mapping of relationship name
+      # to predicate in RELS-EXT would be broken.
       def named_predicate_exists_with_different_name?(subject,name,predicate)
         if named_relationships_desc.has_key?(subject)
           named_relationships_desc[subject].each_pair do |existing_name, args|
@@ -401,24 +516,51 @@ module ActiveFedora
         end
         return false
       end
-        
-      # named relationships desc are tracked as a hash of structure {name => args}}
+      
+      # ** EXPERIMENTAL **
+      #  
+      # Return hash that stores named relationship metadata defined by has_relationship calls
+      # ====Example
+      # For the following relationship
+      #
+      #  has_relationship "audio_records", :has_part, :type=>AudioRecord
+      # Results in the following returned by named_relationships_desc
+      #  {:self=>{"audio_records"=>{:type=>AudioRecord, :singular=>nil, :predicate=>:has_part, :inbound=>false}}}
       def named_relationships_desc
         @class_named_relationships_desc ||= Hash[:self => {}]
       end
-        
+      
+      # ** EXPERIMENTAL **
+      #   
+      # Internal method that ensures a relationship subject such as :self and :inbound
+      # exist within the named_relationships_desc hash tracking named relationships metadata. 
       def register_named_subject(subject)
         unless named_relationships_desc.has_key?(subject) 
           named_relationships_desc[subject] = {} 
         end
       end
   
+      # ** EXPERIMENTAL **
+      # 
+      # Internal method that adds relationship name and predicate pair to either an outbound (:self)
+      # or inbound (:inbound) relationship types.
       def register_named_relationship(subject, name, predicate, opts)
         register_named_subject(subject)
         opts.merge!({:predicate=>predicate})
         named_relationships_desc[subject][name] = opts
       end
-        
+      
+      # ** EXPERIMENTAL **
+      #   
+      # Used in has_relationship call to create dynamic helper methods to 
+      # append and remove objects to and from a named relationship
+      # ====Example
+      # For the following relationship
+      #
+      #  has_relationship "audio_records", :has_part, :type=>AudioRecord
+      #
+      # Methods audio_records_append and audio_records_remove are created.
+      # Boths methods take an object that is kind_of? ActiveFedora::Base as a parameter
       def create_named_relationship_methods(name)
         append_method_name = "#{name.to_s.downcase}_append"
         remove_method_name = "#{name.to_s.downcase}_remove"

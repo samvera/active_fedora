@@ -289,19 +289,39 @@ module ActiveFedora
       # will rely on SemanticNode.remove_relationship once it is implemented
     end
     
+    # ** EXPERIMENTAL **
     #
-    # Named Datastreams management
-    #
+    # Returns array of datastream names defined for this object 
     def datastream_names
       named_datastreams_desc.keys
     end
     
+    # ** EXPERIMENTAL **
+    #
+    # Calls add_named_datastream while assuming it will be managed content and sets :blob and :controlGroup values accordingly
+    # ====Parameters
+    #  name: Datastream name
+    #  file: The file to add for this datastream
+    #  opts: Options hash.  See +add_named_datastream+ for expected keys and values
     def add_named_file_datastream(name, file, opts={})
       opts.merge!({:blob=>file,:controlGroup=>'M'})
       add_named_datastream(name,opts)
     end
-
-    # Creates a datastream with values 
+    
+    # ** EXPERIMENTAL **
+    #
+    # This object is used by [datastream_name]_append helper to add a named datastream
+    # but can also be called directly.
+    # ====Parameters
+    #  name: name of datastream to add
+    #  opts: hash defining datastream attributes
+    # The following are expected keys in opts hash:
+    #   :label => Defaults to the file name
+    #   :blob or :file  => Required to point to the datastream file being added if managed content
+    #   :controlGroup => defaults to 'M' for managed, can also be 'E' external and 'R' for redirected
+    #   :content_type => required if the file does not respond to 'content_type' and should match :mimeType in has_datastream definition if defined
+    #   :dsLocation => holds uri location of datastream.  Required only if :controlGroup is type 'E' or 'R'.
+    #   :dsid or :dsId => Optional, and used to update an existing datastream with dsid supplied.  Will throw an error if dsid does not exist and does not match prefix pattern for datastream name
     def add_named_datastream(name,opts={})
       
       unless named_datastreams_desc.has_key?(name) && named_datastreams_desc[name].has_key?(:type) 
@@ -357,10 +377,14 @@ module ActiveFedora
       add_datastream(ds,opts)
     end
 
-    ########################################################################
-    ### TODO: Currently requires you to update file if a managed datastream
-    ##        but could change to allow metadata only updates as well
-    ########################################################################
+    # ** EXPERIMENTAL **
+    #
+    # Update an existing named datastream.  It has same parameters as add_named_datastream
+    # except the :dsid key is now required.
+    #
+    # ====TODO
+    # Currently requires you to update file if a managed datastream 
+    # but could change to allow metadata only updates as well
     def update_named_datastream(name, opts={})
       #check that dsid provided matches existing datastream with that name
       raise "You must define parameter dsid for datastream to update for #{pid}" unless opts.include?(:dsid)
@@ -368,14 +392,35 @@ module ActiveFedora
       add_named_datastream(name,opts)
     end
     
+    # ** EXPERIMENTAL **
+    #
+    # Throws an assertion failure unless the object 'o' is kind_of? class 't'
+    # ====Parameters
+    #  n: Name of object
+    #  o: The object to test
+    #  t: The class type to check is kind_of?
     def assert_kind_of(n, o,t)
       raise "Assertion failure: #{n}: #{o} is not of type #{t}" unless o.kind_of?(t)
     end
     
+    # ** EXPERIMENTAL **
+    #
+    # Returns true if the name is a defined named datastream
     def is_named_datastream?(name)
       named_datastreams_desc.has_key?(name)
     end
 
+    # ** EXPERIMENTAL **
+    #
+    # Returns hash of datastream names defined by has_datastream calls mapped to 
+    # array of datastream objects that have been added
+    # ====Example
+    # For the following has_datastream entries and a datastream defined for minivan only would be
+    #  has_datastream :name=>"minivan", :prefix => "VAN", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'M'
+    #  has_datastream :name=>"external_images", :prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'E'
+    #
+    # Returns
+    #  {"external_images"=>[],"thumbnails"=>{#<ActiveFedora::Datastream:0x7ffd6512daf8 @new_object=true,...}} 
     def named_datastreams
       ds_values = {}
       self.class.named_datastreams_desc.keys.each do |name|
@@ -384,6 +429,17 @@ module ActiveFedora
       return ds_values
     end
     
+    # ** EXPERIMENTAL **
+    #
+    # Returns hash of datastream names mapped to another hash
+    # of dsid to attributes for corresponding datastream objects
+    # === Example
+    # For the following has_datastream call, assume we have added one datastream.
+    # 
+    #  has_datastream :name=>"thumbnails",:prefix => "THUMB",:type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'                     
+    #
+    # It would then return
+    #  {"thumbnails"=>{"THUMB1"=>{:prefix=>"VAN", :type=>"ActiveFedora::Datastream", :dsid=>"THUMB1", :dsID=>"THUMB1", :pid=>"changme:33", :mimeType=>"image/jpeg", :dsLabel=>"", :name=>"thumbnails", :content_type=>"image/jpeg", :controlGroup=>"M"}}}
     def named_datastreams_attributes
       ds_values = {}
       self.class.named_datastreams_desc.keys.each do |name|
@@ -397,6 +453,17 @@ module ActiveFedora
       return ds_values
     end
     
+    # ** EXPERIMENTAL **
+    #
+    # Returns hash of datastream names mapped to an array
+    # of dsid's for named datastream objects
+    # === Example
+    # For the following has_datastream call, assume we have added two datastreams.
+    # 
+    #  has_datastream :name=>"thumbnails",:prefix => "THUMB",:type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'                     
+    #
+    # It would then return
+    #  {"thumbnails=>["THUMB1", "THUMB2"]}
     def named_datastreams_ids
       dsids = {}
       self.class.named_datastreams_desc.keys.each do |name|
@@ -406,6 +473,10 @@ module ActiveFedora
       return dsids
     end 
     
+    # ** EXPERIMENTAL **
+    #
+    # For all datastream objects, this returns hash of dsid mapped to attribute hash within the corresponding
+    # datastream object.
     def datastreams_attributes
       ds_values = {}
       self.datastreams.each_pair do |dsid,ds|
@@ -414,10 +485,27 @@ module ActiveFedora
       return ds_values
     end
     
+    # ** EXPERIMENTAL **
+    #
+    # Returns the hash that stores arguments passed to has_datastream calls within an
+    # ActiveFedora::Base child class.    
+    #  
+    #  has_datastream :name=>"audio_file", :prefix=>"AUDIO", :type=>ActiveFedora::Datastream, :mimeType=>"audio/x-wav" 
+    #  has_datastream :name=>"external_images", :prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'E'
+    #
+    # The above examples result in the following hash
+    #  {"audio_file"=>{:prefix=>"AUDIO",:type=>ActiveFedora::Datastream, :mimeType=>"audio/x-wav", :controlGroup=>'M'},
+    #   "external_images=>{:prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'E'}}
+    #
+    # This hash is later used when adding a named datastream such as an "audio_file" as defined above.
     def named_datastreams_desc
       @named_datastreams_desc ||= named_datastreams_desc_from_class
     end
     
+    # ** EXPERIMENTAL **
+    #
+    # Get class variable hash that stores has_datastream arguments.
+    # It is used to initialize the value returned by public named_datastreams_desc method
     def named_datastreams_desc_from_class
       self.class.named_datastreams_desc
     end
@@ -427,6 +515,33 @@ module ActiveFedora
       scope.const_get(const_name)}.new(opts)
     end
 
+    # ** EXPERIMENTAL **
+    #
+    # Allows for a datastream to be treated like any other attribute of a model class 
+    # while enforcing mimeType and/or datastream type (ie. external, managed, etc.) if defined. 
+    # ====Examples 
+    #                 
+    #  has_datastream :name=>"thumbnails",:prefix => "THUMB",:type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'                     
+    #  has_datastream :name=>"EADs", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
+    #  has_datastream :name=>"external_images", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
+    #
+    # Required Keys in args
+    #  :name  -  name to give this datastream (must be unique)
+    #
+    # Optional Keys in args
+    #  :prefix - used to create the DSID plus an index ie. THUMB1, THUMB2.  If :prefix is not specified, defaults to :name value in all uppercase 
+    #  :type - defaults to ActiveFedora::Datastream if you would like content specific class to be used supply it here
+    #  :mimeType - if supplied it will ensure any datastreams added are of this type, if not supplied any mimeType is acceptabl e
+    #  :controlGroup -  possible values "X", "M", "R", or "E" (InlineXML, Managed Content, Redirect, or External Referenced) If controlGroup is 'E' or 'R' it expects a dsLocation be defined when adding the datastream.
+    #
+    # You use the datastream attribute using helper methods created for each datastream name:
+    #
+    # ====Helper Method Examples
+    #  thumbnails_append -  Append a thumbnail datastream
+    #  thumbnails        -  Get array of thumbnail datastreams
+    #  thumbnails_ids    -  Get array of dsid's for thumbnail datastreams
+    #
+    # When loading the list of datastreams for a name from Fedora it uses the DSID prefix to find them in Fedora
     def self.has_datastream(args)
       unless args.has_key?(:name)
         return false
@@ -448,7 +563,15 @@ module ActiveFedora
       create_named_datastream_finders(args[:name],args[:prefix])
       create_named_datastream_update_methods(args[:name])
     end
-        
+    
+    # ** EXPERIMENTAL **
+    #
+    # Creates the following helper methods for a datastream name
+    #   [datastream_name]_append  - Add a named datastream
+    #
+    # ==== Examples for "thumbnails" datastream
+    #  thumbnails_append -  Append a thumbnail datastream
+    # TODO: Add [datastream_name]_remove
     def self.create_named_datastream_update_methods(name)
       append_file_method_name = "#{name.to_s.downcase}_file_append"
       append_method_name = "#{name.to_s.downcase}_append"
@@ -466,7 +589,16 @@ module ActiveFedora
         add_named_datastream(name,opts)
       end
     end 
-        
+    
+    # ** EXPERIMENTAL **
+    #
+    # Creates the following helper methods for a datastream name
+    #   [datastream_name]  - Returns array of named datastreams
+    #   [datastream_name]_ids - Returns array of named datastream dsids
+    #
+    # ==== Examples for "thumbnails" datastream
+    #  thumbnails        -  Get array of thumbnail datastreams
+    #  thumbnails_ids    -  Get array of dsid's for thumbnail datastreams
     def self.create_named_datastream_finders(name, prefix)
       class_eval <<-END
       def #{name}(opts={})
@@ -490,8 +622,20 @@ module ActiveFedora
       end
       END
     end
-        
-    # named datastreams desc are tracked as a hash of structure {name => args}}
+    
+    # ** EXPERIMENTAL **
+    #
+    # Accessor for class variable for hash that stores arguments passed to has_datastream calls within an
+    # ActiveFedora::Base child class.    
+    #  
+    #  has_datastream :name=>"audio_file", :prefix=>"AUDIO", :type=>ActiveFedora::Datastream, :mimeType=>"audio/x-wav" 
+    #  has_datastream :name=>"external_images", :prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'E'
+    #
+    # The above examples result in the following hash
+    #  {"audio_file"=>{:prefix=>"AUDIO",:type=>ActiveFedora::Datastream, :mimeType=>"audio/x-wav", :controlGroup=>'M'},
+    #   "external_images=>{:prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'E'}}
+    #
+    # This hash is later used when adding a named datastream such as an "audio_file" as defined above.
     def self.named_datastreams_desc
       @class_named_datastreams_desc ||= {}
     end
@@ -521,6 +665,11 @@ module ActiveFedora
       end
     end
     
+    # ** EXPERIMENTAL **
+    #
+    # Remove a Rels-Ext relationship from the Object.
+    # @param predicate
+    # @param object Either a string URI or an object that responds to .pid 
     def remove_relationship(predicate, obj)
       r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj)
       rels_ext.remove_relationship(r)
@@ -678,17 +827,19 @@ module ActiveFedora
       return solr_doc
     end
     
-    ###########################################################################################################
+    # ** EXPERIMENTAL **
     #
-    # This method is comparable to load_instance except it populates an object from Solr instead of Fedora.
+    # This method can be used instead of ActiveFedora::Model::ClassMethods.load_instance.  
+    # It works similarly except it populates an object from Solr instead of Fedora.
     # It is most useful for objects used in read-only displays in order to speed up loading time.  If only
-    # a pid is passed in it will attempt to load a solr document and then populate an ActiveFedora::Base object
-    # based on the solr doc including any metadata datastreams and relationships.
+    # a pid is passed in it will query solr for a corresponding solr document and then use it
+    # to populate this object.
     # 
-    # solr_doc is an optional parameter and if a value is passed it will not query solr again and just use the
+    # If a value is passed in for optional parameter solr_doc it will not query solr again and just use the
     # one passed to populate the object.
     #
-    ###########################################################################################################
+    # It will anything stored within solr such as metadata and relationships.  Non-metadata datastreams will not
+    # be loaded and if needed you should use load_instance instead.
     def self.load_instance_from_solr(pid,solr_doc=nil)
       if solr_doc.nil?
         result = find_by_solr(pid)
@@ -700,13 +851,8 @@ module ActiveFedora
        raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
      end
      
-<<<<<<< HEAD:lib/active_fedora/base.rb
-      create_date = solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date).to_s] : solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)]
-      modified_date = solr_doc[ActiveFedora::SolrMapper.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date).to_s] : solr_doc[ActiveFedora::SolrMapper.solr_name(:system_modified, :date)]
-=======
       create_date = solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date)].nil? ? solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date).to_s] : solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date)]
       modified_date = solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date)].nil? ? solr_doc[Solrizer::FieldNameMapper.solr_name(:system_modified, :date).to_s] : solr_doc[Solrizer::FieldNameMapper.solr_name(:system_modified, :date)]
->>>>>>> upstream/master:lib/active_fedora/base.rb
       obj = self.new({:pid=>solr_doc[SOLR_DOCUMENT_ID],:create_date=>create_date,:modified_date=>modified_date})
       obj.new_object = false
       #set by default to load any dependent relationship objects from solr as well

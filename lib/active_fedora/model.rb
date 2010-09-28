@@ -143,11 +143,7 @@ module ActiveFedora
       
         #set default sort to created date ascending
         unless query_opts.include?(:sort)
-<<<<<<< HEAD:lib/active_fedora/model.rb
-          query_opts.merge!({:sort=>[ActiveFedora::SolrMapper.solr_name(:system_create,:date)=>:ascending]}) 
-=======
           query_opts.merge!({:sort=>[Solrizer::FieldNameMapper.solr_name(:system_create,:date)=>:ascending]}) 
->>>>>>> upstream/master:lib/active_fedora/model.rb
         else
           #need to convert to solr names for all fields
           sort_array =[]
@@ -173,11 +169,7 @@ module ActiveFedora
          
             solr_name = field_name 
             if class_fields.include?(field_name.to_sym)
-<<<<<<< HEAD:lib/active_fedora/model.rb
-              solr_name = ActiveFedora::SolrMapper.solr_name(key,class_fields[field_name.to_sym][:type])
-=======
               solr_name = Solrizer::FieldNameMapper.solr_name(key,class_fields[field_name.to_sym][:type])
->>>>>>> upstream/master:lib/active_fedora/model.rb
             end
             sort_array.push({solr_name=>sort_direction})
           end
