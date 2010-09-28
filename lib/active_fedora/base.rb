@@ -116,7 +116,7 @@ module ActiveFedora
           end 
         end
       end
-
+      
       Fedora::Repository.instance.delete(@inner_object)
       if ENABLE_SOLR_UPDATES
         ActiveFedora::SolrService.instance.conn.delete(pid) 
