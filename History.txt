@@ -2,6 +2,8 @@
 
 Switched flow of relationship assertions for file objects. Now children assert isPartOf rather than parents asserting hasCollectionMember (see HYDRA-70 and HYDRA-71)
 
+New method: has_bidirectional_relationship creates relationship that searches across bidirectional relationships (ie. finds all of the object's hasPart assertions as well as any objects pointing at it with isPartOf)
+
 Applied some fixes to usage of URIs in SemanticNode
 
 Added RDoc code comments for experimental features from version 1.2

@@ -664,7 +664,7 @@ module ActiveFedora
         
         class_eval <<-END
         def #{name}(opts={})
-          if opts[:response_format] == :solr
+          if opts[:response_format] == :solr || opts[:response_format] == :load_from_solr
             escaped_uri = self.internal_uri.gsub(/(:)/, '\\:')
             query = "#{inbound_predicate}_s:\#{escaped_uri}"
             

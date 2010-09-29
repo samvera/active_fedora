@@ -254,13 +254,23 @@ module ActiveFedora
     end
     
     def file_objects(opts={})
-      cm_array = collection_members(opts)
-      parts_array = parts(opts)
-      unless cm_array.empty?
+      cm_array = collection_members(:response_format=>:id_array)
+      
+      if !cm_array.empty?
         logger.warn "This object has collection member assertions.  hasCollectionMember will no longer be used to track file_object relationships after active_fedora 1.3.  Use isPartOf assertions in the RELS-EXT of child objects instead."
+        if opts[:response_format] == :solr || opts[:response_format] == :load_from_solr
+          logger.warn ":solr and :load_from_solr response formats for file_objects search only uses parts relationships (usage of hasCollectionMember is no longer supported)"
+          result = parts(opts)
+        else
+          cm_result = collection_members(opts)
+          parts_result = parts(opts)
+          ary = cm_array+parts_array
+          result = ary.uniq
+        end
+      else
+        result = parts(opts)
       end
-      ary = cm_array+parts_array
-      return ary.uniq
+      return result
     end
     
     def file_objects_append(obj)
@@ -268,7 +278,8 @@ module ActiveFedora
       unless obj.kind_of? ActiveFedora::Base
         begin
           obj = ActiveFedora::Base.load_instance(obj)
-        rescue "You must provide either an ActiveFedora object or a valid pid to add it as a file object.  You submitted #{obj.inspect}"
+        rescue ActiveFedora::ObjectNotFoundError
+          "You must provide either an ActiveFedora object or a valid pid to add it as a file object.  You submitted #{obj.inspect}"
         end
       end
       obj.add_relationship(:is_part_of, self)
