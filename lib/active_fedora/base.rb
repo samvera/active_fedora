@@ -41,8 +41,7 @@ module ActiveFedora
 
     has_relationship "collection_members", :has_collection_member
     has_relationship "part_of", :is_part_of
-    has_relationship "parts_inbound", :is_part_of, :inbound=>true
-    has_relationship "parts_outbound", :has_part
+    has_bidirectional_relationship "parts", :has_part, :is_part_of
     
 
     # Has this object been saved?
@@ -254,9 +253,9 @@ module ActiveFedora
       add_datastream(ds)
     end
     
-    def file_objects
-      cm_array = collection_members
-      parts_array = parts
+    def file_objects(opts={})
+      cm_array = collection_members(opts)
+      parts_array = parts(opts)
       unless cm_array.empty?
         logger.warn "This object has collection member assertions.  hasCollectionMember will no longer be used to track file_object relationships after active_fedora 1.3.  Use isPartOf assertions in the RELS-EXT of child objects instead."
       end
@@ -275,11 +274,16 @@ module ActiveFedora
       obj.add_relationship(:is_part_of, self)
     end
     
-    # returns an array of all objects that either point to this object with isPartOf or are pointed at by this object using hasPart
-    def parts
-      parts_array = parts_inbound + parts_outbound
-      return parts_array.uniq
-    end
+    # # returns an array of all objects that either point to this object with isPartOf or are pointed at by this object using hasPart
+    # def parts(opts={})
+    #   if opts[:response_format] == :solr
+    #     debugger
+    #   else
+    #     parts_array = parts_inbound(opts) + parts_outbound(opts)
+    #     result = parts_array.uniq
+    #   end
+    #   return result
+    # end
     
     def collection_members_append(obj)
       add_relationship(:has_collection_member, obj)

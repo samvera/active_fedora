@@ -501,6 +501,25 @@ module ActiveFedora
         end
       end
       
+      # Generates relationship finders for predicates that point in both directions
+      #
+      # @name Name of the relationship method(s) to create
+      # @outbound_predicate Predicate used in outbound relationships
+      # @inbound_predicate Predicate used in inbound relationships
+      # @opts
+      #
+      # Example:
+      #  has_bidirectional_relationship("parts", :has_part, :is_part_of)
+      #
+      # will create three instance methods: parts_outbound, and parts_inbound and parts
+      # the inbound and outbound methods are the same that would result from calling 
+      # create_inbound_relationship_finders and create_outbound_relationship_finders
+      # The third method combines the results of both and handles generating appropriate 
+      # solr queries where necessary.
+      def has_bidirectional_relationship(name, outbound_predicate, inbound_predicate, opts={})
+        create_bidirectional_relationship_finders(name, outbound_predicate, inbound_predicate, opts)
+      end
+      
       # ** EXPERIMENTAL **
       # 
       # Check to make sure a subject,name, and predicate triple does not already exist
@@ -619,6 +638,51 @@ module ActiveFedora
             else
               return ActiveFedora::SolrService.reify_solr_results(solr_result)
             end
+          end
+        end
+        def #{name}_ids
+          #{name}(:response_format => :id_array)
+        end
+        def #{name}_from_solr
+          #{name}(:response_format => :load_from_solr)
+        end
+        END
+      end
+      
+      # Generates relationship finders for predicates that point in both directions
+      #
+      # @name Name of the relationship method(s) to create
+      # @outbound_predicate Predicate used in outbound relationships
+      # @inbound_predicate Predicate used in inbound relationships
+      # @opts
+      #
+      def create_bidirectional_relationship_finders(name, outbound_predicate, inbound_predicate, opts={})
+        inbound_method_name = name.to_s+"_inbound"
+        outbound_method_name = name.to_s+"_outbound"
+        create_outbound_relationship_finders(outbound_method_name, outbound_predicate, opts)
+        create_inbound_relationship_finders(inbound_method_name, inbound_predicate, opts)
+        
+        class_eval <<-END
+        def #{name}(opts={})
+          if opts[:response_format] == :solr
+            escaped_uri = self.internal_uri.gsub(/(:)/, '\\:')
+            query = "#{inbound_predicate}_s:\#{escaped_uri}"
+            
+            outbound_id_array = #{outbound_method_name}(:response_format=>:id_array)
+            query = query + " OR " + ActiveFedora::SolrService.construct_query_for_pids(outbound_id_array)
+            
+            solr_result = SolrService.instance.conn.query(query)
+            
+            if opts[:response_format] == :solr
+              return solr_result
+            elsif opts[:response_format] == :load_from_solr || self.load_from_solr
+              return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
+            else
+              return ActiveFedora::SolrService.reify_solr_results(solr_result)
+            end
+          else
+            ary = #{inbound_method_name}(opts) + #{outbound_method_name}(opts)
+            return ary.uniq
           end
         end
         def #{name}_ids

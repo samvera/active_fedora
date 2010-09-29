@@ -354,6 +354,44 @@ describe ActiveFedora::SemanticNode do
     end
   end
   
+  describe ".create_bidirectional_relationship_finder" do
+    before(:each) do
+      SpecNode.create_bidirectional_relationship_finders("all_parts", :has_part, :is_part_of)
+      @local_node = SpecNode.new
+      @local_node.pid = @pid
+      @local_node.internal_uri = @uri
+    end
+    it "should create inbound & outbound finders" do
+      @local_node.should respond_to(:all_parts_inbound)
+      @local_node.should respond_to(:all_parts_outbound)
+    end
+    it "should rely on inbound & outbound finders" do      
+      @local_node.expects(:all_parts_inbound).returns(["foo1"])
+      @local_node.expects(:all_parts_outbound).returns(["foo2"])
+      @local_node.all_parts.should == ["foo1", "foo2"]
+    end
+    it "(:response_format => :id_array) should rely on inbound & outbound finders" do
+      @local_node.expects(:all_parts_inbound).with(:response_format=>:id_array).returns(["fooA"])
+      @local_node.expects(:all_parts_outbound).with(:response_format=>:id_array).returns(["fooB"])
+      @local_node.all_parts(:response_format=>:id_array).should == ["fooA", "fooB"]
+    end
+    it "(:response_format => :solr) should construct a solr query that combines inbound and outbound searches" do
+      # get the id array for outbound relationships then construct solr query by combining id array with inbound relationship search
+      @local_node.expects(:all_parts_outbound).with(:response_format=>:id_array).returns(["mypid:1"])
+      id_array_query = ActiveFedora::SolrService.construct_query_for_pids(["mypid:1"])
+      solr_result = mock("solr result")
+      ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid OR #{id_array_query}").returns(solr_result)
+      @local_node.all_parts(:response_format=>:solr)
+    end
+  end
+  
+  describe "#has_bidirectional_relationship" do
+    it "should ..." do
+      SpecNode.expects(:create_bidirectional_relationship_finders).with("all_parts", :has_part, :is_part_of, {})
+      SpecNode.has_bidirectional_relationship("all_parts", :has_part, :is_part_of)
+    end
+  end
+  
   describe ".add_relationship" do
     it "should add relationship to the relationships hash" do
       @node.add_relationship(@test_relationship)
