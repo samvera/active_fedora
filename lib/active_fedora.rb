@@ -82,19 +82,22 @@ module ActiveFedora #:nodoc:
 end
 
 
-if ![].respond_to?(:count)
-  class Array
-    puts "active_fedora is Adding count method to Array"
-      def count(&action)
-        count = 0
-         self.each { |v| count = count + 1}
-  #      self.each { |v| count = count + 1 if action.call(v) }
-        return count
-      end
-  end
-end
 
-# module ActiveFedora
-#   class ServerError < Fedora::ServerError; end # :nodoc:
+
+# if ![].respond_to?(:count)
+#   class Array
+#     puts "active_fedora is Adding count method to Array"
+#       def count(&action)
+#         count = 0
+#          self.each { |v| count = count + 1}
+#   #      self.each { |v| count = count + 1 if action.call(v) }
+#         return count
+#       end
+#   end
 # end
+
+module ActiveFedora
+  class ServerError < Fedora::ServerError; end # :nodoc:
+  class ObjectNotFoundError < RuntimeError; end # :nodoc:
+end
 

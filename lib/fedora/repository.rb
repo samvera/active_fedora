@@ -100,7 +100,9 @@ module Fedora
     
     def find_model(pid, klazz)
       obj = self.find_objects("pid=#{pid}").first
-      #doc = REXML::Document.new(obj.object_xml, :ignore_whitespace_nodes=>:all)
+      if obj.nil?
+        raise ActiveFedora::ObjectNotFoundError, "The repository does not have an object with pid #{pid}.  The repository URL is #{self.base_url}"
+      end
       doc = Nokogiri::XML::Document.parse(obj.object_xml)     
       klazz.deserialize(doc)
     end

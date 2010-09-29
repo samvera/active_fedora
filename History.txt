@@ -1,3 +1,27 @@
+1.2.3
+
+Switched flow of relationship assertions for file objects. Now children assert isPartOf rather than parents asserting hasCollectionMember (see HYDRA-70 and HYDRA-71)
+
+Applied some fixes to usage of URIs in SemanticNode
+
+Added RDoc code comments for experimental features from version 1.2
+
+1.2.2
+
+Misc bug fixes
+
+1.2.1
+
+TERMPORARY: removed solrizer from gem dependency list (cyclic reference breaks bundler) 
+
+1.2
+
+Now support using OM::XML::Terminologies in NokogiriDatastreams
+
+resolved #504 -- Allow SSL certificate client authentication for connections to Fedora 
+
+Added Experimental methods for has_datastream, named_datastream, and remove_relationship (contributed by Rick Johnson at Notre Dame)
+
 1.1.13
 
 MetadataDatastream.update_indexed_attributes was no longer marking the object dirty when triggered.  Resulted in changed datastreams not saving.  Fixed now.

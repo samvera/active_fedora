@@ -111,6 +111,13 @@ describe Fedora::Repository do
     end
   end
   
+  describe ".find_model" do
+    it "should raise an ObjectNotFound error if there is no object" do
+      Fedora::Repository.instance.expects(:find_objects).returns([])
+      lambda { Fedora::Repository.instance.find_model("mypid", ActiveFedora::Base) }.should raise_error(ActiveFedora::ObjectNotFoundError)  
+    end
+  end
+  
   describe "#register" do
     after(:all) do
       Fedora::Repository.register(ActiveFedora.fedora_config[:url])
