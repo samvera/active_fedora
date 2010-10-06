@@ -46,11 +46,17 @@ module ActiveFedora
       ##FIX this bug, it should delete it from a copy of params in case passed to another datastream for update since this will modify params
       ##for subsequent calls if updating more than one datastream in a single update_indexed_attributes call
       current_params = params.clone
-      # remove any fields from params that this datastream doesn't recognize
-      current_params.delete_if {|field_name,new_values| !self.fields.include?(field_name.to_sym) }
       
+      # remove any fields from params that this datastream doesn't recognize
+      current_params.delete_if do |field_name,new_values| 
+        if field_name.kind_of?(Array) then field_name = field_name.first end
+        !self.fields.include?(field_name.to_sym) 
+      end
+            
       result = current_params.dup
       current_params.each do |field_name,new_values|
+        if field_name.kind_of?(Array) then field_name = field_name.first end
+        
         ##FIX this bug, it should delete it from a copy of params in case passed to another datastream for update
         #if field does not exist just skip it
         next if !self.fields.include?(field_name.to_sym)

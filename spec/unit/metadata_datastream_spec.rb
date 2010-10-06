@@ -146,6 +146,12 @@ describe ActiveFedora::MetadataDatastream do
       @test_ds.fubar_values.should == ["val1", "val2"]
     end
     
+    it "should not get tripped up by field names wrapped in arrays" do
+      att = {[:fubar]=>{"0"=>"eco3bv"}}
+      @test_ds.update_indexed_attributes(att)
+      @test_ds.fubar_values.should == ['eco3bv']
+    end
+    
   end
   
   describe ".get_values" do
