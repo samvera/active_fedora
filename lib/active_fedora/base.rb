@@ -264,7 +264,7 @@ module ActiveFedora
         else
           cm_result = collection_members(opts)
           parts_result = parts(opts)
-          ary = cm_array+parts_array
+          ary = cm_result+parts_result
           result = ary.uniq
         end
       else
