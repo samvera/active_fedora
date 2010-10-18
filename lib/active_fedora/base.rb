@@ -246,6 +246,10 @@ module ActiveFedora
     # File Management
     #
     
+    # Add the given file as a datastream in the object
+    #
+    # @param [File] file the file to add
+    # @param [Hash] opts options: :dsid, :label
     def add_file_datastream(file, opts={})
       label = opts.has_key?(:label) ? opts[:label] : ""
       ds = ActiveFedora::Datastream.new(:dsLabel => label, :controlGroup => 'M', :blob => file)
@@ -253,6 +257,12 @@ module ActiveFedora
       add_datastream(ds)
     end
     
+    # List the objects that assert isPartOf pointing at this object _plus_ all objects that this object asserts hasPart for
+    #   Note: Previous versions of ActiveFedora used hasCollectionMember to represent this type of relationship.  
+    #   To accommodate this, until active-fedora-1.3, .file_assets will also return anything that this asserts hasCollectionMember for and will output a warning in the logs.
+    #
+    # @param [Hash] opts -- same options as auto-generated methods for relationships (ie. :response_format)
+    # @return [Array of ActiveFedora objects, Array of PIDs, or Solr::Result] -- same options as auto-generated methods for relationships (ie. :response_format)
     def file_objects(opts={})
       cm_array = collection_members(:response_format=>:id_array)
       
@@ -273,6 +283,9 @@ module ActiveFedora
       return result
     end
     
+    # Add the given file as a datastream in the object
+    #
+    # @param [ActiveFedora::Base] obj the file to add
     def file_objects_append(obj)
       # collection_members_append(obj)
       unless obj.kind_of? ActiveFedora::Base
@@ -284,17 +297,6 @@ module ActiveFedora
       end
       obj.add_relationship(:is_part_of, self)
     end
-    
-    # # returns an array of all objects that either point to this object with isPartOf or are pointed at by this object using hasPart
-    # def parts(opts={})
-    #   if opts[:response_format] == :solr
-    #     debugger
-    #   else
-    #     parts_array = parts_inbound(opts) + parts_outbound(opts)
-    #     result = parts_array.uniq
-    #   end
-    #   return result
-    # end
     
     def collection_members_append(obj)
       add_relationship(:has_collection_member, obj)
