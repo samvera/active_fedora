@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2010-09-29}
+  s.date = %q{2010-10-17}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
@@ -173,6 +173,7 @@ Gem::Specification.new do |s|
      "LICENSE",
      "License.txt",
      "Manifest.txt",
+     "NG_XML_DATASTREAM.textile",
      "PostInstall.txt",
      "README.textile",
      "Rakefile",
