@@ -19,7 +19,7 @@ module Fedora
     end
 
     def to_s
-      "Failed with #{response.code} #{response.message if response.respond_to?(:message)}"
+      "Failed with #{response.code} #{@message.to_s}"
     end
   end
 
@@ -155,29 +155,30 @@ module Fedora
 
     # Handles response and error codes from remote service.
     def handle_response(response)
+      message = "Error from Fedora: #{response.body}"
       case response.code.to_i
       when 301,302
         raise(Redirection.new(response))
       when 200...400
         response
       when 400
-        raise(BadRequest.new(response))
+        raise(BadRequest.new(response, message))
       when 401
-        raise(UnauthorizedAccess.new(response))
+        raise(UnauthorizedAccess.new(response, message))
       when 403
-        raise(ForbiddenAccess.new(response))
+        raise(ForbiddenAccess.new(response, message))
       when 404
-        raise(ResourceNotFound.new(response))
+        raise(ResourceNotFound.new(response, message))
       when 405
-        raise(MethodNotAllowed.new(response))
+        raise(MethodNotAllowed.new(response, message))
       when 409
-        raise(ResourceConflict.new(response))
+        raise(ResourceConflict.new(response, message))
       when 422
-        raise(ResourceInvalid.new(response))
-      when 401...500
-        raise(ClientError.new(response))
+        raise(ResourceInvalid.new(response, message))
+      when 423...500
+        raise(ClientError.new(response, message))
       when 500...600
-        raise(ServerError.new(response))
+        raise(ServerError.new(response, message))
       else
         raise(ConnectionError.new(response, "Unknown response code: #{response.code}"))
       end

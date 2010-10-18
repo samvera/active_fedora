@@ -10,6 +10,8 @@ Added RDoc code comments for experimental features from version 1.2
 
 Bug: MetadataDatastream.update_indexed_attributes doesn't get tripped up by attribute names wrapped in arrays (previously wrapping the symbol in an array would cause an error
 
+Fedora::Connection now returns the Fedora error in any ServerError messages
+
 1.2.2
 
 Misc bug fixes
