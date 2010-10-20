@@ -26,14 +26,16 @@ describe ActiveFedora::Base do
   end
   
   describe ".file_objects_append" do
-    it "should make the file object being appended assert isPartOf pointing back at the current object" do
+    it "should make the file object being appended assert isPartOf pointing back at the current object and save the child" do
       mock_child = ActiveFedora::Base.new
       mock_child.expects(:add_relationship).with(:is_part_of, @base)
+      mock_child.expects(:save)
       @base.file_objects_append(mock_child)
     end
-    it "should load the file object being appended if only a pid is provided" do
+    it "should load the file object being appended if only a pid is provided and save the child" do
       mock_child = mock("object")
       mock_child.expects(:add_relationship).with(:is_part_of, @base)
+      mock_child.expects(:save)
       ActiveFedora::Base.expects(:load_instance).with("_PID_").returns(mock_child)
       @base.file_objects_append("_PID_")
     end

@@ -1,3 +1,7 @@
+1.2.4
+
+Bug: Base.file_objects_append wasn't saving the child object after modifying its RELS-EXT
+
 1.2.3
 
 Major: Switched flow of relationship assertions for file objects. Now children assert isPartOf rather than parents asserting hasCollectionMember (see HYDRA-70 and HYDRA-71)

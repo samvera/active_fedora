@@ -296,6 +296,7 @@ module ActiveFedora
         end
       end
       obj.add_relationship(:is_part_of, self)
+      obj.save
     end
     
     def collection_members_append(obj)
