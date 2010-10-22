@@ -84,11 +84,6 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     #do nothing for now 
   end
   
-  #overriding this method just so metadatahelper method does not get called
-  def from_solr(solr_doc)
-    #do nothing for now 
-  end
-  
   def solrize_accessor(accessor_name, accessor_info, opts={})
     solr_doc = opts.fetch(:solr_doc, Solr::Document.new)
     parents = opts.fetch(:parents, [])
