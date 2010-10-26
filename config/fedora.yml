@@ -7,7 +7,7 @@ test:
   fedora:
     url: http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora
   solr:
-    url: http://127.0.0.1:8983/solr/test
+    url: http://127.0.0.1:8983/solr/development
 production:
   fedora:
     url: http://fedoraAdmin:fedoraAdmin@127.0.0.1:8080/fedora
