@@ -4,7 +4,10 @@ require "solrizer"
 module ActiveFedora
   class SolrService 
     
+    include Solrizer::FieldNameMapper
     include Loggable
+    
+    load_mappings
       
     attr_reader :conn
         
@@ -29,7 +32,7 @@ module ActiveFedora
       end
       results = []
       solr_result.hits.each do |hit|
-        model_value = hit[Solrizer::FieldNameMapper.solr_name("active_fedora_model", :symbol)].first
+        model_value = hit[solr_name("active_fedora_model", :symbol)].first
         if model_value.include?("::")
           classname = eval(model_value)
         else
@@ -56,22 +59,6 @@ module ActiveFedora
     
     def self.escape_uri_for_query(uri)
       return uri.gsub(/(:)/, '\\:')
-    end
-    
-    def self.mappings
-      Solrizer::FieldNameMapper.mappings
-    end
-    def self.mappings=(mappings)
-      Solrizer::FieldNameMapper.mappings = mappings
-    end
-        
-    def self.logger      
-      @logger ||= defined?(RAILS_DEFAULT_LOGGER) ? RAILS_DEFAULT_LOGGER : Logger.new(STDOUT)
-    end
-    
-    # (re)load solr field name mappings
-    def self.load_mappings( config_path=nil )
-      Solrizer::FieldNameMapper.load_mappings(config_path)
     end
     
   

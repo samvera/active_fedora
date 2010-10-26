@@ -831,7 +831,7 @@ module ActiveFedora
     # If opts[:model_only] == true, the base object metadata and the RELS-EXT datastream will be omitted.  This is mainly to support shelver, which calls .to_solr for each model an object subscribes to. 
     def to_solr(solr_doc = Solr::Document.new, opts={})
       unless opts[:model_only]
-        solr_doc << {SOLR_DOCUMENT_ID.to_sym => pid, solr_name(:system_create, :date) => self.create_date, solr_name(:system_modified, :date) => self.modified_date, solr_name(:active_fedora_model, :symbol) => self.class.inspect}
+        solr_doc << {SOLR_DOCUMENT_ID.to_sym => pid, ActiveFedora::SolrService.solr_name(:system_create, :date) => self.create_date, ActiveFedora::SolrService.solr_name(:system_modified, :date) => self.modified_date, ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol) => self.class.inspect}
       end
       datastreams.each_value do |ds|
         # solr_doc = ds.to_solr(solr_doc) if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) ||( ds.kind_of?(ActiveFedora::RelsExtDatastream) || ( ds.kind_of?(ActiveFedora::QualifiedDublinCoreDatastream) && !opts[:model_only] )
@@ -869,8 +869,8 @@ module ActiveFedora
        raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
      end
      
-      create_date = solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date)].nil? ? solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date).to_s] : solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date)]
-      modified_date = solr_doc[Solrizer::FieldNameMapper.solr_name(:system_create, :date)].nil? ? solr_doc[Solrizer::FieldNameMapper.solr_name(:system_modified, :date).to_s] : solr_doc[Solrizer::FieldNameMapper.solr_name(:system_modified, :date)]
+      create_date = solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date).to_s] : solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)]
+      modified_date = solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrService.solr_name(:system_modified, :date).to_s] : solr_doc[ActiveFedora::SolrService.solr_name(:system_modified, :date)]
       obj = self.new({:pid=>solr_doc[SOLR_DOCUMENT_ID],:create_date=>create_date,:modified_date=>modified_date})
       obj.new_object = false
       #set by default to load any dependent relationship objects from solr as well

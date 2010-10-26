@@ -1,15 +1,8 @@
 id: id
 default: searchable
 searchable:
+  default: _field
   date: _date
-  string: _field
-  text: _field
-  symbol: _field
-  integer: _field
-  long: _field
-  boolean: _field
-  float: _field
-  double: _field
 displayable: _display
 facetable: _facet
 sortable: _sort

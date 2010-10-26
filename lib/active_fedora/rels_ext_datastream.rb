@@ -58,7 +58,7 @@ module ActiveFedora
     # 
     # This is utilized by ActiveFedora::Base.load_instance_from_solr to load 
     # the relationships hash using the Solr document passed in instead of from the RELS-EXT datastream
-    # in Fedora.  Utilizes Solrizer::FieldNameMapper.solr_name to map solr key to
+    # in Fedora.  Utilizes solr_name method (provided by Solrizer::FieldNameMapper) to map solr key to
     # relationship predicate. 
     #
     # ====Warning
@@ -66,7 +66,7 @@ module ActiveFedora
     def from_solr(solr_doc)
       #cycle through all possible predicates
       PREDICATE_MAPPINGS.keys.each do |predicate|
-        predicate_symbol = Solrizer::FieldNameMapper.solr_name(predicate, :symbol)
+        predicate_symbol = ActiveFedora::SolrService.solr_name(predicate, :symbol)
         value = (solr_doc[predicate_symbol].nil? ? solr_doc[predicate_symbol.to_s]: solr_doc[predicate_symbol]) 
         unless value.nil? 
           if value.is_a? Array
