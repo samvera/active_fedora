@@ -1,0 +1,58 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    active-fedora (1.2.4)
+      mime-types (>= 1.16)
+      multipart-post
+      nokogiri
+      om (>= 1.0)
+      solr-ruby (>= 0.0.6)
+      xml-simple (>= 1.0.12)
+    columnize (0.3.1)
+    diff-lcs (1.1.2)
+    facets (2.9.0)
+    linecache (0.43)
+    mime-types (1.16)
+    mocha (0.9.9)
+      rake
+    multipart-post (1.0.1)
+    nokogiri (1.4.3.1)
+    om (1.0.0)
+      facets
+      nokogiri (>= 1.4.2)
+    rake (0.8.7)
+    rspec (2.0.1)
+      rspec-core (~> 2.0.1)
+      rspec-expectations (~> 2.0.1)
+      rspec-mocks (~> 2.0.1)
+    rspec-core (2.0.1)
+    rspec-expectations (2.0.1)
+      diff-lcs (>= 1.1.2)
+    rspec-mocks (2.0.1)
+      rspec-core (~> 2.0.1)
+      rspec-expectations (~> 2.0.1)
+    ruby-debug (0.10.3)
+      columnize (>= 0.1)
+      ruby-debug-base (~> 0.10.3.0)
+    ruby-debug-base (0.10.3)
+      linecache (>= 0.3)
+    solr-ruby (0.0.8)
+    solrizer (0.3.0)
+      active-fedora (>= 1.1.5)
+      om (>= 1.0.0)
+    xml-simple (1.0.12)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  mime-types (>= 1.16)
+  mocha (>= 0.9.8)
+  multipart-post
+  nokogiri
+  om (>= 1.0)
+  rspec (>= 1.2.9)
+  ruby-debug
+  solr-ruby (>= 0.0.6)
+  solrizer (>= 0.3.0)
+  xml-simple (>= 1.0.12)
