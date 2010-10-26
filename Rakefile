@@ -21,7 +21,7 @@ begin
     gem.add_dependency('nokogiri')
     gem.add_dependency('om', '>= 1.0')
     gem.add_dependency('solrizer', '>=0.3.0')
-    gem.add_dependency("active_resource", "<3.0.0")
+    gem.add_dependency("activeresource", "<3.0.0")
     gem.add_development_dependency "rspec", ">= 1.2.9"
     gem.add_development_dependency "mocha", ">= 0.9.8"
     gem.add_development_dependency "ruby-debug"
