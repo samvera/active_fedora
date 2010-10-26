@@ -1,5 +1,6 @@
 require 'rubygems'
 gem 'solr-ruby'
+require "loggable"
 
 $: << 'lib'
 require 'logger'

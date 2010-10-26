@@ -3,6 +3,8 @@ require "solrizer"
 
 module ActiveFedora
   class SolrService 
+    
+    include Loggable
       
     attr_reader :conn
         

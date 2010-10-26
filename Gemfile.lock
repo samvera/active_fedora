@@ -54,6 +54,7 @@ PLATFORMS
 DEPENDENCIES
   activeresource (> 3.0.0)
   jeweler
+  mediashelf-loggable
   mime-types (>= 1.16)
   mocha (>= 0.9.8)
   multipart-post
@@ -62,5 +63,5 @@ DEPENDENCIES
   rspec (< 2.0.0)
   ruby-debug
   solr-ruby (>= 0.0.6)
-  solrizer (>= 0.2.0)
+  solrizer (>= 0.3.0)
   xml-simple (>= 1.0.12)
