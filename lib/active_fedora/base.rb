@@ -1,10 +1,10 @@
 require 'util/class_level_inheritable_attributes'
 require 'active_fedora/model'
 require 'active_fedora/semantic_node'
-require 'solrizer/field_name_mapper'
+require "solrizer"
 require 'nokogiri'
 
-SOLR_DOCUMENT_ID = "id" unless defined?(SOLR_DOCUMENT_ID)
+SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 
 module ActiveFedora
