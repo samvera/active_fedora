@@ -1,5 +1,5 @@
 require 'solr'
-require "solrizer/field_name_mapper"
+require "solrizer"
 
 module ActiveFedora
   class SolrService 
