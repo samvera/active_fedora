@@ -887,9 +887,9 @@ module ActiveFedora
 
     # Updates Solr index with self.
     def update_index
-      if defined?( Solrizer::Solrizer ) 
+      if defined?( Solrizer::Fedora::Solrizer ) 
         #logger.info("Trying to solrize pid: #{pid}")
-        solrizer = Solrizer::Solrizer.new
+        solrizer = Solrizer::Fedora::Solrizer.new
         solrizer.solrize( self )
       else
         #logger.info("Trying to update solr for pid: #{pid}")
