@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{active-fedora}
-  s.version = "1.2.4"
+  s.version = "1.2.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2010-10-20}
+  s.date = %q{2010-10-26}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
@@ -169,6 +169,8 @@ Gem::Specification.new do |s|
      ".hgtags",
      "COPYING.txt",
      "COYING.LESSER.txt",
+     "Gemfile",
+     "Gemfile.lock",
      "History.txt",
      "LICENSE",
      "License.txt",
@@ -348,6 +350,8 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<multipart-post>, [">= 0"])
       s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
       s.add_runtime_dependency(%q<om>, [">= 1.0"])
+      s.add_runtime_dependency(%q<solrizer>, [">= 0.3.0"])
+      s.add_runtime_dependency(%q<activeresource>, ["< 3.0.0"])
       s.add_development_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_development_dependency(%q<mocha>, [">= 0.9.8"])
       s.add_development_dependency(%q<ruby-debug>, [">= 0"])
@@ -358,6 +362,8 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<multipart-post>, [">= 0"])
       s.add_dependency(%q<nokogiri>, [">= 0"])
       s.add_dependency(%q<om>, [">= 1.0"])
+      s.add_dependency(%q<solrizer>, [">= 0.3.0"])
+      s.add_dependency(%q<activeresource>, ["< 3.0.0"])
       s.add_dependency(%q<rspec>, [">= 1.2.9"])
       s.add_dependency(%q<mocha>, [">= 0.9.8"])
       s.add_dependency(%q<ruby-debug>, [">= 0"])
@@ -369,6 +375,8 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<multipart-post>, [">= 0"])
     s.add_dependency(%q<nokogiri>, [">= 0"])
     s.add_dependency(%q<om>, [">= 1.0"])
+    s.add_dependency(%q<solrizer>, [">= 0.3.0"])
+    s.add_dependency(%q<activeresource>, ["< 3.0.0"])
     s.add_dependency(%q<rspec>, [">= 1.2.9"])
     s.add_dependency(%q<mocha>, [">= 0.9.8"])
     s.add_dependency(%q<ruby-debug>, [">= 0"])
