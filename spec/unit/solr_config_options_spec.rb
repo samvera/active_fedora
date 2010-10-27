@@ -27,13 +27,12 @@ describe ActiveFedora do
   describe "field name mappings" do
     it "should default to using the mappings for the current schema" do
       from_default_yml = YAML::load(File.open(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings.yml")))
-      ActiveFedora::SolrService.mappings.should == from_default_yml
-      ActiveFedora::SolrService.mappings["date"].should == "_dt"      
+      ActiveFedora::SolrService.mappings[:searchable].data_types[:date].opts[:suffix].should == from_default_yml["searchable"]["date"]    
     end
     it "should allow you to provide your own mappings file" do
       ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
-      ActiveFedora::SolrService.mappings["date"].should == "_date"      
-      ActiveFedora::SolrService.mappings["symbol"].should == "_field"            
+      ActiveFedora::SolrService.mappings[:searchable].data_types[:date].opts[:suffix].should == "_date"      
+      ActiveFedora::SolrService.mappings[:searchable].data_types[:default].opts[:suffix].should == "_field"
     end
   end
   

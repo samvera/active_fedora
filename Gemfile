@@ -7,10 +7,12 @@ gem 'multipart-post'
 gem 'nokogiri'
 gem 'om', '>= 1.0'
 gem 'solrizer', '>=0.3.0'
-# gem 'yaml'
+gem 'activeresource', '>3.0.0'
+gem 'mediashelf-loggable'
 
 group :development, :test do
-  gem "rspec", ">= 1.2.9"
+  gem "jeweler"
+  gem "rspec", "<2.0.0"
   gem "mocha", ">= 0.9.8"
   gem "ruby-debug"
 end

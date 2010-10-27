@@ -1,17 +1,27 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    active-fedora (1.2.4)
-      mime-types (>= 1.16)
-      multipart-post
-      nokogiri
-      om (>= 1.0)
-      solr-ruby (>= 0.0.6)
-      xml-simple (>= 1.0.12)
+    activemodel (3.0.1)
+      activesupport (= 3.0.1)
+      builder (~> 2.1.2)
+      i18n (~> 0.4.1)
+    activeresource (3.0.1)
+      activemodel (= 3.0.1)
+      activesupport (= 3.0.1)
+    activesupport (3.0.1)
+    builder (2.1.2)
     columnize (0.3.1)
-    diff-lcs (1.1.2)
     facets (2.9.0)
+    gemcutter (0.6.1)
+    git (1.2.5)
+    i18n (0.4.2)
+    jeweler (1.4.0)
+      gemcutter (>= 0.1.0)
+      git (>= 1.2.5)
+      rubyforge (>= 2.0.0)
+    json_pure (1.4.6)
     linecache (0.43)
+    mediashelf-loggable (0.4.0)
     mime-types (1.16)
     mocha (0.9.9)
       rake
@@ -21,37 +31,36 @@ GEM
       facets
       nokogiri (>= 1.4.2)
     rake (0.8.7)
-    rspec (2.0.1)
-      rspec-core (~> 2.0.1)
-      rspec-expectations (~> 2.0.1)
-      rspec-mocks (~> 2.0.1)
-    rspec-core (2.0.1)
-    rspec-expectations (2.0.1)
-      diff-lcs (>= 1.1.2)
-    rspec-mocks (2.0.1)
-      rspec-core (~> 2.0.1)
-      rspec-expectations (~> 2.0.1)
+    rspec (1.3.1)
     ruby-debug (0.10.3)
       columnize (>= 0.1)
       ruby-debug-base (~> 0.10.3.0)
     ruby-debug-base (0.10.3)
       linecache (>= 0.3)
+    rubyforge (2.0.4)
+      json_pure (>= 1.1.7)
     solr-ruby (0.0.8)
     solrizer (0.3.0)
-      active-fedora (>= 1.1.5)
-      om (>= 1.0.0)
+      mediashelf-loggable
+      nokogiri
+      nokogiri
+      om
+      solr-ruby
     xml-simple (1.0.12)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  activeresource (> 3.0.0)
+  jeweler
+  mediashelf-loggable
   mime-types (>= 1.16)
   mocha (>= 0.9.8)
   multipart-post
   nokogiri
   om (>= 1.0)
-  rspec (>= 1.2.9)
+  rspec (< 2.0.0)
   ruby-debug
   solr-ruby (>= 0.0.6)
   solrizer (>= 0.3.0)

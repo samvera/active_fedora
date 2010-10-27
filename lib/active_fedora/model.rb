@@ -56,7 +56,7 @@ module ActiveFedora
       def find(args)
         if args == :all
           escaped_class_name = self.name.gsub(/(:)/, '\\:')
-          q = "#{Solrizer::FieldNameMapper.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}"
+          q = "#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}"
         elsif args.class == String
           escaped_id = args.gsub(/(:)/, '\\:')
           q = "#{SOLR_DOCUMENT_ID}:#{escaped_id}"
@@ -89,7 +89,7 @@ module ActiveFedora
       def find_by_solr(query, args={})
         if query == :all
           escaped_class_name = self.name.gsub(/(:)/, '\\:')
-          SolrService.instance.conn.query("#{Solrizer::FieldNameMapper.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}", args)
+          SolrService.instance.conn.query("#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}", args)
         elsif query.class == String
           escaped_id = query.gsub(/(:)/, '\\:')          
           SolrService.instance.conn.query("#{SOLR_DOCUMENT_ID}:#{escaped_id}", args)
@@ -114,7 +114,7 @@ module ActiveFedora
       def find_by_fields_by_solr(query_fields,opts={})
         #create solr_args from fields passed in, needs to be comma separated list of form field1=value1,field2=value2,...
         escaped_class_name = self.name.gsub(/(:)/, '\\:')
-        query = "#{Solrizer::FieldNameMapper.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}" 
+        query = "#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}" 
         
         query_fields.each_pair do |key,value|
           unless value.nil?
@@ -125,7 +125,7 @@ module ActiveFedora
             if class_fields.has_key?(key) && class_fields[key].has_key?(:type)
               type = class_fields[key][:type]
               type = :string unless type.kind_of?(Symbol)
-              solr_key = Solrizer::FieldNameMapper.solr_name(key,type)
+              solr_key = ActiveFedora::SolrService.solr_name(key,type)
             end
             
             escaped_value = value.gsub(/(:)/, '\\:')
@@ -143,7 +143,7 @@ module ActiveFedora
       
         #set default sort to created date ascending
         unless query_opts.include?(:sort)
-          query_opts.merge!({:sort=>[Solrizer::FieldNameMapper.solr_name(:system_create,:date)=>:ascending]}) 
+          query_opts.merge!({:sort=>[ActiveFedora::SolrService.solr_name(:system_create,:date)=>:ascending]}) 
         else
           #need to convert to solr names for all fields
           sort_array =[]
@@ -169,7 +169,7 @@ module ActiveFedora
          
             solr_name = field_name 
             if class_fields.include?(field_name.to_sym)
-              solr_name = Solrizer::FieldNameMapper.solr_name(key,class_fields[field_name.to_sym][:type])
+              solr_name = ActiveFedora::SolrService.solr_name(key,class_fields[field_name.to_sym][:type])
             end
             sort_array.push({solr_name=>sort_direction})
           end

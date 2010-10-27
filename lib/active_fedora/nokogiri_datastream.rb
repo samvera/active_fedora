@@ -114,13 +114,13 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
   
   def solrize_node(node, accessor_pointer, solr_doc = Solr::Document.new)
     generic_field_name_base = self.class.accessor_generic_name(*accessor_pointer)
-    generic_field_name = Solrizer::FieldNameMapper.solr_name(generic_field_name_base, :text)
+    generic_field_name = ActiveFedora::SolrService.solr_name(generic_field_name_base, :text)
     
     solr_doc << Solr::Field.new(generic_field_name => node.text)
     
     if accessor_pointer.length > 1
       hierarchical_field_name_base = self.class.accessor_hierarchical_name(*accessor_pointer)
-      hierarchical_field_name = Solrizer::FieldNameMapper.solr_name(hierarchical_field_name_base, :text)
+      hierarchical_field_name = ActiveFedora::SolrService.solr_name(hierarchical_field_name_base, :text)
       solr_doc << Solr::Field.new(hierarchical_field_name => node.text)
     end
   end

@@ -1,3 +1,10 @@
+1.2.5
+
+Requires Solrizer 0.3.0 or higher
+
+HYDRA-274 Configurable Facets
+HYDRA-275 Update ActiveFedora to use Solrizer::XML::TermBasedSolrizer when indexing NokogiriDatastreams
+
 1.2.4
 
 Bug: Base.file_objects_append wasn't saving the child object after modifying its RELS-EXT

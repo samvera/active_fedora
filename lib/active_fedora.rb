@@ -1,13 +1,11 @@
 require 'rubygems'
 gem 'solr-ruby'
+require "loggable"
 
 $: << 'lib'
 require 'logger'
 require 'active_fedora/solr_service.rb'
-require 'solrizer/field_name_mapper'
-
-SOLR_DOCUMENT_ID = Solrizer::FieldNameMapper.mappings["id"] unless defined?(SOLR_DOCUMENT_ID)
-ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
+require "solrizer"
 
 require 'ruby-fedora'
 require 'active_fedora/base.rb'
@@ -23,6 +21,9 @@ require 'active_fedora/qualified_dublin_core_datastream.rb'
 require 'active_fedora/relationship.rb'
 require 'active_fedora/rels_ext_datastream.rb'
 require 'active_fedora/semantic_node.rb'
+
+SOLR_DOCUMENT_ID = ActiveFedora::SolrService.id_field unless defined?(SOLR_DOCUMENT_ID)
+ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 
 module ActiveFedora #:nodoc:
   
