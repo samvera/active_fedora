@@ -10,7 +10,8 @@ describe ActiveFedora::NokogiriDatastream do
                       :empty_field => {:values => {}}
                       } 
     @sample_xml = XmlSimple.xml_in("<fields><coverage>coverage1</coverage><coverage>coverage2</coverage><creation_date>fake-date</creation_date><mydate>fake-date</mydate><publisher>publisher1</publisher></fields>")
-    
+
+    @solr_doc = {"id"=>"hydrange_article1","name_role_roleTerm_t"=>["creator","submitter","teacher"],"name_0_role_t"=>"\r\ncreator\r\nsubmitter\r\n","name_1_role_t"=>"\r\n teacher \r\n","name_0_role_0_roleTerm_t"=>"creator","name_0_role_1_roleTerm_t"=>"submitter","name_1_role_0_roleTerm_t"=>["teacher"]}
   end
   
   before(:each) do
@@ -278,5 +279,110 @@ describe ActiveFedora::NokogiriDatastream do
       @test_ds.set_blob_for_save
     end
   end
-  
+
+  describe '.from_solr' do
+    it "should set the internal_solr_doc attribute to the solr document passed in" do 
+      @test_ds.from_solr(@solr_doc)
+      @test_ds.internal_solr_doc.should == @solr_doc
+    end
+  end
+
+  describe '.get_values_from_solr' do
+    before(:each) do
+      @mods_ds = ActiveFedora::NokogiriDatastream.new(:blob=>fixture(File.join("mods_articles","hydrangea_article1.xml")))
+    end
+
+    it "should return empty array if internal_solr_doc not set" do
+      @mods_ds.get_values_from_solr(:name,:role,:roleTerm)
+    end
+ 
+    it "should return correct values from solr_doc given different term pointers" do
+      mock_term = mock("OM::XML::Term")
+      mock_term.stubs(:data_type).returns(:text)
+      mock_terminology = mock("OM::XML::Terminology")
+      mock_terminology.stubs(:retrieve_term).returns(mock_term)
+      ActiveFedora::NokogiriDatastream.stubs(:terminology).returns(mock_terminology)
+      @mods_ds.from_solr(@solr_doc)
+      term_pointer = [:name,:role,:roleTerm]
+      @mods_ds.get_values_from_solr(:name,:role,:roleTerm).should == ["creator","submitter","teacher"]
+      ar = @mods_ds.get_values_from_solr({:name=>0},:role,:roleTerm)
+      ar.length.should == 2
+      ar.include?("creator").should == true
+      ar.include?("submitter").should == true
+      @mods_ds.get_values_from_solr({:name=>1},:role,:roleTerm).should == ["teacher"]
+      @mods_ds.get_values_from_solr({:name=>0},{:role=>0},:roleTerm).should == ["creator"]
+      @mods_ds.get_values_from_solr({:name=>0},{:role=>1},:roleTerm).should == ["submitter"]
+      @mods_ds.get_values_from_solr({:name=>0},{:role=>2},:roleTerm).should == []
+      @mods_ds.get_values_from_solr({:name=>1},{:role=>0},:roleTerm).should == ["teacher"]
+      @mods_ds.get_values_from_solr({:name=>1},{:role=>1},:roleTerm).should == []
+      ar = @mods_ds.get_values_from_solr(:name,{:role=>0},:roleTerm)
+      ar.length.should == 2
+      ar.include?("creator").should == true
+      ar.include?("teacher").should == true
+      @mods_ds.get_values_from_solr(:name,{:role=>1},:roleTerm).should == ["submitter"]
+    end
+  end
+
+  describe '.has_solr_name?' do
+    it "should return true if the given key exists in the solr document passed in" do
+      @test_ds.has_solr_name?("name_0_role_0_roleTerm_t",@solr_doc).should == true
+      @test_ds.has_solr_name?(:name_0_role_0_roleTerm_t,@solr_doc).should == true
+      @test_ds.has_solr_name?("name_1_role_1_roleTerm_t",@solr_doc).should == false
+      #if not doc passed in should be new empty solr doc and always return false
+      @test_ds.has_solr_name?("name_0_role_0_roleTerm_t").should == false
+    end
+  end
+
+  describe '.is_hierarchical_term_pointer?' do
+    it "should return true only if the pointer passed in is an array that contains a hash" do
+      @test_ds.is_hierarchical_term_pointer?(*[:image,{:tag1=>1},:tag2]).should == true
+      @test_ds.is_hierarchical_term_pointer?(*[:image,:tag1,{:tag2=>1}]).should == true
+      @test_ds.is_hierarchical_term_pointer?(*[:image,:tag1,:tag2]).should == false
+      @test_ds.is_hierarchical_term_pointer?(nil).should == false      
+    end
+  end
+
+  describe '.update_values' do
+    before(:each) do
+      @mods_ds = ActiveFedora::NokogiriDatastream.new(:blob=>fixture(File.join("mods_articles","hydrangea_article1.xml")))
+    end
+
+    it "should throw an exception if we have initialized the internal_solr_doc." do
+      @mods_ds.from_solr(@solr_doc)
+      found_exception = false
+      begin
+        @mods_ds.update_values([{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"})
+      rescue
+        found_exception = true
+      end
+      found_exception.should == true
+    end
+
+    it "should update a value internally call OM::XML::TermValueOperators::update_values if internal_solr_doc is not set" do
+      @mods_ds.stubs(:om_update_values).once()
+      term_pointer = [:name,:role,:roleTerm]
+      @mods_ds.update_values([{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"})
+    end
+  end
+
+  describe '.term_values' do
+
+    before(:each) do
+      @mods_ds = ActiveFedora::NokogiriDatastream.new(:blob=>fixture(File.join("mods_articles","hydrangea_article1.xml")))
+    end
+
+    it "should call OM::XML::term_values if internal_solr_doc is not set and return values from xml" do
+      @mods_ds.stubs(:om_term_values).once()
+      term_pointer = [:name,:role,:roleTerm]
+      @mods_ds.term_values(*term_pointer)
+    end
+
+    # we will know this is working because solr_doc and xml are not synced so that wrong return mechanism can be detected
+    it "should call get_values_from_solr if internal_solr_doc is set" do
+      @mods_ds.from_solr(@solr_doc)
+      term_pointer = [:name,:role,:roleTerm]
+      @mods_ds.stubs(:get_values_from_solr).once()
+      @mods_ds.term_values(*term_pointer)
+    end
+  end
 end
