@@ -99,7 +99,7 @@ describe ActiveFedora::NokogiriDatastream do
     end
     
     it "should return the new index of any added values" do
-      @mods_ds.get_values([{:title_info=>0},:main_title]).should == ["ARTICLE TITLE HYDRANGEA ARTICLE 1", "TITLE OF HOST JOURNAL"]
+      @mods_ds.get_values([{:title_info=>0},:main_title]).should == ["ARTICLE TITLE", "TITLE OF HOST JOURNAL"]
       result = @mods_ds.update_indexed_attributes [{"title_info"=>"0"},"main_title"]=>{"-1"=>"mork"}
       result.should == {"title_info_0_main_title"=>{"2"=>"mork"}}
     end
@@ -158,7 +158,7 @@ describe ActiveFedora::NokogiriDatastream do
     # end
     
     it "should set @dirty to true" do
-      @mods_ds.get_values([{:title_info=>0},:main_title]).should == ["ARTICLE TITLE HYDRANGEA ARTICLE 1", "TITLE OF HOST JOURNAL"]
+      @mods_ds.get_values([{:title_info=>0},:main_title]).should == ["ARTICLE TITLE", "TITLE OF HOST JOURNAL"]
       @mods_ds.update_indexed_attributes [{"title_info"=>"0"},"main_title"]=>{"-1"=>"mork"}
       @mods_ds.dirty?.should be_true
     end

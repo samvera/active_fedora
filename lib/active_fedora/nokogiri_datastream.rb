@@ -228,7 +228,7 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
              #just use index supplied instead of trying possibilities
              index = term_pointer[i-1].values.first
              solr_name_base = OM::XML::Terminology.term_hierarchical_name({bases[j]=>index},current_last)
-             solr_name = Solrizer::FieldNameMapper.solr_name(solr_name_base, term.data_type)
+             solr_name = generate_solr_symbol(solr_name_base, term.data_type)
              bases.delete_at(j)
              #insert the new solr name base if found
              bases.insert(j,solr_name_base) if has_solr_name?(solr_name,solr_doc)
@@ -238,14 +238,14 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
              current_base = bases[j]
              bases.delete_at(j)
              solr_name_base = OM::XML::Terminology.term_hierarchical_name({current_base=>index},current_last)
-             solr_name = Solrizer::FieldNameMapper.solr_name(solr_name_base, term.data_type)
+             solr_name = generate_solr_symbol(solr_name_base, term.data_type)
              #check for indexes that exist until we find all nodes
              while has_solr_name?(solr_name,solr_doc) do
                #only reinsert if it exists
                bases.insert(j,solr_name_base)
                index = index + 1
                solr_name_base = OM::XML::Terminology.term_hierarchical_name({current_base=>index},current_last)
-               solr_name = Solrizer::FieldNameMapper.solr_name(solr_name_base, term.data_type)
+               solr_name = generate_solr_symbol(solr_name_base, term.data_type)
              end
            end
          end
@@ -253,7 +253,7 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
 
        #all existing applicable solr_names have been found and we can now grab all values and build up our value array
        bases.each do |base|
-         field_name = Solrizer::FieldNameMapper.solr_name(base.to_sym, term.data_type)
+         field_name = generate_solr_symbol(base.to_sym, term.data_type)
          value = (solr_doc[field_name].nil? ? solr_doc[field_name.to_s]: solr_doc[field_name])
          unless value.nil?
            value.is_a?(Array) ? values.concat(value) : values << value
@@ -262,7 +262,7 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
      else
        #this is not hierarchical and we can simply look for the solr name created using the terms without any indexes
        generic_field_name_base = OM::XML::Terminology.term_generic_name(*term_pointer)
-       generic_field_name = Solrizer::FieldNameMapper.solr_name(generic_field_name_base, term.data_type)
+       generic_field_name = generate_solr_symbol(generic_field_name_base, term.data_type)
        value = (solr_doc[generic_field_name].nil? ? solr_doc[generic_field_name.to_s]: solr_doc[generic_field_name])
        unless value.nil?
          value.is_a?(Array) ? values.concat(value) : values << value
@@ -273,6 +273,10 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
       raise e
     end
     values
+  end
+
+  def generate_solr_symbol(base, data_type)
+    Solrizer::XML::TerminologyBasedSolrizer.default_field_mapper.solr_name(base.to_sym, data_type)
   end
 
   # ** Experimental **
