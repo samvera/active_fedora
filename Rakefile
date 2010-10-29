@@ -14,21 +14,17 @@ begin
     gem.homepage = "http://yourmediashelf.com/activefedora"
     gem.authors = ["Matt Zumwalt", "McClain Looney"]
     gem.rubyforge_project = 'rubyfedora'
-    
     gem.add_dependency('solr-ruby', '>= 0.0.6')
     gem.add_dependency('xml-simple', '>= 1.0.12')
     gem.add_dependency('mime-types', '>= 1.16')
     gem.add_dependency('multipart-post')
     gem.add_dependency('nokogiri')
-    # gem.add_dependency('om', '>= 0.1.9')
     gem.add_dependency('om', '>= 1.0')
-    # gem.add_dependency('solrizer', '>=0.1.4')
-    # gem.add_dependency('yaml')
-
+    gem.add_dependency('solrizer', '>=0.3.0')
+    gem.add_dependency("activeresource", "<3.0.0")
     gem.add_development_dependency "rspec", ">= 1.2.9"
     gem.add_development_dependency "mocha", ">= 0.9.8"
     gem.add_development_dependency "ruby-debug"
-
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
