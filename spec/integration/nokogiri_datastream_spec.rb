@@ -35,7 +35,6 @@ describe ActiveFedora::NokogiriDatastream do
       mock_terminology.stubs(:retrieve_term).returns(mock_term)
 
       ActiveFedora::NokogiriDatastream.stubs(:terminology).returns(mock_terminology)
-      puts "\r\n\r\n#{@test_solr_object.datastreams["descMetadata"].internal_solr_doc.inspect}\r\n\r\n"
       @test_solr_object.datastreams["descMetadata"].term_values(:name,:role,:text).should == ["Creator","Contributor","Funder","Host"]
       @test_solr_object.datastreams["descMetadata"].term_values({:name=>0},:role,:text).should == ["Creator"]
       @test_solr_object.datastreams["descMetadata"].term_values({:name=>1},:role,:text).should == ["Contributor"]

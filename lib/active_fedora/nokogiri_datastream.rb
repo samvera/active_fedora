@@ -11,9 +11,8 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
   
   # extend(OM::XML::Container::ClassMethods)
 
-  #aliases for om document methods that are overriden so cannot be called for load_from_solr case
-  alias :om_term_values :term_values
-  alias :om_update_values :update_values
+  alias_method(:om_term_values, :term_values) unless method_defined?(:om_term_values)
+  alias_method(:om_update_values, :update_values) unless method_defined?(:om_update_values)
   
   attr_accessor :ng_xml, :internal_solr_doc
   
