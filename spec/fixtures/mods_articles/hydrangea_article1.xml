@@ -1,13 +1,13 @@
 <mods version="3.0" xsi:schemaLocation="http://www.loc.gov/mods/v3
- http://www.loc.gov/standards/mods/v3/mods-3-0.xsd" xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   http://www.loc.gov/standards/mods/v3/mods-3-0.xsd" xmlns="http://www.loc.gov/mods/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
     <titleInfo>
         <nonSort>THE</nonSort>
-        <title>ARTICLE TITLE HYDRANGEA ARTICLE 1</title>
+        <title>ARTICLE TITLE</title>
         <subTitle>SUBTITLE</subTitle>
     </titleInfo>
-    <titleInfo lang="finnish">
-        <title>Artikkelin otsikko Hydrangea artiklan 1</title>
+    <titleInfo type="alternative">
+        <title>VARYING FORM OF TITLE</title>
     </titleInfo>
 
     <name type="personal">
@@ -17,23 +17,31 @@
         <displayForm>NAME AS IT APPEARS</displayForm>
         <affiliation>FACULTY, UNIVERSITY</affiliation>    
         <role> 
-            <roleTerm authority="marcrelator" type="text">creator</roleTerm>
-        </role>
-        <role>
-            <roleTerm type="text">submitter</roleTerm>
+            <roleTerm authority="marcrelator" type="text">Creator</roleTerm>
         </role>
     </name>
-    
     <name type="personal">
-        <namePart type="family">Gautama</namePart>
-        <namePart type="given">Siddartha</namePart>
-        <namePart type="termsOfAddress">Prince</namePart>
-        <affiliation>Nirvana</affiliation>    
-        <role> 
-            <roleTerm authority="marcrelator" type="text">teacher</roleTerm>
+        <namePart type="family">Lacks</namePart>
+        <namePart type="given">Henrietta</namePart>
+        <displayForm>HeLa</displayForm>
+        <affiliation>Baltimore</affiliation>    
+        <role>
+            <roleTerm authority="marcrelator" type="text">Contributor</roleTerm>
         </role>
     </name>
-
+    <name type="corporate"> 
+      <namePart>NSF</namePart> 
+      <role> 
+        <roleTerm authority="marcrelator" type="text">Funder</roleTerm> 
+      </role> 
+    </name> 
+    <name type="conference"> 
+      <namePart>some conference</namePart> 
+      <role> 
+        <roleTerm authority="marcrelator" type="text">Host</roleTerm> 
+      </role> 
+    </name>
+      
     <typeOfResource>text</typeOfResource>
     <genre authority="local">journal article</genre>
 
