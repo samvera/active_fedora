@@ -188,11 +188,14 @@ module Fedora
     # remote service and resources.
     def http
       http = Net::HTTP.new(@site.host, @site.port)
-      if(@site.is_a?(URI::HTTPS) && !SSL_CLIENT_CERT_FILE.nil? && !SSL_CLIENT_KEY_FILE.nil? && !SSL_CLIENT_KEY_PASS.nil?)
+      if(@site.is_a?(URI::HTTPS))
         http.use_ssl = true
-        http.cert = OpenSSL::X509::Certificate.new( File.read(SSL_CLIENT_CERT_FILE) )
-        http.key = OpenSSL::PKey::RSA.new( File.read(SSL_CLIENT_KEY_FILE), SSL_CLIENT_KEY_PASS )
         http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+        if (defined?(SSL_CLIENT_CERT_FILE) && !SSL_CLIENT_CERT_FILE.nil? && defined?(SSL_CLIENT_KEY_FILE) && !SSL_CLIENT_KEY_FILE.nil? && defined?(SSL_CLIENT_KEY_PASS) && !SSL_CLIENT_KEY_PASS.nil?)
+          http.cert = OpenSSL::X509::Certificate.new( File.read(SSL_CLIENT_CERT_FILE) )
+          http.key = OpenSSL::PKey::RSA.new( File.read(SSL_CLIENT_KEY_FILE), SSL_CLIENT_KEY_PASS )
+        end
       end
       http
     end
