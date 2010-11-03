@@ -586,6 +586,22 @@ module ActiveFedora
         self.send(:define_method,:"#{append_method_name}") {|object| add_named_relationship(name,object)}
         self.send(:define_method,:"#{remove_method_name}") {|object| remove_named_relationship(name,object)}
       end 
+
+      #  ** EXPERIMENTAL **
+      #  Similar to +create_named_relationship_methods+ except we are merely creating an alias for outbound portion of bidirectional
+      #
+      #  ====Example
+      #    has_bidirectional_relationship "members", :has_collection_member, :is_member_of_collection
+      #    
+      #    Method members_outbound_append and members_outbound_remove added
+      #    This method will create members_append which does same thing as members_outbound_append
+      #    and will create members_remove which does same thing as members_outbound_remove
+      def create_bidirectional_named_relationship_methods(name,outbound_name)
+        append_method_name = "#{name.to_s.downcase}_append"
+        remove_method_name = "#{name.to_s.downcase}_remove"
+        self.send(:define_method,:"#{append_method_name}") {|object| add_named_relationship(outbound_name,object)}
+        self.send(:define_method,:"#{remove_method_name}") {|object| remove_named_relationship(outbound_name,object)}
+      end
     
       def create_inbound_relationship_finders(name, predicate, opts = {})
         class_eval <<-END
@@ -650,6 +666,7 @@ module ActiveFedora
       end
       
       # Generates relationship finders for predicates that point in both directions
+      # and registers predicate relationships for each direction.
       #
       # @name Name of the relationship method(s) to create
       # @outbound_predicate Predicate used in outbound relationships
@@ -659,9 +676,12 @@ module ActiveFedora
       def create_bidirectional_relationship_finders(name, outbound_predicate, inbound_predicate, opts={})
         inbound_method_name = name.to_s+"_inbound"
         outbound_method_name = name.to_s+"_outbound"
-        create_outbound_relationship_finders(outbound_method_name, outbound_predicate, opts)
-        create_inbound_relationship_finders(inbound_method_name, inbound_predicate, opts)
-        
+        has_relationship(outbound_method_name, outbound_predicate, opts)
+        has_relationship(inbound_method_name, inbound_predicate, opts.merge!(:inbound=>true))
+
+        #create methods that mirror the outbound append and remove with our bidirectional name, assume just add and remove locally        
+        create_bidirectional_named_relationship_methods(name,outbound_method_name)
+
         class_eval <<-END
         def #{name}(opts={})
           if opts[:response_format] == :solr || opts[:response_format] == :load_from_solr

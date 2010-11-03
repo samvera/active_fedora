@@ -383,12 +383,42 @@ describe ActiveFedora::SemanticNode do
       ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid OR #{id_array_query}").returns(solr_result)
       @local_node.all_parts(:response_format=>:solr)
     end
+
+    it "should register both inbound and outbound predicate components" do
+      @local_node.relationships[:inbound].has_key?(:is_part_of).should == true
+      @local_node.relationships[:self].has_key?(:has_part).should == true
+    end
+  
+    it "should register relationship names for inbound, outbound" do
+      @local_node.relationship_names.include?("all_parts_inbound").should == true
+      @local_node.relationship_names.include?("all_parts_outbound").should == true
+    end
+
   end
   
   describe "#has_bidirectional_relationship" do
     it "should ..." do
       SpecNode.expects(:create_bidirectional_relationship_finders).with("all_parts", :has_part, :is_part_of, {})
       SpecNode.has_bidirectional_relationship("all_parts", :has_part, :is_part_of)
+    end
+
+    it "should have named_relationship and relationship hashes contain bidirectionally related objects" do
+      SpecNode.has_bidirectional_relationship("all_parts", :has_part, :is_part_of)
+      @local_node = SpecNode.new
+      @local_node.pid = "mypid1"
+      @local_node2 = SpecNode.new
+      @local_node2.pid = "mypid2"
+      r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(SpecNode)}) 
+      @local_node.add_relationship(r)
+      @local_node2.add_relationship(r)
+      r2 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@local_node2})
+      @local_node.add_relationship(r2)
+      r3 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@local_node})
+      @local_node2.add_relationship(r3)
+      @local_node.relationships.should == {:self=>{:has_model=>[r.object],:has_part=>[r2.object]},:inbound=>{:is_part_of=>[]}}
+      @local_node2.relationships.should == {:self=>{:has_model=>[r.object],:has_part=>[r3.object]},:inbound=>{:is_part_of=>[]}}
+      @local_node.named_relationships.should == {:self=>{"all_parts_outbound"=>[r2.object]},:inbound=>{"all_parts_inbound"=>[]}}
+      @local_node2.named_relationships.should == {:self=>{"all_parts_outbound"=>[r3.object]},:inbound=>{"all_parts_inbound"=>[]}}
     end
   end
   
@@ -837,6 +867,21 @@ describe ActiveFedora::SemanticNode do
       class MockCreateNamedRelationshipMethods < SpecNode2
         register_named_relationship :self, "testing", :is_part_of, :type=>SpecNode2
         create_named_relationship_methods "testing"
+      end
+      
+      it 'should create an append and remove method for each outbound relationship' do
+        @test_object2 = MockCreateNamedRelationshipMethods.new
+        @test_object2.pid = increment_pid 
+        @test_object2.should respond_to(:testing_append)
+        @test_object2.should respond_to(:testing_remove)
+        #test execution in base_spec since method definitions include methods in ActiveFedora::Base
+      end
+    end
+
+    describe '#create_bidirectional_named_relationship_methods' do
+      class MockCreateNamedRelationshipMethods < SpecNode2
+        register_named_relationship :self, "testing_outbound", :is_part_of, :type=>SpecNode2
+        create_bidirectional_named_relationship_methods "testing", "testing_outbound"
       end
       
       it 'should create an append and remove method for each outbound relationship' do
