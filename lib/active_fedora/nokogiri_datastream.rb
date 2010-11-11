@@ -303,12 +303,29 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     return false
   end
 
-  #check if hash exists (yes) then generate possible values and include all in results that exist , no just use as is with general base
-  # yes ... all possible part of term need possible indexes except last one
-  # check each if no index then include all possible indexes
-  # if has index, use it
-  # if last element just use it
- 
+  # Update field values within the current datastream
+  # @param [Hash] params The params specifying which fields to update and their new values.  Format: term_pointer => {index => value, ...}
+  #         term_pointer must be a valind OM Term pointer (ie. [:name]).  Strings will be ignored.
+  # @param [Hash] opts This is not currently used by the datastream-level update_indexed_attributes method
+  #
+  # Example: 
+  # @mods_ds.update_indexed_attributes( {[{":person"=>"0"}, "role"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"} })
+  # => {"person_0_role"=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}}
+  #
+  # @mods_ds.to_xml will return something like this:
+  # <mods>
+  #   <mods:name type="person">
+  #    <mods:role>
+  #     <mods:roleTerm>role1</mods:roleTerm>
+  #    </mods:role>
+  #    <mods:role>
+  #     <mods:roleTerm>role2</mods:roleTerm>
+  #    </mods:role>
+  #    <mods:role>
+  #     <mods:roleTerm>role3</mods:roleTerm>
+  #    </mods:role>
+  #   </mods:name>
+  # </mods>
   def update_indexed_attributes(params={}, opts={})    
     if self.class.terminology.nil?
       raise "No terminology is set for this NokogiriDatastream class.  Cannot perform update_indexed_attributes"
@@ -318,6 +335,7 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     current_params = params.clone
     current_params.delete_if do |term_pointer,new_values| 
       if term_pointer.kind_of?(String)
+        logger.warn "WARNING: #{dsid} ignoring {#{term_pointer.inspect} => #{new_values.inspect}} because #{term_pointer.inspect} is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it."
         true
       else
         !self.class.terminology.has_term?(*OM.destringify(term_pointer))
