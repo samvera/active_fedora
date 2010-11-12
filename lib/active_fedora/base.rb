@@ -249,10 +249,19 @@ module ActiveFedora
     # Add the given file as a datastream in the object
     #
     # @param [File] file the file to add
-    # @param [Hash] opts options: :dsid, :label
+    # @param [Hash] opts options: :dsid, :label, :mimeType
     def add_file_datastream(file, opts={})
       label = opts.has_key?(:label) ? opts[:label] : ""
-      ds = ActiveFedora::Datastream.new(:dsLabel => label, :controlGroup => 'M', :blob => file)
+      attrs = {:dsLabel => label, :controlGroup => 'M', :blob => file}
+      if opts.has_key?(:mime_type)
+        attrs.merge!({:mimeType=>opts[:mime_type]})
+      elsif opts.has_key?(:mimeType)
+        attrs.merge!({:mimeType=>opts[:mimeType]})
+      elsif opts.has_key?(:content_type)
+        attrs.merge!({:mimeType=>opts[:content_type]})
+      end
+      
+      ds = ActiveFedora::Datastream.new(attrs)
       opts.has_key?(:dsid) ? ds.dsid=(opts[:dsid]) : nil
       add_datastream(ds)
     end
@@ -345,6 +354,12 @@ module ActiveFedora
       unless named_datastreams_desc.has_key?(name) && named_datastreams_desc[name].has_key?(:type) 
         raise "Failed to add datastream. Named datastream #{name} not defined for object #{pid}." 
       end
+
+      if opts.has_key?(:mime_type)
+        opts.merge!({:content_type=>opts[:mime_type]})
+      elsif opts.has_key?(:mimeType)
+        opts.merge!({:content_type=>opts[:mimeType]})
+      end
       opts.merge!(named_datastreams_desc[name])
         
       label = opts.has_key?(:label) ? opts[:label] : ""
@@ -366,8 +381,8 @@ module ActiveFedora
         if opts[:blob].respond_to?(:content_type)&&!opts[:blob].content_type.nil? && !opts.has_key?(:content_type)
           opts.merge!({:content_type=>opts[:blob].content_type})
         end
-     
-        raise "The blob must respond to content_type or the hash must have :content_type property set" unless opts.has_key?(:content_type)
+
+        raise "The blob must respond to content_type or the hash must have :content_type or :mime_type property set" unless opts.has_key?(:content_type)
         
         #throw error for mimeType mismatch
         if named_datastreams_desc[name].has_key?(:mimeType) && !named_datastreams_desc[name][:mimeType].eql?(opts[:content_type])

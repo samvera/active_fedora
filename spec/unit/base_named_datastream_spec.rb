@@ -5,6 +5,8 @@ require "active_fedora"
 
 describe ActiveFedora::Base do
   
+  @@last_pid = 0
+
   def increment_pid
     @@last_pid += 1    
   end
