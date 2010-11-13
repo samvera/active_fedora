@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{active-fedora}
-  s.version = "1.2.6"
+  s.version = "1.2.7"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2010-10-27}
+  s.date = %q{2010-11-13}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
@@ -220,6 +220,7 @@ Gem::Specification.new do |s|
      "solr/config/solrconfig-1.5.xml",
      "spec/fixtures/changeme155.xml",
      "spec/fixtures/dino.jpg",
+     "spec/fixtures/dino_jpg_no_file_ext",
      "spec/fixtures/hydrangea_fixture_mods_article1.foxml.xml",
      "spec/fixtures/minivan.jpg",
      "spec/fixtures/mods_articles/hydrangea_article1.xml",
@@ -238,6 +239,7 @@ Gem::Specification.new do |s|
      "spec/integration/metadata_datastream_helper_spec.rb",
      "spec/integration/model_spec.rb",
      "spec/integration/mods_article_integration_spec.rb",
+     "spec/integration/nokogiri_datastream_spec.rb",
      "spec/integration/rels_ext_datastream_spec.rb",
      "spec/integration/repository_spec.rb",
      "spec/integration/rf_fedora_object_spec.rb",
@@ -300,6 +302,7 @@ Gem::Specification.new do |s|
      "spec/integration/metadata_datastream_helper_spec.rb",
      "spec/integration/model_spec.rb",
      "spec/integration/mods_article_integration_spec.rb",
+     "spec/integration/nokogiri_datastream_spec.rb",
      "spec/integration/rels_ext_datastream_spec.rb",
      "spec/integration/repository_spec.rb",
      "spec/integration/rf_fedora_object_spec.rb",
