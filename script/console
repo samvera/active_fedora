@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # File: script/console
 irb = RUBY_PLATFORM =~ /(:?mswin|mingw)/ ? 'irb.bat' : 'irb'
-
+ENV["RUBYLIB"] = "lib"
 libs =  " -r irb/completion"
 libs << " -r #{File.dirname(__FILE__) + '/../spec/spec_helper'}"
 #libs << " -r rubygems"
