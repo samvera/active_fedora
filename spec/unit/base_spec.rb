@@ -35,6 +35,7 @@ describe ActiveFedora::Base do
 
   after(:each) do
     begin
+    ActiveFedora::SolrService.stubs(:instance)
     @test_object.delete
     rescue
     end
