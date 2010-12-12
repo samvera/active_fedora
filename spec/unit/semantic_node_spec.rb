@@ -244,7 +244,7 @@ describe ActiveFedora::SemanticNode do
       SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
       local_node = SpecNode.new()
       local_node.expects(:internal_uri).returns("info:fedora/test:sample_pid")
-      ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid").returns(solr_result)
+      ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid", :rows=>25).returns(solr_result)
       Fedora::Repository.expects(:instance).returns(mock_repo).times(3)
       Kernel.expects(:const_get).with("AudioRecord").returns("AudioRecord").times(3)
       local_node.parts.should == ["AR1", "AR2", "AR3"]
@@ -257,8 +257,8 @@ describe ActiveFedora::SemanticNode do
       mock_repo = mock("repo")
       mock_repo.expects(:find_model).never
       local_node.expects(:internal_uri).returns("info:fedora/test:sample_pid")
-      ActiveFedora::SolrService.instance.conn.expects(:query).with("is_constituent_of_s:info\\:fedora/test\\:sample_pid").returns(solr_result)
-      local_node.constituents(:response_format => :solr).should equal(solr_result)
+      ActiveFedora::SolrService.instance.conn.expects(:query).with("is_constituent_of_s:info\\:fedora/test\\:sample_pid", :rows=>101).returns(solr_result)
+      local_node.constituents(:response_format => :solr, :rows=>101).should equal(solr_result)
     end
     
     
@@ -266,7 +266,7 @@ describe ActiveFedora::SemanticNode do
       SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
       local_node = SpecNode.new
       local_node.expects(:internal_uri).returns("info:fedora/test:sample_pid")
-      ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid").returns(mock("solr result", :hits => [Hash["id"=>"pid1"], Hash["id"=>"pid2"]]))
+      ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid", :rows=>25).returns(mock("solr result", :hits => [Hash["id"=>"pid1"], Hash["id"=>"pid2"]]))
       local_node.parts(:response_format => :id_array).should == ["pid1", "pid2"]
     end
     

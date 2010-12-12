@@ -606,8 +606,9 @@ module ActiveFedora
       def create_inbound_relationship_finders(name, predicate, opts = {})
         class_eval <<-END
         def #{name}(opts={})
+          opts = {:rows=>25}.merge(opts)
           escaped_uri = self.internal_uri.gsub(/(:)/, '\\:')
-          solr_result = SolrService.instance.conn.query("#{predicate}_s:\#{escaped_uri}")
+          solr_result = SolrService.instance.conn.query("#{predicate}_s:\#{escaped_uri}", :rows=>opts[:rows])
           if opts[:response_format] == :solr
             return solr_result
           else
