@@ -70,10 +70,18 @@ describe ActiveFedora::Base do
     end
   end
   
-  
-  it "calling constructor should create a new Fedora Object" do    
-    @test_object.should have(0).errors
-    @test_object.pid.should_not be_nil
+  describe ".initialize" do
+    it "calling constructor should create a new Fedora Object" do    
+      @test_object.should have(0).errors
+      @test_object.pid.should_not be_nil
+    end
+
+    it "passing namespace to constructor with no pid should generate a pid with the supplied namespace" do
+      @test_object2 = ActiveFedora::Base.new({:namespace=>"randomNamespace"})
+      #@test_object2.pid.match('changeme:\d+').to_a.first.should == @test_object2.pid
+      # will be nil if match failed, otherwise will equal pid
+      @test_object2.pid.match('randomNamespace:\d+').to_a.first.should == @test_object2.pid
+    end
   end
   
   describe ".save" do

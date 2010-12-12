@@ -56,12 +56,19 @@ module ActiveFedora
     
     # Constructor. If +attrs+  does  not comtain +:pid+, we assume we're making a new one,
     # and call off to the Fedora Rest API for the next available Fedora pid, and mark as new object.
+    # Also, if +attrs+ does not contain +:pid+ but does contain +:namespace+ it will pass the
+    # +:namespace+ value to Fedora::Repository.nextid to generate the next pid available within
+    # the given namespace.
     # 
     # If there is a pid, we're re-hydrating an existing object, and new object is false. Once the @inner_object is stored,
     # we configure any defined datastreams.
     def initialize(attrs = {})
       unless attrs[:pid]
-        attrs = attrs.merge!({:pid=>Fedora::Repository.instance.nextid})  
+        if attrs[:namespace]
+          attrs = attrs.merge!({:pid=>Fedora::Repository.instance.nextid({:namespace=>attrs[:namespace]})})
+        else
+          attrs = attrs.merge!({:pid=>Fedora::Repository.instance.nextid})  
+        end
         @new_object=true
       else
         @new_object = attrs[:new_object] == false ? false : true

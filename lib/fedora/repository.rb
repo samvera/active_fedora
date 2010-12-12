@@ -116,8 +116,10 @@ module Fedora
       object.new_object? ? create(object) : update(object)
     end
 
-    def nextid
-      d = REXML::Document.new(connection.post(fedora_url.path+"/management/getNextPID?xml=true").body)
+    def nextid(attrs={})
+      request_url = fedora_url.path+"/management/getNextPID?xml=true"
+      request_url += "&namespace=#{attrs[:namespace]}" if attrs[:namespace]
+      d = REXML::Document.new(connection.post(request_url).body)
       d.elements['//pid'].text
     end
 
