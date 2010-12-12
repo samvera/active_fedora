@@ -53,7 +53,8 @@ module ActiveFedora
       # Takes :all or a pid as arguments
       # Returns an Array of objects of the Class that +find+ is being 
       # called on
-      def find(args)
+      def find(args, opts={})
+        opts = {:rows=>25}.merge(opts)
         return_multiple = false
         if args == :all
           return_multiple = true
@@ -63,7 +64,11 @@ module ActiveFedora
           escaped_id = args.gsub(/(:)/, '\\:')
           q = "#{SOLR_DOCUMENT_ID}:#{escaped_id}"
         end
-        hits = SolrService.instance.conn.query(q).hits 
+        if return_multiple == true
+          hits = SolrService.instance.conn.query(q, :rows=>opts[:rows]).hits 
+        else
+          hits = SolrService.instance.conn.query(q).hits 
+        end
         results = hits.map do |hit|
           obj = Fedora::Repository.instance.find_model(hit[SOLR_DOCUMENT_ID], self)
           #obj.inner_object.new_object = false
