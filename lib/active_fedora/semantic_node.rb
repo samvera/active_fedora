@@ -685,6 +685,7 @@ module ActiveFedora
 
         class_eval <<-END
         def #{name}(opts={})
+          opts = {:rows=>25}.merge(opts)
           if opts[:response_format] == :solr || opts[:response_format] == :load_from_solr
             escaped_uri = self.internal_uri.gsub(/(:)/, '\\:')
             query = "#{inbound_predicate}_s:\#{escaped_uri}"
@@ -692,7 +693,7 @@ module ActiveFedora
             outbound_id_array = #{outbound_method_name}(:response_format=>:id_array)
             query = query + " OR " + ActiveFedora::SolrService.construct_query_for_pids(outbound_id_array)
             
-            solr_result = SolrService.instance.conn.query(query)
+            solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
             
             if opts[:response_format] == :solr
               return solr_result

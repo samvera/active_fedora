@@ -366,21 +366,21 @@ describe ActiveFedora::SemanticNode do
       @local_node.should respond_to(:all_parts_outbound)
     end
     it "should rely on inbound & outbound finders" do      
-      @local_node.expects(:all_parts_inbound).returns(["foo1"])
-      @local_node.expects(:all_parts_outbound).returns(["foo2"])
+      @local_node.expects(:all_parts_inbound).with(:rows => 25).returns(["foo1"])
+      @local_node.expects(:all_parts_outbound).with(:rows => 25).returns(["foo2"])
       @local_node.all_parts.should == ["foo1", "foo2"]
     end
     it "(:response_format => :id_array) should rely on inbound & outbound finders" do
-      @local_node.expects(:all_parts_inbound).with(:response_format=>:id_array).returns(["fooA"])
-      @local_node.expects(:all_parts_outbound).with(:response_format=>:id_array).returns(["fooB"])
-      @local_node.all_parts(:response_format=>:id_array).should == ["fooA", "fooB"]
+      @local_node.expects(:all_parts_inbound).with(:response_format=>:id_array, :rows => 34).returns(["fooA"])
+      @local_node.expects(:all_parts_outbound).with(:response_format=>:id_array, :rows => 34).returns(["fooB"])
+      @local_node.all_parts(:response_format=>:id_array, :rows => 34).should == ["fooA", "fooB"]
     end
     it "(:response_format => :solr) should construct a solr query that combines inbound and outbound searches" do
       # get the id array for outbound relationships then construct solr query by combining id array with inbound relationship search
       @local_node.expects(:all_parts_outbound).with(:response_format=>:id_array).returns(["mypid:1"])
       id_array_query = ActiveFedora::SolrService.construct_query_for_pids(["mypid:1"])
       solr_result = mock("solr result")
-      ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid OR #{id_array_query}").returns(solr_result)
+      ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid OR #{id_array_query}", :rows=>25).returns(solr_result)
       @local_node.all_parts(:response_format=>:solr)
     end
 
