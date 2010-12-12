@@ -105,9 +105,9 @@ describe ActiveFedora::Model do
       mock_result.expects(:hits).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
       mock_solr.expects(:query).with('active_fedora_model_s:SpecModel\:\:Basic').returns(mock_result)
       ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
-      Fedora::Repository.instance.expects(:find_model).with("changeme:30", SpecModel::Basic).returns("Fake Object")
-      Fedora::Repository.instance.expects(:find_model).with("changeme:22", SpecModel::Basic).returns("Fake Object")
-      SpecModel::Basic.find(:all)
+      Fedora::Repository.instance.expects(:find_model).with("changeme:30", SpecModel::Basic).returns("Fake Object1")
+      Fedora::Repository.instance.expects(:find_model).with("changeme:22", SpecModel::Basic).returns("Fake Object2")
+      SpecModel::Basic.find(:all).should == ["Fake Object1", "Fake Object2"]
     end
     
     it "(String) should query solr for an object with the given id and return that object" do

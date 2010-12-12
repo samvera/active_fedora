@@ -54,7 +54,9 @@ module ActiveFedora
       # Returns an Array of objects of the Class that +find+ is being 
       # called on
       def find(args)
+        return_multiple = false
         if args == :all
+          return_multiple = true
           escaped_class_name = self.name.gsub(/(:)/, '\\:')
           q = "#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}"
         elsif args.class == String
@@ -67,7 +69,11 @@ module ActiveFedora
           #obj.inner_object.new_object = false
           #return obj
         end
-        results.first
+        if return_multiple == true
+          return results
+        else
+          return results.first
+        end
       end
 
       #Sends a query directly to SolrService
