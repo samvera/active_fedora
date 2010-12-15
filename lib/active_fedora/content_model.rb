@@ -13,8 +13,16 @@ module ActiveFedora
     
     def self.pid_from_ruby_class(klass,attrs={})
       sanitized_class_name = klass.name.gsub(/(::)/, '_')
-      pid_suffix = attrs.has_key?(:pid_suffix) ? attrs[:pid_suffix] : CMODEL_PID_SUFFIX
-      namespace = attrs.has_key?(:namespace) ? attrs[:namespace] : CMODEL_NAMESPACE   
+      unless klass.respond_to? :pid_suffix
+        pid_suffix = attrs.has_key?(:pid_suffix) ? attrs[:pid_suffix] : CMODEL_PID_SUFFIX
+      else
+        pid_suffix = klass.pid_suffix
+      end
+      unless klass.respond_to? :pid_namespace
+        namespace = attrs.has_key?(:namespace) ? attrs[:namespace] : CMODEL_NAMESPACE   
+      else
+        namespace = klass.pid_namespace
+      end
       return "#{namespace}:#{sanitized_class_name}#{pid_suffix}" 
     end
     
