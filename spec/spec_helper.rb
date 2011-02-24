@@ -3,6 +3,7 @@ gem 'mocha'
 require 'ruby-debug'
 require 'mocha'
 require 'ruby-fedora'
+require "equivalent-xml"
 begin
   require 'spec'
 rescue LoadError

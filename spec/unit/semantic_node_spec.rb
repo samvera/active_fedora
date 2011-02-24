@@ -503,8 +503,9 @@ describe ActiveFedora::SemanticNode do
       @node.add_relationship(@test_cmodel_relationship1)
       @node.add_relationship(@test_cmodel_relationship2)
       @node.internal_uri = @uri
-      returned_xml = XmlSimple.xml_in(@node.to_rels_ext(@pid))
-      returned_xml.should == XmlSimple.xml_in(@sample_rels_ext_xml)
+      # returned_xml = XmlSimple.xml_in(@node.to_rels_ext(@pid))
+      # returned_xml.should == XmlSimple.xml_in(@sample_rels_ext_xml)
+      EquivalentXml.equivalent?(@node.to_rels_ext(@pid), @sample_rels_ext_xml).should be_true
     end
     
     it "should treat :self and self.pid as equivalent subjects"
