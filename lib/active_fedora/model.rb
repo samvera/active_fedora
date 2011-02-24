@@ -188,7 +188,7 @@ module ActiveFedora
           query_opts[:sort] = sort_array
         end
 
-        puts "Querying solr for #{self.name} objects with query: '#{query}'"
+        logger.debug "Querying solr for #{self.name} objects with query: '#{query}'"
     	results = ActiveFedora::SolrService.instance.conn.query(query,query_opts)
     	#objects = []
         #  results.hits.each do |hit|

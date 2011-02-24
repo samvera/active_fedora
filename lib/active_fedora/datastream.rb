@@ -99,7 +99,7 @@ module ActiveFedora
         
         if datastream_xml.length > 3
           datastream_xml.elements.each do |el|
-            puts el.inspect
+            logger.debug el.inspect
           end
         end
         
