@@ -14,7 +14,8 @@ ha.datastreams["rightsMetadata"].to_xml
 ha.datastreams["rightsMetadata"].ng_xml.class
 </pre>
 
-# Not very informative, but the OM terminology is attached to the datastream's class
+Not very informative, but the OM terminology is attached to the datastream's class
+
 <pre>
 ha.datastreams["rightsMetadata"].class.terminology
 </pre>
