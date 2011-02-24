@@ -3,18 +3,23 @@ h2. Using OM-based NokogiriDatastreams
 ha = HydrangeaArticle.new
 fixture_article = HydrangeaArticle.load_instance("hydrangea:fixture_mods_article1")
 
-
+<pre>
 ha.datastreams.keys
 fixture_article.datastreams.keys
+</pre>
 
+<pre>
 ha.datastreams["rightsMetadata"].class
 ha.datastreams["rightsMetadata"].to_xml
 ha.datastreams["rightsMetadata"].ng_xml.class
+</pre>
 
 # Not very informative, but the OM terminology is attached to the datastream's class
+<pre>
 ha.datastreams["rightsMetadata"].class.terminology
+</pre>
 
-
+<pre>
 ha.datastreams["descMetadata"].class
 
 fixture_mods_ds = fixture_article.datastreams["descMetadata"]
@@ -24,5 +29,6 @@ fixture_mods_ds.term_values(:person, :last_name)
 fixture_mods_ds.find_by_terms(:person)
 fixture_mods_ds.find_by_terms(:person).length
 fixture_mods_ds.find_by_terms(:person).each {|n| puts n.to_xml}
-
+</pre>
+  
 Look in the "Hydra::ModsArticle":https://github.com/projecthydra/hydrangea/blob/master/vendor/plugins/hydra_repository/lib/hydra/mods_article.rb and "Hydra::RightsMetadata":https://github.com/projecthydra/hydrangea/blob/master/vendor/plugins/hydra_repository/lib/hydra/rights_metadata.rb" datastream definitions to see the OM Terminologies they define.
