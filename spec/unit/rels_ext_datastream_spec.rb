@@ -80,17 +80,17 @@ describe ActiveFedora::RelsExtDatastream do
     
     it "should provide .to_solr and return a SolrDocument" do
       @test_ds.should respond_to(:to_solr)
-      @test_ds.to_solr.should be_kind_of(Solr::Document)
+      @test_ds.to_solr.should be_kind_of(Hash)
     end
     
-    it "should serialize the relationships into a Solr::Document" do
+    it "should serialize the relationships into a Hash" do
       @test_ds.add_relationship(@test_relationship1)
       @test_ds.add_relationship(@test_relationship2)
       @test_ds.add_relationship(@test_relationship3)
       solr_doc = @test_ds.to_solr
-      solr_doc[:is_member_of_s].should == "info:fedora/demo:10"
-      solr_doc[:is_part_of_s].should == "info:fedora/demo:11"
-      solr_doc[:has_part_s].should == "info:fedora/demo:12"
+      solr_doc["is_member_of_s"].should == ["info:fedora/demo:10"]
+      solr_doc["is_part_of_s"].should == ["info:fedora/demo:11"]
+      solr_doc["has_part_s"].should == ["info:fedora/demo:12"]
     end
   end
   

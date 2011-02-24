@@ -244,7 +244,7 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
   #@return [Boolean] true if either the key for name exists in solr or if its string value exists
   #@param [String] name Name of key to look for
   #@param [Solr::Document] solr_doc Solr doc to query
-  def has_solr_name?(name, solr_doc=Solr::Document.new)
+  def has_solr_name?(name, solr_doc=Hash.new)
     !solr_doc[name].nil? || !solr_doc[name.to_s].nil?
   end
 

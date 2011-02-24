@@ -181,7 +181,7 @@ describe ActiveFedora::Base do
     
     @solr_result = OralHistory.find_by_solr(@test_history.pid).hits[0]
     @properties_sample_values.each_pair do |field, value|
-      (@solr_result["#{field.to_s}_t"] || @solr_result["#{field.to_s}_dt"]).should == [value] 
+      (@solr_result["#{field.to_s}_t"] || @solr_result["#{field.to_s}_dt"]).should == [::Solrizer::Extractor.format_node_value(value)] 
     end
     
     @dublin_core_sample_values.each_pair do |field, value|

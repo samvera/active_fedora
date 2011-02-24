@@ -369,7 +369,7 @@ describe ActiveFedora::Base do
     it "should omit base metadata and RELS-EXT if :model_only==true" do
       @test_object.add_relationship(:has_part, "foo")
       # @test_object.expects(:modified_date).returns("mDate")
-      solr_doc = @test_object.to_solr(Solr::Document.new, :model_only => true)
+      solr_doc = @test_object.to_solr(Hash.new, :model_only => true)
       solr_doc["system_create_dt"].should be_nil
       solr_doc["system_modified_dt"].should be_nil
       solr_doc["id"].should be_nil

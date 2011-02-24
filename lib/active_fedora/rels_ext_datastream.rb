@@ -41,12 +41,12 @@ module ActiveFedora
       tmpl
     end
     
-    def to_solr(solr_doc = Solr::Document.new)
+    def to_solr(solr_doc = Hash.new)
       self.relationships.each_pair do |subject, predicates|
         if subject == :self || subject == "info:fedora/#{self.pid}"
           predicates.each_pair do |predicate, values|
             values.each do |val|
-              solr_doc << Solr::Field.new(solr_name(predicate, :symbol) => val)
+              ::Solrizer::Extractor.insert_solr_field_value(solr_doc, solr_name(predicate, :symbol), val )
             end
           end
         end

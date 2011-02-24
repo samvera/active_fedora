@@ -4,7 +4,7 @@ module ActiveFedora
     
     include ActiveFedora::MetadataDatastreamHelper
 
-    # .to_solr and .to_xml (among other things) are provided by ActiveFedora::MetadataDatastream
+    # .to_solr and .to_xml (among other things) are provided by ActiveFedora::MetadataDatastreamHelper
     self.xml_model = ActiveFedora::MetadataDatastream    
 
     def update_attributes(params={},opts={})

@@ -1,11 +1,13 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    activeresource (2.3.10)
-      activesupport (= 2.3.10)
-    activesupport (2.3.10)
+    activeresource (2.3.11)
+      activesupport (= 2.3.11)
+    activesupport (2.3.11)
     columnize (0.3.2)
-    facets (2.9.0)
+    equivalent-xml (0.1.6)
+      nokogiri
+    facets (2.9.1)
     git (1.2.5)
     jeweler (1.5.2)
       bundler (~> 1.0.0)
@@ -14,8 +16,7 @@ GEM
     linecache (0.43)
     mediashelf-loggable (0.4.0)
     mime-types (1.16)
-    mocha (0.9.10)
-      rake
+    mocha (0.9.12)
     multipart-post (1.1.0)
     nokogiri (1.4.4)
     om (1.0.2)
@@ -31,12 +32,15 @@ GEM
     ruby-debug-base (0.10.4)
       linecache (>= 0.3)
     solr-ruby (0.0.8)
-    solrizer (0.3.2)
+    solrizer (1.0.0)
+      mediashelf-loggable
       mediashelf-loggable
       nokogiri
       nokogiri
+      nokogiri
       om
-      solr-ruby
+      om (>= 1.0.0)
+      xml-simple
     xml-simple (1.0.14)
 
 PLATFORMS
@@ -44,6 +48,7 @@ PLATFORMS
 
 DEPENDENCIES
   activeresource (< 3.0.0)
+  equivalent-xml
   jeweler
   mediashelf-loggable
   mime-types (>= 1.16)
@@ -54,5 +59,5 @@ DEPENDENCIES
   rspec (< 2.0.0)
   ruby-debug
   solr-ruby (>= 0.0.6)
-  solrizer (>= 0.3.0)
+  solrizer (>= 1.0.0, < 2.0.0)
   xml-simple (>= 1.0.12)

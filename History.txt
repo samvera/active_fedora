@@ -1,3 +1,10 @@
+2.0.0
+
+Upgraded to use solrizer 1.0.0, which uses RSolr instead of the outdated ruby-solr:
+
+  All solrize and extract methods now accept and return a _Hash_ rather than a Solr::Document
+  As part of this switch, *all field names are stored as Strings, not Symbols*. If you previously accessed something as solr_doc[:title_t], now you need to access it as solr_doc["title_t"]
+
 1.2.9
 Minor: Fixed Gemfile to require activeresource <3.0.0 NOT >3.0.0
 

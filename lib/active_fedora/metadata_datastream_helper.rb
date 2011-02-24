@@ -37,12 +37,12 @@ module ActiveFedora::MetadataDatastreamHelper
     self.blob = self.to_xml
   end
 
-  def to_solr(solr_doc = Solr::Document.new) # :nodoc:
+  def to_solr(solr_doc = Hash.new) # :nodoc:
     fields.each do |field_key, field_info|
       if field_info.has_key?(:values) && !field_info[:values].nil?
         field_symbol = ActiveFedora::SolrService.solr_name(field_key, field_info[:type])
-        field_info[:values].each do |val|             
-          solr_doc << Solr::Field.new(field_symbol => val)
+        field_info[:values].each do |val|    
+          ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val )         
         end
       end
     end
@@ -88,7 +88,6 @@ module ActiveFedora::MetadataDatastreamHelper
         element_attrs = field_info[:element_attrs].nil? ? {} : field_info[:element_attrs]
         field_info[:values].each do |val|
           builder_arg = "xml.#{field}(val, element_attrs)"
-          puts builder_arg.inspect
           eval(builder_arg)
         end
       end

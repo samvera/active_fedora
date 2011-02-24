@@ -322,11 +322,11 @@ describe ActiveFedora::MetadataDatastream do
     
     it "should provide .to_solr and return a SolrDocument" do
       @test_ds.should respond_to(:to_solr)
-      @test_ds.to_solr.should be_kind_of(Solr::Document)
+      @test_ds.to_solr.should be_kind_of(Hash)
     end
     
     it "should optionally allow you to provide the Solr::Document to add fields to and return that document when done" do
-      doc = Solr::Document.new
+      doc = Hash.new
       @test_ds.to_solr(doc).should equal(doc)
     end
     
@@ -334,12 +334,12 @@ describe ActiveFedora::MetadataDatastream do
       @test_ds.expects(:fields).returns(@sample_fields)
       solr_doc =  @test_ds.to_solr
       
-      solr_doc[:publisher_t].should == "publisher1"
-      solr_doc[:coverage_t].should == "coverage1"
-      solr_doc[:creation_date_dt].should == "fake-date"
-      solr_doc[:mydate_dt].should == "fake-date"
+      solr_doc["publisher_t"].should == ["publisher1"]
+      solr_doc["coverage_t"].sort.should == ["coverage1", "coverage2"]
+      solr_doc["creation_date_dt"].should == ["fake-date"]
+      solr_doc["mydate_dt"].should == ["fake-date"]
       
-      solr_doc[:empty_field_t].should be_nil
+      solr_doc["empty_field_t"].should be_nil
     end
     
     it "should allow multiple values for a single field"
@@ -349,14 +349,14 @@ describe ActiveFedora::MetadataDatastream do
       
       #should have these
             
-      @test_ds.to_solr[:publisher_t].should_not be_nil
-      @test_ds.to_solr[:coverage_t].should_not be_nil
-      @test_ds.to_solr[:creation_date_dt].should_not be_nil
+      @test_ds.to_solr["publisher_t"].should_not be_nil
+      @test_ds.to_solr["coverage_t"].should_not be_nil
+      @test_ds.to_solr["creation_date_dt"].should_not be_nil
       
       #should NOT have these
-      @test_ds.to_solr[:narrator].should be_nil
-      @test_ds.to_solr[:title].should be_nil
-      @test_ds.to_solr[:empty_field].should be_nil
+      @test_ds.to_solr["narrator"].should be_nil
+      @test_ds.to_solr["title"].should be_nil
+      @test_ds.to_solr["empty_field"].should be_nil
       
     end
     
@@ -367,31 +367,30 @@ describe ActiveFedora::MetadataDatastream do
       
       #should have these
             
-      solr_doc[:publisher_field].should == "publisher1"
-      solr_doc[:coverage_field].should == "coverage1"
-      solr_doc[:creation_date_date].should == "fake-date"
-      solr_doc[:mydate_date].should == "fake-date"
+      solr_doc["publisher_field"].should == ["publisher1"]
+      solr_doc["coverage_field"].sort.should == ["coverage1", "coverage2"]
+      solr_doc["creation_date_date"].should == ["fake-date"]
+      solr_doc["mydate_date"].should == ["fake-date"]
       
-      solr_doc[:publisher_t].should be_nil
-      solr_doc[:coverage_t].should be_nil
-      solr_doc[:creation_date_dt].should be_nil
+      solr_doc["publisher_t"].should be_nil
+      solr_doc["coverage_t"].should be_nil
+      solr_doc["creation_date_dt"].should be_nil
       
       # Reload default mappings
       ActiveFedora::SolrService.load_mappings
     end
     
     it 'should append _dt to dates' do
+      ActiveFedora::SolrService.load_mappings
       @test_ds.expects(:fields).returns(@sample_fields).at_least_once
       
-      #should have these
-      
-      @test_ds.to_solr[:creation_date_dt].should_not be_nil
-      @test_ds.to_solr[:mydate_dt].should_not be_nil
+      @test_ds.to_solr["creation_date_dt"].should_not be_nil
+      @test_ds.to_solr["mydate_dt"].should_not be_nil
       
       #should NOT have these
       
-      @test_ds.to_solr[:mydate].should be_nil
-      @test_ds.to_solr[:creation_date_date].should be_nil
+      @test_ds.to_solr["mydate"].should be_nil
+      @test_ds.to_solr["creation_date_date"].should be_nil
     end
     
   end
