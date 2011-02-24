@@ -28,7 +28,7 @@ describe ActiveFedora::Base do
   end
 
   before(:each) do
-    Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
+    Fedora::Repository.instance.stubs(:nextid).returns(increment_pid.to_s)
     @test_object = ActiveFedora::Base.new
     @test_object.new_object = true
   end
@@ -321,14 +321,14 @@ describe ActiveFedora::Base do
       @test_object.expects(:create_date).returns("cDate")
       @test_object.expects(:modified_date).returns("mDate")
       solr_doc = @test_object.to_solr
-      solr_doc[:system_create_dt].should eql("cDate")
-      solr_doc[:system_modified_dt].should eql("mDate")
+      solr_doc["system_create_dt"].should eql("cDate")
+      solr_doc["system_modified_dt"].should eql("mDate")
       solr_doc[:id].should eql("#{@test_object.pid}")
     end
 
     it "should add self.class as the :active_fedora_model" do
       solr_doc = @test_object.to_solr
-      solr_doc[:active_fedora_model_s].should eql(@test_object.class.inspect)
+      solr_doc["active_fedora_model_s"].should eql(@test_object.class.inspect)
     end
 
     it "should call .to_xml on all MetadataDatastreams and return the resulting document" do
@@ -340,7 +340,7 @@ describe ActiveFedora::Base do
       @test_object.to_xml
     end
   end
-
+  
   describe ".to_solr" do
     
     # before(:all) do
@@ -361,8 +361,8 @@ describe ActiveFedora::Base do
       @test_object.expects(:create_date).returns("cDate")
       @test_object.expects(:modified_date).returns("mDate")
       solr_doc = @test_object.to_solr
-      solr_doc[:system_create_dt].should eql("cDate")
-      solr_doc[:system_modified_dt].should eql("mDate")
+      solr_doc["system_create_dt"].should eql("cDate")
+      solr_doc["system_modified_dt"].should eql("mDate")
       solr_doc[:id].should eql("#{@test_object.pid}")
     end
 
@@ -370,15 +370,15 @@ describe ActiveFedora::Base do
       @test_object.add_relationship(:has_part, "foo")
       # @test_object.expects(:modified_date).returns("mDate")
       solr_doc = @test_object.to_solr(Solr::Document.new, :model_only => true)
-      solr_doc[:system_create_dt].should be_nil
-      solr_doc[:system_modified_dt].should be_nil
-      solr_doc[:id].should be_nil
-      solr_doc[:has_part_s].should be_nil
+      solr_doc["system_create_dt"].should be_nil
+      solr_doc["system_modified_dt"].should be_nil
+      solr_doc["id"].should be_nil
+      solr_doc["has_part_s"].should be_nil
     end
     
     it "should add self.class as the :active_fedora_model" do
       solr_doc = @test_object.to_solr
-      solr_doc[:active_fedora_model_s].should eql(@test_object.class.inspect)
+      solr_doc["active_fedora_model_s"].should eql(@test_object.class.inspect)
     end
 
     it "should use mappings.yml to decide names of solr fields" do      
@@ -387,20 +387,20 @@ describe ActiveFedora::Base do
       @test_object.stubs(:create_date).returns(cdate)
       @test_object.stubs(:modified_date).returns(mdate)
       solr_doc = @test_object.to_solr
-      solr_doc[:system_create_dt].should eql(cdate)
-      solr_doc[:system_modified_dt].should eql(mdate)
+      solr_doc["system_create_dt"].should eql(cdate)
+      solr_doc["system_modified_dt"].should eql(mdate)
       solr_doc[:id].should eql("#{@test_object.pid}")
-      solr_doc[:active_fedora_model_s].should eql(@test_object.class.inspect)
+      solr_doc["active_fedora_model_s"].should eql(@test_object.class.inspect)
       
       ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
       solr_doc = @test_object.to_solr
       [:system_create_dt, :system_modified_dt, :active_fedora_model_s].each do |fn|
         solr_doc[fn].should == nil
       end
-      solr_doc[:system_create_date].should eql(cdate)
-      solr_doc[:system_modified_date].should eql(mdate)
+      solr_doc["system_create_date"].should eql(cdate)
+      solr_doc["system_modified_date"].should eql(mdate)
       solr_doc[:id].should eql("#{@test_object.pid}")
-      solr_doc[:active_fedora_model_field].should eql(@test_object.class.inspect)
+      solr_doc["active_fedora_model_field"].should eql(@test_object.class.inspect)
     end
     
     it "should call .to_solr on all MetadataDatastreams and NokogiriDatastreams, passing the resulting document to solr" do

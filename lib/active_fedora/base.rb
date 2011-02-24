@@ -847,13 +847,13 @@ module ActiveFedora
       return xml.to_s
     end
 
-    # Return a Solr::Document version of this object.
-    # @solr_doc (optional) Solr::Document to insert the fields into
+    # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.
+    # @solr_doc (optional) Hash to insert the fields into
     # @opts (optional) Hash
     # If opts[:model_only] == true, the base object metadata and the RELS-EXT datastream will be omitted.  This is mainly to support shelver, which calls .to_solr for each model an object subscribes to. 
-    def to_solr(solr_doc = Solr::Document.new, opts={})
+    def to_solr(solr_doc = Hash.new, opts={})
       unless opts[:model_only]
-        solr_doc << {SOLR_DOCUMENT_ID.to_sym => pid, ActiveFedora::SolrService.solr_name(:system_create, :date) => self.create_date, ActiveFedora::SolrService.solr_name(:system_modified, :date) => self.modified_date, ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol) => self.class.inspect}
+        solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid, ActiveFedora::SolrService.solr_name(:system_create, :date) => self.create_date, ActiveFedora::SolrService.solr_name(:system_modified, :date) => self.modified_date, ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol) => self.class.inspect)
       end
       datastreams.each_value do |ds|
         # solr_doc = ds.to_solr(solr_doc) if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) ||( ds.kind_of?(ActiveFedora::RelsExtDatastream) || ( ds.kind_of?(ActiveFedora::QualifiedDublinCoreDatastream) && !opts[:model_only] )
@@ -866,6 +866,7 @@ module ActiveFedora
       end
       return solr_doc
     end
+
     
     # ** EXPERIMENTAL **
     #
