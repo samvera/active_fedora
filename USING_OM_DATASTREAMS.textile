@@ -1,35 +1,60 @@
-h2. Using OM-based NokogiriDatastreams
+h1. Using OM-based NokogiriDatastreams
 
+h2. Setup
+
+This tutorial assumes that you've run script/console from the root of Hydrangea and have imported Hydrangea's fixtures.
+
+The HydrangeaArticle model definition is located at https://github.com/projecthydra/hydrangea/blob/master/vendor/plugins/hydrangea_articles/app/models/hydrangea_article.rb
+
+Look in the "Hydra::ModsArticle":https://github.com/projecthydra/hydrangea/blob/master/vendor/plugins/hydra_repository/lib/hydra/mods_article.rb and "Hydra::RightsMetadata":https://github.com/projecthydra/hydrangea/blob/master/vendor/plugins/hydra_repository/lib/hydra/rights_metadata.rb" datastream definitions to see the OM Terminologies they define.
+
+h2. The Tour
+
+First, create some objects to play around with.
+
+<pre>
 ha = HydrangeaArticle.new
 fixture_article = HydrangeaArticle.load_instance("hydrangea:fixture_mods_article1")
+<pre>
 
 <pre>
 ha.datastreams.keys
 fixture_article.datastreams.keys
 </pre>
 
+Each datastream is associated with a class that is aware of its content.  These classes are specified in the model.  
+
 <pre>
 ha.datastreams["rightsMetadata"].class
+ha.datastreams["descMetadata"].class
+<pre>
+  
+You can retrieve the xml from the object as xml (string) using to_xml, or you can access it as a Nokogiri::XML::Document using .ng_xml
+
+<pre>
 ha.datastreams["rightsMetadata"].to_xml
 ha.datastreams["rightsMetadata"].ng_xml.class
 </pre>
 
-Not very informative, but the OM terminology is attached to the datastream's class
+FYI, an OM terminology is attached to the datastream's class.  OM's convenience methods use the terminology to look up nodes and values for you.
 
 <pre>
 ha.datastreams["rightsMetadata"].class.terminology
 </pre>
 
-<pre>
-ha.datastreams["descMetadata"].class
+The ModsArticle Terminology lets you retrieve values from the descMetadata datastream's MODS content.
 
+<pre>
 fixture_mods_ds = fixture_article.datastreams["descMetadata"]
 fixture_mods_ds.term_values(:person, :first_name)
 fixture_mods_ds.term_values(:person, :last_name)
+</pre>
 
+You can use OM's find_by_terms method to retrieve xml nodes from the datastream.  It returns Nokogiri::XML::Node objects.
+
+<pre>
 fixture_mods_ds.find_by_terms(:person)
 fixture_mods_ds.find_by_terms(:person).length
 fixture_mods_ds.find_by_terms(:person).each {|n| puts n.to_xml}
 </pre>
   
-Look in the "Hydra::ModsArticle":https://github.com/projecthydra/hydrangea/blob/master/vendor/plugins/hydra_repository/lib/hydra/mods_article.rb and "Hydra::RightsMetadata":https://github.com/projecthydra/hydrangea/blob/master/vendor/plugins/hydra_repository/lib/hydra/rights_metadata.rb" datastream definitions to see the OM Terminologies they define.
