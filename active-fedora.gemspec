@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{active-fedora}
-  s.version = "1.2.9"
+  s.version = "2.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2011-01-31}
+  s.date = %q{2011-03-03}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
@@ -178,6 +178,7 @@ Gem::Specification.new do |s|
     "PostInstall.txt",
     "README.textile",
     "Rakefile",
+    "USING_OM_DATASTREAMS.textile",
     "VERSION",
     "active-fedora.gemspec",
     "config/fedora.yml",
@@ -351,9 +352,10 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<multipart-post>, [">= 0"])
       s.add_runtime_dependency(%q<nokogiri>, [">= 0"])
       s.add_runtime_dependency(%q<om>, [">= 1.0"])
-      s.add_runtime_dependency(%q<solrizer>, [">= 0.3.0"])
+      s.add_runtime_dependency(%q<solrizer>, [">= 1.0.0", "< 2.0.0"])
       s.add_runtime_dependency(%q<activeresource>, ["< 3.0.0"])
       s.add_runtime_dependency(%q<mediashelf-loggable>, [">= 0"])
+      s.add_runtime_dependency(%q<equivalent-xml>, [">= 0"])
       s.add_development_dependency(%q<jeweler>, [">= 0"])
       s.add_development_dependency(%q<rspec>, ["< 2.0.0"])
       s.add_development_dependency(%q<mocha>, [">= 0.9.8"])
@@ -376,9 +378,10 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<multipart-post>, [">= 0"])
       s.add_dependency(%q<nokogiri>, [">= 0"])
       s.add_dependency(%q<om>, [">= 1.0"])
-      s.add_dependency(%q<solrizer>, [">= 0.3.0"])
+      s.add_dependency(%q<solrizer>, [">= 1.0.0", "< 2.0.0"])
       s.add_dependency(%q<activeresource>, ["< 3.0.0"])
       s.add_dependency(%q<mediashelf-loggable>, [">= 0"])
+      s.add_dependency(%q<equivalent-xml>, [">= 0"])
       s.add_dependency(%q<jeweler>, [">= 0"])
       s.add_dependency(%q<rspec>, ["< 2.0.0"])
       s.add_dependency(%q<mocha>, [">= 0.9.8"])
@@ -402,9 +405,10 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<multipart-post>, [">= 0"])
     s.add_dependency(%q<nokogiri>, [">= 0"])
     s.add_dependency(%q<om>, [">= 1.0"])
-    s.add_dependency(%q<solrizer>, [">= 0.3.0"])
+    s.add_dependency(%q<solrizer>, [">= 1.0.0", "< 2.0.0"])
     s.add_dependency(%q<activeresource>, ["< 3.0.0"])
     s.add_dependency(%q<mediashelf-loggable>, [">= 0"])
+    s.add_dependency(%q<equivalent-xml>, [">= 0"])
     s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<rspec>, ["< 2.0.0"])
     s.add_dependency(%q<mocha>, [">= 0.9.8"])
