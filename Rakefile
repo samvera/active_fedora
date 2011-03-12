@@ -21,10 +21,10 @@ begin
     gem.add_dependency('nokogiri')
     gem.add_dependency('om', '>= 1.0')
     gem.add_dependency('solrizer', '>1.0.0')
-    gem.add_dependency("activeresource", "<3.0.0")
-    gem.add_development_dependency "rspec", ">= 1.2.9"
-    gem.add_development_dependency "mocha", ">= 0.9.8"
-    gem.add_development_dependency "ruby-debug"
+    gem.add_dependency("activeresource")
+    gem.add_dependency("mediashelf-loggable")
+    gem.add_dependency("equivalent-xml")
+    
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new

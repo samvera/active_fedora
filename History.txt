@@ -1,3 +1,8 @@
+2.0.2
+
+Fixed activeresource requirement in specfile
+Switched Bundler to rely on specfile for runtime dependencies.
+
 2.0.1
 
 Made Gemfile agnostic about Rails version (dependency on activeresource)
