@@ -7,7 +7,7 @@ gem 'multipart-post'
 gem 'nokogiri'
 gem 'om', '>= 1.0'
 gem 'solrizer', '>=1.0.0', '<2.0.0'
-gem 'activeresource', '<3.0.0'
+gem 'activeresource'
 gem 'mediashelf-loggable'
 gem "equivalent-xml"
 
