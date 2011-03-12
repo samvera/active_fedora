@@ -1,3 +1,7 @@
+2.0.1
+
+Made Gemfile agnostic about Rails version (dependency on activeresource)
+
 2.0.0
 
 Upgraded to use solrizer 1.0.0, which uses RSolr instead of the outdated ruby-solr:
