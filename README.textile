@@ -21,7 +21,7 @@ The "ActiveFedora Console Tour":http://projects.mediashelf.us/wiki/active-fedora
 
 h2. Testing
 
-In order to run the RSpec tests, you need to have a copy of hydra-jetty running.  To do this, download a working copy of hydra-jetty, cd into its root and run 
+In order to run the RSpec tests, you need to have a copy of hydra-jetty running.  To do this, download a working copy of "hydra-jetty":https://github.com/projecthydra/hydra-jetty, cd into its root and run 
 <pre>java -jar start.jar</pre>
 
 Then open a new terminal and import fedora's demo objects.
