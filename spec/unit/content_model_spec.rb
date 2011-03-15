@@ -9,6 +9,9 @@ describe ActiveFedora::ContentModel do
   before(:all) do
     class SampleModel < ActiveFedora::Base
     end
+
+    class GenericContent < ActiveFedora::Base
+    end
   end
   
   before(:each) do
@@ -96,6 +99,7 @@ describe ActiveFedora::ContentModel do
       ActiveFedora::ContentModel.uri_to_ruby_class("info:fedora/afmodel:SampleModel").should == SampleModel
       ActiveFedora::ContentModel.uri_to_ruby_class("info:fedora/afmodel:NonDefinedModel").should == false
       ActiveFedora::ContentModel.uri_to_ruby_class("info:fedora/afmodel:String").should == String
+      ActiveFedora::ContentModel.uri_to_ruby_class("info:fedora/hydra-cModel:genericContent").should == GenericContent
     end
   end
   
@@ -104,6 +108,7 @@ describe ActiveFedora::ContentModel do
       ActiveFedora::ContentModel.uri_to_model_class("info:fedora/afmodel:SampleModel").should == SampleModel
       ActiveFedora::ContentModel.uri_to_model_class("info:fedora/afmodel:NonDefinedModel").should == false
       ActiveFedora::ContentModel.uri_to_model_class("info:fedora/afmodel:String").should == false
+      ActiveFedora::ContentModel.uri_to_model_class("info:fedora/hydra-cModel:genericContent").should == GenericContent
     end
   end
 
