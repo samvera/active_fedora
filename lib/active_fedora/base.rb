@@ -299,9 +299,12 @@ module ActiveFedora
       return result
     end
     
-    # Add the given file as a datastream in the object
+    # Add the given obj as a child to the current object using an inbound is_part_of relationship
     #
-    # @param [ActiveFedora::Base] obj the file to add
+    # @param [ActiveFedora::Base,String] obj the object or the pid of the object to add
+    # @return [Boolean] whether saving the child object was successful
+    # @example This will add an is_part_of relationship to the child_object's RELS-EXT datastream pointing at parent_object
+    #   parent_object.file_objects_append(child_object)
     def file_objects_append(obj)
       # collection_members_append(obj)
       unless obj.kind_of? ActiveFedora::Base
@@ -315,8 +318,15 @@ module ActiveFedora
       obj.save
     end
     
+    # Add the given obj as a collection member to the current object using an outbound has_collection_member relationship.
+    #
+    # @param [ActiveFedora::Base] obj the file to add
+    # @return [ActiveFedora::Base] obj returns self
+    # @example This will add a has_collection_member relationship to the parent_object's RELS-EXT datastream pointing at child_object
+    #   parent_object.collection_members_append(child_object)
     def collection_members_append(obj)
       add_relationship(:has_collection_member, obj)
+      return self
     end
 
     def collection_members_remove()
