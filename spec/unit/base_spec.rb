@@ -480,8 +480,8 @@ describe ActiveFedora::Base do
       }
       m = FooHistory.new
       m.stubs(:datastreams_in_memory).returns(mock_ds_hash)
-      mock_desc_metadata.expects(:update_attributes).with( ds_values_hash['descMetadata'] )
-      mock_properties.expects(:update_attributes).with( ds_values_hash['properties'] )
+      mock_desc_metadata.expects(:update_indexed_attributes).with( ds_values_hash['descMetadata'] )
+      mock_properties.expects(:update_indexed_attributes).with( ds_values_hash['properties'] )
       m.update_datastream_attributes( ds_values_hash )
     end
     it "should not do anything and should return an empty hash if the specified datastream does not exist" do

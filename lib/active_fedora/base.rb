@@ -995,11 +995,21 @@ module ActiveFedora
       return result
     end
     
+    # Updates the attributes for each datastream named in the params Hash
+    # @param [Hash] params A Hash whose keys correspond to datastream ids and whose values are appropriate Hashes to submit to update_indexed_attributes on that datastream
+    # @param [Hash] opts (currently ignored.)
+    # @example Update the descMetadata and properties datastreams with new values
+    #   article = HydrangeaArticle.new
+    #   ds_values_hash = {
+    #     "descMetadata"=>{ [{:person=>0}, :role]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"} },
+    #     "properties"=>{ "notes"=>"foo" }
+    #   }
+    #   article.update_datastream_attributes( ds_values_hash )
     def update_datastream_attributes(params={}, opts={})
       result = params.dup
       params.each_pair do |dsid, ds_params| 
         if datastreams_in_memory.include?(dsid)
-          result[dsid] = datastreams_in_memory[dsid].update_attributes(ds_params)
+          result[dsid] = datastreams_in_memory[dsid].update_indexed_attributes(ds_params)
         else
           result.delete(dsid)
         end

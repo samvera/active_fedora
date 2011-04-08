@@ -1,3 +1,15 @@
+2.1.0
+
+HYDRUS-151: Base.update_datastream_attributes now relies on update_indexed_attributes instead of update_attributes.  This makes it easier to support non-javascript forms (and makes update_datastream_attributes worth using).
+
+2.0.4 
+
+collection_members_append now returns self.
+
+2.0.3
+
+HYHULL-25: tweaking ContentModel to ignore namespace
+
 2.0.2
 
 Fixed activeresource requirement in specfile
