@@ -379,6 +379,10 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<rspec>, ["< 2.0.0"])
       s.add_development_dependency(%q<mocha>, [">= 0.9.8"])
       s.add_development_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_development_dependency(%q<jeweler>, [">= 0"])
+      s.add_development_dependency(%q<rspec>, ["< 2.0.0"])
+      s.add_development_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_development_dependency(%q<ruby-debug>, [">= 0"])
       s.add_runtime_dependency(%q<solr-ruby>, [">= 0.0.6"])
       s.add_runtime_dependency(%q<xml-simple>, [">= 1.0.12"])
       s.add_runtime_dependency(%q<mime-types>, [">= 1.16"])
@@ -391,6 +395,10 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<equivalent-xml>, [">= 0"])
     else
       s.add_dependency(%q<active-fedora>, [">= 0"])
+      s.add_dependency(%q<jeweler>, [">= 0"])
+      s.add_dependency(%q<rspec>, ["< 2.0.0"])
+      s.add_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_dependency(%q<ruby-debug>, [">= 0"])
       s.add_dependency(%q<jeweler>, [">= 0"])
       s.add_dependency(%q<rspec>, ["< 2.0.0"])
       s.add_dependency(%q<mocha>, [">= 0.9.8"])
@@ -436,6 +444,10 @@ Gem::Specification.new do |s|
     end
   else
     s.add_dependency(%q<active-fedora>, [">= 0"])
+    s.add_dependency(%q<jeweler>, [">= 0"])
+    s.add_dependency(%q<rspec>, ["< 2.0.0"])
+    s.add_dependency(%q<mocha>, [">= 0.9.8"])
+    s.add_dependency(%q<ruby-debug>, [">= 0"])
     s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<rspec>, ["< 2.0.0"])
     s.add_dependency(%q<mocha>, [">= 0.9.8"])
