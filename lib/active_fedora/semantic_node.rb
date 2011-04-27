@@ -5,34 +5,11 @@ module ActiveFedora
     
     attr_accessor :internal_uri, :named_relationship_desc, :relationships_are_dirty, :load_from_solr
     
-    PREDICATE_MAPPINGS = Hash[:is_member_of => "isMemberOf",
-                          :has_member => "hasMember",
-                          :is_part_of => "isPartOf",
-                          :has_part => "hasPart",
-                          :is_member_of_collection => "isMemberOfCollection",
-                          :has_collection_member => "hasCollectionMember",
-                          :is_constituent_of => "isConstituentOf",
-                          :has_constituent => "hasConstituent",
-                          :is_subset_of => "isSubsetOf",
-                          :has_subset => "hasSubset",
-                          :is_derivation_of => "isDerivationOf",
-                          :has_derivation => "hasDerivation",
-                          :is_dependent_of => "isDependentOf",
-                          :has_dependent => "hasDependent",
-                          :is_description_of => "isDescriptionOf",
-                          :has_description => "hasDescription",
-                          :is_metadata_for => "isMetadataFor",
-                          :has_metadata => "hasMetadata",
-                          :is_annotation_of => "isAnnotationOf",
-                          :has_annotation => "hasAnnotation",
-                          :has_equivalent => "hasEquivalent",
-                          :conforms_to => "conformsTo",
-                          :has_model => "hasModel"]
-    PREDICATE_MAPPINGS.freeze
-    
+
     def self.included(klass)
       klass.extend(ClassMethods)
     end
+
     def assert_kind_of(n, o,t)
       raise "Assertion failure: #{n}: #{o} is not of type #{t}" unless o.kind_of?(t)
     end
@@ -473,7 +450,7 @@ module ActiveFedora
       # this object's RELS-EXT datastream
       #
       # Word of caution - The same predicate may not be used twice for two inbound or two outbound relationships.  However, it may be used twice if one is inbound
-      # and one is outbound as shown in the example above.  A full list of possible predicates are defined by PREDICATE_MAPPINGS
+      # and one is outbound as shown in the example above.  A full list of possible predicates are defined by predicate_mappings
       #
       # For the oral_history relationship in the example above the following helper methods are created:
       #  oral_history: returns array of OralHistory objects that have this AudioRecord with predicate :has_part 
@@ -759,19 +736,32 @@ module ActiveFedora
         xml.to_s
       end
     
-      # If predicate is a symbol, looks up the predicate in the PREDICATE_MAPPINGS
+      # If predicate is a symbol, looks up the predicate in the predicate_mappings
       # If predicate is not a Symbol, returns the predicate untouched
-      # @throws UnregisteredPredicateError if the predicate is a symbol but is not found in the PREDICATE_MAPPINGS
-      def predicate_lookup(predicate)
+      # @throws UnregisteredPredicateError if the predicate is a symbol but is not found in the predicate_mappings
+      def predicate_lookup(predicate,namespace="info:fedora/fedora-system:def/relations-external#")
         if predicate.class == Symbol 
-          if PREDICATE_MAPPINGS.has_key?(predicate)
-            return PREDICATE_MAPPINGS[predicate]
+          if predicate_mappings[namespace].has_key?(predicate)
+            return predicate_mappings[namespace][predicate]
           else
             throw UnregisteredPredicateError
           end
         end
         return predicate
       end
+
+      def predicate_config
+        @@predicate_config ||= YAML::load(File.open(ActiveFedora.predicate_config)) if File.exist?(ActiveFedora.predicate_config)
+      end
+
+      def predicate_mappings
+        predicate_config[:predicate_mapping]
+      end
+
+      def default_predicate_namespace
+        predicate_config[:default_namespace]
+      end
+      
     end
   end
 end

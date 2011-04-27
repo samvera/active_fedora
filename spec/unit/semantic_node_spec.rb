@@ -72,36 +72,58 @@ describe ActiveFedora::SemanticNode do
     rescue
     end
   end
-  
-  it 'should provide predicate mappings for entire Fedora Relationship Ontology' do
-    desired_mappings = Hash[:is_member_of => "isMemberOf",
-                          :has_member => "hasMember",
-                          :is_part_of => "isPartOf",
-                          :has_part => "hasPart",
-                          :is_member_of_collection => "isMemberOfCollection",
-                          :has_collection_member => "hasCollectionMember",
-                          :is_constituent_of => "isConstituentOf",
-                          :has_constituent => "hasConstituent",
-                          :is_subset_of => "isSubsetOf",
-                          :has_subset => "hasSubset",
-                          :is_derivation_of => "isDerivationOf",
-                          :has_derivation => "hasDerivation",
-                          :is_dependent_of => "isDependentOf",
-                          :has_dependent => "hasDependent",
-                          :is_description_of => "isDescriptionOf",
-                          :has_description => "hasDescription",
-                          :is_metadata_for => "isMetadataFor",
-                          :has_metadata => "hasMetadata",
-                          :is_annotation_of => "isAnnotationOf",
-                          :has_annotation => "hasAnnotation",
-                          :has_equivalent => "hasEquivalent",
-                          :conforms_to => "conformsTo"]
-    desired_mappings.each_pair do |k,v|
-      SpecNode::PREDICATE_MAPPINGS.should have_key(k)
-      SpecNode::PREDICATE_MAPPINGS[k].should == v
+ 
+  it 'should provide .default_predicate_namespace' do
+    SpecNode.should respond_to(:default_predicate_namespace)
+    SpecNode.default_predicate_namespace.should == 'info:fedora/fedora-system:def/relations-external#'
+  end
+ 
+  it 'should provide .predicate_mappings' do
+    SpecNode.should respond_to(:predicate_mappings)
+  end
+
+  describe "#predicate_mappings" do 
+
+    it 'should return a hash' do
+      SpecNode.predicate_mappings.should be_kind_of Hash
+    end
+
+    it "should provide mappings to the fedora ontology via the info:fedora/fedora-system:def/relations-external default namespace mapping" do
+      SpecNode.predicate_mappings.keys.include?(SpecNode.default_predicate_namespace).should be_true
+      SpecNode.predicate_mappings[SpecNode.default_predicate_namespace].should be_kind_of Hash
+    end
+
+    it 'should provide predicate mappings for entire Fedora Relationship Ontology' do
+      desired_mappings = Hash[:is_member_of => "isMemberOf",
+                            :has_member => "hasMember",
+                            :is_part_of => "isPartOf",
+                            :has_part => "hasPart",
+                            :is_member_of_collection => "isMemberOfCollection",
+                            :has_collection_member => "hasCollectionMember",
+                            :is_constituent_of => "isConstituentOf",
+                            :has_constituent => "hasConstituent",
+                            :is_subset_of => "isSubsetOf",
+                            :has_subset => "hasSubset",
+                            :is_derivation_of => "isDerivationOf",
+                            :has_derivation => "hasDerivation",
+                            :is_dependent_of => "isDependentOf",
+                            :has_dependent => "hasDependent",
+                            :is_description_of => "isDescriptionOf",
+                            :has_description => "hasDescription",
+                            :is_metadata_for => "isMetadataFor",
+                            :has_metadata => "hasMetadata",
+                            :is_annotation_of => "isAnnotationOf",
+                            :has_annotation => "hasAnnotation",
+                            :has_equivalent => "hasEquivalent",
+                            :conforms_to => "conformsTo",
+                            :has_model => "hasModel"]
+      desired_mappings.each_pair do |k,v|
+        SpecNode.predicate_mappings[SpecNode.default_predicate_namespace].should have_key(k)
+        SpecNode.predicate_mappings[SpecNode.default_predicate_namespace][k].should == v
+      end
     end
   end
-  
+
   it 'should provide .internal_uri' do
     @node.should  respond_to(:internal_uri)
   end

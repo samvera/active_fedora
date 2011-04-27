@@ -73,6 +73,12 @@ describe ActiveFedora::RelsExtDatastream do
       ActiveFedora::RelsExtDatastream.from_xml(new_ds,el)
       new_ds.relationships.should == @test_obj.relationships
     end
+    it "should handle un-mapped predicates gracefully" do
+      @test_obj.relationships.should == {:self=>{:is_member_of=>["info:fedora/demo:10"], :is_part_of=>["info:fedora/demo:11"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"]}}
+      @test_obj.add_relationship("foo", "foo:bar")
+      @test_obj.save
+      @test_obj.relationships.should == {:self=>{:is_part_of=>["info:fedora/demo:11"], "foo"=>["info:fedora/foo:bar"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"], :is_member_of=>["info:fedora/demo:10"]}}
+    end
   end
   
   

@@ -82,7 +82,8 @@ describe ActiveFedora::RelsExtDatastream do
   end
   
   it "should load relationships from fedora into parent object" do
-    ActiveFedora::SemanticNode::PREDICATE_MAPPINGS.each_key do |p| 
+    class SpecNode; include ActiveFedora::SemanticNode; end
+    SpecNode.predicate_mappings[SpecNode.default_predicate_namespace].each_key do |p| 
       @test_object.add_relationship(p, "demo:#{rand(100)}")
     end
     @test_object.save
@@ -90,7 +91,7 @@ describe ActiveFedora::RelsExtDatastream do
     @test_object.relationships[:self].should have_key(:is_member_of)
     ActiveFedora::Base.load_instance(@test_object.pid).relationships.should == @test_object.relationships
   end
-  
+
   describe '#from_solr' do
     
     it "should respond_to from_solr" do

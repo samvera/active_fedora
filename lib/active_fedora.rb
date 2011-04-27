@@ -28,13 +28,13 @@ ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 module ActiveFedora #:nodoc:
   
   class << self
-    attr_accessor :solr_config, :fedora_config
+    attr_accessor :solr_config, :fedora_config, :predicate_config_path
   end
   
   # The configuration hash that gets used by RSolr.connect
   @solr_config ||= {}
   @fedora_config ||= {}
-  
+
   # Initializes ActiveFedora's connection to Fedora and Solr based on the info in fedora.yml
   # If RAILS_ENV is set, it will use that environment.  Defaults to "development".
   # @param [String] config_path (optional) the path to fedora.yml
@@ -51,6 +51,7 @@ module ActiveFedora #:nodoc:
         logger.info "Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml as an argument to ActiveFedora.init or set RAILS_ROOT and put fedora.yml into \#{RAILS_ROOT}/config."
       end
     end
+
     
     logger.info("FEDORA: loading ActiveFedora config from #{File.expand_path(config_path)}")
     
@@ -71,6 +72,18 @@ module ActiveFedora #:nodoc:
     Fedora::Repository.register(ActiveFedora.fedora_config[:url])
     logger.info("FEDORA: initialized Fedora as: #{Fedora::Repository.instance.inspect}")    
     
+    # Retrieve the valid path for the predicate mappings config file
+    pred_config_paths = [File.dirname(config_path),File.join(File.dirname(__FILE__),"..","config")]
+    pred_config_paths.each do |path|
+      testfile = File.join(path,"predicate_mappings.yml")
+      if File.exist?(testfile)
+        @predicate_config_path = testfile
+        break
+      end
+    end
+    raise "Could not find predicate_mappings.yml in these locations: #{pred_config_paths.join("; ")}." unless @predicate_config_path
+
+
   end
   
   def self.solr
@@ -83,6 +96,10 @@ module ActiveFedora #:nodoc:
 
   def self.logger      
     @logger ||= defined?(RAILS_DEFAULT_LOGGER) ? RAILS_DEFAULT_LOGGER : Logger.new(STDOUT)
+  end
+
+  def self.predicate_config
+    @predicate_config_path
   end
 end
 

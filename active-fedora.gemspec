@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2011-04-08}
+  s.date = %q{2011-04-27}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
@@ -182,6 +182,7 @@ Gem::Specification.new do |s|
     "VERSION",
     "active-fedora.gemspec",
     "config/fedora.yml",
+    "config/predicate_mappings.yml",
     "config/solr_mappings.yml",
     "config/solr_mappings_af_0.1.yml",
     "config/solr_mappings_bl_2.4.yml",
@@ -383,6 +384,22 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<rspec>, ["< 2.0.0"])
       s.add_development_dependency(%q<mocha>, [">= 0.9.8"])
       s.add_development_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_development_dependency(%q<jeweler>, [">= 0"])
+      s.add_development_dependency(%q<rspec>, ["< 2.0.0"])
+      s.add_development_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_development_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_development_dependency(%q<jeweler>, [">= 0"])
+      s.add_development_dependency(%q<rspec>, ["< 2.0.0"])
+      s.add_development_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_development_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_development_dependency(%q<jeweler>, [">= 0"])
+      s.add_development_dependency(%q<rspec>, ["< 2.0.0"])
+      s.add_development_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_development_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_development_dependency(%q<jeweler>, [">= 0"])
+      s.add_development_dependency(%q<rspec>, ["< 2.0.0"])
+      s.add_development_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_development_dependency(%q<ruby-debug>, [">= 0"])
       s.add_runtime_dependency(%q<solr-ruby>, [">= 0.0.6"])
       s.add_runtime_dependency(%q<xml-simple>, [">= 1.0.12"])
       s.add_runtime_dependency(%q<mime-types>, [">= 1.16"])
@@ -395,6 +412,22 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<equivalent-xml>, [">= 0"])
     else
       s.add_dependency(%q<active-fedora>, [">= 0"])
+      s.add_dependency(%q<jeweler>, [">= 0"])
+      s.add_dependency(%q<rspec>, ["< 2.0.0"])
+      s.add_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_dependency(%q<jeweler>, [">= 0"])
+      s.add_dependency(%q<rspec>, ["< 2.0.0"])
+      s.add_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_dependency(%q<jeweler>, [">= 0"])
+      s.add_dependency(%q<rspec>, ["< 2.0.0"])
+      s.add_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_dependency(%q<jeweler>, [">= 0"])
+      s.add_dependency(%q<rspec>, ["< 2.0.0"])
+      s.add_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_dependency(%q<ruby-debug>, [">= 0"])
       s.add_dependency(%q<jeweler>, [">= 0"])
       s.add_dependency(%q<rspec>, ["< 2.0.0"])
       s.add_dependency(%q<mocha>, [">= 0.9.8"])
@@ -444,6 +477,22 @@ Gem::Specification.new do |s|
     end
   else
     s.add_dependency(%q<active-fedora>, [">= 0"])
+    s.add_dependency(%q<jeweler>, [">= 0"])
+    s.add_dependency(%q<rspec>, ["< 2.0.0"])
+    s.add_dependency(%q<mocha>, [">= 0.9.8"])
+    s.add_dependency(%q<ruby-debug>, [">= 0"])
+    s.add_dependency(%q<jeweler>, [">= 0"])
+    s.add_dependency(%q<rspec>, ["< 2.0.0"])
+    s.add_dependency(%q<mocha>, [">= 0.9.8"])
+    s.add_dependency(%q<ruby-debug>, [">= 0"])
+    s.add_dependency(%q<jeweler>, [">= 0"])
+    s.add_dependency(%q<rspec>, ["< 2.0.0"])
+    s.add_dependency(%q<mocha>, [">= 0.9.8"])
+    s.add_dependency(%q<ruby-debug>, [">= 0"])
+    s.add_dependency(%q<jeweler>, [">= 0"])
+    s.add_dependency(%q<rspec>, ["< 2.0.0"])
+    s.add_dependency(%q<mocha>, [">= 0.9.8"])
+    s.add_dependency(%q<ruby-debug>, [">= 0"])
     s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<rspec>, ["< 2.0.0"])
     s.add_dependency(%q<mocha>, [">= 0.9.8"])
