@@ -19,6 +19,14 @@ describe ActiveFedora::Base do
     it "should accept a prefix argument, default to using DS as prefix" do
       @test_object.generate_dsid("FOO").should == "FOO1"  
     end
+
+    it "if delete a datastream it should still use next index for a prefix" do
+      dsids = Hash["DS2"=>1]
+      @test_object.expects(:datastreams).returns(dsids)
+      generated_id = @test_object.generate_dsid
+      generated_id.should_not be_nil
+      generated_id.should == "DS3"
+    end
   end
   describe '.add_datastream' do
     it "should not call Datastream.save" do

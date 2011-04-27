@@ -225,6 +225,12 @@ module ActiveFedora
       keys = datastreams.keys
       next_index = keys.select {|v| v =~ /(#{prefix}\d*$)/}.length + 1
       new_dsid = prefix.to_s + next_index.to_s
+      while keys.include?(new_dsid)
+        next_index += 1
+        new_dsid = prefix.to_s + next_index.to_s
+      end
+      new_dsid
+
       # while keys.include?(new_dsid)
       #         next_index += 1
       #         new_dsid = prefix.to_s + rand(range).to_s
