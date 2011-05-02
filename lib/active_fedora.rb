@@ -38,7 +38,7 @@ module ActiveFedora #:nodoc:
   # Initializes ActiveFedora's connection to Fedora and Solr based on the info in fedora.yml
   # If RAILS_ENV is set, it will use that environment.  Defaults to "development".
   # @param [String] config_path (optional) the path to fedora.yml
-  #   If config_path is not provided and RAILS_ROOT is set, it will look in RAILS_ENV/config/fedora.yml.  Otherwise, it will use localhost urls.
+  #   If config_path is not provided and RAILS_ROOT is set, it will look in RAILS_ENV/config/fedora.yml.  Otherwise, it will look in your config/fedora.yml.  Failing that, it will use localhost urls.
   def self.init( config_path=nil )
     
     config_env = defined?(RAILS_ENV) ? RAILS_ENV : "development"
@@ -47,8 +47,11 @@ module ActiveFedora #:nodoc:
       if defined?(RAILS_ROOT)
         config_path = "#{RAILS_ROOT}/config/fedora.yml"
       else
-        config_path = File.join(File.dirname(__FILE__), "..", "config", "fedora.yml")
-        logger.info "Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml as an argument to ActiveFedora.init or set RAILS_ROOT and put fedora.yml into \#{RAILS_ROOT}/config."
+        config_path = File.join("config","fedora.yml")
+        unless File.exist?(config_path)
+          config_path = File.join(File.dirname(__FILE__), "..", "config", "fedora.yml")
+          logger.info "Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml as an argument to ActiveFedora.init or set RAILS_ROOT and put fedora.yml into \#{RAILS_ROOT}/config."
+        end
       end
     end
 
