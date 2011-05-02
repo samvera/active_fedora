@@ -1,3 +1,4 @@
+require 'facets/string/titlecase'
 module ActiveFedora
   class ContentModel < Base
     CMODEL_NAMESPACE = "afmodel"

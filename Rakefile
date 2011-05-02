@@ -24,6 +24,7 @@ begin
     gem.add_dependency("activeresource")
     gem.add_dependency("mediashelf-loggable")
     gem.add_dependency("equivalent-xml")
+    gem.add_dependency("facets")
     
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
