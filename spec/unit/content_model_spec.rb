@@ -12,6 +12,11 @@ describe ActiveFedora::ContentModel do
 
     class GenericContent < ActiveFedora::Base
     end
+    
+    module Sample
+      class NamespacedModel < ActiveFedora::Base
+      end
+    end
   end
   
   before(:each) do
@@ -81,6 +86,12 @@ describe ActiveFedora::ContentModel do
       mock_object = mock("ActiveFedora Object")
       mock_object.expects(:relationships).returns( :self=>{:has_model=>["info:fedora/fedora-system:ServiceDefinition-3.0", "info:fedora/afmodel:SampleModel", "info:fedora/afmodel:NonDefinedModel"]} )
       ActiveFedora::ContentModel.known_models_for(mock_object).should == [SampleModel]
+    end
+    it "should support namespaced models" do
+      pending "This is harder than it looks."
+      mock_object = mock("ActiveFedora Object")
+      mock_object.expects(:relationships).returns( :self=>{:has_model=>["info:fedora/afmodel:Sample_NamespacedModel"]} )
+      ActiveFedora::ContentModel.known_models_for(mock_object).should == [Sample::NamespacedModel]
     end
     it "should default to using ActiveFedora::Base as the model" do
       mock_object = mock("ActiveFedora Object")
