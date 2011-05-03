@@ -1,6 +1,8 @@
 require 'rake/clean'
 require 'rubygems'
 load 'tasks/rspec.rake'
+load 'tasks/active_fedora.rake'
+
 $: << 'lib'
 
 
@@ -25,7 +27,12 @@ begin
     gem.add_dependency("mediashelf-loggable")
     gem.add_dependency("equivalent-xml")
     gem.add_dependency("facets")
-    
+    gem.add_development_dependency("yard")
+    gem.add_development_dependency("RedCloth")
+    gem.add_development_dependency("rcov")
+    gem.add_development_dependency("solrizer")
+    gem.add_development_dependency("solrizer-fedora")
+    gem.add_development_dependency("jettywrapper")
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
