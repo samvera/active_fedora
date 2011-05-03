@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{active-fedora}
-  s.version = "2.1.0"
+  s.version = "2.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matt Zumwalt", "McClain Looney"]
-  s.date = %q{2011-04-27}
+  s.date = %q{2011-05-02}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.email = %q{matt.zumwalt@yourmediashelf.com}
   s.extra_rdoc_files = [
@@ -289,58 +289,6 @@ Gem::Specification.new do |s|
   s.rubyforge_project = %q{rubyfedora}
   s.rubygems_version = %q{1.3.7}
   s.summary = %q{A convenience libary for manipulating MODS (Metadata Object Description Schema) documents.}
-  s.test_files = [
-    "spec/integration/base_file_management_spec.rb",
-    "spec/integration/base_find_by_fields_spec.rb",
-    "spec/integration/base_loader_spec.rb",
-    "spec/integration/base_spec.rb",
-    "spec/integration/bug_spec.rb",
-    "spec/integration/datastream_spec.rb",
-    "spec/integration/datastreams_crud_spec.rb",
-    "spec/integration/fedora_object_spec.rb",
-    "spec/integration/full_featured_model_spec.rb",
-    "spec/integration/metadata_datastream_helper_spec.rb",
-    "spec/integration/model_spec.rb",
-    "spec/integration/mods_article_integration_spec.rb",
-    "spec/integration/nokogiri_datastream_spec.rb",
-    "spec/integration/rels_ext_datastream_spec.rb",
-    "spec/integration/repository_spec.rb",
-    "spec/integration/rf_fedora_object_spec.rb",
-    "spec/integration/semantic_node_spec.rb",
-    "spec/integration/solr_service_spec.rb",
-    "spec/samples/models/audio_record.rb",
-    "spec/samples/models/image.rb",
-    "spec/samples/models/oral_history.rb",
-    "spec/samples/models/seminar.rb",
-    "spec/samples/models/seminar_audio_file.rb",
-    "spec/samples/oral_history_sample_model.rb",
-    "spec/spec_helper.rb",
-    "spec/unit/active_fedora_spec.rb",
-    "spec/unit/base_cma_spec.rb",
-    "spec/unit/base_datastream_management_spec.rb",
-    "spec/unit/base_extra_spec.rb",
-    "spec/unit/base_file_management_spec.rb",
-    "spec/unit/base_named_datastream_spec.rb",
-    "spec/unit/base_spec.rb",
-    "spec/unit/connection_spec.rb",
-    "spec/unit/content_model_spec.rb",
-    "spec/unit/datastream_concurrency_spec.rb",
-    "spec/unit/datastream_spec.rb",
-    "spec/unit/fedora_object_spec.rb",
-    "spec/unit/inheritance_spec.rb",
-    "spec/unit/metadata_datastream_spec.rb",
-    "spec/unit/model_spec.rb",
-    "spec/unit/nokogiri_datastream_spec.rb",
-    "spec/unit/property_spec.rb",
-    "spec/unit/qualified_dublin_core_datastream_spec.rb",
-    "spec/unit/relationship_spec.rb",
-    "spec/unit/rels_ext_datastream_spec.rb",
-    "spec/unit/repository_spec.rb",
-    "spec/unit/rf_datastream_spec.rb",
-    "spec/unit/semantic_node_spec.rb",
-    "spec/unit/solr_config_options_spec.rb",
-    "spec/unit/solr_service_spec.rb"
-  ]
 
   if s.respond_to? :specification_version then
     current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
@@ -348,6 +296,10 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<active-fedora>, [">= 0"])
+      s.add_development_dependency(%q<jeweler>, [">= 0"])
+      s.add_development_dependency(%q<rspec>, ["< 2.0.0"])
+      s.add_development_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_development_dependency(%q<ruby-debug>, [">= 0"])
       s.add_development_dependency(%q<jeweler>, [">= 0"])
       s.add_development_dependency(%q<rspec>, ["< 2.0.0"])
       s.add_development_dependency(%q<mocha>, [">= 0.9.8"])
@@ -410,8 +362,13 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<activeresource>, [">= 0"])
       s.add_runtime_dependency(%q<mediashelf-loggable>, [">= 0"])
       s.add_runtime_dependency(%q<equivalent-xml>, [">= 0"])
+      s.add_runtime_dependency(%q<facets>, [">= 0"])
     else
       s.add_dependency(%q<active-fedora>, [">= 0"])
+      s.add_dependency(%q<jeweler>, [">= 0"])
+      s.add_dependency(%q<rspec>, ["< 2.0.0"])
+      s.add_dependency(%q<mocha>, [">= 0.9.8"])
+      s.add_dependency(%q<ruby-debug>, [">= 0"])
       s.add_dependency(%q<jeweler>, [">= 0"])
       s.add_dependency(%q<rspec>, ["< 2.0.0"])
       s.add_dependency(%q<mocha>, [">= 0.9.8"])
@@ -474,9 +431,14 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<activeresource>, [">= 0"])
       s.add_dependency(%q<mediashelf-loggable>, [">= 0"])
       s.add_dependency(%q<equivalent-xml>, [">= 0"])
+      s.add_dependency(%q<facets>, [">= 0"])
     end
   else
     s.add_dependency(%q<active-fedora>, [">= 0"])
+    s.add_dependency(%q<jeweler>, [">= 0"])
+    s.add_dependency(%q<rspec>, ["< 2.0.0"])
+    s.add_dependency(%q<mocha>, [">= 0.9.8"])
+    s.add_dependency(%q<ruby-debug>, [">= 0"])
     s.add_dependency(%q<jeweler>, [">= 0"])
     s.add_dependency(%q<rspec>, ["< 2.0.0"])
     s.add_dependency(%q<mocha>, [">= 0.9.8"])
@@ -539,6 +501,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<activeresource>, [">= 0"])
     s.add_dependency(%q<mediashelf-loggable>, [">= 0"])
     s.add_dependency(%q<equivalent-xml>, [">= 0"])
+    s.add_dependency(%q<facets>, [">= 0"])
   end
 end
 
