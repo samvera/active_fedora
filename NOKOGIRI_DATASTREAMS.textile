@@ -21,6 +21,7 @@ st = SpecialThing.load_instance("hydrangea:fixture_mods_article1")
 </pre>
 
 Take a look at the datastreams in the object.
+
 <pre>
 st.datastreams.keys
 </pre>
@@ -99,7 +100,7 @@ mods_ds.term_values(:organization, :role)
 => ["\n      Funder\n    "] 
 mods_ds.term_values(:organization, :namePart)
 => ["NSF"]
-<pre>
+</pre>
 
 You will often string together a series of term names to point to what you want
 
@@ -108,7 +109,7 @@ Hydra::ModsArticleDatastream.terminology.xpath_for(:journal, :issue, :pages, :st
 => "//oxns:relatedItem[@type=\"host\"]/oxns:part/oxns:extent[@unit=\"pages\"]/oxns:start" 
 mods_ds.term_values(:journal, :issue, :pages, :start)
 => ["195"] 
-<pre>
+</pre>
   
 If you get one of the names wrong in the list, OM will tell you which one is causing problems.  See what happens when you put :page instead of :pages in your argument to term_values.
 
@@ -122,7 +123,7 @@ If you use a term often and you're sick of typing all of those term names, you c
 <pre>
 Hydra::ModsArticleDatastream.terminology.xpath_for(:journal, :issue, :start_page)
 => "//oxns:relatedItem[@type=\"host\"]/oxns:part/oxns:extent[@unit=\"pages\"]/oxns:start"
-<pre>
+</pre>
   
 Here is another proxy term.  It proxies to [:journal,:origin_info,:issuance]
 
