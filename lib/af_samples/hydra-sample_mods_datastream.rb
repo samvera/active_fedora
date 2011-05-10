@@ -1,6 +1,9 @@
-require "hydra"
+require "active-fedora"
 module Hydra
-class Hydra::SampleModsDatastream < ActiveFedora::NokogiriDatastream       
+  
+  # This is an example of a NokogiriDatastream that defines a terminology for MODS xml
+  
+  class Hydra::SampleModsDatastream < ActiveFedora::NokogiriDatastream       
     
     set_terminology do |t|
       t.root(:path=>"mods", :xmlns=>"http://www.loc.gov/mods/v3", :schema=>"http://www.loc.gov/standards/mods/v3/mods-3-2.xsd")
@@ -54,10 +57,6 @@ class Hydra::SampleModsDatastream < ActiveFedora::NokogiriDatastream
       }
       
     end
-    
-    # Changes from OM::Properties implementation
-    # renamed family_name => last_name
-    # start_page & end_page now accessible as [:journal, :issue, :pages, :start] (etc.)
 
-end
+  end
 end

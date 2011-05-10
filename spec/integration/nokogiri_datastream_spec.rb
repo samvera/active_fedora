@@ -1,5 +1,5 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
-require "hydra"
+require "af_samples"
 require "solrizer"
 
 describe ActiveFedora::NokogiriDatastream do
