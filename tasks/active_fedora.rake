@@ -39,7 +39,7 @@ namespace :active_fedora do
 
     YARD::Rake::YardocTask.new(:doc) do |yt|
       yt.files   = Dir.glob(File.join(project_root, 'lib', '**', '*.rb')) + 
-                   [ File.join(project_root, 'README.textile') ]
+                   [ File.join(project_root, 'README.textile'),'-', File.join(project_root,'CONSOLE_GETTING_STARTED.textile'),'-', File.join(project_root,'NOKOGIRI_DATASTREAMS.textile') ]
       yt.options = ['--output-dir', doc_destination, '--readme', 'README.textile']
     end
   rescue LoadError
