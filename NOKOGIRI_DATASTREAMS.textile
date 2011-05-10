@@ -8,8 +8,8 @@ The model definition we're using in this tutorial is located at https://github.c
 
 Look in these datastream definitions to see the OM Terminologies they define (with comments):
 * "Hydra::ModsArticleDatastream":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/hydra-mods_article_datastream.rb 
-* "Hydra::RightsMetadata":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/hydra-rights_metadata_datastream.rb" 
-"Marpa::DcDatastream":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/marpa-dc_datastream.rb" 
+* "Hydra::RightsMetadata":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/hydra-rights_metadata_datastream.rb
+* "Marpa::DcDatastream":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/marpa-dc_datastream.rb 
 
 
 h2. The First Pass with OM
