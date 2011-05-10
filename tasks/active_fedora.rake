@@ -54,12 +54,13 @@ namespace :active_fedora do
     t.spec_files = FileList['spec/**/*_spec.rb']
     # removing because of en suite failures on hudson
     t.spec_files.delete 'spec/unit/nokogiri_datastream_spec.rb'
+    t.spec_files.delete 'spec/integration/nokogiri_datastream_spec.rb'
     t.rcov = true
     t.rcov_opts << "--exclude \"spec/* gems/*\" --rails"
   end
 
   Spec::Rake::SpecTask.new(:nokogiri_datastreams) do |t|
-    t.spec_files = ['spec/unit/nokogiri_datastream_spec.rb']
+    t.spec_files = ['spec/unit/nokogiri_datastream_spec.rb','spec/integration/nokogiri_datastream_spec.rb']
   end
 
   task :refresh_fixtures do
