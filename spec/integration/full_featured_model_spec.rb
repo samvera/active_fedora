@@ -34,7 +34,7 @@ describe ActiveFedora::Base do
         #   m.root_property :myxml, "my_xml", "http://www.example.gov/schema/v3"
         # end
         
-        has_metadata :name=>"mods_article", :type=> Hydra::ModsArticle 
+        has_metadata :name=>"mods_article", :type=> Hydra::ModsArticleDatastream 
         
         has_metadata :name => "dublin_core", :type => ActiveFedora::QualifiedDublinCoreDatastream do |m|
           # Default :multiple => true

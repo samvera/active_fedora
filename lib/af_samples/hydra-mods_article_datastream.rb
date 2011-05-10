@@ -18,7 +18,7 @@ module Hydra
   # * Defines a series of templates, person_template, organization_template, etc. for generating a whole set of xml nodes to insert into the document (note: the new OM::TemplateRegistry provides an even better way to do this)
   # * Defines a custom method, insert_contributor, that uses the Terminology to manipulate xml documents in specialized ways
   # * Defines a series of relator_term Hashes that can then be used when generating views, etc.  In this case, the Hashes are hard-coded into the Class.  Ideally, they might be read from a configuration file or mixed into the class using a module
-  class ModsArticle < ActiveFedora::NokogiriDatastream       
+  class ModsArticleDatastream < ActiveFedora::NokogiriDatastream       
 
     set_terminology do |t|
       t.root(:path=>"mods", :xmlns=>"http://www.loc.gov/mods/v3", :schema=>"http://www.loc.gov/standards/mods/v3/mods-3-2.xsd")
@@ -209,16 +209,16 @@ module Hydra
     def insert_contributor(type, opts={})
       case type.to_sym 
       when :person
-        node = Hydra::ModsArticle.person_template
+        node = Hydra::ModsArticleDatastream.person_template
         nodeset = self.find_by_terms(:person)
       when :organization
-        node = Hydra::ModsArticle.organization_template
+        node = Hydra::ModsArticleDatastream.organization_template
         nodeset = self.find_by_terms(:organization)
       when :conference
-        node = Hydra::ModsArticle.conference_template
+        node = Hydra::ModsArticleDatastream.conference_template
         nodeset = self.find_by_terms(:conference)
       else
-        ActiveFedora.logger.warn("#{type} is not a valid argument for Hydra::ModsArticle.insert_contributor")
+        ActiveFedora.logger.warn("#{type} is not a valid argument for Hydra::ModsArticleDatastream.insert_contributor")
         node = nil
         index = nil
       end
