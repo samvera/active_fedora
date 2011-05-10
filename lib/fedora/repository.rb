@@ -98,6 +98,10 @@ module Fedora
       convert_xml(connection.get("#{fedora_url.path}/objects?#{params.to_fedora_query}#{includes}"))
     end
     
+    # Retrieve an object from fedora and load it as an instance of the given model/class
+    #
+    # @param pid of the Fedora object to retrieve and deserialize
+    # @param klazz the Model whose deserialize method the object's FOXML will be passed into
     def find_model(pid, klazz)
       obj = self.find_objects("pid=#{pid}").first
       if obj.nil?

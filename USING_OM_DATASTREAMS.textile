@@ -6,7 +6,7 @@ This tutorial assumes that you've run script/console from the root of Hydrangea 
 
 The HydrangeaArticle model definition is located at https://github.com/projecthydra/hydrangea/blob/master/vendor/plugins/hydrangea_articles/app/models/hydrangea_article.rb
 
-Look in the "Hydra::ModsArticle":https://github.com/projecthydra/hydrangea/blob/master/vendor/plugins/hydra_repository/lib/hydra/mods_article.rb and "Hydra::RightsMetadata":https://github.com/projecthydra/hydrangea/blob/master/vendor/plugins/hydra_repository/lib/hydra/rights_metadata.rb" datastream definitions to see the OM Terminologies they define.
+Look in the "Hydra::ModsArticleDatastream":https://github.com/projecthydra/hydrangea/blob/master/vendor/plugins/hydra_repository/lib/hydra/mods_article.rb and "Hydra::RightsMetadata":https://github.com/projecthydra/hydrangea/blob/master/vendor/plugins/hydra_repository/lib/hydra/rights_metadata.rb" datastream definitions to see the OM Terminologies they define.
 
 h2. The Tour
 
@@ -40,6 +40,7 @@ FYI, an OM terminology is attached to the datastream's class.  OM's convenience 
 
 <pre>
 ha.datastreams["rightsMetadata"].class.terminology
+Hydra::RightsMetadata.terminology
 </pre>
 
 The ModsArticle Terminology lets you retrieve values from the descMetadata datastream's MODS content.

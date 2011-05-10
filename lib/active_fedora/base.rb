@@ -790,7 +790,9 @@ module ActiveFedora
       @inner_object.label = new_label
     end
 
-
+    # Create an instance of the current Model from the given FOXML
+    # This method is used when you call load_instance on a Model
+    # @param [Nokogiri::XML::Document] doc the FOXML of the object
     def self.deserialize(doc) #:nodoc:
       if doc.instance_of?(REXML::Document)
         pid = doc.elements['/foxml:digitalObject'].attributes['PID']

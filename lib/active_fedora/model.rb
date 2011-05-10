@@ -42,10 +42,14 @@ module ActiveFedora
     #     *appends val to the values array.
     module ClassMethods
 
-      # Load an instance with the following pid. Note that you can actually
-      # pass an pid into this method, regardless of Fedora model type, and
-      # ActiveFedora will try to parse the results into the current type
-      # of self, which may or may not be what you want.
+      # Retrieve the Fedora object with the given pid and deserialize it as an instance of the current model
+      # Note that you can actually pass a pid into this method, regardless of Fedora model type, and
+      # ActiveFedora will try to parse the results into the current type of self, which may or may not be what you want.
+      #
+      # @param [String] pid of the object to load
+      #
+      # @example this will return an instance of Book, even if the object hydra:dataset1 asserts that it is a Dataset
+      #   Book.load_instance("hydra:dataset1") 
       def load_instance(pid)
         Fedora::Repository.instance.find_model(pid, self)
       end
