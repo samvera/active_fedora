@@ -1,0 +1,198 @@
+h1. Using OM-based NokogiriDatastreams
+
+h2. Setup
+
+This tutorial assumes that you've run script/console from the root of ActiveFedora and have imported the hydrangea:fixture_mods_article1 object.  If you haven't done that, see CONSOLE_GETTING_STARTED for instructions.
+
+The model definition we're using in this tutorial is located at https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/SpecialThing.rb
+
+Look in these datastream definitions to see the OM Terminologies they define (with comments):
+* "Hydra::ModsArticleDatastream":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/hydra-mods_article_datastream.rb 
+* "Hydra::RightsMetadata":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/hydra-rights_metadata_datastream.rb" 
+"Marpa::DcDatastream":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/marpa-dc_datastream.rb" 
+
+
+h2. The First Pass with OM
+
+First, load the Fedora object as an instance of the SpecialThing Model
+
+<pre>
+st = SpecialThing.load_instance("hydrangea:fixture_mods_article1")
+</pre>
+
+Take a look at the datastreams in the object.
+<pre>
+st.datastreams.keys
+</pre>
+
+Each datastream is associated with a class that is aware of its content.  These classes are specified in the model.  
+
+<pre>
+st.datastreams["rightsMetadata"].class
+st.datastreams["descMetadata"].class
+<pre>
+  
+You can retrieve the xml from the object as xml (string) using to_xml, or you can access it as a Nokogiri::XML::Document using .ng_xml
+
+<pre>
+st.datastreams["rightsMetadata"].to_xml
+st.datastreams["rightsMetadata"].ng_xml.class
+</pre>
+
+An OM terminology is attached to the datastream's class.  OM's convenience methods use the terminology to look up nodes and values for you.
+
+<pre>
+st.datastreams["rightsMetadata"].class.terminology
+Hydra::RightsMetadata.terminology
+</pre>
+
+The Terminology in Hydra::ModsArticleDatastream lets you retrieve values from the descMetadata datastream's MODS content.
+
+<pre>
+mods_ds = st.datastreams["descMetadata"]
+mods_ds.term_values(:person, :first_name)
+mods_ds.term_values(:person, :last_name)
+</pre>
+
+You can use OM's find_by_terms method to retrieve xml nodes from the datastream.  It returns Nokogiri::XML::Node objects.
+
+<pre>
+mods_ds.find_by_terms(:person)
+mods_ds.find_by_terms(:person).length
+mods_ds.find_by_terms(:person).each {|n| puts n.to_xml}
+</pre>
+
+
+h2. Going a little deeper with OM
+
+Make sure you've got everything set up
+
+<pre>
+mods_ds = st.datastreams["descMetadata"]
+...
+mods_ds.class
+=> Hydra::ModsArticleDatastream
+</pre>
+
+The OM Terminology declared by Hydra::ModsArticleDatastream handles generating xpath queries based on the structures you've defined.  It will also run the queries for you in most cases.  If you're ever curious what the xpath queries are, or if you want to use them in some other way, they are a few keystrokes away.
+
+Here are the xpaths for :name and two variants of :name that were created using the :ref argument in the Terminology builder.
+
+<pre>
+Hydra::ModsArticleDatastream.terminology.xpath_for(:name)
+=> "//oxns:name"
+Hydra::ModsArticleDatastream.terminology.xpath_for(:person)
+=> "//oxns:name[@type=\"personal\"]" 
+Hydra::ModsArticleDatastream.terminology.xpath_for(:organization)
+=> "//oxns:name[@type=\"corporate\"]"
+</pre>
+
+To retrieve the values of xml nodes, use the term_values method
+
+<pre>
+mods_ds.term_values(:name) 
+mods_ds.term_values(:person, :first_name) 
+mods_ds.term_values(:person, :last_name) 
+
+mods_ds.find_by_terms(:organization).to_xml
+mods_ds.term_values(:organization, :role)
+=> ["\n      Funder\n    "] 
+mods_ds.term_values(:organization, :namePart)
+=> ["NSF"]
+<pre>
+
+You will often string together a series of term names to point to what you want
+
+<pre>
+Hydra::ModsArticleDatastream.terminology.xpath_for(:journal, :issue, :pages, :start)
+=> "//oxns:relatedItem[@type=\"host\"]/oxns:part/oxns:extent[@unit=\"pages\"]/oxns:start" 
+mods_ds.term_values(:journal, :issue, :pages, :start)
+=> ["195"] 
+<pre>
+  
+If you get one of the names wrong in the list, OM will tell you which one is causing problems.  See what happens when you put :page instead of :pages in your argument to term_values.
+
+<pre>
+mods_ds.term_values(:journal, :issue, :page, :start)
+OM::XML::Terminology::BadPointerError: You attempted to retrieve a Term using this pointer: [:journal, :issue, :page] but no Term exists at that location. Everything is fine until ":page", which doesn't exist.
+</pre>
+
+If you use a term often and you're sick of typing all of those term names, you can define a proxy term.  Here we have a proxy term called :start_page that saves you from having to remember the details of how MODS is structured.  
+
+<pre>
+Hydra::ModsArticleDatastream.terminology.xpath_for(:journal, :issue, :start_page)
+=> "//oxns:relatedItem[@type=\"host\"]/oxns:part/oxns:extent[@unit=\"pages\"]/oxns:start"
+<pre>
+  
+Here is another proxy term.  It proxies to [:journal,:origin_info,:issuance]
+
+<pre>
+Hydra::ModsArticleDatastream.terminology.xpath_for(:peer_reviewed)
+=> "//oxns:relatedItem[@type=\"host\"]/oxns:originInfo/oxns:issuance"
+</pre>
+
+h2. What to do when elements are reused throughout an XML document
+
+In our MODS document, we have two types of title: 1) the title of the published article and 2) the title of the journal it was published in.  They both use the same xml node.  How can we deal with that? 
+
+<pre>
+mods_ds.term_values(:title_info, :main_title)
+=> ["ARTICLE TITLE", "VARYING FORM OF TITLE", "TITLE OF HOST JOURNAL"] 
+mods_ds.term_values(:mods, :title_info, :main_title)
+=> ["ARTICLE TITLE", "VARYING FORM OF TITLE"]
+Hydra::ModsArticleDatastream.terminology.xpath_for(:title_info, :main_title)
+=> "//oxns:titleInfo/oxns:title" 
+</pre>
+
+The solution: include the root node in your term pointer.
+
+<pre>
+Hydra::ModsArticleDatastream.terminology.xpath_for(:mods, :title_info, :main_title)
+=> "//oxns:mods/oxns:titleInfo/oxns:title"
+mods_ds.term_values(:mods, :title_info, :main_title)
+=> ["ARTICLE TITLE", "VARYING FORM OF TITLE"] 
+</pre>
+
+We can still access the Journal title by its own pointers:
+
+<pre>
+mods_ds.term_values(:journal, :title_info, :main_title)
+ => ["TITLE OF HOST JOURNAL"] 
+</pre>
+
+More Proxy Terms!
+
+Sometimes all of these terms become tedious.  That's where proxy terms come in. You can use them to access frequently used Terms more easily.
+
+<pre>
+Hydra::ModsArticleDatastream.terminology.xpath_for(:title)
+=> "//oxns:mods/oxns:titleInfo/oxns:title" 
+Hydra::ModsArticleDatastream.terminology.xpath_for(:journal_title)
+=> "//oxns:relatedItem[@type=\"host\"]/oxns:titleInfo/oxns:title"
+</pre>
+
+h1. Setting the XML in a NokogiriDatastream from a file
+
+h2. Creating a new Datastream using from_xml
+
+<pre>
+my_path = "spec/fixtures/mods_articles/hydrangea_article1.xml"
+f = File.new(my_path)
+mods_ds = Hydra::ModsArticleDatastream.from_xml(f)
+</pre>
+
+If you want to add that datastream to an object, set the datastream's dsid and then pass the datastream into the object's add_datastream method.
+
+<pre>
+mods_ds.dsid = "descMetadata"
+st.add_datastream(mods_ds)
+</pre>
+
+
+h2. Saving the Datastream
+
+After calling add_datastream, then everything will be ready to save to Fedora.  In order to make sure that your updated datastream is actually saved to fedora, call .save _on the datastream_.  If you call .save on the _object_, the changes you've made to the datastream might not be saved.
+
+<pre>
+ha.datastreams["descMetadata"].save
+</pre>

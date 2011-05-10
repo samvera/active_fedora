@@ -1,0 +1,326 @@
+h2. Get a Copy of the Code
+
+Clone the git repository and cd into the root
+
+<pre>
+git clone git@github.com:mediashelf/active_fedora.git
+cd active_fedora
+</pre>
+
+If you don't have bundler installed yet, install it
+
+<pre>
+gem install bundler
+</pre>
+
+Now let bundler handle installing active-fedora's dependencies
+
+<pre>
+bundle install
+</pre>
+
+h2. Run Solr & Fedora
+
+h3. Get a copy of hydra-jetty and start it (easiest)
+
+"hydra-jetty":http://github.com/projecthydra/hydra-jetty is a copy of a Jetty server with Fedora and Solr installed and ready to use with ActiveFedora.  Grab a copy and start it up.
+
+<pre>
+git clone git://github.com/projecthydra/hydra-jetty.git
+cd hydra-jetty
+java -jar start.jar
+</pre>
+
+This will start Jetty and spit a bunch of info out onto the console.  Leave that terminal window open and open a new one to play around with ActiveFedora.
+
+You can also set up your own copies of Fedora and Solr to run against.   For info on that, see [[Setting up Fedora and Solr for use with ActiveFedora]]
+
+h2. Open up the Console
+
+<pre>
+script/console
+<pre>
+  
+<pre> 
+require "rubygems"
+require "active-fedora"
+require "active_fedora/samples" # these are the sample models and datastreams that come with ActiveFedora
+</pre>
+
+h2. Initialize ActiveFedora
+
+In order to function, ActiveFedora needs to know where Fedora and Solr are running.  It gets this information from a YAML file.  
+
+<pre>
+ActiveFedora.init
+I, [...]  INFO -- : Using the default fedora.yml that comes with active-fedora.  
+If you want to override this, pass the path to fedora.yml as an argument to ActiveFedora.init or set RAILS_ROOT and put fedora.yml into #{RAILS_ROOT}/config.
+I, [...]  INFO -- : FEDORA: loading ActiveFedora config from /opt/local/lib/ruby/gems/1.8/gems/active-fedora-1.1.3/config/fedora.yml
+I, [...]  INFO -- : FEDORA: initializing ActiveFedora::SolrService with solr_config: {:url=>"http://127.0.0.1:8983/solr/development"}
+I, [...8]  INFO -- : FEDORA: initialized Solr with ActiveFedora.solr_config: #<ActiveFedora::SolrService:0x1021245f0 @conn=#<Solr::Connection:... >>>
+I, [...]  INFO -- : FEDORA: initializing Fedora with fedora_config: {:url=>"http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"}
+I, [...]  INFO -- : FEDORA: initialized Fedora as: #<Fedora::Repository:0x102123b78 ....>
+=> true
+</pre>
+
+As you can see, ActiveFedora.init defaults to using the fedora.yml included in the gem, which points to a local instance of jetty running on port 8983 with fedora and solr installed.
+
+If you want to use a different fedora.yml (pointing ActiveFedora to differed Fedora & Solr URLs), put your info into a new fedora.yml and pass that path to ActiveFedora.init
+
+<pre>ActiveFedora.init("path/to/fedora.yml")</pre>
+
+You can see a sample fedora.yml in the ActiveFedora code on GitHub: http://github.com/mediashelf/active_fedora/blob/master/config/fedora.yml
+
+If you are running a rails app, ActiveFedora.init will automatically look for configs in config/fedora.yml
+
+Also, within a rails app, you should create a file in config/initializers (ie. fedora_config.rb) that calls ActiveFedora.init
+
+h2. Load a fixture object to play with
+
+The ActiveFedora code includes foxml files for Fedora objects that you can load into a Fedora repository and play around with.  Here we will load the one called hydrangea_fixture_mods_article1.foxml.xml
+
+<pre>
+filename = File.join(File.dirname(__FILE__),"spec","fixtures", "hydrangea_fixture_mods_article1.foxml.xml")
+file = File.new(filename, "r")
+result = foxml = Fedora::Repository.instance.ingest(file.read)
+</pre>
+
+If you get an error that starts with the lines below, this means that you already have a copy of that object in fedora.
+
+<pre>
+  Fedora::ServerError: Failed with 500 Error from Fedora: javax.ws.rs.WebApplicationException: org.fcrepo.server.errors.ObjectExistsException: The PID 'hydrangea:fixture_mods_article1' already exists in the registry; the object can't be re-created.
+</pre>
+
+The easiest way to delete an object from Fedora is to use the following line.  Note that this will raise an error if the object didn't exist in the first place.
+
+<pre>
+  ActiveFedora::Base.load_instance("hydrangea:fixture_mods_article1").delete
+</pre>
+
+To see a more complete implementation of importing and deleting Fedora objects, see the code in the hydra rake tasks in the hydra-head plugin: https://github.com/projecthydra/hydra-head/blob/master/lib/tasks/hydra.rake
+
+
+*When you're done playing around with importing and deleting, make sure that you leave a copy of hydrangea:fixture_mods_article1 in fedora so we can play with it.*
+
+
+h4. Define a Model
+
+_Look at the SpecialThing model defined in lib/active_fedora/samples/special_thing.rb to see how you declare an ActiveFedora model_
+
+
+Create an instance of the SpecialThing class
+
+<pre>
+newthing = SpecialThing.new
+</pre>
+
+Get the pid of your new object
+<pre>
+newthing.pid
+=> "changeme:30"
+</pre>
+
+This pid was retrieved from Fedora's getNextPid method.  Your object will not show up in Fedora until you save it using oh.save.
+
+h3. RELATIONSHIPS
+
+ActiveFedora provides convenience methods for creating and editing RELS-EXT relationships.  It also auto-generates methods for using Solr to search based on these relationships.
+
+List the object's relationships.
+<pre>
+newthing.relationships
+=> {:self=>{}}
+</pre>
+
+Call the "inspirations" method that was created by the has_relationship line in your class definition.
+<pre>
+newthing.inspirations
+=> []
+</pre>
+
+Now create another Fedora object and make it assert that it's a part of the SpecialThing object, then save it to Fedora.
+<pre>
+inspirational = ActiveFedora::Base.new
+inspirational.add_relationship(:has_derivation, newthing)
+=> true
+inspirational.relationships
+=> {:self=>{:has_derivation=>["info:fedora/changeme:30"]}}
+inspirational.save
+=> ...
+inspirational.pid
+=> "changeme:164" # this is the pid you want to put in the following URLs as a replacement for {PID}
+</pre>
+
+You can now see that object in Fedora by going to http://localhost:8983/fedora/objects/{PID} and you can see the relationship asserted in http://localhost: 8983/fedora/objects/{PID}/datastreams/RELS-EXT/content
+
+Now look and see that the object you created shows up when you call oh.parts
+<pre>
+newthing.inspirations
+=> ...
+newthing.inspirations.each {|pt| puts pt.pid }
+=> ...
+newthing.inspirations(:response_format=>:id_array)
+=> ...
+</pre>
+
+Note that you didn't have to save newthing in order for this relationship to show up in solr because it is an inbound relationship.  Only the object that makes the assertion needs to be saved in order for the search to work. In this case, the inspirational object asserts :has_derivation rather than the derivative asserting :is_derivation_of, so only the inspirational object had to be saved. 
+
+h3. DATASTREAMS & METADATA
+
+h4. Blobs (a.k.a. File Datastreams, a.k.a Managed Content Datastreams)
+
+<pre>
+file = File.new('spec/fixtures/minivan.jpg')
+=> #<File:spec/fixtures/minivan.jpg>
+file_ds = ActiveFedora::Datastream.new(:dsID => "minivan", :dsLabel => 'hello', :controlGroup => 'M', :blob => file)
+=> ...
+newthing.add_datastream(file_ds)
+=> "minivan"
+newthing.save
+=> true
+</pre>
+
+Now user your browser to find the file datastreams in Fedora ...
+
+
+h4. On auto-generating datatsream ids
+
+If you don't specify a dsid, ActiveFedora will generate one for you.
+
+<pre>
+file_ds2 = ActiveFedora::Datastream.new(:dsLabel => 'Minivan Plays', :altIDs => 'default', :controlGroup => 'M', :blob => file)
+newthing.add_datastream(file_ds2)
+=> "DS1"
+newthing.datastreams.keys
+=> ["DS1", "minivan", "RELS-EXT", "DC", "dublin_core", "properties"]
+>> newthing.datastreams_in_memory["DS1"] == file_ds2
+=> true
+</pre>
+
+You can choose a different prefix for the dsid by passing a :prefix value to add_datastream (be careful to ensure that the resulting dsid is a valid XMLString, or fedora will reject it!)
+
+<pre>
+file_ds3 = ActiveFedora::Datastream.new(:dsLabel => 'Minivan Plays', :altIDs => 'default', :controlGroup => 'M', :blob => file)
+newthing.add_datastream(file_ds3, :prefix=>"Foo")
+=> "Foo1"
+newthing.datastreams.keys
+newthing.save
+</pre>
+
+h2. Retrieving Existing Objects
+
+You can use the load_instance class method on any kind of ActiveFedora::Base class to load objects from Fedora.
+
+<pre>
+newthing.pid
+=> "changeme:30"
+copy_as_base = ActiveFedora::Base.load_instance("changeme:30")
+copy_as_base.pid
+=> "changeme:30"
+copy_as_base.relationships
+=> {:self=>{:conforms_to=>["info:fedora/afmodel:OralHistory"], :has_collection_member=>["info:fedora/changeme:16"]}}
+copy_as_base.datastreams.keys
+=> ["DS1", "Foo1", "minivan", "RELS-EXT", "DC", "dublin_core", "properties"]
+</pre>
+
+As you can see, ActiveFedora::Base will load the object, its datastreams, it's generic Fedora Object information, and even its RELS-EXT relationships.  It will _not_, however, know how to deserialize any model-specific metadata datastreams.  In other words, ActiveFedora::Base treats all datastreams as generic Fedora datastreams.
+
+<pre>
+>> copy_as_base.datastreams["dublin_core"].class
+=> ActiveFedora::Datastream
+</pre>
+
+If you want the model-specific metadata to be deserialized, you must call load_instance on the appropriate model class.  This will load all of the same info as ActiveFedora::Base, but it will also attempt to deserialize the xml from any metadata datastreams that were declared by the has_metadata method in the model.
+
+<pre>
+copy_as_specialthing = SpecialThing.load_instance(newthing.pid)
+copy_as_specialthing.datastreams["dublin_core"].class
+=> ActiveFedora::QualifiedDublinCoreDatastream
+copy_as_newthing.datastreams["properties"].class
+=> ActiveFedora::MetadataDatastream
+copy_as_specialthing.datastreams["dublin_core"].subject_heading_values
+=> ["bar", "baz"]
+copy_as_specialthing.datastreams["dublin_core"].subject_values
+=> ["foo"]
+</pre>
+
+h2. Finding Objects
+
+All descendants of ActiveFedora::Base provide a find method that will search for objects of the given class.  The method is somewhat incomplete at the moment, but is functional.  We are actively working on making it better.
+
+h3. Finding Instances of the Class
+
+Imitating ActiveRecord, you can search for instances of the given class by calling find(:all) on that class.  In current versions of the gem, this method searches solr using the active_fedora_model_field.  In future versions it will not hit solr at all, instead relying on Fedora's Resource Index and searching for anything that asserts "conformsTo" or "hasModel" relationships pointing at the given model.
+<pre>
+Base.find(:all)
+SpecialThing.find(:all)
+</pre>
+
+Note that the results from these two searches do not overlap.  OralHistory.find will only return objects that have been saved with active_fedora_model_field set to "info:fedora/afmodel:OralHistory".  If you open an object as an instance of a different model and save it as that model, it will overwrite the active_fedora_model_field.  This is, of course, no good.  That's why the method will be rewritten in "Version 1.1":/versions/show/7.  In the meantime, you could search directly against Solr with queries like this:
+
+<pre>
+solr_result = ActiveFedora::SolrService.instance.conn.query('conforms_to_field:info\:fedora/afmodel\:SpecialThing')
+</pre>
+
+This query will return a Solr::Result containing all of the objects that have conformsTo relationships pointing at info:fedora/afmodel:OralHistory in their RELS-EXT.  This relationship gets added to the RELS-EXT whenever you save an object as a given ActiveFedora model and it does not get erased if you later save it as a different model.
+
+h3. Finding (Loading) a specific Object
+
+You can use this instead of .load_instance.  In practice, we tend to use load_instance though -- it's more direct.
+
+<pre>
+Base.find("changeme:30")
+SpecialThing.find("changeme:30")
+</pre>
+
+
+h3. Looking a bit deeper at what Models do
+
+ActiveFedora Models don't actually do much.  They mainly keep a list of datastream ids and associate them with classes that help you use the content from those datastreams.
+
+When you're ready to learn more about how to define ActiveFedora models and OM-based datastreams, open up the files in lib/active_fedora/samples.  Those will give you more background.  Here, we're seeing what happens when you use those Models and datastreams.
+
+For now, load an instance of the SpecialThing model and take a look at its datastreams.
+
+<pre>
+st = SpecialThing.load_instance("hydrangea:fixture_mods_article1")
+st.datastreams
+... woah.  that's a lot of stuff.  how about just the datastream ids
+st.datastreams.keys
+ => ["descMetadata", "RELS-EXT", "rightsMetadata", "DC", "extraMetadataForFun", "properties"] 
+</pre>
+
+We see the three datastreams that are declared by the SpecialThing Model, but where did the other datastreams come from?
+
+The RELS-EXT is where Fedora objects store their relationships, so SpecialThing uses that datastream when it uses the methods created by has_relationship.
+
+The other two datastreams, DC and properties, were already there in the object we imported.  Our model doesn't define anything about those datastreams, so they are loaded as mere ActiveFedora::Datastreams.  When a datastream is loaded in this way, you can still see it and access/update its content as a blob, but your model doesn't know anything special about its contents.  This behavior is what allows us to have multiple interfaces for the same content.  One model might care only about the descMetadata and the properties while another model only cares about the descMetadata and rightsMetadata.  The two models only need to be consistent with each other when they are both operating on the same datastream. 
+ 
+Lets see what classes the datastreams have been bound to
+
+<pre>
+st.datastreams.keys.each do |dsid|
+  puts "#{dsid}:"  
+  puts "    #{st.datastreams[dsid].class}"
+end
+</pre>
+
+This will output 
+
+descMetadata:
+    Hydra::ModsArticleDatastream
+RELS-EXT:
+    ActiveFedora::RelsExtDatastream
+rightsMetadata:
+    Hydra::RightsMetadataDatastream
+DC:
+    ActiveFedora::Datastream
+extraMetadataForFun:
+    Marpa::DcDatastream
+properties:
+    ActiveFedora::Datastream
+
+Notice that properties and DC have been loaded as ActiveFedora::Datastream, RELS-EXT has been loaded as ActiveFedora::RelsExtDatastream, and the other three have been loaded as the classes specified in the Model.
+
+Now read the NOGOGIRI_DATASTREAMS tutorial to see what the datastream definitions have done for you.
+

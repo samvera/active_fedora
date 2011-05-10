@@ -90,6 +90,7 @@ module Hydra
       t.publication_url(:proxy=>[:location,:url])
       t.peer_reviewed(:proxy=>[:journal,:origin_info,:issuance], :index_as=>[:facetable])
       t.title(:proxy=>[:mods,:title_info, :main_title])
+      t.journal_title(:proxy=>[:journal, :title_info, :main_title])
     end
     
     # Generates an empty Mods Article (used when you call ModsArticle.new without passing in existing xml)

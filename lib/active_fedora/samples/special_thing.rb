@@ -11,7 +11,7 @@ require "active_fedora/samples"
 # For more info on the Hydra conventions, see the documentation on "Common Metadata content model" in https://wiki.duraspace.org/display/hydra/Hydra+content+models+and+disseminators
 # Note that on the wiki, "content model" is often used to refer to Fedora CModels and/or abstract/notional models.  The Common Metadata content model is an example of this.
 # The wiki includes a page that attempts to shed some light on the question of "What is a content model?" https://wiki.duraspace.org/display/hydra/Don't+call+it+a+'content+model'!
-class SampleModel < ActiveFedora::Base
+class SpecialThing < ActiveFedora::Base
   
   #
   # DATASTREAMS
