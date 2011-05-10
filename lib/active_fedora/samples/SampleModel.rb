@@ -1,5 +1,5 @@
 require "active-fedora"
-require "af_samples"
+require "active_fedora/samples"
 
 # This is an example of an ActiveFedora Model
 #
@@ -18,7 +18,7 @@ class SampleModel < ActiveFedora::Base
   #
   
   # This declares a datastream with Datastream ID (dsid) of "descMetadata"
-  # The descMetadata datastream is bound to the Hydra::ModsArticleDatastream class that's defined in lib/af_samples
+  # The descMetadata datastream is bound to the Hydra::ModsArticleDatastream class that's defined in lib/active_fedora/samples
   # Any time you load a Fedora object using an instance of SampleModel, the instance will assume its descMetadata datastream conforms to the assumptions in Hydra::ModsArticleDatastream class
   has_metadata :name => "descMetadata", :type=> Hydra::ModsArticleDatastream
   
@@ -36,8 +36,8 @@ class SampleModel < ActiveFedora::Base
   
   # This is an example of how you can add a custom relationship to a model
   # This will allow you to call .derivations on instances of the model to get a list of all of the _outbound_ "hasDerivation" relationships in the RELS-EXT datastream
-  relationship "derivations", :has_derivation
+  has_relationship "derivations", :has_derivation
 
   # This will allow you to call .inspirations on instances of the model to get a list of all of the objects that assert "hasDerivation" relationships pointing at this object
-  relationship "inspirations", :has_derivation, :inbound => true  
+  has_relationship "inspirations", :has_derivation, :inbound => true  
 end

@@ -508,7 +508,7 @@ module Hydra
       super(solr_doc)
             
       ::Solrizer::Extractor.insert_solr_field_value(solr_doc, "object_type_facet", "Article")
-      ::Solrizer::Extractor.insert_solr_field_value(solr_doc, "mods_journal_title_info_facet", "Unknown") if solr_doc["mods_journal_title_info_facet"].nil? || solr_doc["mods_journal_title_info_facet"].blank?
+      ::Solrizer::Extractor.insert_solr_field_value(solr_doc, "mods_journal_title_info_facet", "Unknown") if solr_doc["mods_journal_title_info_facet"].nil? 
 
       solr_doc
     end

@@ -1,6 +1,6 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
 require 'rexml/document'
-require "af_samples"
+require "active_fedora/samples"
 
 include ActiveFedora
 

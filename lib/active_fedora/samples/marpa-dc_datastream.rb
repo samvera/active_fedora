@@ -10,7 +10,7 @@ module Marpa
   # * Sets the namespace using :xmlns argument on the root term
   # * Does not override or extend to_solr, so the default solrization approach will be used (Solrizer::XML::TerminologyBasedSolrizer)
   #
-  class MarpaDCDatastream < ActiveFedora::NokogiriDatastream
+  class DcDatastream < ActiveFedora::NokogiriDatastream
   
     set_terminology do |t|
       t.root(:path=>"dc", :xmlns=>'http://purl.org/dc/terms/')
