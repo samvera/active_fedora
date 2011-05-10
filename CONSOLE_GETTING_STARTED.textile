@@ -41,7 +41,7 @@ h2. Open up the Console
 
 <pre>
 script/console
-<pre>
+</pre>
   
 <pre> 
 require "rubygems"
@@ -117,6 +117,7 @@ newthing = SpecialThing.new
 </pre>
 
 Get the pid of your new object
+
 <pre>
 newthing.pid
 => "changeme:30"
@@ -129,18 +130,21 @@ h3. RELATIONSHIPS
 ActiveFedora provides convenience methods for creating and editing RELS-EXT relationships.  It also auto-generates methods for using Solr to search based on these relationships.
 
 List the object's relationships.
+
 <pre>
 newthing.relationships
 => {:self=>{}}
 </pre>
 
 Call the "inspirations" method that was created by the has_relationship line in your class definition.
+
 <pre>
 newthing.inspirations
 => []
 </pre>
 
 Now create another Fedora object and make it assert that it's a part of the SpecialThing object, then save it to Fedora.
+
 <pre>
 inspirational = ActiveFedora::Base.new
 inspirational.add_relationship(:has_derivation, newthing)
@@ -156,6 +160,7 @@ inspirational.pid
 You can now see that object in Fedora by going to http://localhost:8983/fedora/objects/{PID} and you can see the relationship asserted in http://localhost: 8983/fedora/objects/{PID}/datastreams/RELS-EXT/content
 
 Now look and see that the object you created shows up when you call oh.parts
+
 <pre>
 newthing.inspirations
 => ...
@@ -253,6 +258,7 @@ All descendants of ActiveFedora::Base provide a find method that will search for
 h3. Finding Instances of the Class
 
 Imitating ActiveRecord, you can search for instances of the given class by calling find(:all) on that class.  In current versions of the gem, this method searches solr using the active_fedora_model_field.  In future versions it will not hit solr at all, instead relying on Fedora's Resource Index and searching for anything that asserts "conformsTo" or "hasModel" relationships pointing at the given model.
+
 <pre>
 Base.find(:all)
 SpecialThing.find(:all)
