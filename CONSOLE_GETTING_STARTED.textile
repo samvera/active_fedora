@@ -1,6 +1,8 @@
 h2. Get a Copy of the Code
 
-Clone the git repository and cd into the root
+All of the stuff you're learning here can be done in any application where you have the active-fedora gem installed and where you have called "require 'active-fedora'".  For this tutorial, you're cloning a full copy of the active-fedora code so you have access to the sample files that are stored there.
+
+First, clone the git repository and cd into the root
 
 <pre>
 git clone git@github.com:mediashelf/active_fedora.git
