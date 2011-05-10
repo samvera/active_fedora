@@ -12,7 +12,7 @@ describe ActiveFedora::Base do
       # has_metadata :name => "rightsMetadata", :type => Hydra::RightsMetadata 
 
       # Uses the Hydra MODS Article profile for tracking most of the descriptive metadata
-      has_metadata :name => "descMetadata", :type => Hydra::SampleModsDatastream 
+      has_metadata :name => "descMetadata", :type => Hydra::ModsArticle 
 
       # A place to put extra metadata values
       has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|
