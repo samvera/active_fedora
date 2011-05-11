@@ -394,7 +394,8 @@ module ActiveFedora
     end
     
     # Creates a RELS-EXT datastream for insertion into a Fedora Object
-    # @pid
+    # @param [String] pid
+    # @param [Hash] relationships (optional) @default self.relationships
     # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
     def to_rels_ext(pid, relationships=self.relationships)
       starter_xml = <<-EOL
@@ -480,10 +481,10 @@ module ActiveFedora
       
       # Generates relationship finders for predicates that point in both directions
       #
-      # @name Name of the relationship method(s) to create
-      # @outbound_predicate Predicate used in outbound relationships
-      # @inbound_predicate Predicate used in inbound relationships
-      # @opts
+      # @param [String] name of the relationship method(s) to create
+      # @param [Symbol] outbound_predicate Predicate used in outbound relationships
+      # @param [Symbol] inbound_predicate Predicate used in inbound relationships
+      # @param [Hash] opts
       #
       # Example:
       #  has_bidirectional_relationship("parts", :has_part, :is_part_of)
@@ -646,11 +647,10 @@ module ActiveFedora
       # Generates relationship finders for predicates that point in both directions
       # and registers predicate relationships for each direction.
       #
-      # @name Name of the relationship method(s) to create
-      # @outbound_predicate Predicate used in outbound relationships
-      # @inbound_predicate Predicate used in inbound relationships
-      # @opts
-      #
+      # @param [String] name Name of the relationship method(s) to create
+      # @param [Symbol] outbound_predicate Predicate used in outbound relationships
+      # @param [Symbol] inbound_predicate Predicate used in inbound relationships
+      # @param [Hash] opts (optional)
       def create_bidirectional_relationship_finders(name, outbound_predicate, inbound_predicate, opts={})
         inbound_method_name = name.to_s+"_inbound"
         outbound_method_name = name.to_s+"_outbound"
@@ -715,7 +715,8 @@ module ActiveFedora
       #alias_method :register_target, :register_object
     
       # Creates a RELS-EXT datastream for insertion into a Fedora Object
-      # @pid
+      # @param [String] pid of the object that the RELS-EXT datastream belongs to
+      # @param [Hash] relationships the relationships hash to transform into RELS-EXT RDF. @default the object's relationships hash
       # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
       def relationships_to_rels_ext(pid, relationships=self.relationships)
         starter_xml = <<-EOL
@@ -738,7 +739,7 @@ module ActiveFedora
     
       # If predicate is a symbol, looks up the predicate in the predicate_mappings
       # If predicate is not a Symbol, returns the predicate untouched
-      # @throws UnregisteredPredicateError if the predicate is a symbol but is not found in the predicate_mappings
+      # @raise UnregisteredPredicateError if the predicate is a symbol but is not found in the predicate_mappings
       def predicate_lookup(predicate,namespace="info:fedora/fedora-system:def/relations-external#")
         if predicate.class == Symbol 
           if predicate_mappings[namespace].has_key?(predicate)

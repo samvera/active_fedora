@@ -27,8 +27,9 @@ module ActiveFedora
       self.blob = self.to_dc_xml
     end
     
-    # @tmpl ActiveFedora::Datastream
-    # @node Nokogiri::XML::Node
+    # Populate a QualifiedDublinCoreDatastream object based on the "datastream" node from a FOXML file
+    # @param [ActiveFedora::Datastream] tmpl the Datastream object that you are building
+    # @param [Nokogiri::XML::Node] node the "foxml:datastream" node from a FOXML file.  Assumes that the content of this datastream is that of an ActiveFedora QualifiedDublinCoreDatastream 
     def self.from_xml(tmpl, node) # :nodoc:
      tmpl.fields.each do |z|
        fname = z.first

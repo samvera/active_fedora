@@ -29,8 +29,10 @@ module ActiveFedora
       EOL
     end
     
-    # @tmpl ActiveFedora::MetadataDatastream
-    # @node Nokogiri::XML::Node
+    # Populate a RelsExtDatastream object based on the "datastream" node from a FOXML file
+    # Assumes that the datastream contains RDF XML from a Fedora RELS-EXT datastream 
+    # @param [ActiveFedora::MetadataDatastream] tmpl the Datastream object that you are populating
+    # @param [Nokogiri::XML::Node] node the "foxml:datastream" node from a FOXML file
     def self.from_xml(tmpl, node) 
       # node.xpath("./foxml:datastreamVersion[last()]/foxml:xmlContent/rdf:RDF/rdf:Description/*").each do |f|
       node.xpath("./foxml:datastreamVersion[last()]/foxml:xmlContent/rdf:RDF/rdf:Description/*", {"rdf"=>"http://www.w3.org/1999/02/22-rdf-syntax-ns#", "foxml"=>"info:fedora/fedora-system:def/foxml#"}).each do |f|
@@ -45,6 +47,8 @@ module ActiveFedora
       tmpl
     end
     
+    # Serialize the datastream's RDF relationships to solr
+    # @param [Hash] solr_doc @deafult an empty Hash
     def to_solr(solr_doc = Hash.new)
       self.relationships.each_pair do |subject, predicates|
         if subject == :self || subject == "info:fedora/#{self.pid}"

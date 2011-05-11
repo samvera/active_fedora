@@ -23,8 +23,9 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     self.class.from_xml(blob, self)
   end
 
-  # @xml String, File or Nokogiri::XML::Node
-  # @tmpl ActiveFedora::MetadataDatastream
+  # Create an instance of this class based on xml content
+  # @param [String, File, Nokogiri::XML::Node] xml the xml content to build from
+  # @param [ActiveFedora::MetadataDatastream] tmpl the Datastream object that you are building @default a new instance of this class
   # Careful! If you call this from a constructor, be sure to provide something 'ie. self' as the @tmpl. Otherwise, you will get an infinite loop!
   def self.from_xml(xml, tmpl=self.new) # :nodoc:
     if xml.nil?

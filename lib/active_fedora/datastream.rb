@@ -54,12 +54,13 @@ module ActiveFedora
       dsid.gsub(/\./, '%2e')
     end
     
-    #has this datastream been modified since it was last saved?
+    # Test whether this datastream been modified since it was last saved?
     def dirty?
       @dirty
     end
   
-    #saves this datastream into fedora.
+    # Save the datastream into fedora.
+    # Also triggers {#before_save} and {#after_save} callbacks
     def save
       before_save
       result = Fedora::Repository.instance.save(self)
@@ -67,21 +68,21 @@ module ActiveFedora
       result
     end
     
-    def before_save # :nodoc:
+    # Callback.  Does nothing by default.  Override this to insert behaviors before the save method.
+    def before_save 
       #check_concurrency
     end
     
-    # @tmpl ActiveFedora::Datastream
-    # @node Nokogiri::XML::Node
+    # Populate a Datastream object based on the "datastream" node from a FOXML file
+    # @param [ActiveFedora::Datastream] tmpl the Datastream object that you are building
+    # @param [Nokogiri::XML::Node] node the "foxml:datastream" node from a FOXML file
     def self.from_xml(tmpl, node)
-      node.xpath("foxml:xmlContent/fields").each do |f|
-        # tmpl.send("#{f.name}_append", f.content)
-      end
       tmpl.instance_variable_set(:@dirty, false)
       tmpl.control_group= node['CONTROL_GROUP']
       tmpl
     end
     
+    # Callback.  Override this to insert behaviors after the save method.  By default, sets self.dirty = false
     def after_save
       self.dirty = false
     end

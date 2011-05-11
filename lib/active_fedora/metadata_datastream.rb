@@ -1,5 +1,11 @@
 module ActiveFedora
-  #this class represents a MetadataDatastream, a special case of ActiveFedora::Datastream
+  # A legacy class that creates and updates simple xml documents
+  # For much greater flexibility, use {ActiveFedora::NokogiriDatastream} instead.
+  # @example The simple, flat xml structure used by these datastreams
+  #   <fields>
+  #     <title>Foo</title>
+  #     <author>Bar</author>
+  #   </fields>
   class MetadataDatastream < Datastream
     
     include ActiveFedora::MetadataDatastreamHelper
@@ -124,8 +130,9 @@ module ActiveFedora
       end
     end
     
-    # @tmpl ActiveFedora::MetadataDatastream
-    # @node Nokogiri::XML::Node
+    # Populate a MetadataDatastream object based on the "datastream" node from a FOXML file
+    # @param [ActiveFedora::Datastream] tmpl the Datastream object that you are building
+    # @param [Nokogiri::XML::Node] node the "foxml:datastream" node from a FOXML file.  Assumes that the content of this datastream is that of an ActiveFedora MetadataDatastream (<fields>...</fields>)
     def self.from_xml(tmpl, node) # :nodoc:
       node.xpath("./foxml:datastreamVersion[last()]/foxml:xmlContent/fields/node()").each do |f|
           tmpl.send("#{f.name}_append", f.text) unless f.class == Nokogiri::XML::Text
