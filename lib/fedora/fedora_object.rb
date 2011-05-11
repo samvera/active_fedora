@@ -153,7 +153,7 @@ class Fedora::FedoraObject < Fedora::BaseObject
     "fedora:info/#{pid}"
   end
   
-  # @returns the url of the object in Fedora, without the repository userinfo
+  # @return [String] url of the datastream in Fedora, without the repository userinfo
   def url
     repo_url = Fedora::Repository.instance.fedora_url
     return "#{repo_url.scheme}://#{repo_url.host}:#{repo_url.port}#{repo_url.path}/objects/#{pid}"

@@ -49,7 +49,7 @@ class Fedora::Datastream < Fedora::BaseObject
     "fedora:info/#{pid}/datastreams/#{dsid}"
   end
   
-  # @returns the url of the datastream in Fedora, without the repository userinfo
+  # @return [String] url of the datastream in Fedora, without the repository userinfo
   def url
     return "#{Fedora::Repository.instance.base_url}/objects/#{pid}/datastreams/#{dsid}"
   end

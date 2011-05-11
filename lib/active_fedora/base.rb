@@ -178,7 +178,7 @@ module ActiveFedora
     # Adds datastream to the object.  Saves the datastream to fedora upon adding.
     # If datastream does not have a DSID, a unique DSID is generated
     # :prefix option will set the prefix on auto-generated DSID
-    # @returns DSID of the added datastream
+    # @return [String] dsid of the added datastream
     def add_datastream(datastream, opts={})
       datastream.pid = self.pid
       if datastream.dsid == nil || datastream.dsid.empty?
@@ -700,7 +700,7 @@ module ActiveFedora
     # Relationships Management
     #
     
-    # @returns Hash of relationships, as defined by SemanticNode
+    # @return [Hash] relationships hash, as defined by SemanticNode
     # Rely on rels_ext datastream to track relationships array
     # Overrides accessor for relationships array used by SemanticNode.
     # If outbound_only is false, inbound relationships will be included.
