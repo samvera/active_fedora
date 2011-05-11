@@ -8,7 +8,7 @@ namespace :fedora do
   desc "Delete and re-import the fixture identified by pid" 
   task :refresh_fixture => [:delete,:import_fixture]
   
-  desc "Delete the object identified by pid. Example: rake hydra:delete pid=demo:12"
+  desc "Delete the object identified by pid. Example: rake fedora:delete pid=demo:12"
   task :delete => :init do
     # If a destination url has been provided, attampt to export from the fedora repository there.
     if ENV["destination"]
@@ -16,7 +16,7 @@ namespace :fedora do
     end
     
     if ENV["pid"].nil? 
-      puts "You must specify a valid pid.  Example: rake hydra:delete pid=demo:12"
+      puts "You must specify a valid pid.  Example: rake fedora:delete pid=demo:12"
     else
       pid = ENV["pid"]
       puts "Deleting '#{pid}' from #{Fedora::Repository.instance.fedora_url}"
@@ -33,7 +33,7 @@ namespace :fedora do
     end
   end
   
-  desc "Delete a range of objects in a given namespace.  ie 'rake hydra:purge_range[demo, 22, 50]' will delete demo:22 through demo:50"
+  desc "Delete a range of objects in a given namespace.  ie 'rake fedora:purge_range[demo, 22, 50]' will delete demo:22 through demo:50"
   task :purge_range => :init do |t, args|
     # If Fedora Repository connection is not already initialized, initialize it using ActiveFedora defaults
     # ActiveFedora.init unless Thread.current[:repo]
@@ -57,14 +57,8 @@ namespace :fedora do
       i += 1
     end
   end
-
-  namespace :fixtures do
-    desc "Refresh the fixtures applicable to this hydra head"
-    task :refresh => ["active_fedora:refresh_fixtures"] do
-    end
-  end
   
-  desc "Export the object identified by pid into spec/fixtures. Example:rake hydra:harvest_fixture pid=druid:sb733gr4073 source=http://fedoraAdmin:fedoraAdmin@127.0.0.1:8080/fedora"
+  desc "Export the object identified by pid into spec/fixtures. Example:rake fedora:harvest_fixture pid=druid:sb733gr4073 source=http://fedoraAdmin:fedoraAdmin@127.0.0.1:8080/fedora"
   task :harvest_fixture => :init do
         
     # If a source url has been provided, attampt to export from the fedora repository there.
@@ -73,7 +67,7 @@ namespace :fedora do
     end
     
     if ENV["pid"].nil? 
-      puts "You must specify a valid pid.  Example: rake hydra:harvest_fixture pid=demo:12"
+      puts "You must specify a valid pid.  Example: rake fedora:harvest_fixture pid=demo:12"
     else
       pid = ENV["pid"]
       puts "Exporting '#{pid}' from #{Fedora::Repository.instance.fedora_url}"
@@ -85,7 +79,7 @@ namespace :fedora do
     end
   end
   
-  desc "Import the fixture located at the provided path. Example: rake hydra:import_fixture fixture=spec/fixtures/demo_12.foxml.xml"
+  desc "Import the fixture located at the provided path. Example: rake fedora:import_fixture fixture=spec/fixtures/demo_12.foxml.xml"
   task :import_fixture => [:init, :environment] do
         
     # If a destination url has been provided, attampt to export from the fedora repository there.
@@ -99,7 +93,7 @@ namespace :fedora do
       pid = ENV["pid"]
       filename = File.join("spec","fixtures","#{pid.gsub(":","_")}.foxml.xml")
     else
-      puts "You must specify a path to the fixture or provide its pid.  Example: rake hydra:import_fixture fixture=spec/fixtures/demo_12.foxml.xml"
+      puts "You must specify a path to the fixture or provide its pid.  Example: rake fedora:import_fixture fixture=spec/fixtures/demo_12.foxml.xml"
     end
     
     if !filename.nil?
@@ -119,52 +113,6 @@ namespace :fedora do
     
   end
 
-  # namespace :default_fixtures do
-  # 
-  #   FIXTURES = [
-  #       "hydrangea:fixture_mods_article1",
-  #       "hydrangea:fixture_mods_article3",
-  #       "hydrangea:fixture_file_asset1",
-  #       "hydrangea:fixture_mods_article2",
-  #       "hydrangea:fixture_uploaded_svg1",
-  #       "hydrangea:fixture_archivist_only_mods_article",
-  #       "hydrangea:fixture_mods_dataset1",
-  #       "hydrus:admin_class1"
-  #   ]
-  # 
-  #   desc "Load default Hydra fixtures"
-  #   task :load do
-  #     FIXTURES.each_with_index do |fixture,index|
-  #       ENV["fixture"] = nil
-  #       ENV["pid"] = fixture
-  #       Rake::Task["hydra:import_fixture"].reenable
-  #       Rake::Task["hydra:import_fixture"].invoke
-  #     end
-  #   end
-  # 
-  #   desc "Remove default Hydra fixtures"
-  #   task :delete do
-  #     FIXTURES.each_with_index do |fixture,index|
-  #       ENV["fixture"] = nil
-  #       ENV["pid"] = fixture
-  #       Rake::Task["hydra:delete"].reenable
-  #       Rake::Task["hydra:delete"].invoke
-  #     end
-  #   end
-  # 
-  #   desc "Refresh default Hydra fixtures"
-  #   task :refresh do
-  #     FIXTURES.each_with_index do |fixture,index|
-  #       logger.debug("Refreshing #{fixture}")
-  #       ENV["fixture"] = nil
-  #       ENV["pid"] = fixture        
-  #       Rake::Task["hydra:delete"].reenable
-  #       Rake::Task["hydra:delete"].invoke
-  #       Rake::Task["hydra:import_fixture"].reenable
-  #       Rake::Task["hydra:import_fixture"].invoke
-  #     end
-  #   end
-  # end
   
   desc "Init ActiveFedora configuration" 
   task :init do
