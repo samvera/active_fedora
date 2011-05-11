@@ -5,6 +5,8 @@ load 'tasks/active_fedora.rake'
 
 $: << 'lib'
 
+# load rake tasks defined in lib/tasks
+Dir["lib/tasks/**/*.rake"].each { |ext| load ext } if defined?(Rake)
 
 begin
   require 'jeweler'
