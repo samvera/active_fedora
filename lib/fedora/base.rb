@@ -1,8 +1,10 @@
 require 'xmlsimple'
 
 class Hash
-  #   {:q => 'test', :num => 5}.to_query # => 'q=test&num=5'
-  #   let's avoid stomping on rails' version eh?
+  
+  # Produces a valid Fedora query based on the current hash
+  # @example
+  #   {:q => 'test', :num => 5}.to_fedora_query # => 'q=test&num=5'
   def to_fedora_query
     self.collect { |key, value| "#{CGI.escape(key.to_s)}=#{CGI.escape(value.to_s)}" }.sort * '&'
   end
@@ -17,9 +19,7 @@ class Fedora::BaseObject
   attr_reader :errors, :uri
   attr_writer :new_object
   
-  # == Parameters
-  # attrs<Hash>:: object attributes
-  #-
+  # @param [Hash] attrs object attributes
   def initialize(attrs = {})
     @new_object = true
     @attributes = attrs || {}

@@ -83,9 +83,9 @@ module Hydra
     # Returns the permissions for the selected person/group
     # If new_access_level is provided, updates the selected person/group access_level to the one specified 
     # A new_access_level of "none" will remove all access_levels for the selected person/group
-    # @param [Hash] selector in format {type => identifier}
+    # @param [Hash] selector
     # @param [String] new_access_level (default nil)
-    # @return [Hash] format: {type => access_level}.  
+    # @return [Hash] 
     # 
     # @example Query permissions for person123, Set the permissions to "read", then query again to see that they have changed.
     #   permissions({:person=>"person123"})
@@ -119,13 +119,21 @@ module Hydra
     end
   
     # Reports on which groups have which permissions
-    # @return [Hash] format: {group_name => group_permissions, group_name => group_permissions}
+    # @return [Hash] 
+    # @example
+    #   sample_ds.permissions({"group"=>"group_zzz"}, "edit")
+    #   sample_ds.permissions({"group"=>"public"}, "discover")
+    #   sample_ds.groups #=>  {"public"=>"discover", "group_zzz"=>"edit"}
     def groups
       return quick_search_by_type(:group)
     end
   
     # Reports on which groups have which permissions
-    # @return [Hash] format: {person_name => person_permissions, person_name => person_permissions}
+    # @return [Hash] 
+    # @example
+    #   sample_ds.permissions({"person"=>"person_123"}, "read")
+    #   sample_ds.permissions({""person"=>"person_456"}, "edit")
+    #   sample_ds.individuals #=>  {"person_123"=>"read", "person_456"=>"edit"}
     def individuals
       return quick_search_by_type(:person)
     end

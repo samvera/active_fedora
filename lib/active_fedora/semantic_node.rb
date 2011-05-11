@@ -693,7 +693,9 @@ module ActiveFedora
         END
       end
     
-      # relationships are tracked as a hash of structure {subject => {predicate => [object]}}
+      # relationships are tracked as a hash of structure 
+      # @example
+      #   ds.relationships # => {:self=>{:has_model=>["afmodel:SimpleThing"],:has_part=>["demo:20"]},:inbound=>{:is_part_of=>["demo:6"]} 
       def relationships
         @class_relationships ||= Hash[:self => {}]
       end

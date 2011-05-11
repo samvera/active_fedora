@@ -265,35 +265,37 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     return false
   end
 
-  # Update field values within the current datastream
-  # @param [Hash] params The params specifying which fields to update and their new values.  Format: term_pointer => {index => value, ...}
-  #         term_pointer must be a valind OM Term pointer (ie. [:name]).  Strings will be ignored.
+  # Update field values within the current datastream using {#update_values}, which is a wrapper for {http://rdoc.info/gems/om/1.2.4/OM/XML/TermValueOperators#update_values-instance_method OM::TermValueOperators#update_values}
+  # Ignores any fields from params that this datastream's Terminology doesn't recognize    
+  #
+  # @param [Hash] params The params specifying which fields to update and their new values.  The syntax of the params Hash is the same as that expected by 
+  #         term_pointers must be a valid OM Term pointers (ie. [:name]).  Strings will be ignored.
   # @param [Hash] opts This is not currently used by the datastream-level update_indexed_attributes method
   #
   # Example: 
-  # @mods_ds.update_indexed_attributes( {[{":person"=>"0"}, "role"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"} })
-  # => {"person_0_role"=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}}
+  #   @mods_ds.update_indexed_attributes( {[{":person"=>"0"}, "role"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"} })
+  #   => {"person_0_role"=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}}
   #
-  # @mods_ds.to_xml will return something like this:
-  # <mods>
-  #   <mods:name type="person">
-  #    <mods:role>
-  #     <mods:roleTerm>role1</mods:roleTerm>
-  #    </mods:role>
-  #    <mods:role>
-  #     <mods:roleTerm>role2</mods:roleTerm>
-  #    </mods:role>
-  #    <mods:role>
-  #     <mods:roleTerm>role3</mods:roleTerm>
-  #    </mods:role>
-  #   </mods:name>
-  # </mods>
+  #   @mods_ds.to_xml # (the following is an approximation)
+  #   <mods>
+  #     <mods:name type="person">
+  #     <mods:role>
+  #       <mods:roleTerm>role1</mods:roleTerm>
+  #     </mods:role>
+  #     <mods:role>
+  #       <mods:roleTerm>role2</mods:roleTerm>
+  #     </mods:role>
+  #     <mods:role>
+  #       <mods:roleTerm>role3</mods:roleTerm>
+  #     </mods:role>
+  #     </mods:name>
+  #   </mods>
   def update_indexed_attributes(params={}, opts={})    
     if self.class.terminology.nil?
       raise "No terminology is set for this NokogiriDatastream class.  Cannot perform update_indexed_attributes"
     end
     # remove any fields from params that this datastream doesn't recognize    
-    #make sure to make a copy of params so not to modify hash that might be passed to other methods
+    # make sure to make a copy of params so not to modify hash that might be passed to other methods
     current_params = params.clone
     current_params.delete_if do |term_pointer,new_values| 
       if term_pointer.kind_of?(String)
@@ -317,9 +319,12 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     term_values(*field_key)
   end
 
-  # Override the method in  OM::XML::TermValueOperators so that returns an error if we have loaded from solr since it should be read-only
+  # Update values in the datastream's xml
+  # This wraps {http://rdoc.info/gems/om/1.2.4/OM/XML/TermValueOperators#update_values-instance_method OM::TermValueOperators#update_values} so that returns an error if we have loaded from solr since datastreams loaded that way should be read-only
   #
-  # example term values hash: {[{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}, [{:person=>1}, :family_name]=>"Andronicus", [{"person"=>"1"},:given_name]=>["Titus"],[{:person=>1},:role,:text]=>["otherrole1","otherrole2"] }
+  # @example Updating multiple values with a Hash of Term pointers and values
+  #   ds.update_values( {[{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}, [{:person=>1}, :family_name]=>"Andronicus", [{"person"=>"1"},:given_name]=>["Titus"],[{:person=>1},:role,:text]=>["otherrole1","otherrole2"] } )
+  #   => {"person_0_role_text"=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}, "person_1_role_text"=>{"0"=>"otherrole1", "1"=>"otherrole2"}} 
   def update_values(params={})
     if @internal_solr_doc
       raise "No update performed, this object was initialized via Solr instead of Fedora and is therefore read-only.  Please utilize ActiveFedora::Base.load_instance to first load object via Fedora instead."
