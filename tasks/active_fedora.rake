@@ -80,9 +80,10 @@ namespace :active_fedora do
     Dir.chdir("..")
   end
 
-  task :load_fixtures do
+  task :load_fixtures => :environment do
     require 'solrizer'
     require 'solrizer-fedora'
+    require 'spec/samples/models/hydrangea_article'
     ENV["FEDORA_HOME"]=File.expand_path(File.join(File.dirname(__FILE__),'..','jetty','fedora','default'))
     retval = `$FEDORA_HOME/client/bin/fedora-ingest-demos.sh localhost 8983 fedoraAdmin fedoraAdmin http`
     puts "loaded demo objects #{retval}"
@@ -106,4 +107,14 @@ namespace :active_fedora do
     end
   end
 
+end
+
+# Provides an :environment task for use while working within a working copy of active-fedora
+# You should never load this rake file into any other application
+desc 'Set up ActiveFedora environment.  !! Only for use while working within a working copy of active-fedora'
+task :environment do
+  puts "Initializing ActiveFedora Rake environment.  This should only be called when working within a workign copy of the active-fedora code."
+  require 'spec/samples/models/hydrangea_article'
+  # $:.unshift(File.dirname(__FILE__) + '/../lib')
+  # Dir[File.join(File.dirname(__FILE__)+'/../lib/')+'**/*.rb'].each{|x| require x}
 end
