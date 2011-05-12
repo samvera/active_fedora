@@ -2,14 +2,15 @@ h1. Using OM-based NokogiriDatastreams
 
 h2. Setup
 
-This tutorial assumes that you've run script/console from the root of ActiveFedora and have imported the hydrangea:fixture_mods_article1 object.  If you haven't done that, see CONSOLE_GETTING_STARTED for instructions.
+This tutorial assumes that you've run script/console from the root of ActiveFedora and have imported the hydrangea:fixture_mods_article1 object.  If you haven't done that, see {file:doc/CONSOLE_GETTING_STARTED.textile Getting Started} for instructions.
 
-The model definition we're using in this tutorial is located at https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/SpecialThing.rb
+The model definition we're using in this tutorial is {SpecialThing} ( "see the code":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/special_thing.rb )
 
-Look in these datastream definitions to see the OM Terminologies they define (with comments):
-* "Hydra::ModsArticleDatastream":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/hydra-mods_article_datastream.rb 
-* "Hydra::RightsMetadata":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/hydra-rights_metadata_datastream.rb
-* "Marpa::DcDatastream":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/marpa-dc_datastream.rb 
+
+Look in these datastream definitions to see the OM Terminologies they define.  They have extra comments in the code:
+* {Hydra::ModsArticleDatastream} ( "see the code":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/hydra-mods_article_datastream.rb ) 
+* {Hydra::RightsMetadataDatastream} ( "see the code":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/hydra-rights_metadata_datastream.rb }
+* {Marpa::DcDatastream} ( "see the code":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/marpa-dc_datastream.rb )
 
 
 h2. The First Pass with OM

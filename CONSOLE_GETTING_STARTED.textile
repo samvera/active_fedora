@@ -315,6 +315,7 @@ end
 
 This will output 
 
+<pre>
 descMetadata:
     Hydra::ModsArticleDatastream
 RELS-EXT:
@@ -327,8 +328,9 @@ extraMetadataForFun:
     Marpa::DcDatastream
 properties:
     ActiveFedora::Datastream
+</pre>
 
 Notice that properties and DC have been loaded as ActiveFedora::Datastream, RELS-EXT has been loaded as ActiveFedora::RelsExtDatastream, and the other three have been loaded as the classes specified in the Model.
 
-Now read the NOGOGIRI_DATASTREAMS tutorial to see what the datastream definitions have done for you.
+Now read the {file:NOGOGIRI_DATASTREAMS.textile Nokogiri Datastreams tutorial} to see what the datastream definitions have done for you.
 
