@@ -1,5 +1,7 @@
 require "active-fedora"
-require "active_fedora/samples"
+require "active_fedora/samples/hydra-mods_article_datastream.rb"
+require "active_fedora/samples/hydra-rights_metadata_datastream.rb"
+require "active_fedora/samples/marpa-dc_datastream.rb"
 
 # This is an example of an ActiveFedora Model
 #
