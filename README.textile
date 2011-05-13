@@ -4,10 +4,9 @@ RubyFedora and ActiveFedora provide a set of Ruby gems for creating and managing
 
 h2. Getting Help
 
-* http://yourmediashelf.com/activefedora
-* Project Homepage: <http://yourmediashelf.com/activefedora>
-* Further documentation is available at <http://projects.mediashelf.us/show/active-fedora>
-* Community Discussions & Mailing List are located at <http://groups.google.com/group/active-fedora>
+* Project Homepage: "http://yourmediashelf.com/activefedora":http://yourmediashelf.com/activefedora
+* Further documentation is available at "http://projects.mediashelf.us/show/active-fedora":http://projects.mediashelf.us/show/active-fedora
+* Community Discussions & Mailing List are located at "http://groups.google.com/group/active-fedora":http://groups.google.com/group/active-fedora
 
 h2. Installation
 
@@ -17,7 +16,7 @@ The gem is hosted on gemcutter.
 
 h2. Getting Started
 
-The "ActiveFedora Console Tour":http://projects.mediashelf.us/wiki/active-fedora/Getting_Started gives you a brief tour through ActiveFedora's features on the command line.
+The {file:CONSOLE_GETTING_STARTED ActiveFedora Console Tour} gives you a brief tour through ActiveFedora's features on the command line.
 
 h2. Testing
 
