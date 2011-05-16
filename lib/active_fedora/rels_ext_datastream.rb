@@ -36,9 +36,14 @@ module ActiveFedora
     def self.from_xml(tmpl, node) 
       # node.xpath("./foxml:datastreamVersion[last()]/foxml:xmlContent/rdf:RDF/rdf:Description/*").each do |f|
       node.xpath("./foxml:datastreamVersion[last()]/foxml:xmlContent/rdf:RDF/rdf:Description/*", {"rdf"=>"http://www.w3.org/1999/02/22-rdf-syntax-ns#", "foxml"=>"info:fedora/fedora-system:def/foxml#"}).each do |f|
-          ns_mapping = self.predicate_mappings[f.namespace.href]
-          predicate = ns_mapping ?  ns_mapping.invert[f.name] : nil
-          predicate = "#{f.namespace.prefix}_#{f.name}" if predicate.nil?
+          if f.namespace
+            ns_mapping = self.predicate_mappings[f.namespace.href]
+            predicate = ns_mapping ?  ns_mapping.invert[f.name] : nil
+            predicate = "#{f.namespace.prefix}_#{f.name}" if predicate.nil?
+          else
+            logger.warn "You have a predicate without a namespace #{f.name}. Verify your rels-ext is correct."
+            predicate = "#{f.name}"
+          end
           object = f["resource"] ? f["resource"] : f.inner_text
           r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>object)
           tmpl.add_relationship(r)
