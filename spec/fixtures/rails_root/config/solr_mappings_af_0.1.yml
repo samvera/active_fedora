@@ -1,0 +1,9 @@
+id: id
+default: searchable
+searchable:
+  default: _field
+  date: _date
+displayable: _display
+facetable: _facet
+sortable: _sort
+unstemmed_searchable: _unstem_search

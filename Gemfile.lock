@@ -1,8 +1,7 @@
 PATH
   remote: .
   specs:
-    active-fedora (2.2.0)
-      RedCloth
+    active-fedora (2.2.0.rails3pre1)
       active-fedora
       activeresource
       equivalent-xml
@@ -12,11 +11,9 @@ PATH
       multipart-post
       nokogiri
       om (>= 1.0)
-      rcov
       solr-ruby (>= 0.0.6)
       solrizer (> 1.0.0)
       xml-simple (>= 1.0.12)
-      yard
 
 GEM
   remote: http://rubygems.org/
@@ -64,8 +61,8 @@ GEM
       nokogiri
       nokogiri
       nokogiri
-      om (>= 1.0.0)
       om
+      om (>= 1.0.0)
       stomp
       xml-simple
     solrizer-fedora (1.0.2)
@@ -88,5 +85,6 @@ DEPENDENCIES
   rcov
   rspec (< 2.0.0)
   ruby-debug
+  solrizer
   solrizer-fedora
   yard

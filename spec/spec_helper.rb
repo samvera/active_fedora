@@ -15,7 +15,7 @@ ENV["RAILS_ENV"] ||= 'test'
 RAILS_ENV = ENV["RAILS_ENV"]
 
 $:.unshift(File.dirname(__FILE__) + '/../lib')
-Dir[File.join(File.dirname(__FILE__)+'/../lib/')+'**/*.rb'].each{|x| require x}
+Dir[File.join(File.dirname(__FILE__)+'/../lib/')+'**/*.rb'].each{|x| require x unless x.match(/railtie.rb$/)}
 $VERBOSE=nil
 
 # This loads the Fedora and Solr config info from /config/fedora.yml
