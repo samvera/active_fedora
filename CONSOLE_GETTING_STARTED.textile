@@ -1,3 +1,7 @@
+h2. Dependencies
+
+You will need Ruby 1.8.7+ to go through this tutorial.  If you don't have Ruby 1.8.7 installed, "RVM":https://rvm.beginrescueend.com/ is the best way to install it.
+
 h2. Get a Copy of the Code
 
 All of the stuff you're learning here can be done in any application where you have the active-fedora gem installed and where you have called "require 'active-fedora'".  For this tutorial, you're cloning a full copy of the active-fedora code so you have access to the sample files that are stored there.
