@@ -239,7 +239,7 @@ copy_as_base.datastreams.keys
 As you can see, ActiveFedora::Base will load the object, its datastreams, its generic Fedora Object information, and even its RELS-EXT relationships.  It will _not_, however, know how to deserialize any model-specific metadata datastreams.  In other words, ActiveFedora::Base treats all datastreams as generic Fedora datastreams.
 
 <pre>
-copy_as_base.datastreams["dublin_core"].class
+copy_as_base.datastreams["extraMetadataForFun"].class
 => ActiveFedora::Datastream
 </pre>
 
@@ -247,14 +247,10 @@ If you want the model-specific metadata to be deserialized, you must call load_i
 
 <pre>
 copy_as_specialthing = SpecialThing.load_instance(newthing.pid)
-copy_as_specialthing.datastreams["dublin_core"].class
-=> ActiveFedora::QualifiedDublinCoreDatastream
-copy_as_specialthing.datastreams["properties"].class
-=> ActiveFedora::MetadataDatastream
-copy_as_specialthing.datastreams["dublin_core"].subject_heading_values
-=> ["bar", "baz"]
-copy_as_specialthing.datastreams["dublin_core"].subject_values
-=> ["foo"]
+copy_as_specialthing.datastreams["descMetadata"].class
+=> Hydra::ModsArticleDatastream
+copy_as_specialthing.datastreams["extraMetadataForFun"].class
+=> ActiveFedora::Marpa::DcDatastream
 </pre>
 
 h2. Finding Objects
