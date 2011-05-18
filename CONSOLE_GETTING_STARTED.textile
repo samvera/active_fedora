@@ -333,5 +333,5 @@ properties:
 
 Notice that properties and DC have been loaded as ActiveFedora::Datastream, RELS-EXT has been loaded as ActiveFedora::RelsExtDatastream, and the other three have been loaded as the classes specified in the Model.
 
-Now read the "NOKOGIRI_DATASTREAMS.textile":https://github.com/mediashelf/active_fedora/blob/master/NOKOGIRI_DATASTREAMS.textile to see what the datastream definitions have done for you.
+Now read about  "OM-based NokogiriDatastreams":https://github.com/mediashelf/active_fedora/blob/master/NOKOGIRI_DATASTREAMS.textile to see what the datastream definitions have done for you.
 
