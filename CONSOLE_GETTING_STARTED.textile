@@ -39,7 +39,7 @@ java -jar start.jar
 
 This will start Jetty and spit a bunch of info out onto the console.  Leave that terminal window open and open a new one to play around with ActiveFedora.
 
-You can also set up your own copies of Fedora and Solr to run against.   For info on that, see [[Setting up Fedora and Solr for use with ActiveFedora]]
+You can also set up your own copies of Fedora and Solr to run against.   For info on that, see "Setting up Fedora and Solr for use with ActiveFedora":http://projects.mediashelf.us/projects/active-fedora/wiki/Setting_up_Fedora_and_Solr_for_use_with_ActiveFedora
 
 h2. Open up the Console
 
