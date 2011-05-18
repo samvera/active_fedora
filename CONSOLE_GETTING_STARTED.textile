@@ -262,14 +262,14 @@ h3. Finding Instances of the Class
 Imitating ActiveRecord, you can search for instances of the given class by calling find(:all) on that class.  In current versions of the gem, this method searches solr using the active_fedora_model_field.  In future versions it will not hit solr at all, instead relying on Fedora's Resource Index and searching for anything that asserts "conformsTo" or "hasModel" relationships pointing at the given model.
 
 <pre>
-Base.find(:all)
+ActiveFedora::Base.find(:all)
 SpecialThing.find(:all)
 </pre>
 
 Note that the results from these two searches do not overlap.  Base.find will only return objects that have been saved with active_fedora_model_field set to "info:fedora/afmodel:Base".  If you open an object as an instance of a different model and save it as that model, it will overwrite the active_fedora_model_field.  This is, of course, no good.  That's why the method will be rewritten in "Version 1.1":/versions/show/7.  In the meantime, you could search directly against Solr with queries like this:
 
 <pre>
-solr_result = ActiveFedora::SolrService.instance.conn.query('conforms_to_field:info\:fedora/afmodel\:SpecialThing')
+solr_result = ActiveFedora::SolrService.instance.conn.query('has_model_s:info\:fedora/afmodel\:SpecialThing')
 </pre>
 
 This query will return a Solr::Result containing all of the objects that have conformsTo relationships pointing at info:fedora/afmodel:SpecialThing in their RELS-EXT.  This relationship gets added to the RELS-EXT whenever you save an object as a given ActiveFedora model and it does not get erased if you later save it as a different model.
