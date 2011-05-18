@@ -103,7 +103,6 @@ The easiest way to delete an object from Fedora is to use the following line.  N
   ActiveFedora::Base.load_instance("hydrangea:fixture_mods_article1").delete
 </pre>
 
-Note that you will need hydrangea:fixtures_mods_article1 later in this tour, so if you delete it, you will need to re-create it.
 
 To see a more complete implementation of importing and deleting Fedora objects, see the code in the fedora rake tasks "https://github.com/mediashelf/active_fedora/blob/master/lib/tasks/fedora.rake":https://github.com/mediashelf/active_fedora/blob/master/lib/tasks/fedora.rake
 
