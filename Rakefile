@@ -1,7 +1,6 @@
 require 'rake/clean'
 require 'rubygems'
-load 'tasks/rspec.rake'
-load 'tasks/active_fedora.rake'
+load 'lib/tasks/rspec.rake'
 
 $: << 'lib'
 

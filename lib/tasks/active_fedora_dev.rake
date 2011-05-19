@@ -3,15 +3,17 @@ $: << 'lib'
 desc "Hudson build"
 task :hudson do
   require 'jettywrapper'
+  project_root = File.expand_path("#{File.dirname(__FILE__)}/../../")
+  
   if (ENV['RAILS_ENV'] == "test")
     Rake::Task["active_fedora:doc"].invoke
     Rake::Task["active_fedora:configure_jetty"].invoke
     jetty_params = {
       :quiet => false,
-      :jetty_home => File.join(File.dirname(__FILE__),'..','jetty'),
+      :jetty_home => File.join(project_root,'jetty'),
       :jetty_port => 8983,
-      :solr_home => File.expand_path(File.join(File.dirname(__FILE__),'..','jetty','solr')),
-      :fedora_home => File.expand_path(File.join(File.dirname(__FILE__),'..','jetty','fedora','default')),
+      :solr_home => File.expand_path(File.join(project_root,'jetty','solr')),
+      :fedora_home => File.expand_path(File.join(project_root,'jetty','fedora','default')),
       :startup_wait=>30
     }
     error = Jettywrapper.wrap(jetty_params) do
@@ -35,7 +37,7 @@ namespace :active_fedora do
   begin
     require 'yard'
     require 'yard/rake/yardoc_task'
-    project_root = File.expand_path("#{File.dirname(__FILE__)}/../")
+    project_root = File.expand_path("#{File.dirname(__FILE__)}/../../")
     doc_destination = File.join(project_root, 'doc')
 
     YARD::Rake::YardocTask.new(:doc) do |yt|
@@ -86,7 +88,7 @@ namespace :active_fedora do
     require 'solrizer'
     require 'solrizer-fedora'
     require 'spec/samples/models/hydrangea_article'
-    ENV["FEDORA_HOME"]=File.expand_path(File.join(File.dirname(__FILE__),'..','jetty','fedora','default'))
+    ENV["FEDORA_HOME"]=File.expand_path(File.join(File.dirname(__FILE__),'..','..','jetty','fedora','default'))
     retval = `$FEDORA_HOME/client/bin/fedora-ingest-demos.sh localhost 8983 fedoraAdmin fedoraAdmin http`
     puts "loaded demo objects #{retval}"
     ActiveFedora.init unless Thread.current[:repo]
