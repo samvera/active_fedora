@@ -1,4 +1,25 @@
+begin
+  require 'spec'
+rescue LoadError
+  require 'rubygems'
+  require 'spec'
+end
+begin
+  require 'spec/rake/spectask'
+rescue LoadError
+  puts <<-EOS
+To use rspec for testing you must install rspec gem:
+    gem install rspec
+EOS
+  exit(0)
+end
+
 $: << 'lib'
+
+desc "Run active-fedora rspec tests"
+task :spec do
+  Rake::Task["active_fedora:rspec"].invoke
+end
 
 desc "Hudson build"
 task :hudson do
@@ -28,7 +49,6 @@ task :hudson do
     system("rake hudson RAILS_ENV=test")
   end
 end
-
 
 namespace :active_fedora do
   require 'lib/active-fedora'
@@ -115,6 +135,7 @@ desc 'Set up ActiveFedora environment.  !! Only for use while working within a w
 task :environment do
   puts "Initializing ActiveFedora Rake environment.  This should only be called when working within a workign copy of the active-fedora code."
   require 'spec/samples/models/hydrangea_article'
+  require 'active_fedora/samples'
   # $:.unshift(File.dirname(__FILE__) + '/../lib')
   # Dir[File.join(File.dirname(__FILE__)+'/../lib/')+'**/*.rb'].each{|x| require x}
 end

@@ -1,6 +1,5 @@
 require 'rake/clean'
 require 'rubygems'
-load 'lib/tasks/rspec.rake'
 
 $: << 'lib'
 
