@@ -2,7 +2,7 @@ require 'rubygems'
 gem 'mocha'
 require 'ruby-debug'
 require 'mocha'
-require 'ruby-fedora'
+require 'active-fedora'
 require "equivalent-xml"
 begin
   require 'spec'
