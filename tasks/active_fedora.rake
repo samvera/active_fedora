@@ -89,15 +89,8 @@ namespace :active_fedora do
     ENV["FEDORA_HOME"]=File.expand_path(File.join(File.dirname(__FILE__),'..','jetty','fedora','default'))
     retval = `$FEDORA_HOME/client/bin/fedora-ingest-demos.sh localhost 8983 fedoraAdmin fedoraAdmin http`
     puts "loaded demo objects #{retval}"
-    fixture = File.open(File.expand_path(File.join("spec","fixtures","hydrangea_fixture_mods_article1.foxml.xml")),"r")
     ActiveFedora.init unless Thread.current[:repo]
-    result = foxml = Fedora::Repository.instance.ingest(fixture.read)
-    if result
-      solrizer = Solrizer::Fedora::Solrizer.new
-      solrizer.solrize "hydrangea:fixture_mods_article1"
-    end
-    #retval = `$FEDORA_HOME/client/bin/fedora-ingest.sh f #{fixture} info:fedora/fedora-system:FOXML-1.1 localhost:8983 fedoraAdmin fedoraAdmin http`
-    puts "Loaded #{fixture}:  #{retval}"
+    Rake::Task["af:refresh_fixture"].invoke("pid=hydrangea:fixture_mods_article1")
   end
 
   desc "Copies the default SOLR config for the bundled Testing Server"
