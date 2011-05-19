@@ -90,7 +90,10 @@ namespace :active_fedora do
     retval = `$FEDORA_HOME/client/bin/fedora-ingest-demos.sh localhost 8983 fedoraAdmin fedoraAdmin http`
     puts "loaded demo objects #{retval}"
     ActiveFedora.init unless Thread.current[:repo]
-    Rake::Task["af:refresh_fixture"].invoke("pid=hydrangea:fixture_mods_article1")
+    
+    ENV["pid"] = "hydrangea:fixture_mods_article1"
+    Rake::Task["af:refresh_fixture"].invoke
+    ENV["pid"] = nil
   end
 
   desc "Copies the default SOLR config for the bundled Testing Server"
