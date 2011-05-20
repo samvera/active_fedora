@@ -44,6 +44,7 @@ task :hudson do
     raise "test failures: #{error}" if error
   else
     system("rake hudson RAILS_ENV=test")
+    fail unless $?.success?
   end
 end
 
