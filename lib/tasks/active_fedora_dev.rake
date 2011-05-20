@@ -39,9 +39,6 @@ task :hudson do
     }
     error = Jettywrapper.wrap(jetty_params) do
       Rake::Task["active_fedora:load_fixtures"].invoke
-      Rake::Task["active_fedora:nokogiri_unit_tests"].invoke
-      Rake::Task["active_fedora:nokogiri_integration_tests"].invoke
-      ENV['HUDSON_BUILD'] = 'true'
       Rake::Task["active_fedora:rspec"].invoke
     end
     raise "test failures: #{error}" if error
@@ -75,21 +72,8 @@ namespace :active_fedora do
 
   Spec::Rake::SpecTask.new(:rspec) do |t|
     t.spec_files = FileList['spec/**/*_spec.rb']
-    # removing because of en suite failures on hudson
-    t.spec_files.delete 'spec/unit/nokogiri_datastream_spec.rb'
-    t.spec_files.delete 'spec/integration/nokogiri_datastream_spec.rb'
-    t.spec_files.delete 'spec/integration/mods_article_integration_spec.rb'
     t.rcov = true
     t.rcov_opts << "--exclude \"spec/* gems/*\" --rails"
-  end
-
-  Spec::Rake::SpecTask.new(:nokogiri_unit_tests) do |t|
-    t.spec_files = ['spec/unit/nokogiri_datastream_spec.rb']
-  end
-
-  Spec::Rake::SpecTask.new(:nokogiri_integration_tests) do |t|
-    t.spec_files = ['spec/integration/nokogiri_datastream_spec.rb']
-    t.spec_files = ['spec/integration/mods_article_integration_spec.rb']
   end
 
   task :refresh_fixtures do
