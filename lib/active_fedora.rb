@@ -28,7 +28,7 @@ ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 module ActiveFedora #:nodoc:
   
   class << self
-    attr_accessor :solr_config, :fedora_config, :predicate_config_path
+    attr_accessor :solr_config, :fedora_config
   end
   
   # The configuration hash that gets used by RSolr.connect
