@@ -58,7 +58,6 @@ module ActiveFedora #:nodoc:
 
     
     logger.info("FEDORA: loading ActiveFedora config from #{File.expand_path(config_path)}")
-    
     fedora_config = YAML::load(File.open(config_path))
     raise "The #{config_env} environment settings were not found in the fedora.yml config.  If you already have a fedora.yml file defined, make sure it defines settings for the #{config_env} environment" unless fedora_config[config_env]
     
@@ -77,16 +76,7 @@ module ActiveFedora #:nodoc:
     logger.info("FEDORA: initialized Fedora as: #{Fedora::Repository.instance.inspect}")    
     
     # Retrieve the valid path for the predicate mappings config file
-    pred_config_paths = [File.dirname(config_path),File.join(File.dirname(__FILE__),"..","config")]
-    pred_config_paths.each do |path|
-      testfile = File.join(path,"predicate_mappings.yml")
-      if File.exist?(testfile)
-        @predicate_config_path = testfile
-        break
-      end
-    end
-    raise "Could not find predicate_mappings.yml in these locations: #{pred_config_paths.join("; ")}." unless @predicate_config_path
-
+    @predicate_config_path = build_predicate_config_path(File.dirname(config_path))
 
   end
   
@@ -103,13 +93,37 @@ module ActiveFedora #:nodoc:
   end
 
   def self.predicate_config
-    @predicate_config_path
+    @predicate_config_path ||= build_predicate_config_path
   end
 
   def self.version
     ActiveFedora::VERSION
   end
+
+  protected
+
+  def self.build_predicate_config_path(config_path=nil)
+    pred_config_paths = [File.expand_path(File.join(File.dirname(__FILE__),"..","config"))]
+    pred_config_paths.unshift config_path if config_path
+    pred_config_paths.each do |path|
+      testfile = File.join(path,"predicate_mappings.yml")
+      if File.exist?(testfile) && valid_predicate_mapping?(testfile)
+        return testfile
+      end
+    end
+    raise PredicateMappingsNotFoundError #"Could not find predicate_mappings.yml in these locations: #{pred_config_paths.join("; ")}." unless @predicate_config_path
+  end
+
+  def self.valid_predicate_mapping?(testfile)
+    mapping = YAML::load(File.open(testfile))
+    return false unless mapping.has_key?(:default_namespace) && mapping[:default_namespace].is_a?(String)
+    return false unless mapping.has_key?(:predicate_mapping) && mapping[:predicate_mapping].is_a?(Hash)
+    true
+  end
+    
+
 end
+
 
 
 
@@ -129,5 +143,6 @@ end
 module ActiveFedora
   class ServerError < Fedora::ServerError; end # :nodoc:
   class ObjectNotFoundError < RuntimeError; end # :nodoc:
+  class PredicateMappingsNotFoundError < RuntimeError; end # :nodoc:
 end
 

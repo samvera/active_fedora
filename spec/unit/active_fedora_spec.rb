@@ -12,4 +12,72 @@ describe ActiveFedora do
       # push the model definition into the cmodel's datastream (ie. dsname: oral_history.rb vs dsname: ruby)
     end
   end
+
+  describe ".build_predicate_config_path" do
+    it "should return the path to the default config/predicate_mappings.yml if no valid path is given" do
+      ActiveFedora.send(:build_predicate_config_path, nil).should == default_predicate_mapping_file
+    end
+
+    it "should return the path to the default config/predicate_mappings.yml if specified config file not found" do
+      File.expects(:exist?).with("/path/to/predicate_mappings.yml").returns(false)
+      File.expects(:exist?).with(default_predicate_mapping_file).returns(true)
+      ActiveFedora.send(:build_predicate_config_path,"/path/to").should == default_predicate_mapping_file
+    end
+
+    it "should return the path to the specified config_path if it exists" do
+      File.expects(:exist?).with("/path/to/predicate_mappings.yml").returns(true)
+      ActiveFedora.expects(:valid_predicate_mapping?).returns(true)
+      ActiveFedora.send(:build_predicate_config_path,"/path/to").should == "/path/to/predicate_mappings.yml"
+    end    
+  end
+
+  describe ".predicate_config" do
+    it "should return the default mapping if it has not been initialized" do
+      ActiveFedora.instance_variable_set("@predicate_config_path",nil)
+      ActiveFedora.predicate_config().should == default_predicate_mapping_file
+    end
+    it "should return the path that was set at initialization" do
+      pending()
+      File.expects(:exist?).with("/path/to/my/files/predicate_mappings.yml").returns(true)
+      mock_file = mock("fedora.yml")
+      File.expects(:open).returns(mock_file)
+      YAML.expects(:load).returns({"test"=>{"solr"=>{"url"=>"http://127.0.0.1:8983/solr/development"}, "fedora"=>{"url"=>"http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"}}})
+      ActiveFedora.init("/path/to/my/files/fedora.yml")
+      ActiveFedora.predicate_config.should == "/path/to/my/files/predicate_mappings.yml"
+    end
+  end
+
+  describe ".valid_predicate_mapping" do
+    it "should return true if the predicate mapping has the appropriate keys and value types" do
+      ActiveFedora.send(:valid_predicate_mapping?,default_predicate_mapping_file).should be_true
+    end
+    it "should return false if the mapping is missing the :default_namespace" do
+      mock_yaml({:default_namespace0=>"my_namespace",:predicate_mapping=>{:key0=>"value0", :key1=>"value1"}})
+      ActiveFedora.send(:valid_predicate_mapping?,"/path/to/predicate_mappings.yml").should be_false
+    end
+    it "should return false if the :default_namespace is not a string" do
+      mock_yaml({:default_namespace=>{:foo=>"bar"}, :predicate_mapping=>{:key0=>"value0", :key1=>"value1"}})
+      ActiveFedora.send(:valid_predicate_mapping?,"/path/to/predicate_mappings.yml").should be_false
+    end
+    it "should return false if the :predicate_mappings key is missing" do
+      mock_yaml({:default_namespace=>"a string"})
+      ActiveFedora.send(:valid_predicate_mapping?,"/path/to/predicate_mappings.yml").should be_false
+    end
+    it "should return false if the :predicate_mappings key is not a hash" do
+      mock_yaml({:default_namespace=>"a string",:predicate_mapping=>"another string"})
+      ActiveFedora.send(:valid_predicate_mapping?,"/path/to/predicate_mappings.yml").should be_false
+    end
+
+  end
+end
+
+
+def mock_yaml(hash)
+  mock_file = mock("predicate_mappings.yml")
+  File.expects(:open).with("/path/to/predicate_mappings.yml").returns(mock_file)
+  YAML.expects(:load).returns(hash)
+end
+
+def default_predicate_mapping_file
+  File.expand_path(File.join(File.dirname(__FILE__),"..","..","config","predicate_mappings.yml"))
 end
