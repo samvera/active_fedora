@@ -18,7 +18,7 @@ h2. Getting Started
 
 The "ActiveFedora Console Tour":https://github.com/mediashelf/active_fedora/blob/master/CONSOLE_GETTING_STARTED.textile  gives you a brief tour through ActiveFedora's features on the command line.
 
-h2. Installation
+h2. Testing
 
 In order to run the RSpec tests, you need to have a copy of the ActiveFedora source code, and then run bundle install in the source directory.
 
@@ -26,9 +26,11 @@ In order to run the RSpec tests, you need to have a copy of the ActiveFedora sou
 git clone https://github.com/mediashelf/active_fedora.git
 cd /wherever/active_fedora/is
 bundle install
+git submodule init
+git submodule update
 </pre>
 
-h2. Testing with Hudson Rake Task
+h3. Testing with Hudson Rake Task
 
 The hudson rake task will spin up jetty, import the fixtures, and run the tests for you.
 
@@ -36,7 +38,7 @@ The hudson rake task will spin up jetty, import the fixtures, and run the tests 
   rake hudson
 </pre>
 
-h2. Testing Manually
+h3. Testing Manually
 
 If you want to run the tests manually, follow these instructions.
 
@@ -49,16 +51,15 @@ java -jar start.jar
 Then open a new terminal, go to your ActiveFedora source directory, and import fedora's demo objects.
 
 <pre>
+  export FEDORA_HOME=/path/to/hydra/jetty/fedora/default
   rake active_fedora:load_fixtures RAILS_ENV=test
 </pre>
 
 This does the equivalent of:
 
 <pre>
-cd /wherever/active_fedora/is
-export FEDORA_HOME=/path/to/hydra/jetty/fedora/default
-$FEDORA_HOME/client/bin/fedora-ingest-demos.sh localhost 8983 fedoraAdmin fedoraAdmin http
-rake af:import_fixture pid=hydrangea:fixture_mods_article1 RAILS_ENV=test
+  $FEDORA_HOME/client/bin/fedora-ingest-demos.sh localhost 8983 fedoraAdmin fedoraAdmin http
+  rake af:import_fixture pid=hydrangea:fixture_mods_article1 RAILS_ENV=test
 </pre>
 
 Now you're ready to run the tests.  In the directory where active_fedora is installed, run

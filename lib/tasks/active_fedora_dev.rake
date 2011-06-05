@@ -38,6 +38,7 @@ task :hudson do
       :startup_wait=>30
     }
     error = Jettywrapper.wrap(jetty_params) do
+      ENV["FEDORA_HOME"]=File.expand_path(File.join(File.dirname(__FILE__),'..','..','jetty','fedora','default'))
       Rake::Task["active_fedora:load_fixtures"].invoke
       Rake::Task["active_fedora:rspec"].invoke
     end
@@ -94,7 +95,7 @@ namespace :active_fedora do
     require 'solrizer'
     require 'solrizer-fedora'
     require 'spec/samples/models/hydrangea_article'
-    ENV["FEDORA_HOME"]=File.expand_path(File.join(File.dirname(__FILE__),'..','..','jetty','fedora','default'))
+    ENV["FEDORA_HOME"] ||= File.expand_path(File.join(File.dirname(__FILE__),'..','..','jetty','fedora','default'))
     retval = `$FEDORA_HOME/client/bin/fedora-ingest-demos.sh localhost 8983 fedoraAdmin fedoraAdmin http`
     puts "loaded demo objects #{retval}"
     ActiveFedora.init unless Thread.current[:repo]
