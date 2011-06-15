@@ -63,4 +63,12 @@ describe Fedora::FedoraObject do
     
   end
 
+  describe ".owner_id=" do
+    it "should update the attributes hash with ownerId attribute" do
+      @test_object.owner_id.should be_nil
+      @test_object.owner_id="fooTest"
+      @test_object.attributes[:ownerId].should == "fooTest"
+    end
+  end
+
 end

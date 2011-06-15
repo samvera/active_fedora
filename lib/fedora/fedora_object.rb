@@ -122,7 +122,7 @@ class Fedora::FedoraObject < Fedora::BaseObject
   end
 
   def owner_id=(new_owner_id)
-    self.attributes.merge!({:ownerID => new_owner_id})
+    self.attributes.merge!({:ownerId => new_owner_id})
   end
   
   def profile
