@@ -417,11 +417,27 @@ module ActiveFedora
           case predicate
           when :has_model, "hasModel", :hasModel
             xmlns="info:fedora/fedora-system:def/model#"
+            begin
+              rel_predicate = self.class.predicate_lookup(predicate,xmlns)
+            rescue UnregisteredPredicateError
+              xmlns = nil
+              rel_predicate = nil
+            end
           else
             xmlns="info:fedora/fedora-system:def/relations-external#"
+            begin
+              rel_predicate = self.class.predicate_lookup(predicate,xmlns)
+            rescue UnregisteredPredicateError
+              xmlns = nil
+              rel_predicate = nil
+            end
+          end
+          
+          unless xmlns && rel_predicate
+            rel_predicate, xmlns = self.class.find_predicate(predicate)
           end
           # puts ". #{predicate} #{target} #{xmlns}"
-          xml.root.elements["rdf:Description"].add_element(self.class.predicate_lookup(predicate), {"xmlns" => "#{xmlns}", "rdf:resource"=>target})
+          xml.root.elements["rdf:Description"].add_element(rel_predicate, {"xmlns" => "#{xmlns}", "rdf:resource"=>target})
         end
       end
       xml.to_s
@@ -747,7 +763,7 @@ module ActiveFedora
           if predicate_mappings[namespace].has_key?(predicate)
             return predicate_mappings[namespace][predicate]
           else
-            throw UnregisteredPredicateError
+            raise ActiveFedora::UnregisteredPredicateError
           end
         end
         return predicate
@@ -764,7 +780,21 @@ module ActiveFedora
       def default_predicate_namespace
         predicate_config[:default_namespace]
       end
+
+      def find_predicate(predicate)
+        predicate_mappings.each do |namespace,predicates|
+          if predicates.fetch(predicate,nil)
+            return predicates[predicate], namespace
+          end
+        end
+        debugger
+        raise ActiveFedora::UnregisteredPredicateError
+      end
+
       
     end
   end
+
+  class UnregisteredPredicateError < RuntimeError; end
+
 end

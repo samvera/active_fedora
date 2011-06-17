@@ -495,6 +495,11 @@ describe ActiveFedora::SemanticNode do
     SpecNode.predicate_lookup(:is_part_of).should == "isPartOf"
     SpecNode.predicate_lookup(:is_member_of).should == "isMemberOf"
     SpecNode.predicate_lookup("isPartOfCollection").should == "isPartOfCollection"
+    SpecNode.predicate_config[:predicate_mapping].merge!({"some_namespace"=>{:has_foo=>"hasFOO"}})
+    SpecNode.find_predicate(:has_foo).should == ["hasFOO","some_namespace"]
+    SpecNode.predicate_lookup(:has_foo,"some_namespace").should == "hasFOO"
+    #SpecNode.predicate_lookup(:has_foo)
+    lambda { SpecNode.predicate_lookup(:has_foo) }.should raise_error ActiveFedora::UnregisteredPredicateError
   end
   
   it 'should provide #relationships_to_rels_ext' do
