@@ -482,12 +482,12 @@ module ActiveFedora
       def has_relationship(name, predicate, opts = {})
         opts = {:singular => nil, :inbound => false}.merge(opts)
         if opts[:inbound] == true
-          raise "Duplicate use of predicate for named inbound relationship not allowed" if named_predicate_exists_with_different_name?(:inbound,name,predicate)
+          #raise "Duplicate use of predicate for named inbound relationship not allowed" if named_predicate_exists_with_different_name?(:inbound,name,predicate)
           register_named_relationship(:inbound, name, predicate, opts)
           register_predicate(:inbound, predicate)
           create_inbound_relationship_finders(name, predicate, opts)
         else
-          raise "Duplicate use of predicate for named outbound relationship not allowed" if named_predicate_exists_with_different_name?(:self,name,predicate)
+          #raise "Duplicate use of predicate for named outbound relationship not allowed" if named_predicate_exists_with_different_name?(:self,name,predicate)
           register_named_relationship(:self, name, predicate, opts)
           register_predicate(:self, predicate)
           create_named_relationship_methods(name)
@@ -598,11 +598,17 @@ module ActiveFedora
       end
     
       def create_inbound_relationship_finders(name, predicate, opts = {})
+        if opts[:query_params]
+          opts[:query_params] = format_query_params(opts[:query_params]) 
+          q = opts[:query_params][:q] if opts[:query_params][:q] 
+        end
         class_eval <<-END
         def #{name}(opts={})
           opts = {:rows=>25}.merge(opts)
           escaped_uri = self.internal_uri.gsub(/(:)/, '\\:')
-          solr_result = SolrService.instance.conn.query("#{predicate}_s:\#{escaped_uri}", :rows=>opts[:rows])
+          query = "#{predicate}_s:\#{escaped_uri}"
+          query << " AND #{q}" unless "#{q}".empty?
+          solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
           if opts[:response_format] == :solr
             return solr_result
           else
@@ -625,10 +631,17 @@ module ActiveFedora
         def #{name}_from_solr
           #{name}(:response_format => :load_from_solr)
         end
+        def #{name}_solr_docs
+          #{name}(:response_format => :solr)
+        end
         END
       end
     
       def create_outbound_relationship_finders(name, predicate, opts = {})
+        if opts[:query_params]
+          opts[:query_params] = format_query_params(opts[:query_params]) 
+          q = opts[:query_params][:q] if opts[:query_params][:q] 
+        end
         class_eval <<-END
         def #{name}(opts={})
           id_array = []
@@ -637,13 +650,20 @@ module ActiveFedora
               id_array << rel.gsub("info:fedora/", "")
             end
           end
-          if opts[:response_format] == :id_array
+          if opts[:response_format] == :id_array && "#{q}".empty?
             return id_array
           else
             query = ActiveFedora::SolrService.construct_query_for_pids(id_array)
+            query << " AND #{q}" unless "#{q}".empty?
             solr_result = SolrService.instance.conn.query(query)
             if opts[:response_format] == :solr
               return solr_result
+            elsif opts[:response_format] == :id_array
+              id_array = []
+              solr_result.hits.each do |hit|
+                id_array << hit[SOLR_DOCUMENT_ID]
+              end
+              return id_array
             elsif opts[:response_format] == :load_from_solr || self.load_from_solr
               return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
             else
@@ -657,9 +677,30 @@ module ActiveFedora
         def #{name}_from_solr
           #{name}(:response_format => :load_from_solr)
         end
+        def #{name}_solr_docs
+          #{name}(:response_format => :solr)
+        end
         END
       end
-      
+
+      # This will transform and encode any query_params defined in a relationship method to properly escape special characters
+      # and format strings such as query string properly for a solr query
+      def format_query_params(query_params)
+        if query_params && query_params[:q]
+          add_query = ""
+          if query_params[:q].is_a? Hash
+            query_params[:q].keys.each_with_index do |key,index|
+              add_query << " AND " if index > 0
+              add_query << "#{key}:#{query_params[:q][key].gsub(/:/, '\\\\\\\\:')}"
+            end
+          elsif !query_params[:q].empty?
+            add_query = "#{query_params[:q]}"
+          end
+          query_params[:q] = add_query unless add_query.empty?
+          query_params
+        end
+      end
+
       # Generates relationship finders for predicates that point in both directions
       # and registers predicate relationships for each direction.
       #
@@ -676,16 +717,20 @@ module ActiveFedora
         #create methods that mirror the outbound append and remove with our bidirectional name, assume just add and remove locally        
         create_bidirectional_named_relationship_methods(name,outbound_method_name)
 
+        if opts[:query_params]
+          opts[:query_params] = format_query_params(opts[:query_params]) 
+          q = opts[:query_params][:q] if opts[:query_params][:q] 
+        end
         class_eval <<-END
         def #{name}(opts={})
           opts = {:rows=>25}.merge(opts)
           if opts[:response_format] == :solr || opts[:response_format] == :load_from_solr
             escaped_uri = self.internal_uri.gsub(/(:)/, '\\:')
             query = "#{inbound_predicate}_s:\#{escaped_uri}"
-            
+            query << " AND #{q}" unless "#{q}".empty?
             outbound_id_array = #{outbound_method_name}(:response_format=>:id_array)
             query = query + " OR " + ActiveFedora::SolrService.construct_query_for_pids(outbound_id_array)
-            
+            query << " AND #{q}" unless "#{q}".empty?
             solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
             
             if opts[:response_format] == :solr
@@ -705,6 +750,9 @@ module ActiveFedora
         end
         def #{name}_from_solr
           #{name}(:response_format => :load_from_solr)
+        end
+        def #{name}_solr_docs
+          #{name}(:response_format => :solr)
         end
         END
       end

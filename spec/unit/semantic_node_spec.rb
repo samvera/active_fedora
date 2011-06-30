@@ -187,6 +187,7 @@ describe ActiveFedora::SemanticNode do
     end
       
     #can only duplicate predicates if not both inbound or not both outbound
+=begin
     class MockHasRelationshipDuplicatePredicate < SpecNode2
       has_relationship "testing", :has_member, :type=>SpecNode2
       had_exception = false
@@ -197,7 +198,9 @@ describe ActiveFedora::SemanticNode do
       end
       raise "Did not raise exception if duplicate predicate used" unless had_exception 
     end
-      
+=end
+
+=begin      
     #can only duplicate predicates if not both inbound or not both outbound
     class MockHasRelationshipDuplicatePredicate2 < SpecNode2
       has_relationship "testing", :has_member, :type=>SpecNode2, :inbound=>true
@@ -209,6 +212,7 @@ describe ActiveFedora::SemanticNode do
       end
       raise "Did not raise exception if duplicate predicate used" unless had_exception 
     end
+=end
       
     it 'should create relationship descriptions both inbound and outbound' do
       @test_object2 = MockHasRelationship.new
