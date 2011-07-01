@@ -1,7 +1,7 @@
 module ActiveFedora
   module SemanticNode 
     include MediaShelfClassLevelInheritableAttributes
-    ms_inheritable_attributes  :class_relationships, :internal_uri, :class_named_relationships_desc
+    ms_inheritable_attributes  :class_relationships, :internal_uri
     
     attr_accessor :internal_uri, :named_relationship_desc, :relationships_are_dirty, :load_from_solr
     
@@ -442,7 +442,33 @@ module ActiveFedora
       end
       xml.to_s
     end
-    
+
+    def named_relationship_query(relationship_name)
+      query = ""
+      if self.class.is_bidirectional_relationship?(relationship_name)
+        id_array = []
+        predicate = outbound_named_relationship_predicates["#{relationship_name}_outbound"]
+        if !outbound_relationships[predicate].nil? 
+          outbound_relationships[predicate].each do |rel|
+            id_array << rel.gsub("info:fedora/", "")
+          end
+        end
+        query = self.class.bidirectional_named_relationship_query(pid,relationship_name,id_array)
+      elsif outbound_relationship_names.include?(relationship_name)
+        id_array = []
+        predicate = outbound_named_relationship_predicates[relationship_name]
+        if !outbound_relationships[predicate].nil? 
+          outbound_relationships[predicate].each do |rel|
+            id_array << rel.gsub("info:fedora/", "")
+          end
+        end
+        query = self.class.outbound_named_relationship_query(relationship_name,id_array)
+      elsif inbound_relationship_names.include?(relationship_name)
+        query = self.class.inbound_named_relationship_query(pid,relationship_name)
+      end
+      query
+    end
+
     module ClassMethods
     
       # Allows for a relationship to be treated like any other attribute of a model class. You define
@@ -562,6 +588,72 @@ module ActiveFedora
         opts.merge!({:predicate=>predicate})
         named_relationships_desc[subject][name] = opts
       end
+
+      def outbound_named_relationship_query(relationship_name,outbound_pids)
+        query = ActiveFedora::SolrService.construct_query_for_pids(outbound_pids)
+        subject = :self
+        if named_relationships_desc.has_key?(subject) && named_relationships_desc[subject].has_key?(relationship_name) && named_relationships_desc[subject][relationship_name].has_key?(:query_params)
+          query_params = format_query_params(named_relationships_desc[subject][relationship_name][:query_params])
+          if query_params[:q]
+            unless query.empty?
+              #substitute in the filter query for each pid so that it is applied to each in the query
+              query.sub!(/OR /,"AND #{query_params[:q]}) OR (")
+              #add opening parenthesis for first case
+              query = "(" + query 
+              #add AND filter case for last element as well since no 'OR' following it
+              query << " AND #{query_params[:q]})"
+            else
+              query = query_params[:q]
+            end
+          end
+        end
+        query
+      end
+
+      def inbound_named_relationship_query(pid,relationship_name)
+        query = ""
+        subject = :inbound
+        if named_relationships_desc.has_key?(subject) && named_relationships_desc[subject].has_key?(relationship_name)
+          predicate = named_relationships_desc[subject][relationship_name][:predicate]
+          internal_uri = "info:fedora/#{pid}"
+          escaped_uri = internal_uri.gsub(/(:)/, '\\:')
+          query = "#{predicate}_s:#{escaped_uri}" 
+          if named_relationships_desc.has_key?(subject) && named_relationships_desc[subject].has_key?(relationship_name) && named_relationships_desc[subject][relationship_name].has_key?(:query_params)
+            query_params = format_query_params(named_relationships_desc[subject][relationship_name][:query_params])
+            if query_params[:q]
+              query << " AND " unless query.empty?
+              query << query_params[:q]
+            end
+          end
+        end
+        query
+      end
+
+      def bidirectional_named_relationship_query(pid,relationship_name,outbound_pids)
+        outbound_named_relationship_query("#{relationship_name}_outbound",outbound_pids) + " OR (" + inbound_named_relationship_query(pid,"#{relationship_name}_inbound") + ")"
+      end
+
+      # This will transform and encode any query_params defined in a relationship method to properly escape special characters
+      # and format strings such as query string properly for a solr query
+      def format_query_params(query_params)
+        if query_params && query_params[:q]
+          add_query = ""
+          if query_params[:q].is_a? Hash
+            query_params[:q].keys.each_with_index do |key,index|
+              add_query << " AND " if index > 0
+              add_query << "#{key}:#{query_params[:q][key].gsub(/:/, '\\\\:')}"
+            end
+          elsif !query_params[:q].empty?
+            add_query = "#{query_params[:q]}"
+          end
+          query_params[:q] = add_query unless add_query.empty?
+          query_params
+        end
+      end
+
+      def is_bidirectional_relationship?(relationship_name)
+        named_relationships_desc[:self]["#{relationship_name}_outbound"] && named_relationships_desc[:inbound]["#{relationship_name}_inbound"] 
+      end
       
       # ** EXPERIMENTAL **
       #   
@@ -598,16 +690,10 @@ module ActiveFedora
       end
     
       def create_inbound_relationship_finders(name, predicate, opts = {})
-        if opts[:query_params]
-          opts[:query_params] = format_query_params(opts[:query_params]) 
-          q = opts[:query_params][:q] if opts[:query_params][:q] 
-        end
         class_eval <<-END
         def #{name}(opts={})
           opts = {:rows=>25}.merge(opts)
-          escaped_uri = self.internal_uri.gsub(/(:)/, '\\:')
-          query = "#{predicate}_s:\#{escaped_uri}"
-          query << " AND #{q}" unless "#{q}".empty?
+          query = self.class.inbound_named_relationship_query(self.pid,"#{name}")
           solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
           if opts[:response_format] == :solr
             return solr_result
@@ -634,14 +720,17 @@ module ActiveFedora
         def #{name}_solr_docs
           #{name}(:response_format => :solr)
         end
+        def #{name}_query
+          named_relationship_query("#{name}")
+        end
         END
+      end
+
+      def relationship_has_query_params?(subject, relationship_name)
+        named_relationships_desc.has_key?(subject) && named_relationships_desc[subject].has_key?(relationship_name) && named_relationships_desc[subject][relationship_name].has_key?(:query_params)
       end
     
       def create_outbound_relationship_finders(name, predicate, opts = {})
-        if opts[:query_params]
-          opts[:query_params] = format_query_params(opts[:query_params]) 
-          q = opts[:query_params][:q] if opts[:query_params][:q] 
-        end
         class_eval <<-END
         def #{name}(opts={})
           id_array = []
@@ -650,11 +739,11 @@ module ActiveFedora
               id_array << rel.gsub("info:fedora/", "")
             end
           end
-          if opts[:response_format] == :id_array && "#{q}".empty?
+          
+          if opts[:response_format] == :id_array && !self.class.relationship_has_query_params?(:self,"#{name}")
             return id_array
           else
-            query = ActiveFedora::SolrService.construct_query_for_pids(id_array)
-            query << " AND #{q}" unless "#{q}".empty?
+            query = self.class.outbound_named_relationship_query("#{name}",id_array)
             solr_result = SolrService.instance.conn.query(query)
             if opts[:response_format] == :solr
               return solr_result
@@ -680,25 +769,10 @@ module ActiveFedora
         def #{name}_solr_docs
           #{name}(:response_format => :solr)
         end
-        END
-      end
-
-      # This will transform and encode any query_params defined in a relationship method to properly escape special characters
-      # and format strings such as query string properly for a solr query
-      def format_query_params(query_params)
-        if query_params && query_params[:q]
-          add_query = ""
-          if query_params[:q].is_a? Hash
-            query_params[:q].keys.each_with_index do |key,index|
-              add_query << " AND " if index > 0
-              add_query << "#{key}:#{query_params[:q][key].gsub(/:/, '\\\\\\\\:')}"
-            end
-          elsif !query_params[:q].empty?
-            add_query = "#{query_params[:q]}"
-          end
-          query_params[:q] = add_query unless add_query.empty?
-          query_params
+        def #{name}_query
+          named_relationship_query("#{name}")
         end
+        END
       end
 
       # Generates relationship finders for predicates that point in both directions
@@ -717,20 +791,19 @@ module ActiveFedora
         #create methods that mirror the outbound append and remove with our bidirectional name, assume just add and remove locally        
         create_bidirectional_named_relationship_methods(name,outbound_method_name)
 
-        if opts[:query_params]
-          opts[:query_params] = format_query_params(opts[:query_params]) 
-          q = opts[:query_params][:q] if opts[:query_params][:q] 
-        end
         class_eval <<-END
         def #{name}(opts={})
           opts = {:rows=>25}.merge(opts)
           if opts[:response_format] == :solr || opts[:response_format] == :load_from_solr
-            escaped_uri = self.internal_uri.gsub(/(:)/, '\\:')
-            query = "#{inbound_predicate}_s:\#{escaped_uri}"
-            query << " AND #{q}" unless "#{q}".empty?
-            outbound_id_array = #{outbound_method_name}(:response_format=>:id_array)
-            query = query + " OR " + ActiveFedora::SolrService.construct_query_for_pids(outbound_id_array)
-            query << " AND #{q}" unless "#{q}".empty?
+            outbound_id_array = []
+            predicate = outbound_named_relationship_predicates["#{name}_outbound"]
+            if !outbound_relationships[predicate].nil? 
+              outbound_relationships[predicate].each do |rel|
+                outbound_id_array << rel.gsub("info:fedora/", "")
+              end
+            end
+            #outbound_id_array = #{outbound_method_name}(:response_format=>:id_array)
+            query = self.class.bidirectional_named_relationship_query(self.pid,"#{name}",outbound_id_array)
             solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
             
             if opts[:response_format] == :solr
@@ -753,6 +826,9 @@ module ActiveFedora
         end
         def #{name}_solr_docs
           #{name}(:response_format => :solr)
+        end
+        def #{name}_query
+          named_relationship_query("#{name}")
         end
         END
       end
