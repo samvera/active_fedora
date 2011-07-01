@@ -269,7 +269,8 @@ describe ActiveFedora::SemanticNode do
       mock_repo.expects(:find_model).with("_PID3_", "AudioRecord").returns("AR3")
       SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
       local_node = SpecNode.new()
-      local_node.expects(:internal_uri).returns("info:fedora/test:sample_pid")
+      local_node.expects(:pid).returns("test:sample_pid")
+      SpecNode.expects(:named_relationships_desc).returns({:inbound=>{"parts"=>{:predicate=>:is_part_of}}}).at_least_once()
       ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid", :rows=>25).returns(solr_result)
       Fedora::Repository.expects(:instance).returns(mock_repo).times(3)
       Kernel.expects(:const_get).with("AudioRecord").returns("AudioRecord").times(3)
@@ -282,7 +283,8 @@ describe ActiveFedora::SemanticNode do
       local_node = SpecNode.new
       mock_repo = mock("repo")
       mock_repo.expects(:find_model).never
-      local_node.expects(:internal_uri).returns("info:fedora/test:sample_pid")
+      local_node.expects(:pid).returns("test:sample_pid")
+      SpecNode.expects(:named_relationships_desc).returns({:inbound=>{"constituents"=>{:predicate=>:is_constituent_of}}}).at_least_once()
       ActiveFedora::SolrService.instance.conn.expects(:query).with("is_constituent_of_s:info\\:fedora/test\\:sample_pid", :rows=>101).returns(solr_result)
       local_node.constituents(:response_format => :solr, :rows=>101).should equal(solr_result)
     end
@@ -291,7 +293,8 @@ describe ActiveFedora::SemanticNode do
     it "resulting _ids finder should search against solr and return an array of fedora PIDs" do
       SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
       local_node = SpecNode.new
-      local_node.expects(:internal_uri).returns("info:fedora/test:sample_pid")
+      local_node.expects(:pid).returns("test:sample_pid")
+      SpecNode.expects(:named_relationships_desc).returns({:inbound=>{"parts"=>{:predicate=>:is_part_of}}}).at_least_once() 
       ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid", :rows=>25).returns(mock("solr result", :hits => [Hash["id"=>"pid1"], Hash["id"=>"pid2"]]))
       local_node.parts(:response_format => :id_array).should == ["pid1", "pid2"]
     end
@@ -403,10 +406,10 @@ describe ActiveFedora::SemanticNode do
     end
     it "(:response_format => :solr) should construct a solr query that combines inbound and outbound searches" do
       # get the id array for outbound relationships then construct solr query by combining id array with inbound relationship search
-      @local_node.expects(:all_parts_outbound).with(:response_format=>:id_array).returns(["mypid:1"])
+      @local_node.expects(:outbound_relationships).returns({:has_part=>["mypid:1"]}).at_least_once()
       id_array_query = ActiveFedora::SolrService.construct_query_for_pids(["mypid:1"])
       solr_result = mock("solr result")
-      ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid OR #{id_array_query}", :rows=>25).returns(solr_result)
+      ActiveFedora::SolrService.instance.conn.expects(:query).with("#{id_array_query} OR (is_part_of_s:info\\:fedora/test\\:sample_pid)", :rows=>25).returns(solr_result)
       @local_node.all_parts(:response_format=>:solr)
     end
 
