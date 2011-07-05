@@ -20,7 +20,8 @@ describe ActiveFedora::NokogiriDatastream do
         m.field 'collection', :string
       end
     end
-
+    
+    RAILS_ENV='development'
     @pid = "hydrangea:fixture_mods_article1"
     @test_solr_object = HydrangeaArticle2.load_instance_from_solr(@pid)
     @test_object = HydrangeaArticle2.load_instance(@pid)
