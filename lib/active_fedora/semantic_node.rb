@@ -511,7 +511,7 @@ module ActiveFedora
       #     possible parameters  
       #       :inbound => if true loads an external relationship via Solr (defaults to false)
       #       :type => The type of model to use when instantiated an object from the pid in this relationship (defaults to ActiveFedora::Base)
-      #       :query_params => Additional filters to be attached via a solr query (currently only :q implemented
+      #       :query_params => Additional filters to be attached via a solr query (currently only :q implemented)
       #
       # If inbound is true it expects the relationship to be defined by another object's RELS-EXT
       # and to load that relationship from Solr.  Otherwise, if inbound is true the relationship is stored in
