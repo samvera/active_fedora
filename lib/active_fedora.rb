@@ -3,7 +3,6 @@ gem 'solr-ruby'
 require "loggable"
 
 $: << 'lib'
-require 'logger'
 require 'active_fedora/solr_service.rb'
 require "solrizer"
 
@@ -29,6 +28,8 @@ SOLR_DOCUMENT_ID = ActiveFedora::SolrService.id_field unless defined?(SOLR_DOCUM
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 
 module ActiveFedora #:nodoc:
+  
+  include Loggable
   
   class << self
     attr_accessor :solr_config, :fedora_config
@@ -88,10 +89,6 @@ module ActiveFedora #:nodoc:
   
   def self.fedora
     Fedora::Repository.instance
-  end
-
-  def self.logger      
-    @logger ||= defined?(RAILS_DEFAULT_LOGGER) ? RAILS_DEFAULT_LOGGER : Logger.new(STDOUT)
   end
 
   def self.predicate_config
