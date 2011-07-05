@@ -73,17 +73,50 @@ describe ActiveFedora::SemanticNode do
   end
   
   after(:all) do
+    begin
     @part1.delete 
+    rescue
+    end
+    begin
     @part2.delete
+    rescue
+    end
+    begin
     @part3.delete
+    rescue
+    end
+    begin
     @container1.delete
+    rescue
+    end
+    begin
     @container2.delete
+    rescue
+    end
+    begin
     @container3.delete
+    rescue
+    end
+    begin
     @test_object.delete
+    rescue
+    end
+    begin
     @test_object_query.delete
+    rescue
+    end
+    begin
     @special_part.delete
+    rescue
+    end
+    begin
     @special_container.delete
+    rescue
+    end
+    begin
     @special_container2.delete
+    rescue
+    end
     Object.send(:remove_const, :SNSpecModel)
 
   end

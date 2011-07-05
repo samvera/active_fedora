@@ -1,13 +1,13 @@
 development:
   fedora:
-    url: http://fedoraAdmin:fedoraAdmin@testhost.com:8983/fedora
+    url: http://fedoraAdmin:fedoraAdmin@localhost:8983/fedora
   solr:
-    url: http://testhost.com:8983/solr/development
+    url: http://localhost:8983/solr/development
 test:
   fedora:
-    url: http://fedoraAdmin:fedoraAdmin@testhost.com:8983/fedora
+    url: http://fedoraAdmin:fedoraAdmin@localhost:8983/fedora
   solr:
-    url: http://testhost.com:8983/solr/development
+    url: http://localhost:8983/solr/development
 production:
   fedora:
     url: http://fedoraAdmin:fedoraAdmin@testhost.com:8080/fedora
