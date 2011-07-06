@@ -1,8 +1,7 @@
 PATH
   remote: .
   specs:
-    active-fedora (2.2.0.rails3pre1)
-      active-fedora
+    active-fedora (2.3.1)
       activeresource
       equivalent-xml
       facets
