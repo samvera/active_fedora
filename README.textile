@@ -1,6 +1,6 @@
 h2. Description
 
-RubyFedora and ActiveFedora provide a set of Ruby gems for creating and managing objects in the Fedora Repository Architecture ("http://fedora-commons.org":http://fedora-commons.org).
+RubyFedora and ActiveFedora provide a set of Ruby gems for creating and managing objects in the Fedora Repository Architecture ("http://fedora-commons.org":http://fedora-commons.org).  ActiveFedora is loosely based on "ActiveRecord" in Rails.
 
 h2. Getting Help
 
@@ -30,7 +30,7 @@ git submodule init
 git submodule update
 </pre>
 
-h3. Testing (this Gem) with Hudson Rake Task
+h3. Testing with Hudson Rake Task
 
 The hudson rake task will spin up jetty, import the fixtures, and run the tests for you.
 
@@ -38,7 +38,7 @@ The hudson rake task will spin up jetty, import the fixtures, and run the tests 
   rake hudson
 </pre>
 
-h3. Testing (this Gem) Manually
+h3. Testing Manually
 
 If you want to run the tests manually, follow these instructions.
 

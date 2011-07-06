@@ -1,11 +1,11 @@
 require "active-fedora"
 module Hydra
   
-  # This is an example of a NokogiriDatastream that defines a terminology for MODS xml
+  # This is an example of a NokogiriDatastream that defines an OM terminology for MODS xml
   # It focuses on the aspects of MODS that deal with descriptive metadata for published articles
-  # The real version of this Terminology is part of the hydra-head plugin.  See https://github.com/projecthydra/hydra-head/blob/master/lib/hydra/mods_article.rb
+  # This is not the hydra-head plugin version of this OM Terminology; See https://github.com/projecthydra/hydra-head/blob/master/lib/hydra/mods_article.rb
   #
-  # Things to note about the Terminology it defines:
+  # Things to note about the OM Terminology defined here:
   #
   # * Uses :ref terms to repeat the structures of a mods:name with a different @type on the mods:name element
   # * Defines a term lang_code that maps to "languageTerm[@type=code]"
