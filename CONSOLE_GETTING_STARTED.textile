@@ -316,7 +316,7 @@ This query will return a Solr::Result containing all of the objects that have co
 
 h2. More About ActiveFedora Models
 
-ActiveFedora Models don't actually do much.  They mainly keep a list of datastream ids and associate them with classes that help you use the content from those datastreams.
+ActiveFedora Models for Fedora objects don't actually do much.  They mainly keep a list of datastream ids and associate them with classes that help you use the content from those datastreams.
 
 When you're ready to learn more about how to define ActiveFedora models and OM-based datastreams, examine the files in lib/active_fedora/samples.  Those will give you more background.  Here, we're seeing what happens when you use those Models and datastreams.
 
@@ -366,5 +366,5 @@ properties:
 
 Notice that properties and DC have been loaded as ActiveFedora::Datastream, RELS-EXT has been loaded as ActiveFedora::RelsExtDatastream, and the other three have been loaded as the classes specified in the Model.
 
-Now read about  "OM-based NokogiriDatastreams":https://github.com/mediashelf/active_fedora/blob/master/NOKOGIRI_DATASTREAMS.textile to see what the datastream definitions have done for you.
+Now read about "OM-based NokogiriDatastreams":https://github.com/mediashelf/active_fedora/blob/master/NOKOGIRI_DATASTREAMS.textile to see what the datastream definitions have done for you.
 
