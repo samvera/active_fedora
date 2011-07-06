@@ -5,10 +5,12 @@ require "active_fedora/samples/marpa-dc_datastream.rb"
 
 # This is an example of an ActiveFedora Model
 #
-# Some of the datastream ids were chosen based on the Hydra modeling conventions.  You don't have to follow them in your work.  ActiveFedora itself has no notion of those conventions, but we do encourage you to use them.
+# Some of the datastream ids were chosen based on the Hydra modeling conventions.  You don't have to follow them in your work.  
+# ActiveFedora itself has no notion of those conventions, but we do encourage you to use them.
 #
 # The Hydra conventions encourage you to have a datastream with this dsid whose contents are descriptive metadata like MODS or Dublin Core.  They especially encourage MODS.  
-# The rightsMetadata datastream is also a convention provided by the Hydra Common Metadata "content model"
+# The descMetadata dsid is a Hydra convention for a datastream with descriptive metadata contents, like MODS or Dublin Core.  They especially encourage MODS.
+# The rightsMetadata dsid is also a convention provided by the Hydra Common Metadata "content model"
 #
 # For more info on the Hydra conventions, see the documentation on "Common Metadata content model" in https://wiki.duraspace.org/display/hydra/Hydra+content+models+and+disseminators
 # Note that on the wiki, "content model" is often used to refer to Fedora CModels and/or abstract/notional models.  The Common Metadata content model is an example of this.
