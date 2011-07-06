@@ -18,7 +18,7 @@ h2. Getting Started
 
 The "ActiveFedora Console Tour":https://github.com/mediashelf/active_fedora/blob/master/CONSOLE_GETTING_STARTED.textile  gives you a brief tour through ActiveFedora's features on the command line.
 
-h2. Testing
+h2. Testing (this Gem)
 
 In order to run the RSpec tests, you need to have a copy of the ActiveFedora source code, and then run bundle install in the source directory.
 
@@ -30,7 +30,7 @@ git submodule init
 git submodule update
 </pre>
 
-h3. Testing with Hudson Rake Task
+h3. Testing (this Gem) with Hudson Rake Task
 
 The hudson rake task will spin up jetty, import the fixtures, and run the tests for you.
 
@@ -38,7 +38,7 @@ The hudson rake task will spin up jetty, import the fixtures, and run the tests 
   rake hudson
 </pre>
 
-h3. Testing Manually
+h3. Testing (this Gem) Manually
 
 If you want to run the tests manually, follow these instructions.
 
