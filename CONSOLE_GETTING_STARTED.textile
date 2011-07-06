@@ -112,7 +112,7 @@ To see a more complete implementation of importing and deleting Fedora objects, 
 *When you're done playing around with importing and deleting, make sure that you leave a copy of hydrangea:fixture_mods_article1 in fedora so we can play with it.*
 
 
-h3. Define a Model for Your (Active)Fedora Objects
+h2. Define a Model for Your (Active)Fedora Objects
 
 Look at the SpecialThing model defined in lib/active_fedora/samples/special_thing.rb to see how you declare an ActiveFedora model.
 
@@ -133,7 +133,7 @@ This pid was retrieved from Fedora's getNextPid method.
 
 Your object will not show up in the actual Fedora repository until you save it using newthing.save, but let's hold off on saving it for now.
 
-h3. Fedora RELATIONSHIPS in ActiveFedora
+h2. Fedora RELATIONSHIPS in ActiveFedora
 
 ActiveFedora provides convenience methods for creating and editing Fedora RELS-EXT relationships.  It also auto-generates methods for searching these relationships with Solr. (see https://github.com/projecthydra/solrizer and https://github.com/projecthydra/solrizer-fedora)
 
@@ -200,9 +200,9 @@ Note that you didn't have to save the "newthing" object in order for this relati
 Only the ActiveFedora object making the assertion needs to be saved in order for the search to work.  In our example above, new_obj asserts :has_derivation (rather than the derivative asserting :is_derivation_of), so only new_obj had to be saved. 
 
 
-h3. Fedora DATASTREAMS & METADATA in ActiveFedora
+h2. Fedora DATASTREAMS & METADATA in ActiveFedora
 
-h4. Blobs (a.k.a. File Datastreams, a.k.a Managed Content Datastreams)
+h3. Blobs (a.k.a. File Datastreams, a.k.a Managed Content Datastreams)
 
 Here we create a simple Datastream (using the default Datastream model). 
 
@@ -220,7 +220,7 @@ newthing.save
 Now use your browser to find the file datastreams in Fedora ...
 
 
-h4. On auto-generating datastream ids
+h3. On auto-generating datastream ids
 
 If you don't specify a dsid, ActiveFedora will generate one for you.  In the example below, "DS1" is the dsID assigned to the new datastream
 
@@ -244,7 +244,7 @@ newthing.datastreams.keys
 newthing.save
 </pre>
 
-h2. Getting Existing Fedora Repository Objects 
+h2. Retrieving Existing Fedora Repository Objects 
 
 When you want your code to interact with existing digital objects in a Fedora repository, use the ActiveFedora load_instance method.
 
@@ -318,9 +318,7 @@ h2. More About ActiveFedora Models
 
 ActiveFedora Models for Fedora objects don't actually do much.  They mainly keep a list of datastream ids and associate them with classes that help you use the content from those datastreams.
 
-When you're ready to learn more about how to define ActiveFedora models and OM-based datastreams, examine the files in lib/active_fedora/samples.  Those will give you more background.  Here, we're seeing what happens when you use those Models and datastreams.
-
-For now, load an instance of the SpecialThing model and take a look at its datastreams.
+Let's load an instance of the SpecialThing model and take a look at its datastreams.
 
 <pre>
 st = SpecialThing.load_instance("hydrangea:fixture_mods_article1")
@@ -366,5 +364,7 @@ properties:
 
 Notice that properties and DC have been loaded as ActiveFedora::Datastream, RELS-EXT has been loaded as ActiveFedora::RelsExtDatastream, and the other three have been loaded as the classes specified in the Model.
 
-Now read about "OM-based NokogiriDatastreams":https://github.com/mediashelf/active_fedora/blob/master/NOKOGIRI_DATASTREAMS.textile to see what the datastream definitions have done for you.
+h2.  Where to Find More Information
+
+You can examine the files in lib/active_fedora/samples to learn more about how to define ActiveFedora models and OM-based datastreams.  We also suggest you read about "OM-based NokogiriDatastreams":https://github.com/mediashelf/active_fedora/blob/master/NOKOGIRI_DATASTREAMS.textile to learn about manipulating XML contained in datastreams.
 

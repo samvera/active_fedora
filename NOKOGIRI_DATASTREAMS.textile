@@ -1,5 +1,21 @@
 h1. Using OM-based NokogiriDatastreams
 
+This document is about working with (Active)Fedora datastreams with XML content.  Nokogiri is a ruby gem for working with xml, and OM (Opinionated Metadata) allows you to define a “terminology” to ease translation between XML and ruby objects.
+
+h3. Learning More about OM (Opinionated Metadata)
+
+For deeper exposure to what you can do with OM, see the "OM documentation":http://hudson.projecthydra.org/job/om/Documentation/ for "Getting Started":http://hudson.projecthydra.org/job/om/Documentation/file.GETTING_STARTED.html, "Querying Documents":http://hudson.projecthydra.org/job/om/Documentation/file.QUERYING_DOCUMENTS.html, and "Updating Documents":http://hudson.projecthydra.org/job/om/Documentation/file.UPDATING_DOCUMENTS.html.   There is also information in the "solrizer":http://github.com/projecthydra/solrizer documentation about Solrizing documents. 
+
+You can run most of the examples from those tutorials against the descMetadata datastream you've created here.
+
+<pre>
+doc = st.datastreams["descMetadata"]  # the datastream is the OM Document
+...
+doc.class
+=> Hydra::ModsArticleDatastream  # Hydra::ModsArticleDatastream is the Document Class
+terminology = doc.class.terminology # The terminology is attached to the Document Class
+</pre>
+
 h2. Setup
 
 This tutorial assumes that you've run script/console from the root of ActiveFedora and have imported the hydrangea:fixture_mods_article1 object.  If you haven't done that, see "CONSOLE_GETTING_STARTED":https://github.com/mediashelf/active_fedora/blob/master/CONSOLE_GETTING_STARTED.textile for instructions.
@@ -13,9 +29,9 @@ Look in these datastream definitions to see the OM Terminologies they define.  T
 * {Marpa::DcDatastream} ( "see the code":https://github.com/mediashelf/active_fedora/blob/master/lib/active_fedora/samples/marpa-dc_datastream.rb )
 
 
-h2. The First Pass with OM
+h2. Using Existing OM Terminology
 
-First, load the Fedora object as an instance of the SpecialThing Model
+First, load the Fedora object as an instance of the SpecialThing ActiveFedora Model
 
 <pre>
 st = SpecialThing.load_instance("hydrangea:fixture_mods_article1")
@@ -64,21 +80,7 @@ mods_ds.find_by_terms(:person).length
 mods_ds.find_by_terms(:person).each {|n| puts n.to_xml}
 </pre>
 
-
-h2. Learning More about OM
-
-Hydra::ModsArticleDatastream has all of the behaviors of an OM::Document.  For deeper exposure to what you can do with OM, see the "OM documentation":http://hudson.projecthydra.org/job/om/Documentation/ for "Getting Started":http://hudson.projecthydra.org/job/om/Documentation/file.GETTING_STARTED.html, "Querying Documents":http://hudson.projecthydra.org/job/om/Documentation/file.QUERYING_DOCUMENTS.html, and "Updating Documents":http://hudson.projecthydra.org/job/om/Documentation/file.UPDATING_DOCUMENTS.html.   There is also information in the "solrizer":http://github.com/projecthydra/solrizer documentation about Solrizing documents. 
-
-You can run most of the examples from those tutorials against the descMetadata datastream you've created here.
-
-<pre>
-doc = st.datastreams["descMetadata"]  # the datastream is the OM Document
-...
-doc.class
-=> Hydra::ModsArticleDatastream  # Hydra::ModsArticleDatastream is the Document Class
-terminology = doc.class.terminology # The terminology is attached to the Document Class
-</pre>
-
+Hydra::ModsArticleDatastream has all of the behaviors of an OM::Document.  
 
 h1. Setting the XML in a NokogiriDatastream from a file
 
