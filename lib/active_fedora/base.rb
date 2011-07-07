@@ -3,6 +3,7 @@ require 'active_fedora/model'
 require 'active_fedora/semantic_node'
 require "solrizer"
 require 'nokogiri'
+require "loggable"
 
 SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
@@ -35,7 +36,8 @@ module ActiveFedora
     include Model
     include SemanticNode
     include Solrizer::FieldNameMapper
-     
+    include Loggable
+    
     attr_accessor :named_datastreams_desc
     
 
@@ -1043,10 +1045,6 @@ module ActiveFedora
         end
         return arr
       end
-    end
-    
-    def logger      
-      @logger ||= defined?(RAILS_DEFAULT_LOGGER) ? RAILS_DEFAULT_LOGGER : Logger.new(STDOUT)
     end
     
     private

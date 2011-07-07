@@ -179,10 +179,10 @@ newobj.relationships
 newobj.save
 => ...
 newobj.pid
-=> "changeme:164" # this is the pid you want to put in the following URLs as a replacement for {PID}
+=> "changeme:164" # this is the pid you want to put in the following URLs as a replacement for (PID)
 </pre>
 
-You can see objects in Fedora by going to http://localhost:8983/fedora/objects/{PID} and you can see the relationships for an object by looking at the RELS-EXT datastream content:  http://localhost: 8983/fedora/objects/{PID}/datastreams/RELS-EXT/content
+You can see objects in Fedora by going to http://localhost:8983/fedora/objects/(PID) and you can see the relationships for an object by looking at the RELS-EXT datastream content:  http://localhost: 8983/fedora/objects/(PID)/datastreams/RELS-EXT/content
 
 Now let's see if the "newthing" object has an "inspiration" relationship with our "newobj"
 
