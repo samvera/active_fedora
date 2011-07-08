@@ -26,7 +26,7 @@ task :hudson do
   require 'jettywrapper'
   project_root = File.expand_path("#{File.dirname(__FILE__)}/../../")
   
-  if (ENV['RAILS_ENV'] == "test")
+  if (ENV['environment'] == "test")
     Rake::Task["active_fedora:doc"].invoke
     Rake::Task["active_fedora:configure_jetty"].invoke
     jetty_params = {
@@ -44,7 +44,7 @@ task :hudson do
     end
     raise "test failures: #{error}" if error
   else
-    system("rake hudson RAILS_ENV=test")
+    system("rake hudson environment=test")
     fail unless $?.success?
   end
 end
