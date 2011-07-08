@@ -77,6 +77,15 @@ describe ActiveFedora do
         ActiveFedora.init()
         ActiveFedora.fedora.fedora_url.to_s.should == "http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"
       end
+      it "can tell what configuration environment it's using" do
+        ActiveFedora.init()
+        ActiveFedora.config_env.should eql("test")
+      end
+      it "can tell what configuration path it's using" do
+        pending
+        ActiveFedora.init('./spec/fixtures/rails_root/config/fedora.yml')
+        ActiveFedora.config_path.should eql('./spec/fixtures/rails_root/config/fedora.yml')
+      end
       it "should load the passed config if explicit config passed in" do
         ActiveFedora.init('./spec/fixtures/rails_root/config/fedora.yml')
         ActiveFedora.fedora.fedora_url.to_s.should == "http://fedoraAdmin:fedoraAdmin@localhost:8983/fedora"

@@ -32,7 +32,7 @@ module ActiveFedora #:nodoc:
   include Loggable
   
   class << self
-    attr_accessor :solr_config, :fedora_config
+    attr_accessor :solr_config, :fedora_config, :config_env
   end
   
   # The configuration hash that gets used by RSolr.connect
@@ -45,8 +45,15 @@ module ActiveFedora #:nodoc:
   #   If config_path is not provided and Rails.root is set, it will look in RAILS_ENV/config/fedora.yml.  Otherwise, it will look in your config/fedora.yml.  Failing that, it will use localhost urls.
   def self.init( config_path=nil )
     
-    config_env = defined?(Rails.env) ? Rails.env : "development"
-    
+    if defined?(Rails.env)
+      @config_env = Rails.env
+    elsif defined?(ENV['environment'])
+      @config_env = ENV['environment']
+    else 
+      @config_env = 'development'
+      logger.warn("No environment setting found: Using the default development environment.")
+    end
+        
     if config_path.nil? 
       if defined?(Rails.root)
         config_path = "#{Rails.root}/config/fedora.yml"
@@ -62,9 +69,9 @@ module ActiveFedora #:nodoc:
     
     logger.info("FEDORA: loading ActiveFedora config from #{File.expand_path(config_path)}")
     fedora_config = YAML::load(File.open(config_path))
-    raise "The #{config_env} environment settings were not found in the fedora.yml config.  If you already have a fedora.yml file defined, make sure it defines settings for the #{config_env} environment" unless fedora_config[config_env]
+    raise "The #{@config_env} environment settings were not found in the fedora.yml config.  If you already have a fedora.yml file defined, make sure it defines settings for the #{@config_env} environment" unless fedora_config[@config_env]
     
-    ActiveFedora.solr_config[:url] = fedora_config[config_env]['solr']['url']
+    ActiveFedora.solr_config[:url] = fedora_config[@config_env]['solr']['url']
     
     # Register Solr
     logger.info("FEDORA: initializing ActiveFedora::SolrService with solr_config: #{ActiveFedora.solr_config.inspect}")
@@ -72,7 +79,7 @@ module ActiveFedora #:nodoc:
     ActiveFedora::SolrService.register(ActiveFedora.solr_config[:url])
     logger.info("FEDORA: initialized Solr with ActiveFedora.solr_config: #{ActiveFedora::SolrService.instance.inspect}")
         
-    ActiveFedora.fedora_config[:url] = fedora_config[config_env]['fedora']['url']
+    ActiveFedora.fedora_config[:url] = fedora_config[@config_env]['fedora']['url']
     logger.info("FEDORA: initializing Fedora with fedora_config: #{ActiveFedora.fedora_config.inspect}")
     
     Fedora::Repository.register(ActiveFedora.fedora_config[:url])
