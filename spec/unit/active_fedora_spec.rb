@@ -100,6 +100,7 @@ describe ActiveFedora do
           it "should load the specified config path" do
             config_hash={"test"=>{"fedora"=>{"url"=>"http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"},"solr"=>{"url"=>"http://127.0.0.1:8983/solr/test/"}}}
             config_path = File.expand_path(File.join(File.dirname(__FILE__),"config"))
+            Rails.expects(:env).returns("test")
             mock_yaml(config_hash,File.join(config_path,"fedora.yml"))
             File.expects(:exist?).with(File.join(config_path,"predicate_mappings.yml")).returns(true)
             ActiveFedora.expects(:valid_predicate_mapping?).returns(true)

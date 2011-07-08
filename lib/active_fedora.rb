@@ -40,12 +40,12 @@ module ActiveFedora #:nodoc:
   @fedora_config ||= {}
 
   # Initializes ActiveFedora's connection to Fedora and Solr based on the info in fedora.yml
-  # If RAILS_ENV is set, it will use that environment.  Defaults to "development".
+  # If Rails.env is set, it will use that environment.  Defaults to "development".
   # @param [String] config_path (optional) the path to fedora.yml
   #   If config_path is not provided and Rails.root is set, it will look in RAILS_ENV/config/fedora.yml.  Otherwise, it will look in your config/fedora.yml.  Failing that, it will use localhost urls.
   def self.init( config_path=nil )
     
-    config_env = defined?(RAILS_ENV) ? RAILS_ENV : "development"
+    config_env = defined?(Rails.env) ? Rails.env : "development"
     
     if config_path.nil? 
       if defined?(Rails.root)
