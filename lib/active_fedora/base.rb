@@ -86,7 +86,7 @@ module ActiveFedora
     #by any future instantiations.
     def self.has_metadata(args, &block)
       @ds_specs ||= Hash.new
-      @ds_specs[args[:name]]= [args[:type], block]
+      @ds_specs[args[:name]]= [args[:type], args.fetch(:label,""), block]
     end
 
     #Saves a Base object, and any dirty datastreams, then updates 
@@ -1054,7 +1054,7 @@ module ActiveFedora
           if self.datastreams.has_key?(name)
             attributes = self.datastreams[name].attributes
           else
-            attributes = {:label=>""}
+            attributes = {:dsLabel=>ar[1]}
           end
           ds = ar.first.new(:dsid=>name)
           # If you called has_metadata with a block, pass the block into the Datastream class

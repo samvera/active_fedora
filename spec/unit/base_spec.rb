@@ -14,7 +14,7 @@ class FooHistory < ActiveFedora::Base
   has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText" do |m|
     m.field "fubar", :text
   end
-  has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText2" do |m|
+  has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText2", :label=>"withLabel" do |m|
     m.field "fubar", :text
   end 
 end
@@ -65,12 +65,23 @@ describe ActiveFedora::Base do
   end
 
   describe "has_metadata" do
+    before :each do
+      @n = FooHistory.new(:pid=>"monkey:99")
+      @n.save
+    end
+
+    after :each do
+      begin
+        @n.delete
+      rescue
+      end
+    end
 
     it "should create specified datastreams with specified fields" do
-      n = FooHistory.new
-      n.datastreams["someData"].should_not be_nil
-      n.datastreams["someData"].fubar_values='bar'
-      n.datastreams["someData"].fubar_values.should == ['bar']
+      @n.datastreams["someData"].should_not be_nil
+      @n.datastreams["someData"].fubar_values='bar'
+      @n.datastreams["someData"].fubar_values.should == ['bar']
+      @n.datastreams["withText2"].label.should == "withLabel"
     end
 
   end
