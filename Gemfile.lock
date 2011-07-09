@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active-fedora (2.3.1)
+    active-fedora (2.3.2)
       activeresource
       equivalent-xml
       facets
@@ -18,13 +18,13 @@ GEM
   remote: http://rubygems.org/
   specs:
     RedCloth (4.2.7)
-    activeresource (2.3.11)
-      activesupport (= 2.3.11)
-    activesupport (2.3.11)
+    activeresource (2.3.12)
+      activesupport (= 2.3.12)
+    activesupport (2.3.12)
     builder (3.0.0)
     columnize (0.3.2)
     daemons (1.1.3)
-    equivalent-xml (0.2.6)
+    equivalent-xml (0.2.7)
       nokogiri (>= 1.4.3)
     facets (2.9.1)
     git (1.2.5)
@@ -37,7 +37,7 @@ GEM
     mediashelf-loggable (0.4.2)
     mime-types (1.16)
     mocha (0.9.12)
-    multipart-post (1.1.0)
+    multipart-post (1.1.2)
     nokogiri (1.4.4)
     om (1.2.4)
       nokogiri (>= 1.4.2)
