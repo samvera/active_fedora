@@ -7,7 +7,7 @@ require 'ftools'
 require 'mocha'
 
 include ActiveFedora::Model
-include Mocha::Standalone
+include Mocha::API
 
 describe ActiveFedora::Model do
   

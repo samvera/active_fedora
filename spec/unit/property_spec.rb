@@ -3,7 +3,7 @@ require File.join( File.dirname(__FILE__), "../spec_helper" )
 require 'active_fedora'
 require 'active_fedora/model'
 require 'mocha'
-include Mocha::Standalone
+include Mocha::API
 
 describe ActiveFedora::Property do
   

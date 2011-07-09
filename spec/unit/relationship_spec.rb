@@ -4,7 +4,7 @@ require 'active_fedora'
 require "rexml/document"
 require 'mocha'
 
-include Mocha::Standalone
+include Mocha::API
 
 describe ActiveFedora::Relationship do
   

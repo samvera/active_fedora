@@ -5,7 +5,7 @@ require 'xmlsimple'
 #require 'mocha'
 
 #include ActiveFedora::SemanticNode
-#include Mocha::Standalone
+#include Mocha::API
 
 @@last_pid = 0
 
