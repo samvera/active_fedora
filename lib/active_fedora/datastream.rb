@@ -47,6 +47,18 @@ module ActiveFedora
       self.attributes[:dsid] = dsid
     end
 
+    def size
+      if !self.attributes.fetch(:dsSize,nil)
+        if self.new_object?
+          self.attributes[:dsSize]=nil
+        else
+          attrs = XmlSimple.xml_in(Fedora::Repository.instance.fetch_custom(self.pid,"datastreams/#{self.dsid}"))
+          self.attributes[:dsSize]=attrs["dsSize"].first
+        end
+      end
+      self.attributes[:dsSize]
+    end
+
     #compatibility method for rails' url generators. This method will 
     #urlescape escape dots, which are apparently
     #invalid characters in a dsid.

@@ -81,5 +81,45 @@ describe ActiveFedora::Datastream do
     ds2 = ActiveFedora::Datastream.new(:mime_type=>"text/bar")
     ds2.mime_type.should == "text/bar"
   end
-  
+
+  describe ".size" do
+    it "should lazily load the datastream size attribute from the fedora repository" do
+      ds_profile = <<-EOS
+        <datastreamProfile 
+            xmlns=\"http://www.fedora.info/definitions/1/0/management/\"  
+            xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" 
+            xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" 
+            xsi:schemaLocation=\"http://www.fedora.info/definitions/1/0/management/ http://www.fedora.info/definitions/1/0/datastreamProfile.xsd\" 
+            pid=\"#{@test_object.pid}\" 
+            dsID=\"#{@test_datastream.dsid}\" >
+         <dsLabel></dsLabel>
+         <dsVersionID>#{@test_datastream.dsid}.1</dsVersionID>
+         <dsCreateDate>2011-07-11T16:48:13.536Z</dsCreateDate>
+         <dsState>A</dsState>
+         <dsMIME>text/xml</dsMIME>
+         <dsFormatURI></dsFormatURI>
+         <dsControlGroup>X</dsControlGroup>
+         <dsSize>9999</dsSize>
+         <dsVersionable>true</dsVersionable>
+         <dsInfoType></dsInfoType>
+         <dsLocation>#{@test_object.pid}+#{@test_datastream.dsid}+#{@test_datastream.dsid}.1</dsLocation>
+         <dsLocationType></dsLocationType>
+         <dsChecksumType>DISABLED</dsChecksumType>
+         <dsChecksum>none</dsChecksum>
+         </datastreamProfile>"
+      EOS
+      Fedora::Repository.instance.expects(:fetch_custom).with(@test_object.pid, "datastreams/#{@test_datastream.dsid}").returns(ds_profile)
+      @test_datastream.expects(:new_object?).returns(false)
+      @test_datastream.attributes.fetch(:dsSize,nil).should be_nil
+      @test_datastream.size.should == "9999"
+      @test_datastream.attributes.fetch(:dsSize,nil).should_not be_nil
+    end
+
+    it "should default to an empty string if ds has not been saved" do
+      @test_datastream.attributes.fetch(:dsSize,nil).should be_nil
+      @test_datastream.size.should be_nil
+      @test_datastream.attributes.fetch(:dsSize,nil).should be_nil
+    end
+  end
+
 end
