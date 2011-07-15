@@ -926,7 +926,28 @@ describe ActiveFedora::SemanticNode do
         @test_object2.should respond_to(:testing_remove)
         #test execution in base_spec since method definitions include methods in ActiveFedora::Base
       end
+      
+      #
+      # HYDRA-541
+      #
+      
+      describe "bidirectional_named_relationship_query" do
+        it "should rely on outbound query if inbound query is empty" do
+           query = MockCreateNamedRelationshipMethods.bidirectional_named_relationship_query("PID",:testing,[])
+           query.should_not include("OR ()")
+        end
+        it "should be tested (HYDRA-541)"
+      end
+      describe "inbound_named_relationship_query" do
+        it "should be tested (HYDRA-541)"
+      end
+      describe "outbound_named_relationship_query" do
+        it "should be tested (HYDRA-541)"
+      end
+      
     end
+    
+
     
     describe '#def named_predicate_exists_with_different_name?' do
       

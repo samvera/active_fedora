@@ -741,7 +741,13 @@ module ActiveFedora
       #   SampleAFObjRelationshipQueryParam.bidirectional_named_relationship_query(s.pid,"series_parents",["id:changeme:13026"])
       #   #=> "(id:changeme\\:13026 AND level_t:series) OR (is_part_of_s:info\\:fedora/changeme\\:13025 AND level_t:series)" 
       def bidirectional_named_relationship_query(pid,relationship_name,outbound_pids)
-        outbound_named_relationship_query("#{relationship_name}_outbound",outbound_pids) + " OR (" + inbound_named_relationship_query(pid,"#{relationship_name}_inbound") + ")"
+        outbound_query = outbound_named_relationship_query("#{relationship_name}_outbound",outbound_pids) 
+        inbound_query = inbound_named_relationship_query(pid,"#{relationship_name}_inbound")
+        query = outbound_query # use outbound_query by default
+        if !inbound_query.empty?
+          query << " OR (" + inbound_named_relationship_query(pid,"#{relationship_name}_inbound") + ")"
+        end
+        return query      
       end
 
       # This will transform and encode any query_params defined in a relationship method to properly escape special characters

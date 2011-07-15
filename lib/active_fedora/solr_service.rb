@@ -47,6 +47,10 @@ module ActiveFedora
       return results
     end
     
+    # Construct a solr query for a list of pids
+    # This is used to get a solr response based on the list of pids in an object's RELS-EXT relationhsips
+    # If the pid_array is empty, defaults to a query of "id:NEVER_USE_THIS_ID", which will return an empty solr response
+    # @param [Array] pid_array the pids that you want included in the query
     def self.construct_query_for_pids(pid_array)
       query = ""
       pid_array.each_index do |i|
