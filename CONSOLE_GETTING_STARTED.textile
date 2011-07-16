@@ -168,7 +168,7 @@ newthing.inspirations
 
 This method is actually making a search request to Solr -- it is looking in Solr to see if the "newthing" object has any "inspirations" relationships.
 
-Now we'll create another Fedora object (using the default ActiveFedora object model) and we'll use ActiveFedora's add_relationship method to relate our new object to the SpecialThing objectl  We'll also save our new object in our Fedora repository.
+Now we'll create another Fedora object (using the default ActiveFedora object model) and we'll use ActiveFedora's add_relationship method to relate our new object to the SpecialThing object.  We'll also save our new object in our Fedora repository.
 
 <pre>
 newobj = ActiveFedora::Base.new
