@@ -661,4 +661,195 @@ describe ActiveFedora::SemanticNode do
       @test_object.assert_kind_of 'SpecNode2', @test_object, SpecNode2
     end
   end
+
+  it 'should provide #relationship_names' do
+    @test_object.should respond_to(:relationship_names)
+  end
+  
+  describe '#relationship_names' do
+    class MockRelationshipNames < SpecNode2
+      has_relationship "testing", :has_part, :type=>SpecNode2
+      has_relationship "testing2", :has_member, :type=>SpecNode2
+      has_relationship "testing_inbound", :has_part, :type=>SpecNode2, :inbound=>true
+      has_relationship "testing_inbound2", :has_member, :type=>SpecNode2, :inbound=>true
+    end
+    
+    it 'should return an array of relationship names for this model' do
+      @test_object2 = MockRelationshipNames.new
+      @test_object2.pid = increment_pid
+      @test_object2.relationship_names.include?("testing").should == true
+      @test_object2.relationship_names.include?("testing2").should == true
+      @test_object2.relationship_names.include?("testing_inbound").should == true
+      @test_object2.relationship_names.include?("testing_inbound2").should == true
+      @test_object2.relationship_names.size.should == 4
+    end
+  end
+  
+  it 'should provide #inbound_relationship_names' do
+    @test_object.should respond_to(:inbound_relationship_names)
+  end
+  
+  describe '#inbound_relationship_names' do
+    it 'should return an array of inbound relationship names for this model' do
+      @test_object2 = MockRelationshipNames.new
+      @test_object2.pid = increment_pid
+      @test_object2.inbound_relationship_names.include?("testing_inbound").should == true
+      @test_object2.inbound_relationship_names.include?("testing_inbound2").should == true
+      @test_object2.inbound_relationship_names.size.should == 2
+    end
+  end
+  
+  it 'should provide #outbound_relationship_names' do
+    @test_object.should respond_to(:outbound_relationship_names)
+  end
+  
+  describe '#outbound_relationship_names' do
+    it 'should return an array of outbound relationship names for this model' do
+      @test_object2 = MockRelationshipNames.new
+      @test_object2.pid = increment_pid
+      @test_object2.outbound_relationship_names.include?("testing").should == true
+      @test_object2.outbound_relationship_names.include?("testing2").should == true
+      @test_object2.outbound_relationship_names.size.should == 2
+    end
+  end
+  
+  it 'should provide #named_outbound_relationships' do
+    @test_object.should respond_to(:named_outbound_relationships)
+  end
+  
+  describe '#named_outbound_relationships' do
+    it 'should return hash of outbound relationship names to arrays of object uri' do
+      @test_object2 = MockRelationshipNames.new
+      @test_object2.pid = increment_pid
+      @test_object2.named_outbound_relationships.should == {"testing"=>[],
+                                                            "testing2"=>[]} 
+    end
+  end
+  
+  it 'should provide #named_inbound_relationships' do
+    #testing execution of this in integration since touches solr
+    @test_object.should respond_to(:named_inbound_relationships)
+  end
+  
+  it 'should provide #named_relationship' do
+    @test_object.should respond_to(:named_relationship)
+  end
+  
+  describe '#named_relationship' do
+    it 'should return an array of object uri for a given relationship name' do
+      @test_object2 = MockRelationshipNames.new
+      @test_object2.pid = increment_pid
+      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_model, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockRelationshipNames))
+      @test_object2.add_relationship(r)
+      @test_object3 = SpecNode2.new 
+      @test_object3.pid = increment_pid
+      r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_model, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(SpecNode2))
+      @test_object3.add_relationship(r2)
+      @test_object4 = SpecNode2.new 
+      @test_object4.pid = increment_pid
+      @test_object4.add_relationship(r2)
+      @test_object.add_relationship(r2)
+      #add relationships that mirror 'testing' and 'testing2'
+      r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_part, :object=>@test_object3)
+      r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_member, :object=>@test_object4)      
+      @test_object2.add_relationship(r3)
+      @test_object2.add_relationship(r4)
+     @test_object2.named_relationship("testing").should == [r3.object] 
+    end
+  end
+  
+  describe ActiveFedora::SemanticNode::ClassMethods do
+    
+    after(:each) do
+      begin
+        @test_object2.delete
+      rescue
+      end
+    end
+    
+    describe '#named_relationships_desc' do
+      it 'should initialize named_relationships_desc to a new hash containing self' do
+        @test_object2 = SpecNode2.new
+        @test_object2.pid = increment_pid
+        @test_object2.named_relationships_desc.should == {:self=>{}}
+      end
+    end
+      
+    describe '#register_named_subject' do
+    
+      class MockRegisterNamedSubject < SpecNode2
+        register_named_subject :test
+      end
+    
+      it 'should add a new named subject to the named relationships only if it does not already exist' do
+        @test_object2 = MockRegisterNamedSubject.new
+        @test_object2.pid = increment_pid
+        @test_object2.named_relationships_desc.should == {:self=>{}, :test=>{}}
+      end 
+    end
+  
+    describe '#register_named_relationship' do
+    
+      class MockRegisterNamedRelationship < SpecNode2
+        register_named_relationship :self, "testing", :is_part_of, :type=>SpecNode2
+        register_named_relationship :inbound, "testing2", :has_part, :type=>SpecNode2
+      end
+    
+      it 'should add a new named subject to the named relationships only if it does not already exist' do
+        @test_object2 = MockRegisterNamedRelationship.new 
+        @test_object2.pid = increment_pid
+        @test_object2.named_relationships_desc.should == {:inbound=>{"testing2"=>{:type=>SpecNode2, :predicate=>:has_part}}, :self=>{"testing"=>{:type=>SpecNode2, :predicate=>:is_part_of}}}
+      end 
+    end
+    
+    describe '#create_named_relationship_methods' do
+      class MockCreateNamedRelationshipMethods < SpecNode2
+        register_named_relationship :self, "testing", :is_part_of, :type=>SpecNode2
+        create_named_relationship_methods "testing"
+      end
+      
+      it 'should create an append and remove method for each outbound relationship' do
+        @test_object2 = MockCreateNamedRelationshipMethods.new
+        @test_object2.pid = increment_pid 
+        @test_object2.should respond_to(:testing_append)
+        @test_object2.should respond_to(:testing_remove)
+        #test execution in base_spec since method definitions include methods in ActiveFedora::Base
+      end
+    end
+
+    describe '#create_bidirectional_named_relationship_methods' do
+      class MockCreateNamedRelationshipMethods < SpecNode2
+        register_named_relationship :self, "testing_outbound", :is_part_of, :type=>SpecNode2
+        create_bidirectional_named_relationship_methods "testing", "testing_outbound"
+      end
+      
+      it 'should create an append and remove method for each outbound relationship' do
+        @test_object2 = MockCreateNamedRelationshipMethods.new
+        @test_object2.pid = increment_pid 
+        @test_object2.should respond_to(:testing_append)
+        @test_object2.should respond_to(:testing_remove)
+        #test execution in base_spec since method definitions include methods in ActiveFedora::Base
+      end
+    end
+    
+    describe '#def named_predicate_exists_with_different_name?' do
+      
+      it 'should return true if a predicate exists for same subject and different name but not different subject' do
+        class MockPredicateExists < SpecNode2
+          has_relationship "testing", :has_part, :type=>SpecNode2
+          has_relationship "testing2", :has_member, :type=>SpecNode2
+          has_relationship "testing_inbound", :is_part_of, :type=>SpecNode2, :inbound=>true
+      
+          named_predicate_exists_with_different_name?(:self,"testing",:has_part).should == false
+          named_predicate_exists_with_different_name?(:self,"testing3",:has_part).should == true
+          named_predicate_exists_with_different_name?(:inbound,"testing",:has_part).should == false
+          named_predicate_exists_with_different_name?(:self,"testing2",:has_member).should == false
+          named_predicate_exists_with_different_name?(:self,"testing3",:has_member).should == true
+          named_predicate_exists_with_different_name?(:inbound,"testing2",:has_member).should == false
+          named_predicate_exists_with_different_name?(:self,"testing_inbound",:is_part_of).should == false
+          named_predicate_exists_with_different_name?(:inbound,"testing_inbound",:is_part_of).should == false
+          named_predicate_exists_with_different_name?(:inbound,"testing_inbound2",:is_part_of).should == true
+        end
+      end
+    end
 end
