@@ -77,18 +77,9 @@ describe ActiveFedora do
         ActiveFedora.init()
         ActiveFedora.fedora.fedora_url.to_s.should == "http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"
       end
-      it "can tell what configuration environment it's using" do
-        ActiveFedora.init()
-        ActiveFedora.config_env.should eql("test")
-      end
-      it "can tell what configuration path it's using" do
-        pending
-        ActiveFedora.init('./spec/fixtures/rails_root/config/fedora.yml')
-        ActiveFedora.config_path.should eql('./spec/fixtures/rails_root/config/fedora.yml')
-      end
       it "should load the passed config if explicit config passed in" do
         ActiveFedora.init('./spec/fixtures/rails_root/config/fedora.yml')
-        ActiveFedora.fedora.fedora_url.to_s.should == "http://fedoraAdmin:fedoraAdmin@localhost:8983/fedora"
+        ActiveFedora.fedora.fedora_url.to_s.should == "http://fedoraAdmin:fedoraAdmin@testhost.com:8983/fedora"
       end
     end
 
@@ -102,7 +93,6 @@ describe ActiveFedora do
         if Rails == String
           Object.send(:remove_const,:Rails)
         end
-        ActiveFedora.init
       end
 
       describe "versions prior to 3.0" do
@@ -110,7 +100,6 @@ describe ActiveFedora do
           it "should load the specified config path" do
             config_hash={"test"=>{"fedora"=>{"url"=>"http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"},"solr"=>{"url"=>"http://127.0.0.1:8983/solr/test/"}}}
             config_path = File.expand_path(File.join(File.dirname(__FILE__),"config"))
-            Rails.expects(:env).returns("test")
             mock_yaml(config_hash,File.join(config_path,"fedora.yml"))
             File.expects(:exist?).with(File.join(config_path,"predicate_mappings.yml")).returns(true)
             ActiveFedora.expects(:valid_predicate_mapping?).returns(true)
@@ -126,7 +115,7 @@ describe ActiveFedora do
             ActiveFedora.init()
             ActiveFedora.solr.class.should == ActiveFedora::SolrService
             ActiveFedora.fedora.class.should == Fedora::Repository
-            ActiveFedora.fedora.fedora_url.to_s.should == "http://fedoraAdmin:fedoraAdmin@localhost:8983/fedora"
+            ActiveFedora.fedora.fedora_url.to_s.should == "http://fedoraAdmin:fedoraAdmin@testhost.com:8983/fedora"
           end
           it "should load the default file if no config is found at Rails.root" do
             Rails.expects(:root).returns(File.join(File.dirname(__FILE__),"../fixtures/bad/path/to/rails_root"))

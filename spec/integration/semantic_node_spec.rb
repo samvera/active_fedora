@@ -13,15 +13,6 @@ describe ActiveFedora::SemanticNode do
     class SNSpecModel < ActiveFedora::Base
       has_relationship("parts", :is_part_of, :inbound => true)
       has_relationship("containers", :is_member_of)
-      has_bidirectional_relationship("bi_containers", :is_member_of, :has_member)
-    end
-    class SpecNodeQueryParam < ActiveFedora::Base
-      has_relationship("parts", :is_part_of, :inbound => true)
-      has_relationship("special_parts", :is_part_of, :inbound => true, :query_params=>{:q=>{"has_model_s"=>"info:fedora/SpecialPart"}})
-      has_relationship("containers", :is_member_of)
-      has_relationship("special_containers", :is_member_of, :query_params=>{:q=>{"has_model_s"=>"info:fedora/SpecialContainer"}})
-      has_bidirectional_relationship("bi_containers", :is_member_of, :has_member)
-      has_bidirectional_relationship("bi_special_containers", :is_member_of, :has_member, :query_params=>{:q=>{"has_model_s"=>"info:fedora/SpecialContainer"}})
     end
     
     @test_object = SNSpecModel.new
@@ -33,6 +24,7 @@ describe ActiveFedora::SemanticNode do
     @part2 = ActiveFedora::Base.new()
     @part2.add_relationship(:is_part_of, @test_object)
     @part2.save
+    
     
     @container1 = ActiveFedora::Base.new()
     @container1.save
@@ -89,50 +81,12 @@ describe ActiveFedora::SemanticNode do
   end
   
   after(:all) do
-    begin
     @part1.delete 
-    rescue
-    end
-    begin
     @part2.delete
-    rescue
-    end
-    begin
-    @part3.delete
-    rescue
-    end
-    begin
     @container1.delete
-    rescue
-    end
-    begin
     @container2.delete
-    rescue
-    end
-    begin
-    @container3.delete
-    rescue
-    end
-    begin
     @test_object.delete
-    rescue
-    end
-    begin
-    @test_object_query.delete
-    rescue
-    end
-    begin
-    @special_part.delete
-    rescue
-    end
-    begin
-    @special_container.delete
-    rescue
-    end
-    begin
-    @special_container2.delete
-    rescue
-    end
+    
     Object.send(:remove_const, :SNSpecModel)
 
   end
