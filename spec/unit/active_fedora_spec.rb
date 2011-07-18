@@ -102,6 +102,7 @@ describe ActiveFedora do
         if Rails == String
           Object.send(:remove_const,:Rails)
         end
+        ActiveFedora.init
       end
 
       describe "versions prior to 3.0" do
