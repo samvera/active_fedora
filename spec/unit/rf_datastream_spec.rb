@@ -45,5 +45,19 @@ describe Fedora::Datastream do
       @test_datastream.attributes[:dsLabel].should == "Foo dsLabel"
     end
   end
+  
+  describe ".mime_type" do
+    it "should return the mimeType attribute" do
+      @test_datastream.mime_type.should == @test_datastream.attributes["mimeType"]
+    end
+  end
 
+  describe ".mime_type=" do
+    it "should set the mimeType attribute" do
+      @test_datastream.mime_type.should_not == "foo/bar"
+      @test_datastream.attributes["mimeType"].should_not == "foo/bar"
+      @test_datastream.mime_type= "foo/bar"
+      @test_datastream.mime_type.should == "foo/bar"
+    end
+  end
 end
