@@ -71,6 +71,11 @@ describe ActiveFedora do
   end
 
   describe ".init" do
+    
+    after(:all) do
+      # Restore to default fedora configs
+      ActiveFedora.init()
+    end
 
     describe "outside of rails" do
       it "should load the default packaged config/fedora.yml file if no explicit config path is passed" do
