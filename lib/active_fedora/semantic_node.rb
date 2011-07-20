@@ -787,7 +787,6 @@ module ActiveFedora
             return predicates[predicate], namespace
           end
         end
-        debugger
         raise ActiveFedora::UnregisteredPredicateError
       end
 
