@@ -1,8 +1,60 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
+require 'equivalent-xml'
 
 # For testing Module-level methods like ActiveFedora.init
 
 describe ActiveFedora do
+  
+  ###########################
+  
+  describe "setting the environment and loading configuration" do
+    
+    before(:all) do
+      Object.const_set("Rails",String)
+      @fake_rails_root = File.expand_path(File.dirname(__FILE__) + '/../fixtures/rails_root')
+    end
+    
+    after(:all) do
+      if Rails == String
+        Object.send(:remove_const,:Rails)
+      end
+    end
+    
+    it "can tell what environment it is set to run in" do
+      Rails.stubs(:env).returns("development")
+      ActiveFedora.init
+      ActiveFedora.environment.should eql("development")
+    end
+    it "can tell its config path" do
+      ActiveFedora.init
+      ActiveFedora.should respond_to(:config_path)
+    end
+    it "loads a config from Rails.root as a first choice" do
+      Rails.stubs(:root).returns(@fake_rails_root)
+      ActiveFedora.init
+      ActiveFedora.config_path.should eql("#{@fake_rails_root}/config/fedora.yml")
+    end
+    it "loads a config from the current working directory as a second choice" do
+      Dir.stubs(:getwd).returns(@fake_rails_root)
+      ActiveFedora.init
+      ActiveFedora.config_path.should eql("#{@fake_rails_root}/config/fedora.yml")
+    end
+    it "loads the config that ships with this gem as a last choice" do
+      Dir.stubs(:getwd).returns("/fake/path")
+      ActiveFedora.init
+      expected_config = File.expand_path(File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml"))
+      ActiveFedora.config_path.should eql(expected_config)
+    end
+    it "overrides any other config file when a file is passed in explicitly" do
+      ActiveFedora.init("#{@fake_rails_root}/config/fake_fedora.yml")
+      ActiveFedora.config_path.should eql("#{@fake_rails_root}/config/fake_fedora.yml")
+    end
+    it "raises an error if you pass in a non-existant config file" do
+      lambda{ ActiveFedora.init("really_fake_fedora.yml") }.should raise_exception
+    end
+  end
+  
+  ##########################
   
   describe ".push_models_to_fedora" do
     it "should push the model definition for each of the ActiveFedora models into Fedora CModel objects" do

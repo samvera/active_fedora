@@ -36,7 +36,7 @@ module ActiveFedora #:nodoc:
   include Loggable
   
   class << self
-    attr_accessor :solr_config, :fedora_config, :config_env
+    attr_accessor :solr_config, :fedora_config, :config_env, :config_path
   end
   
   # The configuration hash that gets used by RSolr.connect
@@ -48,31 +48,12 @@ module ActiveFedora #:nodoc:
   # @param [String] config_path (optional) the path to fedora.yml
   #   If config_path is not provided and Rails.root is set, it will look in RAILS_ENV/config/fedora.yml.  Otherwise, it will look in your config/fedora.yml.  Failing that, it will use localhost urls.
   def self.init( config_path=nil )
+    logger.level = Logger::ERROR
+    @config_env = environment
+    @config_path = get_config_path(config_path)
     
-    if defined?(Rails.env)
-      @config_env = Rails.env
-    elsif defined?(ENV['environment'])
-      @config_env = ENV['environment']
-    else 
-      @config_env = 'development'
-      logger.warn("No environment setting found: Using the default development environment.")
-    end
-        
-    if config_path.nil? 
-      if defined?(Rails.root)
-        config_path = "#{Rails.root}/config/fedora.yml"
-      else
-        config_path = File.join("config","fedora.yml")
-      end
-    end
-
-    unless File.exist?(config_path)
-      config_path = File.join(File.dirname(__FILE__), "..", "config", "fedora.yml")
-      logger.info "Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml as an argument to ActiveFedora.init or set Rails.root and put fedora.yml into \#{Rails.root}/config."
-    end
-    
-    logger.info("FEDORA: loading ActiveFedora config from #{File.expand_path(config_path)}")
-    fedora_config = YAML::load(File.open(config_path))
+    logger.info("FEDORA: loading ActiveFedora config from #{File.expand_path(@config_path)}")
+    fedora_config = YAML::load(File.open(@config_path))
     raise "The #{@config_env.to_s} environment settings were not found in the fedora.yml config.  If you already have a fedora.yml file defined, make sure it defines settings for the #{@config_env} environment" unless fedora_config[@config_env]
     
     ActiveFedora.solr_config[:url] = fedora_config[@config_env]['solr']['url']
@@ -90,8 +71,58 @@ module ActiveFedora #:nodoc:
     logger.info("FEDORA: initialized Fedora as: #{Fedora::Repository.instance.inspect}")    
     
     # Retrieve the valid path for the predicate mappings config file
-    @predicate_config_path = build_predicate_config_path(File.dirname(config_path))
+    @predicate_config_path = build_predicate_config_path(File.dirname(@config_path))
 
+  end
+  
+  # Determine what environment we're running in. Order of preference is:
+  # 1. Rails.env
+  # 2. ENV['environment']
+  # 3. ENV['RAILS_ENV']
+  # 4. raises an exception if none of these is set
+  # @return [String]
+  # @example 
+  #  Rails.env => "test"
+  #  ActiveFedora.init
+  #  ActiveFedora.environment => "test"
+  def self.environment
+    if defined?(Rails.env) and !Rails.env.nil?
+      return Rails.env.to_s
+    elsif defined?(ENV['environment']) and !(ENV['environment'].nil?)
+      return ENV['environment']
+    elsif defined?(ENV['RAILS_ENV']) and !(ENV['RAILS_ENV'].nil?)
+      logger.warn("You're depending on RAILS_ENV for setting your environment. This is deprecated in Rails3. Please use ENV['environment'] for non-rails environment setting: 'rake foo:bar environment=test'")
+      ENV['environment'] = ENV['RAILS_ENV']
+      return ENV['environment']
+    else
+      raise "Can't determine what environment to run in!"
+    end
+  end
+  
+  # Determine the config file to use. Order of preference is:
+  # 1. Look in Rails.root/config/fedora.yml
+  # 2. Look in the current working directory config/fedora.yml
+  # 3. Load the default config that ships with this gem
+  # @return [String]
+  def self.get_config_path(config_path=nil)
+    if config_path
+      return config_path
+    end
+    
+    if defined?(Rails.root)
+      config = "#{Rails.root}/config/fedora.yml"
+      return config if File.file? config
+    end
+    
+    if File.file? "#{Dir.getwd}/config/fedora.yml"  
+      return "#{Dir.getwd}/config/fedora.yml"
+    end
+    
+    # Last choice, check for the default config file
+    config = File.expand_path(File.join(File.dirname(__FILE__), "..", "config", "fedora.yml"))
+    logger.warn "Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml as an argument to ActiveFedora.init or set Rails.root and put fedora.yml into \#{Rails.root}/config."
+    return config if File.file? config 
+    raise "Couldn't load config file!"
   end
   
   def self.solr
