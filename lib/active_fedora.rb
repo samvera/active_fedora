@@ -106,6 +106,7 @@ module ActiveFedora #:nodoc:
   # @return [String]
   def self.get_config_path(config_path=nil)
     if config_path
+      raise ActiveFedoraConfigurationException unless File.file? config_path
       return config_path
     end
     
@@ -122,7 +123,7 @@ module ActiveFedora #:nodoc:
     config = File.expand_path(File.join(File.dirname(__FILE__), "..", "config", "fedora.yml"))
     logger.warn "Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml as an argument to ActiveFedora.init or set Rails.root and put fedora.yml into \#{Rails.root}/config."
     return config if File.file? config 
-    raise "Couldn't load config file!"
+    raise ActiveFedoraConfigurationException "Couldn't load config file!"
   end
   
   def self.solr
