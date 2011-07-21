@@ -50,7 +50,7 @@ describe ActiveFedora do
       ActiveFedora.config_path.should eql("#{@fake_rails_root}/config/fake_fedora.yml")
     end
     it "raises an error if you pass in a non-existant config file" do
-      lambda{ ActiveFedora.init("really_fake_fedora.yml") }.should raise_exception
+      lambda{ ActiveFedora.init("really_fake_fedora.yml") }.should raise_exception(ActiveFedoraConfigurationException)
     end
   end
   
@@ -156,7 +156,7 @@ describe ActiveFedora do
         describe "with explicit config path passed in" do
           it "should load the specified config path" do
             config_hash={"test"=>{"fedora"=>{"url"=>"http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"},"solr"=>{"url"=>"http://127.0.0.1:8983/solr/test/"}}}
-            config_path = File.expand_path(File.join(File.dirname(__FILE__),"config"))
+            config_path = File.expand_path(File.join(File.dirname(__FILE__),"../fixtures/rails_root/config"))
             mock_yaml(config_hash,File.join(config_path,"fedora.yml"))
             File.expects(:exist?).with(File.join(config_path,"predicate_mappings.yml")).returns(true)
             ActiveFedora.expects(:valid_predicate_mapping?).returns(true)
