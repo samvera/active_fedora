@@ -798,6 +798,9 @@ module ActiveFedora
         def #{name}_from_solr
           #{name}(:response_format => :load_from_solr)
         end
+        def #{name}_query
+          named_relationship_query("#{name}")
+        end
         END
       end
     
@@ -829,6 +832,9 @@ module ActiveFedora
         end
         def #{name}_from_solr
           #{name}(:response_format => :load_from_solr)
+        end
+        def #{name}_query
+          named_relationship_query("#{name}")
         end
         END
       end
@@ -878,6 +884,9 @@ module ActiveFedora
         end
         def #{name}_from_solr
           #{name}(:response_format => :load_from_solr)
+        end
+        def #{name}_query
+          named_relationship_query("#{name}")
         end
         END
       end

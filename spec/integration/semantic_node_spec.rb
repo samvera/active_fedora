@@ -118,8 +118,21 @@ describe ActiveFedora::SemanticNode do
       ids.include?(@part1.pid).should == true
       ids.include?(@part2.pid).should == true
     end
+    it "should return an array of Base objects with some filtered out if using query params" do
+      @test_object_query.special_parts_ids.should == [@special_part.pid]
+    end
+
+    it "should return an array of all Base objects with relationship if not using query params" do
+      @test_object_query.parts_ids.size.should == 2
+      @test_object_query.parts_ids.include?(@special_part.pid).should == true
+      @test_object_query.parts_ids.include?(@part3.pid).should == true
+    end
+
+    it "should return a solr query for an inbound relationship" do
+      @test_object_query.special_parts_query.should == "#{@test_object_query.named_relationship_predicates[:inbound]['special_parts']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialPart"
+    end
   end
-  
+
   describe "outbound relationship finders" do
     it "should return an array of Base objects" do
       containers = @test_object.containers
@@ -212,56 +225,6 @@ describe ActiveFedora::SemanticNode do
       expected_string << " OR "
       expected_string << "(#{@test_object_query.named_relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialContainer)"
       @test_object_query.bi_special_containers_query.should == expected_string
-    end
-  end 
-
-  describe "named_relationship_query" do
-    it "should return correct query for a bidirectional relationship with query params" do
-      expected_string = ""
-      @test_object_query.bi_containers_outbound_ids.each_with_index do |id,index|
-        expected_string << " OR " if index > 0
-        expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialContainer)"
-      end
-      expected_string << " OR "
-      expected_string << "(#{@test_object_query.named_relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialContainer)"
-      @test_object_query.named_relationship_query("bi_special_containers").should == expected_string
-    end
-  
-    it "should return correct query for a bidirectional relationship without query params" do
-      expected_string = ""
-      @test_object_query.bi_containers_outbound_ids.each_with_index do |id,index|
-        expected_string << " OR " if index > 0
-        expected_string << "id:" + id.gsub(/(:)/, '\\:')
-      end
-      expected_string << " OR "
-      expected_string << "(#{@test_object_query.named_relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')})"
-      @test_object_query.named_relationship_query("bi_containers").should == expected_string
-    end
-
-    it "should return a properly formatted query for an outbound relationship that has a query param defined" do
-      expected_string = ""
-      @test_object_query.containers_ids.each_with_index do |id,index|
-        expected_string << " OR " if index > 0
-        expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialContainer)"
-      end
-      @test_object_query.named_relationship_query("special_containers").should == expected_string
-    end
-
-    it "should return a properly formatted query for an outbound relationship that does not have a query param defined" do
-      expected_string = ""
-      @test_object_query.containers_ids.each_with_index do |id,index|
-        expected_string << " OR " if index > 0
-        expected_string << "id:" + id.gsub(/(:)/, '\\:')
-      end
-      @test_object_query.named_relationship_query("containers").should == expected_string
-    end
-
-    it "should return a properly formatted query for an inbound relationship that has a query param defined" do
-      @test_object_query.named_relationship_query("special_parts").should == "#{@test_object_query.named_relationship_predicates[:inbound]['special_parts']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialPart"
-    end
-
-    it "should return a properly formatted query for an inbound relationship that does not have a query param defined" do
-      @test_object_query.named_relationship_query("parts").should == "is_part_of_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')}"
     end
   end 
 end
