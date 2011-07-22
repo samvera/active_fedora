@@ -568,6 +568,173 @@ module ActiveFedora
         opts.merge!({:predicate=>predicate})
         named_relationships_desc[subject][name] = opts
       end
+
+      # Returns a solr query for retrieving objects specified in an outbound relationship.
+      # This method is mostly used by internal method calls.
+      # It enables the use of query_params defined within a relationship to attach a query filter
+      # on top of just the predicate being used.  Because it is static it 
+      # needs the pids defined within RELS-EXT for this relationship to be passed in.
+      # If you are calling this method directly to get the query you should use the 
+      # ActiveFedora::SemanticNode.named_relationship_query instead or use the helper method
+      # [relationship_name]_query, i.e. method "parts_query" for relationship "parts".  This
+      # method would only be called directly if you had something like an array of outbound pids
+      # already in something like a solr document for object that has these relationships.
+      # @param [String] The name of the relationship defined in the model
+      # @param [Array] An array of pids to include in the query
+      # @return [String]
+      # @example
+      #   Class SampleAFObjRelationshipQueryParam < ActiveFedora::Base
+      #     #points to all parents linked via is_member_of
+      #     has_relationship "parents", :is_member_of
+      #     #returns only parents that have a level value set to "series"
+      #     has_relationship "series_parents", :is_member_of, :query_params=>{:q=>{"level_t"=>"series"}}
+      #   end
+      #   s = SampleAFObjRelationshipQueryParam.new
+      #   obj = ActiveFedora::Base.new
+      #   s.series_parents_append(obj)
+      #   s.series_parents_query 
+      #   #=> "(id:changeme\\:13020 AND level_t:series)" 
+      #   SampleAFObjRelationshipQueryParam.outbound_named_relationship_query("series_parents",["id:changeme:13020"])
+      #   #=> "(id:changeme\\:13020 AND level_t:series)" 
+      def outbound_named_relationship_query(relationship_name,outbound_pids)
+        query = ActiveFedora::SolrService.construct_query_for_pids(outbound_pids)
+        subject = :self
+        if named_relationships_desc.has_key?(subject) && named_relationships_desc[subject].has_key?(relationship_name) && named_relationships_desc[subject][relationship_name].has_key?(:query_params)
+          query_params = format_query_params(named_relationships_desc[subject][relationship_name][:query_params])
+          if query_params[:q]
+            unless query.empty?
+              #substitute in the filter query for each pid so that it is applied to each in the query
+              query_parts = query.split(/OR/)
+              query = ""
+              query_parts.each_with_index do |query_part,index|
+                query_part.strip!
+                query << " OR " if index > 0
+                query << "(#{query_part} AND #{query_params[:q]})"
+              end
+              #query.sub!(/OR /,"AND #{query_params[:q]}) OR (")
+              #add opening parenthesis for first case
+              #query = "(" + query 
+              #add AND filter case for last element as well since no 'OR' following it
+              #query << " AND #{query_params[:q]})"
+            else
+              query = query_params[:q]
+            end
+          end
+        end
+        query
+      end
+
+      # Returns a solr query for retrieving objects specified in an inbound relationship.
+      # This method is mostly used by internal method calls.
+      # It enables the use of query_params defined within a relationship to attach a query filter
+      # on top of just the predicate being used.  Because it is static it 
+      # needs the pid of the object that has the inbound relationships passed in.
+      # If you are calling this method directly to get the query you should use the 
+      # ActiveFedora::SemanticNode.named_relationship_query instead or use the helper method
+      # [relationship_name]_query, i.e. method "parts_query" for relationship "parts".  This
+      # method would only be called directly if you were working only with Solr and already
+      # had the pid for the object in something like a solr document.
+      # @param [String] The pid for the object that has these inbound relationships
+      # @param [String] The name of the relationship defined in the model
+      # @return [String]
+      # @example
+      #   Class SampleAFObjRelationshipQueryParam < ActiveFedora::Base
+      #     #returns all parts
+      #     has_relationship "parts", :is_part_of, :inbound=>true
+      #     #returns only parts that have level to "series"
+      #     has_relationship "series_parts", :is_part_of, :inbound=>true, :query_params=>{:q=>{"level_t"=>"series"}}
+      #   end
+      #   s = SampleAFObjRelationshipQueryParam.new
+      #   s.pid 
+      #   #=> id:changeme:13020
+      #   s.series_parts_query
+      #   #=> "is_part_of_s:info\\:fedora/changeme\\:13021 AND level_t:series"
+      #   SampleAFObjRelationshipQueryParam.inbound_named_relationship_query(s.pid,"series_parts")
+      #   #=> "is_part_of_s:info\\:fedora/changeme\\:13021 AND level_t:series"
+      def inbound_named_relationship_query(pid,relationship_name)
+        query = ""
+        subject = :inbound
+        if named_relationships_desc.has_key?(subject) && named_relationships_desc[subject].has_key?(relationship_name)
+          predicate = named_relationships_desc[subject][relationship_name][:predicate]
+          internal_uri = "info:fedora/#{pid}"
+          escaped_uri = internal_uri.gsub(/(:)/, '\\:')
+          query = "#{predicate}_s:#{escaped_uri}" 
+          if named_relationships_desc.has_key?(subject) && named_relationships_desc[subject].has_key?(relationship_name) && named_relationships_desc[subject][relationship_name].has_key?(:query_params)
+            query_params = format_query_params(named_relationships_desc[subject][relationship_name][:query_params])
+            if query_params[:q]
+              query << " AND " unless query.empty?
+              query << query_params[:q]
+            end
+          end
+        end
+        query
+      end
+
+      # Returns a solr query for retrieving objects specified in a bidirectional relationship.
+      # This method is mostly used by internal method calls.
+      # It enables the use of query_params defined within a relationship to attach a query filter
+      # on top of just the predicate being used.  Because it is static it 
+      # needs the pids defined within RELS-EXT for the outbound relationship as well as the pid of the
+      # object for the inbound portion of the relationship.
+      # If you are calling this method directly to get the query you should use the 
+      # ActiveFedora::SemanticNode.named_relationship_query instead or use the helper method
+      # [relationship_name]_query, i.e. method "bi_parts_query" for relationship "bi_parts".  This
+      # method would only be called directly if you had something like an array of outbound pids
+      # already in something like a solr document for object that has these relationships.
+      # @param [String] The pid for the object that has these inbound relationships
+      # @param [String] The name of the relationship defined in the model
+      # @param [Array] An array of pids to include in the query
+      # @return [String]
+      # @example
+      #   Class SampleAFObjRelationshipQueryParam < ActiveFedora::Base
+      #     has_bidirectional_relationship "bi_series_parts", :has_part, :is_part_of, :query_params=>{:q=>{"level_t"=>"series"}}
+      #   end
+      #   s = SampleAFObjRelationshipQueryParam.new
+      #   obj = ActiveFedora::Base.new
+      #   s.bi_series_parts_append(obj)
+      #   s.pid
+      #   #=> "changeme:13025" 
+      #   obj.pid
+      #   #=> id:changeme:13026
+      #   s.bi_series_parts_query 
+      #   #=> "(id:changeme\\:13026 AND level_t:series) OR (is_part_of_s:info\\:fedora/changeme\\:13025 AND level_t:series)" 
+      #   SampleAFObjRelationshipQueryParam.bidirectional_named_relationship_query(s.pid,"series_parents",["id:changeme:13026"])
+      #   #=> "(id:changeme\\:13026 AND level_t:series) OR (is_part_of_s:info\\:fedora/changeme\\:13025 AND level_t:series)" 
+      def bidirectional_named_relationship_query(pid,relationship_name,outbound_pids)
+        outbound_query = outbound_named_relationship_query("#{relationship_name}_outbound",outbound_pids) 
+        inbound_query = inbound_named_relationship_query(pid,"#{relationship_name}_inbound")
+        query = outbound_query # use outbound_query by default
+        if !inbound_query.empty?
+          query << " OR (" + inbound_named_relationship_query(pid,"#{relationship_name}_inbound") + ")"
+        end
+        return query      
+      end
+
+      # This will transform and encode any query_params defined in a relationship method to properly escape special characters
+      # and format strings such as query string properly for a solr query
+      # @param [Hash] The has of expected query params (including at least :q)
+      # @return [String]
+      def format_query_params(query_params)
+        if query_params && query_params[:q]
+          add_query = ""
+          if query_params[:q].is_a? Hash
+            query_params[:q].keys.each_with_index do |key,index|
+              add_query << " AND " if index > 0
+              add_query << "#{key}:#{query_params[:q][key].gsub(/:/, '\\\\:')}"
+            end
+          elsif !query_params[:q].empty?
+            add_query = "#{query_params[:q]}"
+          end
+          query_params[:q] = add_query unless add_query.empty?
+          query_params
+        end
+      end
+
+      #Tests if the relationship name passed is in bidirectional
+      # @return [Boolean]
+      def is_bidirectional_relationship?(relationship_name)
+        named_relationships_desc[:self]["#{relationship_name}_outbound"] && named_relationships_desc[:inbound]["#{relationship_name}_inbound"] 
+      end
       
       # ** EXPERIMENTAL **
       #   
