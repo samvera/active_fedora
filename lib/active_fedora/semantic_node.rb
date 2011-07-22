@@ -179,7 +179,10 @@ module ActiveFedora
       #  class AudioRecord < ActiveFedora::Base
       #
       #   has_relationship "oral_history", :has_part, :inbound=>true, :type=>OralHistory
+      #   # returns all similar audio
       #   has_relationship "similar_audio", :has_part, :type=>AudioRecord
+      #   #returns only similar audio with format wav
+      #   has_relationship "similar_audio_wav", :has_part, :query_params=>{:q=>"format_t"=>"wav"}
       #
       # The first two parameters are required:
       #   name: relationship name
@@ -188,6 +191,7 @@ module ActiveFedora
       #     possible parameters  
       #       :inbound => if true loads an external relationship via Solr (defaults to false)
       #       :type => The type of model to use when instantiated an object from the pid in this relationship (defaults to ActiveFedora::Base)
+      #       :query_params => Additional filters to be attached via a solr query (currently only :q implemented)
       #
       # If inbound is true it expects the relationship to be defined by another object's RELS-EXT
       # and to load that relationship from Solr.  Otherwise, if inbound is true the relationship is stored in
@@ -199,22 +203,24 @@ module ActiveFedora
       # For the oral_history relationship in the example above the following helper methods are created:
       #  oral_history: returns array of OralHistory objects that have this AudioRecord with predicate :has_part 
       #  oral_history_ids: Return array of pids for OralHistory objects that have this AudioRecord with predicate :has_part
+      #  oral_history_query: Return solr query that can be used to retrieve related objects as solr documents
       # 
       # For the outbound relationship "similar_audio" there are two additional methods to append and remove objects from that relationship
       # since it is managed internally:
       #  similar_audio: Return array of AudioRecord objects that have been added to similar_audio relationship
       #  similar_audio_ids:  Return array of AudioRecord object pids that have been added to similar_audio relationship
+      #  similar_audio_query: Return solr query that can be used to retrieve related objects as solr documents
       #  similar_audio_append: Add an AudioRecord object to the similar_audio relationship
       #  similar_audio_remove: Remove an AudioRecord from the similar_audio relationship
       def has_relationship(name, predicate, opts = {})
         opts = {:singular => nil, :inbound => false}.merge(opts)
         if opts[:inbound] == true
-          raise "Duplicate use of predicate for named inbound relationship not allowed" if named_predicate_exists_with_different_name?(:inbound,name,predicate)
+          #raise "Duplicate use of predicate for named inbound relationship not allowed" if named_predicate_exists_with_different_name?(:inbound,name,predicate)
           register_named_relationship(:inbound, name, predicate, opts)
           register_predicate(:inbound, predicate)
           create_inbound_relationship_finders(name, predicate, opts)
         else
-          raise "Duplicate use of predicate for named outbound relationship not allowed" if named_predicate_exists_with_different_name?(:self,name,predicate)
+          #raise "Duplicate use of predicate for named outbound relationship not allowed" if named_predicate_exists_with_different_name?(:self,name,predicate)
           register_named_relationship(:self, name, predicate, opts)
           register_predicate(:self, predicate)
           create_named_relationship_methods(name)
@@ -328,8 +334,8 @@ module ActiveFedora
         class_eval <<-END
         def #{name}(opts={})
           opts = {:rows=>25}.merge(opts)
-          escaped_uri = self.internal_uri.gsub(/(:)/, '\\:')
-          solr_result = SolrService.instance.conn.query("#{predicate}_s:\#{escaped_uri}", :rows=>opts[:rows])
+          query = self.class.inbound_named_relationship_query(self.pid,"#{name}")
+          solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
           if opts[:response_format] == :solr
             return solr_result
           else
@@ -413,12 +419,15 @@ module ActiveFedora
         def #{name}(opts={})
           opts = {:rows=>25}.merge(opts)
           if opts[:response_format] == :solr || opts[:response_format] == :load_from_solr
-            escaped_uri = self.internal_uri.gsub(/(:)/, '\\:')
-            query = "#{inbound_predicate}_s:\#{escaped_uri}"
-            
-            outbound_id_array = #{outbound_method_name}(:response_format=>:id_array)
-            query = query + " OR " + ActiveFedora::SolrService.construct_query_for_pids(outbound_id_array)
-            
+            outbound_id_array = []
+            predicate = outbound_named_relationship_predicates["#{name}_outbound"]
+            if !outbound_relationships[predicate].nil? 
+              outbound_relationships[predicate].each do |rel|
+                outbound_id_array << rel.gsub("info:fedora/", "")
+              end
+            end
+            #outbound_id_array = #{outbound_method_name}(:response_format=>:id_array)
+            query = self.class.bidirectional_named_relationship_query(self.pid,"#{name}",outbound_id_array)
             solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
             
             if opts[:response_format] == :solr
