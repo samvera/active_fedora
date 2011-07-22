@@ -138,10 +138,12 @@ describe ActiveFedora::SemanticNode do
       SpecNode.has_relationship("parts", :is_part_of, :inbound => true)
       local_node = SpecNode.new
       local_node.should respond_to(:parts_ids)
+      local_node.should respond_to(:parts_query)
       # local_node.should respond_to(:parts)
       local_node.should_not respond_to(:containers)
       SpecNode.has_relationship("containers", :is_member_of)  
       local_node.should respond_to(:containers_ids)
+      local_node.should respond_to(:containers_query)
     end
     
     it "should add a subject and predicate to the relationships array" do
@@ -259,6 +261,7 @@ describe ActiveFedora::SemanticNode do
       local_node.should respond_to(:containers_ids)
       local_node.should respond_to(:containers)
       local_node.should respond_to(:containers_from_solr)
+      local_node.should respond_to(:containers_query)
     end
     
     it "resulting finder should search against solr and use Model#load_instance to build an array of objects" do
@@ -305,6 +308,13 @@ describe ActiveFedora::SemanticNode do
       local_node.expects(:parts).with(:response_format => :id_array)
       local_node.parts_ids
     end
+
+    it "resulting _query finder should call named_relationship_query" do
+      SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
+      local_node = SpecNode.new
+      local_node.expects(:named_relationship_query).with("parts")
+      local_node.parts_query
+    end
     
     it "resulting finder should provide option of filtering results by :type"
   end
@@ -325,6 +335,7 @@ describe ActiveFedora::SemanticNode do
       local_node.should respond_to(:containers_ids)
       local_node.should respond_to(:containers)  
       local_node.should respond_to(:containers_from_solr)  
+      local_node.should respond_to(:containers_query)
     end
     
     describe " resulting finder" do
@@ -381,6 +392,13 @@ describe ActiveFedora::SemanticNode do
         local_node.parts_ids
       end
     end
+
+    it "resulting _query finder should call named_relationship_query" do
+      SpecNode.create_outbound_relationship_finders("containers", :is_member_of)
+      local_node = SpecNode.new
+      local_node.expects(:named_relationship_query).with("containers")
+      local_node.containers_query
+    end
   end
   
   describe ".create_bidirectional_relationship_finder" do
@@ -423,6 +441,19 @@ describe ActiveFedora::SemanticNode do
       @local_node.relationship_names.include?("all_parts_outbound").should == true
     end
 
+    it "should register finder methods for the bidirectional relationship name" do
+      @local_node.should respond_to(:all_parts)
+      @local_node.should respond_to(:all_parts_ids)
+      @local_node.should respond_to(:all_parts_query)
+      @local_node.should respond_to(:all_parts_from_solr)
+    end
+
+    it "resulting _query finder should call named_relationship_query" do
+      SpecNode.create_bidirectional_relationship_finders("containers", :is_member_of, :has_member)
+      local_node = SpecNode.new
+      local_node.expects(:named_relationship_query).with("containers")
+      local_node.containers_query
+    end
   end
   
   describe "#has_bidirectional_relationship" do
@@ -926,28 +957,132 @@ describe ActiveFedora::SemanticNode do
         @test_object2.should respond_to(:testing_remove)
         #test execution in base_spec since method definitions include methods in ActiveFedora::Base
       end
+    end
+
+    #
+    # HYDRA-541
+    #
       
+    describe "bidirectional_named_relationship_query" do
+      class MockBiNamedRelationshipQuery < SpecNode2
+        has_bidirectional_relationship "testing_query", :has_part, :is_part_of, :type=>SpecNode2, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}}
+        has_bidirectional_relationship "testing_no_query_param", :has_part, :is_part_of, :type=>SpecNode2
+      end
+
       #
       # HYDRA-541
       #
-      
-      describe "bidirectional_named_relationship_query" do
-        it "should rely on outbound query if inbound query is empty" do
-           query = MockCreateNamedRelationshipMethods.bidirectional_named_relationship_query("PID",:testing,[])
-           query.should_not include("OR ()")
-        end
-        it "should be tested (HYDRA-541)"
+      it "should rely on outbound query if inbound query is empty" do
+        query = MockBiNamedRelationshipQuery.bidirectional_named_relationship_query("PID",:testing_query,[])
+        query.should_not include("OR ()")
+        query2 = MockBiNamedRelationshipQuery.bidirectional_named_relationship_query("PID",:testing_no_query_param,[])
+        query2.should_not include("OR ()")
       end
-      describe "inbound_named_relationship_query" do
-        it "should be tested (HYDRA-541)"
-      end
-      describe "outbound_named_relationship_query" do
-        it "should be tested (HYDRA-541)"
-      end
-      
-    end
-    
 
+      it "should return a properly formatted query for a relationship that has a query param defined" do
+        expected_string = ""
+        ids = ["changeme:1","changeme:2","changeme:3","changeme:4","changeme:5"]
+        ids.each_with_index do |id,index|
+          expected_string << " OR " if index > 0
+          expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialPart)"
+        end
+        expected_string << " OR "
+        expected_string << "(is_part_of_s:info\\:fedora/changeme\\:6 AND has_model_s:info\\:fedora/SpecialPart)"
+        MockBiNamedRelationshipQuery.bidirectional_named_relationship_query("changeme:6","testing_query",ids).should == expected_string
+      end
+
+      it "should return a properly formatted query for a relationship that does not have a query param defined" do
+        expected_string = ""
+        ids = ["changeme:1","changeme:2","changeme:3","changeme:4","changeme:5"]
+        ids.each_with_index do |id,index|
+          expected_string << " OR " if index > 0
+          expected_string << "id:" + id.gsub(/(:)/, '\\:')
+        end
+        expected_string << " OR "
+        expected_string << "(is_part_of_s:info\\:fedora/changeme\\:6)"
+        MockBiNamedRelationshipQuery.bidirectional_named_relationship_query("changeme:6","testing_no_query_param",ids).should == expected_string
+      end
+    end
+
+    describe "inbound_named_relationship_query" do
+      class MockInboundNamedRelationshipQuery < SpecNode2
+        has_relationship "testing_inbound_query", :is_part_of, :type=>SpecNode2, :inbound=>true, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}}
+        has_relationship "testing_inbound_no_query_param", :is_part_of, :type=>SpecNode2, :inbound=>true
+      end
+
+      it "should return a properly formatted query for a relationship that has a query param defined" do
+        MockInboundNamedRelationshipQuery.inbound_named_relationship_query("changeme:1","testing_inbound_query").should == "is_part_of_s:info\\:fedora/changeme\\:1 AND has_model_s:info\\:fedora/SpecialPart"
+      end
+      
+      it "should return a properly formatted query for a relationship that does not have a query param defined" do
+        MockInboundNamedRelationshipQuery.inbound_named_relationship_query("changeme:1","testing_inbound_no_query_param").should == "is_part_of_s:info\\:fedora/changeme\\:1"
+      end
+    end
+
+    describe "outbound_named_relationship_query" do
+      class MockOutboundNamedRelationshipQuery < SpecNode2
+        has_relationship "testing_query", :is_part_of, :type=>SpecNode2, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}}
+        has_relationship "testing_no_query_param", :is_part_of, :type=>SpecNode2
+      end
+
+      it "should return a properly formatted query for a relationship that has a query param defined" do
+        ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
+        expected_string = ""
+        ids.each_with_index do |id,index|
+          expected_string << " OR " if index > 0
+          expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialPart)"
+        end
+        MockOutboundNamedRelationshipQuery.outbound_named_relationship_query("testing_query",ids).should == expected_string
+      end
+
+      it "should return a properly formatted query for a relationship that does not have a query param defined" do
+        expected_string = ""
+        ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
+        ids.each_with_index do |id,index|
+          expected_string << " OR " if index > 0
+          expected_string << "id:" + id.gsub(/(:)/, '\\:')
+        end
+        MockOutboundNamedRelationshipQuery.outbound_named_relationship_query("testing_no_query_param",ids).should == expected_string
+      end
+    end
+
+    describe "named_relationship_query" do
+      class MockNamedRelationshipQuery < SpecNode2
+        has_relationship "testing_inbound_query", :is_part_of, :type=>SpecNode2, :inbound=>true, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}}
+        has_relationship "testing_inbound_no_query_param", :is_part_of, :type=>SpecNode2, :inbound=>true
+        has_relationship "testing_outbound_query", :is_part_of, :type=>SpecNode2, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}}
+        has_relationship "testing_outbound_no_query_param", :is_part_of, :type=>SpecNode2
+        has_bidirectional_relationship "testing_bi_query", :has_part, :is_part_of, :type=>SpecNode2, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}}
+        has_bidirectional_relationship "testing_bi_no_query_param", :has_part, :is_part_of, :type=>SpecNode2
+      end
+
+      before(:each) do
+        @mockrelsquery = MockNamedRelationshipQuery.new
+      end
+
+      it "should call bidirectional_named_relationship_query if a bidirectional relationship" do
+        rels_ids = ["info:fedora/changeme:1","info:fedora/changeme:2","info:fedora/changeme:3","info:fedora/changeme:4"]
+        @mockrelsquery.expects(:outbound_relationships).returns({:has_part=>rels_ids}).at_least_once
+        ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
+        @mockrelsquery.expects(:pid).returns("changeme:5")
+        MockNamedRelationshipQuery.expects(:bidirectional_named_relationship_query).with("changeme:5","testing_bi_query",ids)
+        @mockrelsquery.named_relationship_query("testing_bi_query")
+      end
+      
+      it "should call outbound_named_relationship_query if an outbound relationship" do
+        rels_ids = ["info:fedora/changeme:1","info:fedora/changeme:2","info:fedora/changeme:3","info:fedora/changeme:4"]
+        @mockrelsquery.expects(:outbound_relationships).returns({:is_part_of=>rels_ids}).at_least_once
+        ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
+        MockNamedRelationshipQuery.expects(:outbound_named_relationship_query).with("testing_outbound_no_query_param",ids)
+        @mockrelsquery.named_relationship_query("testing_outbound_no_query_param")
+      end
+      
+      it "should call inbound_named_relationship_query if an inbound relationship" do
+        @mockrelsquery.expects(:pid).returns("changeme:5")
+        MockNamedRelationshipQuery.expects(:inbound_named_relationship_query).with("changeme:5","testing_inbound_query")
+        @mockrelsquery.named_relationship_query("testing_inbound_query")
+      end
+    end 
     
     describe '#def named_predicate_exists_with_different_name?' do
       
