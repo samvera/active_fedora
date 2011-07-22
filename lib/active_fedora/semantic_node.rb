@@ -651,11 +651,18 @@ module ActiveFedora
           if query_params[:q]
             unless query.empty?
               #substitute in the filter query for each pid so that it is applied to each in the query
-              query.sub!(/OR /,"AND #{query_params[:q]}) OR (")
+              query_parts = query.split(/OR/)
+              query = ""
+              query_parts.each_with_index do |query_part,index|
+                query_part.strip!
+                query << " OR " if index > 0
+                query << "(#{query_part} AND #{query_params[:q]})"
+              end
+              #query.sub!(/OR /,"AND #{query_params[:q]}) OR (")
               #add opening parenthesis for first case
-              query = "(" + query 
+              #query = "(" + query 
               #add AND filter case for last element as well since no 'OR' following it
-              query << " AND #{query_params[:q]})"
+              #query << " AND #{query_params[:q]})"
             else
               query = query_params[:q]
             end

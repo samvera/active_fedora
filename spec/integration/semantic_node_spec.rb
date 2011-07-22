@@ -40,20 +40,36 @@ describe ActiveFedora::SemanticNode do
     @container2.save
     @container3 = ActiveFedora::Base.new()    
     @container3.save
+    @container4 = ActiveFedora::Base.new()    
+    @container4.save
     
     @test_object.add_relationship(:is_member_of, @container1)
     @test_object.add_relationship(:is_member_of, @container2)
+    @test_object.add_relationship(:is_member_of, @container3)
     @test_object.save
+
+    @container4.add_relationship(:has_member,@test_object)
+    @container4.save
 
     @special_container = ActiveFedora::Base.new()
     @special_container.add_relationship(:has_model,"SpecialContainer")
     @special_container.save
 
-    #even though adding container3 and special container, it should only include special_container when returning via named finder methods
+    @special_container3 = ActiveFedora::Base.new()
+    @special_container3.add_relationship(:has_model,"SpecialContainer")
+    @special_container3.save
+
+    @special_container4 = ActiveFedora::Base.new()
+    @special_container4.add_relationship(:has_model,"SpecialContainer")
+    @special_container4.save
+
+    #even though adding container3 and 3 special containers, it should only include the special containers when returning via named finder methods
     #also should only return special part similarly
     @test_object_query = SpecNodeQueryParam.new
     @test_object_query.add_relationship(:is_member_of, @container3)
     @test_object_query.add_relationship(:is_member_of, @special_container)
+    @test_object_query.add_relationship(:is_member_of, @special_container3)
+    @test_object_query.add_relationship(:is_member_of, @special_container4)
     @test_object_query.save
 
     @special_container2 = ActiveFedora::Base.new()
@@ -144,9 +160,9 @@ describe ActiveFedora::SemanticNode do
     end
     it "_ids should return an array of pids" do
       ids = @test_object.parts_ids
-      ids.each do |id|
-        id.should satisfy {|id| id == @part1.pid || @part2.pid}
-      end  
+      ids.size.should == 2
+      ids.include?(@part1.pid).should == true
+      ids.include?(@part2.pid).should == true
     end
     it "should return an array of Base objects with some filtered out if using query params" do
       @test_object_query.special_parts_ids.should == [@special_part.pid]
@@ -227,22 +243,28 @@ describe ActiveFedora::SemanticNode do
     end
     it "_ids should return an array of pids" do
       ids = @test_object.containers_ids
-      ids.each do |id|
-        id.should satisfy {|id| id == @container1.pid || @container2.pid}
-      end  
+      ids.size.should == 3
+      ids.include?(@container1.pid).should == true
+      ids.include?(@container2.pid).should == true
+      ids.include?(@container3.pid).should == true
+      ids.include?(@container4.pid).should == false
     end
 
     it "should return an array of Base objects with some filtered out if using query params" do
-      @test_object_query.special_containers_ids.size.should == 1
+      @test_object_query.special_containers_ids.size.should == 3
       @test_object_query.special_containers_ids.include?(@container3.pid).should == false
       @test_object_query.special_containers_ids.include?(@special_container.pid).should == true
+      @test_object_query.special_containers_ids.include?(@special_container3.pid).should == true
+      @test_object_query.special_containers_ids.include?(@special_container4.pid).should == true
     end
 
     it "should return an array of all Base objects with relationship if not using query params" do
-      @test_object_query.containers_ids.size.should == 2
+      @test_object_query.containers_ids.size.should == 4
       @test_object_query.containers_ids.include?(@special_container2.pid).should == false
       @test_object_query.containers_ids.include?(@special_container.pid).should == true
       @test_object_query.containers_ids.include?(@container3.pid).should == true
+      @test_object_query.containers_ids.include?(@special_container3.pid).should == true
+      @test_object_query.containers_ids.include?(@special_container4.pid).should == true
     end
 
     it "should return a solr query for an outbound relationship" do
@@ -265,26 +287,33 @@ describe ActiveFedora::SemanticNode do
     end
     it "_ids should return an array of pids" do
       ids = @test_object.bi_containers_ids
-      ids.size.should == 2
-      ids.each do |id|
-        id.should satisfy {|id| id == @container1.pid || @container2.pid}
-      end  
+      ids.size.should == 4
+      ids.include?(@container1.pid).should == true
+      ids.include?(@container2.pid).should == true
+      ids.include?(@container3.pid).should == true
+      ids.include?(@container4.pid).should == true
     end
 
     it "should return an array of Base objects with some filtered out if using query params" do
       ids = @test_object_query.bi_special_containers_ids
-      ids.size.should == 2
-      ids.each do |id|
-        id.should satisfy {|id| id == @special_container.pid || @special_container2.pid}
-      end  
+      ids.size.should == 4
+      ids.include?(@container1.pid).should == false
+      ids.include?(@container2.pid).should == false
+      ids.include?(@container3.pid).should == false
+      ids.include?(@special_container.pid).should == true
+      ids.include?(@special_container2.pid).should == true
+      ids.include?(@special_container3.pid).should == true
+      ids.include?(@special_container4.pid).should == true
     end
 
     it "should return an array of all Base objects with relationship if not using query params" do
       ids = @test_object_query.bi_containers_ids
-      ids.size.should == 3
-      ids.each do |id|
-        id.should satisfy {|id| id == @special_container.pid || @special_container2.pid || @container3.pid}
-      end  
+      ids.size.should == 5
+      ids.include?(@container3.pid).should == true
+      ids.include?(@special_container.pid).should == true
+      ids.include?(@special_container2.pid).should == true
+      ids.include?(@special_container3.pid).should == true
+      ids.include?(@special_container4.pid).should == true
     end
 
     it "should return a solr query for a bidirectional relationship" do
