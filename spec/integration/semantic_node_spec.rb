@@ -249,7 +249,6 @@ describe ActiveFedora::SemanticNode do
       ids.include?(@container2.pid).should == true
       ids.include?(@container3.pid).should == true
       ids.include?(@container4.pid).should == false
-<<<<<<< HEAD
     end
 
     it "should return an array of Base objects with some filtered out if using query params" do
@@ -270,7 +269,6 @@ describe ActiveFedora::SemanticNode do
     end
 
     it "should return a solr query for an outbound relationship" do
-=======
     end
 
     it "should return an array of Base objects with some filtered out if using query params" do
@@ -350,6 +348,7 @@ describe ActiveFedora::SemanticNode do
       @test_object_query.bi_special_containers_query.should == expected_string
     end
   end 
+<<<<<<< HEAD
 
   describe "named_relationship_query" do
     it "should return correct query for a bidirectional relationship with query params" do
@@ -474,4 +473,6 @@ describe ActiveFedora::SemanticNode do
       @test_object2.named_relationships.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]},:inbound=>{"testing_inbound"=>[]}}
     end
   end
+=======
+>>>>>>> Refactored semantic node specs to move as much as possible from the integration test to the unit test
 end

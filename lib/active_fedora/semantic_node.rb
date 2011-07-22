@@ -373,13 +373,19 @@ module ActiveFedora
               id_array << rel.gsub("info:fedora/", "")
             end
           end
-          if opts[:response_format] == :id_array
+          if opts[:response_format] == :id_array && !self.class.relationship_has_query_params?(:self,"#{name}")
             return id_array
           else
-            query = ActiveFedora::SolrService.construct_query_for_pids(id_array)
+            query = self.class.outbound_named_relationship_query("#{name}",id_array)
             solr_result = SolrService.instance.conn.query(query)
             if opts[:response_format] == :solr
               return solr_result
+            elsif opts[:response_format] == :id_array
+              id_array = []
+              solr_result.hits.each do |hit|
+                id_array << hit[SOLR_DOCUMENT_ID]
+              end
+              return id_array
             elsif opts[:response_format] == :load_from_solr || self.load_from_solr
               return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
             else
