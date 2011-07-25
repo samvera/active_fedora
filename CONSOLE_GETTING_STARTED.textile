@@ -305,7 +305,7 @@ ActiveFedora::Base.find(:all)
 SpecialThing.find(:all)
 </pre>
 
-Note that the results from these two searches do not overlap.  Base.find will only return objects that have been saved with active_fedora_model_field set to "info:fedora/afmodel:Base".  If you open an object as an instance of a different model and save it as that model, it will overwrite the active_fedora_model_field.  This is, of course, no good.  That's why the method will be rewritten in "Version 1.1":/versions/show/7.  In the meantime, you could search directly against Solr with queries like this:
+You can also query solr directly like so:
 
 <pre>
 solr_result = ActiveFedora::SolrService.instance.conn.query('has_model_s:info\:fedora/afmodel\:SpecialThing')
@@ -366,5 +366,5 @@ Notice that properties and DC have been loaded as ActiveFedora::Datastream, RELS
 
 h2.  Where to Find More Information
 
-You can examine the files in lib/active_fedora/samples to learn more about how to define ActiveFedora models and OM-based datastreams.  We also suggest you read about "OM-based NokogiriDatastreams":https://github.com/mediashelf/active_fedora/blob/master/NOKOGIRI_DATASTREAMS.textile to learn about manipulating XML contained in datastreams.
+You can examine the files in lib/active_fedora/samples to learn more about how to define ActiveFedora models and OM-based datastreams.  We also suggest you read about "OM-based NokogiriDatastreams":http://hudson.projecthydra.org/job/active_fedora/Documentation/file.NOKOGIRI_DATASTREAMS.html to learn about manipulating XML contained in datastreams.
 
