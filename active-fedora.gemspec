@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.add_dependency('solr-ruby', '>= 0.0.6')
   s.add_dependency('xml-simple', '>= 1.0.12')
   s.add_dependency('mime-types', '>= 1.16')
-  s.add_dependency('multipart-post')
+  s.add_dependency('multipart-post', "1.1.2")
   s.add_dependency('nokogiri')
   s.add_dependency('om', '>= 1.0')
   s.add_dependency('solrizer', '>1.0.0')
