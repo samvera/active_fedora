@@ -7,7 +7,7 @@ PATH
       facets
       mediashelf-loggable
       mime-types (>= 1.16)
-      multipart-post
+      multipart-post (= 1.1.2)
       nokogiri
       om (>= 1.0)
       solr-ruby (>= 0.0.6)
