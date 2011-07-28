@@ -10,29 +10,12 @@ describe ActiveFedora do
   describe "setting the environment and loading configuration" do
     
     before(:all) do
-      Object.const_set("Rails",String)
       @fake_rails_root = File.expand_path(File.dirname(__FILE__) + '/../fixtures/rails_root')
     end
-    
-    after(:all) do
-      if Rails == String
-        Object.send(:remove_const,:Rails)
-      end
-    end
-    
-    it "can tell what environment it is set to run in" do
-      Rails.stubs(:env).returns("development")
-      ActiveFedora.init
-      ActiveFedora.environment.should eql("development")
-    end
+  
     it "can tell its config path" do
       ActiveFedora.init
       ActiveFedora.should respond_to(:config_path)
-    end
-    it "loads a config from Rails.root as a first choice" do
-      Rails.stubs(:root).returns(@fake_rails_root)
-      ActiveFedora.init
-      ActiveFedora.config_path.should eql("#{@fake_rails_root}/config/fedora.yml")
     end
     it "loads a config from the current working directory as a second choice" do
       Dir.stubs(:getwd).returns(@fake_rails_root)
@@ -51,6 +34,36 @@ describe ActiveFedora do
     end
     it "raises an error if you pass in a non-existant config file" do
       lambda{ ActiveFedora.init("really_fake_fedora.yml") }.should raise_exception(ActiveFedoraConfigurationException)
+    end
+    
+    describe "within Rails" do
+      before(:all) do        
+        class Rails
+          def self.root
+            return File.dirname(__FILE__) + '/../fixtures/rails_root'
+          end
+          # def self.env
+          #   return "test"
+          # end
+        end
+      end
+
+      after(:all) do
+        Object.send(:remove_const,:Rails)
+      end
+      
+      it "loads a config from Rails.root as a first choice" do
+        ActiveFedora.init
+        # File.expects(:file?).with("#{Rails.root}/config/fedora.yml").returns(true)
+        ActiveFedora.config_path.should eql("#{Rails.root}/config/fedora.yml")
+      end
+      
+      it "can tell what environment it is set to run in" do
+        Rails.stubs(:env).returns("development")
+        ActiveFedora.init
+        ActiveFedora.environment.should eql("development")
+      end
+      
     end
   end
   
