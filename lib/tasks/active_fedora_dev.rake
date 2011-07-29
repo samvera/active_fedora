@@ -122,6 +122,7 @@ namespace :active_fedora do
       require 'jettywrapper'
       Jettywrapper.start(jetty_params)
     end
+    desc "stop jetty" 
     task :stop do
       require 'jettywrapper'
       Jettywrapper.stop(jetty_params)
