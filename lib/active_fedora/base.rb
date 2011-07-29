@@ -89,6 +89,20 @@ module ActiveFedora
       @ds_specs[args[:name]]= [args[:type], args.fetch(:label,""), block]
     end
 
+    def method_missing(name, *args)
+      if datastreams.has_key? name.to_s
+        ### Create and invoke a proxy method 
+        self.class.class_eval <<-end_eval
+          def #{name}()
+            datastreams["#{name.to_s}"]
+          end
+        end_eval
+        self.send(name)
+      else 
+        super
+      end
+    end
+
     #Saves a Base object, and any dirty datastreams, then updates 
     #the Solr index for this object.
     def save
@@ -149,7 +163,6 @@ module ActiveFedora
         @datastreams = datastreams_in_memory
       else
         @datastreams = (@datastreams == {}) ? datastreams_in_fedora : datastreams_in_memory
-        #@datastreams = datastreams_in_fedora.merge(datastreams_in_memory)
       end
 
     end
