@@ -9,7 +9,6 @@ module ActiveFedora
   module Model 
     extend ActiveFedora::FedoraObject
 
-    attr_accessor :properties
 
     def self.included(klass) # :nodoc:
       klass.extend(ClassMethods)
@@ -221,7 +220,6 @@ module ActiveFedora
 
       #wrapper around instance_variable_get, returns current value of @name
       def attribute_get(name)
-        #instance_variable_get(properties[":#{name}"].instance_variable_name)
         instance_variable_get("@#{name}")
       end
 

@@ -76,7 +76,7 @@ PLATFORMS
 DEPENDENCIES
   RedCloth
   active-fedora!
-  jettywrapper
+  jettywrapper (= 0.0.10)
   mocha (>= 0.9.8)
   rake
   rcov
