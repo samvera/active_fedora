@@ -15,6 +15,17 @@ EOS
 end
 
 $: << 'lib'
+def jetty_params 
+  project_root = File.expand_path("#{File.dirname(__FILE__)}/../../")
+  {
+      :quiet => false,
+      :jetty_home => File.join(project_root,'jetty'),
+      :jetty_port => 8983,
+      :solr_home => File.expand_path(File.join(project_root,'jetty','solr')),
+      :fedora_home => File.expand_path(File.join(project_root,'jetty','fedora','default')),
+      :startup_wait=>30
+    }
+end
 
 desc "Run active-fedora rspec tests"
 task :spec do
@@ -24,19 +35,10 @@ end
 desc "Hudson build"
 task :hudson do
   require 'jettywrapper'
-  project_root = File.expand_path("#{File.dirname(__FILE__)}/../../")
   
   if (ENV['environment'] == "test")
     Rake::Task["active_fedora:doc"].invoke
     Rake::Task["active_fedora:configure_jetty"].invoke
-    jetty_params = {
-      :quiet => false,
-      :jetty_home => File.join(project_root,'jetty'),
-      :jetty_port => 8983,
-      :solr_home => File.expand_path(File.join(project_root,'jetty','solr')),
-      :fedora_home => File.expand_path(File.join(project_root,'jetty','fedora','default')),
-      :startup_wait=>30
-    }
     error = Jettywrapper.wrap(jetty_params) do
       ENV["FEDORA_HOME"]=File.expand_path(File.join(File.dirname(__FILE__),'..','..','jetty','fedora','default'))
       Rake::Task["active_fedora:load_fixtures"].invoke
@@ -111,6 +113,18 @@ namespace :active_fedora do
     FileList['solr/conf/*'].each do |f|  
       cp("#{f}", 'jetty/solr/development-core/conf/', :verbose => true)
       cp("#{f}", 'jetty/solr/test-core/conf/', :verbose => true)
+    end
+  end
+
+  namespace :jetty do
+    desc "start jetty" 
+    task :start do
+      require 'jettywrapper'
+      Jettywrapper.start(jetty_params)
+    end
+    task :stop do
+      require 'jettywrapper'
+      Jettywrapper.stop(jetty_params)
     end
   end
 
