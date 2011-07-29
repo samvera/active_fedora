@@ -12,6 +12,10 @@ describe ActiveFedora do
     before(:all) do
       @fake_rails_root = File.expand_path(File.dirname(__FILE__) + '/../fixtures/rails_root')
     end
+    
+    after(:all) do
+      ActiveFedora.init(File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml"))
+    end
   
     it "can tell its config path" do
       ActiveFedora.init
