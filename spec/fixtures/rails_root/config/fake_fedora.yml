@@ -1,16 +1,7 @@
 development:
-  fedora:
-    url: http://development.com/fedora
-  solr:
-    url: http://development.com/solr
+  url: http://development.com/fedora
 test:
-  fedora:
-    url: http://test.com/fedora
-  solr:
-    url: http://test.com/solr
+  url: http://test.com/fedora
 production:
-  fedora:
-    url: http://production.com/fedora
-  solr:
-    url: http://production.com/solr
+  url: http://production.com/fedora
     
