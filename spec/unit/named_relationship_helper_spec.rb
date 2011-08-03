@@ -14,233 +14,6 @@ describe ActiveFedora::NamedRelationshipHelper do
   def increment_pid
     @@last_pid += 1    
   end
-
-  before(:each) do
-    @test_object = SpecNamedNode.new
-    @test_object.pid = increment_pid
-  end
-
-  describe '#named_relationship_predicates' do
-    class MockNamedRelationshipPredicates < SpecNamedNode
-      register_named_relationship(:self, "testing", :has_part, :type=>SpecNamedNode)
-      create_named_relationship_methods("testing")
-      register_named_relationship(:self, "testing2", :has_member, :type=>SpecNamedNode)
-      create_named_relationship_methods("testing2")
-      register_named_relationship(:inbound, "testing_inbound", :has_part, :type=>SpecNamedNode)
-    end
-
-    it 'should provide #named_relationship_predicates' do
-      @test_object.should respond_to(:named_relationship_predicates)
-    end
-    
-    it 'should return a map of subject to relationship name to fedora ontology relationship predicate' do
-      @test_object2 = MockNamedRelationshipPredicates.new
-      @test_object2.named_relationship_predicates.should == {:self=>{"testing"=>:has_part,"testing2"=>:has_member},
-                                                            :inbound=>{"testing_inbound"=>:has_part}}
-      
-    end 
-  end
-  
-  describe '#kind_of_model?' do
-    it 'should provide #kind_of_model?' do
-      @test_object.should respond_to(:kind_of_model?)
-    end
-    
-    it 'should check if current object is the kind of model class supplied' do
-      #has_model relationship does not get created until save called
-      r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(SpecNamedNode)})
-      @test_object.expects(:relationships).returns({:self=>{:has_model=>[r.object]}}).at_least_once
-      @test_object.kind_of_model?(SpecNamedNode).should == true
-    end
-  end
-  
-  describe '#assert_kind_of_model' do
-    it 'should provide #assert_kind_of_model' do
-      @test_object.should respond_to(:assert_kind_of_model)
-    end
-
-    it 'should correctly assert if an object is the type of model supplied' do
-      @test_object3 = SpecNamedNode.new
-      @test_object3.pid = increment_pid
-      #has_model relationship does not get created until save called so need to add the has model rel here, is fine since not testing save
-      r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(SpecNamedNode)}) 
-      @test_object.expects(:relationships).returns({:self=>{:has_model=>[r.object]}}).at_least_once
-      @test_object3.assert_kind_of_model('object',@test_object,SpecNamedNode)
-    end
-  end
-  
-  it 'should provide #class_from_name' do
-    @test_object.should respond_to(:class_from_name)
-  end
-  
-  describe '#class_from_name' do
-    it 'should return a class constant for a string passed in' do
-      @test_object.class_from_name("SpecNamedNode").should == SpecNamedNode
-    end
-  end
-
-  describe '#named_relationships' do
-    
-    class MockNamedRelationships3 < SpecNamedNode
-      register_named_relationship(:self, "testing", :has_part, :type=>SpecNamedNode)
-      create_named_relationship_methods("testing")
-      register_named_relationship(:self, "testing2", :has_member, :type=>SpecNamedNode)
-      create_named_relationship_methods("testing2")
-      register_named_relationship(:inbound, "testing_inbound", :has_part, :type=>SpecNamedNode)
-    end
-
-    it 'should provide #named_relationships' do
-      @test_object.should respond_to(:named_relationships)
-    end
-    
-    it 'should return current named relationships' do
-      @test_object2 = MockNamedRelationships3.new
-      @test_object2.pid = increment_pid
-      @test_object3 = MockNamedRelationships3.new
-      @test_object3.pid = increment_pid
-      r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockNamedRelationships3)}) 
-      @test_object2.expects(:relationships).returns({:self=>{:has_model=>[r.object],:has_part=>[],:has_member=>[]},:inbound=>{:has_part=>[]}}).at_least_once
-      #should return expected named relationships
-      @test_object2.named_relationships.should == {:self=>{"testing"=>[],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
-      r3 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@test_object})
-      @test_object3.expects(:relationships).returns({:self=>{:has_model=>[r.object],:has_part=>[r3.object],:has_member=>[]},:inbound=>{:has_part=>[]}}).at_least_once
-      @test_object3.named_relationships.should == {:self=>{"testing"=>[r3.object],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
-    end 
-  end
-
-  it 'should provide #relationship_names' do
-    @test_object.should respond_to(:relationship_names)
-  end
-  
-  describe '#relationship_names' do
-    class MockRelationshipNames < SpecNamedNode
-      register_named_relationship(:self, "testing", :has_part, :type=>SpecNamedNode)
-      create_named_relationship_methods("testing")
-      register_named_relationship(:self, "testing2", :has_member, :type=>SpecNamedNode)
-      create_named_relationship_methods("testing2")
-      register_named_relationship(:inbound, "testing_inbound", :has_part, :type=>SpecNamedNode)
-      register_named_relationship(:inbound, "testing_inbound2", :has_member, :type=>SpecNamedNode)
-    end
-    
-    it 'should return an array of relationship names for this model' do
-      @test_object2 = MockRelationshipNames.new
-      @test_object2.pid = increment_pid
-      @test_object2.relationship_names.include?("testing").should == true
-      @test_object2.relationship_names.include?("testing2").should == true
-      @test_object2.relationship_names.include?("testing_inbound").should == true
-      @test_object2.relationship_names.include?("testing_inbound2").should == true
-      @test_object2.relationship_names.size.should == 4
-    end
-  end
-  
-  it 'should provide #inbound_relationship_names' do
-    @test_object.should respond_to(:inbound_relationship_names)
-  end
-  
-  describe '#inbound_relationship_names' do
-    it 'should return an array of inbound relationship names for this model' do
-      @test_object2 = MockRelationshipNames.new
-      @test_object2.pid = increment_pid
-      @test_object2.inbound_relationship_names.include?("testing_inbound").should == true
-      @test_object2.inbound_relationship_names.include?("testing_inbound2").should == true
-      @test_object2.inbound_relationship_names.size.should == 2
-    end
-  end
-  
-  it 'should provide #outbound_relationship_names' do
-    @test_object.should respond_to(:outbound_relationship_names)
-  end
-  
-  describe '#outbound_relationship_names' do
-    it 'should return an array of outbound relationship names for this model' do
-      @test_object2 = MockRelationshipNames.new
-      @test_object2.pid = increment_pid
-      @test_object2.outbound_relationship_names.include?("testing").should == true
-      @test_object2.outbound_relationship_names.include?("testing2").should == true
-      @test_object2.outbound_relationship_names.size.should == 2
-    end
-  end
-  
-  it 'should provide #named_outbound_relationships' do
-    @test_object.should respond_to(:named_outbound_relationships)
-  end
-  
-  describe '#named_outbound_relationships' do
-    it 'should return hash of outbound relationship names to arrays of object uri' do
-      @test_object2 = MockRelationshipNames.new
-      @test_object2.pid = increment_pid
-      @test_object2.expects(:relationships).returns({:self=>{:has_part=>[],:has_member=>[],:inbound=>{:has_part=>[],:has_member=>[]}}}).at_least_once
-      @test_object2.named_outbound_relationships.should == {"testing"=>[],
-                                                            "testing2"=>[]} 
-    end
-  end
-  
-  it 'should provide #named_inbound_relationships' do
-    #testing execution of this in integration since touches solr
-    @test_object.should respond_to(:named_inbound_relationships)
-  end
-  
-  it 'should provide #named_relationship' do
-    @test_object.should respond_to(:named_relationship)
-  end
-  
-  describe '#named_relationship' do
-    it 'should return an array of object uri for a given relationship name' do
-      @test_object2 = MockRelationshipNames.new
-      @test_object2.pid = increment_pid
-      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_model, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockRelationshipNames))
-      @test_object3 = SpecNamedNode.new 
-      @test_object3.pid = increment_pid
-      @test_object4 = SpecNamedNode.new 
-      @test_object4.pid = increment_pid
-      #add relationships that mirror 'testing' and 'testing2'
-      r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_part, :object=>@test_object3)
-      r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_member, :object=>@test_object4)      
-      @test_object2.expects(:relationships).returns({:self=>{:has_part=>[r3.object]},:has_member=>[r4.object],:has_model=>[r.object]}).at_least_once
-     @test_object2.named_relationship("testing").should == [r3.object] 
-    end
-  end
-
-  describe "named_relationship_query" do
-    class MockNamedRelationshipQuery < SpecNamedNode
-      register_named_relationship(:inbound, "testing_inbound_query", :is_part_of, :type=>SpecNamedNode, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}})
-      register_named_relationship(:inbound, "testing_inbound_no_query_param", :is_part_of, :type=>SpecNamedNode)
-      register_named_relationship(:self, "testing_outbound_query", :is_part_of, :type=>SpecNamedNode, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}})
-      register_named_relationship(:self, "testing_outbound_no_query_param", :is_part_of, :type=>SpecNamedNode)
-      #for bidirectional relationship testing need to register both outbound and inbound names
-      register_named_relationship(:self, "testing_bi_query_outbound", :has_part, :type=>SpecNamedNode, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}})
-      register_named_relationship(:inbound, "testing_bi_query_inbound", :is_part_of, :type=>SpecNamedNode, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}})
-      register_named_relationship(:self, "testing_bi_no_query_param_outbound", :has_part, :type=>SpecNamedNode)
-      register_named_relationship(:inbound, "testing_bi_no_query_param_inbound", :is_part_of, :type=>SpecNamedNode)
-    end
-    
-    before(:each) do
-      @mockrelsquery = MockNamedRelationshipQuery.new
-    end
-    
-    it "should call bidirectional_named_relationship_query if a bidirectional relationship" do
-      rels_ids = ["info:fedora/changeme:1","info:fedora/changeme:2","info:fedora/changeme:3","info:fedora/changeme:4"]
-      @mockrelsquery.expects(:outbound_relationships).returns({:has_part=>rels_ids}).at_least_once
-      ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
-      @mockrelsquery.expects(:pid).returns("changeme:5")
-      MockNamedRelationshipQuery.expects(:bidirectional_named_relationship_query).with("changeme:5","testing_bi_query",ids)
-      @mockrelsquery.named_relationship_query("testing_bi_query")
-    end
-    
-    it "should call outbound_named_relationship_query if an outbound relationship" do
-      rels_ids = ["info:fedora/changeme:1","info:fedora/changeme:2","info:fedora/changeme:3","info:fedora/changeme:4"]
-      @mockrelsquery.expects(:outbound_relationships).returns({:is_part_of=>rels_ids}).at_least_once
-      ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
-      MockNamedRelationshipQuery.expects(:outbound_named_relationship_query).with("testing_outbound_no_query_param",ids)
-      @mockrelsquery.named_relationship_query("testing_outbound_no_query_param")
-    end
-    
-    it "should call inbound_named_relationship_query if an inbound relationship" do
-      @mockrelsquery.expects(:pid).returns("changeme:5")
-      MockNamedRelationshipQuery.expects(:inbound_named_relationship_query).with("changeme:5","testing_inbound_query")
-      @mockrelsquery.named_relationship_query("testing_inbound_query")
-    end
-  end
     
   describe ActiveFedora::NamedRelationshipHelper::ClassMethods do
 
@@ -286,6 +59,7 @@ describe ActiveFedora::NamedRelationshipHelper do
       end 
     end
 
+<<<<<<< HEAD
     describe "#is_bidirectional_relationship?" do
       
       class MockIsBiRegisterNamedRelationship < SpecNamedNode
@@ -303,6 +77,8 @@ describe ActiveFedora::NamedRelationshipHelper do
       end
     end
 
+=======
+>>>>>>> Moved remaining named relationship methods from Semantic Node to NamedRelationshipHelper
     describe '#relationship_has_query_params' do
       class RelsHasQueryParams < SpecNamedNode
         register_named_relationship :self, "testing", :is_part_of, :query_params=>{:q=>{:testing=>"value"}}
@@ -327,6 +103,7 @@ describe ActiveFedora::NamedRelationshipHelper do
         RelsHasQueryParams.relationship_has_query_params?(:self,"testing_no_query").should == false
       end
     end
+<<<<<<< HEAD
 
     describe '#create_named_relationship_methods' do
       class MockCreateNamedRelationshipMethods < SpecNamedNode
@@ -357,6 +134,8 @@ describe ActiveFedora::NamedRelationshipHelper do
         #test execution in base_spec since method definitions include methods in ActiveFedora::Base
       end
     end
+=======
+>>>>>>> Moved remaining named relationship methods from Semantic Node to NamedRelationshipHelper
     
     describe '#def named_predicate_exists_with_different_name?' do
       
@@ -378,6 +157,7 @@ describe ActiveFedora::NamedRelationshipHelper do
         end
       end
     end
+<<<<<<< HEAD
 
      #
     # HYDRA-541
@@ -469,5 +249,7 @@ describe ActiveFedora::NamedRelationshipHelper do
         MockOutboundNamedRelationshipQuery.outbound_named_relationship_query("testing_no_query_param",ids).should == expected_string
       end
     end 
+=======
+>>>>>>> Moved remaining named relationship methods from Semantic Node to NamedRelationshipHelper
   end
 end
