@@ -28,6 +28,7 @@ GEM
       nokogiri (>= 1.4.3)
     facets (2.9.2)
     fastercsv (1.5.4)
+    i18n (0.5.0)
     jettywrapper (0.0.10)
       logger
       mediashelf-loggable

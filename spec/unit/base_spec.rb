@@ -5,7 +5,6 @@ require 'active_fedora/base'
 require 'active_fedora/metadata_datastream'
 require 'time'
 require 'date'
-
 class FooHistory < ActiveFedora::Base
   has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"someData" do |m|
     m.field "fubar", :string
@@ -57,9 +56,34 @@ describe ActiveFedora::Base do
     end
   end
 
-  it "should have to_param" do
+  ### Methods for ActiveModel::Conversions
+  it "should have to_param once it's saved" do
+    @test_object.to_param.should be_nil
+    @test_object.expects(:create).returns(true)
+    @test_object.save
     @test_object.to_param.should == @test_object.pid
   end
+
+  it "should have to_key once it's saved" do 
+    @test_object.to_key.should be_nil
+    @test_object.expects(:create).returns(true)
+    @test_object.save
+    @test_object.to_key.should == [@test_object.pid]
+  end
+
+  it "should have to_model" do
+    @test_object.to_model.should be @test_object
+  end
+  ### end ActiveModel::Conversions
+
+  ### Methods for ActiveModel::Naming
+  it "Should know the model_name" do
+    FooHistory.model_name.should == 'FooHistory'
+    FooHistory.model_name.human.should == 'Foo history'
+  end
+  ### End ActiveModel::Naming 
+  
+ 
 
   it "should respond_to has_metadata" do
     ActiveFedora::Base.respond_to?(:has_metadata).should be_true
@@ -86,6 +110,8 @@ describe ActiveFedora::Base do
     end
 
   end
+
+
 
   describe ".fields" do
     it "should provide fields" do
@@ -234,10 +260,13 @@ describe ActiveFedora::Base do
   describe '.save' do
     
     
-    it "should return true if object and datastreams all save successfully" do
+    it "should return true and set persisted if object and datastreams all save successfully" do
+      @test_object.persisted?.should be false 
       @test_object.expects(:create).returns(true)
       @test_object.save.should == true
+      @test_object.persisted?.should be true
     end
+
     
     it "should raise an exception if object fails to save" do
       server_response = mock("Server Error")
@@ -436,6 +465,7 @@ describe ActiveFedora::Base do
     end
     
   end
+  
 
   describe ".update_index" do
     it "should provide .update_index" do

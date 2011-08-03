@@ -1,9 +1,11 @@
 require 'util/class_level_inheritable_attributes'
 require 'active_fedora/model'
 require 'active_fedora/semantic_node'
+require 'active_fedora/delegating'
 require "solrizer"
 require 'nokogiri'
 require "loggable"
+require 'active_model'
 
 SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
@@ -37,6 +39,10 @@ module ActiveFedora
     include SemanticNode
     include Solrizer::FieldNameMapper
     include Loggable
+    include ActiveModel::Conversion
+    extend ActiveModel::Naming
+    extend Delegating
+
     
     attr_accessor :named_datastreams_desc
     
@@ -55,6 +61,12 @@ module ActiveFedora
       @new_object = bool
       inner_object.new_object = bool
     end
+
+    def persisted?
+      !new_object?
+    end
+
+
     
     # Constructor. If +attrs+  does  not comtain +:pid+, we assume we're making a new one,
     # and call off to the Fedora Rest API for the next available Fedora pid, and mark as new object.
@@ -93,10 +105,11 @@ module ActiveFedora
       if datastreams.has_key? name.to_s
         ### Create and invoke a proxy method 
         self.class.class_eval <<-end_eval
-          def #{name}()
+          def #{name.to_s}()
             datastreams["#{name.to_s}"]
           end
         end_eval
+
         self.send(name)
       else 
         super
@@ -758,10 +771,10 @@ module ActiveFedora
       @inner_object.pid
     end
     
-    #For Rails compatibility with url generators.
-    def to_param
-      self.pid
+    def to_key
+      persisted? ? [pid] : nil
     end
+
     #return the internal fedora URI
     def internal_uri
       "info:fedora/#{pid}"

@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency('om', '>= 1.0')
   s.add_dependency('solrizer', '>1.0.0')
   s.add_dependency("activeresource")
+  s.add_dependency("activemodel")
   s.add_dependency("mediashelf-loggable")
   s.add_dependency("equivalent-xml")
   s.add_dependency("facets")
