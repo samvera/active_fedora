@@ -884,7 +884,45 @@ describe ActiveFedora::SemanticNode do
      @test_object2.named_relationship("testing").should == [r3.object] 
     end
   end
-  
+
+  describe "named_relationship_query" do
+    class MockNamedRelationshipQuery < SpecNode2
+      has_relationship "testing_inbound_query", :is_part_of, :type=>SpecNode2, :inbound=>true, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}}
+      has_relationship "testing_inbound_no_query_param", :is_part_of, :type=>SpecNode2, :inbound=>true
+      has_relationship "testing_outbound_query", :is_part_of, :type=>SpecNode2, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}}
+      has_relationship "testing_outbound_no_query_param", :is_part_of, :type=>SpecNode2
+      has_bidirectional_relationship "testing_bi_query", :has_part, :is_part_of, :type=>SpecNode2, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}}
+      has_bidirectional_relationship "testing_bi_no_query_param", :has_part, :is_part_of, :type=>SpecNode2
+    end
+    
+    before(:each) do
+      @mockrelsquery = MockNamedRelationshipQuery.new
+    end
+    
+    it "should call bidirectional_named_relationship_query if a bidirectional relationship" do
+      rels_ids = ["info:fedora/changeme:1","info:fedora/changeme:2","info:fedora/changeme:3","info:fedora/changeme:4"]
+      @mockrelsquery.expects(:outbound_relationships).returns({:has_part=>rels_ids}).at_least_once
+      ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
+      @mockrelsquery.expects(:pid).returns("changeme:5")
+      MockNamedRelationshipQuery.expects(:bidirectional_named_relationship_query).with("changeme:5","testing_bi_query",ids)
+      @mockrelsquery.named_relationship_query("testing_bi_query")
+    end
+    
+    it "should call outbound_named_relationship_query if an outbound relationship" do
+      rels_ids = ["info:fedora/changeme:1","info:fedora/changeme:2","info:fedora/changeme:3","info:fedora/changeme:4"]
+      @mockrelsquery.expects(:outbound_relationships).returns({:is_part_of=>rels_ids}).at_least_once
+      ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
+      MockNamedRelationshipQuery.expects(:outbound_named_relationship_query).with("testing_outbound_no_query_param",ids)
+      @mockrelsquery.named_relationship_query("testing_outbound_no_query_param")
+    end
+    
+    it "should call inbound_named_relationship_query if an inbound relationship" do
+      @mockrelsquery.expects(:pid).returns("changeme:5")
+      MockNamedRelationshipQuery.expects(:inbound_named_relationship_query).with("changeme:5","testing_inbound_query")
+      @mockrelsquery.named_relationship_query("testing_inbound_query")
+    end
+  end
+
   describe ActiveFedora::SemanticNode::ClassMethods do
     
     after(:each) do
@@ -892,41 +930,6 @@ describe ActiveFedora::SemanticNode do
         @test_object2.delete
       rescue
       end
-    end
-    
-    describe '#named_relationships_desc' do
-      it 'should initialize named_relationships_desc to a new hash containing self' do
-        @test_object2 = SpecNode2.new
-        @test_object2.pid = increment_pid
-        @test_object2.named_relationships_desc.should == {:self=>{}}
-      end
-    end
-      
-    describe '#register_named_subject' do
-    
-      class MockRegisterNamedSubject < SpecNode2
-        register_named_subject :test
-      end
-    
-      it 'should add a new named subject to the named relationships only if it does not already exist' do
-        @test_object2 = MockRegisterNamedSubject.new
-        @test_object2.pid = increment_pid
-        @test_object2.named_relationships_desc.should == {:self=>{}, :test=>{}}
-      end 
-    end
-  
-    describe '#register_named_relationship' do
-    
-      class MockRegisterNamedRelationship < SpecNode2
-        register_named_relationship :self, "testing", :is_part_of, :type=>SpecNode2
-        register_named_relationship :inbound, "testing2", :has_part, :type=>SpecNode2
-      end
-    
-      it 'should add a new named subject to the named relationships only if it does not already exist' do
-        @test_object2 = MockRegisterNamedRelationship.new 
-        @test_object2.pid = increment_pid
-        @test_object2.named_relationships_desc.should == {:inbound=>{"testing2"=>{:type=>SpecNode2, :predicate=>:has_part}}, :self=>{"testing"=>{:type=>SpecNode2, :predicate=>:is_part_of}}}
-      end 
     end
     
     describe '#create_named_relationship_methods' do
@@ -1044,65 +1047,6 @@ describe ActiveFedora::SemanticNode do
         end
         MockOutboundNamedRelationshipQuery.outbound_named_relationship_query("testing_no_query_param",ids).should == expected_string
       end
-    end
-
-    describe "named_relationship_query" do
-      class MockNamedRelationshipQuery < SpecNode2
-        has_relationship "testing_inbound_query", :is_part_of, :type=>SpecNode2, :inbound=>true, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}}
-        has_relationship "testing_inbound_no_query_param", :is_part_of, :type=>SpecNode2, :inbound=>true
-        has_relationship "testing_outbound_query", :is_part_of, :type=>SpecNode2, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}}
-        has_relationship "testing_outbound_no_query_param", :is_part_of, :type=>SpecNode2
-        has_bidirectional_relationship "testing_bi_query", :has_part, :is_part_of, :type=>SpecNode2, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}}
-        has_bidirectional_relationship "testing_bi_no_query_param", :has_part, :is_part_of, :type=>SpecNode2
-      end
-
-      before(:each) do
-        @mockrelsquery = MockNamedRelationshipQuery.new
-      end
-
-      it "should call bidirectional_named_relationship_query if a bidirectional relationship" do
-        rels_ids = ["info:fedora/changeme:1","info:fedora/changeme:2","info:fedora/changeme:3","info:fedora/changeme:4"]
-        @mockrelsquery.expects(:outbound_relationships).returns({:has_part=>rels_ids}).at_least_once
-        ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
-        @mockrelsquery.expects(:pid).returns("changeme:5")
-        MockNamedRelationshipQuery.expects(:bidirectional_named_relationship_query).with("changeme:5","testing_bi_query",ids)
-        @mockrelsquery.named_relationship_query("testing_bi_query")
-      end
-      
-      it "should call outbound_named_relationship_query if an outbound relationship" do
-        rels_ids = ["info:fedora/changeme:1","info:fedora/changeme:2","info:fedora/changeme:3","info:fedora/changeme:4"]
-        @mockrelsquery.expects(:outbound_relationships).returns({:is_part_of=>rels_ids}).at_least_once
-        ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
-        MockNamedRelationshipQuery.expects(:outbound_named_relationship_query).with("testing_outbound_no_query_param",ids)
-        @mockrelsquery.named_relationship_query("testing_outbound_no_query_param")
-      end
-      
-      it "should call inbound_named_relationship_query if an inbound relationship" do
-        @mockrelsquery.expects(:pid).returns("changeme:5")
-        MockNamedRelationshipQuery.expects(:inbound_named_relationship_query).with("changeme:5","testing_inbound_query")
-        @mockrelsquery.named_relationship_query("testing_inbound_query")
-      end
     end 
-    
-    describe '#def named_predicate_exists_with_different_name?' do
-      
-      it 'should return true if a predicate exists for same subject and different name but not different subject' do
-        class MockPredicateExists < SpecNode2
-          has_relationship "testing", :has_part, :type=>SpecNode2
-          has_relationship "testing2", :has_member, :type=>SpecNode2
-          has_relationship "testing_inbound", :is_part_of, :type=>SpecNode2, :inbound=>true
-      
-          named_predicate_exists_with_different_name?(:self,"testing",:has_part).should == false
-          named_predicate_exists_with_different_name?(:self,"testing3",:has_part).should == true
-          named_predicate_exists_with_different_name?(:inbound,"testing",:has_part).should == false
-          named_predicate_exists_with_different_name?(:self,"testing2",:has_member).should == false
-          named_predicate_exists_with_different_name?(:self,"testing3",:has_member).should == true
-          named_predicate_exists_with_different_name?(:inbound,"testing2",:has_member).should == false
-          named_predicate_exists_with_different_name?(:self,"testing_inbound",:is_part_of).should == false
-          named_predicate_exists_with_different_name?(:inbound,"testing_inbound",:is_part_of).should == false
-          named_predicate_exists_with_different_name?(:inbound,"testing_inbound2",:is_part_of).should == true
-        end
-      end
-    end
   end
 end
