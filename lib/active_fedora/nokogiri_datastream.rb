@@ -309,7 +309,6 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     result = {}
     unless current_params.empty?
       result = update_values( current_params )
-      self.dirty = true
     end
     
     return result
@@ -329,7 +328,9 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     if @internal_solr_doc
       raise "No update performed, this object was initialized via Solr instead of Fedora and is therefore read-only.  Please utilize ActiveFedora::Base.load_instance to first load object via Fedora instead."
     else
-      om_update_values(params)
+      result = om_update_values(params)
+      self.dirty= true
+      return result
     end
   end
 
