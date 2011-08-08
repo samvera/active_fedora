@@ -366,6 +366,12 @@ module ActiveFedora
         named_relationships_desc[subject][name] = opts
       end
 
+      #Tests if the relationship name passed is in bidirectional
+      # @return [Boolean]
+      def is_bidirectional_relationship?(relationship_name)
+        (named_relationships_desc.has_key?(:self)&&named_relationships_desc.has_key?(:inbound)&&named_relationships_desc[:self].has_key?("#{relationship_name}_outbound") && named_relationships_desc[:inbound].has_key?("#{relationship_name}_inbound")) 
+      end
+
       # ** EXPERIMENTAL **
       #   
       # Used in has_relationship call to create dynamic helper methods to 
