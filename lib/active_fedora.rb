@@ -64,9 +64,10 @@ module ActiveFedora #:nodoc:
 
     @config_env = environment
     @fedora_config_path = get_config_path(:fedora)
-    @solr_config_path = get_config_path(:solr)
+    load_config(:fedora)
 
-    load_configs
+    @solr_config_path = get_config_path(:solr)
+    load_config(:solr)
 
     register_fedora_and_solr
 
@@ -178,6 +179,14 @@ module ActiveFedora #:nodoc:
       return config_path
     end
     
+    # if solr, attempt to use path where fedora.yml is first
+    if config_type == "solr" && (config_path = check_fedora_path_for_solr)
+      return config_path
+    elsif config_type == "solr" && fedora_config[environment].fetch("solr",nil)
+      logger.warn("DEPRECATION WARNING: You appear to be using a deprecated format for your fedora.yml file.  The solr url should be stored in a separate solr.yml file in the same directory as the fedora.yml")
+      raise ActiveFedoraConfigurationException
+    end
+
     if defined?(Rails.root)
       config_path = "#{Rails.root}/config/#{config_type}.yml"
       return config_path if File.file? config_path
@@ -194,6 +203,16 @@ module ActiveFedora #:nodoc:
     raise ActiveFedoraConfigurationException "Couldn't load #{config_type} config file!"
   end
   
+  # Checks the existing fedora_config_path to see if there is a solr.yml there
+  def self.check_fedora_path_for_solr
+    path = fedora_config_path.split('/')[0..-2].join('/') + "/solr.yml"
+    if File.file? path
+      return path
+    else
+      return nil
+    end
+  end
+
   def self.solr
     ActiveFedora::SolrService.instance
   end

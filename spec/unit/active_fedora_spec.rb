@@ -7,6 +7,131 @@ describe ActiveFedora do
   
   describe "initialization methods" do
     
+    describe "environment" do
+      it "should use config_options[:environment] if set" do
+        ActiveFedora.expects(:config_options).at_least_once.returns(:environment=>"ballyhoo")
+        ActiveFedora.environment.should eql("ballyhoo")
+      end
+
+      it "should use Rails.env if no config_options and Rails.env is set" do
+        stub_rails(:env => "bedbugs")
+        ActiveFedora.expects(:config_options).at_least_once.returns({})
+        ActiveFedora.environment.should eql("bedbugs")
+        unstub_rails
+      end
+
+      it "should use ENV['environment'] if neither config_options nor Rails.env are set" do
+        ENV['environment'] = "wichita"
+        ActiveFedora.expects(:config_options).at_least_once.returns({})
+        ActiveFedora.environment.should eql("wichita")
+      end
+
+      it "should use ENV['RAILS_ENV'] and log a warning if none of the above are set" do
+        ENV['environment']=nil
+        ENV['RAILS_ENV'] = "rails_env"
+        logger.expects(:warn)
+        ActiveFedora.expects(:config_options).at_least_once.returns({})
+        ActiveFedora.environment.should eql("rails_env")
+        ENV['environment']='test'
+      end
+
+      it "should raise an exception if none of the above are present" do
+        ENV['environment']=nil
+        ENV['RAILS_ENV'] = nil
+        ActiveFedora.expects(:config_options).at_least_once.returns({})
+        lambda { ActiveFedora.environment }.should raise_exception
+        ENV['environment']="test"
+      end
+    end
+
+    describe "get_config_path(:fedora)" do
+      it "should use the config_options[:config_path] if it exists" do
+        ActiveFedora.expects(:config_options).at_least_once.returns({:fedora_config_path => "/path/to/fedora.yml"})
+        File.expects(:file?).with("/path/to/fedora.yml").returns(true)
+        ActiveFedora.get_config_path(:fedora).should eql("/path/to/fedora.yml")
+      end
+
+      it "should look in Rails.root/config/fedora.yml if it exists and no fedora_config_path passed in" do
+        ActiveFedora.expects(:config_options).at_least_once.returns({})
+        stub_rails(:root => "/rails/root")
+        File.expects(:file?).with("/rails/root/config/fedora.yml").returns(true)
+        ActiveFedora.get_config_path(:fedora).should eql("/rails/root/config/fedora.yml")
+        unstub_rails
+      end
+
+      it "should look in ./config/fedora.yml if neither rails.root nor :fedora_config_path are set" do
+        ActiveFedora.expects(:config_options).at_least_once.returns({})
+        Dir.expects(:getwd).at_least_once.returns("/current/working/directory")
+        File.expects(:file?).with("/current/working/directory/config/fedora.yml").returns(true)
+        ActiveFedora.get_config_path(:fedora).should eql("/current/working/directory/config/fedora.yml")
+      end
+
+      it "should return default fedora.yml that ships with active-fedora if none of the above" do
+        ActiveFedora.expects(:config_options).at_least_once.returns({})
+        Dir.expects(:getwd).at_least_once.returns("/current/working/directory")
+        File.expects(:file?).with("/current/working/directory/config/fedora.yml").returns(false)
+        File.expects(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"),'config','fedora.yml'))).returns(true)
+        ActiveFedora.get_config_path(:fedora).should eql(File.expand_path(File.join(File.dirname("__FILE__"),'config','fedora.yml')))
+      end
+    end
+
+    describe "get_config_path(:solr)" do
+      it "should return the solr_config_path if set in config_options hash" do
+        ActiveFedora.expects(:config_options).at_least_once.returns({:solr_config_path => "/path/to/solr.yml"})
+        File.expects(:file?).with("/path/to/solr.yml").returns(true)
+        ActiveFedora.get_config_path(:solr).should eql("/path/to/solr.yml")
+      end
+      
+      it "should return the solr.yml file in the same directory as the fedora.yml if it exists" do
+        ActiveFedora.expects(:config_options).at_least_once.returns({})
+        ActiveFedora.expects(:fedora_config_path).returns("/path/to/fedora/config/fedora.yml")
+        File.expects(:file?).with("/path/to/fedora/config/solr.yml").returns(true)
+        ActiveFedora.get_config_path(:solr).should eql("/path/to/fedora/config/solr.yml")
+      end
+      
+      it "should raise an error if there is not a solr.yml in the same directory as the fedora.yml and the fedora.yml has a solr url defined" do
+        ActiveFedora.expects(:config_options).at_least_once.returns({})
+        ActiveFedora.expects(:fedora_config_path).returns("/path/to/fedora/config/fedora.yml")
+        File.expects(:file?).with("/path/to/fedora/config/solr.yml").returns(false)
+        ActiveFedora.expects(:fedora_config).returns({"test"=>{"solr"=>{"url"=>"http://some_url"}}})
+        lambda { ActiveFedora.get_config_path(:solr) }.should raise_exception
+      end
+
+      context "no solr.yml in same directory as fedora.yml and fedora.yml does not contain solr url" do
+
+        before :each do
+          ActiveFedora.expects(:config_options).at_least_once.returns({})
+          ActiveFedora.expects(:fedora_config_path).returns("/path/to/fedora/config/fedora.yml")
+          File.expects(:file?).with("/path/to/fedora/config/solr.yml").returns(false)
+          ActiveFedora.expects(:fedora_config).returns({"test"=>{"url"=>"http://some_url"}})
+        end
+        after :each do
+          unstub_rails
+        end
+
+        it "should not raise an error if there is not a solr.yml in the same directory as the fedora.yml and the fedora.yml has a solr url defined and look in rails.root" do
+          stub_rails(:root=>"/rails/root")
+          File.expects(:file?).with("/rails/root/config/solr.yml").returns(true)
+          ActiveFedora.get_config_path(:solr).should eql("/rails/root/config/solr.yml")
+        end
+
+        it "should look in ./config/solr.yml if no rails root" do
+          Dir.expects(:getwd).at_least_once.returns("/current/working/directory")
+          File.expects(:file?).with("/current/working/directory/config/solr.yml").returns(true)
+          ActiveFedora.get_config_path(:solr).should eql("/current/working/directory/config/solr.yml")
+        end
+
+        it "should return the default solr.yml file that ships with active-fedora if no other option is set" do
+          Dir.expects(:getwd).at_least_once.returns("/current/working/directory")
+          File.expects(:file?).with("/current/working/directory/config/solr.yml").returns(false)
+          File.expects(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"),'config','solr.yml'))).returns(true)
+          ActiveFedora.get_config_path(:solr).should eql(File.expand_path(File.join(File.dirname("__FILE__"),'config','solr.yml')))
+        end
+      end
+
+    end
+
+
     describe "#determine url" do
       it "should support config['environment']['fedora']['url'] if config_type is fedora" do
         config = {"test"=> {"fedora"=>{"url"=>"http://fedoraAdmin:fedorAdmin@oldstyle_url:8983/fedora"}}}
@@ -58,6 +183,18 @@ describe ActiveFedora do
       end
     end
 
+    describe "check_fedora_path_for_solr" do
+      it "should find the solr.yml file and return it if it exists" do
+        ActiveFedora.expects(:fedora_config_path).returns("/path/to/fedora/fedora.yml")
+        File.expects(:file?).with("/path/to/fedora/solr.yml").returns(true)
+        ActiveFedora.check_fedora_path_for_solr.should == "/path/to/fedora/solr.yml"
+      end
+      it "should return nil if the solr.yml file is not there" do
+        ActiveFedora.expects(:fedora_config_path).returns("/path/to/fedora/fedora.yml")
+        File.expects(:file?).with("/path/to/fedora/solr.yml").returns(false)
+        ActiveFedora.check_fedora_path_for_solr.should be_nil
+      end
+    end
   end
 
 
