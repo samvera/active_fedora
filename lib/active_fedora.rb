@@ -44,10 +44,22 @@ module ActiveFedora #:nodoc:
   @solr_config ||= {}
   @fedora_config ||= {}
 
-  # Initializes ActiveFedora's connection to Fedora and Solr based on the info in fedora.yml
+  # Initializes ActiveFedora's connection to Fedora and Solr based on the info in fedora.yml and solr.yml
+  # NOTE: this deprecates the use of a solr url in the fedora.yml
+  #
+  # 
   # If Rails.env is set, it will use that environment.  Defaults to "development".
-  # @param [String] config_path (optional) the path to fedora.yml
-  #   If config_path is not provided and Rails.root is set, it will look in RAILS_ENV/config/fedora.yml.  Otherwise, it will look in your config/fedora.yml.  Failing that, it will use localhost urls.
+  # @param [Hash] options (optional) a list of options for the configuration of active_fedora
+  # @option options [String] :environment The environment within which to run
+  # @option options [String] :fedora_config_path The full path to the fedora.yml config file.
+  # @option options [String] :solr_config_path The full path to the solr.yml config file.
+  # 
+  # If :environment is not set, order of preference is Rails.env, ENV['environment'], RAILS_ENV
+  # If :fedora_config_path is not set, it will look in {Rails.root}/config, {current working directory}/config, fedora.yml shipped with gem
+  # If :solr_config_path is not set, it will look in config_options[:fedora_config_path]
+  #    If it finds a solr.yml there, it will use it
+  #    If it finds no solr.yml and the fedora.yml contains a solr url, it will raise an configuration error 
+  #    If it finds no solr.yml and teh fedora.yml does not contain a solr url, it will look in: {Rails.root}/config, {current working directory}/config, solr.yml shipped with gem
   def self.init( options={} )
     logger.level = Logger::ERROR
     # Make config_options into a Hash if nil is passed in as the value
