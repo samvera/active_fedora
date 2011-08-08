@@ -246,12 +246,6 @@ module ActiveFedora
       def has_bidirectional_relationship(name, outbound_predicate, inbound_predicate, opts={})
         create_bidirectional_relationship_finders(name, outbound_predicate, inbound_predicate, opts)
       end
-
-      #Tests if the relationship name passed is in bidirectional
-      # @return [Boolean]
-      def is_bidirectional_relationship?(relationship_name)
-        named_relationships_desc[:self]["#{relationship_name}_outbound"] && named_relationships_desc[:inbound]["#{relationship_name}_inbound"] 
-      end
     
       def create_inbound_relationship_finders(name, predicate, opts = {})
         class_eval <<-END

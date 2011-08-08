@@ -272,5 +272,29 @@ describe ActiveFedora::SemanticNode do
       expected_string << "(#{@test_object_query.named_relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialContainer)"
       @test_object_query.bi_special_containers_query.should == expected_string
     end
-  end 
+  end
+
+  #putting this test here instead of named_relationships_helper because testing that named_relationships hash gets refreshed if the relationships hash is changed
+  describe "named_relationships" do
+    class MockSemNamedRelationships
+      include ActiveFedora::SemanticNode
+      has_relationship "testing", :has_part
+      has_relationship "testing2", :has_member
+      has_relationship "testing_inbound", :has_part, :inbound=>true
+    end
+
+    it 'should automatically update the named_relationships if relationships has changed (no refresh of named_relationships hash unless relationships hash has changed' do
+      @test_object2 = MockSemNamedRelationships.new
+      r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockSemNamedRelationships)}) 
+      @test_object2.add_relationship(r)
+      #should return expected named relationships
+      @test_object2.named_relationships.should == {:self=>{"testing"=>[],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
+      r3 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@test_object})
+      @test_object2.add_relationship(r3)
+      @test_object2.named_relationships.should == {:self=>{"testing"=>[r3.object],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
+      r4 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_member,:object=>"3"})
+      @test_object2.add_relationship(r4)
+      @test_object2.named_relationships.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]},:inbound=>{"testing_inbound"=>[]}}
+    end
+  end
 end
