@@ -347,107 +347,6 @@ describe ActiveFedora::SemanticNode do
       expected_string << "(#{@test_object_query.named_relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialContainer)"
       @test_object_query.bi_special_containers_query.should == expected_string
     end
-  end 
-<<<<<<< HEAD
-
-  describe "named_relationship_query" do
-    it "should return correct query for a bidirectional relationship with query params" do
-      expected_string = ""
-      @test_object_query.bi_containers_outbound_ids.each_with_index do |id,index|
-        expected_string << " OR " if index > 0
-        expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialContainer)"
-      end
-      expected_string << " OR "
-      expected_string << "(#{@test_object_query.named_relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialContainer)"
-      @test_object_query.named_relationship_query("bi_special_containers").should == expected_string
-    end
-  
-    it "should return correct query for a bidirectional relationship without query params" do
-      expected_string = ""
-      @test_object_query.bi_containers_outbound_ids.each_with_index do |id,index|
-        expected_string << " OR " if index > 0
-        expected_string << "id:" + id.gsub(/(:)/, '\\:')
-      end
-      expected_string << " OR "
-      expected_string << "(#{@test_object_query.named_relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')})"
-      @test_object_query.named_relationship_query("bi_containers").should == expected_string
-    end
-
-    it "should return a properly formatted query for an outbound relationship that has a query param defined" do
-      expected_string = ""
-      @test_object_query.containers_ids.each_with_index do |id,index|
-        expected_string << " OR " if index > 0
-        expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialContainer)"
-      end
-      @test_object_query.named_relationship_query("special_containers").should == expected_string
-    end
-
-    it "should return a properly formatted query for an outbound relationship that does not have a query param defined" do
-      expected_string = ""
-      @test_object_query.containers_ids.each_with_index do |id,index|
-        expected_string << " OR " if index > 0
-        expected_string << "id:" + id.gsub(/(:)/, '\\:')
-      end
-      @test_object_query.named_relationship_query("containers").should == expected_string
-    end
-
-    it "should return a properly formatted query for an inbound relationship that has a query param defined" do
-      @test_object_query.named_relationship_query("special_parts").should == "#{@test_object_query.named_relationship_predicates[:inbound]['special_parts']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialPart"
-    end
-
-    it "should return a properly formatted query for an inbound relationship that does not have a query param defined" do
-      @test_object_query.named_relationship_query("parts").should == "is_part_of_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')}"
-  end  
-
-  describe "bidirectional relationship finders" do
-    it "should return an array of Base objects" do
-      containers = @test_object.bi_containers
-      containers.length.should > 0
-      containers.each do |container|
-        container.should be_kind_of(ActiveFedora::Base)
-      end  
-    end
-    it "_ids should return an array of pids" do
-      ids = @test_object.bi_containers_ids
-      ids.size.should == 4
-      ids.include?(@container1.pid).should == true
-      ids.include?(@container2.pid).should == true
-      ids.include?(@container3.pid).should == true
-      ids.include?(@container4.pid).should == true
-    end
-
-    it "should return an array of Base objects with some filtered out if using query params" do
-      ids = @test_object_query.bi_special_containers_ids
-      ids.size.should == 4
-      ids.include?(@container1.pid).should == false
-      ids.include?(@container2.pid).should == false
-      ids.include?(@container3.pid).should == false
-      ids.include?(@special_container.pid).should == true
-      ids.include?(@special_container2.pid).should == true
-      ids.include?(@special_container3.pid).should == true
-      ids.include?(@special_container4.pid).should == true
-    end
-
-    it "should return an array of all Base objects with relationship if not using query params" do
-      ids = @test_object_query.bi_containers_ids
-      ids.size.should == 5
-      ids.include?(@container3.pid).should == true
-      ids.include?(@special_container.pid).should == true
-      ids.include?(@special_container2.pid).should == true
-      ids.include?(@special_container3.pid).should == true
-      ids.include?(@special_container4.pid).should == true
-    end
-
-    it "should return a solr query for a bidirectional relationship" do
-      expected_string = ""
-      @test_object_query.bi_containers_outbound_ids.each_with_index do |id,index|
-        expected_string << " OR " if index > 0
-        expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialContainer)"
-      end
-      expected_string << " OR "
-      expected_string << "(#{@test_object_query.named_relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialContainer)"
-      @test_object_query.bi_special_containers_query.should == expected_string
-    end
   end
 
   #putting this test here instead of named_relationships_helper because testing that named_relationships hash gets refreshed if the relationships hash is changed
@@ -473,6 +372,4 @@ describe ActiveFedora::SemanticNode do
       @test_object2.named_relationships.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]},:inbound=>{"testing_inbound"=>[]}}
     end
   end
-=======
->>>>>>> Refactored semantic node specs to move as much as possible from the integration test to the unit test
 end
