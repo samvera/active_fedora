@@ -54,12 +54,20 @@ module ActiveFedora #:nodoc:
   # @option options [String] :fedora_config_path The full path to the fedora.yml config file.
   # @option options [String] :solr_config_path The full path to the solr.yml config file.
   # 
-  # If :environment is not set, order of preference is Rails.env, ENV['environment'], RAILS_ENV
-  # If :fedora_config_path is not set, it will look in {Rails.root}/config, {current working directory}/config, fedora.yml shipped with gem
-  # If :solr_config_path is not set, it will look in config_options[:fedora_config_path]
-  #    If it finds a solr.yml there, it will use it
-  #    If it finds no solr.yml and the fedora.yml contains a solr url, it will raise an configuration error 
-  #    If it finds no solr.yml and teh fedora.yml does not contain a solr url, it will look in: {Rails.root}/config, {current working directory}/config, solr.yml shipped with gem
+  # If :environment is not set, order of preference is 
+  # 1. Rails.env
+  # 2. ENV['environment']
+  # 3. RAILS_ENV
+  #
+  # If :fedora_config_path is not set, it will look in 
+  # 1. +Rails.root+/config
+  # 2. +current working directory+/config
+  # 3. (default) the fedora.yml shipped with gem
+  #
+  # If :solr_config_path is not set, it will 
+  # 1. look in config_options[:fedora_config_path].  If it finds a solr.yml there, it will use it.
+  # 2. If it does not find a solr.yml and the fedora.yml contains a solr url, it will raise an configuration error 
+  # 3. If it does not find a solr.yml and the fedora.yml does not contain a solr url, it will look in: +Rails.root+/config, +current working directory+/config, then the solr.yml shipped with gem
   def self.init( options={} )
     logger.level = Logger::ERROR
     # Make config_options into a Hash if nil is passed in as the value
@@ -180,9 +188,10 @@ module ActiveFedora #:nodoc:
   
   # Determine the fedora config file to use. Order of preference is:
   # 1. Use the config_options[:config_path] if it exists
-  # 2. Look in Rails.root/config/fedora.yml
-  # 3. Look in the current working directory config/fedora.yml
+  # 2. Look in +Rails.root+/config/fedora.yml
+  # 3. Look in +current working directory+/config/fedora.yml
   # 4. Load the default config that ships with this gem
+  # @param [String] config_type Either ‘fedora’ or ‘solr’
   # @return [String]
   def self.get_config_path(config_type)
     config_type = config_type.to_s
@@ -264,22 +273,6 @@ module ActiveFedora #:nodoc:
     
 
 end
-
-
-
-
-
-# if ![].respond_to?(:count)
-#   class Array
-#     puts "active_fedora is Adding count method to Array"
-#       def count(&action)
-#         count = 0
-#          self.each { |v| count = count + 1}
-#   #      self.each { |v| count = count + 1 if action.call(v) }
-#         return count
-#       end
-#   end
-# end
 
 module ActiveFedora
   class ServerError < Fedora::ServerError; end # :nodoc:
