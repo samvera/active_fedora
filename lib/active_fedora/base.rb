@@ -4,11 +4,26 @@ require 'active_fedora/semantic_node'
 require "solrizer"
 require 'nokogiri'
 require "loggable"
+require 'active_support'
+
+require 'active_support/core_ext/class/attribute'
+require 'active_support/core_ext/class/inheritable_attributes'
+require 'active_support/inflector'
+
+
 
 SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 
 module ActiveFedora
+  extend ActiveSupport::Autoload
+
+  eager_autoload do
+    autoload :Associations
+    autoload :AttributeMethods
+    autoload :Reflection
+
+  end
   
   # This class ties together many of the lower-level modules, and
   # implements something akin to an ActiveRecord-alike interface to
@@ -37,6 +52,7 @@ module ActiveFedora
     include SemanticNode
     include Solrizer::FieldNameMapper
     include Loggable
+    include Associations, Reflection
     
     attr_accessor :named_datastreams_desc
     
@@ -55,6 +71,13 @@ module ActiveFedora
       @new_object = bool
       inner_object.new_object = bool
     end
+
+    ## Required by associations
+    def new_record?
+      self.new_object?
+    end
+
+
     
     # Constructor. If +attrs+  does  not comtain +:pid+, we assume we're making a new one,
     # and call off to the Fedora Rest API for the next available Fedora pid, and mark as new object.
