@@ -463,6 +463,27 @@ module ActiveFedora
         end
       end
     end
+    def load_outbound_relationship(name, predicate, opts)
+      id_array = []
+      if !outbound_relationships[predicate].nil? 
+        outbound_relationships[predicate].each do |rel|
+          id_array << rel.gsub("info:fedora/", "")
+        end
+      end
+      if opts[:response_format] == :id_array
+        return id_array
+      else
+        query = ActiveFedora::SolrService.construct_query_for_pids(id_array)
+        solr_result = SolrService.instance.conn.query(query)
+        if opts[:response_format] == :solr
+          return solr_result
+        elsif opts[:response_format] == :load_from_solr || self.load_from_solr
+          return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
+        else
+          return ActiveFedora::SolrService.reify_solr_results(solr_result)
+        end
+      end
+    end
     
     module ClassMethods
     
@@ -636,25 +657,7 @@ module ActiveFedora
       def create_outbound_relationship_finders(name, predicate, opts = {})
         class_eval <<-END
         def #{name}(opts={})
-          id_array = []
-          if !outbound_relationships[#{predicate.inspect}].nil? 
-            outbound_relationships[#{predicate.inspect}].each do |rel|
-              id_array << rel.gsub("info:fedora/", "")
-            end
-          end
-          if opts[:response_format] == :id_array
-            return id_array
-          else
-            query = ActiveFedora::SolrService.construct_query_for_pids(id_array)
-            solr_result = SolrService.instance.conn.query(query)
-            if opts[:response_format] == :solr
-              return solr_result
-            elsif opts[:response_format] == :load_from_solr || self.load_from_solr
-              return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
-            else
-              return ActiveFedora::SolrService.reify_solr_results(solr_result)
-            end
-          end
+          load_outbound_relationship('#{name}', #{predicate.inspect}, opts)
         end
         def #{name}_ids
           #{name}(:response_format => :id_array)
