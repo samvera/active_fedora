@@ -2,6 +2,7 @@ PATH
   remote: .
   specs:
     active-fedora (2.3.3)
+      activemodel
       activeresource (>= 3.0)
       activesupport (>= 3.0)
       equivalent-xml
