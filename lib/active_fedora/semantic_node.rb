@@ -196,6 +196,35 @@ module ActiveFedora
         end
       end
     end
+
+
+    def load_outbound_relationship(name, predicate, opts)
+      id_array = []
+      if !outbound_relationships[predicate].nil? 
+        outbound_relationships[predicate].each do |rel|
+          id_array << rel.gsub("info:fedora/", "")
+        end
+      end
+      if opts[:response_format] == :id_array  && !self.class.relationship_has_solr_filter_query?(:self,"#{name}")
+        return id_array
+      else
+        query = self.class.outbound_relationship_query("#{name}",id_array)
+        solr_result = SolrService.instance.conn.query(query)
+        if opts[:response_format] == :solr
+          return solr_result
+        elsif opts[:response_format] == :id_array
+          id_array = []
+          solr_result.hits.each do |hit|
+            id_array << hit[SOLR_DOCUMENT_ID]
+          end
+          return id_array
+        elsif opts[:response_format] == :load_from_solr || self.load_from_solr
+          return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
+        else
+          return ActiveFedora::SolrService.reify_solr_results(solr_result)
+        end
+      end
+    end
     
     module ClassMethods
       #include ActiveFedora::RelationshipsHelper::ClassMethods
@@ -379,31 +408,7 @@ module ActiveFedora
       def create_outbound_relationship_finders(name, predicate, opts = {})
         class_eval <<-END
         def #{name}(opts={})
-          id_array = []
-          if !outbound_relationships[#{predicate.inspect}].nil? 
-            outbound_relationships[#{predicate.inspect}].each do |rel|
-              id_array << rel.gsub("info:fedora/", "")
-            end
-          end
-          if opts[:response_format] == :id_array && !self.class.relationship_has_solr_filter_query?(:self,"#{name}")
-            return id_array
-          else
-            query = self.class.outbound_relationship_query("#{name}",id_array)
-            solr_result = SolrService.instance.conn.query(query)
-            if opts[:response_format] == :solr
-              return solr_result
-            elsif opts[:response_format] == :id_array
-              id_array = []
-              solr_result.hits.each do |hit|
-                id_array << hit[SOLR_DOCUMENT_ID]
-              end
-              return id_array
-            elsif opts[:response_format] == :load_from_solr || self.load_from_solr
-              return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
-            else
-              return ActiveFedora::SolrService.reify_solr_results(solr_result)
-            end
-          end
+          load_outbound_relationship('#{name}', #{predicate.inspect}, opts)
         end
         def #{name}_ids
           #{name}(:response_format => :id_array)
