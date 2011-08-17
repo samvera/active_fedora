@@ -66,7 +66,16 @@ module ActiveFedora
       !new_object?
     end
 
+    def attributes= (attrs)
+      attrs.each do |key, value|
+        send(key.to_s + '=', value)
+      end
+    end
 
+    # def update_attributes (attrs)
+    #   self.attributes = attrs
+    #   save
+    # end
     
     # Constructor. If +attrs+  does  not comtain +:pid+, we assume we're making a new one,
     # and call off to the Fedora Rest API for the next available Fedora pid, and mark as new object.

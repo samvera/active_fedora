@@ -442,6 +442,27 @@ module ActiveFedora
       end
       xml.to_s
     end
+
+    def load_inbound_relationship(name, predicate, opts={})
+      opts = {:rows=>25}.merge(opts)
+      escaped_uri = self.internal_uri.gsub(/(:)/, '\\:')
+      solr_result = SolrService.instance.conn.query("#{predicate}_s:#{escaped_uri}", :rows=>opts[:rows])
+      if opts[:response_format] == :solr
+        return solr_result
+      else
+        if opts[:response_format] == :id_array
+          id_array = []
+          solr_result.hits.each do |hit|
+            id_array << hit[SOLR_DOCUMENT_ID]
+          end
+          return id_array
+        elsif opts[:response_format] == :load_from_solr || self.load_from_solr
+          return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
+        else
+          return ActiveFedora::SolrService.reify_solr_results(solr_result)
+        end
+      end
+    end
     
     module ClassMethods
     
@@ -596,28 +617,12 @@ module ActiveFedora
         self.send(:define_method,:"#{append_method_name}") {|object| add_named_relationship(outbound_name,object)}
         self.send(:define_method,:"#{remove_method_name}") {|object| remove_named_relationship(outbound_name,object)}
       end
+
     
       def create_inbound_relationship_finders(name, predicate, opts = {})
         class_eval <<-END
         def #{name}(opts={})
-          opts = {:rows=>25}.merge(opts)
-          escaped_uri = self.internal_uri.gsub(/(:)/, '\\:')
-          solr_result = SolrService.instance.conn.query("#{predicate}_s:\#{escaped_uri}", :rows=>opts[:rows])
-          if opts[:response_format] == :solr
-            return solr_result
-          else
-            if opts[:response_format] == :id_array
-              id_array = []
-              solr_result.hits.each do |hit|
-                id_array << hit[SOLR_DOCUMENT_ID]
-              end
-              return id_array
-            elsif opts[:response_format] == :load_from_solr || self.load_from_solr
-              return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
-            else
-              return ActiveFedora::SolrService.reify_solr_results(solr_result)
-            end
-          end
+          load_inbound_relationship('#{name}', '#{predicate}', opts)
         end
         def #{name}_ids
           #{name}(:response_format => :id_array)
