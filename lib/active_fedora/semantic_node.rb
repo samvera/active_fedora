@@ -443,7 +443,7 @@ module ActiveFedora
       xml.to_s
     end
 
-    def load_inbound_relationship(name, predicate, opts={})
+    def load_inbound_relationship(predicate, opts={})
       opts = {:rows=>25}.merge(opts)
       escaped_uri = self.internal_uri.gsub(/(:)/, '\\:')
       solr_result = SolrService.instance.conn.query("#{predicate}_s:#{escaped_uri}", :rows=>opts[:rows])
@@ -463,7 +463,7 @@ module ActiveFedora
         end
       end
     end
-    def load_outbound_relationship(name, predicate, opts)
+    def load_outbound_relationship(predicate, opts={})
       id_array = []
       if !outbound_relationships[predicate].nil? 
         outbound_relationships[predicate].each do |rel|
@@ -643,7 +643,7 @@ module ActiveFedora
       def create_inbound_relationship_finders(name, predicate, opts = {})
         class_eval <<-END
         def #{name}(opts={})
-          load_inbound_relationship('#{name}', '#{predicate}', opts)
+          load_inbound_relationship('#{predicate}', opts)
         end
         def #{name}_ids
           #{name}(:response_format => :id_array)
@@ -657,7 +657,7 @@ module ActiveFedora
       def create_outbound_relationship_finders(name, predicate, opts = {})
         class_eval <<-END
         def #{name}(opts={})
-          load_outbound_relationship('#{name}', #{predicate.inspect}, opts)
+          load_outbound_relationship(#{predicate.inspect}, opts)
         end
         def #{name}_ids
           #{name}(:response_format => :id_array)
