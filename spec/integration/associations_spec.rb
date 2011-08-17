@@ -47,8 +47,8 @@ describe ActiveFedora::Base do
       @library.books.map(&:pid).should == [@book.pid]
 
 
-      # @library2 = Library.find(@library.pid)
-      # @library2.books.map(&:pid).should == [@book.pid]
+      @library2 = Library.find(@library.pid)
+      @library2.books.map(&:pid).should == [@book.pid]
 
     
     end
