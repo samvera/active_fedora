@@ -175,7 +175,9 @@ module ActiveFedora
       end
       xml.to_s
     end
+
     def load_inbound_relationship(name, predicate, opts={})
+    # def load_inbound_relationship(predicate, opts={}) ### TODO, actually we need name
       opts = {:rows=>25}.merge(opts)
       query = self.class.inbound_relationship_query(self.pid,"#{name}")
       return [] if query.empty?
@@ -197,8 +199,8 @@ module ActiveFedora
       end
     end
 
-
     def load_outbound_relationship(name, predicate, opts)
+    #def load_outbound_relationship(predicate, opts={}) ### TODO, uhhh, actually we need names
       id_array = []
       if !outbound_relationships[predicate].nil? 
         outbound_relationships[predicate].each do |rel|
@@ -408,7 +410,7 @@ module ActiveFedora
       def create_outbound_relationship_finders(name, predicate, opts = {})
         class_eval <<-END
         def #{name}(opts={})
-          load_outbound_relationship('#{name}', #{predicate.inspect}, opts)
+          load_outbound_relationship(#{name.inspect}, #{predicate.inspect}, opts)
         end
         def #{name}_ids
           #{name}(:response_format => :id_array)
