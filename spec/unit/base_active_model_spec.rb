@@ -29,8 +29,8 @@ describe ActiveFedora::Base do
       end 
 
       has_metadata :type=>BarStream, :name=>"xmlish"
-      delegate :fubar, :to=>'withText'
-      delegate :duck, :to=>'xmlish'
+      delegate :fubar, :to=>'withText', :unique=>true
+      delegate :duck, :to=>'xmlish', :unique=>true
     end
     before :each do
       @n = BarHistory.new(:pid=>"monkey:99")

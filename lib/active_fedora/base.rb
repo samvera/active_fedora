@@ -1,7 +1,4 @@
 require 'util/class_level_inheritable_attributes'
-require 'active_fedora/model'
-require 'active_fedora/semantic_node'
-require 'active_fedora/delegating'
 require "solrizer"
 require 'nokogiri'
 require "loggable"
@@ -22,6 +19,9 @@ module ActiveFedora
     autoload :Associations
     autoload :AttributeMethods
     autoload :Reflection
+    autoload :Delegating
+    autoload :Model
+    autoload :SemanticNode
 
   end
   
@@ -54,7 +54,7 @@ module ActiveFedora
     include Loggable
     include ActiveModel::Conversion
     extend ActiveModel::Naming
-    extend Delegating
+    include Delegating
 
     include Associations, Reflection
     
