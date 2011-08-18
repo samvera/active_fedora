@@ -41,6 +41,14 @@ describe ActiveFedora::Base do
       @library.book_ids = [@book.pid, @book2.pid]
       @library.books.map(&:pid).should == [@book.pid, @book2.pid]
     end
+
+    it "setter should wipe out previously saved relations" do
+      @library.book_ids = [@book.pid, @book2.pid]
+      @library.book_ids = [@book2.pid]
+      @library.books.map(&:pid).should == [@book2.pid]
+      
+    end
+
     after do
       @book.delete
       @book2.delete
