@@ -76,6 +76,17 @@ module ActiveFedora
           super
           @collection = [:has_many, :has_and_belongs_to_many].include?(macro)
         end
+
+        def primary_key_name
+          @primary_key_name ||= options[:foreign_key] || derive_primary_key_name
+        end
+
+        private
+
+        def derive_primary_key_name
+          'pid'
+        end        
+
       end
     end
   end

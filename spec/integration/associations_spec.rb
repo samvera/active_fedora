@@ -58,6 +58,35 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe "setting belongs_to" do
+    before do
+      @library = Library.new()
+      @library.save()
+      @book = Book.new
+    end
+    it "should set the association" do
+      @book.library = @library
+      @book.library.pid.should == @library.pid
+      @book.save
+
+
+      Book.find(@book.pid).library.pid.should == @library.pid
+      
+    end
+    it "should clear the association" do
+      @book.library = @library
+      @book.library = nil
+      @book.save
+
+      Book.find(@book.pid).library.should be_nil 
+      
+    end
+    after do
+      @library.delete
+      @book.delete
+    end
+  end
+
 
 
 
