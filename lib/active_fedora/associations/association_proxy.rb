@@ -1,6 +1,42 @@
 module ActiveFedora
   module Associations
+    # This is the root class of all association proxies:
+    #
+    #   AssociationProxy
+    #     BelongsToAssociation
+    #     AssociationCollection
+    #       HasManyAssociation
+    #
+    # Association proxies in Active Fedora are middlemen between the object that
+    # holds the association, known as the <tt>@owner</tt>, and the actual associated
+    # object, known as the <tt>@target</tt>. The kind of association any proxy is
+    # about is available in <tt>@reflection</tt>. That's an instance of the class
+    # ActiveFedora::Reflection::AssociationReflection.
+    #
+    # For example, given
+    #
+    #   class Blog < ActiveFedora::Base
+    #     has_many :posts
+    #   end
+    #
+    #   blog = Blog.find('changeme:123')
+    #
+    # the association proxy in <tt>blog.posts</tt> has the object in +blog+ as
+    # <tt>@owner</tt>, the collection of its posts as <tt>@target</tt>, and
+    # the <tt>@reflection</tt> object represents a <tt>:has_many</tt> macro.
+    #
+    # This class has most of the basic instance methods removed, and delegates
+    # unknown methods to <tt>@target</tt> via <tt>method_missing</tt>. As a
+    # corner case, it even removes the +class+ method and that's why you get
+    #
+    #   blog.posts.class # => Array
+    #
+    # though the object behind <tt>blog.posts</tt> is not an Array, but an
+    # ActiveFedora::Associations::HasManyAssociation.
+
     class AssociationProxy
+       delegate :to_param, :to=>:target
+
        def initialize(owner, reflection)
         @owner, @reflection = owner, reflection
         @updated = false
