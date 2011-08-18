@@ -95,12 +95,21 @@ module ActiveFedora
             @target = find_target
           end
 
-          @loaded = true
-          @target
-        # rescue ActiveFedora::RecordNotFound
-        #   reset
+          if @target.nil?
+            reset
+          else
+            @loaded = true
+            @target
+          end
         end
 
+        # Can be overwritten by associations that might have the foreign key
+        # available for an association without having the object itself (and
+        # still being a new record). Currently, only +belongs_to+ presents
+        # this scenario.
+        def foreign_key_present
+          false
+        end
 
 
 
