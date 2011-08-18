@@ -34,15 +34,14 @@ module ActiveFedora
         record.save
       end
 
+      protected
 
-
-      # def has_cached_counter?
-      #   @owner.attribute_present?(cached_counter_attribute_name)
-      # end
-
-      # def cached_counter_attribute_name
-      #   "#{@reflection.name}_count"
-      # end
+        # Deletes the records according to the <tt>:dependent</tt> option.
+        def delete_records(records)
+          records.each do |r| 
+            r.remove_relationship(@reflection.options[:property], @owner)
+          end
+        end
 
 
 

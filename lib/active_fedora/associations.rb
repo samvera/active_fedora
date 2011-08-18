@@ -1,4 +1,5 @@
 require 'active_support/core_ext/module/delegation'
+require 'active_support/core_ext/object/blank'
 
 module ActiveFedora
   module Associations
@@ -144,10 +145,12 @@ module ActiveFedora
             end
 
             redefine_method("#{reflection.name.to_s.singularize}_ids=") do |new_value|
-              pk_column = reflection.primary_key_column
               ids = (new_value || []).reject { |nid| nid.blank? }
-              ids.map!{ |i| pk_column.type_cast(i) }
-              send("#{reflection.name}=", reflection.klass.find(ids).index_by{ |r| r.id }.values_at(*ids))
+              #TODO, like this when find() can return multiple records
+              #send("#{reflection.name}=", reflection.klass.find(ids))
+              ids.each do |id|
+                send("#{reflection.name}").send("<<", reflection.klass.find(id))
+              end
             end
           end
         end

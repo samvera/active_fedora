@@ -14,9 +14,11 @@ describe ActiveFedora::Base do
       @library = Library.new()
       @book = Book.new
       @book.save
+      @book2 = Book.new
+      @book2.save
     end
 
-    it "should have many books" do
+    it "should let you shift onto the association" do
       @library.new_record?.should be_true
       @library.books.size == 0
       @library.books.to_ary.should == []
@@ -25,8 +27,23 @@ describe ActiveFedora::Base do
       @library.books.map(&:pid).should == [@book.pid]
       @library.book_ids.should ==[@book.pid]
     end
+
+    it "should let you set an array of objects" do
+      @library.books = [@book, @book2]
+      @library.books.map(&:pid).should == [@book.pid, @book2.pid]
+      @library.save
+
+      @library.books = [@book]
+      @library.books.map(&:pid).should == [@book.pid]
+    
+    end
+    it "should let you set an array of object ids" do
+      @library.book_ids = [@book.pid, @book2.pid]
+      @library.books.map(&:pid).should == [@book.pid, @book2.pid]
+    end
     after do
       @book.delete
+      @book2.delete
     end
   end
 
