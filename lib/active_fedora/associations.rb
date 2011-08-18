@@ -148,9 +148,7 @@ module ActiveFedora
               ids = (new_value || []).reject { |nid| nid.blank? }
               #TODO, like this when find() can return multiple records
               #send("#{reflection.name}=", reflection.klass.find(ids))
-              ids.each do |id|
-                send("#{reflection.name}").send("<<", reflection.klass.find(id))
-              end
+              send("#{reflection.name}=", ids.collect { |id| reflection.klass.find(id)})
             end
           end
         end
