@@ -82,6 +82,17 @@ describe ActiveFedora::Base do
       
     end
 
+    it "should replace the association" do
+      @library2 = Library.new
+      @library2.save
+      @book.library = @library
+      @book.save
+      @book.library = @library2
+      @book.save
+      Book.find(@book.pid).library.pid.should == @library2.pid 
+
+    end
+
     it "should be able to be set by id" do
       @book.library_id = @library.pid
       @book.library_id.should == @library.pid
@@ -93,6 +104,7 @@ describe ActiveFedora::Base do
     after do
       @library.delete
       @book.delete
+      @library2.delete if @library2
     end
   end
 
