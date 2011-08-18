@@ -23,6 +23,19 @@ module ActiveFedora
           count_records
         end
       end
+
+      # Replace this collection with +other_array+
+      # This will perform a diff and delete/add only records that have changed.
+      def replace(other_array)
+        other_array.each { |val| raise_on_type_mismatch(val) }
+
+        load_target
+        other   = other_array.size < 100 ? other_array : other_array.to_set
+        current = @target.size < 100 ? @target : @target.to_set
+
+        delete(@target.select { |v| !other.include?(v) })
+        concat(other_array.select { |v| !current.include?(v) })
+      end
       
 
       def to_ary
@@ -34,6 +47,11 @@ module ActiveFedora
         end
       end
       alias_method :to_a, :to_ary
+
+      def reset
+        reset_target!
+        @loaded = false
+      end
 
       # Add +records+ to this association.  Returns +self+ so method calls may be chained.
       # Since << flattens its argument list and inserts each record, +push+ and +concat+ behave identically.
@@ -53,6 +71,20 @@ module ActiveFedora
 
       alias_method :push, :<<
       alias_method :concat, :<<
+
+      # Removes +records+ from this association calling +before_remove+ and
+      # +after_remove+ callbacks.
+      #
+      # This method is abstract in the sense that +delete_records+ has to be
+      # provided by descendants. Note this method does not imply the records
+      # are actually removed from the database, that depends precisely on
+      # +delete_records+. They are in any case removed from the collection.
+      def delete(*records)
+        remove_records(records) do |_records, old_records|
+          delete_records(old_records) if old_records.any?
+          _records.each { |record| @target.delete(record) }
+        end
+      end
       
 
       def load_target
@@ -103,6 +135,23 @@ module ActiveFedora
         record
       end
 
+      protected
+        def reset_target!
+          @target = Array.new
+        end
+
+
+      private 
+
+        def remove_records(*records)
+          records = flatten_deeper(records)
+          records.each { |record| raise_on_type_mismatch(record) }
+
+          #records.each { |record| callback(:before_remove, record) }
+          old_records = records.reject { |r| r.new_record? }
+          yield(records, old_records)
+          #records.each { |record| callback(:after_remove, record) }
+        end
       
     end
   end
