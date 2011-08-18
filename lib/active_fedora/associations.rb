@@ -1,3 +1,5 @@
+require 'active_support/core_ext/module/delegation'
+
 module ActiveFedora
   module Associations
     extend ActiveSupport::Concern
