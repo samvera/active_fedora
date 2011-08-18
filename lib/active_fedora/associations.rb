@@ -99,6 +99,14 @@ module ActiveFedora
             association.target = target
             association_instance_set(reflection.name, association)
           end
+
+          redefine_method("#{reflection.name}_id=") do |new_value|
+            send("#{reflection.name}=", reflection.klass.find(new_value))
+          end
+          redefine_method("#{reflection.name}_id") do 
+            obj = send("#{reflection.name}")
+            obj.pid if obj
+          end
         end
 
 

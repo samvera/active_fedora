@@ -81,6 +81,15 @@ describe ActiveFedora::Base do
       Book.find(@book.pid).library.should be_nil 
       
     end
+
+    it "should be able to be set by id" do
+      @book.library_id = @library.pid
+      @book.library_id.should == @library.pid
+      @book.library.pid.should == @library.pid
+      @book.save
+      Book.find(@book.pid).library_id.should == @library.pid
+    end
+
     after do
       @library.delete
       @book.delete
