@@ -1,2 +1,0 @@
-class ActiveFedoraConfigurationException < Exception
-end

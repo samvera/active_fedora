@@ -16,4 +16,12 @@ describe ActiveFedora::Associations::HasManyAssociation do
 
   end
 
+  it "should build" do
+    class Foo; end
+    @owner = stub(:new_record? => false)
+    @assoc = ActiveFedora::Associations::HasManyAssociation.new(@owner, @reflection)
+    @assoc.should respond_to :build
+      
+  end
+
 end

@@ -9,4 +9,5 @@ describe ActiveFedora::Associations::AssociationProxy do
     @assoc.to_param.should == '1234'
   
   end
+
 end

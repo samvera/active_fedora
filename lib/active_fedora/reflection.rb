@@ -13,9 +13,54 @@ module ActiveFedora
         reflection
       end
 
+      # Returns a hash containing all AssociationReflection objects for the current class.
+      # Example:
+      #
+      #   Invoice.reflections
+      #   Account.reflections
+      #
+      def reflections
+        read_inheritable_attribute(:reflections) || write_inheritable_attribute(:reflections, {})
+      end
+
+      # Returns the AssociationReflection object for the +association+ (use the symbol).
+      #
+      #   Account.reflect_on_association(:owner)             # returns the owner AssociationReflection
+      #   Invoice.reflect_on_association(:line_items).macro  # returns :has_many
+      #
+      def reflect_on_association(association)
+        reflections[association].is_a?(AssociationReflection) ? reflections[association] : nil
+      end
+
       class MacroReflection
+
+        # Returns the target association's class.
+        #
+        #   class Author < ActiveRecord::Base
+        #     has_many :books
+        #   end
+        #
+        #   Author.reflect_on_association(:books).klass
+        #   # => Book
+        #
+        # <b>Note:</b> Do not call +klass.new+ or +klass.create+ to instantiate
+        # a new association object. Use +build_association+ or +create_association+
+        # instead. This allows plugins to hook into association object creation.
+        def klass
+          #@klass ||= active_record.send(:compute_type, class_name)
+          @klass ||= class_name
+        end
+
+
+
         def initialize(macro, name, options, active_fedora)
           @macro, @name, @options, @active_fedora = macro, name, options, active_fedora
+        end
+
+        # Returns a new, unsaved instance of the associated class. +options+ will
+        # be passed to the class's constructor.
+        def build_association(*options)
+          klass.new(*options)
         end
 
         # Returns the name of the macro.

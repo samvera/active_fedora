@@ -2,28 +2,17 @@ require 'util/class_level_inheritable_attributes'
 require "solrizer"
 require 'nokogiri'
 require "loggable"
-require 'active_support'
+
+require 'active_support/core_ext/kernel/singleton_class'
 
 require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/class/inheritable_attributes'
 require 'active_support/inflector'
 
-
 SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 
 module ActiveFedora
-  extend ActiveSupport::Autoload
-
-  eager_autoload do
-    autoload :Associations
-    autoload :AttributeMethods
-    autoload :Reflection
-    autoload :Delegating
-    autoload :Model
-    autoload :SemanticNode
-
-  end
   
   # This class ties together many of the lower-level modules, and
   # implements something akin to an ActiveRecord-alike interface to
@@ -47,8 +36,6 @@ module ActiveFedora
   # This class is really a facade for a basic Fedora::FedoraObject, which is stored internally.
   class Base
     include MediaShelfClassLevelInheritableAttributes
-    ms_inheritable_attributes  :ds_specs, :class_named_datastreams_desc
-    include Model
     include SemanticNode
     include Solrizer::FieldNameMapper
     include Loggable
@@ -58,6 +45,7 @@ module ActiveFedora
 
     include Associations, Reflection
     
+    ms_inheritable_attributes  :ds_specs, :class_named_datastreams_desc
     attr_accessor :named_datastreams_desc
     
 
@@ -80,11 +68,13 @@ module ActiveFedora
       !new_object?
     end
 
-    def attributes= (attrs)
-      attrs.each do |key, value|
-        send(key.to_s + '=', value)
+    def attributes=(properties)
+      properties.each do |k, v|
+        respond_to?(:"#{k}=") ? send(:"#{k}=", v) : raise(UnknownAttributeError, "unknown attribute: #{k}")
       end
     end
+
+
 
     # def update_attributes (attrs)
     #   self.attributes = attrs
@@ -118,6 +108,10 @@ module ActiveFedora
       @inner_object = Fedora::FedoraObject.new(attrs)
       @datastreams = {}
       configure_defined_datastreams
+
+      attributes = attrs.dup
+      [:pid, :namespace, :new_object,:create_date, :modified_date].each { |k| attributes.delete(k)}
+      self.attributes=attributes
     end
 
     #This method is used to specify the details of a datastream. 
@@ -798,6 +792,11 @@ module ActiveFedora
     def pid
       @inner_object.pid
     end
+
+
+    def id   ### Needed for the nested form helper
+      self.pid
+    end
     
     def to_key
       persisted? ? [pid] : nil
@@ -994,36 +993,10 @@ module ActiveFedora
       end
     end
 
-    # An ActiveRecord-ism to udpate metadata values.
-    #
-    # Example Usage:
-    #
-    # m.update_attributes(:fubar=>'baz')
-    #
-    # This will attempt to set the values for any fields named fubar in any of 
-    # the object's datastreams. This means DS1.fubar_values and DS2.fubar_values 
-    # are _both_ overwritten.  
-    #
-    # If you want to specify which datastream(s) to update,
-    # use the :datastreams argument like so:
-    #  m.update_attributes({:fubar=>'baz'}, :datastreams=>"my_ds")
-    # or
-    #  m.update_attributes({:fubar=>'baz'}, :datastreams=>["my_ds", "my_other_ds"])
-    def update_attributes(params={}, opts={})
-      result = {}
-      if opts[:datastreams]
-        ds_array = []
-        opts[:datastreams].each do |dsname|
-          ds_array << datastreams[dsname]
-        end
-      else
-        ds_array = metadata_streams
-      end
-      ds_array.each do |d|
-        ds_result = d.update_attributes(params,opts)
-        result[d.dsid] = ds_result
-      end
-      return result
+
+    def update_attributes(properties)
+      self.attributes=properties
+      save
     end
 
     # A convenience method  for updating indexed attributes.  The passed in hash
@@ -1146,4 +1119,16 @@ module ActiveFedora
     end
 
   end
+
+  Base.class_eval do
+    include Model
+    include Solrizer::FieldNameMapper
+    include Loggable
+    include Associations, Reflection
+    include ActiveModel::Conversion
+    extend ActiveModel::Naming
+    include Delegating
+    include NestedAttributes
+  end
+
 end
