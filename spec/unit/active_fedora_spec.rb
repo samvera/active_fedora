@@ -37,7 +37,7 @@ describe ActiveFedora do
       ActiveFedora.config_path.should eql("#{@fake_rails_root}/config/fake_fedora.yml")
     end
     it "raises an error if you pass in a non-existant config file" do
-      lambda{ ActiveFedora.init("really_fake_fedora.yml") }.should raise_exception(ActiveFedoraConfigurationException)
+      lambda{ ActiveFedora.init("really_fake_fedora.yml") }.should raise_exception(ActiveFedora::ActiveFedoraConfigurationException)
     end
     
     describe "within Rails" do

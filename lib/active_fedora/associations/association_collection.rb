@@ -53,6 +53,18 @@ module ActiveFedora
         @loaded = false
       end
 
+
+      def build(attributes = {}, &block)
+        if attributes.is_a?(Array)
+          attributes.collect { |attr| build(attr, &block) }
+        else
+          build_record(attributes) do |record|
+            block.call(record) if block_given?
+            set_belongs_to_association_for(record)
+          end
+        end
+      end
+
       # Add +records+ to this association.  Returns +self+ so method calls may be chained.
       # Since << flattens its argument list and inserts each record, +push+ and +concat+ behave identically.
       def <<(*records)
@@ -107,7 +119,7 @@ module ActiveFedora
                 @target = find_target
               end
             end
-          rescue ActiveRecord::RecordNotFound
+          rescue ObjectNotFoundError # TODO this isn't ever thrown. Maybe check for nil instead
             reset
           end
         end
@@ -142,6 +154,16 @@ module ActiveFedora
 
 
       private 
+
+        def build_record(attrs)
+          #attrs.update(@reflection.options[:conditions]) if @reflection.options[:conditions].is_a?(Hash)
+          record = @reflection.build_association(attrs)
+          if block_given?
+            add_record_to_target_with_callbacks(record) { |*block_args| yield(*block_args) }
+          else
+            add_record_to_target_with_callbacks(record)
+          end
+        end
 
         def remove_records(*records)
           records = flatten_deeper(records)

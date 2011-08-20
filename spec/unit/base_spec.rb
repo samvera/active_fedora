@@ -538,64 +538,14 @@ describe ActiveFedora::Base do
   
   describe "update_attributes" do
 
-    it "should call .update_attributes on all metadata datastreams & nokogiri datastreams" do
+    it "should set the attributes and save" do
       m = FooHistory.new
-      att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
+      att= {"fubar"=> '1234', "baz" =>'stuff'}
       
-      m.metadata_streams.each {|ds| ds.expects(:update_attributes)}
+      m.expects(:fubar=).with('1234')
+      m.expects(:baz=).with('stuff')
+      m.expects(:save)
       m.update_attributes(att)
-    end
-    
-    it "should be able to update attr on text fields" do
-      m = FooHistory.new
-      m.should_not be_nil
-      m.datastreams['someData'].swank_values.should == []
-      m.update_attributes(:swank=>'baz')
-      m.should_not be_nil
-      m.datastreams['someData'].swank_values.should == ['baz']
-    end
-
-    it "should have update_attributes" do
-      n = FooHistory.new
-      n.update_attributes(:fubar=>'baz')
-      n.datastreams["someData"].fubar_values.should == ['baz']
-      n.update_attributes('fubar'=>'bak')
-      n.datastreams["someData"].fubar_values.should == ['bak']
-      #really? should it hit all matching datastreams?
-      n.datastreams["withText"].fubar_values.should == ['bak']
-    end
-
-    it "should allow deleting of values" do
-      n = FooHistory.new
-      n.datastreams["someData"].fubar_values.should == []
-      n.update_attributes(:fubar=>'baz')
-      n.datastreams["someData"].fubar_values.should == ['baz']
-      n.update_attributes(:fubar=>:delete)
-      n.datastreams["someData"].fubar_values.should == []
-      n.update_attributes(:fubar=>'baz')
-      n.datastreams["someData"].fubar_values.should == ['baz']
-      n.update_attributes(:fubar=>"")
-      n.datastreams["someData"].fubar_values.should == []
-    end
-    
-    it "should take a :datastreams argument" do 
-      m = FooHistory.new
-      m.should_not be_nil
-      m.datastreams['someData'].fubar_values.should == []
-      m.datastreams['withText'].fubar_values.should == []
-      m.datastreams['withText2'].fubar_values.should == []
-
-      m.update_attributes({:fubar=>'baz'}, :datastreams=>"someData")
-      m.should_not be_nil
-      m.datastreams['someData'].fubar_values.should == ['baz']
-      m.datastreams["withText"].fubar_values.should == []
-      m.datastreams['withText2'].fubar_values.should == []
-      
-      m.update_attributes({:fubar=>'baz'}, :datastreams=>["someData", "withText2"])
-      m.should_not be_nil
-      m.datastreams['someData'].fubar_values.should == ['baz']
-      m.datastreams["withText"].fubar_values.should == []
-      m.datastreams['withText2'].fubar_values.should == ['baz']
     end
   end
   

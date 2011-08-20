@@ -2,36 +2,50 @@ require 'rubygems'
 require "bundler/setup"
 
 Bundler.require(:default)
-
 gem 'solr-ruby'
 require "loggable"
 
 $: << 'lib'
+
+require 'active_support'
+require 'active_model'
+
 require 'active_fedora/solr_service.rb'
 require "solrizer"
 
 require 'ruby-fedora'
-require 'active_fedora/base.rb'
-require 'active_fedora/content_model.rb'
-require 'active_fedora/datastream.rb'
-require 'active_fedora/fedora_object.rb'
-require 'active_fedora/metadata_datastream_helper.rb'
-require 'active_fedora/metadata_datastream.rb'
-require 'active_fedora/nokogiri_datastream'
-require 'active_fedora/model.rb'
-require 'active_fedora/property.rb'
-require 'active_fedora/qualified_dublin_core_datastream.rb'
-require 'active_fedora/relationship.rb'
-require 'active_fedora/rels_ext_datastream.rb'
-require 'active_fedora/semantic_node.rb'
-require 'active_fedora/version.rb'
-
-require 'active_fedora/railtie' if defined?(Rails) && Rails.version >= "3.0"
+# require 'active_fedora/fedora_object.rb'
+# require 'active_fedora/version.rb'
+# 
+# require 'active_fedora/railtie' if defined?(Rails) && Rails.version >= "3.0"
 
 SOLR_DOCUMENT_ID = ActiveFedora::SolrService.id_field unless defined?(SOLR_DOCUMENT_ID)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 
 module ActiveFedora #:nodoc:
+  extend ActiveSupport::Autoload
+
+  eager_autoload do
+    autoload :Associations
+    autoload :AttributeMethods
+    autoload :Base
+    autoload :ContentModel
+    autoload :Reflection
+    autoload :Relationship
+    autoload :Datastream
+    autoload :Delegating
+    autoload :Model
+    autoload :MetadataDatastream
+    autoload :MetadataDatastreamHelper
+    autoload :NokogiriDatastream
+    autoload :Property
+    autoload :QualifiedDublinCoreDatastream
+    autoload :RelsExtDatastream
+    autoload :SemanticNode
+    autoload :NestedAttributes
+
+  end
+  
   
   include Loggable
   
@@ -166,25 +180,12 @@ module ActiveFedora #:nodoc:
 
 end
 
-
-
-
-
-# if ![].respond_to?(:count)
-#   class Array
-#     puts "active_fedora is Adding count method to Array"
-#       def count(&action)
-#         count = 0
-#          self.each { |v| count = count + 1}
-#   #      self.each { |v| count = count + 1 if action.call(v) }
-#         return count
-#       end
-#   end
-# end
-
 module ActiveFedora
   class ServerError < Fedora::ServerError; end # :nodoc:
   class ObjectNotFoundError < RuntimeError; end # :nodoc:
   class PredicateMappingsNotFoundError < RuntimeError; end # :nodoc:
+  class UnknownAttributeError < NoMethodError; end; # :nodoc:
+  class ActiveFedoraConfigurationException < Exception; end # :nodoc:
+
 end
 
