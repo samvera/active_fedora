@@ -1,13 +1,11 @@
-require 'util/class_level_inheritable_attributes'
 require "solrizer"
 require 'nokogiri'
 require "loggable"
 
-require 'active_support/core_ext/kernel/singleton_class'
-
-require 'active_support/core_ext/class/attribute'
+#require 'active_support/core_ext/kernel/singleton_class'
+#require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/class/inheritable_attributes'
-require 'active_support/inflector'
+#require 'active_support/inflector'
 
 SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
@@ -35,7 +33,6 @@ module ActiveFedora
   # =Implementation
   # This class is really a facade for a basic Fedora::FedoraObject, which is stored internally.
   class Base
-    include MediaShelfClassLevelInheritableAttributes
     include SemanticNode
     include Solrizer::FieldNameMapper
     include Loggable
@@ -45,7 +42,10 @@ module ActiveFedora
 
     include Associations, Reflection
     
-    ms_inheritable_attributes  :ds_specs, :class_named_datastreams_desc
+    #ms_inheritable_attributes  :ds_specs, :class_named_datastreams_desc
+    class_inheritable_accessor  :ds_specs, :named_datastreams_desc
+    self.named_datastreams_desc = {}
+    self.ds_specs = {}
     attr_accessor :named_datastreams_desc
     
 
@@ -119,8 +119,8 @@ module ActiveFedora
     #execute the block, but stores it at the class level, to be executed
     #by any future instantiations.
     def self.has_metadata(args, &block)
-      @ds_specs ||= Hash.new
-      @ds_specs[args[:name]]= [args[:type], args.fetch(:label,""), block]
+      #@ds_specs ||= Hash.new
+      ds_specs[args[:name]]= [args[:type], args.fetch(:label,""), block]
     end
 
     def method_missing(name, *args)
@@ -742,9 +742,9 @@ module ActiveFedora
     #   "external_images=>{:prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'E'}}
     #
     # This hash is later used when adding a named datastream such as an "audio_file" as defined above.
-    def self.named_datastreams_desc
-      @class_named_datastreams_desc ||= {}
-    end
+    # def self.named_datastreams_desc
+    #   @class_named_datastreams_desc ||= {}
+    # end
 
     # 
     # Relationships Management
@@ -1124,11 +1124,12 @@ module ActiveFedora
     include Model
     include Solrizer::FieldNameMapper
     include Loggable
-    include Associations, Reflection
     include ActiveModel::Conversion
     extend ActiveModel::Naming
     include Delegating
+    include Associations
     include NestedAttributes
+    include Reflection
   end
 
 end

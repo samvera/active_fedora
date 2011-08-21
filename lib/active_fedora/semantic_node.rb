@@ -2,12 +2,15 @@ require 'active_fedora/relationships_helper'
 
 module ActiveFedora
   module SemanticNode 
-    include MediaShelfClassLevelInheritableAttributes
-    
-    ms_inheritable_attributes  :class_relationships, :internal_uri
-    
-    attr_accessor :internal_uri, :relationships_are_dirty, :load_from_solr
-    
+    #ms_inheritable_attributes  :class_relationships, :internal_uri
+    #attr_accessor :internal_uri, :relationships_are_dirty, :load_from_solr
+    extend ActiveSupport::Concern
+    included do
+      class_inheritable_accessor  :class_relationships, :internal_uri, :class_named_relationships_desc
+      self.class_relationships = {}
+      self.class_named_relationships_desc = {}
+    end
+    attr_accessor :internal_uri, :named_relationship_desc, :relationships_are_dirty, :load_from_solr
 
     def self.included(klass)
       klass.extend(ClassMethods)
@@ -332,7 +335,8 @@ module ActiveFedora
       # Results in the following returned by named_relationships_desc
       #  {:self=>{"audio_records"=>{:type=>AudioRecord, :singular=>nil, :predicate=>:has_part, :inbound=>false}}}
       def named_relationships_desc
-        @class_named_relationships_desc ||= Hash[:self => {}]
+        #@class_named_relationships_desc ||= Hash[:self => {}]
+        class_named_relationships_desc
       end
       
       # ** EXPERIMENTAL **
@@ -483,7 +487,8 @@ module ActiveFedora
       # @example
       #   ds.relationships # => {:self=>{:has_model=>["afmodel:SimpleThing"],:has_part=>["demo:20"]},:inbound=>{:is_part_of=>["demo:6"]} 
       def relationships
-        @class_relationships ||= Hash[:self => {}]
+        #@class_relationships ||= Hash[:self => {}]
+        class_relationships
       end
     
     
