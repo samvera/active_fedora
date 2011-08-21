@@ -1,11 +1,11 @@
 require 'spec_helper'
 
 class Library < ActiveFedora::Base 
-  has_many :books, :property=>:has_collection_member
+  has_many :books, :property=>:has_constituent
 end
 
 class Book < ActiveFedora::Base 
-  belongs_to :library, :property=>:has_collection_member
+  belongs_to :library, :property=>:has_constituent
 end
 
 describe ActiveFedora::Base do

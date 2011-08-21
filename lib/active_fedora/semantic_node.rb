@@ -3,7 +3,6 @@ require 'active_fedora/relationships_helper'
 module ActiveFedora
   module SemanticNode 
     #ms_inheritable_attributes  :class_relationships, :internal_uri
-    #attr_accessor :internal_uri, :relationships_are_dirty, :load_from_solr
     extend ActiveSupport::Concern
     included do
       class_inheritable_accessor  :class_relationships, :internal_uri, :class_named_relationships_desc
@@ -11,6 +10,7 @@ module ActiveFedora
       self.class_named_relationships_desc = {}
     end
     attr_accessor :internal_uri, :named_relationship_desc, :relationships_are_dirty, :load_from_solr
+    #TODO I think we can remove named_relationship_desc from attr_accessor  - jcoyne
 
     def self.included(klass)
       klass.extend(ClassMethods)
@@ -282,7 +282,7 @@ module ActiveFedora
           register_predicate(:inbound, predicate)
           create_inbound_relationship_finders(name, predicate, opts)
         else
-          #raise "Duplicate use of predicate for outbound relationship name not allowed" if predicate_exists_with_different_relationship_name?(:self,name,predicate)
+          #raise "Duplicate use of predicate for named outbound relationship \"#{predicate.inspect}\" not allowed" if named_predicate_exists_with_different_name?(:self,name,predicate)
           register_relationship_desc(:self, name, predicate, opts)
           register_predicate(:self, predicate)
           create_relationship_name_methods(name)
@@ -335,8 +335,8 @@ module ActiveFedora
       # Results in the following returned by named_relationships_desc
       #  {:self=>{"audio_records"=>{:type=>AudioRecord, :singular=>nil, :predicate=>:has_part, :inbound=>false}}}
       def named_relationships_desc
-        #@class_named_relationships_desc ||= Hash[:self => {}]
-        class_named_relationships_desc
+        @class_named_relationships_desc ||= Hash[:self => {}]
+        #class_named_relationships_desc
       end
       
       # ** EXPERIMENTAL **
@@ -487,8 +487,8 @@ module ActiveFedora
       # @example
       #   ds.relationships # => {:self=>{:has_model=>["afmodel:SimpleThing"],:has_part=>["demo:20"]},:inbound=>{:is_part_of=>["demo:6"]} 
       def relationships
-        #@class_relationships ||= Hash[:self => {}]
-        class_relationships
+        @class_relationships ||= Hash[:self => {}]
+        #class_relationships
       end
     
     

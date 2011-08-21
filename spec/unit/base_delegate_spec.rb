@@ -3,7 +3,7 @@ require File.join( File.dirname(__FILE__), "../spec_helper" )
 describe ActiveFedora::Base do
 
   describe "first level delegation" do 
-    class BarStream < ActiveFedora::NokogiriDatastream 
+    class BarStream2 < ActiveFedora::NokogiriDatastream 
       set_terminology do |t|
         t.root(:path=>"first", :xmlns=>"urn:foobar")
         t.duck()
@@ -18,7 +18,7 @@ describe ActiveFedora::Base do
       end
     end
 
-    class BarHistory < ActiveFedora::Base
+    class BarHistory2 < ActiveFedora::Base
       has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"someData" do |m|
         m.field "fubar", :string
         m.field "bandana", :string
@@ -31,13 +31,13 @@ describe ActiveFedora::Base do
         m.field "fubar", :text
       end 
 
-      has_metadata :type=>BarStream, :name=>"xmlish"
+      has_metadata :type=>BarStream2, :name=>"xmlish"
       delegate :fubar, :to=>'withText', :unique=>true
       delegate :duck, :to=>'xmlish', :unique=>true
       delegate :cow, :to=>'xmlish'
     end
     before :each do
-      @n = BarHistory.new(:pid=>"monkey:99")
+      @n = BarHistory2.new(:pid=>"monkey:99")
     end
     it "should save a delegated property uniquely" do
       @n.fubar="Quack"

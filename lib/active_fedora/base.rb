@@ -43,8 +43,8 @@ module ActiveFedora
     include Associations, Reflection
     
     #ms_inheritable_attributes  :ds_specs, :class_named_datastreams_desc
-    class_inheritable_accessor  :ds_specs, :named_datastreams_desc
-    self.named_datastreams_desc = {}
+    class_inheritable_accessor  :ds_specs, :class_named_datastreams_desc
+    self.class_named_datastreams_desc = {}
     self.ds_specs = {}
     attr_accessor :named_datastreams_desc
     
@@ -742,9 +742,9 @@ module ActiveFedora
     #   "external_images=>{:prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'E'}}
     #
     # This hash is later used when adding a named datastream such as an "audio_file" as defined above.
-    # def self.named_datastreams_desc
-    #   @class_named_datastreams_desc ||= {}
-    # end
+    def self.named_datastreams_desc
+      self.class_named_datastreams_desc ||= {}
+    end
 
     # 
     # Relationships Management
