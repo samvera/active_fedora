@@ -46,7 +46,6 @@ describe ActiveFedora::Base do
     end
     describe "update_attributes" do
       it "should set attributes and save " do
-        pending
         @n.update_attributes(:fubar=>"baz", :duck=>"Quack")
         @q = BarHistory.find('monkey:99')
         @q.fubar.should == "baz"
