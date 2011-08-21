@@ -62,7 +62,7 @@ module ActiveFedora
             reflection.options[:autosave] = true
             # add_autosave_association_callbacks(reflection)
             ## TODO this ought to work, but doesn't seem to do the class inheitance right
-            #nested_attributes_options[association_name.to_sym] = options
+            nested_attributes_options[association_name.to_sym] = options
             type = (reflection.collection? ? :collection : :one_to_one)
 
             # def pirate_attributes=(attributes)
