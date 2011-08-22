@@ -1,10 +1,11 @@
+require 'uri'
 module ActiveFedora
   
   class Relationship 
     
     attr_accessor :subject, :predicate, :object, :is_literal, :data_type
     def initialize(attr={})
-      attr.merge!({:is_literal => false})
+      attr = {:is_literal => false}.merge(attr)
       self.subject = attr[:subject]
       @predicate = attr[:predicate]
       self.object = attr[:object]
@@ -21,7 +22,7 @@ module ActiveFedora
     end
     
     def object=(object)
-      @object = generate_uri(object)
+      @object = (is_literal)? object : generate_uri(object)
     end
     
     def object_pid=(pid)
@@ -31,6 +32,8 @@ module ActiveFedora
     def generate_uri(input)
       if input.class == Symbol || input == nil
         return input
+      elsif input.is_a? URI::Generic
+        return input.to_s
       elsif input.respond_to?(:pid)
         return "info:fedora/#{input.pid}"
       else
