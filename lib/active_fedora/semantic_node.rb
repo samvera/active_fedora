@@ -438,7 +438,12 @@ module ActiveFedora
             rel_predicate, xmlns = self.class.find_predicate(predicate)
           end
           # puts ". #{predicate} #{target} #{xmlns}"
-          xml.root.elements["rdf:Description"].add_element(rel_predicate, {"xmlns" => "#{xmlns}", "rdf:resource"=>target})
+          literal = URI.parse(target).scheme.nil?
+          if literal
+            xml.root.elements["rdf:Description"].add_element(rel_predicate, {"xmlns" => "#{xmlns}"}).add_text(target)
+          else
+            xml.root.elements["rdf:Description"].add_element(rel_predicate, {"xmlns" => "#{xmlns}", "rdf:resource"=>target})
+          end
         end
       end
       xml.to_s
