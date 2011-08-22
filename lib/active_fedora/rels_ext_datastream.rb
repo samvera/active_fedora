@@ -1,4 +1,5 @@
 require 'solrizer/field_name_mapper'
+require 'uri'
 
 module ActiveFedora
   class RelsExtDatastream < Datastream
@@ -44,8 +45,9 @@ module ActiveFedora
             logger.warn "You have a predicate without a namespace #{f.name}. Verify your rels-ext is correct."
             predicate = "#{f.name}"
           end
-          object = f["resource"] ? f["resource"] : f.inner_text
-          r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>object)
+          is_obj = f["resource"]
+          object = is_obj ? f["resource"] : f.inner_text
+          r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>object, :is_literal=>!is_obj)
           tmpl.add_relationship(r)
       end
       tmpl.send(:dirty=, false)
@@ -84,11 +86,15 @@ module ActiveFedora
         unless value.nil? 
           if value.is_a? Array
             value.each do |obj|
-              r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj)
+              o_uri = URI.parse(obj)
+              literal = o_uri.scheme.nil?
+              r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj, :is_literal=>literal)
               add_relationship(r)
             end
           else
-            r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>value)
+            o_uri = URI.parse(value)
+            literal = o_uri.scheme.nil?
+            r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>value, :is_literal=>literal)
             add_relationship(r)
           end
         end

@@ -726,8 +726,8 @@ module ActiveFedora
     # Add a Rels-Ext relationship to the Object.
     # @param predicate
     # @param object Either a string URI or an object that responds to .pid 
-    def add_relationship(predicate, obj)
-      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj)
+    def add_relationship(predicate, obj, literal=false)
+      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj, :is_literal=>literal)
       unless relationship_exists?(r.subject, r.predicate, r.object)
         rels_ext.add_relationship(r)
         #need to call here to indicate update of named_relationships
@@ -741,8 +741,8 @@ module ActiveFedora
     # Remove a Rels-Ext relationship from the Object.
     # @param predicate
     # @param object Either a string URI or an object that responds to .pid 
-    def remove_relationship(predicate, obj)
-      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj)
+    def remove_relationship(predicate, obj, literal=false)
+      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj, :is_literal=>literal)
       rels_ext.remove_relationship(r)
       #need to call here to indicate update of named_relationships
       @relationships_are_dirty = true

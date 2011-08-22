@@ -95,6 +95,7 @@ module ActiveFedora
         objects.each do |object|
           if (response_format == :uri)    
             #create a Relationship object so that it generates the appropriate uri
+            #inbound relationships are always object properties
             r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>object)
             items.push(r.object)
           else
