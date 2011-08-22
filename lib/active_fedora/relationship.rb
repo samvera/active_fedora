@@ -6,10 +6,10 @@ module ActiveFedora
     attr_accessor :subject, :predicate, :object, :is_literal, :data_type
     def initialize(attr={})
       attr = {:is_literal => false}.merge(attr)
+      @is_literal = attr[:is_literal] # must happen first
       self.subject = attr[:subject]
       @predicate = attr[:predicate]
       self.object = attr[:object]
-      @is_literal = attr[:is_literal]
       @data_type = attr[:data_type]
     end
     
