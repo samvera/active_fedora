@@ -47,6 +47,13 @@ describe ActiveFedora::Base do
       result.inner_object.should be_kind_of(Fedora::FedoraObject)    
     end
 
+    it "should allow initialization with nil" do  
+      # for doing AFObject.new(params[:foo]) when nothing is in params[:foo]
+      Fedora::Repository.instance.expects(:save).never
+      result = ActiveFedora::Base.new(nil)  
+      result.inner_object.should be_kind_of(Fedora::FedoraObject)    
+    end
+
   end
 
   describe ".internal_uri" do

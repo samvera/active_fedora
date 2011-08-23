@@ -86,7 +86,8 @@ module ActiveFedora
     # 
     # If there is a pid, we're re-hydrating an existing object, and new object is false. Once the @inner_object is stored,
     # we configure any defined datastreams.
-    def initialize(attrs = {})
+    def initialize(attrs = nil)
+      attrs = {} if attrs.nil?
       unless attrs[:pid]
         if attrs[:namespace]
           attrs = attrs.merge!({:pid=>Fedora::Repository.instance.nextid({:namespace=>attrs[:namespace]})})
