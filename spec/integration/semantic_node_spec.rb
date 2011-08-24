@@ -64,7 +64,7 @@ describe ActiveFedora::SemanticNode do
     @special_container4.add_relationship(:has_model,"SpecialContainer")
     @special_container4.save
 
-    #even though adding container3 and 3 special containers, it should only include the special containers when returning via named finder methods
+    #even though adding container3 and 3 special containers, it should only include the special containers when returning via relationship name finder methods
     #also should only return special part similarly
     @test_object_query = SpecNodeQueryParam.new
     @test_object_query.add_relationship(:is_member_of, @container3)
@@ -176,28 +176,28 @@ describe ActiveFedora::SemanticNode do
     end
 
     it "should return a solr query for an inbound relationship" do
-      @test_object_query.special_parts_query.should == "#{@test_object_query.named_relationship_predicates[:inbound]['special_parts']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialPart"
+      @test_object_query.special_parts_query.should == "#{@test_object_query.relationship_predicates[:inbound]['special_parts']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialPart"
     end
   end
 
-  describe "inbound named relationship query" do
+  describe "inbound relationship query" do
     it "should return a properly formatted query for a relationship that has a query param defined" do
-      SpecNodeQueryParam.inbound_named_relationship_query(@test_object_query.pid,"special_parts").should == "#{@test_object_query.named_relationship_predicates[:inbound]['special_parts']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialPart"
+      SpecNodeQueryParam.inbound_relationship_query(@test_object_query.pid,"special_parts").should == "#{@test_object_query.relationship_predicates[:inbound]['special_parts']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialPart"
     end
 
     it "should return a properly formatted query for a relationship that does not have a query param defined" do
-      SpecNodeQueryParam.inbound_named_relationship_query(@test_object_query.pid,"parts").should == "is_part_of_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')}"
+      SpecNodeQueryParam.inbound_relationship_query(@test_object_query.pid,"parts").should == "is_part_of_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')}"
     end
   end
 
-  describe "outbound named relationship query" do
+  describe "outbound relationship query" do
     it "should return a properly formatted query for a relationship that has a query param defined" do
       expected_string = ""
       @test_object_query.containers_ids.each_with_index do |id,index|
         expected_string << " OR " if index > 0
         expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialContainer)"
       end
-      SpecNodeQueryParam.outbound_named_relationship_query("special_containers",@test_object_query.containers_ids).should == expected_string
+      SpecNodeQueryParam.outbound_relationship_query("special_containers",@test_object_query.containers_ids).should == expected_string
     end
 
     it "should return a properly formatted query for a relationship that does not have a query param defined" do
@@ -206,11 +206,11 @@ describe ActiveFedora::SemanticNode do
         expected_string << " OR " if index > 0
         expected_string << "id:" + id.gsub(/(:)/, '\\:')
       end
-      SpecNodeQueryParam.outbound_named_relationship_query("containers",@test_object_query.containers_ids).should == expected_string
+      SpecNodeQueryParam.outbound_relationship_query("containers",@test_object_query.containers_ids).should == expected_string
     end
   end
 
-  describe "bidirectional named relationship query" do
+  describe "bidirectional relationship query" do
     it "should return a properly formatted query for a relationship that has a query param defined" do
       expected_string = ""
       @test_object_query.bi_containers_outbound_ids.each_with_index do |id,index|
@@ -218,8 +218,8 @@ describe ActiveFedora::SemanticNode do
         expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialContainer)"
       end
       expected_string << " OR "
-      expected_string << "(#{@test_object_query.named_relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialContainer)"
-      SpecNodeQueryParam.bidirectional_named_relationship_query(@test_object_query.pid,"bi_special_containers",@test_object_query.bi_containers_outbound_ids).should == expected_string
+      expected_string << "(#{@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialContainer)"
+      SpecNodeQueryParam.bidirectional_relationship_query(@test_object_query.pid,"bi_special_containers",@test_object_query.bi_containers_outbound_ids).should == expected_string
     end
 
     it "should return a properly formatted query for a relationship that does not have a query param defined" do
@@ -229,8 +229,8 @@ describe ActiveFedora::SemanticNode do
         expected_string << "id:" + id.gsub(/(:)/, '\\:')
       end
       expected_string << " OR "
-      expected_string << "(#{@test_object_query.named_relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')})"
-      SpecNodeQueryParam.bidirectional_named_relationship_query(@test_object_query.pid,"bi_containers",@test_object_query.bi_containers_outbound_ids).should == expected_string
+      expected_string << "(#{@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')})"
+      SpecNodeQueryParam.bidirectional_relationship_query(@test_object_query.pid,"bi_containers",@test_object_query.bi_containers_outbound_ids).should == expected_string
     end
   end
 
@@ -344,13 +344,13 @@ describe ActiveFedora::SemanticNode do
         expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialContainer)"
       end
       expected_string << " OR "
-      expected_string << "(#{@test_object_query.named_relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialContainer)"
+      expected_string << "(#{@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialContainer)"
       @test_object_query.bi_special_containers_query.should == expected_string
     end
   end
 
-  #putting this test here instead of named_relationships_helper because testing that named_relationships hash gets refreshed if the relationships hash is changed
-  describe "named_relationships" do
+  #putting this test here instead of relationships_helper because testing that relationships_by_name hash gets refreshed if the relationships hash is changed
+  describe "relationships_by_name" do
     class MockSemNamedRelationships
       include ActiveFedora::SemanticNode
       has_relationship "testing", :has_part
@@ -358,18 +358,18 @@ describe ActiveFedora::SemanticNode do
       has_relationship "testing_inbound", :has_part, :inbound=>true
     end
 
-    it 'should automatically update the named_relationships if relationships has changed (no refresh of named_relationships hash unless relationships hash has changed' do
+    it 'should automatically update the relationships_by_name if relationships has changed (no refresh of relationships_by_name hash unless relationships hash has changed' do
       @test_object2 = MockSemNamedRelationships.new
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockSemNamedRelationships)}) 
       @test_object2.add_relationship(r)
       #should return expected named relationships
-      @test_object2.named_relationships.should == {:self=>{"testing"=>[],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
       r3 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@test_object})
       @test_object2.add_relationship(r3)
-      @test_object2.named_relationships.should == {:self=>{"testing"=>[r3.object],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
       r4 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_member,:object=>"3"})
       @test_object2.add_relationship(r4)
-      @test_object2.named_relationships.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]},:inbound=>{"testing_inbound"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]},:inbound=>{"testing_inbound"=>[]}}
     end
   end
 end

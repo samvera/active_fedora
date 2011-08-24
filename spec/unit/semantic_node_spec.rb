@@ -230,7 +230,7 @@ describe ActiveFedora::SemanticNode do
       @test_object2.should_not respond_to(:testing_inbound_append)
       @test_object2.should_not respond_to(:testing_inbound_remove)
       
-      @test_object2.named_relationships_desc.should == 
+      @test_object2.relationships_desc.should == 
       {:inbound=>{"testing_inbound"=>{:type=>SpecNode2, 
                                      :predicate=>:has_part, 
                                       :inbound=>true, 
@@ -273,7 +273,7 @@ describe ActiveFedora::SemanticNode do
       SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
       local_node = SpecNode.new()
       local_node.expects(:pid).returns("test:sample_pid")
-      SpecNode.expects(:named_relationships_desc).returns({:inbound=>{"parts"=>{:predicate=>:is_part_of}}}).at_least_once()
+      SpecNode.expects(:relationships_desc).returns({:inbound=>{"parts"=>{:predicate=>:is_part_of}}}).at_least_once()
       ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid", :rows=>25).returns(solr_result)
       Fedora::Repository.expects(:instance).returns(mock_repo).times(3)
       Kernel.expects(:const_get).with("AudioRecord").returns("AudioRecord").times(3)
@@ -287,7 +287,7 @@ describe ActiveFedora::SemanticNode do
       mock_repo = mock("repo")
       mock_repo.expects(:find_model).never
       local_node.expects(:pid).returns("test:sample_pid")
-      SpecNode.expects(:named_relationships_desc).returns({:inbound=>{"constituents"=>{:predicate=>:is_constituent_of}}}).at_least_once()
+      SpecNode.expects(:relationships_desc).returns({:inbound=>{"constituents"=>{:predicate=>:is_constituent_of}}}).at_least_once()
       ActiveFedora::SolrService.instance.conn.expects(:query).with("is_constituent_of_s:info\\:fedora/test\\:sample_pid", :rows=>101).returns(solr_result)
       local_node.constituents(:response_format => :solr, :rows=>101).should equal(solr_result)
     end
@@ -297,7 +297,7 @@ describe ActiveFedora::SemanticNode do
       SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
       local_node = SpecNode.new
       local_node.expects(:pid).returns("test:sample_pid")
-      SpecNode.expects(:named_relationships_desc).returns({:inbound=>{"parts"=>{:predicate=>:is_part_of}}}).at_least_once() 
+      SpecNode.expects(:relationships_desc).returns({:inbound=>{"parts"=>{:predicate=>:is_part_of}}}).at_least_once() 
       ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid", :rows=>25).returns(mock("solr result", :hits => [Hash["id"=>"pid1"], Hash["id"=>"pid2"]]))
       local_node.parts(:response_format => :id_array).should == ["pid1", "pid2"]
     end
@@ -309,10 +309,10 @@ describe ActiveFedora::SemanticNode do
       local_node.parts_ids
     end
 
-    it "resulting _query finder should call named_relationship_query" do
+    it "resulting _query finder should call relationship_query" do
       SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
       local_node = SpecNode.new
-      local_node.expects(:named_relationship_query).with("parts")
+      local_node.expects(:relationship_query).with("parts")
       local_node.parts_query
     end
     
@@ -393,10 +393,10 @@ describe ActiveFedora::SemanticNode do
       end
     end
 
-    it "resulting _query finder should call named_relationship_query" do
+    it "resulting _query finder should call relationship_query" do
       SpecNode.create_outbound_relationship_finders("containers", :is_member_of)
       local_node = SpecNode.new
-      local_node.expects(:named_relationship_query).with("containers")
+      local_node.expects(:relationship_query).with("containers")
       local_node.containers_query
     end
   end
@@ -448,10 +448,10 @@ describe ActiveFedora::SemanticNode do
       @local_node.should respond_to(:all_parts_from_solr)
     end
 
-    it "resulting _query finder should call named_relationship_query" do
+    it "resulting _query finder should call relationship_query" do
       SpecNode.create_bidirectional_relationship_finders("containers", :is_member_of, :has_member)
       local_node = SpecNode.new
-      local_node.expects(:named_relationship_query).with("containers")
+      local_node.expects(:relationship_query).with("containers")
       local_node.containers_query
     end
   end
@@ -462,7 +462,7 @@ describe ActiveFedora::SemanticNode do
       SpecNode.has_bidirectional_relationship("all_parts", :has_part, :is_part_of)
     end
 
-    it "should have named_relationship and relationship hashes contain bidirectionally related objects" do
+    it "should have relationships_by_name and relationships hashes contain bidirectionally related objects" do
       SpecNode.has_bidirectional_relationship("all_parts", :has_part, :is_part_of)
       @local_node = SpecNode.new
       @local_node.pid = "mypid1"
@@ -477,8 +477,8 @@ describe ActiveFedora::SemanticNode do
       @local_node2.add_relationship(r3)
       @local_node.relationships.should == {:self=>{:has_model=>[r.object],:has_part=>[r2.object]},:inbound=>{:is_part_of=>[]}}
       @local_node2.relationships.should == {:self=>{:has_model=>[r.object],:has_part=>[r3.object]},:inbound=>{:is_part_of=>[]}}
-      @local_node.named_relationships.should == {:self=>{"all_parts_outbound"=>[r2.object]},:inbound=>{"all_parts_inbound"=>[]}}
-      @local_node2.named_relationships.should == {:self=>{"all_parts_outbound"=>[r3.object]},:inbound=>{"all_parts_inbound"=>[]}}
+      @local_node.relationships_by_name.should == {:self=>{"all_parts_outbound"=>[r2.object]},:inbound=>{"all_parts_inbound"=>[]}}
+      @local_node2.relationships_by_name.should == {:self=>{"all_parts_outbound"=>[r3.object]},:inbound=>{"all_parts_inbound"=>[]}}
     end
   end
   
