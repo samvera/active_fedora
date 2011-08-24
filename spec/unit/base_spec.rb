@@ -617,11 +617,11 @@ describe ActiveFedora::Base do
     FooHistory.solr_search("pid: foobar", {:ding=>:dang}).should == {:baz=>:bif}
   end
 
-  it 'should provide #named_relationships' do
-    @test_object.should respond_to(:named_relationships)
+  it 'should provide #relationships_by_name' do
+    @test_object.should respond_to(:relationships_by_name)
   end
   
-  describe '#named_relationships' do
+  describe '#relationships_by_name' do
     
     class MockNamedRelationships < ActiveFedora::Base
       has_relationship "testing", :has_part, :type=>ActiveFedora::Base
@@ -629,25 +629,25 @@ describe ActiveFedora::Base do
       has_relationship "testing_inbound", :has_part, :type=>ActiveFedora::Base, :inbound=>true
     end
     
-    it 'should return current named relationships' do
+    it 'should return current relationships by name' do
       Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
       @test_object2 = MockNamedRelationships.new
       @test_object2.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(MockNamedRelationships))
       @test_object.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(ActiveFedora::Base))
       #should return expected named relationships
-      @test_object2.named_relationships
-      @test_object2.named_relationships.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      @test_object2.relationships_by_name
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]}}
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:dummy,:object=>@test_object})
-      @test_object2.add_named_relationship("testing",@test_object)
-      @test_object2.named_relationships.should == {:self=>{"testing"=>[r.object],"testing2"=>[]}}
+      @test_object2.add_relationship_by_name("testing",@test_object)
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r.object],"testing2"=>[]}}
     end 
   end
 
   
-  describe '#create_named_relationship_methods' do
+  describe '#create_relationship_name_methods' do
     class MockCreateNamedRelationshipMethodsBase < ActiveFedora::Base
-      register_named_relationship :self, "testing", :is_part_of, :type=>ActiveFedora::Base
-      create_named_relationship_methods "testing"
+      register_relationship_desc :self, "testing", :is_part_of, :type=>ActiveFedora::Base
+      create_relationship_name_methods "testing"
     end
       
     it 'should append and remove using helper methods for each outbound relationship' do
@@ -662,9 +662,9 @@ describe ActiveFedora::Base do
       @test_object2.testing_append(@test_object)
       #create relationship to access generate_uri method for an object
       r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object)
-      @test_object2.named_relationships.should == {:self=>{"testing"=>[r.object]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r.object]}}
       @test_object2.testing_remove(@test_object)
-      @test_object2.named_relationships.should == {:self=>{"testing"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[]}}
     end
   end
 end

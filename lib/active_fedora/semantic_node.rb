@@ -1,9 +1,9 @@
-require 'active_fedora/named_relationship_helper'
+require 'active_fedora/relationships_helper'
 
 module ActiveFedora
   module SemanticNode 
     include MediaShelfClassLevelInheritableAttributes
-    include ActiveFedora::NamedRelationshipHelper
+    include ActiveFedora::RelationshipsHelper
     ms_inheritable_attributes  :class_relationships, :internal_uri
     
     attr_accessor :internal_uri, :relationships_are_dirty, :load_from_solr
@@ -75,7 +75,7 @@ module ActiveFedora
 
     def inbound_relationships(response_format=:uri)
       rel_values = {}
-      inbound_named_relationship_predicates.each_pair do |name,predicate|
+      inbound_relationship_predicates.each_pair do |name,predicate|
         objects = self.send("#{name}",{:response_format=>response_format})
         items = []
         objects.each do |object|
@@ -176,10 +176,10 @@ module ActiveFedora
     end
 
     module ClassMethods
-      include ActiveFedora::NamedRelationshipHelper::ClassMethods
+      include ActiveFedora::RelationshipsHelper::ClassMethods
 
       # Allows for a relationship to be treated like any other attribute of a model class. You define
-      # named relationships in your model class using this method.  You then have access to several
+      # relationships in your model class using this method.  You then have access to several
       # helper methods to list, append, and remove objects from the list of relationships. 
       # ====Examples to define two relationships 
       #  class AudioRecord < ActiveFedora::Base
@@ -221,15 +221,15 @@ module ActiveFedora
       def has_relationship(name, predicate, opts = {})
         opts = {:singular => nil, :inbound => false}.merge(opts)
         if opts[:inbound] == true
-          #raise "Duplicate use of predicate for named inbound relationship not allowed" if named_predicate_exists_with_different_name?(:inbound,name,predicate)
-          register_named_relationship(:inbound, name, predicate, opts)
+          #raise "Duplicate use of predicate for inbound relationship name not allowed" if predicate_exists_with_different_relationship_name?(:inbound,name,predicate)
+          register_relationship_desc(:inbound, name, predicate, opts)
           register_predicate(:inbound, predicate)
           create_inbound_relationship_finders(name, predicate, opts)
         else
-          #raise "Duplicate use of predicate for named outbound relationship not allowed" if named_predicate_exists_with_different_name?(:self,name,predicate)
-          register_named_relationship(:self, name, predicate, opts)
+          #raise "Duplicate use of predicate for outbound relationship name not allowed" if predicate_exists_with_different_relationship_name?(:self,name,predicate)
+          register_relationship_desc(:self, name, predicate, opts)
           register_predicate(:self, predicate)
-          create_named_relationship_methods(name)
+          create_relationship_name_methods(name)
           create_outbound_relationship_finders(name, predicate, opts)
         end
       end
@@ -257,7 +257,7 @@ module ActiveFedora
         class_eval <<-END
         def #{name}(opts={})
           opts = {:rows=>25}.merge(opts)
-          query = self.class.inbound_named_relationship_query(self.pid,"#{name}")
+          query = self.class.inbound_relationship_query(self.pid,"#{name}")
           solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
           if opts[:response_format] == :solr
             return solr_result
@@ -282,7 +282,7 @@ module ActiveFedora
           #{name}(:response_format => :load_from_solr)
         end
         def #{name}_query
-          named_relationship_query("#{name}")
+          relationship_query("#{name}")
         end
         END
       end
@@ -299,7 +299,7 @@ module ActiveFedora
           if opts[:response_format] == :id_array && !self.class.relationship_has_query_params?(:self,"#{name}")
             return id_array
           else
-            query = self.class.outbound_named_relationship_query("#{name}",id_array)
+            query = self.class.outbound_relationship_query("#{name}",id_array)
             solr_result = SolrService.instance.conn.query(query)
             if opts[:response_format] == :solr
               return solr_result
@@ -323,7 +323,7 @@ module ActiveFedora
           #{name}(:response_format => :load_from_solr)
         end
         def #{name}_query
-          named_relationship_query("#{name}")
+          relationship_query("#{name}")
         end
         END
       end
@@ -342,21 +342,21 @@ module ActiveFedora
         has_relationship(inbound_method_name, inbound_predicate, opts.merge!(:inbound=>true))
 
         #create methods that mirror the outbound append and remove with our bidirectional name, assume just add and remove locally        
-        create_bidirectional_named_relationship_methods(name,outbound_method_name)
+        create_bidirectional_relationship_name_methods(name,outbound_method_name)
 
         class_eval <<-END
         def #{name}(opts={})
           opts = {:rows=>25}.merge(opts)
           if opts[:response_format] == :solr || opts[:response_format] == :load_from_solr
             outbound_id_array = []
-            predicate = outbound_named_relationship_predicates["#{name}_outbound"]
+            predicate = outbound_relationship_predicates["#{name}_outbound"]
             if !outbound_relationships[predicate].nil? 
               outbound_relationships[predicate].each do |rel|
                 outbound_id_array << rel.gsub("info:fedora/", "")
               end
             end
             #outbound_id_array = #{outbound_method_name}(:response_format=>:id_array)
-            query = self.class.bidirectional_named_relationship_query(self.pid,"#{name}",outbound_id_array)
+            query = self.class.bidirectional_relationship_query(self.pid,"#{name}",outbound_id_array)
             solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
             
             if opts[:response_format] == :solr
@@ -378,7 +378,7 @@ module ActiveFedora
           #{name}(:response_format => :load_from_solr)
         end
         def #{name}_query
-          named_relationship_query("#{name}")
+          relationship_query("#{name}")
         end
         END
       end

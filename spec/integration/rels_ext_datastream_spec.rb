@@ -139,15 +139,15 @@ describe ActiveFedora::RelsExtDatastream do
       test_from_solr_object5.rels_ext.from_solr(solr_doc)
       
       test_from_solr_object2.relationships.should == {:self=>{:has_part=>[r3.object],:has_member=>[r4.object],:has_model=>[model_rel.object]}}
-      test_from_solr_object2.named_relationships.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]}}
+      test_from_solr_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]}}
       test_from_solr_object3.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
-      test_from_solr_object3.named_relationships.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      test_from_solr_object3.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]}}
       test_from_solr_object4.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
-      test_from_solr_object4.named_relationships.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      test_from_solr_object4.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]}}
       test_from_solr_object5.relationships.should == {:self=>{:has_model=>[model_rel.object],
                                                              :has_part=>[r2.object],
                                                              :has_member=>[r3.object]}}
-      test_from_solr_object5.named_relationships.should == {:self=>{"testing"=>[r2.object],"testing2"=>[r3.object]}}
+      test_from_solr_object5.relationships_by_name.should == {:self=>{"testing"=>[r2.object],"testing2"=>[r3.object]}}
     end
   end
 end
