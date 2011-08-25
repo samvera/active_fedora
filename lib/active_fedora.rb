@@ -1,7 +1,6 @@
 require 'rubygems'
 require "bundler/setup"
-# not allowed in gems
-#Bundler.require(:default)
+Bundler.require(:default)
 
 gem 'solr-ruby'
 require "loggable"
