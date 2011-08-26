@@ -3,6 +3,8 @@ require File.join( File.dirname(__FILE__), "../spec_helper" )
 require 'active_fedora'
 require 'xmlsimple'
 
+@@last_pid = 0
+
 class SpecNamedNode
   include ActiveFedora::RelationshipsHelper
   
@@ -54,9 +56,9 @@ describe ActiveFedora::RelationshipsHelper do
     end
   end
   
-  describe '#assert_kind_of_model' do
-    it 'should provide #assert_kind_of_model' do
-      @test_object.should respond_to(:assert_kind_of_model)
+  describe '#assert_conforms_to' do
+    it 'should provide #assert_conforms_to' do
+      @test_object.should respond_to(:assert_conforms_to)
     end
 
     it 'should correctly assert if an object is the type of model supplied' do
@@ -65,7 +67,7 @@ describe ActiveFedora::RelationshipsHelper do
       #has_model relationship does not get created until save called so need to add the has model rel here, is fine since not testing save
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(SpecNamedNode)}) 
       @test_object.expects(:relationships).returns({:self=>{:has_model=>[r.object]}}).at_least_once
-      @test_object3.assert_kind_of_model('object',@test_object,SpecNamedNode)
+      @test_object3.assert_conforms_to('object',@test_object,SpecNamedNode)
     end
   end
   
@@ -469,5 +471,372 @@ describe ActiveFedora::RelationshipsHelper do
         MockOutboundNamedRelationshipQuery.outbound_relationship_query("testing_no_query_param",ids).should == expected_string
       end
     end 
+
+    ### Deprecated class method checks for HYDRA-541 methods renamed
+    #  named_relationships_desc
+    #  register_named_subject(subject)
+    #  register_named_relationship(subject, name, predicate, opts={})
+    #  create_named_relationship_methods(name)
+    #  create_bidirectional_named_relationship_methods(name,outbound_name)
+    #  outbound_named_relationship_query(relationship_name,outbound_pids)
+    #  inbound_named_relationship_query(pid,relationship_name)
+    #  bidirectional_named_relationship_query(pid,relationship_name,outbound_pids)
+    #  named_predicate_exists_with_different_name?(subject,name,predicate)
+    describe "named_relationships_desc" do
+      it 'should throw deprecation warning if old method name called and should call new method name' do
+        logger = mock()
+        logger.expects(:warn).with("Deprecation: named_relationships_desc has been deprecated.  Please call relationships_desc instead.")
+        @test_object.class.expects(:logger).returns(logger)
+        @test_object.class.respond_to?(:relationships_desc)
+        obj = mock()
+        @test_object.class.expects(:relationships_desc)
+        @test_object.class.named_relationships_desc
+      end
+    end
+
+    describe "register_named_subject" do
+      it 'should throw deprecation warning if old method name called and should call new method name' do
+        logger = mock()
+        logger.expects(:warn).with("Deprecation: register_named_subject has been deprecated.  Please call register_relationship_desc_subject instead.")
+        @test_object.class.expects(:logger).returns(logger)
+        @test_object.class.respond_to?(:register_relationship_desc_subject)
+        obj = mock()
+        @test_object.class.expects(:register_relationship_desc_subject).with(:self)
+        @test_object.class.register_named_subject(:self)
+      end
+    end
+
+    describe "register_named_relationship" do
+      it 'should throw deprecation warning if old method name called and should call new method name' do
+        logger = mock()
+        logger.expects(:warn).with("Deprecation: register_named_relationship has been deprecated.  Please call register_relationship_desc instead.")
+        @test_object.class.expects(:logger).returns(logger)
+        @test_object.class.respond_to?(:register_relationship_desc)
+        obj = mock()
+        @test_object.class.expects(:register_relationship_desc).with(:self,"testing",:has_member,{})
+        @test_object.class.register_named_relationship(:self,"testing",:has_member,{})
+      end
+    end
+
+    describe "create_named_relationship_methods" do
+      it 'should throw deprecation warning if old method name called and should call new method name' do
+        logger = mock()
+        logger.expects(:warn).with("Deprecation: create_named_relationship_methods has been deprecated.  Please call create_relationship_name_methods instead.")
+        @test_object.class.expects(:logger).returns(logger)
+        @test_object.class.respond_to?(:create_relationship_name_methods)
+        obj = mock()
+        @test_object.class.expects(:create_relationship_name_methods).with("testing")
+        @test_object.class.create_named_relationship_methods("testing")
+      end
+    end
+
+    describe "create_bidirectional_named_relationship_methods" do
+      it 'should throw deprecation warning if old method name called and should call new method name' do
+        logger = mock()
+        logger.expects(:warn).with("Deprecation: create_bidirectional_named_relationship_methods has been deprecated.  Please call create_bidirectional_relationship_name_methods instead.")
+        @test_object.class.expects(:logger).returns(logger)
+        @test_object.class.respond_to?(:create_bidirectional_relationship_name_methods)
+        obj = mock()
+        @test_object.class.expects(:create_bidirectional_relationship_name_methods).with("testing","testing_outbound")
+        @test_object.class.create_bidirectional_named_relationship_methods("testing","testing_outbound")
+      end
+    end
+
+    describe "outbound_named_relationship_query" do
+      it 'should throw deprecation warning if old method name called and should call new method name' do
+        logger = mock()
+        logger.expects(:warn).with("Deprecation: outbound_named_relationship_query has been deprecated.  Please call outbound_relationship_query instead.")
+        @test_object.class.expects(:logger).returns(logger)
+        @test_object.class.respond_to?(:outbound_relationship_query)
+        obj = mock()
+        @test_object.class.expects(:outbound_relationship_query).with("testing",["testid"])
+        @test_object.class.outbound_named_relationship_query("testing",["testid"])
+      end
+    end
+
+    describe "inbound_named_relationship_query" do
+      it 'should throw deprecation warning if old method name called and should call new method name' do
+        logger = mock()
+        logger.expects(:warn).with("Deprecation: inbound_named_relationship_query has been deprecated.  Please call inbound_relationship_query instead.")
+        @test_object.class.expects(:logger).returns(logger)
+        @test_object.class.respond_to?(:inbound_relationship_query)
+        obj = mock()
+        @test_object.class.expects(:inbound_relationship_query).with("testid","testing")
+        @test_object.class.inbound_named_relationship_query("testid","testing")
+      end
+    end
+
+    describe "bidirectional_named_relationship_query" do
+      it 'should throw deprecation warning if old method name called and should call new method name' do
+        logger = mock()
+        logger.expects(:warn).with("Deprecation: bidirectional_named_relationship_query has been deprecated.  Please call bidirectional_relationship_query instead.")
+        @test_object.class.expects(:logger).returns(logger)
+        @test_object.class.respond_to?(:bidirectional_relationship_query)
+        obj = mock()
+        @test_object.class.expects(:bidirectional_relationship_query).with("testid","testing",["testid2"])
+        @test_object.class.bidirectional_named_relationship_query("testid","testing",["testid2"])
+      end
+    end
+
+    describe "named_predicate_exists_with_different_name?" do
+      it 'should throw deprecation warning if old method name called and should call new method name' do
+        logger = mock()
+        logger.expects(:warn).with("Deprecation: named_predicate_exists_with_different_name? has been deprecated.  Please call predicate_exists_with_different_relationship_name? instead.")
+        @test_object.class.expects(:logger).returns(logger)
+        @test_object.class.respond_to?(:predicate_exists_with_different_relationship_name?)
+        obj = mock()
+        @test_object.class.expects(:predicate_exists_with_different_relationship_name?).with(:subject,"testing",:has_member)
+        @test_object.class.named_predicate_exists_with_different_name?(:subject,"testing",:has_member)
+      end
+    end
+  end
+
+  ## Deprecated method checks for HYDRA-541 methods renamed
+  #
+  # Old Name                                                      New Name
+  # named_relationship                                            find_relationship_by_name
+  # register_named_subject                                        register_relationship_desc_subject
+  # register_named_relationship                                   register_relationship_desc
+  # named_relationships                                           relationships_by_name
+  # named_relationships_from_class                                relationships_by_name_from_class
+  # named_inbound_relationships                                   inbound_relationship_names
+  # outbound_named_relationship_predicates                        outbound_relationship_predicates
+  # inbound_named_relationship_predicates                         inbound_relationship_predicates
+  # named_relationship_predicates                                 relationship_predicates
+  # named_relationship_predicates_from_class                      relationship_predicates_from_class
+  # named_outbound_relationships                                  outbound_relationships_by_name
+  # is_named_relationship?                                        is_relationship_name?
+  # named_relationships_desc                                      relationships_desc
+  # named_relationships_desc_from_class                           relationships_desc_from_class
+  # named_relationship_type                                       relationship_model_type
+  # add_named_relationship                                        add_relationship_by_name
+  # remove_named_relationship                                     remove_relationship_by_name
+  # assert_kind_of_model                                          assert_conforms_to
+  # kind_of_model?                                                conforms_to?
+  # named_relationship_query                                      relationship_query
+
+  describe "named_relationship" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: named_relationship has been deprecated.  Please call find_relationship_by_name instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:find_relationship_by_name).should == true
+      @test_object.expects(:find_relationship_by_name).with("testing")
+      @test_object.named_relationship("testing")
+    end
+  end
+
+  describe "register_named_subject" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: register_named_subject has been deprecated.  Please call register_relationship_desc_subject instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:register_relationship_desc_subject).should == true
+      @test_object.expects(:register_relationship_desc_subject).with(:self)
+      @test_object.register_named_subject(:self)
+    end
+  end
+
+  describe "register_named_relationship" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: register_named_relationship has been deprecated.  Please call register_relationship_desc instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:register_relationship_desc).should == true
+      @test_object.expects(:register_relationship_desc).with(:self,"testing",:has_member,{})
+      @test_object.register_named_relationship(:self,"testing",:has_member,{})
+    end
+  end
+
+  describe "named_relationships" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: named_relationships has been deprecated.  Please call relationships_by_name instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:relationships_by_name).should == true
+      @test_object.expects(:relationships_by_name)
+      @test_object.named_relationships
+    end
+  end
+
+  describe "named_relationships_from_class" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: named_relationships_from_class has been deprecated.  Please call relationships_by_name_from_class instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:relationships_by_name_from_class).should == true
+      @test_object.expects(:relationships_by_name_from_class)
+      @test_object.named_relationships_from_class
+    end
+  end
+
+  describe "named_inbound_relationships" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: named_inbound_relationships has been deprecated.  Please call inbound_relationships_by_name instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:inbound_relationships_by_name).should == true
+      @test_object.expects(:inbound_relationships_by_name)
+      @test_object.named_inbound_relationships
+    end
+  end
+
+  describe "named_outbound_relationships" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: named_outbound_relationships has been deprecated.  Please call outbound_relationships_by_name instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:outbound_relationships_by_name).should == true
+      @test_object.expects(:outbound_relationships_by_name)
+      @test_object.named_outbound_relationships
+    end
+  end
+
+  describe "outbound_named_relationship_predicates" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: outbound_named_relationship_predicates has been deprecated.  Please call outbound_relationship_predicates instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:outbound_relationship_predicates).should == true
+      @test_object.expects(:outbound_relationship_predicates)
+      @test_object.outbound_named_relationship_predicates
+    end
+  end
+
+  describe "inbound_named_relationship_predicates" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: inbound_named_relationship_predicates has been deprecated.  Please call inbound_relationship_predicates instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:inbound_relationship_predicates).should == true
+      @test_object.expects(:inbound_relationship_predicates)
+      @test_object.inbound_named_relationship_predicates
+    end
+  end
+
+  describe "named_relationship_predicates" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: named_relationship_predicates has been deprecated.  Please call relationship_predicates instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:relationship_predicates).should == true
+      @test_object.expects(:relationship_predicates)
+      @test_object.named_relationship_predicates
+    end
+  end
+
+  describe "named_relationship_predicates_from_class" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: named_relationship_predicates_from_class has been deprecated.  Please call relationship_predicates_from_class instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:relationship_predicates_from_class).should == true
+      @test_object.expects(:relationship_predicates_from_class)
+      @test_object.named_relationship_predicates_from_class
+    end
+  end
+
+  describe "is_named_relationship?" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: is_named_relationship? has been deprecated.  Please call is_relationship_name? instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:is_relationship_name?).should == true
+      @test_object.expects(:is_relationship_name?)
+      @test_object.is_named_relationship?("testing",true)
+    end
+  end
+
+  describe "named_relationships_desc" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: named_relationships_desc has been deprecated.  Please call relationships_desc instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:relationships_desc)
+      @test_object.expects(:relationships_desc)
+      @test_object.named_relationships_desc
+    end
+  end
+
+  describe "named_relationships_desc_from_class" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: named_relationships_desc_from_class has been deprecated.  Please call relationships_desc_from_class instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:relationships_desc_from_class)
+      @test_object.expects(:relationships_desc_from_class)
+      @test_object.named_relationships_desc_from_class
+    end
+  end
+
+  describe "named_relationship_type" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: named_relationship_type has been deprecated.  Please call relationship_model_type instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:relationship_model_type)
+      @test_object.expects(:relationship_model_type).with("testing")
+      @test_object.named_relationship_type("testing")
+    end
+  end
+
+  describe "add_named_relationship" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: add_named_relationship has been deprecated.  Please call add_relationship_by_name instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:add_relationship_by_name)
+      obj = mock()
+      @test_object.expects(:add_relationship_by_name).with("testing",obj)
+      @test_object.add_named_relationship("testing",obj)
+    end
+  end
+
+  describe "remove_named_relationship" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: remove_named_relationship has been deprecated.  Please call remove_relationship_by_name instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:remove_relationship_by_name)
+      obj = mock()
+      @test_object.expects(:remove_relationship_by_name).with("testing",obj)
+      @test_object.remove_named_relationship("testing",obj)
+    end
+  end
+
+  describe "assert_kind_of_model" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: assert_kind_of_model has been deprecated.  Please call assert_conforms_to instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:assert_conforms_to)
+      obj = mock()
+      @test_object.expects(:assert_conforms_to).with("testing",obj,ActiveFedora::Base)
+      @test_object.assert_kind_of_model("testing",obj,ActiveFedora::Base)
+    end
+  end
+
+  describe "kind_of_model?" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: kind_of_model? has been deprecated.  Please call conforms_to? instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:conforms_to?)
+      obj = mock()
+      @test_object.expects(:conforms_to?).with(ActiveFedora::Base)
+      @test_object.kind_of_model?(ActiveFedora::Base)
+    end
+  end
+
+  describe "named_relationship_query" do
+    it 'should throw deprecation warning if old method name called and should call new method name' do
+      logger = mock()
+      logger.expects(:warn).with("Deprecation: named_relationship_query has been deprecated.  Please call relationship_query instead.")
+      @test_object.expects(:logger).returns(logger)
+      @test_object.respond_to?(:relationship_query)
+      obj = mock()
+      @test_object.expects(:relationship_query).with("testing")
+      @test_object.named_relationship_query("testing")
+    end
   end
 end
