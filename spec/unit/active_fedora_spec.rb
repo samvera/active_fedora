@@ -24,6 +24,7 @@ describe ActiveFedora do
         ENV['environment'] = "wichita"
         ActiveFedora.expects(:config_options).at_least_once.returns({})
         ActiveFedora.environment.should eql("wichita")
+        ENV['environment']='test'
       end
 
       it "should use ENV['RAILS_ENV'] and log a warning if none of the above are set" do
