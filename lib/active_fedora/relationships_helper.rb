@@ -3,26 +3,24 @@ module ActiveFedora
   # It is meant to turn a relationship into just another attribute in a model.
   # The notion of a "relationship name" is used _internally_ to distinguish between the relationships you've set up using has_relationship and the implicit relationships that are based on the predicates themselves.
   #
-  # @example
+  # @example ActiveFedora
+  #   has_relationship "parents", :is_member_of
   #
-  # has_relationship "parents", :is_member_of
+  #   obj.parents is a relationship in ActiveFedora while :is_member_of is the literal RDF relationship in Fedora
   #
-  # obj.parents is a relationship in ActiveFedora while :is_member_of is the literal RDF relationship in Fedora
+  #   There are also several helper methods created for any relationship declared in ActiveFedora.  For the above example
+  #   the following methods are created:
   #
-  # There are also several helper methods created for any relationship declared in ActiveFedora.  For the above example
-  # the following methods are created:
+  #   obj.parents_append(object)  Appends an object to the "parents" relationship
+  #   obj.parents_remove(object)  Removes an object from the "parents" relationship
+  #   obj.parents_query           Returns the query used against solr to retrieve objects linked via the "parents" relationship
   #
-  # obj.parents_append(object)  Appends an object to the "parents" relationship
-  # obj.parents_remove(object)  Removes an object from the "parents" relationship
-  # obj.parents_query           Returns the query used against solr to retrieve objects linked via the "parents" relationship
-  #
-  # Note: ActiveFedora relationships can reflect filters ...
-  # If you define the solr_fq parameter in your has_relationship call some objects will be filtered out.
-  # For example:
+  #   Note: ActiveFedora relationships can reflect filters ...
+  #   If you define the solr_fq parameter in your has_relationship call some objects will be filtered out:
   #  
-  # has_relationship "parents", :is_member_of, :solr_fq=>"eyes:blue"
+  #   has_relationship "parents", :is_member_of, :solr_fq=>"eyes:blue"
   #
-  # Then obj.parents will only return parents where their eyes are blue.
+  #   Then obj.parents will only return parents where their eyes are blue.
   module RelationshipsHelper
     attr_accessor :relationships_desc
 
@@ -554,10 +552,11 @@ module ActiveFedora
       # Return hash that persists relationship metadata defined by has_relationship calls
       # @return [Hash] Hash of relationship subject (:self or :inbound) mapped to nested hashs of each relationship name mapped to another hash relationship options
       # @example
-      # For the following relationship
+      #  For the following relationship
       #
       #  has_relationship "audio_records", :has_part, :type=>AudioRecord
-      # Results in the following returned by relationships_desc
+      #  
+      #  Results in the following returned by relationships_desc
       #  {:self=>{"audio_records"=>{:type=>AudioRecord, :singular=>nil, :predicate=>:has_part, :inbound=>false}}}
       def relationships_desc
         @class_relationships_desc ||= Hash[:self => {}]
@@ -601,12 +600,12 @@ module ActiveFedora
       # append and remove objects to and from a relationship
       # @param [String] relationship name to create helper methods for
       # @example
-      # For the following relationship
+      #   For the following relationship
       #
-      #  has_relationship "audio_records", :has_part, :type=>AudioRecord
+      #   has_relationship "audio_records", :has_part, :type=>AudioRecord
       #
-      # Methods audio_records_append and audio_records_remove are created.
-      # Boths methods take an object that is kind_of? ActiveFedora::Base as a parameter
+      #   Methods audio_records_append and audio_records_remove are created.
+      #   Boths methods take an object that is kind_of? ActiveFedora::Base as a parameter
       def create_relationship_name_methods(name)
         append_method_name = "#{name.to_s.downcase}_append"
         remove_method_name = "#{name.to_s.downcase}_remove"
@@ -804,7 +803,8 @@ module ActiveFedora
       # inbound_named_relationship_query                              inbound_relationship_query
       # bidirectional_named_relationship_query                        bidirectional_relationship_query
       # named_predicate_exists_with_different_name?                   predicate_exists_with_different_relationship_name?
-      # @deprecated Please use {#relationship_desc} instead.
+
+      # @deprecated Please use {#relationships_desc} instead.
       def named_relationships_desc
         logger.warn("Deprecation: named_relationships_desc has been deprecated.  Please call relationships_desc instead.")
         relationships_desc
@@ -828,7 +828,7 @@ module ActiveFedora
         create_relationship_name_methods(name)
       end
 
-      # @deprecated Please use {#create_bidirecational_relationship_name_methods} instead.
+      # @deprecated Please use {#create_bidirectional_relationship_name_methods} instead.
       def create_bidirectional_named_relationship_methods(name,outbound_name)
         logger.warn("Deprecation: create_bidirectional_named_relationship_methods has been deprecated.  Please call create_bidirectional_relationship_name_methods instead.")
         create_bidirectional_relationship_name_methods(name,outbound_name)
