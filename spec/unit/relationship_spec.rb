@@ -3,6 +3,7 @@ require File.join( File.dirname(__FILE__), "../spec_helper" )
 require 'active_fedora'
 require "rexml/document"
 require 'mocha'
+require 'uri'
 
 include Mocha::API
 
@@ -24,6 +25,7 @@ describe ActiveFedora::Relationship do
   /%
   before(:each) do
     @test_relationship = ActiveFedora::Relationship.new
+    @test_literal = ActiveFedora::Relationship.new(:is_literal=>true)
   end
   
   it "should provide #new" do
@@ -36,6 +38,9 @@ describe ActiveFedora::Relationship do
     test_relationship.subject.should == "info:fedora/demo:5"
     test_relationship.predicate.should == "isMemberOf"
     test_relationship.object.should == "info:fedora/demo:10"
+    test_relationship.is_literal.should == false
+    test_literal = ActiveFedora::Relationship.new(:is_literal=>true)
+    test_literal.is_literal.should == true
   end
   
   describe "#subject=" do
@@ -61,7 +66,16 @@ describe ActiveFedora::Relationship do
       mock_fedora_object = stub("mock_fedora_object", :pid => "demo:stub_pid")
       @test_relationship.object = mock_fedora_object
       @test_relationship.object.should == "info:fedora/#{mock_fedora_object.pid}"
-    end  end
+    end
+    it "should let URI objects stringify themselves" do
+      @test_relationship.object = URI.parse("http://projecthydra.org")
+      @test_relationship.object.should == "http://projecthydra.org"
+    end
+    it "should not turn literal property objects into Fedora URIs" do
+      @test_literal.object = "foo"
+      @test_literal.object.should == "foo"
+    end
+  end
   
   describe "#predicate=" do
     it "should default to setting the argument itself as the new subject" do

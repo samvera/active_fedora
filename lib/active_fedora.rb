@@ -1,6 +1,5 @@
 require 'rubygems'
 require "bundler/setup"
-
 Bundler.require(:default)
 
 gem 'solr-ruby'

@@ -187,6 +187,11 @@ describe ActiveFedora::Base do
       @test_object.add_relationship(:has_part,@test_object3)
       @test_object.relationships.should == {:self=>{:has_part=>[r.object]}}
     end
+
+    it 'should add literal relationships if requested' do
+      @test_object.add_relationship(:conforms_to,"AnInterface",true)
+      @test_object.relationships[:self][:conforms_to].should == ["AnInterface"]
+    end
   end
   
   it 'should provide #remove_relationship' do
