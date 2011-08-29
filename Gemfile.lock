@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active-fedora (2.3.3)
+    active-fedora (2.3.4)
       activeresource
       equivalent-xml
       facets
@@ -18,9 +18,9 @@ GEM
   remote: http://rubygems.org/
   specs:
     RedCloth (4.2.7)
-    activeresource (2.3.12)
-      activesupport (= 2.3.12)
-    activesupport (2.3.12)
+    activeresource (2.3.14)
+      activesupport (= 2.3.14)
+    activesupport (2.3.14)
     builder (3.0.0)
     columnize (0.3.4)
     daemons (1.1.4)

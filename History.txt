@@ -1,3 +1,7 @@
+2.3.4
+moved dirty assignment to NokogiriDatastream#update_values; added test (Benjamin Armintor)
+Fixed HYDRA-590
+
 2.1.0
 
 HYDRUS-151: Base.update_datastream_attributes now relies on update_indexed_attributes instead of update_attributes.  This makes it easier to support non-javascript forms (and makes update_datastream_attributes worth using).
