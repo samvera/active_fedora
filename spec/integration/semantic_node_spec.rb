@@ -15,13 +15,13 @@ describe ActiveFedora::SemanticNode do
       has_relationship("containers", :is_member_of)
       has_bidirectional_relationship("bi_containers", :is_member_of, :has_member)
     end
-    class SpecNodeQueryParam < ActiveFedora::Base
+    class SpecNodeSolrFilterQuery < ActiveFedora::Base
       has_relationship("parts", :is_part_of, :inbound => true)
-      has_relationship("special_parts", :is_part_of, :inbound => true, :query_params=>{:q=>{"has_model_s"=>"info:fedora/SpecialPart"}})
+      has_relationship("special_parts", :is_part_of, :inbound => true, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
       has_relationship("containers", :is_member_of)
-      has_relationship("special_containers", :is_member_of, :query_params=>{:q=>{"has_model_s"=>"info:fedora/SpecialContainer"}})
+      has_relationship("special_containers", :is_member_of, :solr_fq=>"has_model_s:info\\:fedora/SpecialContainer")
       has_bidirectional_relationship("bi_containers", :is_member_of, :has_member)
-      has_bidirectional_relationship("bi_special_containers", :is_member_of, :has_member, :query_params=>{:q=>{"has_model_s"=>"info:fedora/SpecialContainer"}})
+      has_bidirectional_relationship("bi_special_containers", :is_member_of, :has_member, :solr_fq=>"has_model_s:info\\:fedora/SpecialContainer")
     end
     
     @test_object = SNSpecModel.new
@@ -66,7 +66,7 @@ describe ActiveFedora::SemanticNode do
 
     #even though adding container3 and 3 special containers, it should only include the special containers when returning via relationship name finder methods
     #also should only return special part similarly
-    @test_object_query = SpecNodeQueryParam.new
+    @test_object_query = SpecNodeSolrFilterQuery.new
     @test_object_query.add_relationship(:is_member_of, @container3)
     @test_object_query.add_relationship(:is_member_of, @special_container)
     @test_object_query.add_relationship(:is_member_of, @special_container3)
@@ -165,11 +165,11 @@ describe ActiveFedora::SemanticNode do
       ids.include?(@part1.pid).should == true
       ids.include?(@part2.pid).should == true
     end
-    it "should return an array of Base objects with some filtered out if using query params" do
+    it "should return an array of Base objects with some filtered out if using solr_fq" do
       @test_object_query.special_parts_ids.should == [@special_part.pid]
     end
 
-    it "should return an array of all Base objects with relationship if not using query params" do
+    it "should return an array of all Base objects with relationship if not using solr_fq" do
       @test_object_query.parts_ids.size.should == 2
       @test_object_query.parts_ids.include?(@special_part.pid).should == true
       @test_object_query.parts_ids.include?(@part3.pid).should == true
@@ -181,37 +181,37 @@ describe ActiveFedora::SemanticNode do
   end
 
   describe "inbound relationship query" do
-    it "should return a properly formatted query for a relationship that has a query param defined" do
-      SpecNodeQueryParam.inbound_relationship_query(@test_object_query.pid,"special_parts").should == "#{@test_object_query.relationship_predicates[:inbound]['special_parts']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialPart"
+    it "should return a properly formatted query for a relationship that has a solr filter query defined" do
+      SpecNodeSolrFilterQuery.inbound_relationship_query(@test_object_query.pid,"special_parts").should == "#{@test_object_query.relationship_predicates[:inbound]['special_parts']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialPart"
     end
 
-    it "should return a properly formatted query for a relationship that does not have a query param defined" do
-      SpecNodeQueryParam.inbound_relationship_query(@test_object_query.pid,"parts").should == "is_part_of_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')}"
+    it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
+      SpecNodeSolrFilterQuery.inbound_relationship_query(@test_object_query.pid,"parts").should == "is_part_of_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')}"
     end
   end
 
   describe "outbound relationship query" do
-    it "should return a properly formatted query for a relationship that has a query param defined" do
+    it "should return a properly formatted query for a relationship that has a solr filter query defined" do
       expected_string = ""
       @test_object_query.containers_ids.each_with_index do |id,index|
         expected_string << " OR " if index > 0
         expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialContainer)"
       end
-      SpecNodeQueryParam.outbound_relationship_query("special_containers",@test_object_query.containers_ids).should == expected_string
+      SpecNodeSolrFilterQuery.outbound_relationship_query("special_containers",@test_object_query.containers_ids).should == expected_string
     end
 
-    it "should return a properly formatted query for a relationship that does not have a query param defined" do
+    it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
       expected_string = ""
       @test_object_query.containers_ids.each_with_index do |id,index|
         expected_string << " OR " if index > 0
         expected_string << "id:" + id.gsub(/(:)/, '\\:')
       end
-      SpecNodeQueryParam.outbound_relationship_query("containers",@test_object_query.containers_ids).should == expected_string
+      SpecNodeSolrFilterQuery.outbound_relationship_query("containers",@test_object_query.containers_ids).should == expected_string
     end
   end
 
   describe "bidirectional relationship query" do
-    it "should return a properly formatted query for a relationship that has a query param defined" do
+    it "should return a properly formatted query for a relationship that has a solr filter query defined" do
       expected_string = ""
       @test_object_query.bi_containers_outbound_ids.each_with_index do |id,index|
         expected_string << " OR " if index > 0
@@ -219,10 +219,10 @@ describe ActiveFedora::SemanticNode do
       end
       expected_string << " OR "
       expected_string << "(#{@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialContainer)"
-      SpecNodeQueryParam.bidirectional_relationship_query(@test_object_query.pid,"bi_special_containers",@test_object_query.bi_containers_outbound_ids).should == expected_string
+      SpecNodeSolrFilterQuery.bidirectional_relationship_query(@test_object_query.pid,"bi_special_containers",@test_object_query.bi_containers_outbound_ids).should == expected_string
     end
 
-    it "should return a properly formatted query for a relationship that does not have a query param defined" do
+    it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
       expected_string = ""
       @test_object_query.bi_containers_outbound_ids.each_with_index do |id,index|
         expected_string << " OR " if index > 0
@@ -230,7 +230,7 @@ describe ActiveFedora::SemanticNode do
       end
       expected_string << " OR "
       expected_string << "(#{@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')})"
-      SpecNodeQueryParam.bidirectional_relationship_query(@test_object_query.pid,"bi_containers",@test_object_query.bi_containers_outbound_ids).should == expected_string
+      SpecNodeSolrFilterQuery.bidirectional_relationship_query(@test_object_query.pid,"bi_containers",@test_object_query.bi_containers_outbound_ids).should == expected_string
     end
   end
 
@@ -251,7 +251,7 @@ describe ActiveFedora::SemanticNode do
       ids.include?(@container4.pid).should == false
     end
 
-    it "should return an array of Base objects with some filtered out if using query params" do
+    it "should return an array of Base objects with some filtered out if using solr_fq" do
       @test_object_query.special_containers_ids.size.should == 3
       @test_object_query.special_containers_ids.include?(@container3.pid).should == false
       @test_object_query.special_containers_ids.include?(@special_container.pid).should == true
@@ -259,7 +259,7 @@ describe ActiveFedora::SemanticNode do
       @test_object_query.special_containers_ids.include?(@special_container4.pid).should == true
     end
 
-    it "should return an array of all Base objects with relationship if not using query params" do
+    it "should return an array of all Base objects with relationship if not using solr_fq" do
       @test_object_query.containers_ids.size.should == 4
       @test_object_query.containers_ids.include?(@special_container2.pid).should == false
       @test_object_query.containers_ids.include?(@special_container.pid).should == true
@@ -271,7 +271,7 @@ describe ActiveFedora::SemanticNode do
     it "should return a solr query for an outbound relationship" do
     end
 
-    it "should return an array of Base objects with some filtered out if using query params" do
+    it "should return an array of Base objects with some filtered out if using solr_fq" do
       @test_object_query.special_containers_ids.size.should == 3
       @test_object_query.special_containers_ids.include?(@container3.pid).should == false
       @test_object_query.special_containers_ids.include?(@special_container.pid).should == true
@@ -279,7 +279,7 @@ describe ActiveFedora::SemanticNode do
       @test_object_query.special_containers_ids.include?(@special_container4.pid).should == true
     end
 
-    it "should return an array of all Base objects with relationship if not using query params" do
+    it "should return an array of all Base objects with relationship if not using solr_fq" do
       @test_object_query.containers_ids.size.should == 4
       @test_object_query.containers_ids.include?(@special_container2.pid).should == false
       @test_object_query.containers_ids.include?(@special_container.pid).should == true
@@ -315,7 +315,7 @@ describe ActiveFedora::SemanticNode do
       ids.include?(@container4.pid).should == true
     end
 
-    it "should return an array of Base objects with some filtered out if using query params" do
+    it "should return an array of Base objects with some filtered out if using solr_fq" do
       ids = @test_object_query.bi_special_containers_ids
       ids.size.should == 4
       ids.include?(@container1.pid).should == false
@@ -327,7 +327,7 @@ describe ActiveFedora::SemanticNode do
       ids.include?(@special_container4.pid).should == true
     end
 
-    it "should return an array of all Base objects with relationship if not using query params" do
+    it "should return an array of all Base objects with relationship if not using solr_fq" do
       ids = @test_object_query.bi_containers_ids
       ids.size.should == 5
       ids.include?(@container3.pid).should == true
