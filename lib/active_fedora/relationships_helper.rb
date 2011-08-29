@@ -5,7 +5,7 @@ module ActiveFedora
   #
   # @example
   #
-  # has_relationship "parents" :is_member_of
+  # has_relationship "parents", :is_member_of
   #
   # obj.parents is a relationship in ActiveFedora while :is_member_of is the literal RDF relationship in Fedora
   #
@@ -17,6 +17,12 @@ module ActiveFedora
   # obj.parents_query           Returns the query used against solr to retrieve objects linked via the "parents" relationship
   #
   # Note: ActiveFedora relationships can reflect filters ...
+  # If you define the solr_fq parameter in your has_relationship call some objects will be filtered out.
+  # For example:
+  #  
+  # has_relationship "parents", :is_member_of, :solr_fq=>"eyes:blue"
+  #
+  # Then obj.parents will only return parents where their eyes are blue.
   module RelationshipsHelper
     attr_accessor :relationships_desc
 
@@ -60,7 +66,7 @@ module ActiveFedora
     # @param [Symbol] Subject name to register
     # @param [String] Name of relationship being registered
     # @param [Symbol] Fedora ontology predicate to use
-    # @param [Hash] Any options passed to has_relationship such as :type, :query_params, etc.
+    # @param [Hash] Any options passed to has_relationship such as :type, :solr_fq, etc.
     def register_relationship_desc(subject, name, predicate, opts={})
       self.class.register_relationship_desc(subject, name, predicate, opts)
     end
@@ -348,18 +354,18 @@ module ActiveFedora
     # @param [String] The name of the relationship defined in the model
     # @return [String] The query used when querying solr for objects for this relationship
     # @example
-    #   Class SampleAFObjRelationshipQueryParam < ActiveFedora::Base
+    #   Class SampleAFObjRelationshipFilterQuery < ActiveFedora::Base
     #     #points to all parents linked via is_member_of
     #     has_relationship "parents", :is_member_of
     #     #returns only parents that have a level value set to "series"
-    #     has_relationship "series_parents", :is_member_of, :query_params=>{:q=>{"level_t"=>"series"}}
+    #     has_relationship "series_parents", :is_member_of, :solr_fq=>level_t:series"
     #   end
-    #   s = SampleAFObjRelationshipQueryParam.new
+    #   s = SampleAFObjRelationshipFilterQuery.new
     #   obj = ActiveFedora::Base.new
     #   s.parents_append(obj)
     #   s.series_parents_query 
     #   #=> "(id:changeme\\:13020 AND level_t:series)" 
-    #   SampleAFObjRelationshipQueryParam.relationship_query("series_parents")
+    #   SampleAFObjRelationshipFilterQuery.relationship_query("series_parents")
     #   #=> "(id:changeme\\:13020 AND level_t:series)" 
     def relationship_query(relationship_name)
       query = ""
@@ -575,7 +581,7 @@ module ActiveFedora
       # @param [Symbol] Subject name to register
       # @param [String] Name of relationship being registered
       # @param [Symbol] Fedora ontology predicate to use
-      # @param [Hash] Any options passed to has_relationship such as :type, :query_params, etc.
+      # @param [Hash] Any options passed to has_relationship such as :type, :solr_fq, etc.
       def register_relationship_desc(subject, name, predicate, opts={})
         register_relationship_desc_subject(subject)
         opts.merge!({:predicate=>predicate})
@@ -628,8 +634,9 @@ module ActiveFedora
 
       # Returns a solr query for retrieving objects specified in an outbound relationship.
       # This method is mostly used by internal method calls.
-      # It enables the use of query_params defined within a relationship to attach a query filter
-      # on top of just the predicate being used.  Because it is static it 
+      # It utilizes any solr_fq value defined within a relationship to attach a query filter when
+      # querying solr on top of just the predicate being used.
+      # Because it is static it 
       # needs the pids defined within RELS-EXT for this relationship to be passed in.
       # If you are calling this method directly to get the query you should use the 
       # ActiveFedora::SemanticNode.relationship_query instead or use the helper method
@@ -640,42 +647,35 @@ module ActiveFedora
       # @param [Array] An array of pids to include in the query
       # @return [String]
       # @example
-      #   Class SampleAFObjRelationshipQueryParam < ActiveFedora::Base
+      #   Class SampleAFObjRelationshipFilterQuery < ActiveFedora::Base
       #     #points to all parents linked via is_member_of
       #     has_relationship "parents", :is_member_of
       #     #returns only parents that have a level value set to "series"
-      #     has_relationship "series_parents", :is_member_of, :query_params=>{:q=>{"level_t"=>"series"}}
+      #     has_relationship "series_parents", :is_member_of, :solr_fq=>"level_t:series"
       #   end
-      #   s = SampleAFObjRelationshipQueryParam.new
+      #   s = SampleAFObjRelationshipFilterQuery.new
       #   obj = ActiveFedora::Base.new
       #   s.series_parents_append(obj)
       #   s.series_parents_query 
       #   #=> "(id:changeme\\:13020 AND level_t:series)" 
-      #   SampleAFObjRelationshipQueryParam.outbound_relationship_query("series_parents",["id:changeme:13020"])
+      #   SampleAFObjRelationshipFilterQuery.outbound_relationship_query("series_parents",["id:changeme:13020"])
       #   #=> "(id:changeme\\:13020 AND level_t:series)" 
       def outbound_relationship_query(relationship_name,outbound_pids)
         query = ActiveFedora::SolrService.construct_query_for_pids(outbound_pids)
         subject = :self
-        if relationships_desc.has_key?(subject) && relationships_desc[subject].has_key?(relationship_name) && relationships_desc[subject][relationship_name].has_key?(:query_params)
-          query_params = format_query_params(relationships_desc[subject][relationship_name][:query_params])
-          if query_params[:q]
-            unless query.empty?
-              #substitute in the filter query for each pid so that it is applied to each in the query
-              query_parts = query.split(/OR/)
-              query = ""
-              query_parts.each_with_index do |query_part,index|
-                query_part.strip!
-                query << " OR " if index > 0
-                query << "(#{query_part} AND #{query_params[:q]})"
-              end
-              #query.sub!(/OR /,"AND #{query_params[:q]}) OR (")
-              #add opening parenthesis for first case
-              #query = "(" + query 
-              #add AND filter case for last element as well since no 'OR' following it
-              #query << " AND #{query_params[:q]})"
-            else
-              query = query_params[:q]
+        if relationships_desc.has_key?(subject) && relationships_desc[subject].has_key?(relationship_name) && relationships_desc[subject][relationship_name].has_key?(:solr_fq)
+          solr_fq = relationships_desc[subject][relationship_name][:solr_fq]
+          unless query.empty?
+            #substitute in the filter query for each pid so that it is applied to each in the query
+            query_parts = query.split(/OR/)
+            query = ""
+            query_parts.each_with_index do |query_part,index|
+              query_part.strip!
+              query << " OR " if index > 0
+              query << "(#{query_part} AND #{solr_fq})"
             end
+          else
+            query = solr_fq
           end
         end
         query
@@ -683,7 +683,7 @@ module ActiveFedora
 
       # Returns a solr query for retrieving objects specified in an inbound relationship.
       # This method is mostly used by internal method calls.
-      # It enables the use of query_params defined within a relationship to attach a query filter
+      # It utilizes any solr_fq value defined within a relationship to attach a query filter
       # on top of just the predicate being used.  Because it is static it 
       # needs the pid of the object that has the inbound relationships passed in.
       # If you are calling this method directly to get the query you should use the 
@@ -695,18 +695,18 @@ module ActiveFedora
       # @param [String] The name of the relationship defined in the model
       # @return [String]
       # @example
-      #   Class SampleAFObjRelationshipQueryParam < ActiveFedora::Base
+      #   Class SampleAFObjRelationshipFilterQuery < ActiveFedora::Base
       #     #returns all parts
       #     has_relationship "parts", :is_part_of, :inbound=>true
       #     #returns only parts that have level to "series"
-      #     has_relationship "series_parts", :is_part_of, :inbound=>true, :query_params=>{:q=>{"level_t"=>"series"}}
+      #     has_relationship "series_parts", :is_part_of, :inbound=>true, :solr_fq=>"level_t:series"
       #   end
-      #   s = SampleAFObjRelationshipQueryParam.new
+      #   s = SampleAFObjRelationshipFilterQuery.new
       #   s.pid 
       #   #=> id:changeme:13020
       #   s.series_parts_query
       #   #=> "is_part_of_s:info\\:fedora/changeme\\:13021 AND level_t:series"
-      #   SampleAFObjRelationshipQueryParam.inbound_relationship_query(s.pid,"series_parts")
+      #   SampleAFObjRelationshipFilterQuery.inbound_relationship_query(s.pid,"series_parts")
       #   #=> "is_part_of_s:info\\:fedora/changeme\\:13021 AND level_t:series"
       def inbound_relationship_query(pid,relationship_name)
         query = ""
@@ -716,12 +716,10 @@ module ActiveFedora
           internal_uri = "info:fedora/#{pid}"
           escaped_uri = internal_uri.gsub(/(:)/, '\\:')
           query = "#{predicate}_s:#{escaped_uri}" 
-          if relationships_desc.has_key?(subject) && relationships_desc[subject].has_key?(relationship_name) && relationships_desc[subject][relationship_name].has_key?(:query_params)
-            query_params = format_query_params(relationships_desc[subject][relationship_name][:query_params])
-            if query_params[:q]
-              query << " AND " unless query.empty?
-              query << query_params[:q]
-            end
+          if relationships_desc.has_key?(subject) && relationships_desc[subject].has_key?(relationship_name) && relationships_desc[subject][relationship_name].has_key?(:solr_fq)
+            solr_fq = relationships_desc[subject][relationship_name][:solr_fq]
+            query << " AND " unless query.empty?
+            query << solr_fq
           end
         end
         query
@@ -729,7 +727,7 @@ module ActiveFedora
 
       # Returns a solr query for retrieving objects specified in a bidirectional relationship.
       # This method is mostly used by internal method calls.
-      # It enables the use of query_params defined within a relationship to attach a query filter
+      # It usea of solr_fq value defined within a relationship to attach a query filter
       # on top of just the predicate being used.  Because it is static it 
       # needs the pids defined within RELS-EXT for the outbound relationship as well as the pid of the
       # object for the inbound portion of the relationship.
@@ -743,10 +741,10 @@ module ActiveFedora
       # @param [Array] An array of pids to include in the query
       # @return [String]
       # @example
-      #   Class SampleAFObjRelationshipQueryParam < ActiveFedora::Base
-      #     has_bidirectional_relationship "bi_series_parts", :has_part, :is_part_of, :query_params=>{:q=>{"level_t"=>"series"}}
+      #   Class SampleAFObjRelationshipFilterQuery < ActiveFedora::Base
+      #     has_bidirectional_relationship "bi_series_parts", :has_part, :is_part_of, :solr_fq=>"level_t:series"
       #   end
-      #   s = SampleAFObjRelationshipQueryParam.new
+      #   s = SampleAFObjRelationshipFilterQuery.new
       #   obj = ActiveFedora::Base.new
       #   s.bi_series_parts_append(obj)
       #   s.pid
@@ -755,7 +753,7 @@ module ActiveFedora
       #   #=> id:changeme:13026
       #   s.bi_series_parts_query 
       #   #=> "(id:changeme\\:13026 AND level_t:series) OR (is_part_of_s:info\\:fedora/changeme\\:13025 AND level_t:series)" 
-      #   SampleAFObjRelationshipQueryParam.bidirectional_relationship_query(s.pid,"series_parents",["id:changeme:13026"])
+      #   SampleAFObjRelationshipFilterQuery.bidirectional_relationship_query(s.pid,"series_parents",["id:changeme:13026"])
       #   #=> "(id:changeme\\:13026 AND level_t:series) OR (is_part_of_s:info\\:fedora/changeme\\:13025 AND level_t:series)" 
       def bidirectional_relationship_query(pid,relationship_name,outbound_pids)
         outbound_query = outbound_relationship_query("#{relationship_name}_outbound",outbound_pids) 
@@ -767,32 +765,12 @@ module ActiveFedora
         return query      
       end
 
-      # This will transform and encode any query_params defined in a relationship method to properly escape special characters
-      # and format strings such as query string properly for a solr query
-      # @param [Hash] The has of expected query params (including at least :q)
-      # @return [String]
-      def format_query_params(query_params)
-        if query_params && query_params[:q]
-          add_query = ""
-          if query_params[:q].is_a? Hash
-            query_params[:q].keys.each_with_index do |key,index|
-              add_query << " AND " if index > 0
-              add_query << "#{key}:#{query_params[:q][key].gsub(/:/, '\\\\:')}"
-            end
-          elsif !query_params[:q].empty?
-            add_query = "#{query_params[:q]}"
-          end
-          query_params[:q] = add_query unless add_query.empty?
-          query_params
-        end
-      end
-
       # Check if a relationship has any solr query filters defined by has_relationship call
       # @param [Symbol] subject to use such as :self or :inbound
       # @param [String] relationship name
       # @return [Boolean] true if the relationship has a query filter defined
-      def relationship_has_query_params?(subject, relationship_name)
-        relationships_desc.has_key?(subject) && relationships_desc[subject].has_key?(relationship_name) && relationships_desc[subject][relationship_name].has_key?(:query_params)
+      def relationship_has_solr_filter_query?(subject, relationship_name)
+        relationships_desc.has_key?(subject) && relationships_desc[subject].has_key?(relationship_name) && relationships_desc[subject][relationship_name].has_key?(:solr_fq)
       end
 
       # ** EXPERIMENTAL **

@@ -188,7 +188,7 @@ module ActiveFedora
       #   # returns all similar audio
       #   has_relationship "similar_audio", :has_part, :type=>AudioRecord
       #   #returns only similar audio with format wav
-      #   has_relationship "similar_audio_wav", :has_part, :query_params=>{:q=>"format_t"=>"wav"}
+      #   has_relationship "similar_audio_wav", :has_part, :solr_fq=>"format_t:wav"
       #
       # The first two parameters are required:
       #   name: relationship name
@@ -197,7 +197,7 @@ module ActiveFedora
       #     possible parameters  
       #       :inbound => if true loads an external relationship via Solr (defaults to false)
       #       :type => The type of model to use when instantiated an object from the pid in this relationship (defaults to ActiveFedora::Base)
-      #       :query_params => Additional filters to be attached via a solr query (currently only :q implemented)
+      #       :solr_fq => Define a solr query here if you want to filter out some objects in your relationship (must be a properly formatted solr query)
       #
       # If inbound is true it expects the relationship to be defined by another object's RELS-EXT
       # and to load that relationship from Solr.  Otherwise, if inbound is true the relationship is stored in
@@ -296,7 +296,7 @@ module ActiveFedora
               id_array << rel.gsub("info:fedora/", "")
             end
           end
-          if opts[:response_format] == :id_array && !self.class.relationship_has_query_params?(:self,"#{name}")
+          if opts[:response_format] == :id_array && !self.class.relationship_has_solr_filter_query?(:self,"#{name}")
             return id_array
           else
             query = self.class.outbound_relationship_query("#{name}",id_array)

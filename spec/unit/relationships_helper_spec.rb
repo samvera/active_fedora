@@ -205,15 +205,15 @@ describe ActiveFedora::RelationshipsHelper do
 
   describe "relationship_query" do
     class MockNamedRelationshipQuery < SpecNamedNode
-      register_relationship_desc(:inbound, "testing_inbound_query", :is_part_of, :type=>SpecNamedNode, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}})
-      register_relationship_desc(:inbound, "testing_inbound_no_query_param", :is_part_of, :type=>SpecNamedNode)
-      register_relationship_desc(:self, "testing_outbound_query", :is_part_of, :type=>SpecNamedNode, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}})
-      register_relationship_desc(:self, "testing_outbound_no_query_param", :is_part_of, :type=>SpecNamedNode)
+      register_relationship_desc(:inbound, "testing_inbound_query", :is_part_of, :type=>SpecNamedNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+      register_relationship_desc(:inbound, "testing_inbound_no_solr_fq", :is_part_of, :type=>SpecNamedNode)
+      register_relationship_desc(:self, "testing_outbound_query", :is_part_of, :type=>SpecNamedNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+      register_relationship_desc(:self, "testing_outbound_no_solr_fq", :is_part_of, :type=>SpecNamedNode)
       #for bidirectional relationship testing need to register both outbound and inbound names
-      register_relationship_desc(:self, "testing_bi_query_outbound", :has_part, :type=>SpecNamedNode, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}})
-      register_relationship_desc(:inbound, "testing_bi_query_inbound", :is_part_of, :type=>SpecNamedNode, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}})
-      register_relationship_desc(:self, "testing_bi_no_query_param_outbound", :has_part, :type=>SpecNamedNode)
-      register_relationship_desc(:inbound, "testing_bi_no_query_param_inbound", :is_part_of, :type=>SpecNamedNode)
+      register_relationship_desc(:self, "testing_bi_query_outbound", :has_part, :type=>SpecNamedNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+      register_relationship_desc(:inbound, "testing_bi_query_inbound", :is_part_of, :type=>SpecNamedNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+      register_relationship_desc(:self, "testing_bi_no_solr_fq_outbound", :has_part, :type=>SpecNamedNode)
+      register_relationship_desc(:inbound, "testing_bi_no_solr_fq_inbound", :is_part_of, :type=>SpecNamedNode)
     end
     
     before(:each) do
@@ -233,8 +233,8 @@ describe ActiveFedora::RelationshipsHelper do
       rels_ids = ["info:fedora/changeme:1","info:fedora/changeme:2","info:fedora/changeme:3","info:fedora/changeme:4"]
       @mockrelsquery.expects(:outbound_relationships).returns({:is_part_of=>rels_ids}).at_least_once
       ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
-      MockNamedRelationshipQuery.expects(:outbound_relationship_query).with("testing_outbound_no_query_param",ids)
-      @mockrelsquery.relationship_query("testing_outbound_no_query_param")
+      MockNamedRelationshipQuery.expects(:outbound_relationship_query).with("testing_outbound_no_solr_fq",ids)
+      @mockrelsquery.relationship_query("testing_outbound_no_solr_fq")
     end
     
     it "should call inbound_relationship_query if an inbound relationship" do
@@ -305,28 +305,28 @@ describe ActiveFedora::RelationshipsHelper do
       end
     end
 
-    describe '#relationship_has_query_params' do
-      class RelsHasQueryParams < SpecNamedNode
-        register_relationship_desc :self, "testing", :is_part_of, :query_params=>{:q=>{:testing=>"value"}}
+    describe '#relationship_has_solr_filter_query' do
+      class RelsHasSolrFilter < SpecNamedNode
+        register_relationship_desc :self, "testing", :is_part_of, :solr_fq=>"testing:value"
         register_relationship_desc :self, "no_query_testing", :is_part_of
-        register_relationship_desc :inbound, "inbound_testing", :has_part, :query_params=>{:q=>{:in_testing=>"value_in"}}
+        register_relationship_desc :inbound, "inbound_testing", :has_part, :solr_fq=>"in_testing:value_in"
         register_relationship_desc :inbound, "inbound_testing_no_query", :has_part
       end
 
-      it 'should return true if an object has an inbound relationship with query params' do
-        RelsHasQueryParams.relationship_has_query_params?(:inbound,"inbound_testing").should == true
+      it 'should return true if an object has an inbound relationship with solr filter query' do
+        RelsHasSolrFilter.relationship_has_solr_filter_query?(:inbound,"inbound_testing").should == true
       end
 
-      it 'should return false if an object does not have inbound relationship with query params' do
-        RelsHasQueryParams.relationship_has_query_params?(:inbound,"inbound_testing_no_query").should == false
+      it 'should return false if an object does not have inbound relationship with solr filter query' do
+        RelsHasSolrFilter.relationship_has_solr_filter_query?(:inbound,"inbound_testing_no_query").should == false
       end
 
-      it 'should return true if an object has an outbound relationship with query params' do
-        RelsHasQueryParams.relationship_has_query_params?(:self,"testing").should == true
+      it 'should return true if an object has an outbound relationship with solr filter query' do
+        RelsHasSolrFilter.relationship_has_solr_filter_query?(:self,"testing").should == true
       end
 
-      it 'should return false if an object does not have outbound relationship with query params' do
-        RelsHasQueryParams.relationship_has_query_params?(:self,"testing_no_query").should == false
+      it 'should return false if an object does not have outbound relationship with solr filter query' do
+        RelsHasSolrFilter.relationship_has_solr_filter_query?(:self,"testing_no_query").should == false
       end
     end
 
@@ -387,12 +387,12 @@ describe ActiveFedora::RelationshipsHelper do
       
     describe "bidirectional_relationship_query" do
       class MockBiNamedRelationshipQuery < SpecNamedNode
-        register_relationship_desc(:self, "testing_query_outbound", :has_part, :type=>SpecNamedNode, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}})
-        register_relationship_desc(:inbound, "testing_query_inbound", :is_part_of, :type=>SpecNamedNode, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}})
+        register_relationship_desc(:self, "testing_query_outbound", :has_part, :type=>SpecNamedNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+        register_relationship_desc(:inbound, "testing_query_inbound", :is_part_of, :type=>SpecNamedNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
         create_bidirectional_relationship_name_methods("testing","testing_outbound")
-        register_relationship_desc(:self, "testing_no_query_param_outbound", :has_part, :type=>SpecNamedNode)
-        register_relationship_desc(:inbound, "testing_no_query_param_inbound", :is_part_of, :type=>SpecNamedNode)
-        create_bidirectional_relationship_name_methods("testing_no_query_param","testing_no_query_param_outbound")
+        register_relationship_desc(:self, "testing_no_solr_fq_outbound", :has_part, :type=>SpecNamedNode)
+        register_relationship_desc(:inbound, "testing_no_solr_fq_inbound", :is_part_of, :type=>SpecNamedNode)
+        create_bidirectional_relationship_name_methods("testing_no_solr_fq","testing_no_solr_fq_outbound")
       end
 
       #
@@ -401,11 +401,11 @@ describe ActiveFedora::RelationshipsHelper do
       it "should rely on outbound query if inbound query is empty" do
         query = MockBiNamedRelationshipQuery.bidirectional_relationship_query("PID",:testing_query,[])
         query.should_not include("OR ()")
-        query2 = MockBiNamedRelationshipQuery.bidirectional_relationship_query("PID",:testing_no_query_param,[])
+        query2 = MockBiNamedRelationshipQuery.bidirectional_relationship_query("PID",:testing_no_solr_fq,[])
         query2.should_not include("OR ()")
       end
 
-      it "should return a properly formatted query for a relationship that has a query param defined" do
+      it "should return a properly formatted query for a relationship that has a solr filter query defined" do
         expected_string = ""
         ids = ["changeme:1","changeme:2","changeme:3","changeme:4","changeme:5"]
         ids.each_with_index do |id,index|
@@ -417,7 +417,7 @@ describe ActiveFedora::RelationshipsHelper do
         MockBiNamedRelationshipQuery.bidirectional_relationship_query("changeme:6","testing_query",ids).should == expected_string
       end
 
-      it "should return a properly formatted query for a relationship that does not have a query param defined" do
+      it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
         expected_string = ""
         ids = ["changeme:1","changeme:2","changeme:3","changeme:4","changeme:5"]
         ids.each_with_index do |id,index|
@@ -426,32 +426,32 @@ describe ActiveFedora::RelationshipsHelper do
         end
         expected_string << " OR "
         expected_string << "(is_part_of_s:info\\:fedora/changeme\\:6)"
-        MockBiNamedRelationshipQuery.bidirectional_relationship_query("changeme:6","testing_no_query_param",ids).should == expected_string
+        MockBiNamedRelationshipQuery.bidirectional_relationship_query("changeme:6","testing_no_solr_fq",ids).should == expected_string
       end
     end
 
     describe "inbound_relationship_query" do
       class MockInboundNamedRelationshipQuery < SpecNamedNode
-        register_relationship_desc(:inbound, "testing_inbound_query", :is_part_of, :type=>SpecNamedNode, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}})
-        register_relationship_desc(:inbound, "testing_inbound_no_query_param", :is_part_of, :type=>SpecNamedNode)
+        register_relationship_desc(:inbound, "testing_inbound_query", :is_part_of, :type=>SpecNamedNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+        register_relationship_desc(:inbound, "testing_inbound_no_solr_fq", :is_part_of, :type=>SpecNamedNode)
       end
 
-      it "should return a properly formatted query for a relationship that has a query param defined" do
+      it "should return a properly formatted query for a relationship that has a solr filter query defined" do
         MockInboundNamedRelationshipQuery.inbound_relationship_query("changeme:1","testing_inbound_query").should == "is_part_of_s:info\\:fedora/changeme\\:1 AND has_model_s:info\\:fedora/SpecialPart"
       end
       
-      it "should return a properly formatted query for a relationship that does not have a query param defined" do
-        MockInboundNamedRelationshipQuery.inbound_relationship_query("changeme:1","testing_inbound_no_query_param").should == "is_part_of_s:info\\:fedora/changeme\\:1"
+      it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
+        MockInboundNamedRelationshipQuery.inbound_relationship_query("changeme:1","testing_inbound_no_solr_fq").should == "is_part_of_s:info\\:fedora/changeme\\:1"
       end
     end
 
     describe "outbound_relationship_query" do
       class MockOutboundNamedRelationshipQuery < SpecNamedNode
-        register_relationship_desc(:self, "testing_query", :is_part_of, :type=>SpecNamedNode, :query_params=>{:q=>{:has_model_s=>"info:fedora/SpecialPart"}})
-        register_relationship_desc(:self,"testing_no_query_param", :is_part_of, :type=>SpecNamedNode)
+        register_relationship_desc(:self, "testing_query", :is_part_of, :type=>SpecNamedNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+        register_relationship_desc(:self,"testing_no_solr_fq", :is_part_of, :type=>SpecNamedNode)
       end
 
-      it "should return a properly formatted query for a relationship that has a query param defined" do
+      it "should return a properly formatted query for a relationship that has a solr filter query defined" do
         ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
         expected_string = ""
         ids.each_with_index do |id,index|
@@ -461,14 +461,14 @@ describe ActiveFedora::RelationshipsHelper do
         MockOutboundNamedRelationshipQuery.outbound_relationship_query("testing_query",ids).should == expected_string
       end
 
-      it "should return a properly formatted query for a relationship that does not have a query param defined" do
+      it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
         expected_string = ""
         ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
         ids.each_with_index do |id,index|
           expected_string << " OR " if index > 0
           expected_string << "id:" + id.gsub(/(:)/, '\\:')
         end
-        MockOutboundNamedRelationshipQuery.outbound_relationship_query("testing_no_query_param",ids).should == expected_string
+        MockOutboundNamedRelationshipQuery.outbound_relationship_query("testing_no_solr_fq",ids).should == expected_string
       end
     end 
 
