@@ -334,7 +334,8 @@ describe ActiveFedora do
     
     after(:all) do
       # Restore to default fedora configs
-      ActiveFedora.init()
+      ActiveFedora.init(File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml"))
+
     end
 
     describe "outside of rails" do
