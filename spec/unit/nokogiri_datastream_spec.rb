@@ -366,6 +366,13 @@ describe ActiveFedora::NokogiriDatastream do
       term_pointer = [:name,:role,:roleTerm]
       @mods_ds.update_values([{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"})
     end
+
+    it "should set @dirty to true" do
+      mods_ds = Hydra::ModsArticleDatastream.new(:blob=>fixture(File.join("mods_articles","hydrangea_article1.xml")))
+      mods_ds.dirty?.should be_false
+      mods_ds.update_values([{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"})
+      mods_ds.dirty?.should be_true
+    end
   end
 
   describe '.term_values' do
