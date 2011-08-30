@@ -209,7 +209,9 @@ describe ActiveFedora do
     end
     
     after(:all) do
-      ActiveFedora.init(File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml"))
+      config_file = File.join (File.dirname(__FILE__), "..", "..", "config", "fedora.yml")
+      environment = "test"
+      ActiveFedora.init(:environment=>environment, :fedora_config_path=>config_file)
     end
   
     it "can tell its config paths" do
