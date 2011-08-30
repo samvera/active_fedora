@@ -31,6 +31,7 @@ describe ActiveFedora::Base do
     Fedora::Repository.instance.stubs(:nextid).returns(increment_pid.to_s)
     @test_object = ActiveFedora::Base.new
     @test_object.new_object = true
+    @test_history = FooHistory.new
   end
 
   after(:each) do
@@ -342,11 +343,6 @@ describe ActiveFedora::Base do
       solr_doc[:id].should eql("#{@test_object.pid}")
     end
 
-    it "should add self.class as the :active_fedora_model" do
-      solr_doc = @test_object.to_solr
-      solr_doc["active_fedora_model_s"].should eql(@test_object.class.inspect)
-    end
-
     it "should call .to_xml on all MetadataDatastreams and return the resulting document" do
       ds1 = ActiveFedora::MetadataDatastream.new
       ds2 = ActiveFedora::MetadataDatastream.new
@@ -393,8 +389,8 @@ describe ActiveFedora::Base do
     end
     
     it "should add self.class as the :active_fedora_model" do
-      solr_doc = @test_object.to_solr
-      solr_doc["active_fedora_model_s"].should eql(@test_object.class.inspect)
+      solr_doc = @test_history.to_solr
+      solr_doc["active_fedora_model_s"].should eql("FooHistory")
     end
 
     it "should use mappings.yml to decide names of solr fields" do      
