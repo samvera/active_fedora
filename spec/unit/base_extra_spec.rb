@@ -101,6 +101,7 @@ describe ActiveFedora::Base do
       @test_object.stubs(:pid).returns("foo")
       ActiveFedora::SolrService.instance.conn.expects(:delete).with("foo")      
       Fedora::Repository.instance.stubs(:delete).with(@test_object.inner_object)
+      @test_object.expects(:inbound_relationships).returns({})
       @test_object.delete
     end
 
