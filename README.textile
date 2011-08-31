@@ -1,6 +1,6 @@
 h2. Description
 
-RubyFedora and ActiveFedora provide a set of Ruby gems for creating and managing objects in the Fedora Repository Architecture ("http://fedora-commons.org":http://fedora-commons.org).  ActiveFedora is loosely based on "ActiveRecord" in Rails.
+RubyFedora and ActiveFedora provide a set of Ruby gems for creating and managing objects in the Fedora Repository Architecture ("http://fedora-commons.org":http://fedora-commons.org).  ActiveFedora is loosely based on "ActiveRecord" in Rails.  The 3.x series of ActiveFedora depends on Rails 3, specifically activemodel and activesupport.
 
 h2. Getting Help
 
