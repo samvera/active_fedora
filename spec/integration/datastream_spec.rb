@@ -44,15 +44,15 @@ describe ActiveFedora::Datastream do
   it "should be able to update Blob Datastream content and save to Fedora" do    
     dsid = "ds#{Time.now.to_i}"
     ds = ActiveFedora::Datastream.new(:dsID => dsid, :dsLabel => 'hello', :altIDs => '3333', 
-      :controlGroup => 'M', :blob => fixture('dino.jpg'))
-    File.identical?(ds.blob, fixture('dino.jpg')).should be_true
+      :controlGroup => 'M', :blob => fixture('dino.jpg').read)
+    ds.blob.should == fixture('dino.jpg').read
     @test_object.add_datastream(ds).should be_true
     @test_object.save
     to = ActiveFedora::Base.load_instance(@test_object.pid) 
     to.should_not be_nil 
     to.datastreams[dsid].should_not be_nil
     # to.datastreams[dsid].control_group.should == "M"
-    to.datastreams[dsid].content.length.should eql(fixture('dino.jpg').read.length)
+    to.datastreams[dsid].content.should == fixture('dino.jpg').read
     
   end
   
