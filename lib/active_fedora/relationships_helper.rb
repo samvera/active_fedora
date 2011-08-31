@@ -22,6 +22,7 @@ module ActiveFedora
   #
   #   Then obj.parents will only return parents where their eyes are blue.
   module RelationshipsHelper
+    include MediaShelfClassLevelInheritableAttributes
     attr_accessor :relationships_desc
 
     def self.included(klass)

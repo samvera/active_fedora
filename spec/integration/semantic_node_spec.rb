@@ -153,6 +153,30 @@ describe ActiveFedora::SemanticNode do
   end
   
   describe "inbound relationship finders" do
+    describe "when inheriting from parents" do
+      before do
+        class Test2 < ActiveFedora::Base
+        end
+        @test_object2 = Test2.new
+        @test_object2.save
+        @part4 = ActiveFedora::Base.new()
+      end
+      it "should return an empty set" do
+        @test_object2.parts.should == []
+      end
+      it "Should return stuff" do
+        @part4.add_relationship(:is_part_of, @test_object)
+        @part4.save
+        @test_object2.parts.map(&:pid).should == [@part4.pid]
+      end 
+      after do
+        @test_object2.delete
+        begin
+          @part4.delete
+        rescue
+        end
+      end
+    end
     it "should return an array of Base objects" do
       parts = @test_object.parts
       parts.each do |part|

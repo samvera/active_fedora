@@ -258,6 +258,7 @@ module ActiveFedora
         def #{name}(opts={})
           opts = {:rows=>25}.merge(opts)
           query = self.class.inbound_relationship_query(self.pid,"#{name}")
+          return [] if query.empty?
           solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
           if opts[:response_format] == :solr
             return solr_result
