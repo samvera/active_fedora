@@ -1,4 +1,10 @@
+2.3.5
+
+branched so that trunk now require rails 3.
+Named finders HYDRA-541 (Rick Johnson)
+
 2.3.4
+
 moved dirty assignment to NokogiriDatastream#update_values; added test (Benjamin Armintor)
 Fixed HYDRA-590
 
