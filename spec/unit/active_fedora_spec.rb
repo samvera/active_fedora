@@ -11,6 +11,7 @@ describe ActiveFedora do
       it "should use config_options[:environment] if set" do
         ActiveFedora.expects(:config_options).at_least_once.returns(:environment=>"ballyhoo")
         ActiveFedora.environment.should eql("ballyhoo")
+        ENV['environment']='test'
       end
 
       it "should use Rails.env if no config_options and Rails.env is set" do
