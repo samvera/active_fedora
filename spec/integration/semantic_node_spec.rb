@@ -156,18 +156,45 @@ describe ActiveFedora::SemanticNode do
     describe "when inheriting from parents" do
       before do
         class Test2 < ActiveFedora::Base
+          # has_bidirectional_relationship "components", :has_component, :is_component_of
         end
         @test_object2 = Test2.new
         @test_object2.save
         @part4 = ActiveFedora::Base.new()
       end
+      it "should have relationships defined" do
+        # puts "Test2 relationships_desc:"
+        # puts Test2.relationships_desc.inspect
+        # puts "ActiveFedora::Base relationships_desc:"
+        # puts ActiveFedora::Base.relationships_desc.inspect
+        ActiveFedora::Base.relationships_desc.should have_key(:inbound)
+        Test2.relationships_desc.should have_key(:inbound)
+        ActiveFedora::Base.relationships_desc[:inbound].each_pair do |key, value|
+          Test2.relationships_desc[:inbound].should have_key(key)
+          Test2.relationships_desc[:inbound][key].should == value
+          Test2.inbound_relationship_query("foo:1",key.to_s).should_not be_empty
+        end
+        ActiveFedora::Base.relationships_desc[:self].each_pair do |key, value|
+          Test2.relationships_desc[:self].should have_key(key)
+          Test2.relationships_desc[:self][key].should == value
+        end
+      end
+      it "should not have relationships bleeding over from other sibling classes" do
+        SpecNodeSolrFilterQuery.relationships_desc[:inbound].should have_key("bi_special_containers_inbound")
+        ActiveFedora::Base.relationships_desc[:inbound].should_not have_key("bi_special_containers_inbound")
+        Test2.relationships_desc[:inbound].should_not have_key("bi_special_containers_inbound")
+      end
       it "should return an empty set" do
         @test_object2.parts.should == []
+        @test_object2.parts_outbound.should == []
       end
-      it "Should return stuff" do
-        @part4.add_relationship(:is_part_of, @test_object)
+      it "should return stuff" do
+        @part4.add_relationship(:is_part_of, @test_object2)
+        @test_object2.add_relationship(:has_part, @test_object)
         @part4.save
-        @test_object2.parts.map(&:pid).should == [@part4.pid]
+        @test_object2.parts_inbound.map(&:pid).should == [@part4.pid]
+        @test_object2.parts_outbound.map(&:pid).should == [@test_object.pid]
+        @test_object2.parts.map(&:pid).should == [@part4.pid, @test_object.pid]
       end 
       after do
         @test_object2.delete

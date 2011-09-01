@@ -2,15 +2,18 @@ require 'active_fedora/relationships_helper'
 
 module ActiveFedora
   module SemanticNode 
-    include MediaShelfClassLevelInheritableAttributes
-    include ActiveFedora::RelationshipsHelper
-    ms_inheritable_attributes  :class_relationships, :internal_uri
+    # include MediaShelfClassLevelInheritableAttributes
+    
+    # ms_inheritable_attributes  :class_relationships, :class_relationships_desc, :internal_uri
     
     attr_accessor :internal_uri, :relationships_are_dirty, :load_from_solr
     
 
     def self.included(klass)
       klass.extend(ClassMethods)
+      klass.send(:include, MediaShelfClassLevelInheritableAttributes)
+      klass.send(:include, ActiveFedora::RelationshipsHelper)
+      klass.send(:ms_inheritable_attributes, :class_relationships, :internal_uri)
     end
 
     def assert_kind_of(n, o,t)
@@ -176,7 +179,7 @@ module ActiveFedora
     end
 
     module ClassMethods
-      include ActiveFedora::RelationshipsHelper::ClassMethods
+      # include ActiveFedora::RelationshipsHelper::ClassMethods
 
       # Allows for a relationship to be treated like any other attribute of a model class. You define
       # relationships in your model class using this method.  You then have access to several
