@@ -61,8 +61,10 @@ module ActiveFedora
         return_multiple = false
         if args == :all
           return_multiple = true
-          escaped_class_name = self.name.gsub(/(:)/, '\\:')
-          q = "#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}"
+          # escaped_class_name = self.name.gsub(/(:)/, '\\:')
+          escaped_class_uri = "info:fedora/afmodel:#{self.name}".gsub(/(:)/, '\\:')
+          # q = "#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}"
+          q = "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
         elsif args.class == String
           escaped_id = args.gsub(/(:)/, '\\:')
           q = "#{SOLR_DOCUMENT_ID}:#{escaped_id}"
