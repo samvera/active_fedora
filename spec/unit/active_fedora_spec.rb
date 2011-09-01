@@ -14,6 +14,9 @@ describe ActiveFedora do
   end
   
   before(:each) do
+    # Stubbing register_fedora_and_solr in order to speed up tests.  
+    # If you have tests that need fedora & solr registered, 
+    # put them in the separate ActiveFedora describe block towards the end of this file.
     ActiveFedora.stubs(:register_fedora_and_solr)
   end
   
