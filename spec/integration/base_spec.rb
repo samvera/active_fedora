@@ -322,43 +322,18 @@ describe ActiveFedora::Base do
         r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
         model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseRelationship))
         #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
-        @test_object2.relationships_by_name(false).should == {:self=>{"testing"=>[r3.object],
-                                                              "testing2"=>[r4.object],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                            :inbound=>{"testing_inbound"=>[r5.object],"testing_inbound2"=>[],
-                                                                       "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
-        @test_object3.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                           :inbound=>{"testing_inbound"=>[r2.object],
-                                                                      "testing_inbound2"=>[r5.object],
-                                                                      "testing_bidirectional_inbound"=>[],
-                                                                      "testing_inbound3"=>[]}}
-        @test_object4.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                            :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[r2.object],
-                                                                       "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
-        @test_object5.relationships_by_name(false).should == {:self=>{"testing"=>[r2.object],
-                                                                    "testing2"=>[r3.object],
-                                                                    "testing_bidirectional_outbound"=>[],
-                                                                    "testing3"=>[]},
-                                                            :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[],
-                                                                       "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
+        @test_object2.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[r5.object], "testing_inbound2"=>[]}, :self=>{"testing2"=>[r4.object], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[r3.object], "parts_outbound"=>[r3.object], "testing_bidirectional_outbound"=>[]}}
+        @test_object3.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[r2.object], "testing_inbound2"=>[r5.object]}, :self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+        @test_object4.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[r2.object]}, :self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+        @test_object5.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[]}, :self=>{"testing2"=>[r3.object], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[r2.object], "parts_outbound"=>[r2.object], "testing_bidirectional_outbound"=>[]}}
         @test_object2.delete
         #need to reload since removed from rels_ext in memory
         @test_object5 = MockAFBaseRelationship.load_instance(@test_object5.pid)
       
         #check any test_object2 inbound rels gone from source
-        @test_object3.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                            :inbound=>{"testing_inbound"=>[],
-                                                                       "testing_inbound2"=>[r5.object],
-                                                                       "testing_bidirectional_inbound"=>[],
-                                                                       "testing_inbound3"=>[]}}
-        @test_object4.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                            :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[],
-                                                                       "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
-        @test_object5.relationships_by_name(false).should == {:self=>{"testing"=>[],
-                                                                  "testing2"=>[r3.object],
-                                                                  "testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                            :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[],
-                                                                       "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
-   
+        @test_object3.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[r5.object]}, :self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+        @test_object4.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[]}, :self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+        @test_object5.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[]}, :self=>{"testing2"=>[r3.object], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
     end
   end
     
@@ -509,13 +484,13 @@ describe ActiveFedora::Base do
       model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseRelationship))
       #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
       @test_object2.inbound_relationships_by_name.should == {"testing_inbound"=>[r5.object],"testing_inbound2"=>[],
-                                                           "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}
+                                                           "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[], "parts_inbound" => []}
       @test_object3.inbound_relationships_by_name.should == {"testing_inbound"=>[r2.object],"testing_inbound2"=>[r5.object],
-                                                           "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}
+                                                           "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[], "parts_inbound" => []}
       @test_object4.inbound_relationships_by_name.should == {"testing_inbound"=>[],"testing_inbound2"=>[r2.object],
-                                                           "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}
+                                                           "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[], "parts_inbound" => []}
       @test_object5.inbound_relationships_by_name.should == {"testing_inbound"=>[],"testing_inbound2"=>[],
-                                                           "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}
+                                                           "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[], "parts_inbound" => []}
     end
   end
   
@@ -546,33 +521,15 @@ describe ActiveFedora::Base do
       r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
       model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseRelationship))
       #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
-      @test_object2.relationships_by_name(false).should == {:self=>{"testing"=>[r3.object],
-                                                            "testing2"=>[r4.object],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                    :inbound=>{"testing_inbound"=>[r5.object],"testing_inbound2"=>[],
-                                                               "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
-      @test_object3.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                    :inbound=>{"testing_inbound"=>[r2.object],
-                                                               "testing_inbound2"=>[r5.object],
-                                                               "testing_bidirectional_inbound"=>[],
-                                                               "testing_inbound3"=>[]}}
-      @test_object4.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                    :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[r2.object],
-                                                               "testing_bidirectional_inbound"=>[], "testing_inbound3"=>[]}}
-      @test_object5.relationships_by_name(false).should == {:self=>{"testing"=>[r2.object],
-                                                                  "testing2"=>[r3.object],
-                                                                  "testing_bidirectional_outbound"=>[],
-                                                                  "testing3"=>[]},
-                                                          :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[],
-                                                                     "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
+      @test_object2.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[r5.object], "testing_inbound2"=>[]}, :self=>{"testing2"=>[r4.object], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[r3.object], "parts_outbound"=>[r3.object], "testing_bidirectional_outbound"=>[]}}
+      @test_object3.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[r2.object], "testing_inbound2"=>[r5.object]}, :self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+      @test_object4.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[r2.object]}, :self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+      @test_object5.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[]}, :self=>{"testing2"=>[r3.object], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[r2.object], "parts_outbound"=>[r2.object], "testing_bidirectional_outbound"=>[]}}
       #all inbound should now be empty if no parameter supplied to relationships
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],
-                                                            "testing2"=>[r4.object],
-                                                            "testing_bidirectional_outbound"=>[],
-                                                            "testing3"=>[]}}
-      @test_object3.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]}}
-      @test_object4.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]}}
-      @test_object5.relationships_by_name.should == {:self=>{"testing"=>[r2.object],
-                                                           "testing2"=>[r3.object],"testing_bidirectional_outbound"=>[],"testing3"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing2"=>[r4.object], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[r3.object], "parts_outbound"=>[r3.object], "testing_bidirectional_outbound"=>[]}}
+      @test_object3.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+      @test_object4.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+      @test_object5.relationships_by_name.should == {:self=>{"testing2"=>[r3.object], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[r2.object], "parts_outbound"=>[r2.object], "testing_bidirectional_outbound"=>[]}}
     end
   end
   
@@ -603,24 +560,10 @@ describe ActiveFedora::Base do
       r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
       model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseRelationship))
       #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
-      @test_object2.relationships_by_name(false).should == {:self=>{"testing"=>[r3.object],
-                                                            "testing2"=>[r4.object],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                    :inbound=>{"testing_inbound"=>[r5.object],"testing_inbound2"=>[],
-                                                               "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
-      @test_object3.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                    :inbound=>{"testing_inbound"=>[r2.object],
-                                                               "testing_inbound2"=>[r5.object],
-                                                               "testing_bidirectional_inbound"=>[],
-                                                               "testing_inbound3"=>[]}}
-      @test_object4.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                    :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[r2.object],
-                                                               "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
-      @test_object5.relationships_by_name(false).should == {:self=>{"testing"=>[r2.object],
-                                                                  "testing2"=>[r3.object],
-                                                                  "testing_bidirectional_outbound"=>[],
-                                                                  "testing3"=>[]},
-                                                          :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[],
-                                                                     "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
+      @test_object2.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[r5.object], "testing_inbound2"=>[]}, :self=>{"testing2"=>[r4.object], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[r3.object], "parts_outbound"=>[r3.object], "testing_bidirectional_outbound"=>[]}}
+      @test_object3.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[r2.object], "testing_inbound2"=>[r5.object]}, :self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+      @test_object4.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[r2.object]}, :self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+      @test_object5.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[]}, :self=>{"testing2"=>[r3.object], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[r2.object], "parts_outbound"=>[r2.object], "testing_bidirectional_outbound"=>[]}}
     end
   end
   
@@ -653,45 +596,20 @@ describe ActiveFedora::Base do
       #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
       @test_object2.relationships_by_name(false).should == {:self=>{"testing"=>[r3.object],
                                                             "testing2"=>[r4.object],
-                                                            "testing_bidirectional_outbound"=>[],"testing3"=>[]},
+                                                            "testing_bidirectional_outbound"=>[],"testing3"=>[], 
+                                                            "collection_members"=>[], "part_of"=>[], "parts_outbound"=>[r3.object]},
                                                     :inbound=>{"testing_inbound"=>[r5.object],"testing_inbound2"=>[],
-                                                               "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
-      @test_object3.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                    :inbound=>{"testing_inbound"=>[r2.object],
-                                                               "testing_inbound2"=>[r5.object],
-                                                               "testing_bidirectional_inbound"=>[],
-                                                               "testing_inbound3"=>[]}}
-      @test_object4.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                    :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[r2.object],
-                                                               "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
-      @test_object5.relationships_by_name(false).should == {:self=>{"testing"=>[r2.object],
-                                                                  "testing2"=>[r3.object],
-                                                                  "testing_bidirectional_outbound"=>[],
-                                                                  "testing3"=>[]},
-                                                          :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[],
-                                                                     "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
+          "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[], "parts_inbound"=>[]}}
+      @test_object3.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[r2.object], "testing_inbound2"=>[r5.object]}, :self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+      @test_object4.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[r2.object]}, :self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+      @test_object5.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[]}, :self=>{"testing2"=>[r3.object], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[r2.object], "parts_outbound"=>[r2.object], "testing_bidirectional_outbound"=>[]}}
       @test_object2.remove_relationship_by_name("testing",@test_object3)
       @test_object2.save
       #check now removed for both outbound and inbound
-      @test_object2.relationships_by_name(false).should == {:self=>{"testing"=>[],
-                                                            "testing2"=>[r4.object],
-                                                            "testing_bidirectional_outbound"=>[],
-                                                            "testing3"=>[]},
-                                                    :inbound=>{"testing_inbound"=>[r5.object],"testing_inbound2"=>[],
-                                                               "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
-      @test_object3.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                    :inbound=>{"testing_inbound"=>[],
-                                                               "testing_inbound2"=>[r5.object],
-                                                                "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
-      @test_object4.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[],"testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                    :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[r2.object],
-                                                               "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
-      @test_object5.relationships_by_name(false).should == {:self=>{"testing"=>[r2.object],
-                                                                  "testing2"=>[r3.object],
-                                                                  "testing_bidirectional_outbound"=>[],"testing3"=>[]},
-                                                          :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[],
-                                                                     "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[]}}
-   
+      @test_object2.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[r5.object], "testing_inbound2"=>[]}, :self=>{"testing2"=>[r4.object], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+      @test_object3.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[r5.object]}, :self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+      @test_object4.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[r2.object]}, :self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
+      @test_object5.relationships_by_name(false).should == {:inbound=>{"testing_inbound3"=>[], "testing_bidirectional_inbound"=>[], "parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[]}, :self=>{"testing2"=>[r3.object], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[r2.object], "parts_outbound"=>[r2.object], "testing_bidirectional_outbound"=>[]}}
     end
   end
 
@@ -951,34 +869,33 @@ describe ActiveFedora::Base do
                                                             :has_part=>[r3.object],
                                                             :has_member=>[r4.object]},
                                                     :inbound=>{:has_part=>[r5.object]}}
-      test_from_solr_object2.relationships_by_name(false).should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]},
-                                                                   :inbound=>{"testing_inbound"=>[r5.object],"testing_inbound2"=>[]}}                                              
+      test_from_solr_object2.relationships_by_name(false).should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object],
+        "collection_members"=>[],"part_of"=>[],"parts_outbound"=>[r3.object]},
+        :inbound=>{"testing_inbound"=>[r5.object],"testing_inbound2"=>[],"parts_inbound"=>[]}}
       test_from_solr_object3.relationships(false).should == {:self=>{:has_model=>[model_rel.object]},
                                                    :inbound=>{:has_part=>[r2.object],
                                                                :has_member=>[r5.object]}}
-      test_from_solr_object3.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
-                                                                   :inbound=>{"testing_inbound"=>[r2.object],"testing_inbound2"=>[r5.object]}}                                                                  
+      test_from_solr_object3.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[], "collection_members"=>[],"part_of"=>[],"parts_outbound"=>[]},
+                                                                   :inbound=>{"testing_inbound"=>[r2.object],"testing_inbound2"=>[r5.object], "parts_inbound"=>[]}}                                                                  
       test_from_solr_object4.relationships(false).should == {:self=>{:has_model=>[model_rel.object]},
                                                     :inbound=>{:has_member=>[r2.object]}}
-      test_from_solr_object4.relationships_by_name(false).should == {:self=>{"testing"=>[],"testing2"=>[]},
-                                                                   :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[r2.object]}}                                                      
+      test_from_solr_object4.relationships_by_name(false).should == {:inbound=>{"parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[r2.object]}, :self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}}                       
       test_from_solr_object5.relationships(false).should == {:self=>{:has_model=>[model_rel.object],
                                                             :has_part=>[r2.object],
                                                             :has_member=>[r3.object]},
                                                     :inbound=>{}}
-      test_from_solr_object5.relationships_by_name(false).should == {:self=>{"testing"=>[r2.object],"testing2"=>[r3.object]},
-                                                                   :inbound=>{"testing_inbound"=>[],"testing_inbound2"=>[]}}                                                     
+      test_from_solr_object5.relationships_by_name(false).should == {:inbound=>{"parts_inbound"=>[], "testing_inbound"=>[], "testing_inbound2"=>[]}, :self=>{"testing2"=>[r3.object], "collection_members"=>[], "part_of"=>[], "testing"=>[r2.object], "parts_outbound"=>[r2.object]}}
       #all inbound should now be empty if no parameter supplied to relationships
       test_from_solr_object2.relationships.should == {:self=>{:has_part=>[r3.object],:has_member=>[r4.object],:has_model=>[model_rel.object]}}
-      test_from_solr_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]}}
+      test_from_solr_object2.relationships_by_name.should == {:self=>{"testing2"=>[r4.object], "collection_members"=>[], "part_of"=>[], "testing"=>[r3.object], "parts_outbound"=>[r3.object]}}
       test_from_solr_object3.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
-      test_from_solr_object3.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      test_from_solr_object3.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}}
       test_from_solr_object4.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
-      test_from_solr_object4.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      test_from_solr_object4.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}} 
       test_from_solr_object5.relationships.should == {:self=>{:has_model=>[model_rel.object],
                                                              :has_part=>[r2.object],
                                                              :has_member=>[r3.object]}}
-      test_from_solr_object5.relationships_by_name.should == {:self=>{"testing"=>[r2.object],"testing2"=>[r3.object]}}
+      test_from_solr_object5.relationships_by_name.should == {:self=>{"testing2"=>[r3.object], "collection_members"=>[], "part_of"=>[], "testing"=>[r2.object], "parts_outbound"=>[r2.object]}}
       # need to check metadata
       test_from_solr_object2.fields[:language][:values].should == ["Italian"]
       test_from_solr_object2.fields[:creator][:values].should == ["Linguist, A."]

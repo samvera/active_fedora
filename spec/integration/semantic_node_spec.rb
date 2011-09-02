@@ -5,7 +5,7 @@ require 'active_fedora'
 describe ActiveFedora::SemanticNode do
   
   before(:all) do 
-    class SpecNode 
+    class SpecNode
       include ActiveFedora::SemanticNode
       has_relationship "collection_members", :has_collection_member
     end
@@ -23,7 +23,7 @@ describe ActiveFedora::SemanticNode do
       has_bidirectional_relationship("bi_containers", :is_member_of, :has_member)
       has_bidirectional_relationship("bi_special_containers", :is_member_of, :has_member, :solr_fq=>"has_model_s:info\\:fedora/SpecialContainer")
     end
-    
+
     @test_object = SNSpecModel.new
     @test_object.save
     
@@ -402,7 +402,7 @@ describe ActiveFedora::SemanticNode do
 
   #putting this test here instead of relationships_helper because testing that relationships_by_name hash gets refreshed if the relationships hash is changed
   describe "relationships_by_name" do
-    class MockSemNamedRelationships
+    class MockSemNamedRelationships 
       include ActiveFedora::SemanticNode
       has_relationship "testing", :has_part
       has_relationship "testing2", :has_member

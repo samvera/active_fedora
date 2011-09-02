@@ -22,13 +22,12 @@ module ActiveFedora
   #
   #   Then obj.parents will only return parents where their eyes are blue.
   module RelationshipsHelper
-    include MediaShelfClassLevelInheritableAttributes
-    attr_accessor :relationships_desc
 
     def self.included(klass)
       klass.extend(ClassMethods)
+      klass.send(:include, MediaShelfClassLevelInheritableAttributes)
+      klass.send(:ms_inheritable_attributes, :class_relationships_desc)
     end
-
     
 
     # ** EXPERIMENTAL **
@@ -560,7 +559,36 @@ module ActiveFedora
       #  Results in the following returned by relationships_desc
       #  {:self=>{"audio_records"=>{:type=>AudioRecord, :singular=>nil, :predicate=>:has_part, :inbound=>false}}}
       def relationships_desc
-        @class_relationships_desc ||= Hash[:self => {}]
+        @class_relationships_desc ||= Hash[self => {:self => {}}]
+        @class_relationships_desc[self] = {:self => {}} unless @class_relationships_desc.has_key?(self)
+
+        #get super classes
+        super_klasses = []
+        #insert in reverse order so the child overwrites anything in parent
+        super_klass = self.superclass
+        while !super_klass.nil?
+          super_klasses.insert(0,super_klass)
+          super_klass = super_klass.superclass
+        end
+        
+        rels_desc = {}
+        super_klasses.each do |super_klass|
+          if @class_relationships_desc.has_key?(super_klass)
+            @class_relationships_desc[super_klass].each_pair do |subject,rels|
+              rels_desc[subject] = {} unless rels_desc.has_key?(subject)
+              rels_desc[subject].merge!(rels)
+            end
+          end
+        end
+
+        #apply this class last
+        if @class_relationships_desc.has_key?(self)
+          @class_relationships_desc[self].each_pair do |subject,rels|
+            rels_desc[subject] = {} unless rels_desc.has_key?(subject)
+            rels_desc[subject].merge!(rels)
+          end
+        end
+        rels_desc
       end
 
       # ** EXPERIMENTAL **
@@ -569,8 +597,10 @@ module ActiveFedora
       # exist within the relationships_desc hash tracking relationships metadata. 
       # @param [Symbol] Subject name to register (will probably be something like :self or :inbound)
       def register_relationship_desc_subject(subject)
-        unless relationships_desc.has_key?(subject) 
-          relationships_desc[subject] = {} 
+        @class_relationships_desc ||= Hash[self => {:self => {}}]
+        @class_relationships_desc[self] = {} unless @class_relationships_desc.has_key?(self)
+        unless @class_relationships_desc[self].has_key?(subject) 
+          @class_relationships_desc[self][subject] = {} 
         end
       end
   
@@ -585,7 +615,7 @@ module ActiveFedora
       def register_relationship_desc(subject, name, predicate, opts={})
         register_relationship_desc_subject(subject)
         opts.merge!({:predicate=>predicate})
-        relationships_desc[subject][name] = opts
+        @class_relationships_desc[self][subject][name] = opts
       end
 
       # Tests if the relationship name passed is in bidirectional

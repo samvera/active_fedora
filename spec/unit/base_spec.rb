@@ -632,10 +632,10 @@ describe ActiveFedora::Base do
       @test_object.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(ActiveFedora::Base))
       #should return expected named relationships
       @test_object2.relationships_by_name
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}}
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:dummy,:object=>@test_object})
       @test_object2.add_relationship_by_name("testing",@test_object)
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r.object],"testing2"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r.object],"testing2"=>[],"part_of"=>[], "parts_outbound"=>[r.object], "collection_members"=>[]}}
     end 
   end
 
@@ -658,9 +658,9 @@ describe ActiveFedora::Base do
       @test_object2.testing_append(@test_object)
       #create relationship to access generate_uri method for an object
       r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object)
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r.object]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r.object],"collection_members"=>[], "part_of"=>[r.object], "parts_outbound"=>[]}}
       @test_object2.testing_remove(@test_object)
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"collection_members"=>[], "part_of"=>[], "parts_outbound"=>[]}}
     end
   end
 end
