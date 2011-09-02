@@ -3,7 +3,7 @@ require 'active_fedora/relationships_helper'
 module ActiveFedora
   module SemanticNode 
     include MediaShelfClassLevelInheritableAttributes
-    include ActiveFedora::RelationshipsHelper
+    
     ms_inheritable_attributes  :class_relationships, :internal_uri
     
     attr_accessor :internal_uri, :relationships_are_dirty, :load_from_solr
@@ -11,6 +11,7 @@ module ActiveFedora
 
     def self.included(klass)
       klass.extend(ClassMethods)
+      klass.send(:include, ActiveFedora::RelationshipsHelper)
     end
 
     def assert_kind_of(n, o,t)
@@ -176,7 +177,7 @@ module ActiveFedora
     end
 
     module ClassMethods
-      include ActiveFedora::RelationshipsHelper::ClassMethods
+      #include ActiveFedora::RelationshipsHelper::ClassMethods
 
       # Allows for a relationship to be treated like any other attribute of a model class. You define
       # relationships in your model class using this method.  You then have access to several
@@ -258,6 +259,7 @@ module ActiveFedora
         def #{name}(opts={})
           opts = {:rows=>25}.merge(opts)
           query = self.class.inbound_relationship_query(self.pid,"#{name}")
+          return [] if query.empty?
           solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
           if opts[:response_format] == :solr
             return solr_result

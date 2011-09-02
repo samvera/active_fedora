@@ -5,6 +5,21 @@ require 'equivalent-xml'
 
 describe ActiveFedora do
   
+  after :all do
+    unstub_rails
+    unstub_blacklight
+    # Restore to default fedora configs
+    fedora_config_path = File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml")
+    ActiveFedora.init(:environment=>"test", :fedora_config=>fedora_config_path)
+  end
+  
+  before(:each) do
+    # Stubbing register_fedora_and_solr in order to speed up tests.  
+    # If you have tests that need fedora & solr registered, 
+    # put them in the separate ActiveFedora describe block towards the end of this file.
+    ActiveFedora.stubs(:register_fedora_and_solr)
+  end
+  
   describe "initialization methods" do
     
     describe "environment" do
@@ -175,16 +190,6 @@ describe ActiveFedora do
       end
     end
 
-    describe "register_solr_and_fedora" do
-      it "should regiser instances with the appropriate urls" do
-        ActiveFedora.expects(:solr_config).at_least_once.returns({:url=>"http://megasolr:8983"})
-        ActiveFedora.expects(:fedora_config).at_least_once.returns({:url=>"http://megafedora:8983"})
-        ActiveFedora.register_fedora_and_solr
-        ActiveFedora.solr.conn.url.to_s.should eql("http://megasolr:8983")
-        ActiveFedora.fedora.fedora_url.to_s.should eql("http://megafedora:8983")
-      end
-    end
-
     describe "check_fedora_path_for_solr" do
       it "should find the solr.yml file and return it if it exists" do
         ActiveFedora.expects(:fedora_config_path).returns("/path/to/fedora/fedora.yml")
@@ -210,7 +215,7 @@ describe ActiveFedora do
     end
     
     after(:all) do
-      config_file = File.join (File.dirname(__FILE__), "..", "..", "config", "fedora.yml")
+      config_file = File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml")
       environment = "test"
       ActiveFedora.init(:environment=>environment, :fedora_config_path=>config_file)
     end
@@ -347,9 +352,13 @@ describe ActiveFedora do
         ActiveFedora.init()
         ActiveFedora.fedora.fedora_url.to_s.should == "http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"
       end
-      it "should load the passed config if explicit config passed in" do
+      it "should load the passed config if explicit config passed in as a string" do
         ActiveFedora.init('./spec/fixtures/rails_root/config/fedora.yml')
-        ActiveFedora.fedora.fedora_url.to_s.should == "http://fedoraAdmin:fedoraAdmin@testhost.com:8983/fedora"
+        ActiveFedora.fedora_config[:url].should == "http://fedoraAdmin:fedoraAdmin@testhost.com:8983/fedora"
+      end
+      it "should load the passed config if explicit config passed in as a string" do
+        ActiveFedora.init(:fedora_config_path=>'./spec/fixtures/rails_root/config/fedora.yml')
+        ActiveFedora.fedora_config[:url].should == "http://fedoraAdmin:fedoraAdmin@testhost.com:8983/fedora"
       end
     end
 
@@ -384,19 +393,30 @@ describe ActiveFedora do
           it "should look for the file in the path defined at Rails.root" do
             stub_rails(:root=>File.join(File.dirname(__FILE__),"../fixtures/rails_root"))
             ActiveFedora.init()
-            ActiveFedora.solr.class.should == ActiveFedora::SolrService
-            ActiveFedora.fedora.class.should == Fedora::Repository
-            ActiveFedora.fedora.fedora_url.to_s.should == "http://fedoraAdmin:fedoraAdmin@testhost.com:8983/fedora"
+            ActiveFedora.fedora_config[:url].should == "http://fedoraAdmin:fedoraAdmin@testhost.com:8983/fedora"
           end
           it "should load the default file if no config is found at Rails.root" do
             stub_rails(:root=>File.join(File.dirname(__FILE__),"../fixtures/bad/path/to/rails_root"))
             ActiveFedora.init()
-            ActiveFedora.solr.class.should == ActiveFedora::SolrService
-            ActiveFedora.fedora.class.should == Fedora::Repository
-            ActiveFedora.fedora.fedora_url.to_s.should == "http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"
+            ActiveFedora.fedora_config[:url].should == "http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"
           end
         end
       end
+    end
+  end
+end
+
+
+describe ActiveFedora do
+  # Put methods whose tests require registering Fedora & Solr here.
+  # to allow tests to run fast, keep these to a minimum.
+  describe "register_solr_and_fedora" do
+    it "should regiser instances with the appropriate urls" do
+      ActiveFedora.expects(:solr_config).at_least_once.returns({:url=>"http://megasolr:8983"})
+      ActiveFedora.expects(:fedora_config).at_least_once.returns({:url=>"http://megafedora:8983"})
+      ActiveFedora.register_fedora_and_solr
+      ActiveFedora.solr.conn.url.to_s.should eql("http://megasolr:8983")
+      ActiveFedora.fedora.fedora_url.to_s.should eql("http://megafedora:8983")
     end
   end
 end

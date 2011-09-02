@@ -22,12 +22,13 @@ module ActiveFedora
   #
   #   Then obj.parents will only return parents where their eyes are blue.
   module RelationshipsHelper
-    attr_accessor :relationships_desc
+
+    include MediaShelfClassLevelInheritableAttributes
+    ms_inheritable_attributes :class_relationships_desc
 
     def self.included(klass)
       klass.extend(ClassMethods)
     end
-
     
 
     # ** EXPERIMENTAL **
@@ -549,7 +550,10 @@ module ActiveFedora
 
       # ** EXPERIMENTAL **
       #  
-      # Return hash that persists relationship metadata defined by has_relationship calls
+      # Return hash that persists relationship metadata defined by has_relationship calls.  If you implement a child class of ActiveFedora::Base it will inherit
+      # the relationship descriptions defined there by merging in the class
+      # instance variable values.  It will also do this for any level of 
+      # ancestors.
       # @return [Hash] Hash of relationship subject (:self or :inbound) mapped to nested hashs of each relationship name mapped to another hash relationship options
       # @example
       #  For the following relationship
@@ -559,7 +563,30 @@ module ActiveFedora
       #  Results in the following returned by relationships_desc
       #  {:self=>{"audio_records"=>{:type=>AudioRecord, :singular=>nil, :predicate=>:has_part, :inbound=>false}}}
       def relationships_desc
-        @class_relationships_desc ||= Hash[:self => {}]
+        #get any relationship descriptions from superclasses
+        if @class_relationships_desc.nil?
+          @class_relationships_desc ||= Hash[:self => {}]
+
+          #get super classes
+          super_klasses = []
+          #insert in reverse order so the child overwrites anything in parent
+          super_klass = self.superclass
+          while !super_klass.nil?
+            super_klasses.insert(0,super_klass)
+            super_klass = super_klass.superclass
+          end
+        
+          super_klasses.each do |super_klass|
+            if super_klass.respond_to?(:relationships_desc)
+              super_rels = super_klass.relationships_desc
+              super_rels.each_pair do |subject,rels|
+                @class_relationships_desc[subject] = {} unless @class_relationships_desc.has_key?(subject)
+                @class_relationships_desc[subject].merge!(rels)
+              end
+            end
+          end
+        end
+        @class_relationships_desc
       end
 
       # ** EXPERIMENTAL **

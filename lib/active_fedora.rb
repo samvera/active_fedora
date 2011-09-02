@@ -1,6 +1,6 @@
 require 'rubygems'
-require "bundler/setup"
-Bundler.require(:default)
+# require "bundler/setup"
+# Bundler.require(:default)
 
 gem 'solr-ruby'
 require "loggable"
@@ -68,14 +68,14 @@ module ActiveFedora #:nodoc:
   # 2. If it does not find a solr.yml and the fedora.yml contains a solr url, it will raise an configuration error 
   # 3. If it does not find a solr.yml and the fedora.yml does not contain a solr url, it will look in: +Rails.root+/config, +current working directory+/config, then the solr.yml shipped with gem
   def self.init( options={} )
-    logger.level = Logger::ERROR
+    logger.level = Logger::ERROR if logger.respond_to? :level ###MediaShelf StubLogger doesn't have a level= method
     # Make config_options into a Hash if nil is passed in as the value
     options = {} if options.nil?
 
     # For backwards compatibility, handle cases where config_path (a String) is passed in as the argument rather than a config_options hash
     # In all other cases, set config_path to config_options[:config_path], which is ok if it's nil
     if options.is_a? String
-      logger.warn "DEPRECATION WARNING: Calling ActiveFedora.init with a path as an argument is deprecated.  Use ActiveFedora.init(:config_path=>#{options})"
+      logger.warn "DEPRECATION WARNING: Calling ActiveFedora.init with a path as an argument is deprecated.  Use ActiveFedora.init(:fedora_config_path=>#{options})"
       @config_options = {:fedora_config_path=>options}
     else
       @config_options = options

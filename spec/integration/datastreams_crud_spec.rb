@@ -141,7 +141,7 @@ end
   
   it "should create/update image/file datastream" do
     ds = Fedora::Datastream.new(:pid => @test_object.pid, :dsID => 'DS1', :dsLabel => 'hello', :altIDs => '3333', 
-      :controlGroup => 'M', :blob => fixture('dino.jpg'))
+      :controlGroup => 'M', :blob => fixture('dino.jpg').read, :mimeType=>'image/jpeg')
       
     @fedora.save(ds).should be_true
     
