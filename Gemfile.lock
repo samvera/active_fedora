@@ -2,8 +2,8 @@ PATH
   remote: .
   specs:
     active-fedora (3.0.0)
-      activeresource (>= 3.0)
-      activesupport (>= 3.0)
+      activeresource (~> 3.0.9)
+      activesupport (~> 3.0.9)
       equivalent-xml
       facets
       mediashelf-loggable
@@ -18,6 +18,7 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
+<<<<<<< HEAD
     RedCloth (4.2.8)
     activemodel (3.1.0)
       activesupport (= 3.1.0)
@@ -31,13 +32,29 @@ GEM
       multi_json (~> 1.0)
     bcrypt-ruby (3.0.0)
     builder (3.0.0)
+=======
+    RedCloth (4.2.7)
+    activemodel (3.0.10)
+      activesupport (= 3.0.10)
+      builder (~> 2.1.2)
+      i18n (~> 0.5.0)
+    activeresource (3.0.10)
+      activemodel (= 3.0.10)
+      activesupport (= 3.0.10)
+    activesupport (3.0.10)
+    builder (2.1.2)
+>>>>>>> ab8dd179f37b38a7ee9cf9295229064613e777c4
     columnize (0.3.4)
     daemons (1.1.4)
     equivalent-xml (0.2.7)
       nokogiri (>= 1.4.3)
     facets (2.9.2)
     fastercsv (1.5.4)
+<<<<<<< HEAD
     i18n (0.6.0)
+=======
+    i18n (0.5.0)
+>>>>>>> ab8dd179f37b38a7ee9cf9295229064613e777c4
     jettywrapper (0.0.10)
       logger
       mediashelf-loggable

@@ -35,15 +35,6 @@ module ActiveFedora
   class Base
     include RelationshipsHelper
     include SemanticNode
-    include Solrizer::FieldNameMapper
-    include Loggable
-    include ActiveModel::Conversion
-    extend ActiveModel::Naming
-    include Delegating
-
-    include Associations, Reflection
-    
-    #ms_inheritable_attributes  :ds_specs, :class_named_datastreams_desc
     class_inheritable_accessor  :ds_specs, :class_named_datastreams_desc
     self.class_named_datastreams_desc = {}
     self.ds_specs = {}
@@ -65,6 +56,11 @@ module ActiveFedora
       inner_object.new_object = bool
     end
 
+    ## Required by associations
+    def new_record?
+      self.new_object?
+    end
+
     def persisted?
       !new_object?
     end
@@ -75,18 +71,6 @@ module ActiveFedora
       end
     end
 
-
-
-    # def update_attributes (attrs)
-    #   self.attributes = attrs
-    #   save
-    # end
-    ## Required by associations
-    def new_record?
-      self.new_object?
-    end
-
-    
     # Constructor. If +attrs+  does  not comtain +:pid+, we assume we're making a new one,
     # and call off to the Fedora Rest API for the next available Fedora pid, and mark as new object.
     # Also, if +attrs+ does not contain +:pid+ but does contain +:namespace+ it will pass the
