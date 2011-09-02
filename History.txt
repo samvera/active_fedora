@@ -1,5 +1,15 @@
-2.3.5
+2.3.7 
 
+HYDRA-650 -- Fixed relationship inheritance (Rick Johnson)
+
+2.3.6
+
+YANKED
+Removed Bundler.require, which was causing odd dependency order resolving.
+
+2.3.5 
+
+YANKED
 branched so that trunk now require rails 3.
 Named finders HYDRA-541 (Rick Johnson)
 
