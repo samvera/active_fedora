@@ -158,6 +158,19 @@ describe ActiveFedora::SemanticNode do
         class Test2 < ActiveFedora::Base
           # has_bidirectional_relationship "components", :has_component, :is_component_of
         end
+        class Test3 < Test2
+          # has_bidirectional_relationship "components", :has_component, :is_component_of
+          has_relationship "testing", :has_member
+        end
+
+        class Test4 < Test3
+          has_relationship "testing_inbound", :is_member_of, :inbound=>true
+        end
+
+        class Test5 < Test4
+          has_relationship "testing_inbound", :is_part_of, :inbound=>true
+        end 
+ 
         @test_object2 = Test2.new
         @test_object2.save
         @part4 = ActiveFedora::Base.new()
@@ -179,6 +192,20 @@ describe ActiveFedora::SemanticNode do
           Test2.relationships_desc[:self][key].should == value
         end
       end
+
+      it "should have relationships defined from more than one ancestor class" do
+        Test4.relationships_desc[:self].should have_key("collection_members")
+        Test4.relationships_desc[:self].should have_key("testing")
+        Test4.relationships_desc[:inbound].should have_key("testing_inbound")
+      end
+
+      it "should override a parents relationship description if defined in the child" do
+        #check parent description
+        Test4.relationships_desc[:inbound]["testing_inbound"][:predicate].should == :is_member_of
+        #check child with overwritten relationship description has different predicate
+        Test5.relationships_desc[:inbound]["testing_inbound"][:predicate].should == :is_part_of
+      end
+
       it "should not have relationships bleeding over from other sibling classes" do
         SpecNodeSolrFilterQuery.relationships_desc[:inbound].should have_key("bi_special_containers_inbound")
         ActiveFedora::Base.relationships_desc[:inbound].should_not have_key("bi_special_containers_inbound")
