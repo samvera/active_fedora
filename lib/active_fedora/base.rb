@@ -33,6 +33,7 @@ module ActiveFedora
   # =Implementation
   # This class is really a facade for a basic Fedora::FedoraObject, which is stored internally.
   class Base
+    include RelationshipsHelper
     include SemanticNode
     include Solrizer::FieldNameMapper
     include Loggable

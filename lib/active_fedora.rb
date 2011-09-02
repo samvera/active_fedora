@@ -38,6 +38,7 @@ module ActiveFedora #:nodoc:
     autoload :Property
     autoload :QualifiedDublinCoreDatastream
     autoload :RelsExtDatastream
+    autoload :RelationshipsHelper
     autoload :SemanticNode
     autoload :NestedAttributes
 

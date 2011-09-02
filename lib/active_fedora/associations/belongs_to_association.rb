@@ -24,7 +24,7 @@ module ActiveFedora
 
       private
         def find_target
-          @owner.load_outbound_relationship(@reflection.options[:property]).first
+          @owner.load_outbound_relationship(@reflection.name.to_s, @reflection.options[:property]).first
         end
 
         def foreign_key_present

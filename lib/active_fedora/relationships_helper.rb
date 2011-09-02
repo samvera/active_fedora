@@ -1,3 +1,4 @@
+require 'active_support/core_ext/class/inheritable_attributes'
 module ActiveFedora
   # This module is meant to extend semantic node to add functionality based on a relationship's name
   # It is meant to turn a relationship into just another attribute in a model.
@@ -22,13 +23,17 @@ module ActiveFedora
   #
   #   Then obj.parents will only return parents where their eyes are blue.
   module RelationshipsHelper
+    extend ActiveSupport::Concern
 
-    include MediaShelfClassLevelInheritableAttributes
-    ms_inheritable_attributes :class_relationships_desc
-
-    def self.included(klass)
-      klass.extend(ClassMethods)
+#    ms_inheritable_attributes :class_relationships_desc
+    included do
+      class_inheritable_accessor  :class_relationships_desc
+#    self.class_relationships_desc = {}
     end
+
+    # def self.included(klass)
+    #   klass.extend(ClassMethods)
+    # end
     
 
     # ** EXPERIMENTAL **

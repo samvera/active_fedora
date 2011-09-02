@@ -129,7 +129,7 @@ module ActiveFedora
       end
 
       def find_target
-        @owner.load_inbound_relationship(@reflection.options[:property])
+        @owner.load_inbound_relationship(@reflection.name.to_s, @reflection.options[:property])
       end
 
 

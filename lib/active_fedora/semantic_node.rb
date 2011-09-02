@@ -1,8 +1,5 @@
-require 'active_fedora/relationships_helper'
-
 module ActiveFedora
   module SemanticNode 
-    #ms_inheritable_attributes  :class_relationships, :internal_uri
     extend ActiveSupport::Concern
     included do
       class_inheritable_accessor  :class_relationships, :internal_uri, :class_named_relationships_desc
@@ -11,11 +8,6 @@ module ActiveFedora
     end
     attr_accessor :internal_uri, :named_relationship_desc, :relationships_are_dirty, :load_from_solr
     #TODO I think we can remove named_relationship_desc from attr_accessor  - jcoyne
-
-    def self.included(klass)
-      klass.extend(ClassMethods)
-      klass.send(:include, ActiveFedora::RelationshipsHelper)
-    end
 
     def assert_kind_of(n, o,t)
       raise "Assertion failure: #{n}: #{o} is not of type #{t}" unless o.kind_of?(t)
@@ -180,7 +172,6 @@ module ActiveFedora
     end
 
     def load_inbound_relationship(name, predicate, opts={})
-    # def load_inbound_relationship(predicate, opts={}) ### TODO, actually we need name
       opts = {:rows=>25}.merge(opts)
       query = self.class.inbound_relationship_query(self.pid,"#{name}")
       return [] if query.empty?
@@ -202,8 +193,7 @@ module ActiveFedora
       end
     end
 
-    def load_outbound_relationship(name, predicate, opts)
-    #def load_outbound_relationship(predicate, opts={}) ### TODO, uhhh, actually we need names
+    def load_outbound_relationship(name, predicate, opts={})
       id_array = []
       if !outbound_relationships[predicate].nil? 
         outbound_relationships[predicate].each do |rel|
