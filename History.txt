@@ -1,3 +1,9 @@
+3.0.0
+
+added belongs_to and has_many model relationships
+added nested_attributes_for
+Added dependency on rails > 3.0.0
+
 2.3.7 
 
 HYDRA-650 -- Fixed relationship inheritance (Rick Johnson)
