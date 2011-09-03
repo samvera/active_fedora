@@ -21,6 +21,7 @@ module ActiveFedora
     #set this Datastream's content
     def content=(content)
       self.blob = content
+      self.dirty = true
     end
 
     def self.delete(parent_pid, dsid)
