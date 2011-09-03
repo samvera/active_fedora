@@ -60,6 +60,17 @@ describe ActiveFedora::Datastream do
     end
   end
   
+  describe '.content=' do
+    it "should update the content and ng_xml, marking the datastream as dirty" do
+      sample_xml = "<foo><xmlelement/></foo>"
+      @test_datastream.should_not be_dirty
+      @test_datastream.blob.should_not be_equivalent_to(sample_xml)
+      @test_datastream.content = sample_xml
+      @test_datastream.should be_dirty
+      @test_datastream.blob.should be_equivalent_to(sample_xml)
+    end
+  end
+  
   describe ".dirty?" do
     it "should return the value of the @dirty attribute" do
       @test_datastream.dirty.should equal(@test_datastream.dirty?)

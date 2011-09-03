@@ -10,7 +10,7 @@ describe ActiveFedora::NokogiriDatastream do
                       :empty_field => {:values => {}}
                       } 
     @sample_xml = XmlSimple.xml_in("<fields><coverage>coverage1</coverage><coverage>coverage2</coverage><creation_date>fake-date</creation_date><mydate>fake-date</mydate><publisher>publisher1</publisher></fields>")
-
+    @sample_raw_xml = "<foo><xmlelement/></foo>"
     @solr_doc = {"id"=>"hydrange_article1","name_role_roleTerm_t"=>["creator","submitter","teacher"],"name_0_role_t"=>"\r\ncreator\r\nsubmitter\r\n","name_1_role_t"=>"\r\n teacher \r\n","name_0_role_0_roleTerm_t"=>"creator","name_0_role_1_roleTerm_t"=>"submitter","name_1_role_0_roleTerm_t"=>["teacher"]}
   end
   
@@ -35,8 +35,8 @@ describe ActiveFedora::NokogiriDatastream do
       test_ds1.ng_xml.to_xml.should == "<?xml version=\"1.0\"?>\n<xml>\n  <foo/>\n</xml>\n"
     end
     it "should initialize from #xml_template if no xml is provided" do
-      ActiveFedora::NokogiriDatastream.expects(:xml_template).returns("fake template")
-      ActiveFedora::NokogiriDatastream.new.ng_xml.should == "fake template"
+      ActiveFedora::NokogiriDatastream.expects(:xml_template).returns("<fake template/>")
+      ActiveFedora::NokogiriDatastream.new.ng_xml.should be_equivalent_to("<fake template/>")
     end
   end
   
@@ -231,6 +231,32 @@ describe ActiveFedora::NokogiriDatastream do
       @test_ds.expects(:to_xml).returns("fake xml")
       @test_ds.expects(:blob=).with("fake xml")
       @test_ds.save
+    end
+  end
+  
+  describe '.content=' do
+    it "should update the content and ng_xml, marking the datastream as dirty" do
+      @test_ds.should_not be_dirty
+      @test_ds.blob.should_not be_equivalent_to(@sample_raw_xml)
+      @test_ds.ng_xml.to_xml.should_not be_equivalent_to(@sample_raw_xml)
+      @test_ds.content = @sample_raw_xml
+      @test_ds.should be_dirty
+      @test_ds.blob.should be_equivalent_to(@sample_raw_xml)
+      @test_ds.ng_xml.to_xml.should be_equivalent_to(@sample_raw_xml)
+    end
+  end
+  
+  describe 'ng_xml=' do
+    it "should parse raw xml for you" do
+      @test_ds.ng_xml.to_xml.should_not be_equivalent_to(@sample_raw_xml)
+      @test_ds.ng_xml = @sample_raw_xml
+      @test_ds.ng_xml.class.should == Nokogiri::XML::Document
+      @test_ds.ng_xml.to_xml.should be_equivalent_to(@sample_raw_xml)
+    end
+    it "should mark the datastream as dirty" do
+      @test_ds.should_not be_dirty
+      @test_ds.ng_xml = @sample_raw_xml
+      @test_ds.should be_dirty
     end
   end
   

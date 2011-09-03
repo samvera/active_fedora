@@ -14,7 +14,8 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
   alias_method(:om_term_values, :term_values) unless method_defined?(:om_term_values)
   alias_method(:om_update_values, :update_values) unless method_defined?(:om_update_values)
   
-  attr_accessor :ng_xml, :internal_solr_doc
+  attr_accessor :internal_solr_doc
+  attr_reader :ng_xml
   
   #constructor, calls up to ActiveFedora::Datastream's constructor
   def initialize(attrs=nil)
@@ -43,22 +44,22 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     Nokogiri::XML::Document.parse("<xml/>")
   end
   
-  # class << self
-  #   from_xml_original = self.instance_method(:from_xml)
-  #   
-  #   define_method(:from_xml, xml, tmpl=self.new) do
-  #     from_xml_original.bind(self).call(xml, tmpl)
-  #     tmpl.send(:dirty=, false)
-  #   end
-  #   
-  #   # def from_xml_custom(xml, tmpl=self.new)
-  #   #   from_xml_original(xml, tmpl)
-  #   #   tmpl.send(:dirty=, false)
-  #   # end
-  #   # 
-  #   # alias_method :from_xml_original, :from_xml 
-  #   # alias_method :from_xml, :from_xml_custom
-  # end
+  def ng_xml=(new_xml)
+    case new_xml 
+    when Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node
+      @ng_xml = new_xml
+    when String 
+      @ng_xml = Nokogiri::XML::Document.parse(new_xml)
+    else
+      raise TypeError, "You passed a #{new_xml.class} into the ng_xml of the #{self.dsid} datastream. NokogiriDatastream.ng_xml= only accepts Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node, or raw XML (String) as inputs."
+    end
+    self.dirty = true
+  end
+  
+  def content=(content)
+    super
+    self.ng_xml = Nokogiri::XML::Document.parse(content)
+  end
   
   
   def to_xml(xml = self.ng_xml)
