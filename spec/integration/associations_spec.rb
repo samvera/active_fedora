@@ -126,6 +126,11 @@ describe ActiveFedora::Base do
         @book.topics << Topic.new
         @book.topics.first.pid.should_not be_nil
       end
+      it "should clear out the old associtions" do
+        @book.topics = [@topic1]
+        @book.topics = [@topic2]
+        @book.topic_ids.should == [@topic2.pid]
+      end
       after do
         @book.delete
         @topic1.delete

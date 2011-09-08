@@ -59,13 +59,8 @@ module ActiveFedora
         end
 
         def delete_records(records)
-          if sql = @reflection.options[:delete_sql]
-            records.each { |record| @owner.connection.delete(interpolate_and_sanitize_sql(sql, record)) }
-          else
-            relation = Arel::Table.new(@reflection.options[:join_table])
-            relation.where(relation[@reflection.primary_key_name].eq(@owner.id).
-              and(relation[@reflection.association_foreign_key].in(records.map { |x| x.id }.compact))
-            ).delete
+          records.each do |r| 
+            r.remove_relationship(@reflection.options[:property], @owner)
           end
         end
 
