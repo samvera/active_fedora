@@ -139,6 +139,10 @@ module ActiveFedora
       @metadata_is_dirty == false
       return result
     end
+
+    def save!
+      save
+    end
     
     # Refreshes the object's info from Fedora
     # Note: Currently just registers any new datastreams that have appeared in fedora

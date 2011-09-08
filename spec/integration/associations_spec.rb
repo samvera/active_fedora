@@ -122,6 +122,10 @@ describe ActiveFedora::Base do
         @book.topics.map(&:pid).should == [@topic1.pid]
         Topic.find(@topic1.pid).books.map(&:pid).should == [@book.pid] #Can't have saved it because @book isn't saved yet.
       end
+      it "should save new child objects" do
+        @book.topics << Topic.new
+        @book.topics.first.pid.should_not be_nil
+      end
       after do
         @book.delete
         @topic1.delete
