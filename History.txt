@@ -1,3 +1,7 @@
+3.0.1
+
+HYDRA-654 -- Fixed reification using has_model as the class instead of active_fedora_model
+
 3.0.0
 
 added belongs_to and has_many model relationships

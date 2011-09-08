@@ -292,6 +292,7 @@ module ActiveFedora
   class PredicateMappingsNotFoundError < RuntimeError; end # :nodoc:
   class UnknownAttributeError < NoMethodError; end; # :nodoc:
   class ActiveFedoraConfigurationException < Exception; end # :nodoc:
+  class AssociationTypeMismatch < RuntimeError; end # :nodoc:
 
 end
 

@@ -25,9 +25,9 @@ describe ActiveFedora::SemanticNode do
   before(:all) do
     @pid = "test:sample_pid"
     @uri = "info:fedora/#{@pid}"
-    @sample_solr_hits = [{"id"=>"_PID1_", "active_fedora_model_s"=>["AudioRecord"]},
-                          {"id"=>"_PID2_", "active_fedora_model_s"=>["AudioRecord"]},
-                          {"id"=>"_PID3_", "active_fedora_model_s"=>["AudioRecord"]}]
+    @sample_solr_hits = [{"id"=>"_PID1_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
+                          {"id"=>"_PID2_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
+                          {"id"=>"_PID3_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]}]
   end
   
   before(:each) do
@@ -347,7 +347,11 @@ describe ActiveFedora::SemanticNode do
         local_node.expects(:outbound_relationships).returns({:is_member_of => ["my:_PID1_", "my:_PID2_", "my:_PID3_"]}).times(2)      
         mock_repo = mock("repo")
         solr_result = mock("solr result", :is_a? => true)
-        solr_result.expects(:hits).returns([{"id"=> "my:_PID1_", "active_fedora_model_s" => ["SpecNode"]}, {"id"=> "my:_PID2_", "active_fedora_model_s" => ["SpecNode"]}, {"id"=> "my:_PID3_", "active_fedora_model_s" => ["SpecNode"]}])
+        solr_result.expects(:hits).returns(
+                      [{"id"=> "my:_PID1_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]},
+                       {"id"=> "my:_PID2_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]}, 
+                       {"id"=> "my:_PID3_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]}])
+
         ActiveFedora::SolrService.instance.conn.expects(:query).with("id:my\\:_PID1_ OR id:my\\:_PID2_ OR id:my\\:_PID3_").returns(solr_result)
         mock_repo.expects(:find_model).with("my:_PID1_", SpecNode).returns("AR1")
         mock_repo.expects(:find_model).with("my:_PID2_", SpecNode).returns("AR2")

@@ -47,9 +47,9 @@ describe ActiveFedora::SolrService do
   
   describe "#reify_solr_results" do
     before(:each) do
-      @sample_solr_hits = [{"id"=>"my:_PID1_", "active_fedora_model_s"=>["AudioRecord"]},
-                            {"id"=>"my:_PID2_", "active_fedora_model_s"=>["AudioRecord"]},
-                            {"id"=>"my:_PID3_", "active_fedora_model_s"=>["AudioRecord"]}]
+      @sample_solr_hits = [{"id"=>"my:_PID1_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
+                            {"id"=>"my:_PID2_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
+                            {"id"=>"my:_PID3_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]}]
     end
     it "should only take Solr::Response::Standard objects as input" do
       mocko = mock("input", :is_a? => false)
