@@ -5,7 +5,7 @@ module ActiveFedora
     module ClassMethods
       def create_reflection(macro, name, options, active_fedora)
         case macro
-          when :has_many, :belongs_to
+          when :has_many, :belongs_to, :has_and_belongs_to_many
             klass = AssociationReflection
             reflection = klass.new(macro, name, options, active_fedora)
         end

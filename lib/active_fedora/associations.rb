@@ -7,6 +7,8 @@ module ActiveFedora
 
     autoload :HasManyAssociation, 'active_fedora/associations/has_many_association'
     autoload :BelongsToAssociation, 'active_fedora/associations/belongs_to_association'
+    autoload :HasAndBelongsToManyAssociation, 'active_fedora/associations/has_and_belongs_to_many_association'
+
 
     autoload :AssociationCollection, 'active_fedora/associations/association_collection'
     autoload :AssociationProxy, 'active_fedora/associations/association_proxy'
@@ -50,6 +52,73 @@ module ActiveFedora
       end
 
 
+      # Specifies a many-to-many relationship with another class. The relatioship is written to both classes simultaneously.
+      #
+      # Adds the following methods for retrieval and query:
+      #
+      # [collection(force_reload = false)]
+      #   Returns an array of all the associated objects.
+      #   An empty array is returned if none are found.
+      # [collection<<(object, ...)]
+      #   Adds one or more objects to the collection by creating associations in the join table
+      #   (<tt>collection.push</tt> and <tt>collection.concat</tt> are aliases to this method).
+      #   Note that this operation instantly fires update sql without waiting for the save or update call on the
+      #   parent object.
+      # [collection.delete(object, ...)]
+      #   Removes one or more objects from the collection by removing their associations from the join table.
+      #   This does not destroy the objects.
+      # [collection=objects]
+      #   Replaces the collection's content by deleting and adding objects as appropriate.
+      # [collection_singular_ids]
+      #   Returns an array of the associated objects' ids.
+      # [collection_singular_ids=ids]
+      #   Replace the collection by the objects identified by the primary keys in +ids+.
+      # [collection.clear]
+      #   Removes every object from the collection. This does not destroy the objects.
+      # [collection.empty?]
+      #   Returns +true+ if there are no associated objects.
+      # [collection.size]
+      #   Returns the number of associated objects.
+      #
+      # (+collection+ is replaced with the symbol passed as the first argument, so
+      # <tt>has_and_belongs_to_many :categories</tt> would add among others <tt>categories.empty?</tt>.)
+      #
+      # === Example
+      #
+      # A Developer class declares <tt>has_and_belongs_to_many :projects</tt>, which will add:
+      # * <tt>Developer#projects</tt>
+      # * <tt>Developer#projects<<</tt>
+      # * <tt>Developer#projects.delete</tt>
+      # * <tt>Developer#projects=</tt>
+      # * <tt>Developer#project_ids</tt>
+      # * <tt>Developer#project_ids=</tt>
+      # * <tt>Developer#projects.clear</tt>
+      # * <tt>Developer#projects.empty?</tt>
+      # * <tt>Developer#projects.size</tt>
+      # * <tt>Developer#projects.find(id)</tt>
+      # * <tt>Developer#projects.exists?(...)</tt>
+      # The declaration may include an options hash to specialize the behavior of the association.
+      #
+      # === Options
+      #
+      # [:class_name]
+      #   Specify the class name of the association. Use it only if that name can't be inferred
+      #   from the association name. So <tt>has_and_belongs_to_many :projects</tt> will by default be linked to the
+      #   Project class, but if the real class name is SuperProject, you'll have to specify it with this option.
+      # [:property]
+      #   <b>REQUIRED</b> Specify the predicate to use when storing the relationship.
+      #
+      # Option examples:
+      #   has_and_belongs_to_many :projects, :property=>:works_on
+      #   has_and_belongs_to_many :nations, :class_name => "Country", :property=>:is_citizen_of
+      def has_and_belongs_to_many(association_id, options = {}, &extension)
+        reflection = create_has_and_belongs_to_many_reflection(association_id, options, &extension)
+        collection_accessor_methods(reflection, HasAndBelongsToManyAssociation)
+        #configure_after_destroy_method_for_has_and_belongs_to_many(reflection)
+        #add_association_callbacks(reflection.name, options)
+      end
+
+
       private 
 
         def create_has_many_reflection(association_id, options)
@@ -58,6 +127,10 @@ module ActiveFedora
 
         def create_belongs_to_reflection(association_id, options)
           create_reflection(:belongs_to, association_id, options, self)
+        end
+
+        def create_has_and_belongs_to_many_reflection(association_id, options)
+          create_reflection(:has_and_belongs_to_many, association_id, options, self)
         end
 
         def association_accessor_methods(reflection, association_proxy_class)

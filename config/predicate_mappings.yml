@@ -38,6 +38,7 @@
     :is_metadata_for: isMetadataFor
     :is_part_of: isPartOf
     :is_subset_of: isSubsetOf
+    :is_topic_of: isTopicOf
   info:fedora/fedora-system:def/model#:
     :has_model: hasModel
 #  http://www.openarchives.org/OAI/2.0/: 

@@ -69,7 +69,7 @@ module ActiveFedora
       # Since << flattens its argument list and inserts each record, +push+ and +concat+ behave identically.
       def <<(*records)
         result = true
-        load_target if @owner.new_record?
+        load_target unless loaded?
 
         flatten_deeper(records).each do |record|
           raise_on_type_mismatch(record)

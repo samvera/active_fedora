@@ -552,7 +552,7 @@ module ActiveFedora
             return predicates[predicate], namespace
           end
         end
-        raise ActiveFedora::UnregisteredPredicateError
+        raise ActiveFedora::UnregisteredPredicateError, "Unregistered predicate: #{predicate.inspect}"
       end
 
       

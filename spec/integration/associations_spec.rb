@@ -6,80 +6,127 @@ end
 
 class Book < ActiveFedora::Base 
   belongs_to :library, :property=>:has_constituent
+  has_and_belongs_to_many :topics, :property=>:is_topic_of
+end
+
+class Topic < ActiveFedora::Base 
+  has_and_belongs_to_many :books, :property=>:is_topic_of
 end
 
 describe ActiveFedora::Base do
   describe "an unsaved instance" do
-    before do
-      @library = Library.new()
-      @book = Book.new
-      @book.save
-      @book2 = Book.new
-      @book2.save
-    end
+    describe "of belongs_to" do
+      before do
+        @library = Library.new()
+        @book = Book.new
+        @book.save
+        @book2 = Book.new
+        @book2.save
+      end
 
-    it "should let you shift onto the association" do
-      @library.new_record?.should be_true
-      @library.books.size == 0
-      @library.books.to_ary.should == []
-      @library.book_ids.should ==[]
-      @library.books << @book
-      @library.books.map(&:pid).should == [@book.pid]
-      @library.book_ids.should ==[@book.pid]
-    end
+      it "should let you shift onto the association" do
+        @library.new_record?.should be_true
+        @library.books.size == 0
+        @library.books.to_ary.should == []
+        @library.book_ids.should ==[]
+        @library.books << @book
+        @library.books.map(&:pid).should == [@book.pid]
+        @library.book_ids.should ==[@book.pid]
+      end
 
-    it "should let you set an array of objects" do
-      @library.books = [@book, @book2]
-      @library.books.map(&:pid).should == [@book.pid, @book2.pid]
-      @library.save
+      it "should let you set an array of objects" do
+        @library.books = [@book, @book2]
+        @library.books.map(&:pid).should == [@book.pid, @book2.pid]
+        @library.save
 
-      @library.books = [@book]
-      @library.books.map(&:pid).should == [@book.pid]
-    
-    end
-    it "should let you set an array of object ids" do
-      @library.book_ids = [@book.pid, @book2.pid]
-      @library.books.map(&:pid).should == [@book.pid, @book2.pid]
-    end
-
-    it "setter should wipe out previously saved relations" do
-      @library.book_ids = [@book.pid, @book2.pid]
-      @library.book_ids = [@book2.pid]
-      @library.books.map(&:pid).should == [@book2.pid]
+        @library.books = [@book]
+        @library.books.map(&:pid).should == [@book.pid]
       
-    end
+      end
+      it "should let you set an array of object ids" do
+        @library.book_ids = [@book.pid, @book2.pid]
+        @library.books.map(&:pid).should == [@book.pid, @book2.pid]
+      end
 
-    after do
-      @book.delete
-      @book2.delete
+      it "setter should wipe out previously saved relations" do
+        @library.book_ids = [@book.pid, @book2.pid]
+        @library.book_ids = [@book2.pid]
+        @library.books.map(&:pid).should == [@book2.pid]
+        
+      end
+
+
+      after do
+        @book.delete
+        @book2.delete
+      end
+    end
+    describe "of has_many_and_belongs_to" do
+      before do
+        @topic1 = Topic.new
+        @topic1.save
+        @topic2 = Topic.new
+        @topic2.save
+      end
+      it "habtm should set relationships bidirectionally" do
+        @book = Book.new
+        @book.topics << @topic1
+        @book.topics.map(&:pid).should == [@topic1.pid]
+        Topic.find(@topic1.pid).books.map(&:pid).should == [] #Can't have saved it because @book isn't saved yet.
+      end
+      after do
+        @topic1.delete
+        @topic2.delete
+      end
     end
   end
 
+  
+
 
   describe "a saved instance" do
-    before do
-      @library = Library.new()
-      @library.save()
-      @book = Book.new
-      @book.save
+    describe "of belongs_to" do
+      before do
+        @library = Library.new()
+        @library.save()
+        @book = Book.new
+        @book.save
+      end
+      it "should have many books once it has been saved" do
+        @library.books << @book
+
+        @book.library.pid.should == @library.pid
+        @library.books.reload
+        @library.books.map(&:pid).should == [@book.pid]
+
+
+        @library2 = Library.find(@library.pid)
+        @library2.books.map(&:pid).should == [@book.pid]
+      end
+      after do
+        @library.delete
+        @book.delete
+      end
     end
-    it "should have many books once it has been saved" do
-      @library.save
-      @library.books << @book
-
-      @book.library.pid.should == @library.pid
-      @library.books.reload
-      @library.books.map(&:pid).should == [@book.pid]
-
-
-      @library2 = Library.find(@library.pid)
-      @library2.books.map(&:pid).should == [@book.pid]
-
-    
-    end
-    after do
-      @library.delete
-      @book.delete
+    describe "of has_many_and_belongs_to" do
+      before do
+        @topic1 = Topic.new
+        @topic1.save
+        @topic2 = Topic.new
+        @topic2.save
+        @book = Book.new
+        @book.save
+      end
+      it "habtm should set relationships bidirectionally" do
+        @book.topics << @topic1
+        @book.topics.map(&:pid).should == [@topic1.pid]
+        Topic.find(@topic1.pid).books.map(&:pid).should == [@book.pid] #Can't have saved it because @book isn't saved yet.
+      end
+      after do
+        @book.delete
+        @topic1.delete
+        @topic2.delete
+      end
     end
   end
 
