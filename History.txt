@@ -1,6 +1,11 @@
-3.0.2
+3.0.3
 
 Added HasAndBelongsToManyAssociation
+
+3.0.2
+
+YANKED
+
 
 3.0.1
 
