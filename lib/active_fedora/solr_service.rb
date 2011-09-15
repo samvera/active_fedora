@@ -65,6 +65,13 @@ module ActiveFedora
       return uri.gsub(/(:)/, '\\:')
     end
     
+    # Escapes these characters
+    # + - || ! ( ) { } [ ] ^ " ~ * ? : \
+    # See: http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Escaping%20Special%20Characters
+    def self.escape_characters_for_query(value)
+      value.gsub(/([\#\+\-\|\{\}\^\"\~\*\:\>\<\?\(\)\[\]\+\!\\])/) {|v| "\\#{v}"}
+    end
+    
   
 end #SolrService
 class SolrNotInitialized < StandardError;end

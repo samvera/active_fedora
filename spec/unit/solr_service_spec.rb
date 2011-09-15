@@ -84,4 +84,11 @@ describe ActiveFedora::SolrService do
     end
   end
   
+  describe "escape_characters_for_query" do
+    it "should escape the Solr special characters" do
+      test_val = '# + - || ! ( ) { } [ ] ^ " ~ * ? : \\'
+      expected_result = '\\# \\+ \\- \\|\\| \\! \\( \\) \\{ \\} \\[ \\] \\^ \\" \\~ \\* \\? \\: \\\\'
+      ActiveFedora::SolrService.escape_characters_for_query(test_val).should == expected_result
+    end
+  end
 end
