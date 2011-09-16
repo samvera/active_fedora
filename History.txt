@@ -1,3 +1,7 @@
+3.0.4
+
+HYDRA-663 -- Passing an empty string to a id setter should clear the belongs to association
+
 3.0.3
 
 Added HasAndBelongsToManyAssociation

@@ -15,7 +15,7 @@ end
 
 describe ActiveFedora::Base do
   describe "an unsaved instance" do
-    describe "of belongs_to" do
+    describe "of has_many" do
       before do
         @library = Library.new()
         @book = Book.new
@@ -56,11 +56,32 @@ describe ActiveFedora::Base do
       end
 
 
+
       after do
         @book.delete
         @book2.delete
       end
     end
+
+    describe "of belongs to" do
+      before do
+        @library = Library.new()
+        @library.save
+        @book = Book.new
+        @book.save
+      end
+      it "should be settable from the book side" do
+        @book.library_id = @library.pid
+        @book.library.pid.should == @library.pid
+        @book.attributes= {:library_id => ""}
+        @book.library_id.should be_nil
+      end
+      after do
+        @library.delete
+        @book.delete
+      end
+    end
+
     describe "of has_many_and_belongs_to" do
       before do
         @topic1 = Topic.new
