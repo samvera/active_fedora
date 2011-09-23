@@ -1,13 +1,14 @@
 PATH
   remote: .
   specs:
-    active-fedora (2.3.5)
-      activeresource
+    active-fedora (2.3.7)
+      activeresource (< 3.0.0)
       equivalent-xml
       facets
       mediashelf-loggable
       mime-types (>= 1.16)
       multipart-post (= 1.1.2)
+      net-http-persistent
       nokogiri
       om (>= 1.0)
       solr-ruby (>= 0.0.6)
@@ -38,6 +39,7 @@ GEM
     mime-types (1.16)
     mocha (0.9.12)
     multipart-post (1.1.2)
+    net-http-persistent (2.1)
     nokogiri (1.5.0)
     om (1.4.0)
       mediashelf-loggable

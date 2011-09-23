@@ -1,3 +1,8 @@
+2.3.8
+
+HYDRA-670 -- Use persistent http connections
+
+
 2.3.7 
 
 HYDRA-650 -- Fixed relationship inheritance (Rick Johnson)

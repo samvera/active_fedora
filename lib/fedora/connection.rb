@@ -1,6 +1,7 @@
 require "base64"
 gem 'multipart-post'
 require 'net/http/post/multipart'
+require 'net/http/persistent'
 require 'cgi'
 require "mime/types"
 require 'net/http'
@@ -46,6 +47,9 @@ module Fedora
   # 409 Conflict
   class ResourceConflict < ClientError; end # :nodoc:
 
+  # 415 Unsupported Media Type
+  class UnsupportedMediaType < ClientError; end # :nodoc:
+
   # 5xx Server Error
   class ServerError < ConnectionError; end # :nodoc:
 
@@ -60,6 +64,23 @@ module Fedora
   # This class is used by ActiveResource::Base to interface with REST
   # services.
   class Connection
+
+    CLASSES = [
+      Net::HTTP::Delete,
+      Net::HTTP::Get,
+      Net::HTTP::Head,
+      Net::HTTP::Post,
+      Net::HTTP::Put
+    ].freeze
+
+    MIME_TYPES = {
+      :binary => "application/octet-stream",
+      :json   => "application/json",
+      :xml    => "text/xml",
+      :none   => "text/plain"
+    }.freeze
+
+
     attr_reader :site, :surrogate
     attr_accessor :format
 
@@ -78,84 +99,102 @@ module Fedora
       @surrogate=surrogate
     end
 
+    ##
+    # Perform an HTTP Delete, Head, Get, Post, or Put.
+
+    CLASSES.each do |clazz|
+      verb = clazz.to_s.split("::").last.downcase
+
+      define_method verb do |*args|
+        path = args[0]
+        params = args[1] || {}
+
+        response_for clazz, path, params
+      end
+    end
+
     # Set URI for remote service.
     def site=(site)
       @site = site.is_a?(URI) ? site : URI.parse(site)
     end
 
-    # Execute a GET request.
-    # Used to get (find) resources.
-    def get(path, headers = {})
-      format.decode(request(:get, path, build_request_headers(headers)).body)
-    end
-
-    # Execute a DELETE request (see HTTP protocol documentation if unfamiliar).
-    # Used to delete resources.
-    def delete(path, headers = {})
-      request(:delete, path, build_request_headers(headers))
-    end
-
-
-
-    def raw_get(path, headers = {})
-      request(:get, path, build_request_headers(headers))
-    end
-    def post(path, body='', headers={})
-      do_method(:post, path, body, headers)
-    end
-    def put( path, body='', headers={})
-      do_method(:put, path, body, headers)
-    end
 
     private
-    def do_method(method, path, body = '', headers = {})
-      meth_map={:put=>Net::HTTP::Put::Multipart, :post=>Net::HTTP::Post::Multipart}
-      raise "undefined method: #{method}" unless meth_map.has_key? method
-      headers = build_request_headers(headers) 
-      if body.respond_to?(:read)
-        if body.respond_to?(:original_filename?)
-          filename = File.basename(body.original_filename)
-          io = UploadIO.new(body, mime_type,filename)
-        elsif body.path
-          filename = File.basename(body.path)
-        else
-          filename="NOFILE"
-        end
-        mime_types = MIME::Types.of(filename)
-        mime_type ||= mime_types.empty? ? "application/octet-stream" : mime_types.first.content_type
-
-        io = nil
-        if body.is_a?(File)
-          io = UploadIO.new(body.path,mime_type)
-        else
-          io =UploadIO.new(body, mime_type, filename)
-        end
-
-        req = meth_map[method].new(path, {:file=>io}, headers)
-        multipart_request(req)
-      else
-        request(method, path, body.to_s, headers)
-      end
-    end
-    def multipart_request(req)
-      result = nil
-      result = http.start do |conn|
-        conn.read_timeout=60600 #these can take a while
-        conn.request(req)
-      end
-      handle_response(result)
-
-    end
 
     # Makes request to remote service.
-    def request(method, path, *arguments)
-      result = http.send(method, path, *arguments)
+    def response_for(clazz, path, params)
+      logger.debug "#{clazz} #{path}"
+      request = clazz.new path
+      request.body = params[:body]
+
+      handle_request request, params[:upload], params[:type], params[:headers] || {}
+    end
+
+
+    def handle_request request, upload, type, headers
+      handle_uploads request, upload, type
+      handle_headers request, upload, type, headers
+      result = http.request self.site, request
       handle_response(result)
+    end
+
+    ##
+    # Handle chunked uploads.
+    #
+    # +request+: A Net::HTTP request Object.
+    # +upload+: A Hash with the following keys:
+    #   +:file+: The file to be HTTP chunked uploaded.
+    #   +:headers+: A Hash containing additional HTTP headers.
+    # +:type+: A Symbol with the mime_type.
+
+    def handle_uploads request, upload, type
+      return unless upload
+      io = nil
+      if upload[:file].is_a?(File)
+         io = File.open upload[:file].path
+      else
+        io = upload[:file]
+      end
+
+      request.body_stream = io
+    end
+
+
+    def handle_headers request, upload, type, headers
+      request.basic_auth(self.site.user, self.site.password) if self.site.user
+
+      request.add_field "Accept", mime_type(type)
+      request.add_field "Content-Type", mime_type(type) if requires_content_type? request
+
+      headers.merge! chunked_headers upload
+      headers.each do |header, value|
+        request[header] = value
+      end
+    end
+
+    ##
+    # Setting of chunked upload headers.
+    #
+    # +upload+: A Hash with the following keys:
+    #   +:file+: The file to be HTTP chunked uploaded.
+
+    def chunked_headers upload
+      return {} unless upload
+
+      chunked_headers = {
+        "Content-Type"      => mime_type(:binary),
+        "Transfer-Encoding" => "chunked"
+      }.merge upload[:headers] || {}
+    end
+
+    def requires_content_type? request
+      [Net::HTTP::Post, Net::HTTP::Put].include? request.class
     end
 
     # Handles response and error codes from remote service.
     def handle_response(response)
       message = "Error from Fedora: #{response.body}"
+      logger.debug "Response: #{response.code}"
       case response.code.to_i
       when 301,302
         raise(Redirection.new(response))
@@ -173,6 +212,8 @@ module Fedora
         raise(MethodNotAllowed.new(response, message))
       when 409
         raise(ResourceConflict.new(response, message))
+      when 415
+        raise UnsupportedMediaType.new(response, message)
       when 422
         raise(ResourceInvalid.new(response, message))
       when 423...500
@@ -184,35 +225,29 @@ module Fedora
       end
     end
 
+    def mime_type type
+      if type.kind_of? String
+        type
+      else
+        MIME_TYPES[type] || MIME_TYPES[:xml]
+      end
+    end
+
     # Creates new Net::HTTP instance for communication with
     # remote service and resources.
     def http
-      http = Net::HTTP.new(@site.host, @site.port)
+      @http ||= Net::HTTP::Persistent.new#(@site)
       if(@site.is_a?(URI::HTTPS))
-        http.use_ssl = true
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        @http.use_ssl = true
+        @http.verify_mode = OpenSSL::SSL::VERIFY_NONE
 
         if (defined?(SSL_CLIENT_CERT_FILE) && !SSL_CLIENT_CERT_FILE.nil? && defined?(SSL_CLIENT_KEY_FILE) && !SSL_CLIENT_KEY_FILE.nil? && defined?(SSL_CLIENT_KEY_PASS) && !SSL_CLIENT_KEY_PASS.nil?)
-          http.cert = OpenSSL::X509::Certificate.new( File.read(SSL_CLIENT_CERT_FILE) )
-          http.key = OpenSSL::PKey::RSA.new( File.read(SSL_CLIENT_KEY_FILE), SSL_CLIENT_KEY_PASS )
+          @http.cert = OpenSSL::X509::Certificate.new( File.read(SSL_CLIENT_CERT_FILE) )
+          @http.key = OpenSSL::PKey::RSA.new( File.read(SSL_CLIENT_KEY_FILE), SSL_CLIENT_KEY_PASS )
         end
       end
-      http
+      @http
     end
 
-    def default_header
-      @default_header ||= { 'Content-Type' => format.mime_type }
-    end
-
-    # Builds headers for request to remote service.
-    def build_request_headers(headers)
-      headers.merge!({"From"=>surrogate}) if @surrogate
-      authorization_header.update(default_header).update(headers)
-    end
-
-    # Sets authorization header; authentication information is pulled from credentials provided with site URI.
-    def authorization_header
-      (@site.user || @site.password ? { 'Authorization' => 'Basic ' + ["#{@site.user}:#{ @site.password}"].pack('m').delete("\r\n") } : {})
-    end
   end
 end

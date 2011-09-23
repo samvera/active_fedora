@@ -59,7 +59,7 @@ module Fedora
     
     # Fetch the raw content of either a fedora object or datastream
     def fetch_content(object_uri)
-      response = connection.raw_get("#{url_for(object_uri)}?format=xml")
+      response = connection.get("#{url_for(object_uri)}?format=xml")
       StringResponse.new(response.body, response.content_type)
     end
     
@@ -95,7 +95,7 @@ module Fedora
       params[:sessionToken] = options[:sessionToken] if options[:sessionToken]
       includes = fields.inject("") { |s, f| s += "&#{f}=true"; s }
       
-      convert_xml(connection.get("#{fedora_url.path}/objects?#{params.to_fedora_query}#{includes}"))
+      convert_xml(XmlFormat.decode(connection.get("#{fedora_url.path}/objects?#{params.to_fedora_query}#{includes}").body))
     end
     
     # Retrieve an object from fedora and load it as an instance of the given model/class
@@ -132,7 +132,7 @@ module Fedora
       case object
         when Fedora::FedoraObject
           pid = (object.pid ? object : 'new')
-          response = connection.post("#{url_for(pid)}?" + object.attributes.to_fedora_query, object.blob)
+          response = connection.post("#{url_for(pid)}?" + object.attributes.to_fedora_query, :body=>object.blob)
           if response.code == '201'
             object.pid = extract_pid(response) 
             object.new_object = false
@@ -142,10 +142,14 @@ module Fedora
           end
         when Fedora::Datastream
           raise ArgumentError, "Missing dsID attribute" if object.dsid.nil?
-          extra_headers = {}
-          extra_headers['Content-Type'] = object.attributes[:mimeType] if object.attributes[:mimeType]
-          response = connection.post("#{url_for(object)}?" + object.attributes.to_fedora_query, 
-            object.blob, extra_headers)
+          headers = {}
+          headers[:type] = object.attributes[:mimeType] if object.attributes[:mimeType]
+          if object.blob.respond_to? :read
+            headers[:upload] = {:file=>object.blob}
+          else
+            headers[:body]=object.blob
+          end
+          response = connection.post("#{url_for(object)}?" + object.attributes.to_fedora_query, headers)
           if response.code == '201'
             object.new_object = false
             true
@@ -170,7 +174,13 @@ module Fedora
         response.code == '200' || '307'
       when Fedora::Datastream
         raise ArgumentError, "Missing dsID attribute" if object.dsid.nil?
-        response = connection.put("#{url_for(object)}?" + object.attributes.to_fedora_query, object.blob)
+        headers = {}
+        if object.blob.respond_to? :read
+          headers[:upload] = {:file=>object.blob}
+        else
+          headers[:body]=object.blob
+        end
+        response = connection.put("#{url_for(object)}?" + object.attributes.to_fedora_query, headers)
         response.code == '200' || '201'
         return response.code
       else
@@ -225,7 +235,7 @@ module Fedora
         content_to_ingest = content_to_ingest.read
       end
         
-      connection.post(url,content_to_ingest)
+      connection.post(url, :body=>content_to_ingest)
     end
 
     # Fetch the given object using custom method.  This is used to fetch other aspects of a fedora object,
@@ -245,11 +255,11 @@ module Fedora
       end
       
       extra_params.delete(:format) if method == :export
-      connection.raw_get("#{url_for(object)}#{path}?#{extra_params.to_fedora_query}").body
+      connection.get("#{url_for(object)}#{path}?#{extra_params.to_fedora_query}").body
     end
     
     def describe_repository
-      result_body = connection.raw_get("#{fedora_url.path}/describe?xml=true").body
+      result_body = connection.get("#{fedora_url.path}/describe?xml=true").body
       XmlSimple.xml_in(result_body)
     end
     

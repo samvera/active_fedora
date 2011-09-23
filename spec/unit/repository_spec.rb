@@ -99,14 +99,14 @@ describe Fedora::Repository do
     it "should post the provided xml or file to fedora" do
       foxml = fixture("test_12.foxml.xml").read
       connection = Fedora::Repository.instance.send(:connection)
-      connection.expects(:post).with("/fedora/objects/new",foxml)
+      connection.expects(:post).with("/fedora/objects/new",:body=>foxml)
       Fedora::Repository.instance.ingest(foxml)
     end
     it "should accept a file as its input" do
       foxml_file = fixture("test_12.foxml.xml")
       foxml = fixture("test_12.foxml.xml").read
       connection = Fedora::Repository.instance.send(:connection)
-      connection.expects(:post).with("/fedora/objects/new",foxml)
+      connection.expects(:post).with("/fedora/objects/new",:body=>foxml)
       Fedora::Repository.instance.ingest(foxml_file)
     end
   end

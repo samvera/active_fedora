@@ -140,6 +140,8 @@ end
 describe Fedora::Repository, "find_objects" do
   before(:all) do
     Fedora::Repository.register(ActiveFedora.fedora_config[:url])
+    @mock_response = mock("Response")
+    @mock_response.stubs(:body).returns(sample_response_xml)
   end
   
   def fields_to_s(fields)
@@ -156,31 +158,33 @@ describe Fedora::Repository, "find_objects" do
   
   it "should include all fields by default" do
     when_find_objects('label~Image*') { |conn|
-      conn.expects(:get).with('/fedora/objects?query=label%7EImage%2A&resultFormat=xml' + fields_to_s(Fedora::ALL_FIELDS))
+      conn.expects(:get).with('/fedora/objects?query=label%7EImage%2A&resultFormat=xml' + fields_to_s(Fedora::ALL_FIELDS)).returns(@mock_response)
     }
   end
   
   it "should include all fields when :include => :all " do
     when_find_objects('label~Image*', :include => :all) { |conn|
-      conn.expects(:get).with('/fedora/objects?query=label%7EImage%2A&resultFormat=xml' + fields_to_s(Fedora::ALL_FIELDS))
+      conn.expects(:get).with('/fedora/objects?query=label%7EImage%2A&resultFormat=xml' + fields_to_s(Fedora::ALL_FIELDS)).returns(@mock_response)
     }
   end
   
   it "should fetch results with limit" do
     when_find_objects('label~Image*', :limit => 10) { |conn|
-      conn.expects(:get).with('/fedora/objects?maxResults=10&query=label%7EImage%2A&resultFormat=xml' + fields_to_s(Fedora::ALL_FIELDS))
+      conn.expects(:get).with('/fedora/objects?maxResults=10&query=label%7EImage%2A&resultFormat=xml' + fields_to_s(Fedora::ALL_FIELDS)).returns(@mock_response)
     }
   end
   
   it "should fetch results with some fields but not :pid" do
     when_find_objects('label~Image*', :select => [:label, :mDate]) { |conn|
-      conn.expects(:get).with('/fedora/objects?query=label%7EImage%2A&resultFormat=xml' + fields_to_s([:pid, :label, :mDate]))
+      conn.expects(:get).with('/fedora/objects?query=label%7EImage%2A&resultFormat=xml' + fields_to_s([:pid, :label, :mDate])).returns(@mock_response)
+
     }
   end
   
   it "should fetch results with some fields with :pid" do
     when_find_objects('label~Image*', :select => [:pid, :label, :mDate]) { |conn|
-      conn.expects(:get).with('/fedora/objects?query=label%7EImage%2A&resultFormat=xml' + fields_to_s([:pid, :label, :mDate]))
+      conn.expects(:get).with('/fedora/objects?query=label%7EImage%2A&resultFormat=xml' + fields_to_s([:pid, :label, :mDate])).returns(@mock_response)
+
     }
   end
   
@@ -203,7 +207,7 @@ describe Fedora::Repository, "find_objects" do
   it "should convert xml response with 0 objectFields into array of FedoraObject" do
     objects = when_find_objects('label~Image*', :select => [:pid, :label, :mDate]) { |conn|
       conn.expects(:get).with('/fedora/objects?query=label%7EImage%2A&resultFormat=xml' + fields_to_s([:pid, :label, :mDate])).
-        returns(Fedora::XmlFormat.decode(sample_response_xml))
+        returns(@mock_response)
     }
     
     objects.session_token.should == 'aToken'
@@ -213,7 +217,7 @@ describe Fedora::Repository, "find_objects" do
   it "should return FedoraObjects with new_object set to false" do
     objects = when_find_objects('label~Image*', :select => [:pid, :label, :mDate]) { |conn|
       conn.expects(:get).with('/fedora/objects?query=label%7EImage%2A&resultFormat=xml' + fields_to_s([:pid, :label, :mDate])).
-        returns(Fedora::XmlFormat.decode(sample_response_xml))
+        returns(@mock_response)
     }
     objects.each do |obj|
       obj.should_not be_new_object
@@ -224,7 +228,7 @@ describe Fedora::Repository, "find_objects" do
   it "should convert xml response with single objectFields into array of FedoraObject" do
     objects = when_find_objects('label~Image*', :select => [:pid, :label, :mDate]) { |conn|
       conn.expects(:get).with('/fedora/objects?query=label%7EImage%2A&resultFormat=xml' + fields_to_s([:pid, :label, :mDate])).
-        returns(Fedora::XmlFormat.decode(sample_response_xml(1)))
+        returns(@mock_response)
     }
     
     objects.session_token.should == 'aToken'
@@ -234,9 +238,10 @@ describe Fedora::Repository, "find_objects" do
   end
   
   it "should convert xml response 2 objectFields into array of FedoraObject" do
+    @mock_response.stubs(:body).returns(sample_response_xml(2))
     objects = when_find_objects('label~Image*', :select => [:pid, :label, :mDate]) { |conn|
       conn.expects(:get).with('/fedora/objects?query=label%7EImage%2A&resultFormat=xml' + fields_to_s([:pid, :label, :mDate])).
-        returns(Fedora::XmlFormat.decode(sample_response_xml(2)))
+        returns(@mock_response)
     }
     
     objects.session_token.should == 'aToken'

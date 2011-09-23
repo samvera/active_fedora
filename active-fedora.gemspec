@@ -22,10 +22,11 @@ Gem::Specification.new do |s|
   s.add_dependency('nokogiri')
   s.add_dependency('om', '>= 1.0')
   s.add_dependency('solrizer', '>1.0.0')
-  s.add_dependency("activeresource")
+  s.add_dependency("activeresource", "<3.0.0")
   s.add_dependency("mediashelf-loggable")
   s.add_dependency("equivalent-xml")
   s.add_dependency("facets")
+  s.add_dependency("net-http-persistent")
   s.add_development_dependency("yard")
   s.add_development_dependency("RedCloth") # for RDoc formatting
   s.add_development_dependency("rake")
