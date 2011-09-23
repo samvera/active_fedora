@@ -5,16 +5,26 @@ describe ActiveFedora::Base do
   describe "first level delegation" do 
     class BarStream2 < ActiveFedora::NokogiriDatastream 
       set_terminology do |t|
-        t.root(:path=>"first", :xmlns=>"urn:foobar")
-        t.duck()
+        t.root(:path=>"animals", :xmlns=>"urn:zoobar")
+        t.waterfowl do
+          t.ducks do 
+            t.duck
+          end
+        end
+        t.donkey()
         t.cow()
       end
 
       def self.xml_template
-            Nokogiri::XML::Document.parse '<first xmlns="urn:foobar"> 
-              <duck></duck>
+            Nokogiri::XML::Document.parse '<animals xmlns="urn:zoobar"> 
+              <waterfowl>
+                <ducks>
+                  <duck/>
+                </ducks>
+              </waterfowl>
+              <donkey></donkey>
               <cow></cow>
-            </first>'
+            </animals>'
       end
     end
 
@@ -33,8 +43,9 @@ describe ActiveFedora::Base do
 
       has_metadata :type=>BarStream2, :name=>"xmlish"
       delegate :fubar, :to=>'withText', :unique=>true
-      delegate :duck, :to=>'xmlish', :unique=>true
+      delegate :donkey, :to=>'xmlish', :unique=>true
       delegate :cow, :to=>'xmlish'
+      delegate :duck, :to=>'xmlish', :at=>[:waterfowl, :ducks]
     end
     before :each do
       @n = BarHistory2.new(:pid=>"monkey:99")
@@ -43,14 +54,20 @@ describe ActiveFedora::Base do
       @n.fubar="Quack"
       @n.fubar.should == "Quack"
       @n.withText.get_values(:fubar).first.should == 'Quack'
-      @n.duck="Quack"
-      @n.duck.should == "Quack"
-      @n.xmlish.term_values(:duck).first.should == 'Quack'
+      @n.donkey="Bray"
+      @n.donkey.should == "Bray"
+      @n.xmlish.term_values(:donkey).first.should == 'Bray'
     end
     it "should return an array if not marked as unique" do
       ### Metadata datastream does not appear to support multiple value setting
       @n.cow=["one", "two"]
       @n.cow.should == ["one", "two"]
+    end
+
+    it "should be able to delegate deeply into the terminology" do
+      pending
+      @n.duck=["Quack", "Peep"]
+      @n.duck.should == ["Quack", "Peep"]
     end
 
   end
