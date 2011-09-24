@@ -1,6 +1,8 @@
 2.3.8
 
 HYDRA-670 -- Use persistent http connections
+Don't set log level to error by default
+Benchmark fedora and solr queries
 
 
 2.3.7 

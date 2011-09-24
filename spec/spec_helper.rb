@@ -14,6 +14,8 @@ end
 ENV["RAILS_ENV"] ||= 'test'
 RAILS_ENV = ENV["RAILS_ENV"]
 
+logger.level = Logger::WARN if logger.respond_to? :level ###MediaShelf StubLogger doesn't have a level= method
+
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 Dir[File.join(File.dirname(__FILE__)+'/../lib/')+'**/*.rb'].each{|x| require x unless x.match(/railtie.rb$/)}
 $VERBOSE=nil
