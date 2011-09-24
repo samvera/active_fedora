@@ -103,10 +103,14 @@ module Fedora
     # @param pid of the Fedora object to retrieve and deserialize
     # @param klazz the Model whose deserialize method the object's FOXML will be passed into
     def find_model(pid, klazz)
-      obj = self.find_objects("pid=#{pid}").first
-      if obj.nil?
-        raise ActiveFedora::ObjectNotFoundError, "The repository does not have an object with pid #{pid}.  The repository URL is #{self.base_url}"
+      obj = nil
+      ms = 1000 * Benchmark.realtime do
+        obj = self.find_objects("pid=#{pid}").first
+        if obj.nil?
+          raise ActiveFedora::ObjectNotFoundError, "The repository does not have an object with pid #{pid}.  The repository URL is #{self.base_url}"
+        end
       end
+      logger.debug "loading #{pid} took #{ms} ms"
       doc = Nokogiri::XML::Document.parse(obj.object_xml)     
       klazz.deserialize(doc)
     end

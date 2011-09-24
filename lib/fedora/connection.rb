@@ -236,7 +236,8 @@ module Fedora
     # Creates new Net::HTTP instance for communication with
     # remote service and resources.
     def http
-      @http ||= Net::HTTP::Persistent.new#(@site)
+      return @http if @http
+      @http = Net::HTTP::Persistent.new#(@site)
       if(@site.is_a?(URI::HTTPS))
         @http.use_ssl = true
         @http.verify_mode = OpenSSL::SSL::VERIFY_NONE

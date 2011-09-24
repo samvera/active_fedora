@@ -4,6 +4,7 @@ require 'active_fedora/semantic_node'
 require "solrizer"
 require 'nokogiri'
 require "loggable"
+require 'benchmark'
 
 SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
@@ -122,8 +123,12 @@ module ActiveFedora
     # Refreshes the object's info from Fedora
     # Note: Currently just registers any new datastreams that have appeared in fedora
     def refresh
-      inner_object.load_attributes_from_fedora
-      @datastreams = datastreams_in_fedora.merge(datastreams_in_memory)
+      ms = 1000 * Benchmark.realtime do
+        inner_object.load_attributes_from_fedora
+        @datastreams = datastreams_in_fedora.merge(datastreams_in_memory)
+      end
+      logger.debug "refreshing #{pid} took #{ms} ms"
+      @datastreams
     end
 
     #Deletes a Base object, also deletes the info indexed in Solr, and 
@@ -945,11 +950,17 @@ module ActiveFedora
     def update_index
       if defined?( Solrizer::Fedora::Solrizer ) 
         #logger.info("Trying to solrize pid: #{pid}")
-        solrizer = Solrizer::Fedora::Solrizer.new
-        solrizer.solrize( self )
+        ms = 1000 * Benchmark.realtime do
+          solrizer = Solrizer::Fedora::Solrizer.new
+          solrizer.solrize( self )
+        end
+        logger.debug "solrize for #{pid} took #{ms} ms"
       else
         #logger.info("Trying to update solr for pid: #{pid}")
-        SolrService.instance.conn.update(self.to_solr)
+        ms = 1000 * Benchmark.realtime do
+          SolrService.instance.conn.update(self.to_solr)
+        end
+        logger.debug "solr update for #{pid} took #{ms} ms"
       end
     end
 
@@ -1090,17 +1101,23 @@ module ActiveFedora
     
     # Pushes the object and all of its new or dirty datastreams into Fedora
     def update
-      result = Fedora::Repository.instance.save(@inner_object)      
-      datastreams_in_memory.each do |k,ds|
-        if ds.dirty? || ds.new_object? 
-          if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.instance_of?(ActiveFedora::RelsExtDatastream)
-          # if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ds.instance_of?(ActiveFedora::RelsExtDatastream)
-            @metadata_is_dirty = true
-          end
-          result = ds.save
-        end 
+      result = nil
+      ms = 1000 * Benchmark.realtime do
+        result = Fedora::Repository.instance.save(@inner_object)      
       end
-      refresh
+      logger.debug "instance save for #{pid} took #{ms} ms"
+      ms = 1000 * Benchmark.realtime do
+        datastreams_in_memory.each do |k,ds|
+          if ds.dirty? || ds.new_object? 
+            if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.instance_of?(ActiveFedora::RelsExtDatastream)
+              @metadata_is_dirty = true
+            end
+            result = ds.save
+          end 
+        end
+        refresh
+      end
+      logger.debug "datastream save for #{pid} took #{ms} ms"
       return result
     end
 
