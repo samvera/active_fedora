@@ -21,6 +21,7 @@ describe ActiveFedora::Model do
       
     end
 
+    ActiveFedora::RubydoraConnection.connect(ActiveFedora.fedora_config[:url])
     @test_instance = ModelIntegrationSpec::Basic.new
     @test_instance.save
     
@@ -46,9 +47,9 @@ describe ActiveFedora::Model do
     
     it "should return an object of the given Model whose inner object is nil" do
       #result = ModelIntegrationSpec::Basic.find_model(@test_instance.pid, ModelIntegrationSpec::Basic)
-      result = Fedora::Repository.instance.find_model(@test_instance.pid, ModelIntegrationSpec::Basic)
+      result = ActiveFedora::RubydoraConnection.instance.find_model(@test_instance.pid, ModelIntegrationSpec::Basic)
       result.class.should == ModelIntegrationSpec::Basic
-      result.inner_object.new_object?.should be_false
+      result.inner_object.new?.should be_false
     end
   end
   

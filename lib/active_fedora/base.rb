@@ -1,12 +1,9 @@
 require "solrizer"
 require 'nokogiri'
 require "loggable"
+require 'active_fedora/datastream_hash'
 
-#require 'active_support/core_ext/kernel/singleton_class'
-#require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/class/inheritable_attributes'
-#require 'active_support/inflector'
-
 SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 
@@ -37,7 +34,7 @@ module ActiveFedora
     include SemanticNode
     class_inheritable_accessor  :ds_specs, :class_named_datastreams_desc
     self.class_named_datastreams_desc = {}
-    self.ds_specs = {}
+    self.ds_specs = {'RELS-EXT'=> [ActiveFedora::RelsExtDatastream, "", nil]}#, 'DC'=> [ActiveFedora::Datastream, "", nil]}
     attr_accessor :named_datastreams_desc
     
 
@@ -48,12 +45,12 @@ module ActiveFedora
 
     # Has this object been saved?
     def new_object?
-      @new_object
+      inner_object.new?
     end
     
     def new_object=(bool)
       @new_object = bool
-      inner_object.new_object = bool
+      #inner_object.new_object = bool
     end
 
     ## Required by associations
@@ -83,16 +80,17 @@ module ActiveFedora
       attrs = {} if attrs.nil?
       unless attrs[:pid]
         if attrs[:namespace]
-          attrs = attrs.merge!({:pid=>Fedora::Repository.instance.nextid({:namespace=>attrs[:namespace]})})
+          attrs = attrs.merge!({:pid=>RubydoraConnection.instance.nextid({:namespace=>attrs[:namespace]})})
         else
-          attrs = attrs.merge!({:pid=>Fedora::Repository.instance.nextid})  
+          attrs = attrs.merge!({:pid=>RubydoraConnection.instance.nextid})  
         end
         @new_object=true
+        @inner_object = RubydoraConnection.instance.connection.find(attrs[:pid])
       else
         @new_object = attrs[:new_object] == false ? false : true
+        @inner_object = RubydoraConnection.instance.connection.find(attrs[:pid])
+        load_datastreams_from_fedora
       end
-      @inner_object = Fedora::FedoraObject.new(attrs)
-      @datastreams = {}
       configure_defined_datastreams
 
       attributes = attrs.dup
@@ -127,7 +125,6 @@ module ActiveFedora
     #Saves a Base object, and any dirty datastreams, then updates 
     #the Solr index for this object.
     def save
-      #@metadata_is_dirty = false
       # If it's a new object, set the conformsTo relationship for Fedora CMA
       if new_object? 
         result = create
@@ -147,8 +144,7 @@ module ActiveFedora
     # Refreshes the object's info from Fedora
     # Note: Currently just registers any new datastreams that have appeared in fedora
     def refresh
-      inner_object.load_attributes_from_fedora
-      @datastreams = datastreams_in_fedora.merge(datastreams_in_memory)
+#      inner_object.load_attributes_from_fedora
     end
 
     #Deletes a Base object, also deletes the info indexed in Solr, and 
@@ -164,7 +160,8 @@ module ActiveFedora
         end
       end
       
-      Fedora::Repository.instance.delete(@inner_object)
+      #Fedora::Repository.instance.delete(@inner_object)
+      @inner_object.delete
       if ENABLE_SOLR_UPDATES
         ActiveFedora::SolrService.instance.conn.delete(pid) 
         # if defined?( Solrizer::Solrizer ) 
@@ -184,35 +181,26 @@ module ActiveFedora
     # Datastreams that have been modified in memory are given preference over 
     # the copy in Fedora.
     def datastreams
-      if @new_object
-        @datastreams = datastreams_in_memory
-      else
-        @datastreams = (@datastreams == {}) ? datastreams_in_fedora : datastreams_in_memory
-      end
-
+      @datastreams ||= DatastreamHash.new(self)
     end
 
-    def datastreams_in_fedora #:nodoc:
-      mds = {}
-      self.datastreams_xml['datastream'].each do |ds|
-        ds.merge!({:pid => self.pid, :dsID => ds["dsid"], :dsLabel => ds["label"]})
-        if ds["dsid"] == "RELS-EXT" 
-          mds.merge!({ds["dsid"] => ActiveFedora::RelsExtDatastream.new(ds)})
+    def load_datastreams_from_fedora
+      inner_object.datastreams.each do |dsid, datastream|
+        ds_spec = self.class.ds_specs[dsid]
+        if (ds_spec)
+          klass = ds_spec.first
+          datastreams[dsid] = klass.new(inner_object, dsid, true)
+          #datastreams[dsid].dsLabel = ds_spec[1]   #this shouldn't cause it to be dirty
+          if ds_spec.last.class == Proc
+            ds_spec.last.call(datastreams[dsid])
+          end
+          klass.from_xml(datastreams[dsid].content, datastreams[dsid])  ### TODO, this is loading eagerly, we could load it as needed
+          ### TODO, if rubydora could know which klass to use, we could probably skip this step.
         else
-          mds.merge!({ds["dsid"] => ActiveFedora::Datastream.new(ds)})
+          #TODO, this may be a perfomance hit and we may not need it.
+          datastreams[dsid] =Datastream.new(inner_object, dsid)#, true)
         end
-        mds[ds["dsid"]].new_object = false
       end
-      mds
-    end
-
-    def datastreams_in_memory #:ndoc:
-      @datastreams ||= Hash.new
-    end
-
-    #return the datastream xml representation direclty from Fedora
-    def datastreams_xml
-      datastreams_xml = XmlSimple.xml_in(Fedora::Repository.instance.fetch_custom(self.pid, :datastreams))
     end
 
     # Adds datastream to the object.  Saves the datastream to fedora upon adding.
@@ -220,10 +208,9 @@ module ActiveFedora
     # :prefix option will set the prefix on auto-generated DSID
     # @return [String] dsid of the added datastream
     def add_datastream(datastream, opts={})
-      datastream.pid = self.pid
       if datastream.dsid == nil || datastream.dsid.empty?
         prefix = opts.has_key?(:prefix) ? opts[:prefix] : "DS"
-        datastream.dsid = generate_dsid(prefix)
+        datastream.instance_variable_set :@dsid, generate_dsid(prefix)
       end
       datastreams[datastream.dsid] = datastream
       return datastream.dsid
@@ -290,7 +277,7 @@ module ActiveFedora
     # Failing that, creates a new RelsExtDatastream and adds it to the object
     def rels_ext
       if !datastreams.has_key?("RELS-EXT") 
-        add_datastream(ActiveFedora::RelsExtDatastream.new)
+        add_datastream(ActiveFedora::RelsExtDatastream.new(@inner_object,'RELS-EXT'))
       end
       return datastreams["RELS-EXT"]
     end
@@ -313,8 +300,7 @@ module ActiveFedora
       elsif opts.has_key?(:content_type)
         attrs.merge!({:mimeType=>opts[:content_type]})
       end
-      
-      ds = ActiveFedora::Datastream.new(attrs)
+      ds = create_datastream(ActiveFedora::Datastream, nil, attrs)
       opts.has_key?(:dsid) ? ds.dsid=(opts[:dsid]) : nil
       add_datastream(ds)
     end
@@ -413,7 +399,6 @@ module ActiveFedora
     #   :dsLocation => holds uri location of datastream.  Required only if :controlGroup is type 'E' or 'R'.
     #   :dsid or :dsId => Optional, and used to update an existing datastream with dsid supplied.  Will throw an error if dsid does not exist and does not match prefix pattern for datastream name
     def add_named_datastream(name,opts={})
-      
       unless named_datastreams_desc.has_key?(name) && named_datastreams_desc[name].has_key?(:type) 
         raise "Failed to add datastream. Named datastream #{name} not defined for object #{pid}." 
       end
@@ -457,11 +442,7 @@ module ActiveFedora
       
       opts.merge!(:dsLabel => label)
       
-      #make sure both dsid and dsID populated if a dsid is supplied
-      opts.merge!(:dsid=>opts[:dsID]) if opts.has_key?(:dsID)
-      opts.merge!(:dsID=>opts[:dsid]) if opts.has_key?(:dsid)
-      
-      ds = create_datastream(named_datastreams_desc[name][:type],opts)
+      ds = create_datastream(named_datastreams_desc[name][:type], opts[:dsid], opts)
       #Must be of type datastream
       assert_kind_of 'datastream',  ds, ActiveFedora::Datastream
       #make sure dsid is nil so that it uses the prefix for mapping purposes
@@ -527,30 +508,6 @@ module ActiveFedora
     
     # ** EXPERIMENTAL **
     #
-    # Returns hash of datastream names mapped to another hash
-    # of dsid to attributes for corresponding datastream objects
-    # === Example
-    # For the following has_datastream call, assume we have added one datastream.
-    # 
-    #  has_datastream :name=>"thumbnails",:prefix => "THUMB",:type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'                     
-    #
-    # It would then return
-    #  {"thumbnails"=>{"THUMB1"=>{:prefix=>"VAN", :type=>"ActiveFedora::Datastream", :dsid=>"THUMB1", :dsID=>"THUMB1", :pid=>"changme:33", :mimeType=>"image/jpeg", :dsLabel=>"", :name=>"thumbnails", :content_type=>"image/jpeg", :controlGroup=>"M"}}}
-    def named_datastreams_attributes
-      ds_values = {}
-      self.class.named_datastreams_desc.keys.each do |name|
-        ds_array = self.send("#{name}")
-        result_hash = {}
-        ds_array.each do |ds|
-          result_hash[ds.dsid]=ds.attributes
-        end
-        ds_values.merge!({name=>result_hash})
-      end
-      return ds_values
-    end
-    
-    # ** EXPERIMENTAL **
-    #
     # Returns hash of datastream names mapped to an array
     # of dsid's for named datastream objects
     # === Example
@@ -568,18 +525,6 @@ module ActiveFedora
       end
       return dsids
     end 
-    
-    # ** EXPERIMENTAL **
-    #
-    # For all datastream objects, this returns hash of dsid mapped to attribute hash within the corresponding
-    # datastream object.
-    def datastreams_attributes
-      ds_values = {}
-      self.datastreams.each_pair do |dsid,ds|
-        ds_values.merge!({dsid=>ds.attributes})
-      end
-      return ds_values
-    end
     
     # ** EXPERIMENTAL **
     #
@@ -606,9 +551,30 @@ module ActiveFedora
       self.class.named_datastreams_desc
     end
     
-    def create_datastream(type,opts={})
-      type.to_s.split('::').inject(Kernel) {|scope, const_name| 
-      scope.const_get(const_name)}.new(opts)
+    def create_datastream(type, dsid, opts={})
+      dsid = generate_dsid(opts[:prefix] || "DS") if dsid == nil
+      klass = type.kind_of?(Class) ? type : type.constantize
+      raise ArgumentError, "Argument dsid must be of type string" unless dsid.kind_of?(String) || dsid.kind_of?(NilClass)
+      ds = klass.new(inner_object, dsid)
+      ds.mimeType = opts[:mimeType] 
+      ds.controlGroup = opts[:controlGroup] 
+      ds.dsLabel = opts[:dsLabel] 
+      ds.dsLocation = opts[:dsLocation] 
+      blob = opts[:blob] 
+      if blob 
+        if !ds.mimeType.present? 
+          ##TODO, this is all done by rubydora -- remove
+          ds.mimeType = blob.respond_to?(:content_type) ? blob.content_type : "application/octet-stream"
+        end
+        if !ds.dsLabel.present?
+          ds.dsLabel = File.basename(blob.path)
+#          ds.dsLabel = blob.original_filename
+        end
+      end
+
+#      blob = blob.read if blob.respond_to? :read
+      ds.content = blob || "" 
+      ds
     end
 
     # ** EXPERIMENTAL **
@@ -779,8 +745,10 @@ module ActiveFedora
     end
 
     #return the pid of the Fedora Object
+    # if there is no fedora object (loaded from solr) get the instance var
+    # TODO make inner_object a proxy that can hold the pid
     def pid
-      @inner_object.pid
+      @inner_object ?  @inner_object.pid : @pid
     end
 
 
@@ -813,17 +781,18 @@ module ActiveFedora
 
     #return the create_date of the inner object (unless it's a new object)
     def create_date
-      @inner_object.create_date unless new_object?
+      @inner_object.profile["objCreateDate"] unless @inner_object.new?
     end
 
     #return the modification date of the inner object (unless it's a new object)
     def modified_date
-      @inner_object.modified_date unless new_object?
+      @inner_object.profile["objLastModDate"] unless @inner_object.new?
     end
 
     #return the error list of the inner object (unless it's a new object)
     def errors
-      @inner_object.errors
+      #@inner_object.errors
+      []
     end
     
     #return the label of the inner object (unless it's a new object)
@@ -832,48 +801,7 @@ module ActiveFedora
     end
     
     def label=(new_label)
-      @inner_object.label = new_label
-    end
-
-    # Create an instance of the current Model from the given FOXML
-    # This method is used when you call load_instance on a Model
-    # @param [Nokogiri::XML::Document] doc the FOXML of the object
-    def self.deserialize(doc) #:nodoc:
-      if doc.instance_of?(REXML::Document)
-        pid = doc.elements['/foxml:digitalObject'].attributes['PID']
-      
-        proto = self.new(:pid=>pid, :new_object=>false)
-        proto.datastreams.each do |name,ds|
-          doc.elements.each("//foxml:datastream[@ID='#{name}']") do |el|
-            # datastreams remain marked as new if the foxml doesn't have an entry for that datastream
-            ds.new_object = false
-            proto.datastreams[name]=ds.class.from_xml(ds, el)          
-          end
-        end
-        proto.inner_object.new_object = false
-        return proto
-      elsif doc.instance_of?(Nokogiri::XML::Document)
-        pid = doc.xpath('/foxml:digitalObject').first["PID"]
-      
-        proto = self.new(:pid=>pid, :new_object=>false)
-        proto.datastreams.each do |name,ds|
-          doc.xpath("//foxml:datastream[@ID='#{name}']").each do |node|
-            # datastreams remain marked as new if the foxml doesn't have an entry for that datastream
-            ds.new_object = false
-            # Nokogiri Datstreams use a new syntax for .from_xml (tmpl is optional!) and expects the actual xml content rather than the foxml datstream xml
-            # NB: Base.deserialize, or a separately named method, should set any other info from the foxml if necessary though by this point it's all been grabbed elsewhere... 
-            if ds.kind_of?(ActiveFedora::NokogiriDatastream) 
-              xml_content = Fedora::Repository.instance.fetch_custom(pid, "datastreams/#{name}/content")
-              # node = node.search('./foxml:datastreamVersion[last()]/foxml:xmlContent/*').first
-              proto.datastreams[name]=ds.class.from_xml(xml_content, ds)
-            else
-              proto.datastreams[name]=ds.class.from_xml(ds, node)          
-            end
-          end
-        end
-        proto.inner_object.new_object = false
-        return proto
-      end
+      @inner_object.profile["objLabel"] = new_label
     end
 
     #Return a hash of all available metadata fields for all 
@@ -919,7 +847,6 @@ module ActiveFedora
         solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid, ActiveFedora::SolrService.solr_name(:system_create, :date) => self.create_date, ActiveFedora::SolrService.solr_name(:system_modified, :date) => self.modified_date, ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol) => self.class.inspect)
       end
       datastreams.each_value do |ds|
-        # solr_doc = ds.to_solr(solr_doc) if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) ||( ds.kind_of?(ActiveFedora::RelsExtDatastream) || ( ds.kind_of?(ActiveFedora::QualifiedDublinCoreDatastream) && !opts[:model_only] )
         solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ( ds.kind_of?(ActiveFedora::RelsExtDatastream) && !opts[:model_only] )
       end
       begin
@@ -958,9 +885,8 @@ module ActiveFedora
       create_date = solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date).to_s] : solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)]
       modified_date = solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrService.solr_name(:system_modified, :date).to_s] : solr_doc[ActiveFedora::SolrService.solr_name(:system_modified, :date)]
       obj = self.new({:pid=>solr_doc[SOLR_DOCUMENT_ID],:create_date=>create_date,:modified_date=>modified_date})
-      obj.new_object = false
+      #obj.new_object = false
       #set by default to load any dependent relationship objects from solr as well
-      obj.load_from_solr = true
       #need to call rels_ext once so it exists when iterating over datastreams
       obj.rels_ext
       obj.datastreams.each_value do |ds|
@@ -1035,8 +961,8 @@ module ActiveFedora
     def update_datastream_attributes(params={}, opts={})
       result = params.dup
       params.each_pair do |dsid, ds_params| 
-        if datastreams_in_memory.include?(dsid)
-          result[dsid] = datastreams_in_memory[dsid].update_indexed_attributes(ds_params)
+        if datastreams.include?(dsid)
+          result[dsid] = datastreams[dsid].update_indexed_attributes(ds_params)
         else
           result.delete(dsid)
         end
@@ -1045,8 +971,8 @@ module ActiveFedora
     end
     
     def get_values_from_datastream(dsid,field_key,default=[])
-      if datastreams_in_memory.include?(dsid)
-        return datastreams_in_memory[dsid].get_values(field_key,default)
+      if datastreams.include?(dsid)
+        return datastreams[dsid].get_values(field_key,default)
       else
         return nil
       end
@@ -1069,17 +995,17 @@ module ActiveFedora
       if self.class.ds_specs
         self.class.ds_specs.each do |name,ar|
           if self.datastreams.has_key?(name)
-            attributes = self.datastreams[name].attributes
+            #attributes = self.datastreams[name].attributes
           else
-            attributes = {:dsLabel=>ar[1]}
+            ds = ar.first.new(inner_object, name)
+            ds.dsLabel = ar[1]
+            # If you called has_metadata with a block, pass the block into the Datastream class
+            if ar.last.class == Proc
+              ar.last.call(ds)
+            end
+            #ds.attributes = attributes.merge(ds.attributes)
+            self.add_datastream(ds)
           end
-          ds = ar.first.new(:dsid=>name)
-          # If you called has_metadata with a block, pass the block into the Datastream class
-          if ar.last.class == Proc
-            ar.last.call(ds)
-          end
-          ds.attributes = attributes.merge(ds.attributes)
-          self.add_datastream(ds)
         end
       end
     end
@@ -1089,23 +1015,17 @@ module ActiveFedora
       add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(self.class))
       @metadata_is_dirty = true
       update
-      #@datastreams = datastreams_in_fedora
     end
     
     # Pushes the object and all of its new or dirty datastreams into Fedora
     def update
-      result = Fedora::Repository.instance.save(@inner_object)      
-      datastreams_in_memory.each do |k,ds|
-        if ds.dirty? || ds.new_object? 
-          if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.instance_of?(ActiveFedora::RelsExtDatastream)
-          # if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ds.instance_of?(ActiveFedora::RelsExtDatastream)
-            @metadata_is_dirty = true
-          end
-          result = ds.save
-        end 
-      end
+      result = @inner_object.save
+      datastreams.each {|k, ds| ds.serialize! }
+      @metadata_is_dirty = datastreams.any? {|k,ds| ds.changed? && (ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.instance_of?(ActiveFedora::RelsExtDatastream))}
+      ## TODO rubydora is saving datastreams, but not of our subclasses
+      datastreams.select {|k, ds| ds.changed? }.each do |k, ds| ds.save end  
       refresh
-      return result
+      return !!result
     end
 
   end

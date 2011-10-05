@@ -16,19 +16,18 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
   
   attr_accessor :internal_solr_doc
   attr_reader :ng_xml
-  
-  #constructor, calls up to ActiveFedora::Datastream's constructor
-  def initialize(attrs=nil)
+
+  def initialize(digital_object, dsid, exists_in_fedora=false)
     super
-    @fields={}
-    self.class.from_xml(blob, self)
+    self.class.from_xml(nil, self)
   end
 
+  
   # Create an instance of this class based on xml content
   # @param [String, File, Nokogiri::XML::Node] xml the xml content to build from
   # @param [ActiveFedora::MetadataDatastream] tmpl the Datastream object that you are building @default a new instance of this class
   # Careful! If you call this from a constructor, be sure to provide something 'ie. self' as the @tmpl. Otherwise, you will get an infinite loop!
-  def self.from_xml(xml, tmpl=self.new) # :nodoc:
+  def self.from_xml(xml, tmpl) # :nodoc:
     if xml.nil?
       tmpl.ng_xml = self.xml_template
     elsif xml.kind_of? Nokogiri::XML::Node || xml.kind_of?(Nokogiri::XML::Document)
@@ -53,7 +52,6 @@ class ActiveFedora::NokogiriDatastream < ActiveFedora::Datastream
     else
       raise TypeError, "You passed a #{new_xml.class} into the ng_xml of the #{self.dsid} datastream. NokogiriDatastream.ng_xml= only accepts Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node, or raw XML (String) as inputs."
     end
-    self.dirty = true
   end
   
   def content=(content)

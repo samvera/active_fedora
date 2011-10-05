@@ -50,7 +50,7 @@ module ActiveFedora
       # @example this will return an instance of Book, even if the object hydra:dataset1 asserts that it is a Dataset
       #   Book.load_instance("hydra:dataset1") 
       def load_instance(pid)
-        Fedora::Repository.instance.find_model(pid, self)
+        RubydoraConnection.instance.find_model(pid, self)
       end
 
       # Takes :all or a pid as arguments
@@ -75,7 +75,7 @@ module ActiveFedora
           hits = SolrService.instance.conn.query(q).hits 
         end
         results = hits.map do |hit|
-          obj = Fedora::Repository.instance.find_model(hit[SOLR_DOCUMENT_ID], self)
+          obj = RubydoraConnection.instance.find_model(hit[SOLR_DOCUMENT_ID], self)
           #obj.inner_object.new_object = false
           #return obj
         end
@@ -208,7 +208,7 @@ module ActiveFedora
     
       def class_fields
         #create dummy object that is empty by passing in fake pid
-        object = self.new({:pid=>'FAKE'})
+        object = self.new()#{:pid=>'FAKE'})
         fields = object.fields
         #reset id to nothing
         fields[:id][:values] = []

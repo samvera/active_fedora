@@ -7,29 +7,10 @@ require 'ftools'
 describe ActiveFedora::Datastream do
   
   before(:each) do
-    Fedora::Repository.instance.expects(:nextid).returns("foo")
     @test_object = ActiveFedora::Base.new
-    @test_datastream = ActiveFedora::Datastream.new(:pid=>@test_object.pid, :dsid=>'abcd', :blob=>StringIO.new("hi there"))
-  end
-
-  it "should implement delete" do
-    Fedora::Repository.instance.expects(:delete).with('foo/datastreams/abcd').returns(true).times(2)
-    @test_datastream.delete.should == true
-    ActiveFedora::Datastream.delete('foo', 'abcd').should == true
-  end
-  
-  it "should set control_group" do
-    xml=<<-EOF
-    <?xml version="1.0" encoding="UTF-8"?>
-    <foxml:datastream xmlns:foxml="foo" ID="Addelson_Frances19971114_FINAL.doc" STATE="A" CONTROL_GROUP="M" VERSIONABLE="true">
-        <foxml:datastreamVersion ID="Addelson_Frances19971114_FINAL.doc.0" LABEL="Addelson_Frances19971114_FINAL.doc" CREATED="2008-11-19T18:18:46.631Z" MIMETYPE="application/msword">
-          <foxml:contentLocation TYPE="INTERNAL_ID" REF="changeme:551+Addelson_Frances19971114_FINAL.doc+Addelson_Frances19971114_FINAL.doc.0"/>
-        </foxml:datastreamVersion>
-      </foxml:datastream>
-    EOF
-    n = ActiveFedora::Datastream.from_xml(ActiveFedora::Datastream.new, Nokogiri::XML::Document.parse(xml).root)
-    n.control_group.should == 'M'
-
+    @test_datastream = ActiveFedora::Datastream.new(@test_object.inner_object, 'abcd')
+    #:pid=>@test_object.pid, :dsid=>'abcd', :blob=>StringIO.new("hi there"))
+    @test_datastream.content = "hi there"
   end
 
   it "should escape dots in  to_param" do
@@ -45,7 +26,12 @@ describe ActiveFedora::Datastream do
   
   describe '#save' do
     it 'should call #before_save and #after_save' do
-      Fedora::Repository.instance.stubs(:save)
+      @mock_repo = mock('repository')
+      @mock_repo.stubs(:add_datastream).with(:versionable => true, :pid => nil, :dsid => 'abcd', :controlGroup => 'M', :dsState => 'A', :content => 'hi there', :checksumType => 'DISABLED')
+      @mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => nil)
+      @test_object.inner_object.stubs(:repository).returns(@mock_repo)
+      @test_object.inner_object.stubs(:pid).returns(@pid)
+
       @test_datastream.stubs(:last_modified_in_repository)
       @test_datastream.expects(:before_save)
       @test_datastream.expects(:after_save)
@@ -53,21 +39,24 @@ describe ActiveFedora::Datastream do
     end
     
     it "should set @dirty to false" do
-      Fedora::Repository.instance.stubs(:save)
-      #@test_datastream.stubs(:last_modified_in_repository)
+      @mock_repo = mock('repository')
+      @mock_repo.stubs(:add_datastream).with(:versionable => true, :pid => @test_object.pid, :dsid => 'abcd', :controlGroup => 'M', :dsState => 'A', :content => 'hi there', :checksumType => 'DISABLED')
+      @mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid)
+      @test_object.inner_object.stubs(:repository).returns(@mock_repo)
       @test_datastream.expects(:dirty=).with(false)
       @test_datastream.save
     end
   end
   
   describe '.content=' do
-    it "should update the content and ng_xml, marking the datastream as dirty" do
+    it "should update the content and ng_xml, marking the datastream as changed" do
       sample_xml = "<foo><xmlelement/></foo>"
-      @test_datastream.should_not be_dirty
-      @test_datastream.blob.should_not be_equivalent_to(sample_xml)
+      @test_datastream.instance_variable_get(:@changed_attributes).clear
+      @test_datastream.should_not be_changed
+      @test_datastream.content.should_not be_equivalent_to(sample_xml)
       @test_datastream.content = sample_xml
-      @test_datastream.should be_dirty
-      @test_datastream.blob.should be_equivalent_to(sample_xml)
+      @test_datastream.should be_changed
+      @test_datastream.content.should be_equivalent_to(sample_xml)
     end
   end
   
@@ -79,18 +68,13 @@ describe ActiveFedora::Datastream do
     end
   end 
   
-  describe ".dsid=" do
-    it "should set the datastream's dsid" do
-      @test_datastream.dsid = "foodsid"
-      @test_datastream.dsid.should == "foodsid"
-    end
-  end 
-  
-  it "should have mime_type accessors and should allow you to pass :mime_type OR :mimeType as an argument to initialize block" do
-    ds1 = ActiveFedora::Datastream.new(:mime_type=>"text/foo")    
-    ds1.mime_type.should == "text/foo"
-    ds2 = ActiveFedora::Datastream.new(:mime_type=>"text/bar")
-    ds2.mime_type.should == "text/bar"
+  it "should have mimeType accessors" do
+    ds1 = ActiveFedora::Datastream.new(nil, nil)#:mime_type=>"text/foo")    
+    ds1.mimeType = "text/foo"
+    ds1.mimeType.should == "text/foo"
+    ds2 = ActiveFedora::Datastream.new(nil, nil)#:mime_type=>"text/bar")
+    ds2.mimeType = "text/bar"
+    ds2.mimeType.should == "text/bar"
   end
 
   describe ".size" do
@@ -119,17 +103,13 @@ describe ActiveFedora::Datastream do
          <dsChecksum>none</dsChecksum>
          </datastreamProfile>"
       EOS
-      Fedora::Repository.instance.expects(:fetch_custom).with(@test_object.pid, "datastreams/#{@test_datastream.dsid}").returns(ds_profile)
-      @test_datastream.expects(:new_object?).returns(false)
-      @test_datastream.attributes.fetch(:dsSize,nil).should be_nil
+      @test_datastream.expects(:repository).returns(@mock_repo)
+      @mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).returns(ds_profile)
       @test_datastream.size.should == "9999"
-      @test_datastream.attributes.fetch(:dsSize,nil).should_not be_nil
     end
 
     it "should default to an empty string if ds has not been saved" do
-      @test_datastream.attributes.fetch(:dsSize,nil).should be_nil
       @test_datastream.size.should be_nil
-      @test_datastream.attributes.fetch(:dsSize,nil).should be_nil
     end
   end
 

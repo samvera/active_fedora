@@ -27,9 +27,16 @@ describe ActiveFedora::Base do
   end
 
   before(:each) do
-    Fedora::Repository.instance.stubs(:nextid).returns(increment_pid.to_s)
+    @mock_repo = mock("repository")
+    Rubydora::DigitalObject.any_instance.expects(:repository).returns(@mock_repo).at_least_once
+    @this_pid = increment_pid.to_s
+    ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(@this_pid)
+
+    @mock_repo.expects(:datastream).with{ |x| x[:dsid] == 'RELS-EXT'}.returns("").at_least_once #raises(RuntimeError, "Fake Not found")
+    @mock_repo.expects(:datastream).with{ |x| x[:dsid] == 'someData'}.returns("").at_least_once #raises(RuntimeError, "Fake Not found")
+    @mock_repo.expects(:datastream).with{ |x| x[:dsid] == 'withText2'}.returns("").at_least_once #raises(RuntimeError, "Fake Not found")
+    @mock_repo.expects(:datastream).with{ |x| x[:dsid] == 'withText'}.returns("").at_least_once #raises(RuntimeError, "Fake Not found")
     @test_object = ActiveFedora::Base.new
-    @test_object.new_object = true
     @test_history = FooHistory.new
   end
 
@@ -43,16 +50,18 @@ describe ActiveFedora::Base do
 
   describe '#new' do
     it "should create a new inner object" do
-      Fedora::Repository.instance.expects(:save).never
+      Rubydora::DigitalObject.any_instance.expects(:save).never
+      @mock_repo.expects(:datastreams).with(:pid => "test:1").returns("")
+
       result = ActiveFedora::Base.new(:pid=>"test:1")  
-      result.inner_object.should be_kind_of(Fedora::FedoraObject)    
+      result.inner_object.should be_kind_of(Rubydora::DigitalObject)    
     end
 
     it "should allow initialization with nil" do  
       # for doing AFObject.new(params[:foo]) when nothing is in params[:foo]
-      Fedora::Repository.instance.expects(:save).never
+      Rubydora::DigitalObject.any_instance.expects(:save).never
       result = ActiveFedora::Base.new(nil)  
-      result.inner_object.should be_kind_of(Fedora::FedoraObject)    
+      result.inner_object.should be_kind_of(Rubydora::DigitalObject)    
     end
 
   end
@@ -65,16 +74,21 @@ describe ActiveFedora::Base do
 
   ### Methods for ActiveModel::Conversions
   it "should have to_param once it's saved" do
+    @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
+
     @test_object.to_param.should be_nil
     @test_object.expects(:create).returns(true)
     @test_object.save
+    @test_object.expects(:persisted?).returns(true).at_least_once
     @test_object.to_param.should == @test_object.pid
   end
 
   it "should have to_key once it's saved" do 
+    @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
     @test_object.to_key.should be_nil
     @test_object.expects(:create).returns(true)
     @test_object.save
+    @test_object.expects(:persisted?).returns(true).at_least_once
     @test_object.to_key.should == [@test_object.pid]
   end
 
@@ -98,22 +112,28 @@ describe ActiveFedora::Base do
 
   describe "has_metadata" do
     before :each do
-      @n = FooHistory.new(:pid=>"monkey:99")
-      @n.save
-    end
+      @mock_repo.expects(:datastreams).with(:pid => "monkey:99").returns("")
+      @mock_repo.expects(:object).with(:pid => "monkey:99").returns("")
+      @mock_repo.expects(:ingest).with(:pid => "monkey:99").returns("monkey:99")
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'someData',:pid => 'monkey:99').returns('asdf') 
+      @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'someData'}
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText',:pid => 'monkey:99').returns('asdf') 
+      @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'withText'}
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText2',:pid => 'monkey:99').returns('asdf') 
+      @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'withText2'}
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'RELS-EXT',:pid => 'monkey:99').returns('asdf') 
+      @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'RELS-EXT'}
 
-    after :each do
-      begin
-        @n.delete
-      rescue
-      end
+      @n = FooHistory.new(:pid=>"monkey:99")
+      @n.expects(:update_index)
+      @n.save
     end
 
     it "should create specified datastreams with specified fields" do
       @n.datastreams["someData"].should_not be_nil
       @n.datastreams["someData"].fubar_values='bar'
       @n.datastreams["someData"].fubar_values.should == ['bar']
-      @n.datastreams["withText2"].label.should == "withLabel"
+      @n.datastreams["withText2"].dsLabel.should == "withLabel"
     end
 
   end
@@ -136,6 +156,7 @@ describe ActiveFedora::Base do
     end
     
     it "should add self.class as the :active_fedora_model" do
+      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
       fields = @test_object.fields
       fields[:active_fedora_model][:values].should eql([@test_object.class.inspect])
     end
@@ -147,6 +168,7 @@ describe ActiveFedora::Base do
       mock2.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
 
       @test_object.expects(:datastreams).returns({:ds1 => mock1, :ds2 => mock2})
+      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
       @test_object.fields
     end
   end
@@ -168,15 +190,6 @@ describe ActiveFedora::Base do
   end
 
   describe '.rels_ext' do
-    it 'should create the RELS-EXT datastream if it doesnt exist' do
-      mocker = mock("rels-ext")
-      ActiveFedora::RelsExtDatastream.expects(:new).returns(mocker)
-      @test_object.expects(:add_datastream).with(mocker)
-      # Make sure the RELS-EXT datastream does not exist yet
-      @test_object.datastreams["RELS-EXT"].should == nil
-      @test_object.rels_ext
-      # Assume that @test_object.add_datastream actually does its job and adds the datastream to the datastreams array.  Not testing that here.
-    end
 
     it 'should return the RelsExtDatastream object from the datastreams array' do
       @test_object.expects(:datastreams).returns({"RELS-EXT" => "foo"}).at_least_once
@@ -212,7 +225,7 @@ describe ActiveFedora::Base do
     end
     
     it 'should add a relationship to an object only if it does not exist already' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
+      ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(increment_pid.to_s)
       @test_object3 = ActiveFedora::Base.new
       @test_object.add_relationship(:has_part,@test_object3)
       r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
@@ -234,9 +247,9 @@ describe ActiveFedora::Base do
   
   describe '#remove_relationship' do
     it 'should remove a relationship from the relationships hash' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
+      ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(increment_pid.to_s)
       @test_object3 = ActiveFedora::Base.new
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
+      ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(increment_pid.to_s)
       @test_object4 = ActiveFedora::Base.new
       @test_object.add_relationship(:has_part,@test_object3)
       @test_object.add_relationship(:has_part,@test_object4)
@@ -268,14 +281,22 @@ describe ActiveFedora::Base do
     
     
     it "should return true and set persisted if object and datastreams all save successfully" do
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'RELS-EXT',:pid => @this_pid).returns('asdf') 
+
+      @mock_repo.expects(:ingest).with(:pid => @this_pid).returns(@this_pid)
+      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
+      @mock_repo.expects(:datastreams).with(:pid => @this_pid).returns("")
+      @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'RELS-EXT'}
       @test_object.persisted?.should be false 
-      @test_object.expects(:create).returns(true)
+      @test_object.expects(:update_index)
       @test_object.save.should == true
+      @mock_repo.expects(:object).with(:pid => @this_pid).returns("<objectProfile><objOwnerId>fedoraAdmin</objOwnerId></objectProfile>")
       @test_object.persisted?.should be true
     end
 
     
     it "should raise an exception if object fails to save" do
+      pending # Not using Fedora::Repository anymore
       server_response = mock("Server Error")
       Fedora::Repository.instance.expects(:save).with(@test_object.inner_object).raises(Fedora::ServerError, server_response)
       lambda {@test_object.save}.should raise_error(Fedora::ServerError)
@@ -283,6 +304,7 @@ describe ActiveFedora::Base do
     end
     
     it "should raise an exception if any of the datastreams fail to save" do
+      pending # Not using Fedora::Repository anymore
       Fedora::Repository.instance.expects(:save).with(@test_object.inner_object).returns(true)
       Fedora::Repository.instance.expects(:save).with(kind_of(ActiveFedora::RelsExtDatastream)).raises(Fedora::ServerError,  mock("Server Error")) 
       lambda {@test_object.save}.should raise_error(Fedora::ServerError)
@@ -291,71 +313,124 @@ describe ActiveFedora::Base do
     it "should call .save on any datastreams that are dirty" do
       to = FooHistory.new
       to.expects(:update_index)
-      Fedora::Repository.instance.expects(:save).with(to.inner_object)
-      Fedora::Repository.instance.expects(:save).with(kind_of(ActiveFedora::RelsExtDatastream))
-      Fedora::Repository.instance.expects(:save).with(to.datastreams["withText"])
-      Fedora::Repository.instance.expects(:save).with(to.datastreams["withText2"])
-      to.datastreams["someData"].stubs(:dirty?).returns(true)
+      @mock_repo.expects(:ingest).with(:pid => @this_pid).returns(@this_pid)
+      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
+      @mock_repo.expects(:datastreams).with(:pid => @this_pid).returns("")
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText',:pid => @this_pid).returns('asdf') 
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText2',:pid => @this_pid).returns('asdf') 
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'RELS-EXT',:pid => @this_pid).returns('asdf') 
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'someData',:pid => @this_pid).returns('asdf') 
+
+      @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'withText2'}
+      @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'withText'}
+      @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'RELS-EXT'}
+
+
+      to.datastreams["someData"].stubs(:changed?).returns(true)
       to.datastreams["someData"].stubs(:new_object?).returns(true)
       to.datastreams["someData"].expects(:save)
       to.expects(:refresh)
       to.save
     end
     it "should call .save on any datastreams that are new" do
-      ds = ActiveFedora::Datastream.new(:dsid => 'ds_to_add')
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'ds_to_add',:pid => @this_pid).returns('asdf') 
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'RELS-EXT',:pid => @this_pid).returns('asdf') 
+      ds = ActiveFedora::Datastream.new(@test_object.inner_object, 'ds_to_add')
+      ds.content = "DS CONTENT"
       @test_object.add_datastream(ds)
       ds.expects(:save)
       @test_object.instance_variable_set(:@new_object, false)
-      Fedora::Repository.instance.expects(:save).with(@test_object.inner_object)
-      #Fedora::Repository.instance.expects(:save).with(kind_of(ActiveFedora::RelsExtDatastream))
       @test_object.expects(:refresh)
+      @mock_repo.expects(:object).with(:pid => @this_pid).returns("").at_least_once
+      @mock_repo.expects(:ingest).with(:pid => @test_object.pid)
+      @mock_repo.expects(:datastreams).with(:pid => @test_object.pid).returns("")
+      @mock_repo.expects(:add_datastream).with{ |x| x[:dsid] = "RELS-EXT"}
+      @test_object.expects(:update_index)
       @test_object.save
     end
     it "should not call .save on any datastreams that are not dirty" do
       @test_object = FooHistory.new
       @test_object.expects(:update_index)
       @test_object.expects(:refresh)
-      @test_object.dc.should be_nil #heh, haven't saved it yet!
-      Fedora::Repository.instance.expects(:save).with(@test_object.inner_object)
-      Fedora::Repository.instance.expects(:save).with(kind_of(ActiveFedora::RelsExtDatastream))
-      Fedora::Repository.instance.expects(:save).with(@test_object.datastreams["withText"])
-      Fedora::Repository.instance.expects(:save).with(@test_object.datastreams["withText2"])
+
+      @mock_repo.expects(:ingest).with(:pid => @test_object.pid)
+
+      @test_object.inner_object.expects(:new?).returns(true).twice
+      @test_object.inner_object.expects(:datastreams).returns({'someData'=>mock('obj', :changed? => false)})
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'someData',:pid => @test_object.pid).returns('asdf') 
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText',:pid => @test_object.pid).returns('asdf') 
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText2',:pid => @test_object.pid).returns('asdf') 
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'RELS-EXT',:pid => @test_object.pid).returns('asdf') 
       @test_object.datastreams["someData"].should_not be_nil
-      @test_object.datastreams['someData'].stubs(:dirty?).returns(false)
-      @test_object.datastreams['someData'].stubs(:new_object?).returns(false)
+      @test_object.datastreams['someData'].stubs(:changed?).returns(false)
+      @test_object.datastreams['someData'].stubs(:new?).returns(false)
       @test_object.datastreams['someData'].expects(:save).never
+      @test_object.datastreams['withText2'].expects(:save)
+      @test_object.datastreams['withText'].expects(:save)
+      @test_object.datastreams['RELS-EXT'].expects(:save)
       @test_object.save
     end
     it "should update solr index with all metadata if any MetadataDatastreams have changed" do
-      Fedora::Repository.instance.stubs(:save)
-      dirty_ds = ActiveFedora::MetadataDatastream.new
-      dirty_ds.expects(:dirty?).returns(true)
-      dirty_ds.expects(:save).returns(true)
-      mock2 = mock("ds2", :dirty? => false, :new_object? => false)
-      @test_object.stubs(:datastreams_in_memory).returns({:ds1 => dirty_ds, :ds2 => mock2})
+      @mock_repo.expects(:ingest).with(:pid => nil)
+      @mock_repo.expects(:modify_datastream).with{ |x| x[:pid] == nil && x[:dsid] == 'RELS-EXT'}
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'RELS-EXT',:pid => nil).returns('asdf') 
+      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'ds1',:pid => nil).returns('asdf') 
+      @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'ds1'}
+      @mock_repo.expects(:datastream).with{ |x| x[:dsid] == 'ds1'}.returns("").at_least_once #raises(RuntimeError, "Fake Not found")
+      @test_object.inner_object.expects(:new?).returns(true).twice
+      @test_object.inner_object.expects(:datastreams).returns([])
+      @test_object.inner_object.expects(:pid).at_least_once
+
+      dirty_ds = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, 'ds1')
+      rels_ds = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
+      rels_ds.expects(:new?).returns(false)
+      mock2 = mock("ds2")
+      mock2.stubs(:changed? => false)
+      mock2.expects(:serialize!)
+      @test_object.stubs(:datastreams).returns({:ds1 => dirty_ds, :ds2 => mock2, 'RELS-EXT'=>rels_ds})
       @test_object.expects(:update_index)
       @test_object.expects(:refresh)
       
       @test_object.save
     end
     it "should NOT update solr index if no MetadataDatastreams have changed" do
-      Fedora::Repository.instance.stubs(:save)
-      mock1 = mock("ds1", :dirty? => false, :new_object? => false)
-      mock2 = mock("ds2", :dirty? => false, :new_object? => false)
-      @test_object.stubs(:datastreams_in_memory).returns({:ds1 => mock1, :ds2 => mock2})
+      Rubydora::DigitalObject.any_instance.stubs(:save)
+      mock1 = mock("ds1")
+      mock1.expects( :changed?).returns(false).at_least_once
+      mock1.expects(:serialize!)
+      mock2 = mock("ds2")
+      mock2.expects( :changed?).returns(false).at_least_once
+      mock2.expects(:serialize!)
+      mock_rels_ext = mock("rels-ext")
+      mock_rels_ext.stubs(:dsid=>"RELS-EXT", :relationships=>{}, :add_relationship=>nil, :dirty= => nil)
+      mock_rels_ext.expects( :changed?).returns(false).at_least_once
+      mock_rels_ext.expects(:serialize!)
+      ActiveFedora::RelsExtDatastream.expects(:new).returns(mock_rels_ext)
+      @test_object.stubs(:datastreams).returns({:ds1 => mock1, :ds2 => mock2})
       @test_object.expects(:update_index).never
       @test_object.expects(:refresh)
       @test_object.instance_variable_set(:@new_object, false)
-      
+
+      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
+       
       @test_object.save
     end
     it "should update solr index if RELS-EXT datastream has changed" do
-      Fedora::Repository.instance.stubs(:save)
-      rels_ext = ActiveFedora::RelsExtDatastream.new
-      rels_ext.expects(:dirty?).returns(true)
+      @mock_repo = mock('repository')
+      @mock_repo.expects(:ingest).with(:pid => @test_object.pid)
+      @test_object.inner_object.expects(:repository).returns(@mock_repo).at_least_once
+      @test_object.inner_object.expects(:new?).returns(true).twice
+
+      rels_ext = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
+      rels_ext.expects(:relationships_are_dirty).returns(true).at_least_once
+      rels_ext.expects(:new?).returns(true)
       rels_ext.expects(:save).returns(true)
-      clean_ds = mock("ds2", :dirty? => false, :new_object? => false)
-      @test_object.stubs(:datastreams_in_memory).returns({"RELS-EXT" => rels_ext, :clean_ds => clean_ds})
+      rels_ext.expects(:serialize!)
+      clean_ds = mock("ds2")
+      clean_ds.stubs(:dirty? => false, :changed? => false, :new? => false)
+      clean_ds.expects(:serialize!)
+      @test_object.inner_object.stubs(:datastreams).returns({"RELS-EXT" => rels_ext, :clean_ds => clean_ds})
+      @test_object.stubs(:datastreams).returns({"RELS-EXT" => rels_ext, :clean_ds => clean_ds})
       @test_object.instance_variable_set(:@new_object, false)
       @test_object.expects(:refresh)
       @test_object.expects(:update_index)
@@ -380,10 +455,11 @@ describe ActiveFedora::Base do
     end
 
     it "should call .to_xml on all MetadataDatastreams and return the resulting document" do
-      ds1 = ActiveFedora::MetadataDatastream.new
-      ds2 = ActiveFedora::MetadataDatastream.new
+      ds1 = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, 'ds1')
+      ds2 = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, 'ds2')
       [ds1,ds2].each {|ds| ds.expects(:to_xml)}
 
+      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
       @test_object.expects(:datastreams).returns({:ds1 => ds1, :ds2 => ds2})
       @test_object.to_xml
     end
@@ -425,6 +501,7 @@ describe ActiveFedora::Base do
     end
     
     it "should add self.class as the :active_fedora_model" do
+      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
       solr_doc = @test_history.to_solr
       solr_doc["active_fedora_model_s"].should eql("FooHistory")
     end
@@ -452,6 +529,7 @@ describe ActiveFedora::Base do
     end
     
     it "should call .to_solr on all MetadataDatastreams and NokogiriDatastreams, passing the resulting document to solr" do
+      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
       mock1 = mock("ds1", :to_solr)
       mock2 = mock("ds2", :to_solr)
       ngds = mock("ngds", :to_solr)
@@ -464,8 +542,9 @@ describe ActiveFedora::Base do
       @test_object.to_solr
     end
     it "should call .to_solr on the RELS-EXT datastream if it is dirty" do
+      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
       @test_object.add_relationship(:has_collection_member, "foo member")
-      rels_ext = @test_object.datastreams_in_memory["RELS-EXT"]
+      rels_ext = @test_object.rels_ext
       rels_ext.dirty?.should == true
       rels_ext.expects(:to_solr)
       @test_object.to_solr
@@ -489,6 +568,7 @@ describe ActiveFedora::Base do
   
   describe ".label=" do
     it "should set the label of the inner object" do
+      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
       @test_object.label.should_not == "foo label"
       @test_object.label = "foo label"
       @test_object.label.should == "foo label"
@@ -496,14 +576,14 @@ describe ActiveFedora::Base do
   end
   
   it "should get a pid but not save on init" do
-    Fedora::Repository.instance.expects(:save).never
-    Fedora::Repository.instance.expects(:nextid).returns('mooshoo:24')
+    Rubydora::DigitalObject.any_instance.expects(:save).never
+    ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns('mooshoo:24')
     f = FooHistory.new
     f.pid.should_not be_nil
     f.pid.should == 'mooshoo:24'
   end
   it "should not clobber a pid if i'm creating!" do
-    FooHistory.any_instance.expects(:configure_defined_datastreams)
+    @mock_repo.expects(:datastreams).with(:pid => "numbnuts:1").returns("")
     f = FooHistory.new(:pid=>'numbnuts:1')
     f.pid.should == 'numbnuts:1'
 
@@ -512,7 +592,7 @@ describe ActiveFedora::Base do
   describe "get_values_from_datastream" do
     it "should look up the named datastream and call get_values with the given pointer/field_name" do
       mock_ds = mock("Datastream", :get_values=>["value1", "value2"])
-      @test_object.stubs(:datastreams_in_memory).returns({"ds1"=>mock_ds})
+      @test_object.stubs(:datastreams).returns({"ds1"=>mock_ds})
       @test_object.get_values_from_datastream("ds1", "--my xpath--").should == ["value1", "value2"]
     end
   end
@@ -528,12 +608,13 @@ describe ActiveFedora::Base do
         "properties"=>{ "notes"=>"foo" }
       }
       m = FooHistory.new
-      m.stubs(:datastreams_in_memory).returns(mock_ds_hash)
+      m.stubs(:datastreams).returns(mock_ds_hash)
       mock_desc_metadata.expects(:update_indexed_attributes).with( ds_values_hash['descMetadata'] )
       mock_properties.expects(:update_indexed_attributes).with( ds_values_hash['properties'] )
       m.update_datastream_attributes( ds_values_hash )
     end
     it "should not do anything and should return an empty hash if the specified datastream does not exist" do
+      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
       ds_values_hash = {
         "nonexistentDatastream"=>{ "notes"=>"foo" }
       }
@@ -562,7 +643,9 @@ describe ActiveFedora::Base do
       m = FooHistory.new
       att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
       
-      m.datastreams_in_memory.each_value {|ds| ds.expects(:update_indexed_attributes)}
+      m.datastreams['someData'].expects(:update_indexed_attributes)
+      m.datastreams["withText"].expects(:update_indexed_attributes)
+      m.datastreams['withText2'].expects(:update_indexed_attributes)
       m.update_indexed_attributes(att)
     end
     it "should take a :datastreams argument" do 
@@ -613,7 +696,7 @@ describe ActiveFedora::Base do
     end
     
     it 'should return current relationships by name' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
+      ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(increment_pid.to_s)
       @test_object2 = MockNamedRelationships.new
       @test_object2.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(MockNamedRelationships))
       @test_object.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(ActiveFedora::Base))
@@ -634,7 +717,7 @@ describe ActiveFedora::Base do
     end
       
     it 'should append and remove using helper methods for each outbound relationship' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
+      ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(increment_pid.to_s)
       @test_object2 = MockCreateNamedRelationshipMethodsBase.new 
       @test_object2.should respond_to(:testing_append)
       @test_object2.should respond_to(:testing_remove)

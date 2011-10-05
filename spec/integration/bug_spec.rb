@@ -21,7 +21,6 @@ class FooHistory < ActiveFedora::Base
 end
 
   before(:each) do
-    #Fedora::Repository.instance.stubs(:nextid).returns("foo:pid")
     @test_object = FooHistory.new
     @test_object.save
   end
@@ -29,20 +28,20 @@ end
     @test_object.delete
   end
   it "should not clobber everything when setting a value" do
-    @test_object.datastreams["someData"].fubar_values.should == []
-    @test_object.datastreams["someData"].should_not be_nil
-    @test_object.datastreams["someData"].fubar_values=['bar']
-    @test_object.datastreams["someData"].fubar_values.should == ['bar']
+    ds = @test_object.datastreams["someData"]
+    ds.fubar_values.should == []
+    ds.should_not be_nil
+    ds.fubar_values=['bar']
+    ds.fubar_values.should == ['bar']
     @test_object.save
 
     @test_object.pid.should_not be_nil
 
     x = *FooHistory.find(@test_object.pid)
-    x.datastreams["someData"].fubar_values.should == ['bar']
-    x.datastreams['someData'].dirty?.should == false
-    x.datastreams['someData'].fubar_values = ["meh"]
-    x.datastreams['someData'].fubar_values.should == ["meh"]
-    x.datastreams['someData'].dirty?.should == true
+    ds2 = x.datastreams["someData"]
+    ds2.fubar_values.should == ['bar']
+    ds2.fubar_values = ["meh"]
+    ds2.fubar_values.should == ["meh"]
     x.save
     x = *FooHistory.find(@test_object.pid)
     x.datastreams['someData'].fubar_values.should == ["meh"]

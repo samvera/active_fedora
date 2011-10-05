@@ -5,7 +5,6 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 describe ActiveFedora::Base do
   
   before(:each) do
-    Fedora::Repository.stubs(:instance).returns(stub_everything())
     @base = ActiveFedora::Base.new
     @base.stubs(:create_date).returns("2008-07-02T05:09:42.015Z")
     @base.stubs(:modified_date).returns("2008-09-29T21:21:52.892Z")
@@ -81,24 +80,18 @@ describe ActiveFedora::Base do
   
   describe ".add_file_datastream" do
     it "should create a new datastream with the file as its content" do
-      mock_file = mock("File")
-      mock_ds = mock("Datastream")
-      ActiveFedora::Datastream.expects(:new).with(:dsLabel => "", :controlGroup => 'M', :blob=>mock_file).returns(mock_ds)
+      mock_file = mock("File", :path=>'foo')
+      mock_ds = stub_everything("Datastream")
+      ActiveFedora::Datastream.expects(:new).with(@base.inner_object, 'DS1').returns(mock_ds)
       @base.expects(:add_datastream).with(mock_ds)
       @base.add_file_datastream(mock_file)
     end
-    it "should apply filename argument to the datastream label if it is provided" do
-      mock_file = mock("File")
-      mock_ds = mock("Datastream")
-      ActiveFedora::Datastream.expects(:new).with(:dsLabel => "My Label", :controlGroup => 'M', :blob=>mock_file).returns(mock_ds)
-      @base.expects(:add_datastream).with(mock_ds)
-      @base.add_file_datastream(mock_file, :label => "My Label")
-    end
-    it "should use :dsid if provided" do
-      mock_file = mock("File")
-      mock_ds = mock("Datastream")
-      mock_ds.expects(:dsid=).with("__DSID__")
-      ActiveFedora::Datastream.expects(:new).with(:dsLabel => "My Label", :controlGroup => 'M', :blob=>mock_file).returns(mock_ds)
+    it "should set  :dsid  and :label when supplied" do
+      mock_file = stub("File", :path=>'foo')
+      mock_ds = stub_everything("Datastream")
+      mock_ds.expects(:dsid=).with('__DSID__')
+      mock_ds.expects(:dsLabel=).with('My Label')
+      ActiveFedora::Datastream.expects(:new).with(@base.inner_object, 'DS1').returns(mock_ds)
       @base.expects(:add_datastream).with(mock_ds)
       @base.add_file_datastream(mock_file, :label => "My Label", :dsid => "__DSID__")
     end

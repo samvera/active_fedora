@@ -1,11 +1,6 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
 
-require 'active_fedora'
 require 'xmlsimple'
-#require 'mocha'
-
-#include ActiveFedora::SemanticNode
-#include Mocha::API
 
 @@last_pid = 0
 
@@ -36,6 +31,16 @@ describe ActiveFedora::SemanticNode do
       include ActiveFedora::SemanticNode
       
       attr_accessor :pid
+      def initialize (params={}) 
+        self.pid = params[:pid]
+      end
+    end
+  
+    class AudioRecord
+      attr_accessor :pid
+      def initialize (params={}) 
+        self.pid = params[:pid]
+      end
     end
     
     @node = SpecNode.new
@@ -268,18 +273,12 @@ describe ActiveFedora::SemanticNode do
     
     it "resulting finder should search against solr and use Model#load_instance to build an array of objects" do
       solr_result = (mock("solr result", :is_a? => true, :hits => @sample_solr_hits))
-      mock_repo = mock("repo")
-      mock_repo.expects(:find_model).with("_PID1_", "AudioRecord").returns("AR1")
-      mock_repo.expects(:find_model).with("_PID2_", "AudioRecord").returns("AR2")
-      mock_repo.expects(:find_model).with("_PID3_", "AudioRecord").returns("AR3")
       SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
       local_node = SpecNode.new()
       local_node.expects(:pid).returns("test:sample_pid")
       SpecNode.expects(:relationships_desc).returns({:inbound=>{"parts"=>{:predicate=>:is_part_of}}}).at_least_once()
       ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid", :rows=>25).returns(solr_result)
-      Fedora::Repository.expects(:instance).returns(mock_repo).times(3)
-      Kernel.expects(:const_get).with("AudioRecord").returns("AudioRecord").times(3)
-      local_node.parts.should == ["AR1", "AR2", "AR3"]
+      local_node.parts.map(&:pid).should == ["_PID1_", "_PID2_", "_PID3_"]
     end
     
     it "resulting finder should accept :solr as :response_format value and return the raw Solr Result" do
@@ -353,11 +352,7 @@ describe ActiveFedora::SemanticNode do
                        {"id"=> "my:_PID3_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]}])
 
         ActiveFedora::SolrService.instance.conn.expects(:query).with("id:my\\:_PID1_ OR id:my\\:_PID2_ OR id:my\\:_PID3_").returns(solr_result)
-        mock_repo.expects(:find_model).with("my:_PID1_", SpecNode).returns("AR1")
-        mock_repo.expects(:find_model).with("my:_PID2_", SpecNode).returns("AR2")
-        mock_repo.expects(:find_model).with("my:_PID3_", SpecNode).returns("AR3")
-        Fedora::Repository.expects(:instance).returns(mock_repo).times(3)
-        local_node.containers.should == ["AR1", "AR2", "AR3"]
+        local_node.containers.map(&:pid).should == ["my:_PID1_", "my:_PID2_", "my:_PID3_"]
       end
     
       it "should accept :solr as :response_format value and return the raw Solr Result" do

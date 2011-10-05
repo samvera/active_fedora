@@ -24,22 +24,6 @@ describe ActiveFedora::Base do
     @test_object.delete
   end
   
-  describe "deserialize" do
-    it "should return an object whose inner_object is not marked as new.  The datastreams should only be marked new if the model expects a datastream that doesn't exist yet in fedora" do
-      #mocko = mock("object")
-      #ActiveFedora::Base.expects(:new).returns(mocko)
-      @test_object.datastreams["sensitive_passages"].delete
-      doc = Nokogiri::XML::Document.parse(@test_object.inner_object.object_xml)
-      result = OralHistorySampleModel.deserialize(doc)
-      result.new_object?.should be_false
-      result.datastreams_in_memory.should have_key("dublin_core")
-      result.datastreams_in_memory.should have_key("properties")
-      result.datastreams_in_memory.each do |name,ds|
-        ds.new_object?.should be_false unless name == "sensitive_passages"
-      end
-      result.datastreams_in_memory["sensitive_passages"].new_object?.should be_true
-    end
-  end
   describe "load_instance" do
     it "should retain all datastream attributes pulled from fedora" do
       # raw_object = Fedora::Repository.instance.find_objects("pid=#{@test_object.pid}").first
@@ -48,10 +32,9 @@ describe ActiveFedora::Base do
       raw_datastreams = raw_object.datastreams
       loaded_datastreams = loaded.datastreams
       raw_datastreams.each_pair do |k,v|
-        v.attributes.each_pair do |attr_name, attr_value|
-          loaded_datastreams[k].attributes.should have_key(attr_name)
-          loaded_datastreams[k].attributes[attr_name].should == attr_value
-        end
+        v.dsid.should == loaded_datastreams[k].dsid
+        v.dsLabel.should == loaded_datastreams[k].dsLabel
+        v.mimeType.should == loaded_datastreams[k].mimeType
       end
     end
   end

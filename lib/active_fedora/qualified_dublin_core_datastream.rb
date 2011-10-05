@@ -15,36 +15,41 @@ module ActiveFedora
     
     #Constructor. this class will call self.field for each DCTERM. In short, all DCTERMS fields will already exist
     #when this method returns. Each term is marked as a multivalue string.
-    def initialize(attrs=nil)
-      super
+    def initialize(digital_object, dsid, exists_in_fedora=false )
+      super(digital_object, dsid)
       DCTERMS.each do |el|
         field el, :string, :multiple=>true
       end
+      ###TODO this is loading eagerly, but we could make it lazy
+      self.class.from_xml(exists_in_fedora ? content : nil, self)
       self
     end
     
-    def set_blob_for_save # :nodoc:
-      self.blob = self.to_dc_xml
-    end
-    
     # Populate a QualifiedDublinCoreDatastream object based on the "datastream" node from a FOXML file
+    # @param [String] node the xml from the content.  Assumes that the content of this datastream is that of an ActiveFedora QualifiedDublinCoreDatastream 
     # @param [ActiveFedora::Datastream] tmpl the Datastream object that you are building
-    # @param [Nokogiri::XML::Node] node the "foxml:datastream" node from a FOXML file.  Assumes that the content of this datastream is that of an ActiveFedora QualifiedDublinCoreDatastream 
-    def self.from_xml(tmpl, node) # :nodoc:
-     tmpl.fields.each do |z|
-       fname = z.first
-       fspec = z.last
-       node_name = "dcterms:#{fspec[:xml_node] ? fspec[:xml_node] : fname}"
-       attr_modifier= "[@xsi:type='#{fspec[:encoding]}']" if fspec[:encoding]
-       query = "./foxml:datastreamVersion[last()]/foxml:xmlContent/dc/#{node_name}#{attr_modifier}"
-       node.xpath(query, {"foxml"=>"info:fedora/fedora-system:def/foxml#", "dcterms"=>'http://purl.org/dc/terms/', "xsi"=>'http://www.w3.org/2001/XMLSchema-instance'}).each do |f|
-          tmpl.send("#{fname}_append", f.text)
+    def self.from_xml(xml, tmpl) # :nodoc:
+      return if xml.nil?
+      node = Nokogiri::XML::Document.parse(xml)
+      tmpl.fields.each do |z|
+        fname = z.first
+        fspec = z.last
+        node_name = "dcterms:#{fspec[:xml_node] ? fspec[:xml_node] : fname}"
+        attr_modifier= "[@xsi:type='#{fspec[:encoding]}']" if fspec[:encoding]
+        query = "/dc/#{node_name}#{attr_modifier}"
+
+        node.xpath(query).each do |f|
+           tmpl.send("#{fname}_append", f.text)
         end
 
-     end
-     tmpl.instance_variable_set(:@dirty, false)
-     tmpl
+      end
+      tmpl.instance_variable_set(:@dirty, false)
+      tmpl
     end
+
+  def to_xml() 
+    to_dc_xml() 
+  end
 
    #Render self as a Fedora DC xml document.
    def to_dc_xml

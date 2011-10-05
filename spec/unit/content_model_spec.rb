@@ -20,7 +20,7 @@ describe ActiveFedora::ContentModel do
   end
   
   before(:each) do
-    Fedora::Repository.instance.stubs(:nextid).returns("_nextid_")
+    ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns("_nextid_")
     @test_cmodel = ActiveFedora::ContentModel.new
   end
   

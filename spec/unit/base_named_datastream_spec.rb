@@ -12,9 +12,7 @@ describe ActiveFedora::Base do
   end
   
   before(:each) do
-    Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
     @test_object = ActiveFedora::Base.new
-    @test_object.new_object = true
   end
 
   after(:each) do
@@ -45,7 +43,6 @@ describe ActiveFedora::Base do
     end
     
     it 'should return an array of datastream names defined by has_datastream' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
       @test_object2 = MockDatastreamNames.new
       @test_object2.datastream_names.should == ["thumbnail","EAD"]
     end
@@ -64,7 +61,6 @@ describe ActiveFedora::Base do
     end
       
     it 'should add a named datastream to a fedora object' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
       @test_object2 = MockAddNamedDatastream.new
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
       f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
@@ -91,9 +87,9 @@ describe ActiveFedora::Base do
       @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:file=>f})
       #check dslabel set from either opt[label] or opt[blob].original_file_name
       @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2, :label=>"my_image"})
-      @test_object2.high.first.attributes[:dsLabel].should == "my_image"
+      @test_object2.high.first.dsLabel.should == "my_image"
       @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2})
-      @test_object2.high.first.attributes[:dsLabel].should == "dino.jpg"
+      @test_object2.high.first.dsLabel.should == "dino.jpg"
       #check opt[content_type] must be set or opt[blob] responds to content_type, already checking if content_type option set above
       f.expects(:content_type).returns("image/jpeg")
       @test_object2.add_named_datastream("thumbnail",{:file=>f})
@@ -128,16 +124,15 @@ describe ActiveFedora::Base do
       end
       raise "Did not raise exception with dsid that does not conform to prefix" unless had_exception
       #if prefix not set check uses name in CAPS and dsid uses prefix
-      @test_object2.high.first.attributes[:prefix].should == "HIGH"
+      #@test_object2.high.first.attributes[:prefix].should == "HIGH"
       @test_object2.high.first.dsid.match(/HIGH[0-9]/)
       #check datastreams added with other right properties
-      @test_object2.high.first.attributes[:controlGroup].should == "M"
-      @test_object2.high.first.attributes[:type].should == "ActiveFedora::Datastream"
+      @test_object2.high.first.controlGroup.should == "M"
       
       #check external datastream
       @test_object2.add_named_datastream("external",{:dsLocation=>"http://myreasource.com"})
       #check dslocation goes to dslabel
-      @test_object2.external.first.attributes[:dsLabel].should == "http://myreasource.com"
+      @test_object2.external.first.dsLabel.should == "http://myreasource.com"
       #check datastreams added to fedora (may want to stub this at first)
       
     end
@@ -155,16 +150,21 @@ describe ActiveFedora::Base do
     end
     
     it 'should add a datastream as controlGroup M with blob set to file' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
       @test_object2 = MockAddNamedFileDatastream.new
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
       #these normally supplied in multi-part post request
       f.stubs(:original_filename).returns("minivan.jpg")
       f.stubs(:content_type).returns("image/jpeg")
       @test_object2.add_named_file_datastream("thumbnail",f)
-      @test_object2.thumbnail.first.attributes.should == {:type=>"ActiveFedora::Datastream", 
-        :prefix=>"THUMB", :content_type=>"image/jpeg", :dsid=>"THUMB1", :dsID=>"THUMB1", 
-        :pid=>@test_object2.pid, :mimeType=>"image/jpeg", :controlGroup=>"M", :dsLabel=>"minivan.jpg", :name=>"thumbnail"}
+      thumb = @test_object2.thumbnail.first
+      thumb.class.should == ActiveFedora::Datastream
+      thumb.mimeType.should == "image/jpeg"
+      thumb.dsid.should == "THUMB1"
+      thumb.controlGroup.should == "M"
+      thumb.dsLabel.should == "minivan.jpg"
+      #thumb.name.should == "thumbnail"
+        # :prefix=>"THUMB", :content_type=>"image/jpeg", :dsid=>"THUMB1", :dsID=>"THUMB1", 
+        # :pid=>@test_object2.pid, :mimeType=>"image/jpeg", :controlGroup=>"M", :dsLabel=>"minivan.jpg", :name=>"thumbnail"}
       
     end
   end
@@ -179,7 +179,6 @@ describe ActiveFedora::Base do
     end
     
     it 'should update a datastream and not increment the dsid' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
       @test_object2 = MockUpdateNamedDatastream.new
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
       f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
@@ -207,28 +206,28 @@ describe ActiveFedora::Base do
       #check datastream is updated in place without new dsid  
       @test_object2.thumbnail.size.should == 1
       @test_object2.thumbnail_ids == ["THUMB1"]
-      @test_object2.thumbnail.first.attributes.should == {:type=>"ActiveFedora::Datastream",
-                                                          :content_type=>"image/jpeg", 
-                                                          :prefix=>"THUMB", :mimeType=>"image/jpeg", 
-                                                          :controlGroup=>"M", :dsid=>"THUMB1", 
-                                                          :pid=>@test_object2.pid, :dsID=>"THUMB1", 
-                                                          :name=>"thumbnail", :dsLabel=>"minivan.jpg"}
-      @test_object2.thumbnail.first.blob.should == f
+      thumb1 = @test_object2.thumbnail.first
+      thumb1.dsid.should == 'THUMB1'
+      thumb1.pid.should == @test_object2.pid
+      thumb1.dsLabel.should == 'minivan.jpg'
+      f.rewind
+      @test_object2.thumbnail.first.content.should == f.read
       @test_object2.update_named_datastream("thumbnail",{:file=>f2,:dsid=>"THUMB1"})
       @test_object2.thumbnail.size.should == 1
       @test_object2.thumbnail_ids == ["THUMB1"]
-      @test_object2.thumbnail.first.attributes.should == {:type=>"ActiveFedora::Datastream",
-                                                          :content_type=>"image/jpeg", 
-                                                          :prefix=>"THUMB", :mimeType=>"image/jpeg", 
-                                                          :controlGroup=>"M", :dsid=>"THUMB1", 
-                                                          :pid=>@test_object2.pid, :dsID=>"THUMB1", 
-                                                          :name=>"thumbnail", :dsLabel=>"dino.jpg"}
-      @test_object2.thumbnail.first.blob.should == f2
+      # @test_object2.thumbnail.first.attributes.should == {:type=>"ActiveFedora::Datastream",
+      #                                                     :content_type=>"image/jpeg", 
+      #                                                     :prefix=>"THUMB", :mimeType=>"image/jpeg", 
+      #                                                     :controlGroup=>"M", :dsid=>"THUMB1", 
+      #                                                     :pid=>@test_object2.pid, :dsID=>"THUMB1", 
+      #                                                     :name=>"thumbnail", :dsLabel=>"dino.jpg"}
+      thumb1 = @test_object2.thumbnail.first
+      thumb1.dsid.should == 'THUMB1'
+      thumb1.pid.should == @test_object2.pid
+      thumb1.dsLabel.should == 'dino.jpg'
+      f2.rewind
+      @test_object2.thumbnail.first.content.should == f2.read
     end
-  end
-  
-  it 'should provide #create_datastream' do
-    @test_object.should respond_to(:create_datastream)
   end
   
   describe '#create_datastream' do
@@ -236,9 +235,10 @@ describe ActiveFedora::Base do
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
       f.stubs(:content_type).returns("image/jpeg")
       f.stubs(:original_filename).returns("minivan.jpg")
-      ds = @test_object.create_datastream("ActiveFedora::Datastream",{:blob=>f})
+      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:blob=>f})
       ds.class.should == ActiveFedora::Datastream
-      ds.blob.should == f
+      ds.dsLabel.should == "minivan.jpg"
+      ds.mimeType.should == "image/jpeg"
     end
   end
   
@@ -252,7 +252,6 @@ describe ActiveFedora::Base do
     end
     
     it 'should return true if a named datastream exists in model' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
       @test_object2 = MockIsNamedDatastream.new
       @test_object2.is_named_datastream?("thumbnail").should == true
       @test_object2.is_named_datastream?("thumb").should == false
@@ -271,7 +270,6 @@ describe ActiveFedora::Base do
     end
     
     it 'should return a hash of datastream names to arrays of datastreams' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
       @test_object2 = MockNamedDatastreams.new
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg" ))
       f.stubs(:content_type).returns("image/jpeg")
@@ -288,102 +286,27 @@ describe ActiveFedora::Base do
       datastreams.keys.include?("high").should == true
       datastreams.keys.size.should == 3
       datastreams["thumbnail"].size.should == 1
-      datastreams["thumbnail"].first.class.should == ActiveFedora::Datastream
-      datastreams["thumbnail"].first.attributes.should == {:type=>"ActiveFedora::Datastream", 
-                                                           :content_type=>"image/jpeg", 
-                                                           :prefix=>"THUMB", 
-                                                           :mimeType=>"image/jpeg", 
-                                                           :controlGroup=>"M", 
-                                                           :dsid=>"THUMB1", 
-                                                           :pid=>@test_object2.pid, 
-                                                           :dsID=>"THUMB1", 
-                                                           :name=>"thumbnail", :dsLabel=>"minivan.jpg"}
-      datastreams["thumbnail"].first.blob.should == f
+      datastreams["thumbnail"].first.dsid.should == 'THUMB1'
+      datastreams["thumbnail"].first.dsLabel.should == 'minivan.jpg'
+      datastreams["thumbnail"].first.controlGroup.should == "M"
+      f.rewind
+      datastreams["thumbnail"].first.content.should == f.read
+
       datastreams["external"].size.should == 1
-      datastreams["external"].first.class.should == ActiveFedora::Datastream
-      datastreams["external"].first.attributes.should == {:type=>"ActiveFedora::Datastream", 
-                                                           :prefix=>"EXTERNAL", 
-                                                           :controlGroup=>"E", 
-                                                           :dsid=>"EXTERNAL1", 
-                                                           :pid=>@test_object2.pid, 
-                                                           :dsID=>"EXTERNAL1",
-                                                           :dsLocation=>"http://myresource.com",
-                                                           :name=>"external", :dsLabel=>"http://myresource.com"}
-      datastreams["external"].first.blob.should == nil
+      datastreams["external"].first.dsid.should == "EXTERNAL1"
+      datastreams["external"].first.dsLocation.should == "http://myresource.com"
+      datastreams["external"].first.controlGroup.should == "E"
+      datastreams["external"].first.content.should == "" 
+
       datastreams["high"].size.should == 1
-      datastreams["high"].first.class.should == ActiveFedora::Datastream
-      datastreams["high"].first.attributes.should == {:type=>"ActiveFedora::Datastream", 
-                                                           :content_type=>"image/jpeg", 
-                                                           :prefix=>"HIGH", 
-                                                           :mimeType=>"image/jpeg", 
-                                                           :controlGroup=>"M", 
-                                                           :dsid=>"HIGH1", 
-                                                           :pid=>@test_object2.pid, 
-                                                           :dsID=>"HIGH1", 
-                                                           :name=>"high", :dsLabel=>"dino.jpg"}
-      datastreams["high"].first.blob.should == f2
+      datastreams["high"].first.dsLabel.should == 'dino.jpg'
+      datastreams["high"].first.controlGroup.should == "M"
+      datastreams["high"].first.dsid.should == "HIGH1"
+      f2.rewind
+      datastreams["high"].first.content.should == f2.read
     end
   end
   
-  it 'should provide #named_datastreams_attributes' do
-    @test_object.should respond_to(:named_datastreams_attributes)
-  end
-  
-  describe '#named_datastreams_attributes' do
-    class MockNamedDatastreamsAttributes < ActiveFedora::Base
-      has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
-      has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
-      has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
-    end
-    
-    it 'should return a hash of datastream names to hash of dsid to attribute hashes' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
-      @test_object2 = MockNamedDatastreamsAttributes.new
-      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg" ))
-      f.stubs(:content_type).returns("image/jpeg")
-      f.stubs(:original_filename).returns("minivan.jpg")
-      f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
-      f2.stubs(:content_type).returns("image/jpeg")
-      f2.stubs(:original_filename).returns("dino.jpg")
-      @test_object2.thumbnail_file_append(f)
-      @test_object2.high_file_append(f2)
-      @test_object2.external_append({:dsLocation=>"http://myresource.com"})
-      datastreams_attr = @test_object2.named_datastreams_attributes
-      datastreams_attr.keys.include?("thumbnail").should == true
-      datastreams_attr.keys.include?("external").should == true
-      datastreams_attr.keys.include?("high").should == true
-      datastreams_attr.keys.size.should == 3
-      datastreams_attr["thumbnail"].size.should == 1
-      datastreams_attr["thumbnail"]["THUMB1"].should == {:type=>"ActiveFedora::Datastream", 
-                                                :content_type=>"image/jpeg", 
-                                                :prefix=>"THUMB", 
-                                                :mimeType=>"image/jpeg", 
-                                                :controlGroup=>"M", 
-                                                :dsid=>"THUMB1", 
-                                                :pid=>@test_object2.pid, 
-                                                :dsID=>"THUMB1", 
-                                                :name=>"thumbnail", :dsLabel=>"minivan.jpg"}
-      datastreams_attr["external"].size.should == 1
-      datastreams_attr["external"]["EXTERNAL1"].should == {:type=>"ActiveFedora::Datastream", 
-                                                    :prefix=>"EXTERNAL", 
-                                                    :controlGroup=>"E", 
-                                                    :dsid=>"EXTERNAL1", 
-                                                    :pid=>@test_object2.pid, 
-                                                    :dsID=>"EXTERNAL1",
-                                                    :dsLocation=>"http://myresource.com",
-                                                    :name=>"external", :dsLabel=>"http://myresource.com"}
-      datastreams_attr["high"].size.should == 1
-      datastreams_attr["high"]["HIGH1"].should == {:type=>"ActiveFedora::Datastream", 
-                                                :content_type=>"image/jpeg", 
-                                                :prefix=>"HIGH", 
-                                                :mimeType=>"image/jpeg", 
-                                                :controlGroup=>"M", 
-                                                :dsid=>"HIGH1", 
-                                                :pid=>@test_object2.pid, 
-                                                :dsID=>"HIGH1", 
-                                                :name=>"high", :dsLabel=>"dino.jpg"}
-    end
-  end
   
   it 'should provide #named_datastreams_ids' do
     @test_object.should respond_to(:named_datastreams_ids)
@@ -397,7 +320,6 @@ describe ActiveFedora::Base do
     end
     
     it 'should provide a hash of datastreams names to array of datastream ids' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
       @test_object2 = MockNamedDatastreamsIds.new
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg" ))
       f.stubs(:content_type).returns("image/jpeg")
@@ -412,59 +334,6 @@ describe ActiveFedora::Base do
     end
   end
   
-  it 'should provide #datastreams_attributes' do
-    @test_object.should respond_to(:datastreams_attributes)
-  end
-  
-  describe '#datastreams_attributes' do
-    class MockDatastreamsAttributes < ActiveFedora::Base
-      has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
-      has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
-      has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
-    end
-    
-    it 'should return a hash of datastream ids to an attribute hash' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
-      @test_object2 = MockDatastreamsAttributes.new
-      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg" ))
-      f.stubs(:content_type).returns("image/jpeg")
-      f.stubs(:original_filename).returns("minivan.jpg")
-      f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
-      f2.stubs(:content_type).returns("image/jpeg")
-      f2.stubs(:original_filename).returns("dino.jpg")
-      @test_object2.thumbnail_file_append(f)
-      @test_object2.high_file_append(f2)
-      @test_object2.external_append({:dsLocation=>"http://myresource.com"})
-      datastreams_attr = @test_object2.datastreams_attributes
-      datastreams_attr.should == {"THUMB1"=>{:type=>"ActiveFedora::Datastream", 
-                                                :content_type=>"image/jpeg", 
-                                                :prefix=>"THUMB", 
-                                                :mimeType=>"image/jpeg", 
-                                                :controlGroup=>"M", 
-                                                :dsid=>"THUMB1", 
-                                                :pid=>@test_object2.pid, 
-                                                :dsID=>"THUMB1", 
-                                                :name=>"thumbnail", :dsLabel=>"minivan.jpg"},
-                                   "EXTERNAL1"=>{:type=>"ActiveFedora::Datastream", 
-                                                    :prefix=>"EXTERNAL", 
-                                                    :controlGroup=>"E", 
-                                                    :dsid=>"EXTERNAL1", 
-                                                    :pid=>@test_object2.pid, 
-                                                    :dsID=>"EXTERNAL1",
-                                                    :dsLocation=>"http://myresource.com",
-                                                    :name=>"external", :dsLabel=>"http://myresource.com"},
-                                    "HIGH1"=>{:type=>"ActiveFedora::Datastream", 
-                                                :content_type=>"image/jpeg", 
-                                                :prefix=>"HIGH", 
-                                                :mimeType=>"image/jpeg", 
-                                                :controlGroup=>"M", 
-                                                :dsid=>"HIGH1", 
-                                                :pid=>@test_object2.pid, 
-                                                :dsID=>"HIGH1", 
-                                                :name=>"high", :dsLabel=>"dino.jpg"}}
-    end
-  end
-  
   #
   # Class level methods
   #
@@ -476,7 +345,6 @@ describe ActiveFedora::Base do
     
     it 'should intialize a value to an empty hash and then not modify afterward' do
       @test_object.named_datastreams_desc.should == {}
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
       @test_object2 = MockNamedDatastreamsDesc.new
       @test_object2.named_datastreams_desc.should == {"thumbnail"=>{:name=>"thumbnail",:prefix => "THUMB", 
                                                                     :type=>"ActiveFedora::Datastream", :mimeType=>"image/jpeg", 
@@ -491,7 +359,6 @@ describe ActiveFedora::Base do
     end
     
     it 'should create helper methods to get named datastreams or dsids' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
       @test_object2 = MockCreateNamedDatastreamFinder.new
       @test_object2.should respond_to(:thumbnail)
       @test_object2.should respond_to(:thumbnail_ids)  
@@ -504,9 +371,15 @@ describe ActiveFedora::Base do
       @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f, :label=>"testDS"})
       @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2})
       @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2})
-      @test_object2.thumbnail.first.attributes.should == {:type=>"ActiveFedora::Datastream", 
-      :prefix=>"THUMB", :content_type=>"image/jpeg", :dsid=>"THUMB1", :dsID=>"THUMB1", 
-      :pid=>@test_object2.pid, :mimeType=>"image/jpeg", :controlGroup=>"M", :dsLabel=>"testDS", :name=>"thumbnail", :label=>"testDS"}
+      t2_thumb1 = @test_object2.thumbnail.first
+      t2_thumb1.mimeType.should == "image/jpeg"
+      t2_thumb1.controlGroup.should == "M"
+      t2_thumb1.dsLabel.should == "testDS"
+      t2_thumb1.pid.should == @test_object2.pid 
+      t2_thumb1.dsid.should == "THUMB1"
+      # :type=>"ActiveFedora::Datastream", 
+      # :prefix=>"THUMB", :content_type=>"image/jpeg", :dsid=>"THUMB1", :dsID=>"THUMB1", 
+      # :pid=>@test_object2.pid, :mimeType=>"image/jpeg", :controlGroup=>"M", :dsLabel=>"testDS", :name=>"thumbnail", :label=>"testDS"}
       @test_object2.thumbnail_ids.should == ["THUMB1"]
       @test_object2.high_ids.include?("HIGH1") == true
       @test_object2.high_ids.include?("HIGH2") == true
@@ -524,9 +397,7 @@ describe ActiveFedora::Base do
     end
     
     it 'should create append method for each has_datastream entry' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
       @test_object2 = MockCreateNamedDatastreamUpdateMethods.new
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
       @test_object3 = MockCreateNamedDatastreamUpdateMethods.new
       @test_object2.should respond_to(:thumbnail_append)
       @test_object2.should respond_to(:ead_append)
@@ -534,17 +405,24 @@ describe ActiveFedora::Base do
       f.stubs(:content_type).returns("image/jpeg")
       f.stubs(:original_filename).returns("minivan.jpg")
       @test_object2.thumbnail_file_append(f)
-      @test_object2.thumbnail.first.attributes.should == {:type=>"ActiveFedora::Datastream", 
-      :prefix=>"THUMB", :content_type=>"image/jpeg", :dsid=>"THUMB1", :dsID=>"THUMB1", 
-      :pid=>@test_object2.pid, :mimeType=>"image/jpeg", :controlGroup=>"M", :dsLabel=>"minivan.jpg", :name=>"thumbnail"}
+      t2_thumb1 = @test_object2.thumbnail.first
+      t2_thumb1.mimeType.should == "image/jpeg"
+      t2_thumb1.dsLabel.should == "minivan.jpg"
+      t2_thumb1.pid.should == @test_object2.pid 
+      t2_thumb1.dsid.should == "THUMB1"
       @test_object3.thumbnail_append({:file=>f})
-      @test_object3.thumbnail.first.attributes.should == {:type=>"ActiveFedora::Datastream", 
-      :prefix=>"THUMB", :content_type=>"image/jpeg", :dsid=>"THUMB1", :dsID=>"THUMB1", 
-      :pid=>@test_object3.pid, :mimeType=>"image/jpeg", :controlGroup=>"M", :dsLabel=>"minivan.jpg", :name=>"thumbnail"}
+      t3_thumb1 = @test_object3.thumbnail.first
+      t3_thumb1.mimeType.should == "image/jpeg"
+      t3_thumb1.dsLabel.should == "minivan.jpg"
+      t3_thumb1.pid.should == @test_object3.pid 
+      t3_thumb1.dsid.should == "THUMB1"
       @test_object3.external_append({:dsLocation=>"http://myresource.com"})
-      @test_object3.external.first.attributes.should == {:type=>"ActiveFedora::Datastream", 
-      :prefix=>"EXTERNAL", :dsid=>"EXTERNAL1", :dsID=>"EXTERNAL1", 
-      :pid=>@test_object3.pid, :controlGroup=>"E", :dsLabel=>"http://myresource.com", :dsLocation=>"http://myresource.com", :name=>"external"}
+      t3_external1 = @test_object3.external.first
+      t3_external1.dsLabel.should == "http://myresource.com"
+      t3_external1.dsLocation.should == "http://myresource.com"
+      t3_external1.pid.should == @test_object3.pid 
+      t3_external1.dsid.should == "EXTERNAL1"
+      t3_external1.controlGroup == 'E'
     end
   end
     
@@ -556,7 +434,6 @@ describe ActiveFedora::Base do
     end
     
     it 'should cache a definition of named datastream and create helper methods to add/remove/access them' do
-      Fedora::Repository.instance.stubs(:nextid).returns(increment_pid)
       @test_object2 = MockHasDatastream.new
       #prefix should default to name in caps if not specified in has_datastream call
       @test_object2.named_datastreams_desc.should == {"thumbnail"=>{:name=>"thumbnail",:prefix => "THUMB", 
