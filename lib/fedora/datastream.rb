@@ -4,7 +4,7 @@ require 'fedora/repository'
 class Fedora::Datastream < Fedora::BaseObject
   
   
-  def initialize(attrs = {})
+  def initialize(digital_object, dsid)
     super
     if attrs
       if attrs[:mime_type]

@@ -16,11 +16,11 @@ module ActiveFedora
     def add_relationship(relationship)
       # Only accept ActiveFedora::Relationships as input arguments
       assert_kind_of 'relationship',  relationship, ActiveFedora::Relationship
-      self.relationships_are_dirty = true
       register_triple(relationship.subject, relationship.predicate, relationship.object)
     end
     
     def register_triple(subject, predicate, object)
+      self.relationships_are_dirty = true
       register_subject(subject)
       register_predicate(subject, predicate)
       relationships[subject][predicate] << object

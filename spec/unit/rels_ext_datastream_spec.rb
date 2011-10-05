@@ -18,39 +18,24 @@ describe ActiveFedora::RelsExtDatastream do
   end
   
   before(:each) do
-      @test_ds = ActiveFedora::RelsExtDatastream.new(:pid => @pid)
-  end
-  
-  it "should respond to #new" do  
-    ActiveFedora::RelsExtDatastream.should respond_to(:new)
-  end
-  
-  describe "#new" do
-    it "should create a datastream with DSID of RELS-EXT" do
-      test_datastream = ActiveFedora::RelsExtDatastream.new
-      test_datastream.dsid.should eql("RELS-EXT")  
-    end
+      mock_inner = mock('inner object')
+      @mock_repo = mock('repository')
+      @mock_repo.stubs(:datastream_dissemination=>'My Content')
+      mock_inner.stubs(:repository).returns(@mock_repo)
+      mock_inner.stubs(:pid).returns(@pid)
+      @test_ds = ActiveFedora::RelsExtDatastream.new(mock_inner, "RELS-EXT")
   end
   
   it 'should respond to #save' do
     @test_ds.should respond_to(:save)
   end
   
-  describe '#save' do
-    
-    it "should call super.save" do
-      # Funny jiggering to mock super when RelsExt datstream calls super.save
-      Fedora::Repository.instance.expects(:save).returns(mock("boo"))
-      @test_ds.save
-    end
+  describe '#serialize!' do
     
     it "should generate new rdf/xml as the datastream content if the object has been changed" do
-      @test_ds.dirty = true
-      @test_ds.expects(:to_rels_ext)
-      @test_ds.expects(:content=)
-      # Funny jiggering to mock super when RelsExt datstream calls super.save
-      Fedora::Repository.instance.expects(:save).returns(mock("boo"))
-      @test_ds.save
+      @test_ds.register_triple(:self, :is_member_of, "demo:10") 
+      @test_ds.serialize!
+      @test_ds.content.should == "      <rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>\n        <rdf:Description rdf:about='info:fedora/test:sample_pid'>\n        <isMemberOf rdf:resource='demo:10' xmlns='info:fedora/fedora-system:def/relations-external#'/></rdf:Description>\n      </rdf:RDF>\n"
     end
   
   end
@@ -68,11 +53,9 @@ describe ActiveFedora::RelsExtDatastream do
     end
     it "should load RELS-EXT relationships into relationships hash" do
       @test_obj.relationships.should == {:self=>{:is_member_of=>["info:fedora/demo:10"], :is_part_of=>["info:fedora/demo:11"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"], :conforms_to=>["AnInterface"]}}
-      doc = Nokogiri::XML::Document.parse(@test_obj.inner_object.object_xml)
-      el = doc.xpath("/foxml:digitalObject//foxml:datastream[@ID='RELS-EXT']").first
-      new_ds = ActiveFedora::RelsExtDatastream.new
+      new_ds = ActiveFedora::RelsExtDatastream.new(nil, nil)
       new_ds.relationships.should == {:self=>{}}
-      ActiveFedora::RelsExtDatastream.from_xml(new_ds,el)
+      ActiveFedora::RelsExtDatastream.from_xml(@test_obj.rels_ext.content,new_ds)
       new_ds.relationships.should == @test_obj.relationships
     end
     it "should handle un-mapped predicates gracefully" do

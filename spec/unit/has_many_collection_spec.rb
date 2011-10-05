@@ -21,6 +21,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
     @owner = stub(:new_record? => false)
     @assoc = ActiveFedora::Associations::HasManyAssociation.new(@owner, @reflection)
     @assoc.should respond_to :build
+    Object.send(:remove_const, :Foo)
       
   end
 

@@ -36,7 +36,7 @@ module ActiveFedora
         if opts[:load_from_solr]
           results << classname.load_instance_from_solr(hit[SOLR_DOCUMENT_ID])
         else
-          results << Fedora::Repository.instance.find_model(hit[SOLR_DOCUMENT_ID], classname)
+          results << ActiveFedora::RubydoraConnection.instance.find_model(hit[SOLR_DOCUMENT_ID], classname)
         end
       end
       return results

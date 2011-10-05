@@ -349,7 +349,7 @@ describe ActiveFedora do
     describe "outside of rails" do
       it "should load the default packaged config/fedora.yml file if no explicit config path is passed" do
         ActiveFedora.init()
-        ActiveFedora.fedora.fedora_url.to_s.should == "http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"
+        ActiveFedora.fedora.options[:url].to_s.should == "http://127.0.0.1:8983/fedora"
       end
       it "should load the passed config if explicit config passed in as a string" do
         ActiveFedora.init('./spec/fixtures/rails_root/config/fedora.yml')
@@ -384,7 +384,7 @@ describe ActiveFedora do
 
             ActiveFedora.init(:fedora_config_path=>fedora_config_path,:solr_config_path=>solr_config_path)
             ActiveFedora.solr.class.should == ActiveFedora::SolrService
-            ActiveFedora.fedora.class.should == Fedora::Repository
+            ActiveFedora.fedora.class.should == ActiveFedora::RubydoraConnection
           end
         end
 
@@ -415,7 +415,7 @@ describe ActiveFedora do
       ActiveFedora.expects(:fedora_config).at_least_once.returns({:url=>"http://megafedora:8983"})
       ActiveFedora.register_fedora_and_solr
       ActiveFedora.solr.conn.url.to_s.should eql("http://megasolr:8983")
-      ActiveFedora.fedora.fedora_url.to_s.should eql("http://megafedora:8983")
+      ActiveFedora.fedora.options[:url].to_s.should eql("http://megafedora:8983")
     end
   end
 end

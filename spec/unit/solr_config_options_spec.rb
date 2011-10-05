@@ -1,8 +1,7 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
 
-require 'active_fedora/solr_service'
 
-include ActiveFedora
+#include ActiveFedora
 
 describe ActiveFedora do
   
@@ -10,12 +9,13 @@ describe ActiveFedora do
     module SpecModel
       class Basic
         include ActiveFedora::Model
+        def initialize(opts)
+        end
       end
     end
   end
   
   before(:each) do
-    Fedora::Repository.instance.stubs(:nextid).returns("_nextid_")
     @test_object = ActiveFedora::Base.new
   end
   
@@ -53,7 +53,7 @@ describe ActiveFedora do
       mock_result = mock("MockResult")
       mock_result.expects(:hits).returns([{SOLR_DOCUMENT_ID => "changeme:30"}])
       mock_solr.expects(:query).with(SOLR_DOCUMENT_ID + ':changeme\:30').returns(mock_result)
-      Fedora::Repository.instance.expects(:find_model).with("changeme:30", SpecModel::Basic).returns("fake object")
+      #Fedora::Repository.instance.expects(:find_model).with("changeme:30", SpecModel::Basic).returns("fake object")
 
       ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
   
@@ -79,18 +79,17 @@ describe ActiveFedora do
     end
     
     it "should prevent Base.save from calling update_index if false" do
-      Fedora::Repository.instance.stubs(:save)
-      dirty_ds = ActiveFedora::MetadataDatastream.new
-      dirty_ds.expects(:dirty?).returns(true)
-      dirty_ds.expects(:save).returns(true)
-      @test_object.instance_variable_set(:@metadata_is_dirty, true)
-      @test_object.stubs(:datastreams_in_memory).returns({:ds1 => dirty_ds})
+      dirty_ds = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, 'ds1')
+      repo = @test_object.inner_object.repository
+      repo.expects(:add_datastream).twice
+      repo.expects(:ingest)
+      @test_object.stubs(:datastreams).returns({:ds1 => dirty_ds})
       @test_object.expects(:update_index).never
       @test_object.expects(:refresh)
       @test_object.save
     end
     it "should prevent Base.delete from deleting the corresponding Solr document if false" do
-      Fedora::Repository.instance.expects(:delete)
+      Rubydora::DigitalObject.any_instance.expects(:delete)
       ActiveFedora::SolrService.instance.conn.expects(:delete).with(@test_object.pid).never 
       @test_object.delete
     end

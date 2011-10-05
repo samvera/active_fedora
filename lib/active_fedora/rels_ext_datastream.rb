@@ -1,3 +1,4 @@
+require 'active_support/core_ext/class/inheritable_attributes'
 require 'solrizer/field_name_mapper'
 require 'uri'
 
@@ -8,50 +9,51 @@ module ActiveFedora
     include Solrizer::FieldNameMapper
     
     
-    def initialize(attrs=nil)
-      super
-      self.dsid = "RELS-EXT"
+    # def initialize(digital_object, dsid, exists_in_fedora=nil)
+    #   super(digital_object, 'RELS-EXT')
+    # end
+
+    def changed?
+      relationships_are_dirty || super
+    end
+
+    def serialize!
+      self.content = to_rels_ext(self.pid) if relationships_are_dirty
+      relationships_are_dirty = false
     end
     
-    def save
-      if @dirty == true
-        self.content = to_rels_ext(self.pid)
-      end
-      super
+
+    def to_xml(fields_xml) 
+      to_rels_ext(self.pid) 
     end
       
-    def pid=(pid)
-      super
-      self.blob = <<-EOL
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-        <rdf:Description rdf:about="info:fedora/#{pid}">
-        </rdf:Description>
-      </rdf:RDF>
-      EOL
-    end
-    
-    # Populate a RelsExtDatastream object based on the "datastream" node from a FOXML file
+    # Populate a RelsExtDatastream object based on the "datastream" content 
     # Assumes that the datastream contains RDF XML from a Fedora RELS-EXT datastream 
     # @param [ActiveFedora::MetadataDatastream] tmpl the Datastream object that you are populating
-    # @param [Nokogiri::XML::Node] node the "foxml:datastream" node from a FOXML file
-    def self.from_xml(tmpl, node) 
-      # node.xpath("./foxml:datastreamVersion[last()]/foxml:xmlContent/rdf:RDF/rdf:Description/*").each do |f|
-      node.xpath("./foxml:datastreamVersion[last()]/foxml:xmlContent/rdf:RDF/rdf:Description/*", {"rdf"=>"http://www.w3.org/1999/02/22-rdf-syntax-ns#", "foxml"=>"info:fedora/fedora-system:def/foxml#"}).each do |f|
-          if f.namespace
-            ns_mapping = self.predicate_mappings[f.namespace.href]
-            predicate = ns_mapping ?  ns_mapping.invert[f.name] : nil
-            predicate = "#{f.namespace.prefix}_#{f.name}" if predicate.nil?
-          else
-            logger.warn "You have a predicate without a namespace #{f.name}. Verify your rels-ext is correct."
-            predicate = "#{f.name}"
-          end
-          is_obj = f["resource"]
-          object = is_obj ? f["resource"] : f.inner_text
-          r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>object, :is_literal=>!is_obj)
-          tmpl.add_relationship(r)
+    # @param [String] the "rdf" node 
+    def self.from_xml(xml, tmpl) 
+      if (xml.nil?)
+        ### maybe put the template here?
+      else
+        node = Nokogiri::XML::Document.parse(xml)
+        node.xpath("rdf:RDF/rdf:Description/*", {"rdf"=>"http://www.w3.org/1999/02/22-rdf-syntax-ns#"}).each do |f|
+            if f.namespace
+              ns_mapping = self.predicate_mappings[f.namespace.href]
+              predicate = ns_mapping ?  ns_mapping.invert[f.name] : nil
+              predicate = "#{f.namespace.prefix}_#{f.name}" if predicate.nil?
+            else
+              logger.warn "You have a predicate without a namespace #{f.name}. Verify your rels-ext is correct."
+              predicate = "#{f.name}"
+            end
+            is_obj = f["resource"]
+            object = is_obj ? f["resource"] : f.inner_text
+            r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>object, :is_literal=>!is_obj)
+            tmpl.add_relationship(r)
+        end
+        tmpl.relationships_are_dirty = false
+        #tmpl.send(:dirty=, false)
+        tmpl
       end
-      tmpl.send(:dirty=, false)
-      tmpl
     end
     
     # Serialize the datastream's RDF relationships to solr

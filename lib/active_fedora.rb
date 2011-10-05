@@ -7,14 +7,10 @@ $: << 'lib'
 require 'active_support'
 require 'active_model'
 
-require 'active_fedora/solr_service.rb'
+require 'active_fedora/solr_service'
 require "solrizer"
 
 require 'ruby-fedora'
-# require 'active_fedora/fedora_object.rb'
-# require 'active_fedora/version.rb'
-# 
-# require 'active_fedora/railtie' if defined?(Rails) && Rails.version >= "3.0"
 
 SOLR_DOCUMENT_ID = ActiveFedora::SolrService.id_field unless defined?(SOLR_DOCUMENT_ID)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
@@ -29,6 +25,7 @@ module ActiveFedora #:nodoc:
     autoload :ContentModel
     autoload :Reflection
     autoload :Relationship
+    autoload :RelationshipsHelper
     autoload :Datastream
     autoload :Delegating
     autoload :Model
@@ -39,6 +36,7 @@ module ActiveFedora #:nodoc:
     autoload :QualifiedDublinCoreDatastream
     autoload :RelsExtDatastream
     autoload :RelationshipsHelper
+    autoload :RubydoraConnection
     autoload :SemanticNode
     autoload :NestedAttributes
 
@@ -167,8 +165,8 @@ module ActiveFedora #:nodoc:
     logger.info("FEDORA: initialized Solr with ActiveFedora.solr_config: #{ActiveFedora::SolrService.instance.inspect}")
         
     logger.info("FEDORA: initializing Fedora with fedora_config: #{ActiveFedora.fedora_config.inspect}")
-    Fedora::Repository.register(ActiveFedora.fedora_config[:url])
-    logger.info("FEDORA: initialized Fedora as: #{Fedora::Repository.instance.inspect}")    
+    ActiveFedora::RubydoraConnection.connect(ActiveFedora.fedora_config[:url])
+    logger.info("FEDORA: initialized Fedora as: #{ActiveFedora::RubydoraConnection.instance.inspect}")    
     
   end
 
@@ -251,7 +249,7 @@ module ActiveFedora #:nodoc:
   end
   
   def self.fedora
-    Fedora::Repository.instance
+    ActiveFedora::RubydoraConnection.instance
   end
 
   def self.predicate_config
@@ -287,7 +285,6 @@ module ActiveFedora #:nodoc:
 end
 
 module ActiveFedora
-  class ServerError < Fedora::ServerError; end # :nodoc:
   class ObjectNotFoundError < RuntimeError; end # :nodoc:
   class PredicateMappingsNotFoundError < RuntimeError; end # :nodoc:
   class UnknownAttributeError < NoMethodError; end; # :nodoc:

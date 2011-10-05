@@ -18,9 +18,8 @@ describe ActiveFedora::Datastream do
   it "should be able to access Datastreams using datastreams method" do    
     dc = @test_object.datastreams["DC"]
     dc.should be_an_instance_of(ActiveFedora::Datastream)
-    dc.attributes.should be_an_instance_of(Hash)
-    dc.attributes["dsid"].to_s.should eql("DC")
-    dc.attributes[:pid].should_not be_nil
+    dc.dsid.should eql("DC")
+    dc.pid.should_not be_nil
     # dc.control_group.should == "X"
   end
   
@@ -30,28 +29,29 @@ describe ActiveFedora::Datastream do
   end
   
   it "should be able to update XML Datastream content and save to Fedora" do    
-    xml_content =REXML::Document.new(@test_object.datastreams["DC"].content)
-    title = REXML::Element.new "dc:title"
-    title.text = "Test Title"
-    xml_content.root.elements << title
+    xml_content = Nokogiri::XML::Document.parse(@test_object.datastreams["DC"].content)
+    title = Nokogiri::XML::Element.new "title", xml_content
+    title.content = "Test Title"
+    title.namespace = xml_content.xpath('//oai_dc:dc/dc:identifier').first.namespace
+    xml_content.root.add_child title
     
+    @test_object.datastreams["DC"].stubs(:before_save)
     @test_object.datastreams["DC"].content = xml_content.to_s
     @test_object.datastreams["DC"].save
     
-    @test_object.datastreams["DC"].content.should eql(Fedora::Repository.instance.fetch_custom(@test_object.pid, "datastreams/DC/content"))
+    found = Nokogiri::XML::Document.parse(@test_object.class.find(@test_object.pid).datastreams['DC'].content)
+    found.xpath('*/dc:title/text()').first.inner_text.should == title.content
   end
   
   it "should be able to update Blob Datastream content and save to Fedora" do    
     dsid = "ds#{Time.now.to_i}"
-    ds = ActiveFedora::Datastream.new(:dsID => dsid, :dsLabel => 'hello', :altIDs => '3333', 
-      :controlGroup => 'M', :blob => fixture('dino.jpg').read)
-    ds.blob.should == fixture('dino.jpg').read
+    ds = ActiveFedora::Datastream.new(@test_object.inner_object, dsid)
+    ds.content = fixture('dino.jpg')
     @test_object.add_datastream(ds).should be_true
     @test_object.save
     to = ActiveFedora::Base.load_instance(@test_object.pid) 
     to.should_not be_nil 
     to.datastreams[dsid].should_not be_nil
-    # to.datastreams[dsid].control_group.should == "M"
     to.datastreams[dsid].content.should == fixture('dino.jpg').read
     
   end

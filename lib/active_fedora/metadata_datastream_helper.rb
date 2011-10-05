@@ -21,20 +21,8 @@ module ActiveFedora::MetadataDatastreamHelper
     klass.send(:include, Solrizer::FieldNameMapper)
   end
   
-  #constructor, calls up to ActiveFedora::Datastream's constructor
-  def initialize(attrs=nil)
-    super
-    @fields={}
-  end
-  
-  # sets the blob, which in this case is the xml version of self, then calls ActiveFedora::Datastream.save
-  def save
-    self.set_blob_for_save
-    super
-  end
-  
-  def set_blob_for_save # :nodoc:
-    self.blob = self.to_xml
+  def serialize! # :nodoc:
+    self.content = self.to_xml  ##TODO only do this when the xml will have changed to avoid a load of the datastream content. 
   end
 
   def to_solr(solr_doc = Hash.new) # :nodoc:

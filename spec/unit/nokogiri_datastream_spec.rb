@@ -15,7 +15,13 @@ describe ActiveFedora::NokogiriDatastream do
   end
   
   before(:each) do
-    @test_ds = ActiveFedora::NokogiriDatastream.new(:blob=>"<test_xml/>")
+    mock_inner = mock('inner object')
+    @mock_repo = mock('repository')
+    @mock_repo.stubs(:datastream_dissemination=>'My Content')
+    mock_inner.stubs(:repository).returns(@mock_repo)
+    mock_inner.stubs(:pid)
+    @test_ds = ActiveFedora::NokogiriDatastream.new(mock_inner, "descMetadata")
+    @test_ds.content="<test_xml/>"
   end
   
   after(:each) do
@@ -31,12 +37,13 @@ describe ActiveFedora::NokogiriDatastream do
       @test_ds.ng_xml.should be_instance_of(Nokogiri::XML::Document)
     end
     it 'should load xml from blob if provided' do
-      test_ds1 = ActiveFedora::NokogiriDatastream.new(:blob=>"<xml><foo/></xml>")
+      test_ds1 = ActiveFedora::NokogiriDatastream.new(nil, 'ds1')
+      test_ds1.content="<xml><foo/></xml>"
       test_ds1.ng_xml.to_xml.should == "<?xml version=\"1.0\"?>\n<xml>\n  <foo/>\n</xml>\n"
     end
     it "should initialize from #xml_template if no xml is provided" do
       ActiveFedora::NokogiriDatastream.expects(:xml_template).returns("<fake template/>")
-      ActiveFedora::NokogiriDatastream.new.ng_xml.should be_equivalent_to("<fake template/>")
+      ActiveFedora::NokogiriDatastream.new(nil, nil).ng_xml.should be_equivalent_to("<fake template/>")
     end
   end
   
@@ -49,7 +56,8 @@ describe ActiveFedora::NokogiriDatastream do
   describe ".update_indexed_attributes" do
     
     before(:each) do
-      @mods_ds = Hydra::ModsArticleDatastream.new(:blob=>fixture(File.join("mods_articles","hydrangea_article1.xml")))
+      @mods_ds = Hydra::ModsArticleDatastream.new(nil, 'descMetadata')
+      @mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
     end
     
     it "should apply submitted hash to corresponding datastream field values" do
@@ -170,7 +178,8 @@ describe ActiveFedora::NokogiriDatastream do
   describe ".get_values" do
     
     before(:each) do
-      @mods_ds = Hydra::ModsArticleDatastream.new(:blob=>fixture(File.join("mods_articles","hydrangea_article1.xml")))
+      @mods_ds = Hydra::ModsArticleDatastream.new(nil, 'modsDs')
+      @mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
     end
     
     it "should call lookup with field_name and return the text values from each resulting node" do
@@ -201,19 +210,15 @@ describe ActiveFedora::NokogiriDatastream do
   describe '#from_xml' do
     it "should work when a template datastream is passed in" do
       mods_xml = Nokogiri::XML::Document.parse( fixture(File.join("mods_articles", "hydrangea_article1.xml")) )
-      tmpl = Hydra::ModsArticleDatastream.new
+      tmpl = Hydra::ModsArticleDatastream.new(nil, nil)
       Hydra::ModsArticleDatastream.from_xml(mods_xml,tmpl).ng_xml.root.to_xml.should == mods_xml.root.to_xml
+      tmpl.dirty?.should be_false
     end
     it "should work when foxml datastream xml is passed in" do
       pending "at least for now, just updated Base.deserialize to feed in the xml content rather than the foxml datstream xml.  Possibly we can update MetadataDatstream to assume the same and leave it at that? -MZ 23-06-2010"
       hydrangea_article_foxml = Nokogiri::XML::Document.parse( fixture("hydrangea_fixture_mods_article1.foxml.xml") )
       ds_xml = hydrangea_article_foxml.at_xpath("//foxml:datastream[@ID='descMetadata']")
       Hydra::ModsArticleDatastream.from_xml(ds_xml).ng_xml.to_xml.should == hydrangea_article_foxml.at_xpath("//foxml:datastream[@ID='descMetadata']/foxml:datastreamVersion[last()]/foxml:xmlContent").first_element_child.to_xml
-    end
-    it "should set @dirty to false" do
-      hydrangea_article_foxml = Nokogiri::XML::Document.parse( fixture("hydrangea_fixture_mods_article1.foxml.xml") )
-      ds_xml = hydrangea_article_foxml.at_xpath("//foxml:datastream[@ID='descMetadata']")
-      Hydra::ModsArticleDatastream.from_xml(ds_xml).dirty?.should be_false
     end
   end
   
@@ -227,21 +232,22 @@ describe ActiveFedora::NokogiriDatastream do
       @test_ds.should respond_to(:save)
     end
     it "should persist the product of .to_xml in fedora" do
-      Fedora::Repository.instance.expects(:save)
+      @test_ds.expects(:new?).returns(true)
+      @mock_repo.expects(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :checksumType => 'DISABLED', :versionable => true, :content => 'fake xml', :controlGroup => 'M', :dsState => 'A')
       @test_ds.expects(:to_xml).returns("fake xml")
-      @test_ds.expects(:blob=).with("fake xml")
+      @test_ds.serialize!
       @test_ds.save
     end
   end
   
   describe '.content=' do
     it "should update the content and ng_xml, marking the datastream as dirty" do
-      @test_ds.should_not be_dirty
-      @test_ds.blob.should_not be_equivalent_to(@sample_raw_xml)
+      @test_ds.dirty = false  # pretend it isn't dirty to show that content= does it
+      @test_ds.content.should_not be_equivalent_to(@sample_raw_xml)
       @test_ds.ng_xml.to_xml.should_not be_equivalent_to(@sample_raw_xml)
       @test_ds.content = @sample_raw_xml
       @test_ds.should be_dirty
-      @test_ds.blob.should be_equivalent_to(@sample_raw_xml)
+      @test_ds.content.should be_equivalent_to(@sample_raw_xml)
       @test_ds.ng_xml.to_xml.should be_equivalent_to(@sample_raw_xml)
     end
   end
@@ -254,7 +260,7 @@ describe ActiveFedora::NokogiriDatastream do
       @test_ds.ng_xml.to_xml.should be_equivalent_to(@sample_raw_xml)
     end
     it "should mark the datastream as dirty" do
-      @test_ds.should_not be_dirty
+      @test_ds.dirty = false  # pretend it isn't dirty to show that content= does it
       @test_ds.ng_xml = @sample_raw_xml
       @test_ds.should be_dirty
     end
@@ -298,17 +304,6 @@ describe ActiveFedora::NokogiriDatastream do
     
   end
   
-  describe '.set_blob_for_save' do
-    it "should provide .set_blob_for_save" do
-      @test_ds.should respond_to(:set_blob_for_save)
-    end
-    
-    it "should set the blob to to_xml" do
-      @test_ds.expects(:blob=).with(@test_ds.to_xml)
-      @test_ds.set_blob_for_save
-    end
-  end
-
   describe '.from_solr' do
     it "should set the internal_solr_doc attribute to the solr document passed in" do 
       @test_ds.from_solr(@solr_doc)
@@ -318,7 +313,8 @@ describe ActiveFedora::NokogiriDatastream do
 
   describe '.get_values_from_solr' do
     before(:each) do
-      @mods_ds = ActiveFedora::NokogiriDatastream.new(:blob=>fixture(File.join("mods_articles","hydrangea_article1.xml")))
+      @mods_ds = ActiveFedora::NokogiriDatastream.new(nil, nil)
+      @mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
     end
 
     it "should return empty array if internal_solr_doc not set" do
@@ -373,7 +369,8 @@ describe ActiveFedora::NokogiriDatastream do
 
   describe '.update_values' do
     before(:each) do
-      @mods_ds = ActiveFedora::NokogiriDatastream.new(:blob=>fixture(File.join("mods_articles","hydrangea_article1.xml")))
+      @mods_ds = ActiveFedora::NokogiriDatastream.new(nil, nil)
+      @mods_ds.content= fixture(File.join("mods_articles","hydrangea_article1.xml")).read
     end
 
     it "should throw an exception if we have initialized the internal_solr_doc." do
@@ -394,8 +391,8 @@ describe ActiveFedora::NokogiriDatastream do
     end
 
     it "should set @dirty to true" do
-      mods_ds = Hydra::ModsArticleDatastream.new(:blob=>fixture(File.join("mods_articles","hydrangea_article1.xml")))
-      mods_ds.dirty?.should be_false
+      mods_ds = Hydra::ModsArticleDatastream.new(nil, nil)
+      mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
       mods_ds.update_values([{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"})
       mods_ds.dirty?.should be_true
     end
@@ -404,7 +401,8 @@ describe ActiveFedora::NokogiriDatastream do
   describe '.term_values' do
 
     before(:each) do
-      @mods_ds = ActiveFedora::NokogiriDatastream.new(:blob=>fixture(File.join("mods_articles","hydrangea_article1.xml")))
+      @mods_ds = ActiveFedora::NokogiriDatastream.new(nil, nil)
+      @mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
     end
 
     it "should call OM::XML::term_values if internal_solr_doc is not set and return values from xml" do

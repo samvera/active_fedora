@@ -18,7 +18,8 @@ describe ActiveFedora::MetadataDatastream do
   end
   
   before(:each) do
-    @test_ds = ActiveFedora::MetadataDatastream.new
+    @test_object = ActiveFedora::Base.new
+    @test_ds = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, 'mdDs')
   end
   
   after(:each) do
@@ -38,12 +39,6 @@ describe ActiveFedora::MetadataDatastream do
   describe '.save' do
     it "should provide .save" do
       @test_ds.should respond_to(:save)
-    end
-    it "should persist the product of .to_xml in fedora" do
-      Fedora::Repository.instance.expects(:save)
-      @test_ds.expects(:to_xml).returns("fake xml")
-      @test_ds.expects(:blob=).with("fake xml")
-      @test_ds.save
     end
   end
   
@@ -201,22 +196,11 @@ describe ActiveFedora::MetadataDatastream do
     
   end
   
-  describe '.set_blob_for_save' do
-    it "should provide .set_blob_for_save" do
-      @test_ds.should respond_to(:set_blob_for_save)
-    end
-    
-    it "should set the blob to to_xml" do
-      @test_ds.expects(:blob=).with(@test_ds.to_xml)
-      @test_ds.set_blob_for_save
-    end
-  end
-  
   describe '#field' do
     
     before(:each) do
       class SpecDatastream < ActiveFedora::MetadataDatastream
-        def initialize
+        def initialize(inner_object, dsid)
         super
         field :publisher, :string
         field :coverage, :text
@@ -232,7 +216,7 @@ describe ActiveFedora::MetadataDatastream do
     end
     
     it 'should add corresponding field to the @fields hash and set the field :type ' do
-      sds = SpecDatastream.new
+      sds = SpecDatastream.new(nil, nil)
       sds.fields.should_not have_key(:bio)
       sds.field :bio, :text
       sds.fields.should have_key(:bio)
@@ -242,7 +226,7 @@ describe ActiveFedora::MetadataDatastream do
     end
     
     it "should insert custom element attrs into the xml stream" do
-      sds = SpecDatastream.new
+      sds = SpecDatastream.new(nil, nil)
       sds.mycomplicated_field_values='foo'
       sds.fields[:mycomplicated_field][:element_attrs].should == {:foo=>:bar, :baz=>:bat}
       expected_xml = '<fields><mycomplicated_field baz=\'bat\' foo=\'bar\'>foo</mycomplicated_field></fields>'
@@ -250,7 +234,7 @@ describe ActiveFedora::MetadataDatastream do
     end
     
     it "should add getters and setters and appenders with field name" do
-      local_test_ds = SpecDatastream.new
+      local_test_ds = SpecDatastream.new(nil, nil)
       local_test_ds.should respond_to(:publisher_values)
       local_test_ds.should respond_to(:publisher_append)
       local_test_ds.should respond_to(:publisher_values=)
@@ -267,8 +251,8 @@ describe ActiveFedora::MetadataDatastream do
     end
     
     it "should track field values at instance level, not at class level" do
-      local_test_ds1 = SpecDatastream.new
-      local_test_ds2 = SpecDatastream.new
+      local_test_ds1 = SpecDatastream.new(nil, nil)
+      local_test_ds2 = SpecDatastream.new(nil, nil)
       local_test_ds1.publisher_values = ["publisher1", "publisher2"]
       local_test_ds2.publisher_values = ["publisherA", "publisherB"]
       
@@ -277,19 +261,19 @@ describe ActiveFedora::MetadataDatastream do
     end
     
     it "should allow you to add field values using <<" do
-      local_test_ds1 = SpecDatastream.new
+      local_test_ds1 = SpecDatastream.new(nil, nil)
       local_test_ds1.publisher_values << "publisher1"
       local_test_ds1.publisher_values.should == ["publisher1"] 
     end
     
     it "should create setter that always turns non-arrays into arrays" do
-      local_test_ds = SpecDatastream.new
+      local_test_ds = SpecDatastream.new(nil, nil)
       local_test_ds.publisher_values = "Foo"
       local_test_ds.publisher_values.should == ["Foo"]
     end
     
     it "should create setter that sets datastream.dirty? to true" do
-      local_test_ds = SpecDatastream.new
+      local_test_ds = SpecDatastream.new(nil, nil)
       local_test_ds.should_not be_dirty
       local_test_ds.publisher_values = "Foo"
       local_test_ds.should be_dirty
@@ -303,7 +287,7 @@ describe ActiveFedora::MetadataDatastream do
     end
     
     it "should add any extra opts to the field hash" do
-      local_test_ds = SpecDatastream.new
+      local_test_ds = SpecDatastream.new(nil, nil)
       local_test_ds.field "myfield", :string, :foo => "foo", :bar => "bar"      
       local_test_ds.fields[:myfield].should have_key(:foo)
       local_test_ds.fields[:myfield][:foo].should == "foo"

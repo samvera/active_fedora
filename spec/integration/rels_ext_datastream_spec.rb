@@ -28,8 +28,8 @@ describe ActiveFedora::RelsExtDatastream do
   end
   
   before(:each) do
-    @test_datastream = ActiveFedora::RelsExtDatastream.new
     @test_object = ActiveFedora::Base.new
+    @test_datastream = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
     @test_object.save
     @test_relationships = [ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "info:fedora/demo:5"), 
                               ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "info:fedora/demo:10")]
@@ -59,24 +59,17 @@ describe ActiveFedora::RelsExtDatastream do
   end
   
   
-  describe '#save' do
+  describe '#serialize!' do
     
-    it "should generate new rdf/xml as the datastream content if the object has been changed" do
+    it "should generate new rdf/xml as the datastream content" do
       @test_object.add_datastream(@test_datastream)
       @test_relationships.each do |rel|
         @test_datastream.add_relationship(rel)
       end
       rexml1 = REXML::Document.new(@test_datastream.to_rels_ext(@test_object.pid))
-      @test_datastream.dirty = true
-      @test_datastream.save
+      @test_datastream.serialize!
       rexml2 = REXML::Document.new(@test_object.datastreams["RELS-EXT"].content)
       rexml1.root.elements["rdf:Description"].inspect.should eql(rexml2.root.elements["rdf:Description"].inspect)
-      #rexml1.root.elements["rdf:Description"].to_s.should eql(rexml2.root.elements["rdf:Description"].to_s)
-      
-      #rexml1.root.elements["rdf:Description"].each_element do |el|
-      #  el.inspect.should eql(rexml2.root.elements["rdf:Description"][el.index_in_parent].inspect)
-      #end
-      
     end
   
   end
@@ -89,6 +82,7 @@ describe ActiveFedora::RelsExtDatastream do
     @test_object.save
     # make sure that _something_ was actually added to the object's relationships hash
     @test_object.relationships[:self].should have_key(:is_member_of)
+    o = ActiveFedora::Base.load_instance(@test_object.pid)
     ActiveFedora::Base.load_instance(@test_object.pid).relationships.should == @test_object.relationships
   end
 
@@ -100,16 +94,16 @@ describe ActiveFedora::RelsExtDatastream do
     
     it 'should populate the relationships hash based on data in solr only for any possible fedora predicates' do
       @test_object2 = MockAFRelsSolr.new
-      @test_object2.new_object = true
+      #@test_object2.new_object = true
       @test_object2.save
       @test_object3 = MockAFRelsSolr.new
-      @test_object3.new_object = true
+      #@test_object3.new_object = true
       @test_object3.save
       @test_object4 = MockAFRelsSolr.new
-      @test_object4.new_object = true
+      #@test_object4.new_object = true
       @test_object4.save
       @test_object5 = MockAFRelsSolr.new
-      @test_object5.new_object = true
+      #@test_object5.new_object = true
       @test_object5.save
       #append to named relationship 'testing'
       @test_object2.testing_append(@test_object3)

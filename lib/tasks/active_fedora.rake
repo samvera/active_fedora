@@ -19,17 +19,15 @@ namespace :af do
       puts "You must specify a valid pid.  Example: rake fedora:delete pid=demo:12"
     else
       pid = ENV["pid"]
-      puts "Deleting '#{pid}' from #{Fedora::Repository.instance.fedora_url}"
+      puts "Deleting '#{pid}' from #{ActiveFedora::RubydoraConnection.instance.options[:url]}"
       begin
         ActiveFedora::Base.load_instance(pid).delete
       rescue ActiveFedora::ObjectNotFoundError
         puts "The object #{pid} has already been deleted (or was never created)."
       rescue Errno::ECONNREFUSED => e
         puts "Can't connect to Fedora! Are you sure jetty is running?"
-      rescue Fedora::ServerError => e
-          logger.error("Received a Fedora error while deleting #{pid}")
       end
-      logger.info "Deleted '#{pid}' from #{Fedora::Repository.instance.fedora_url}"
+      logger.info "Deleted '#{pid}' from #{ActiveFedora::RubydoraConnection.instance.options[:url]}"
     end
   end
   
@@ -53,7 +51,7 @@ namespace :af do
       rescue ActiveFedora::ObjectNotFoundError
         # The object has already been deleted (or was never created).  Do nothing.
       end
-      puts "Deleted '#{pid}' from #{Fedora::Repository.instance.fedora_url}"
+      puts "Deleted '#{pid}' from #{ActiveFedora::RubydoraConnection.instance.options[:url]}"
       i += 1
     end
   end
@@ -63,14 +61,18 @@ namespace :af do
         
     # If a source url has been provided, attampt to export from the fedora repository there.
     if ENV["source"]
-      Fedora::Repository.register(ENV["source"])
+      #FIXME
+      raise "Not Implemented"
+      #Fedora::Repository.register(ENV["source"])
     end
     
     if ENV["pid"].nil? 
       puts "You must specify a valid pid.  Example: rake fedora:harvest_fixture pid=demo:12"
     else
       pid = ENV["pid"]
-      puts "Exporting '#{pid}' from #{Fedora::Repository.instance.fedora_url}"
+      puts "Exporting '#{pid}' from #{ActiveFedora::RubydoraConnection.instance.options[:url]}"
+      #FIXME
+      raise "Not Implemented"
       foxml = Fedora::Repository.instance.export(pid)
       filename = File.join("spec","fixtures","#{pid.gsub(":","_")}.foxml.xml")
       file = File.new(filename,"w")
@@ -84,6 +86,8 @@ namespace :af do
         
     # If a destination url has been provided, attampt to export from the fedora repository there.
     if ENV["destination"]
+      #FIXME
+      raise "Not Implemented"
       Fedora::Repository.register(ENV["destination"])
     end
         
@@ -97,7 +101,7 @@ namespace :af do
     end
     
     if !filename.nil?
-      puts "Importing '#{filename}' to #{Fedora::Repository.instance.fedora_url}"
+      puts "Importing '#{filename}' to #{ActiveFedora::RubydoraConnection.instance.options[:url]}"
       file = File.new(filename, "r")
       result = foxml = Fedora::Repository.instance.ingest(file.read)
       if result

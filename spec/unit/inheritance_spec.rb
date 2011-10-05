@@ -7,7 +7,7 @@ require 'active_fedora/qualified_dublin_core_datastream'
 
 describe ActiveFedora::Base do
   before(:each) do
-    Fedora::Repository.instance.stubs(:nextid).returns("_nextid_")
+    #Fedora::Repository.instance.stubs(:nextid).returns("_nextid_")
     class Foo < ActiveFedora::Base
       has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"foostream" do|m|
         m.field "foostream", :string
@@ -25,11 +25,11 @@ describe ActiveFedora::Base do
 
   it "doesn't overwrite stream specs" do
     f = Foo.new
-    f.datastreams.size.should == 2 #doesn't get dc until saved
-    streams = f.datastreams.values.map(&:class).sort
-#    streams.pop.name.should == "ActiveFedora::Datastream" #dc isn't here till saved
-    streams.pop.name.should == "ActiveFedora::MetadataDatastream"
-    streams.pop.name.should == "ActiveFedora::QualifiedDublinCoreDatastream"
+    f.datastreams.size.should == 3
+    streams = f.datastreams.values.map{|x| x.class.to_s}.sort
+    streams.pop.should == "ActiveFedora::RelsExtDatastream"
+    streams.pop.should == "ActiveFedora::QualifiedDublinCoreDatastream"
+    streams.pop.should == "ActiveFedora::MetadataDatastream"
   end
 
   it "should work for multiple types" do
