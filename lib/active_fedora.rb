@@ -11,10 +11,6 @@ require 'active_fedora/solr_service.rb'
 require "solrizer"
 
 require 'ruby-fedora'
-# require 'active_fedora/fedora_object.rb'
-# require 'active_fedora/version.rb'
-# 
-# require 'active_fedora/railtie' if defined?(Rails) && Rails.version >= "3.0"
 
 SOLR_DOCUMENT_ID = ActiveFedora::SolrService.id_field unless defined?(SOLR_DOCUMENT_ID)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
@@ -81,7 +77,6 @@ module ActiveFedora #:nodoc:
   # 2. If it does not find a solr.yml and the fedora.yml contains a solr url, it will raise an configuration error 
   # 3. If it does not find a solr.yml and the fedora.yml does not contain a solr url, it will look in: +Rails.root+/config, +current working directory+/config, then the solr.yml shipped with gem
   def self.init( options={} )
-    logger.level = Logger::ERROR if logger.respond_to? :level ###MediaShelf StubLogger doesn't have a level= method
     # Make config_options into a Hash if nil is passed in as the value
     options = {} if options.nil?
 
