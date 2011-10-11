@@ -161,7 +161,11 @@ module ActiveFedora
       end
       
       #Fedora::Repository.instance.delete(@inner_object)
-      @inner_object.delete
+      begin
+        @inner_object.delete
+      rescue RestClient::ResourceNotFound =>e
+        raise ObjectNotFoundError, "Unable to find #{pid} in the repository"
+      end
       if ENABLE_SOLR_UPDATES
         ActiveFedora::SolrService.instance.conn.delete(pid) 
         # if defined?( Solrizer::Solrizer ) 
@@ -182,6 +186,11 @@ module ActiveFedora
     # the copy in Fedora.
     def datastreams
       @datastreams ||= DatastreamHash.new(self)
+    end
+  
+    def datastreams_in_memory
+      ActiveSupport::Deprecation.warn("ActiveFedora::Base.datastreams_in_memory has been deprecated.  Use #datastreams instead")
+      datastreams
     end
 
     def load_datastreams_from_fedora

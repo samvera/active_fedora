@@ -14,18 +14,21 @@ EOS
   exit(0)
 end
 
+APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/../../")
+require 'jettywrapper'
+
 $: << 'lib'
-def jetty_params 
-  project_root = File.expand_path("#{File.dirname(__FILE__)}/../../")
-  {
-      :quiet => false,
-      :jetty_home => File.join(project_root,'jetty'),
-      :jetty_port => 8983,
-      :solr_home => File.expand_path(File.join(project_root,'jetty','solr')),
-      :fedora_home => File.expand_path(File.join(project_root,'jetty','fedora','default')),
-      :startup_wait=>30
-    }
-end
+# def jetty_params 
+#   project_root = File.expand_path("#{File.dirname(__FILE__)}/../../")
+#   {
+#       :quiet => false,
+#       :jetty_home => File.join(project_root,'jetty'),
+#       :jetty_port => 8983,
+#       :solr_home => File.expand_path(File.join(project_root,'jetty','solr')),
+#       :fedora_home => File.expand_path(File.join(project_root,'jetty','fedora','default')),
+#       :startup_wait=>30
+#     }
+# end
 
 desc "Run active-fedora rspec tests"
 task :spec do
@@ -34,21 +37,17 @@ end
 
 desc "Hudson build"
 task :hudson do
-  require 'jettywrapper'
   
-  if (ENV['environment'] == "test")
-    Rake::Task["active_fedora:doc"].invoke
-    Rake::Task["active_fedora:configure_jetty"].invoke
-    error = Jettywrapper.wrap(jetty_params) do
-      ENV["FEDORA_HOME"]=File.expand_path(File.join(File.dirname(__FILE__),'..','..','jetty','fedora','default'))
-      Rake::Task["active_fedora:load_fixtures"].invoke
-      Rake::Task["active_fedora:rspec"].invoke
-    end
-    raise "test failures: #{error}" if error
-  else
-    system("rake hudson environment=test")
-    fail unless $?.success?
+  ENV['environment'] = "test"
+  Rake::Task["active_fedora:doc"].invoke
+  Rake::Task["active_fedora:configure_jetty"].invoke
+  jetty_params = Jettywrapper.load_config
+  error = Jettywrapper.wrap(jetty_params) do
+    ENV["FEDORA_HOME"]=File.expand_path(File.join(File.dirname(__FILE__),'..','..','jetty','fedora','default'))
+    Rake::Task["active_fedora:load_fixtures"].invoke
+    Rake::Task["active_fedora:rspec"].invoke
   end
+  raise "test failures: #{error}" if error
 end
 
 namespace :active_fedora do
@@ -115,20 +114,6 @@ namespace :active_fedora do
       cp("#{f}", 'jetty/solr/test-core/conf/', :verbose => true)
     end
   end
-
-  namespace :jetty do
-    desc "start jetty" 
-    task :start do
-      require 'jettywrapper'
-      Jettywrapper.start(jetty_params)
-    end
-    desc "stop jetty" 
-    task :stop do
-      require 'jettywrapper'
-      Jettywrapper.stop(jetty_params)
-    end
-  end
-
 end
 
 # Provides an :environment task for use while working within a working copy of active-fedora
@@ -138,6 +123,4 @@ task :environment do
   puts "Initializing ActiveFedora Rake environment.  This should only be called when working within a workign copy of the active-fedora code."
   require 'spec/samples/models/hydrangea_article'
   require 'active_fedora/samples'
-  # $:.unshift(File.dirname(__FILE__) + '/../lib')
-  # Dir[File.join(File.dirname(__FILE__)+'/../lib/')+'**/*.rb'].each{|x| require x}
 end

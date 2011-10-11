@@ -32,8 +32,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency("RedCloth") # for RDoc formatting
   s.add_development_dependency("rake")
   s.add_development_dependency("rcov")
-  s.add_development_dependency("solrizer-fedora") # used by the fixtures rake tasks
-  s.add_development_dependency("jettywrapper")
+  s.add_development_dependency("solrizer-fedora", ">=1.1.2") # used by the fixtures rake tasks
+  s.add_development_dependency("jettywrapper", ">=1.0.0")
   s.add_development_dependency("rspec", "<2.0.0")
   s.add_development_dependency("mocha", ">= 0.9.8")
   s.add_development_dependency("ruby-debug")  

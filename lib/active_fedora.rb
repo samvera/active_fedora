@@ -8,6 +8,7 @@ require 'active_support'
 require 'active_model'
 
 require 'active_fedora/solr_service'
+require 'active_fedora/rubydora_connection'
 require "solrizer"
 
 require 'ruby-fedora'
@@ -36,7 +37,6 @@ module ActiveFedora #:nodoc:
     autoload :QualifiedDublinCoreDatastream
     autoload :RelsExtDatastream
     autoload :RelationshipsHelper
-    autoload :RubydoraConnection
     autoload :SemanticNode
     autoload :NestedAttributes
 
@@ -175,7 +175,7 @@ module ActiveFedora #:nodoc:
   # 2. Rails.env
   # 3. ENV['environment']
   # 4. ENV['RAILS_ENV']
-  # 5. raises an exception if none of these is set
+  # 5. development
   # @return [String]
   # @example 
   #  ActiveFedora.init(:environment=>"test")
@@ -192,7 +192,7 @@ module ActiveFedora #:nodoc:
       ENV['environment'] = ENV['RAILS_ENV']
       return ENV['environment']
     else
-      raise "Can't determine what environment to run in!"
+      ENV['environment'] = 'development' #raise "Can't determine what environment to run in!"
     end
   end
   

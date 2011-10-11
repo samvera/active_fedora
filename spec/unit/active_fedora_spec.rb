@@ -51,11 +51,11 @@ describe ActiveFedora do
         ENV['environment']='test'
       end
 
-      it "should raise an exception if none of the above are present" do
+      it "should be development if none of the above are present" do
         ENV['environment']=nil
         ENV['RAILS_ENV'] = nil
         ActiveFedora.expects(:config_options).at_least_once.returns({})
-        lambda { ActiveFedora.environment }.should raise_exception
+        ActiveFedora.environment.should == 'development'
         ENV['environment']="test"
       end
     end

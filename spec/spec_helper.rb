@@ -1,18 +1,6 @@
-require 'rubygems'
-gem 'mocha'
-require 'ruby-debug'
-require 'mocha'
-require 'active-fedora'
-require "equivalent-xml"
-begin
-  require 'spec'
-rescue LoadError
-  gem 'rspec'
-  require 'spec'
-end
-
 ENV["RAILS_ENV"] ||= 'test'
-RAILS_ENV = ENV["RAILS_ENV"]
+require 'active-fedora'
+require 'spec'
 
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 $VERBOSE=nil
@@ -25,19 +13,6 @@ Spec::Runner.configure do |config|
   config.mock_with :mocha
 end
 
-#TEST_FEDORA_URL = 'http://fedoraAdmin:fedoraAdmin@127.0.0.1:8080/fedora' 
-#TEST_SOLR_URL = 'http://127.0.0.1:8080/solr' 
-#Fedora::Repository.register(TEST_FEDORA_URL)
-#ActiveFedora::SolrService.register(TEST_SOLR_URL)
-
-
-
 def fixture(file)
   File.new(File.join(File.dirname(__FILE__), 'fixtures', file))
-end
-
-def validate_xml(xml, expected_root)
-  root = REXML::Document.new(xml).root
-  root.should_not be_nil
-  root.name.should == expected_root
 end

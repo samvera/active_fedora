@@ -6,7 +6,7 @@ require File.join( File.dirname(__FILE__), "../spec_helper" )
 describe ActiveFedora do
   
   before(:all) do
-    module SpecModel
+    module SolrSpecModel
       class Basic
         include ActiveFedora::Model
         def initialize(opts)
@@ -53,11 +53,11 @@ describe ActiveFedora do
       mock_result = mock("MockResult")
       mock_result.expects(:hits).returns([{SOLR_DOCUMENT_ID => "changeme:30"}])
       mock_solr.expects(:query).with(SOLR_DOCUMENT_ID + ':changeme\:30').returns(mock_result)
-      #Fedora::Repository.instance.expects(:find_model).with("changeme:30", SpecModel::Basic).returns("fake object")
+      #Fedora::Repository.instance.expects(:find_model).with("changeme:30", SolrSpecModel::Basic).returns("fake object")
 
       ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
   
-      res = SpecModel::Basic.find("changeme:30")
+      res = SolrSpecModel::Basic.find("changeme:30")
     end
     it "should be used by ActiveFedora::Base#find_by_solr" do
       mock_solr = mock("SolrConnection")
@@ -65,7 +65,7 @@ describe ActiveFedora do
       mock_solr.expects(:query).with(SOLR_DOCUMENT_ID + ':changeme\:30', {}).returns(mock_response)
       ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
   
-      SpecModel::Basic.find_by_solr("changeme:30").should equal(mock_response)
+      SolrSpecModel::Basic.find_by_solr("changeme:30").should equal(mock_response)
     end
   end
   

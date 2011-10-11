@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active-fedora (3.1.0)
+    active-fedora (3.1.0.pre1)
       activeresource (~> 3.0.0)
       activesupport (~> 3.0.0)
       equivalent-xml
@@ -31,18 +31,24 @@ GEM
     akami (1.0.0)
       gyoku (>= 0.4.0)
     builder (2.1.2)
+    childprocess (0.2.2)
+      ffi (~> 1.0.6)
     columnize (0.3.4)
     daemons (1.1.4)
-    equivalent-xml (0.2.7)
+    equivalent-xml (0.2.8)
       nokogiri (>= 1.4.3)
     facets (2.9.2)
     fastercsv (1.5.4)
+    ffi (1.0.9)
     gyoku (0.4.4)
       builder (>= 2.1.2)
     httpi (0.9.5)
       rack
     i18n (0.5.0)
-    jettywrapper (0.0.10)
+    jettywrapper (1.0.0)
+      activesupport (>= 3.0.0)
+      childprocess
+      i18n
       logger
       mediashelf-loggable
     linecache (0.46)
@@ -97,7 +103,7 @@ GEM
       om (>= 1.4.0)
       stomp
       xml-simple
-    solrizer-fedora (1.1.1)
+    solrizer-fedora (1.1.2)
       active-fedora (>= 2.3.0)
       fastercsv
       rsolr
@@ -115,11 +121,11 @@ PLATFORMS
 DEPENDENCIES
   RedCloth
   active-fedora!
-  jettywrapper
+  jettywrapper (>= 1.0.0)
   mocha (>= 0.9.8)
   rake
   rcov
   rspec (< 2.0.0)
   ruby-debug
-  solrizer-fedora
+  solrizer-fedora (>= 1.1.2)
   yard

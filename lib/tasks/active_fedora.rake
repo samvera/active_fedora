@@ -103,7 +103,8 @@ namespace :af do
     if !filename.nil?
       puts "Importing '#{filename}' to #{ActiveFedora::RubydoraConnection.instance.options[:url]}"
       file = File.new(filename, "r")
-      result = foxml = Fedora::Repository.instance.ingest(file.read)
+      result = foxml = ActiveFedora::RubydoraConnection.instance.connection.ingest(:file=>file.read)
+#      result = foxml = Fedora::Repository.instance.ingest(file.read)
       if result
         puts "The fixture has been ingested as #{result.body}"
         if !pid.nil?
