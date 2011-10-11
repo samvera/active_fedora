@@ -42,8 +42,9 @@ task :hudson do
   Rake::Task["active_fedora:doc"].invoke
   Rake::Task["active_fedora:configure_jetty"].invoke
   jetty_params = Jettywrapper.load_config
+  jetty_params[:startup_wait]= 20
   error = Jettywrapper.wrap(jetty_params) do
-    ENV["FEDORA_HOME"]=File.expand_path(File.join(File.dirname(__FILE__),'..','..','jetty','fedora','default'))
+    #ENV["FEDORA_HOME"]=File.expand_path(File.join(File.dirname(__FILE__),'..','..','jetty','fedora','default'))
     Rake::Task["active_fedora:load_fixtures"].invoke
     Rake::Task["active_fedora:rspec"].invoke
   end

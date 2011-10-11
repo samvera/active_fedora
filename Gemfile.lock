@@ -45,7 +45,7 @@ GEM
     httpi (0.9.5)
       rack
     i18n (0.5.0)
-    jettywrapper (1.0.0)
+    jettywrapper (1.0.1)
       activesupport (>= 3.0.0)
       childprocess
       i18n
@@ -121,7 +121,7 @@ PLATFORMS
 DEPENDENCIES
   RedCloth
   active-fedora!
-  jettywrapper (>= 1.0.0)
+  jettywrapper (>= 1.0.1)
   mocha (>= 0.9.8)
   rake
   rcov

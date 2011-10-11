@@ -11,6 +11,13 @@ describe ActiveFedora::Base do
             t.duck
           end
         end
+        t.africa do
+          t.savanah do
+            t.gnu
+            t.giraffe
+            t.lion
+          end
+        end
         t.donkey()
         t.cow()
       end
@@ -22,6 +29,13 @@ describe ActiveFedora::Base do
                   <duck/>
                 </ducks>
               </waterfowl>
+              <africa>
+                <savanah>
+                  <gnu/>
+                  <giraffe/>
+                  <lion/>
+                </savanah>
+              </africa>
               <donkey></donkey>
               <cow></cow>
             </animals>'
