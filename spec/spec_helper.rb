@@ -2,6 +2,8 @@ ENV["RAILS_ENV"] ||= 'test'
 require 'active-fedora'
 require 'spec'
 
+logger.level = Logger::WARN if logger.respond_to? :level ###MediaShelf StubLogger doesn't have a level= method
+
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 $VERBOSE=nil
 
