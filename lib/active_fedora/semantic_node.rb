@@ -116,61 +116,6 @@ module ActiveFedora
       return rels
     end
     
-    # Creates a RELS-EXT datastream for insertion into a Fedora Object
-    # @param [String] pid
-    # @param [Hash] relationships (optional) @default self.relationships
-    # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
-    def to_rels_ext(pid, relationships=self.relationships)
-      starter_xml = <<-EOL
-      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-        <rdf:Description rdf:about="info:fedora/#{pid}">
-        </rdf:Description>
-      </rdf:RDF>
-      EOL
-      xml = REXML::Document.new(starter_xml)
-    
-      # Iterate through the hash of predicates, adding an element to the RELS-EXT for each "object" in the predicate's corresponding array.
-      # puts ""
-      # puts "Iterating through a(n) #{self.class}"
-      # puts "=> whose relationships are #{self.relationships.inspect}"
-      # puts "=> and whose outbound relationships are #{self.outbound_relationships.inspect}"
-      self.outbound_relationships.each do |predicate, targets_array|
-        targets_array.each do |target|
-          xmlns=String.new
-          case predicate
-          when :has_model, "hasModel", :hasModel
-            xmlns="info:fedora/fedora-system:def/model#"
-            begin
-              rel_predicate = self.class.predicate_lookup(predicate,xmlns)
-            rescue UnregisteredPredicateError
-              xmlns = nil
-              rel_predicate = nil
-            end
-          else
-            xmlns="info:fedora/fedora-system:def/relations-external#"
-            begin
-              rel_predicate = self.class.predicate_lookup(predicate,xmlns)
-            rescue UnregisteredPredicateError
-              xmlns = nil
-              rel_predicate = nil
-            end
-          end
-          
-          unless xmlns && rel_predicate
-            rel_predicate, xmlns = self.class.find_predicate(predicate)
-          end
-          # puts ". #{predicate} #{target} #{xmlns}"
-          literal = URI.parse(target).scheme.nil?
-          if literal
-            xml.root.elements["rdf:Description"].add_element(rel_predicate, {"xmlns" => "#{xmlns}"}).add_text(target)
-          else
-            xml.root.elements["rdf:Description"].add_element(rel_predicate, {"xmlns" => "#{xmlns}", "rdf:resource"=>target})
-          end
-        end
-      end
-      xml.to_s
-    end
-
     def load_inbound_relationship(name, predicate, opts={})
       opts = {:rows=>25}.merge(opts)
       query = self.class.inbound_relationship_query(self.pid,"#{name}")
@@ -495,31 +440,6 @@ module ActiveFedora
         end
       end
 
-      #alias_method :register_target, :register_object
-    
-      # Creates a RELS-EXT datastream for insertion into a Fedora Object
-      # @param [String] pid of the object that the RELS-EXT datastream belongs to
-      # @param [Hash] relationships the relationships hash to transform into RELS-EXT RDF. @default the object's relationships hash
-      # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
-      def relationships_to_rels_ext(pid, relationships=self.relationships)
-        starter_xml = <<-EOL
-        <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-          <rdf:Description rdf:about="info:fedora/#{pid}">
-          </rdf:Description>
-        </rdf:RDF>
-        EOL
-        xml = REXML::Document.new(starter_xml)
-      
-        # Iterate through the hash of predicates, adding an element to the RELS-EXT for each "object" in the predicate's corresponding array.
-        self.outbound_relationships.each do |predicate, targets_array|
-          targets_array.each do |target|
-            #puts ". #{predicate} #{target}"
-            xml.root.elements["rdf:Description"].add_element(predicate_lookup(predicate), {"xmlns" => "info:fedora/fedora-system:def/relations-external#", "rdf:resource"=>target})
-          end
-        end
-        xml.to_s
-      end
-    
       # If predicate is a symbol, looks up the predicate in the predicate_mappings
       # If predicate is not a Symbol, returns the predicate untouched
       # @raise UnregisteredPredicateError if the predicate is a symbol but is not found in the predicate_mappings

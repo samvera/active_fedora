@@ -28,6 +28,8 @@ Gem::Specification.new do |s|
   s.add_dependency("equivalent-xml")
   s.add_dependency("facets")
   s.add_dependency("rubydora", '~>0.1.6')
+  s.add_dependency("rdf")
+  s.add_dependency("rdf-rdfxml")
   s.add_development_dependency("yard")
   s.add_development_dependency("RedCloth") # for RDoc formatting
   s.add_development_dependency("rake")

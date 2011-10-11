@@ -1,9 +1,6 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
 
-require 'active_fedora'
-require "rexml/document"
-require "nokogiri"
-require 'ftools'
+require 'equivalent-xml'
 
 describe ActiveFedora::RelsExtDatastream do
   
@@ -35,9 +32,44 @@ describe ActiveFedora::RelsExtDatastream do
     it "should generate new rdf/xml as the datastream content if the object has been changed" do
       @test_ds.register_triple(:self, :is_member_of, "demo:10") 
       @test_ds.serialize!
-      @test_ds.content.should == "      <rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>\n        <rdf:Description rdf:about='info:fedora/test:sample_pid'>\n        <isMemberOf rdf:resource='demo:10' xmlns='info:fedora/fedora-system:def/relations-external#'/></rdf:Description>\n      </rdf:RDF>\n"
+      EquivalentXml.equivalent?(@test_ds.content, "<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>\n        <rdf:Description rdf:about='info:fedora/test:sample_pid'>\n        <isMemberOf rdf:resource='demo:10' xmlns='info:fedora/fedora-system:def/relations-external#'/></rdf:Description>\n      </rdf:RDF>").should be_true
     end
   
+  end
+
+  describe '#to_rels_ext' do
+    
+    before(:all) do
+      @sample_rels_ext_xml = <<-EOS
+      <rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+        <rdf:Description rdf:about='info:fedora/test:sample_pid'>
+          <isMemberOf rdf:resource='info:fedora/demo:10' xmlns='info:fedora/fedora-system:def/relations-external#'/>
+          <isPartOf rdf:resource='info:fedora/demo:11' xmlns='info:fedora/fedora-system:def/relations-external#'/>
+          <hasPart rdf:resource='info:fedora/demo:12' xmlns='info:fedora/fedora-system:def/relations-external#'/>
+          <hasModel rdf:resource='info:fedora/afmodel:OtherModel' xmlns='info:fedora/fedora-system:def/model#'/>
+          <hasModel rdf:resource='info:fedora/afmodel:SampleModel' xmlns='info:fedora/fedora-system:def/model#'/>
+        </rdf:Description>
+      </rdf:RDF>
+      EOS
+      @pid = "test:sample_pid"
+      @uri = "info:fedora/#{@pid}"
+      @test_relationship1 = ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "demo:10")  
+      @test_relationship2 = ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_part_of, :object => "demo:11")  
+      @test_relationship3 = ActiveFedora::Relationship.new(:subject => @pid, :predicate => :has_part, :object => "demo:12")
+      @test_cmodel_relationship1 = ActiveFedora::Relationship.new(:subject => @pid, :predicate => :has_model, :object => "afmodel:SampleModel")
+      @test_cmodel_relationship2 = ActiveFedora::Relationship.new(:subject => @pid, :predicate => "hasModel", :object => "afmodel:OtherModel")
+    end
+    
+    it 'should serialize the relationships array to Fedora RELS-EXT rdf/xml' do
+      @test_ds.add_relationship(@test_relationship1)
+      @test_ds.add_relationship(@test_relationship2)
+      @test_ds.add_relationship(@test_relationship3)
+      @test_ds.add_relationship(@test_cmodel_relationship1)
+      @test_ds.add_relationship(@test_cmodel_relationship2)
+      @test_ds.internal_uri = @uri
+      EquivalentXml.equivalent?(@test_ds.to_rels_ext(@pid), @sample_rels_ext_xml).should be_true
+    end
+    
   end
   
   describe "#from_xml" do

@@ -97,7 +97,7 @@ describe ActiveFedora::Base do
       @test_object2.save
       rexml = REXML::Document.new(@test_object2.datastreams["RELS-EXT"].content)
       # Purpose: confirm that the isMemberOf entries exist and have real RDF in them
-      rexml.root.elements["rdf:Description/hasModel"].attributes["rdf:resource"].should == 'info:fedora/afmodel:ActiveFedora_Base'
+      rexml.root.elements["rdf:Description/ns0:hasModel"].attributes["rdf:resource"].should == 'info:fedora/afmodel:ActiveFedora_Base'
     end
     it "should merge attributes from fedora into attributes hash" do
       inner_object = @test_object2.inner_object
@@ -215,8 +215,9 @@ describe ActiveFedora::Base do
       @test_object.save
       rexml = REXML::Document.new(@test_object.datastreams["RELS-EXT"].content)
       # Purpose: confirm that the isMemberOf entries exist and have real RDF in them
-      rexml.root.elements["rdf:Description/isMemberOf[@rdf:resource='info:fedora/demo:5']"].attributes["xmlns"].should == 'info:fedora/fedora-system:def/relations-external#'
-      rexml.root.elements["rdf:Description/isMemberOf[@rdf:resource='info:fedora/demo:10']"].attributes["xmlns"].should == 'info:fedora/fedora-system:def/relations-external#'
+      rexml.root.attributes["xmlns:ns1"].should == 'info:fedora/fedora-system:def/relations-external#'
+      rexml.root.elements["rdf:Description/ns1:isMemberOf[@rdf:resource='info:fedora/demo:5']"].should_not be_nil
+      rexml.root.elements["rdf:Description/ns1:isMemberOf[@rdf:resource='info:fedora/demo:10']"].should_not be_nil
     end
   end
 

@@ -1,6 +1,8 @@
 require 'active_support/core_ext/class/inheritable_attributes'
 require 'solrizer/field_name_mapper'
 require 'uri'
+require 'rdf/rdfxml'
+require 'rdf'
 
 module ActiveFedora
   class RelsExtDatastream < Datastream
@@ -55,6 +57,128 @@ module ActiveFedora
         tmpl
       end
     end
+
+    # # Creates a RELS-EXT datastream for insertion into a Fedora Object
+    # # @param [String] pid
+    # # @param [Hash] relationships (optional) @default self.relationships
+    # # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
+    # def to_rels_ext(pid, relationships=self.relationships)
+    #   starter_xml = <<-EOL
+    #   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    #     <rdf:Description rdf:about="info:fedora/#{pid}">
+    #     </rdf:Description>
+    #   </rdf:RDF>
+    #   EOL
+    #   xml = REXML::Document.new(starter_xml)
+    # 
+    #   # Iterate through the hash of predicates, adding an element to the RELS-EXT for each "object" in the predicate's corresponding array.
+    #   # puts ""
+    #   # puts "Iterating through a(n) #{self.class}"
+    #   # puts "=> whose relationships are #{self.relationships.inspect}"
+    #   # puts "=> and whose outbound relationships are #{self.outbound_relationships.inspect}"
+    #   self.outbound_relationships.each do |predicate, targets_array|
+    #     targets_array.each do |target|
+    #       xmlns=String.new
+    #       case predicate
+    #       when :has_model, "hasModel", :hasModel
+    #         xmlns="info:fedora/fedora-system:def/model#"
+    #         begin
+    #           rel_predicate = self.class.predicate_lookup(predicate,xmlns)
+    #         rescue UnregisteredPredicateError
+    #           xmlns = nil
+    #           rel_predicate = nil
+    #         end
+    #       else
+    #         xmlns="info:fedora/fedora-system:def/relations-external#"
+    #         begin
+    #           rel_predicate = self.class.predicate_lookup(predicate,xmlns)
+    #         rescue UnregisteredPredicateError
+    #           xmlns = nil
+    #           rel_predicate = nil
+    #         end
+    #       end
+    #       
+    #       unless xmlns && rel_predicate
+    #         rel_predicate, xmlns = self.class.find_predicate(predicate)
+    #       end
+    #       # puts ". #{predicate} #{target} #{xmlns}"
+    #       literal = URI.parse(target).scheme.nil?
+    #       if literal
+    #         xml.root.elements["rdf:Description"].add_element(rel_predicate, {"xmlns" => "#{xmlns}"}).add_text(target)
+    #       else
+    #         xml.root.elements["rdf:Description"].add_element(rel_predicate, {"xmlns" => "#{xmlns}", "rdf:resource"=>target})
+    #       end
+    #     end
+    #   end
+    #   xml.to_s
+    # end
+
+
+    # Creates a RELS-EXT datastream for insertion into a Fedora Object
+    # @param [String] pid
+    # @param [Hash] relationships (optional) @default self.relationships
+    # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
+    def to_rels_ext(pid, relationships=self.relationships)
+      starter_xml = <<-EOL
+      <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        <rdf:Description rdf:about="info:fedora/#{pid}">
+        </rdf:Description>
+      </rdf:RDF>
+      EOL
+
+      vocabularies = {"info:fedora/fedora-system:def/relations-external#" =>  RDF::Vocabulary.new("info:fedora/fedora-system:def/relations-external#"),
+        "info:fedora/fedora-system:def/model#" =>  RDF::Vocabulary.new("info:fedora/fedora-system:def/model#")}
+                  
+      graph = RDF::Graph.new
+      subject =  RDF::URI.new("info:fedora/#{pid}")
+      # Iterate through the hash of predicates, adding an element to the RELS-EXT for each "object" in the predicate's corresponding array.
+      # puts ""
+      # puts "Iterating through a(n) #{self.class}"
+      # puts "=> whose relationships are #{self.relationships.inspect}"
+      # puts "=> and whose outbound relationships are #{self.outbound_relationships.inspect}"
+      self.outbound_relationships.each do |predicate, targets_array|
+        xmlns=String.new
+        case predicate
+        when :has_model, "hasModel", :hasModel
+          xmlns="info:fedora/fedora-system:def/model#"
+          begin
+            rel_predicate = self.class.predicate_lookup(predicate,xmlns)
+          rescue UnregisteredPredicateError
+            xmlns = nil
+            rel_predicate = nil
+          end
+        else
+          xmlns="info:fedora/fedora-system:def/relations-external#"
+          begin
+            rel_predicate = self.class.predicate_lookup(predicate,xmlns)
+          rescue UnregisteredPredicateError
+            xmlns = nil
+            rel_predicate = nil
+          end
+        end
+        
+        unless xmlns && rel_predicate
+          rel_predicate, xmlns = self.class.find_predicate(predicate)
+        end
+        graph_predicate = vocabularies[xmlns][rel_predicate] 
+        targets_array.each do |target|
+          literal = URI.parse(target).scheme.nil?
+          object = literal ? RDF::Literal.new(target) : RDF::URI.new(target)
+          stm = RDF::Statement.new(subject, graph_predicate, object)
+          graph.insert stm
+        end
+      end
+
+      xml = RDF::RDFXML::Writer.buffer do |writer|
+        graph.each_statement do |statement|
+          writer << statement
+        end
+      end
+
+      xml
+
+    end
+
     
     # Serialize the datastream's RDF relationships to solr
     # @param [Hash] solr_doc @deafult an empty Hash

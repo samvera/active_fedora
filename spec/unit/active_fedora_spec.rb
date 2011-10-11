@@ -1,5 +1,4 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
-require 'equivalent-xml'
 
 # For testing Module-level methods like ActiveFedora.init
 

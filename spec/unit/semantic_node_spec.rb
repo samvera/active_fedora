@@ -541,47 +541,6 @@ describe ActiveFedora::SemanticNode do
     lambda { SpecNode.predicate_lookup(:has_foo) }.should raise_error ActiveFedora::UnregisteredPredicateError
   end
   
-  it 'should provide #relationships_to_rels_ext' do
-    SpecNode.should respond_to(:relationships_to_rels_ext)
-    @node.should respond_to(:to_rels_ext)
-  end
-  
-  describe '#relationships_to_rels_ext' do
-    
-    before(:all) do
-      @sample_rels_ext_xml = <<-EOS
-      <rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
-        <rdf:Description rdf:about='info:fedora/test:sample_pid'>
-          <isMemberOf rdf:resource='info:fedora/demo:10' xmlns='info:fedora/fedora-system:def/relations-external#'/>
-          <isPartOf rdf:resource='info:fedora/demo:11' xmlns='info:fedora/fedora-system:def/relations-external#'/>
-          <hasPart rdf:resource='info:fedora/demo:12' xmlns='info:fedora/fedora-system:def/relations-external#'/>
-          <hasModel rdf:resource='info:fedora/afmodel:OtherModel' xmlns='info:fedora/fedora-system:def/model#'/>
-          <hasModel rdf:resource='info:fedora/afmodel:SampleModel' xmlns='info:fedora/fedora-system:def/model#'/>
-        </rdf:Description>
-      </rdf:RDF>
-      EOS
-    end
-    
-    it 'should serialize the relationships array to Fedora RELS-EXT rdf/xml' do
-      @node.add_relationship(@test_relationship1)
-      @node.add_relationship(@test_relationship2)
-      @node.add_relationship(@test_relationship3)
-      @node.add_relationship(@test_cmodel_relationship1)
-      @node.add_relationship(@test_cmodel_relationship2)
-      @node.internal_uri = @uri
-      # returned_xml = XmlSimple.xml_in(@node.to_rels_ext(@pid))
-      # returned_xml.should == XmlSimple.xml_in(@sample_rels_ext_xml)
-      EquivalentXml.equivalent?(@node.to_rels_ext(@pid), @sample_rels_ext_xml).should be_true
-    end
-    
-    it "should treat :self and self.pid as equivalent subjects"
-  end
-  
-  it 'should provide #relationships_to_rdf_xml' 
-
-  describe '#relationships_to_rdf_xml' do
-    it 'should serialize the relationships array to rdf/xml'
-  end
   
   it "should provide .outbound_relationships" do 
     @node.should respond_to(:outbound_relationships)
@@ -612,10 +571,6 @@ describe ActiveFedora::SemanticNode do
     end
   end
 
-  it 'should provide #remove_relationship' do
-    @test_object.should respond_to(:remove_relationship)
-  end
-
   describe '#remove_relationship' do
     it 'should remove a relationship from the relationships hash' do
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>"info:fedora/3"})
@@ -637,10 +592,6 @@ describe ActiveFedora::SemanticNode do
     end
   end
   
-  it 'should provide #relationship_exists?' do
-    @test_object.should respond_to(:relationship_exists?)
-  end
-  
   describe '#relationship_exists?' do
     it 'should return true if a relationship does exist' do
       @test_object3 = SpecNode2.new
@@ -650,10 +601,6 @@ describe ActiveFedora::SemanticNode do
       @test_object.add_relationship(r)
       @test_object.relationship_exists?(r.subject,r.predicate,r.object).should == true
     end
-  end
-
-  it 'should provide #assert_kind_of' do
-    @test_object.should respond_to(:assert_kind_of)
   end
 
   describe '#assert_kind_of' do
