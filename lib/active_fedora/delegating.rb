@@ -7,11 +7,14 @@ module ActiveFedora
       # as member of the base object. Pass the target datastream via the 
       # <tt>:to</tt> argument. If you want to return a unique result, (e.g. string 
       # instead of an array) set the <tt>:unique</tt> argument to true.
+      #
+      # The optional <tt>:at</tt> argument provides a terminology that the delegate will point to.
       #   
       #   class Foo < ActiveFedora::Base
       #     has_metadata :name => "descMetadata", :type => MyDatastream 
       #     
       #     delegate :field1, :to=>"descMetadata", :unique=>true
+      #     delegate :field2, :to=>"descMetadata", :at=>[:term1, :term2]
       #   end
       #
       #   foo = Foo.new
@@ -29,7 +32,8 @@ module ActiveFedora
             define_method field do
               ds = self.send(args[:to])
               val = if ds.kind_of? ActiveFedora::NokogiriDatastream 
-                ds.send(:term_values, field)
+                terminology = args[:at] || [field]
+                ds.send(:term_values, *terminology)
               else 
                 ds.send(:get_values, field)
               end 
@@ -42,7 +46,8 @@ module ActiveFedora
             define_method "#{field}=".to_sym do |v|
               ds = self.send(args[:to])
               if ds.kind_of? ActiveFedora::NokogiriDatastream 
-                ds.send(:update_indexed_attributes, {[field] => v})
+                terminology = args[:at] || [field]
+                ds.send(:update_indexed_attributes, {terminology => v})
               else 
                 ds.send(:set_value, field, v)
               end

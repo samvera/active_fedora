@@ -11,13 +11,6 @@ describe ActiveFedora::Base do
             t.duck
           end
         end
-        t.africa do
-          t.savanah do
-            t.gnu
-            t.giraffe
-            t.lion
-          end
-        end
         t.donkey()
         t.cow()
       end
@@ -29,13 +22,6 @@ describe ActiveFedora::Base do
                   <duck/>
                 </ducks>
               </waterfowl>
-              <africa>
-                <savanah>
-                  <gnu/>
-                  <giraffe/>
-                  <lion/>
-                </savanah>
-              </africa>
               <donkey></donkey>
               <cow></cow>
             </animals>'
@@ -79,7 +65,6 @@ describe ActiveFedora::Base do
     end
 
     it "should be able to delegate deeply into the terminology" do
-      pending
       @n.duck=["Quack", "Peep"]
       @n.duck.should == ["Quack", "Peep"]
     end
