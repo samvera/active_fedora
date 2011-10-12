@@ -87,7 +87,7 @@ module ActiveFedora
     # @return [Hash] Returns a hash of subject name (:self or :inbound) mapped to nested hashs of each relationship name mapped to an Array of objects linked via the relationship
     def relationships_by_name(outbound_only=true)
       #make sure to update if relationships have been updated
-      if @relationships_are_dirty == true
+      if @relationships_are_dirty
         @relationships_by_name = relationships_by_name_from_class()
         @relationships_are_dirty = false
       end

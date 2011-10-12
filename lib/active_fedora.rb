@@ -288,6 +288,7 @@ module ActiveFedora
   class UnknownAttributeError < NoMethodError; end; # :nodoc:
   class ActiveFedoraConfigurationException < Exception; end # :nodoc:
   class AssociationTypeMismatch < RuntimeError; end # :nodoc:
+  class UnregisteredPredicateError < RuntimeError; end
 
 end
 

@@ -6,10 +6,6 @@ describe ActiveFedora::RelsExtDatastream do
   
   before(:all) do
     @pid = "test:sample_pid"
-    @test_relationship1 = ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "demo:10")  
-    @test_relationship2 = ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_part_of, :object => "demo:11")  
-    @test_relationship3 = ActiveFedora::Relationship.new(:subject => @pid, :predicate => :has_part, :object => "demo:12")  
-    @test_relationship4 = ActiveFedora::Relationship.new(:subject => @pid, :predicate => :conforms_to, :object => "AnInterface", :is_literal=>true)  
   
     @sample_xml = Nokogiri::XML::Document.parse(@sample_xml_string)
   end
@@ -30,7 +26,8 @@ describe ActiveFedora::RelsExtDatastream do
   describe '#serialize!' do
     
     it "should generate new rdf/xml as the datastream content if the object has been changed" do
-      @test_ds.register_triple(:self, :is_member_of, "demo:10") 
+      @test_ds.expects(:model).returns(stub("model", :outbound_relationships=>{:is_member_of=>['demo:10']}, :relationships=>{:self=>{:is_member_of=>['demo:10']}},  :relationships_are_dirty =>true, :relationships_are_dirty= => true)).times(4)
+#register_triple(:self, :is_member_of, "demo:10") 
       @test_ds.serialize!
       EquivalentXml.equivalent?(@test_ds.content, "<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>\n        <rdf:Description rdf:about='info:fedora/test:sample_pid'>\n        <isMemberOf rdf:resource='demo:10' xmlns='info:fedora/fedora-system:def/relations-external#'/></rdf:Description>\n      </rdf:RDF>").should be_true
     end
@@ -52,21 +49,12 @@ describe ActiveFedora::RelsExtDatastream do
       </rdf:RDF>
       EOS
       @pid = "test:sample_pid"
-      @uri = "info:fedora/#{@pid}"
-      @test_relationship1 = ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "demo:10")  
-      @test_relationship2 = ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_part_of, :object => "demo:11")  
-      @test_relationship3 = ActiveFedora::Relationship.new(:subject => @pid, :predicate => :has_part, :object => "demo:12")
-      @test_cmodel_relationship1 = ActiveFedora::Relationship.new(:subject => @pid, :predicate => :has_model, :object => "afmodel:SampleModel")
-      @test_cmodel_relationship2 = ActiveFedora::Relationship.new(:subject => @pid, :predicate => "hasModel", :object => "afmodel:OtherModel")
     end
     
     it 'should serialize the relationships array to Fedora RELS-EXT rdf/xml' do
-      @test_ds.add_relationship(@test_relationship1)
-      @test_ds.add_relationship(@test_relationship2)
-      @test_ds.add_relationship(@test_relationship3)
-      @test_ds.add_relationship(@test_cmodel_relationship1)
-      @test_ds.add_relationship(@test_cmodel_relationship2)
-      @test_ds.internal_uri = @uri
+      @test_ds.expects(:model).returns(stub("model", :relationships=>{:self=>{:is_member_of=>['info:fedora/demo:10'], :is_part_of=>['info:fedora/demo:11'], :has_part=>['info:fedora/demo:12'], :has_model=>["info:fedora/afmodel:OtherModel", "info:fedora/afmodel:SampleModel"]}}, 
+                  :outbound_relationships=>{:is_member_of=>['info:fedora/demo:10'], :is_part_of=>['info:fedora/demo:11'], :has_part=>['info:fedora/demo:12'], :has_model=>["info:fedora/afmodel:OtherModel", "info:fedora/afmodel:SampleModel"]},
+                  :relationships_are_dirty= => true)).twice
       EquivalentXml.equivalent?(@test_ds.to_rels_ext(@pid), @sample_rels_ext_xml).should be_true
     end
     
@@ -75,26 +63,19 @@ describe ActiveFedora::RelsExtDatastream do
   describe "#from_xml" do
     before(:all) do
       @test_obj = ActiveFedora::Base.new
-      @test_obj.add_relationship(:is_member_of, "demo:10")
-      @test_obj.add_relationship(:is_part_of, "demo:11")
+      @test_obj.add_relationship(:is_member_of, "info:fedora/demo:10")
+      @test_obj.add_relationship(:is_part_of, "info:fedora/demo:11")
       @test_obj.add_relationship(:conforms_to, "AnInterface", true)
       @test_obj.save
     end
     after(:all) do
       @test_obj.delete
     end
-    it "should load RELS-EXT relationships into relationships hash" do
-      @test_obj.relationships.should == {:self=>{:is_member_of=>["info:fedora/demo:10"], :is_part_of=>["info:fedora/demo:11"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"], :conforms_to=>["AnInterface"]}}
-      new_ds = ActiveFedora::RelsExtDatastream.new(nil, nil)
-      new_ds.relationships.should == {:self=>{}}
-      ActiveFedora::RelsExtDatastream.from_xml(@test_obj.rels_ext.content,new_ds)
-      new_ds.relationships.should == @test_obj.relationships
-    end
     it "should handle un-mapped predicates gracefully" do
-      @test_obj.relationships.should == {:self=>{:is_member_of=>["info:fedora/demo:10"], :is_part_of=>["info:fedora/demo:11"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"], :conforms_to=>["AnInterface"]}}
+      @test_obj.relationships.should == {:self=>{:is_member_of=>["info:fedora/demo:10"], :is_part_of=>["info:fedora/demo:11"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"], :conforms_to=>["AnInterface"], :has_collection_member=>[], :has_part=>[]},:inbound=>{:is_part_of=>[]}}
       @test_obj.add_relationship("foo", "foo:bar")
       @test_obj.save
-      @test_obj.relationships.should == {:self=>{:is_part_of=>["info:fedora/demo:11"], "foo"=>["info:fedora/foo:bar"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"], :is_member_of=>["info:fedora/demo:10"], :conforms_to=>["AnInterface"]}}
+      @test_obj.relationships.should == {:self=>{:is_part_of=>["info:fedora/demo:11"], "foo"=>["foo:bar"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"], :is_member_of=>["info:fedora/demo:10"], :conforms_to=>["AnInterface"], :has_collection_member=>[], :has_part=>[]},:inbound=>{:is_part_of=>[]}}
     end
     it "should handle un-mapped literals" do
       pending
@@ -126,14 +107,12 @@ describe ActiveFedora::RelsExtDatastream do
     
     it "should provide .to_solr and return a SolrDocument" do
       @test_ds.should respond_to(:to_solr)
+      @test_ds.expects(:model).returns(stub("model", :relationships=>{:self=>{:is_member_of=>['demo:10']}}, :relationships_are_dirty= => true))
       @test_ds.to_solr.should be_kind_of(Hash)
     end
     
     it "should serialize the relationships into a Hash" do
-      @test_ds.add_relationship(@test_relationship1)
-      @test_ds.add_relationship(@test_relationship2)
-      @test_ds.add_relationship(@test_relationship3)
-      @test_ds.add_relationship(@test_relationship4)
+      @test_ds.expects(:model).returns(stub("model", :relationships=>{:self=>{:is_member_of=>['info:fedora/demo:10'], :is_part_of=>['info:fedora/demo:11'], :has_part=>['info:fedora/demo:12'], :conforms_to=>["AnInterface"]}}, :relationships_are_dirty= => true))
       solr_doc = @test_ds.to_solr
       solr_doc["is_member_of_s"].should == ["info:fedora/demo:10"]
       solr_doc["is_part_of_s"].should == ["info:fedora/demo:11"]

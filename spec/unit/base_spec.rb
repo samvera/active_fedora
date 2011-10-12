@@ -203,19 +203,16 @@ describe ActiveFedora::Base do
 
   describe '#add_relationship' do
     it 'should call #add_relationship on the rels_ext datastream' do
-      mock_relationship = mock("relationship")
-      mock_rels_ext = mock("rels-ext", :add_relationship)
+      mock_rels_ext = mock("rels-ext")#, :add_relationship)
       mock_rels_ext.expects(:dirty=).with(true)
       @test_object.expects(:relationship_exists?).returns(false).once()
-      @test_object.expects(:rels_ext).returns(mock_rels_ext).times(2) 
+      @test_object.expects(:rels_ext).returns(mock_rels_ext) 
       @test_object.add_relationship("predicate", "object")
     end
 
     it "should update the RELS-EXT datastream and set the datastream as dirty when relationships are added" do
       mock_ds = mock("Rels-Ext")
-      mock_ds.expects(:add_relationship).times(2)
       mock_ds.expects(:dirty=).with(true).times(2)
-      @test_object.expects(:relationship_exists?).returns(false).times(2)
       @test_object.datastreams["RELS-EXT"] = mock_ds
       test_relationships = [ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "info:fedora/demo:5"), 
         ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "info:fedora/demo:10")]
@@ -229,10 +226,10 @@ describe ActiveFedora::Base do
       @test_object3 = ActiveFedora::Base.new
       @test_object.add_relationship(:has_part,@test_object3)
       r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
-      @test_object.relationships.should == {:self=>{:has_part=>[r.object]}}
+      @test_object.relationships.should == {:inbound=>{:is_part_of=>[]}, :self=>{:has_part=>[r.object], :has_collection_member=>[], :is_part_of=>[]}}
       #try adding again and make sure not there twice
       @test_object.add_relationship(:has_part,@test_object3)
-      @test_object.relationships.should == {:self=>{:has_part=>[r.object]}}
+      @test_object.relationships.should == {:inbound=>{:is_part_of=>[]}, :self=>{:has_part=>[r.object], :has_collection_member=>[], :is_part_of=>[]}}
     end
 
     it 'should add literal relationships if requested' do
@@ -256,13 +253,13 @@ describe ActiveFedora::Base do
       r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
       r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
       #check both are there
-      @test_object.relationships.should == {:self=>{:has_part=>[r.object,r2.object]}}
+      @test_object.relationships.should == {:inbound=>{:is_part_of=>[]}, :self=>{:has_part=>[r.object,r2.object], :has_collection_member=>[], :is_part_of=>[]}}
       @test_object.remove_relationship(:has_part,@test_object3)
       #check only one item removed
-      @test_object.relationships.should == {:self=>{:has_part=>[r2.object]}}
+      @test_object.relationships.should == {:inbound=>{:is_part_of=>[]}, :self=>{:has_part=>[r2.object], :has_collection_member=>[], :is_part_of=>[]}}
       @test_object.remove_relationship(:has_part,@test_object4)
       #check last item removed and predicate removed since now emtpy
-      @test_object.relationships.should == {:self=>{}}
+      @test_object.relationships.should == {:inbound=>{:is_part_of=>[]}, :self=>{:has_collection_member=>[], :is_part_of=>[]}}
     end
   end
 
@@ -271,9 +268,8 @@ describe ActiveFedora::Base do
   end
 
   describe '#relationships' do
-    it 'should call #relationships on the rels_ext datastream and return that' do
-      @test_object.expects(:rels_ext).returns(mock("rels-ext", :relationships))
-      @test_object.relationships
+    it 'should return a hash' do
+      @test_object.relationships.should == {:inbound=>{:is_part_of=>[]}, :self=>{:has_collection_member=>[], :has_part=>[], :is_part_of=>[]}}
     end
   end
 
@@ -384,6 +380,7 @@ describe ActiveFedora::Base do
       dirty_ds = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, 'ds1')
       rels_ds = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
       rels_ds.expects(:new?).returns(false)
+      rels_ds.model = @test_object
       mock2 = mock("ds2")
       mock2.stubs(:changed? => false)
       mock2.expects(:serialize!)
@@ -405,6 +402,7 @@ describe ActiveFedora::Base do
       mock_rels_ext.stubs(:dsid=>"RELS-EXT", :relationships=>{}, :add_relationship=>nil, :dirty= => nil)
       mock_rels_ext.expects( :changed?).returns(false).at_least_once
       mock_rels_ext.expects(:serialize!)
+      mock_rels_ext.expects(:model=).with(@test_object)
       ActiveFedora::RelsExtDatastream.expects(:new).returns(mock_rels_ext)
       @test_object.stubs(:datastreams).returns({:ds1 => mock1, :ds2 => mock2})
       @test_object.expects(:update_index).never
@@ -415,16 +413,16 @@ describe ActiveFedora::Base do
        
       @test_object.save
     end
-    it "should update solr index if RELS-EXT datastream has changed" do
+    it "should update solr index if relationships have changed" do
       @mock_repo = mock('repository')
       @mock_repo.expects(:ingest).with(:pid => @test_object.pid)
       @test_object.inner_object.expects(:repository).returns(@mock_repo).at_least_once
       @test_object.inner_object.expects(:new?).returns(true).twice
 
       rels_ext = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
-      rels_ext.expects(:relationships_are_dirty).returns(true).at_least_once
+      rels_ext.model = @test_object
       rels_ext.expects(:new?).returns(true)
-      rels_ext.expects(:save).returns(true)
+       rels_ext.expects(:save).returns(true)
       rels_ext.expects(:serialize!)
       clean_ds = mock("ds2")
       clean_ds.stubs(:dirty? => false, :changed? => false, :new? => false)
@@ -702,10 +700,10 @@ describe ActiveFedora::Base do
       @test_object.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(ActiveFedora::Base))
       #should return expected named relationships
       @test_object2.relationships_by_name
-      @test_object2.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]},:inbound=>{"parts_inbound"=>[], "testing_inbound"=>[]}}
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:dummy,:object=>@test_object})
       @test_object2.add_relationship_by_name("testing",@test_object)
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r.object],"testing2"=>[],"part_of"=>[], "parts_outbound"=>[r.object], "collection_members"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r.object],"testing2"=>[],"part_of"=>[], "parts_outbound"=>[r.object], "collection_members"=>[]}, :inbound=>{"parts_inbound"=>[], "testing_inbound"=>[]}}
     end 
   end
 

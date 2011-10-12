@@ -24,7 +24,7 @@ module ActiveFedora
       else
         namespace = klass.pid_namespace
       end
-      return "#{namespace}:#{sanitized_class_name}#{pid_suffix}" 
+      return "info:fedora/#{namespace}:#{sanitized_class_name}#{pid_suffix}" 
     end
     
     def self.models_asserted_by(obj)

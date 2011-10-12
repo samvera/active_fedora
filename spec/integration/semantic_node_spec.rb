@@ -9,6 +9,11 @@ describe ActiveFedora::SemanticNode do
       include ActiveFedora::RelationshipsHelper
       include ActiveFedora::SemanticNode
       has_relationship "collection_members", :has_collection_member
+      attr_accessor :rels_ext
+      def initialize
+        self.rels_ext = ActiveFedora::RelsExtDatastream.new(nil, nil)
+        rels_ext.model = self
+      end
     end
     @node = SpecNode.new
     class SNSpecModel < ActiveFedora::Base
@@ -18,11 +23,11 @@ describe ActiveFedora::SemanticNode do
     end
     class SpecNodeSolrFilterQuery < ActiveFedora::Base
       has_relationship("parts", :is_part_of, :inbound => true)
-      has_relationship("special_parts", :is_part_of, :inbound => true, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+      has_relationship("special_parts", :is_part_of, :inbound => true, :solr_fq=>"has_model_s:info\\:fedora/afmodel\\:SpecialPart")
       has_relationship("containers", :is_member_of)
-      has_relationship("special_containers", :is_member_of, :solr_fq=>"has_model_s:info\\:fedora/SpecialContainer")
+      has_relationship("special_containers", :is_member_of, :solr_fq=>"has_model_s:info\\:fedora/afmodel\\:SpecialContainer")
       has_bidirectional_relationship("bi_containers", :is_member_of, :has_member)
-      has_bidirectional_relationship("bi_special_containers", :is_member_of, :has_member, :solr_fq=>"has_model_s:info\\:fedora/SpecialContainer")
+      has_bidirectional_relationship("bi_special_containers", :is_member_of, :has_member, :solr_fq=>"has_model_s:info\\:fedora/afmodel\\:SpecialContainer")
     end
 
     @test_object = SNSpecModel.new
@@ -53,16 +58,18 @@ describe ActiveFedora::SemanticNode do
     @container4.add_relationship(:has_member,@test_object)
     @container4.save
 
+    class SpecialContainer; end;
+    class SpecialPart; end;
     @special_container = ActiveFedora::Base.new()
-    @special_container.add_relationship(:has_model,"SpecialContainer")
+    @special_container.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(SpecialContainer))
     @special_container.save
 
     @special_container3 = ActiveFedora::Base.new()
-    @special_container3.add_relationship(:has_model,"SpecialContainer")
+    @special_container3.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(SpecialContainer))
     @special_container3.save
 
     @special_container4 = ActiveFedora::Base.new()
-    @special_container4.add_relationship(:has_model,"SpecialContainer")
+    @special_container4.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(SpecialContainer))
     @special_container4.save
 
     #even though adding container3 and 3 special containers, it should only include the special containers when returning via relationship name finder methods
@@ -75,8 +82,8 @@ describe ActiveFedora::SemanticNode do
     @test_object_query.save
 
     @special_container2 = ActiveFedora::Base.new()
-    @special_container2.add_relationship(:has_model,"SpecialContainer")
-    @special_container2.add_relationship(:has_member,@test_object_query.pid)
+    @special_container2.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(SpecialContainer))
+    @special_container2.add_relationship(:has_member, 'info:fedora/'+@test_object_query.pid)
     @special_container2.save
 
     @part3 = ActiveFedora::Base.new()
@@ -84,7 +91,7 @@ describe ActiveFedora::SemanticNode do
     @part3.save
 
     @special_part = ActiveFedora::Base.new()
-    @special_part.add_relationship(:has_model,"SpecialPart")
+    @special_part.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(SpecialPart))
     @special_part.add_relationship(:is_part_of, @test_object_query)
     @special_part.save
    
@@ -144,7 +151,8 @@ describe ActiveFedora::SemanticNode do
       spec_node = SpecNode.new
       spec_node.collection_members.should == []
       rel = ActiveFedora::Relationship.new(:subject => :self, :predicate => :has_collection_member, :object => @test_object.pid)  
-      spec_node.add_relationship(rel)
+      
+      spec_node.add_relationship(rel.predicate, rel.object)
       collection_members = spec_node.collection_members
       collection_members.length.should == 1
       collection_members.first.pid.should == @test_object.pid
@@ -255,13 +263,13 @@ describe ActiveFedora::SemanticNode do
     end
 
     it "should return a solr query for an inbound relationship" do
-      @test_object_query.special_parts_query.should == "#{@test_object_query.relationship_predicates[:inbound]['special_parts']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialPart"
+      @test_object_query.special_parts_query.should == "#{@test_object_query.relationship_predicates[:inbound]['special_parts']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/afmodel\\:SpecialPart"
     end
   end
 
   describe "inbound relationship query" do
     it "should return a properly formatted query for a relationship that has a solr filter query defined" do
-      SpecNodeSolrFilterQuery.inbound_relationship_query(@test_object_query.pid,"special_parts").should == "#{@test_object_query.relationship_predicates[:inbound]['special_parts']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialPart"
+      SpecNodeSolrFilterQuery.inbound_relationship_query(@test_object_query.pid,"special_parts").should == "#{@test_object_query.relationship_predicates[:inbound]['special_parts']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/afmodel\\:SpecialPart"
     end
 
     it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
@@ -274,7 +282,7 @@ describe ActiveFedora::SemanticNode do
       expected_string = ""
       @test_object_query.containers_ids.each_with_index do |id,index|
         expected_string << " OR " if index > 0
-        expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialContainer)"
+        expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/afmodel\\:SpecialContainer)"
       end
       SpecNodeSolrFilterQuery.outbound_relationship_query("special_containers",@test_object_query.containers_ids).should == expected_string
     end
@@ -294,10 +302,10 @@ describe ActiveFedora::SemanticNode do
       expected_string = ""
       @test_object_query.bi_containers_outbound_ids.each_with_index do |id,index|
         expected_string << " OR " if index > 0
-        expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialContainer)"
+        expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/afmodel\\:SpecialContainer)"
       end
       expected_string << " OR "
-      expected_string << "(#{@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialContainer)"
+      expected_string << "(#{@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/afmodel\\:SpecialContainer)"
       SpecNodeSolrFilterQuery.bidirectional_relationship_query(@test_object_query.pid,"bi_special_containers",@test_object_query.bi_containers_outbound_ids).should == expected_string
     end
 
@@ -371,7 +379,7 @@ describe ActiveFedora::SemanticNode do
       expected_string = ""
       @test_object_query.containers_ids.each_with_index do |id,index|
         expected_string << " OR " if index > 0
-        expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialContainer)"
+        expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/afmodel\\:SpecialContainer)"
       end
       @test_object_query.special_containers_query.should == expected_string
     end 
@@ -407,23 +415,19 @@ describe ActiveFedora::SemanticNode do
     end
 
     it "should return an array of all Base objects with relationship if not using solr_fq" do
-      ids = @test_object_query.bi_containers_ids
-      ids.size.should == 5
-      ids.include?(@container3.pid).should == true
-      ids.include?(@special_container.pid).should == true
-      ids.include?(@special_container2.pid).should == true
-      ids.include?(@special_container3.pid).should == true
-      ids.include?(@special_container4.pid).should == true
+      @test_object_query.bi_containers_ids.should include @container3.pid, @special_container.pid, @special_container2.pid, @special_container3.pid, @special_container4.pid
+
+      @test_object_query.bi_containers_ids.size.should == 5
     end
 
     it "should return a solr query for a bidirectional relationship" do
       expected_string = ""
       @test_object_query.bi_containers_outbound_ids.each_with_index do |id,index|
         expected_string << " OR " if index > 0
-        expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialContainer)"
+        expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/afmodel\\:SpecialContainer)"
       end
       expected_string << " OR "
-      expected_string << "(#{@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/SpecialContainer)"
+      expected_string << "(#{@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{@test_object_query.internal_uri.gsub(/(:)/, '\\:')} AND has_model_s:info\\:fedora/afmodel\\:SpecialContainer)"
       @test_object_query.bi_special_containers_query.should == expected_string
     end
   end
@@ -436,19 +440,24 @@ describe ActiveFedora::SemanticNode do
       has_relationship "testing", :has_part
       has_relationship "testing2", :has_member
       has_relationship "testing_inbound", :has_part, :inbound=>true
+      attr_accessor :rels_ext
+      def initialize
+        self.rels_ext = ActiveFedora::RelsExtDatastream.new(nil, nil)
+        rels_ext.model = self
+      end
     end
 
     it 'should automatically update the relationships_by_name if relationships has changed (no refresh of relationships_by_name hash unless relationships hash has changed' do
       @test_object2 = MockSemNamedRelationships.new
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockSemNamedRelationships)}) 
-      @test_object2.add_relationship(r)
+      @test_object2.add_relationship(r.predicate, r.object)
       #should return expected named relationships
       @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
       r3 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@test_object})
-      @test_object2.add_relationship(r3)
+      @test_object2.add_relationship(r3.predicate, r3.object)
       @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
       r4 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_member,:object=>"3"})
-      @test_object2.add_relationship(r4)
+      @test_object2.add_relationship(r4.predicate, r4.object)
       @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]},:inbound=>{"testing_inbound"=>[]}}
     end
   end

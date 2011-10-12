@@ -55,16 +55,16 @@ describe ActiveFedora::ContentModel do
   
   describe "#pid_from_ruby_class" do
     it "should construct pids" do
-     ActiveFedora::ContentModel.pid_from_ruby_class(@test_cmodel.class).should == "afmodel:ActiveFedora_ContentModel"
-     ActiveFedora::ContentModel.pid_from_ruby_class(@test_cmodel.class, :namespace => "foo", :pid_suffix => "BarBar").should == "foo:ActiveFedora_ContentModelBarBar"
+     ActiveFedora::ContentModel.pid_from_ruby_class(@test_cmodel.class).should == "info:fedora/afmodel:ActiveFedora_ContentModel"
+     ActiveFedora::ContentModel.pid_from_ruby_class(@test_cmodel.class, :namespace => "foo", :pid_suffix => "BarBar").should == "info:fedora/foo:ActiveFedora_ContentModelBarBar"
     end
     it "should construct pids with the namespace declared in the model" do
       ActiveFedora::ContentModel.stubs(:pid_namespace).returns("test-cModel")
-      ActiveFedora::ContentModel.pid_from_ruby_class(@test_cmodel.class).should == "test-cModel:ActiveFedora_ContentModel"
+      ActiveFedora::ContentModel.pid_from_ruby_class(@test_cmodel.class).should == "info:fedora/test-cModel:ActiveFedora_ContentModel"
     end
     it "should construct pids with the suffix declared in the model" do
       ActiveFedora::ContentModel.stubs(:pid_suffix).returns("-TEST-SUFFIX")
-      ActiveFedora::ContentModel.pid_from_ruby_class(@test_cmodel.class).should == 'afmodel:ActiveFedora_ContentModel-TEST-SUFFIX'
+      ActiveFedora::ContentModel.pid_from_ruby_class(@test_cmodel.class).should == 'info:fedora/afmodel:ActiveFedora_ContentModel-TEST-SUFFIX'
     end
   end
   

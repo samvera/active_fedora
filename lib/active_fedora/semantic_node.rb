@@ -13,12 +13,26 @@ module ActiveFedora
       raise "Assertion failure: #{n}: #{o} is not of type #{t}" unless o.kind_of?(t)
     end
     
-    def add_relationship(relationship)
-      # Only accept ActiveFedora::Relationships as input arguments
-      assert_kind_of 'relationship',  relationship, ActiveFedora::Relationship
-      register_triple(relationship.subject, relationship.predicate, relationship.object)
+    # def add_relationship(relationship)
+    #   # Only accept ActiveFedora::Relationships as input arguments
+    #   assert_kind_of 'relationship',  relationship, ActiveFedora::Relationship
+    #   register_triple(relationship.subject, relationship.predicate, relationship.object)
+    # end
+    # 
+
+    # Add a Rels-Ext relationship to the Object.
+    # @param predicate
+    # @param object Either a string URI or an object that is a kind of ActiveFedora::Base 
+    def add_relationship(predicate, obj, literal=false)
+      obj = obj.internal_uri if obj.respond_to? :internal_uri
+      unless relationship_exists?(:self, predicate, obj)
+        register_triple(:self, predicate, obj)
+        #need to call here to indicate update of named_relationships
+        @relationships_are_dirty = true
+        rels_ext.dirty = true
+      end
     end
-    
+
     def register_triple(subject, predicate, object)
       self.relationships_are_dirty = true
       register_subject(subject)
@@ -40,12 +54,28 @@ module ActiveFedora
     end
 
     # ** EXPERIMENTAL **
+    #
+    # Remove a Rels-Ext relationship from the Object.
+    # @param predicate
+    # @param object Either a string URI or an object that responds to .pid 
+    def remove_relationship(predicate, obj, literal=false)
+      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj, :is_literal=>literal)
+      if unregister_triple(r.subject, r.predicate, r.object)
+        #need to call here to indicate update of named_relationships
+        @relationships_are_dirty = true
+        rels_ext.dirty = true
+      else
+        false
+      end
+    end
+
+    # ** EXPERIMENTAL **
     # 
     # Remove the given ActiveFedora::Relationship from this object
-    def remove_relationship(relationship)
-      @relationships_are_dirty = true
-      unregister_triple(relationship.subject, relationship.predicate, relationship.object)
-    end
+    # def remove_relationship(relationship)
+    #   @relationships_are_dirty = true
+    #   unregister_triple(relationship.subject, relationship.predicate, relationship.object)
+    # end
 
     # ** EXPERIMENTAL **
     # 
@@ -63,9 +93,8 @@ module ActiveFedora
     # 
     # Returns true if a relationship exists for the given subject, predicate, and object triple
     def relationship_exists?(subject, predicate, object)
-      outbound_only = (subject != :inbound)
       #cache the call in case it is retrieving inbound as well, don't want to hit solr too many times
-      cached_relationships = relationships(outbound_only)
+      cached_relationships = relationships
       cached_relationships.has_key?(subject)&&cached_relationships[subject].has_key?(predicate)&&cached_relationships[subject][predicate].include?(object)
     end
 
@@ -93,16 +122,15 @@ module ActiveFedora
     
     def outbound_relationships()
       if !internal_uri.nil? && !relationships[internal_uri].nil?
+        ##TODO I don't think we ought to have this clause -Justin
         return relationships[:self].merge(relationships[internal_uri]) 
       else
         return relationships[:self]
       end
     end
     
-    # If outbound_only is false, inbound relationships will be included.
-    def relationships(outbound_only=true)
+    def relationships
       @relationships ||= relationships_from_class
-      outbound_only ? @relationships : @relationships.merge(:inbound=>inbound_relationships)
     end
     
     def relationships_from_class
@@ -479,6 +507,5 @@ module ActiveFedora
     end
   end
 
-  class UnregisteredPredicateError < RuntimeError; end
 
 end

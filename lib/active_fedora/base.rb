@@ -199,7 +199,8 @@ module ActiveFedora
         if (ds_spec)
           klass = ds_spec.first
           datastreams[dsid] = klass.new(inner_object, dsid, true)
-          #datastreams[dsid].dsLabel = ds_spec[1]   #this shouldn't cause it to be dirty
+          datastreams[dsid].model = self if klass == RelsExtDatastream
+
           if ds_spec.last.class == Proc
             ds_spec.last.call(datastreams[dsid])
           end
@@ -286,7 +287,9 @@ module ActiveFedora
     # Failing that, creates a new RelsExtDatastream and adds it to the object
     def rels_ext
       if !datastreams.has_key?("RELS-EXT") 
-        add_datastream(ActiveFedora::RelsExtDatastream.new(@inner_object,'RELS-EXT'))
+        ds = ActiveFedora::RelsExtDatastream.new(@inner_object,'RELS-EXT')
+        ds.model = self
+        add_datastream(ds)
       end
       return datastreams["RELS-EXT"]
     end
@@ -719,35 +722,11 @@ module ActiveFedora
     # Rely on rels_ext datastream to track relationships array
     # Overrides accessor for relationships array used by SemanticNode.
     # If outbound_only is false, inbound relationships will be included.
-    def relationships(outbound_only=true)
-      outbound_only ? rels_ext.relationships : rels_ext.relationships.merge(:inbound=>inbound_relationships)
-    end
+    # def relationships(outbound_only=true)
+    #   outbound_only ? rels_ext.relationships : rels_ext.relationships.merge(:inbound=>inbound_relationships)
+    # end
 
-    # Add a Rels-Ext relationship to the Object.
-    # @param predicate
-    # @param object Either a string URI or an object that responds to .pid 
-    def add_relationship(predicate, obj, literal=false)
-      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj, :is_literal=>literal)
-      unless relationship_exists?(r.subject, r.predicate, r.object)
-        rels_ext.add_relationship(r)
-        #need to call here to indicate update of named_relationships
-        @relationships_are_dirty = true
-        rels_ext.dirty = true
-      end
-    end
     
-    # ** EXPERIMENTAL **
-    #
-    # Remove a Rels-Ext relationship from the Object.
-    # @param predicate
-    # @param object Either a string URI or an object that responds to .pid 
-    def remove_relationship(predicate, obj, literal=false)
-      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj, :is_literal=>literal)
-      rels_ext.remove_relationship(r)
-      #need to call here to indicate update of named_relationships
-      @relationships_are_dirty = true
-      rels_ext.dirty = true
-    end
 
     def inner_object # :nodoc
       @inner_object
@@ -1007,6 +986,7 @@ module ActiveFedora
             #attributes = self.datastreams[name].attributes
           else
             ds = ar.first.new(inner_object, name)
+            ds.model = self if ar.first == RelsExtDatastream
             ds.dsLabel = ar[1]
             # If you called has_metadata with a block, pass the block into the Datastream class
             if ar.last.class == Proc
