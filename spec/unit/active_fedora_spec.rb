@@ -9,7 +9,7 @@ describe ActiveFedora do
     unstub_blacklight
     # Restore to default fedora configs
     fedora_config_path = File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml")
-    ActiveFedora.init(:environment=>"test", :fedora_config=>fedora_config_path)
+    ActiveFedora.init(:environment=>"test", :fedora_config_path=>fedora_config_path)
   end
   
   before(:each) do
@@ -236,13 +236,11 @@ describe ActiveFedora do
       ActiveFedora.fedora_config_path.should eql(expected_config+'/fedora.yml')
       ActiveFedora.solr_config_path.should eql(expected_config+'/solr.yml')
     end
-    it "overrides any other config file when a file is passed in explicitly" do
-      ActiveFedora.init("#{@fake_rails_root}/config/fake_fedora.yml")
-      ActiveFedora.fedora_config_path.should eql("#{@fake_rails_root}/config/fake_fedora.yml")
-#ActiveFedora.config_path.should eql("#{@fake_rails_root}/config/fake_fedora.yml")
+    it "raises an error if you pass in a string" do
+      lambda{ ActiveFedora.init("#{@fake_rails_root}/config/fake_fedora.yml") }.should raise_exception(ArgumentError)
     end
     it "raises an error if you pass in a non-existant config file" do
-      lambda{ ActiveFedora.init("really_fake_fedora.yml") }.should raise_exception(ActiveFedora::ActiveFedoraConfigurationException)
+      lambda{ ActiveFedora.init(:fedora_config_path=>"really_fake_fedora.yml") }.should raise_exception(ActiveFedora::ActiveFedoraConfigurationException)
     end
     
     describe "within Rails" do
@@ -309,7 +307,7 @@ describe ActiveFedora do
       mock_file = mock("fedora.yml")
       File.expects(:open).returns(mock_file)
       YAML.expects(:load).returns({"test"=>{"solr"=>{"url"=>"http://127.0.0.1:8983/solr/development"}, "fedora"=>{"url"=>"http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"}}})
-      ActiveFedora.init("/path/to/my/files/fedora.yml")
+      ActiveFedora.init(:fedora_config_path => "/path/to/my/files/fedora.yml")
       ActiveFedora.predicate_config.should == "/path/to/my/files/predicate_mappings.yml"
     end
   end
@@ -341,7 +339,7 @@ describe ActiveFedora do
     
     after(:all) do
       # Restore to default fedora configs
-      ActiveFedora.init(File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml"))
+      ActiveFedora.init(:fedora_config_path => File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml"))
 
     end
 
@@ -349,10 +347,6 @@ describe ActiveFedora do
       it "should load the default packaged config/fedora.yml file if no explicit config path is passed" do
         ActiveFedora.init()
         ActiveFedora.fedora.options[:url].to_s.should == "http://127.0.0.1:8983/fedora"
-      end
-      it "should load the passed config if explicit config passed in as a string" do
-        ActiveFedora.init('./spec/fixtures/rails_root/config/fedora.yml')
-        ActiveFedora.fedora_config[:url].should == "http://fedoraAdmin:fedoraAdmin@testhost.com:8983/fedora"
       end
       it "should load the passed config if explicit config passed in as a string" do
         ActiveFedora.init(:fedora_config_path=>'./spec/fixtures/rails_root/config/fedora.yml')

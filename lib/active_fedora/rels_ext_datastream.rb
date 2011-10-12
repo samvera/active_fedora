@@ -29,6 +29,35 @@ module ActiveFedora
       to_rels_ext(self.pid) 
     end
       
+    # # Populate a RelsExtDatastream object based on the "datastream" content 
+    # # Assumes that the datastream contains RDF XML from a Fedora RELS-EXT datastream 
+    # # @param [ActiveFedora::MetadataDatastream] tmpl the Datastream object that you are populating
+    # # @param [String] the "rdf" node 
+    # def self.from_xml(xml, tmpl) 
+    #   if (xml.nil?)
+    #     ### maybe put the template here?
+    #   else
+    #     node = Nokogiri::XML::Document.parse(xml)
+    #     node.xpath("rdf:RDF/rdf:Description/*", {"rdf"=>"http://www.w3.org/1999/02/22-rdf-syntax-ns#"}).each do |f|
+    #         if f.namespace
+    #           ns_mapping = self.predicate_mappings[f.namespace.href]
+    #           predicate = ns_mapping ?  ns_mapping.invert[f.name] : nil
+    #           predicate = "#{f.namespace.prefix}_#{f.name}" if predicate.nil?
+    #         else
+    #           logger.warn "You have a predicate without a namespace #{f.name}. Verify your rels-ext is correct."
+    #           predicate = "#{f.name}"
+    #         end
+    #         is_obj = f["resource"]
+    #         object = is_obj ? f["resource"] : f.inner_text
+    #         r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>object, :is_literal=>!is_obj)
+    #         tmpl.add_relationship(r)
+    #     end
+    #     tmpl.relationships_are_dirty = false
+    #     #tmpl.send(:dirty=, false)
+    #     tmpl
+    #   end
+    # end
+
     # Populate a RelsExtDatastream object based on the "datastream" content 
     # Assumes that the datastream contains RDF XML from a Fedora RELS-EXT datastream 
     # @param [ActiveFedora::MetadataDatastream] tmpl the Datastream object that you are populating
@@ -37,82 +66,18 @@ module ActiveFedora
       if (xml.nil?)
         ### maybe put the template here?
       else
-        node = Nokogiri::XML::Document.parse(xml)
-        node.xpath("rdf:RDF/rdf:Description/*", {"rdf"=>"http://www.w3.org/1999/02/22-rdf-syntax-ns#"}).each do |f|
-            if f.namespace
-              ns_mapping = self.predicate_mappings[f.namespace.href]
-              predicate = ns_mapping ?  ns_mapping.invert[f.name] : nil
-              predicate = "#{f.namespace.prefix}_#{f.name}" if predicate.nil?
-            else
-              logger.warn "You have a predicate without a namespace #{f.name}. Verify your rels-ext is correct."
-              predicate = "#{f.name}"
-            end
-            is_obj = f["resource"]
-            object = is_obj ? f["resource"] : f.inner_text
-            r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>object, :is_literal=>!is_obj)
+        RDF::RDFXML::Reader.new(xml) do |reader|
+          reader.each_statement do |statement|
+            literal = statement.object.kind_of?(RDF::Literal)
+            predicate = statement.predicate.to_str.gsub(/^[^#]+#/, '').underscore.to_sym
+            r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>literal ? statement.object.value : statement.object.to_str, :is_literal=>literal)
             tmpl.add_relationship(r)
+          end
         end
         tmpl.relationships_are_dirty = false
-        #tmpl.send(:dirty=, false)
         tmpl
       end
     end
-
-    # # Creates a RELS-EXT datastream for insertion into a Fedora Object
-    # # @param [String] pid
-    # # @param [Hash] relationships (optional) @default self.relationships
-    # # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
-    # def to_rels_ext(pid, relationships=self.relationships)
-    #   starter_xml = <<-EOL
-    #   <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-    #     <rdf:Description rdf:about="info:fedora/#{pid}">
-    #     </rdf:Description>
-    #   </rdf:RDF>
-    #   EOL
-    #   xml = REXML::Document.new(starter_xml)
-    # 
-    #   # Iterate through the hash of predicates, adding an element to the RELS-EXT for each "object" in the predicate's corresponding array.
-    #   # puts ""
-    #   # puts "Iterating through a(n) #{self.class}"
-    #   # puts "=> whose relationships are #{self.relationships.inspect}"
-    #   # puts "=> and whose outbound relationships are #{self.outbound_relationships.inspect}"
-    #   self.outbound_relationships.each do |predicate, targets_array|
-    #     targets_array.each do |target|
-    #       xmlns=String.new
-    #       case predicate
-    #       when :has_model, "hasModel", :hasModel
-    #         xmlns="info:fedora/fedora-system:def/model#"
-    #         begin
-    #           rel_predicate = self.class.predicate_lookup(predicate,xmlns)
-    #         rescue UnregisteredPredicateError
-    #           xmlns = nil
-    #           rel_predicate = nil
-    #         end
-    #       else
-    #         xmlns="info:fedora/fedora-system:def/relations-external#"
-    #         begin
-    #           rel_predicate = self.class.predicate_lookup(predicate,xmlns)
-    #         rescue UnregisteredPredicateError
-    #           xmlns = nil
-    #           rel_predicate = nil
-    #         end
-    #       end
-    #       
-    #       unless xmlns && rel_predicate
-    #         rel_predicate, xmlns = self.class.find_predicate(predicate)
-    #       end
-    #       # puts ". #{predicate} #{target} #{xmlns}"
-    #       literal = URI.parse(target).scheme.nil?
-    #       if literal
-    #         xml.root.elements["rdf:Description"].add_element(rel_predicate, {"xmlns" => "#{xmlns}"}).add_text(target)
-    #       else
-    #         xml.root.elements["rdf:Description"].add_element(rel_predicate, {"xmlns" => "#{xmlns}", "rdf:resource"=>target})
-    #       end
-    #     end
-    #   end
-    #   xml.to_s
-    # end
-
 
     # Creates a RELS-EXT datastream for insertion into a Fedora Object
     # @param [String] pid

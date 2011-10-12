@@ -85,8 +85,7 @@ module ActiveFedora #:nodoc:
     # For backwards compatibility, handle cases where config_path (a String) is passed in as the argument rather than a config_options hash
     # In all other cases, set config_path to config_options[:config_path], which is ok if it's nil
     if options.is_a? String
-      logger.warn "DEPRECATION WARNING: Calling ActiveFedora.init with a path as an argument is deprecated.  Use ActiveFedora.init(:fedora_config_path=>#{options})"
-      @config_options = {:fedora_config_path=>options}
+      raise ArgumentError, "Calling ActiveFedora.init with a path as an argument has been removed.  Use ActiveFedora.init(:fedora_config_path=>#{options})"
     else
       @config_options = options
     end
