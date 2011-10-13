@@ -226,15 +226,15 @@ describe ActiveFedora::Base do
       @test_object3 = ActiveFedora::Base.new
       @test_object.add_relationship(:has_part,@test_object3)
       r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
-      @test_object.relationships.should == {:self=>{:has_part=>[r.object]}}
+      @test_object.ids_for_outbound(:has_part).should == [@test_object3.pid]
       #try adding again and make sure not there twice
       @test_object.add_relationship(:has_part,@test_object3)
-      @test_object.relationships.should == {:self=>{:has_part=>[r.object]}}
+      @test_object.ids_for_outbound(:has_part).should == [@test_object3.pid]
     end
 
     it 'should add literal relationships if requested' do
       @test_object.add_relationship(:conforms_to,"AnInterface",true)
-      @test_object.relationships[:self][:conforms_to].should == ["AnInterface"]
+      @test_object.ids_for_outbound(:conforms_to).should == ["AnInterface"]
     end
   end
   
@@ -250,16 +250,14 @@ describe ActiveFedora::Base do
       @test_object4 = ActiveFedora::Base.new
       @test_object.add_relationship(:has_part,@test_object3)
       @test_object.add_relationship(:has_part,@test_object4)
-      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
-      r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
       #check both are there
-      @test_object.relationships.should == {:self=>{:has_part=>[r.object,r2.object]}}
+      @test_object.ids_for_outbound(:has_part).should == [@test_object3.pid,@test_object4.pid]
       @test_object.remove_relationship(:has_part,@test_object3)
       #check only one item removed
-      @test_object.relationships.should == {:self=>{:has_part=>[r2.object]}}
+      @test_object.ids_for_outbound(:has_part).should == [@test_object4.pid]
       @test_object.remove_relationship(:has_part,@test_object4)
       #check last item removed and predicate removed since now emtpy
-      @test_object.relationships.should == {:self=>{}}
+      @test_object.relationships.size.should == 0
     end
   end
 
@@ -268,8 +266,9 @@ describe ActiveFedora::Base do
   end
 
   describe '#relationships' do
-    it 'should return a hash' do
-      @test_object.relationships.should == {:self=>{}}
+    it 'should return a graph' do
+      @test_object.relationships.kind_of?(RDF::Graph).should be_true
+      @test_object.relationships.size.should == 0 
     end
   end
 

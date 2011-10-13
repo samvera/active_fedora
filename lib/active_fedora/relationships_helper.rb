@@ -86,14 +86,7 @@ module ActiveFedora
     # @param [Boolean] if false it will include inbound relationships (defaults to true)
     # @return [Hash] Returns a hash of subject name (:self or :inbound) mapped to nested hashs of each relationship name mapped to an Array of objects linked via the relationship
     def relationships_by_name(outbound_only=true)
-      #make sure to update if relationships have been updated
-      if @relationships_are_dirty
-        @relationships_by_name = relationships_by_name_from_class()
-        @relationships_are_dirty = false
-      end
-      
-      #this will get called normally on first fetch if relationships are not dirty
-      @relationships_by_name ||= relationships_by_name_from_class()
+      @relationships_by_name = relationships_by_name_from_class()
       outbound_only ? @relationships_by_name : @relationships_by_name.merge(:inbound=>inbound_relationships_by_name)      
     end
 
@@ -105,11 +98,23 @@ module ActiveFedora
     def relationships_by_name_from_class()
       rels = {}
       relationship_predicates.each_pair do |subj, names|
-        if relationships.has_key?(subj)
-          rels[subj] = {}
+        case subj
+        when :self
+          rels[:self] = {}
           names.each_pair do |name, predicate|
-            rels[subj][name] = (relationships[subj].has_key?(predicate) ? relationships[subj][predicate] : [])
+            set = []
+            res = relationships.query(:predicate => find_graph_predicate(predicate))
+            res.each_object do |o|
+              set << o.to_s
+            end
+            rels[:self][name] = set
           end
+        when :inbound
+          #nop
+          # inbound = inbound_relationships
+          # names.each_pair do |name, predicate|
+          #   rels[:inbound][name] = inbound[predicate]
+          # end
         end
       end
       return rels
@@ -325,12 +330,13 @@ module ActiveFedora
     def conforms_to?(model_class)
       if self.kind_of?(model_class)
         #check has model and class match
-        if relationships[:self].has_key?(:has_model)
-          r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_model, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(self.class))
-          if relationships[:self][:has_model].first.to_s.eql?(r.object.to_s)
+        mod = relationships.first(:predicate=>find_graph_predicate(:has_model))
+        if mod
+          expected = ActiveFedora::ContentModel.pid_from_ruby_class(self.class)
+          if mod.object.to_s == expected
             return true
           else
-            raise "has_model relationship check failed for model #{model_class} raising exception, expected: '#{r.object.to_s}' actual: '#{relationships[:self][:has_model].to_s}'"
+            raise "has_model relationship check failed for model #{model_class} raising exception, expected: '#{expected}' actual: '#{mod.object.to_s}'"
           end
         else
           raise "has_model relationship does not exist for model #{model_class} check raising exception"
@@ -374,22 +380,12 @@ module ActiveFedora
     def relationship_query(relationship_name)
       query = ""
       if self.class.is_bidirectional_relationship?(relationship_name)
-        id_array = []
         predicate = outbound_relationship_predicates["#{relationship_name}_outbound"]
-        if !outbound_relationships[predicate].nil? 
-          outbound_relationships[predicate].each do |rel|
-            id_array << rel.gsub("info:fedora/", "")
-          end
-        end
+        id_array = ids_for_outbound(predicate)
         query = self.class.bidirectional_relationship_query(pid,relationship_name,id_array)
       elsif outbound_relationship_names.include?(relationship_name)
-        id_array = []
         predicate = outbound_relationship_predicates[relationship_name]
-        if !outbound_relationships[predicate].nil? 
-          outbound_relationships[predicate].each do |rel|
-            id_array << rel.gsub("info:fedora/", "")
-          end
-        end
+        id_array = ids_for_outbound(predicate)
         query = self.class.outbound_relationship_query(relationship_name,id_array)
       elsif inbound_relationship_names.include?(relationship_name)
         query = self.class.inbound_relationship_query(pid,relationship_name)

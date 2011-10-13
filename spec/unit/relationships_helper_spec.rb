@@ -6,6 +6,7 @@ require 'xmlsimple'
 @@last_pid = 0
 
 class SpecNamedNode
+  include ActiveFedora::SemanticNode
   include ActiveFedora::RelationshipsHelper
   
   attr_accessor :pid
@@ -51,7 +52,10 @@ describe ActiveFedora::RelationshipsHelper do
     it 'should check if current object is the kind of model class supplied' do
       #has_model relationship does not get created until save called
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(SpecNamedNode)})
-      @test_object.expects(:relationships).returns({:self=>{:has_model=>[r.object]}}).at_least_once
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
+      @test_object.expects(:relationships).returns(graph).at_least_once
       @test_object.conforms_to?(SpecNamedNode).should == true
     end
   end
@@ -66,7 +70,10 @@ describe ActiveFedora::RelationshipsHelper do
       @test_object3.pid = increment_pid
       #has_model relationship does not get created until save called so need to add the has model rel here, is fine since not testing save
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(SpecNamedNode)}) 
-      @test_object.expects(:relationships).returns({:self=>{:has_model=>[r.object]}}).at_least_once
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
+      @test_object.expects(:relationships).returns(graph).at_least_once
       @test_object3.assert_conforms_to('object',@test_object,SpecNamedNode)
     end
   end
@@ -101,12 +108,19 @@ describe ActiveFedora::RelationshipsHelper do
       @test_object3 = MockNamedRelationships3.new
       @test_object3.pid = increment_pid
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockNamedRelationships3)}) 
-      @test_object2.expects(:relationships).returns({:self=>{:has_model=>[r.object],:has_part=>[],:has_member=>[]},:inbound=>{:has_part=>[]}}).at_least_once
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
+      @test_object2.expects(:relationships).returns(graph).at_least_once
       #should return expected named relationships
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]}}
       r3 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@test_object})
-      @test_object3.expects(:relationships).returns({:self=>{:has_model=>[r.object],:has_part=>[r3.object],:has_member=>[]},:inbound=>{:has_part=>[]}}).at_least_once
-      @test_object3.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_part),  RDF::URI.new(r3.object))
+      @test_object3.expects(:relationships).returns(graph).at_least_once
+      @test_object3.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[]}}
     end 
   end
 
@@ -171,7 +185,9 @@ describe ActiveFedora::RelationshipsHelper do
     it 'should return hash of outbound relationship names to arrays of object uri' do
       @test_object2 = MockRelationshipNames.new
       @test_object2.pid = increment_pid
-      @test_object2.expects(:relationships).returns({:self=>{:has_part=>[],:has_member=>[],:inbound=>{:has_part=>[],:has_member=>[]}}}).at_least_once
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      @test_object2.expects(:relationships).returns(graph).at_least_once
       @test_object2.outbound_relationships_by_name.should == {"testing"=>[],
                                                             "testing2"=>[]} 
     end
@@ -198,7 +214,12 @@ describe ActiveFedora::RelationshipsHelper do
       #add relationships that mirror 'testing' and 'testing2'
       r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_part, :object=>@test_object3)
       r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_member, :object=>@test_object4)      
-      @test_object2.expects(:relationships).returns({:self=>{:has_part=>[r3.object]},:has_member=>[r4.object],:has_model=>[r.object]}).at_least_once
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_member),  RDF::URI.new(r4.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_part),  RDF::URI.new(r3.object))
+      @test_object2.expects(:relationships).returns(graph).at_least_once
      @test_object2.find_relationship_by_name("testing").should == [r3.object] 
     end
   end
@@ -221,18 +242,16 @@ describe ActiveFedora::RelationshipsHelper do
     end
     
     it "should call bidirectional_relationship_query if a bidirectional relationship" do
-      rels_ids = ["info:fedora/changeme:1","info:fedora/changeme:2","info:fedora/changeme:3","info:fedora/changeme:4"]
-      @mockrelsquery.expects(:outbound_relationships).returns({:has_part=>rels_ids}).at_least_once
       ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
+      @mockrelsquery.expects(:ids_for_outbound).with(:has_part).returns(ids).at_least_once
       @mockrelsquery.expects(:pid).returns("changeme:5")
       MockNamedRelationshipQuery.expects(:bidirectional_relationship_query).with("changeme:5","testing_bi_query",ids)
       @mockrelsquery.relationship_query("testing_bi_query")
     end
     
     it "should call outbound_relationship_query if an outbound relationship" do
-      rels_ids = ["info:fedora/changeme:1","info:fedora/changeme:2","info:fedora/changeme:3","info:fedora/changeme:4"]
-      @mockrelsquery.expects(:outbound_relationships).returns({:is_part_of=>rels_ids}).at_least_once
       ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
+      @mockrelsquery.expects(:ids_for_outbound).with(:is_part_of).returns(ids).at_least_once
       MockNamedRelationshipQuery.expects(:outbound_relationship_query).with("testing_outbound_no_solr_fq",ids)
       @mockrelsquery.relationship_query("testing_outbound_no_solr_fq")
     end

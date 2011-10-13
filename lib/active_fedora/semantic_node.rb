@@ -1,3 +1,5 @@
+require 'rdf'
+require 'active_support/core_ext/class/inheritable_attributes'
 module ActiveFedora
   module SemanticNode 
     extend ActiveSupport::Concern
@@ -6,52 +8,97 @@ module ActiveFedora
       self.class_relationships = {}
       self.class_named_relationships_desc = {}
     end
-    attr_accessor :internal_uri, :named_relationship_desc, :relationships_are_dirty, :load_from_solr
+    attr_accessor :named_relationship_desc, :relationships_are_dirty, :load_from_solr, :subject #:internal_uri
+
     #TODO I think we can remove named_relationship_desc from attr_accessor  - jcoyne
 
     def assert_kind_of(n, o,t)
       raise "Assertion failure: #{n}: #{o} is not of type #{t}" unless o.kind_of?(t)
     end
     
-    # def add_relationship(relationship)
-    #   # Only accept ActiveFedora::Relationships as input arguments
-    #   assert_kind_of 'relationship',  relationship, ActiveFedora::Relationship
-    #   register_triple(relationship.subject, relationship.predicate, relationship.object)
-    # end
-    # 
-
-    # Add a Rels-Ext relationship to the Object.
+    # Add a relationship to the Object.
     # @param predicate
     # @param object Either a string URI or an object that is a kind of ActiveFedora::Base 
     def add_relationship(predicate, obj, literal=false)
-      obj = obj.internal_uri if obj.respond_to? :internal_uri
-      unless relationship_exists?(:self, predicate, obj)
-        register_triple(:self, predicate, obj)
+      unless relationship_exists?(internal_uri, predicate, obj)
+        register_triple(internal_uri, predicate, obj)
         #need to call here to indicate update of named_relationships
         @relationships_are_dirty = true
         rels_ext.dirty = true
       end
     end
 
-    def register_triple(subject, predicate, object)
+    # Add a RDF triple to the relationship graph
+    # @param pid a string represending the pid of the subject
+    # @param predicate a predicate symbol
+    # @param target an object to store
+    def register_triple(pid, predicate, target)
       self.relationships_are_dirty = true
-      register_subject(subject)
-      register_predicate(subject, predicate)
-      relationships[subject][predicate] << object
+      relationships.insert build_statement(pid, predicate, target)
+
+      # register_subject(subject)
+      # register_predicate(subject, predicate)
+      # relationships[subject][predicate] << object
+    end
+
+    # Create an RDF statement
+    # @param pid a string represending the pid of the subject
+    # @param predicate a predicate symbol
+    # @param target an object to store
+    def build_statement(pid, predicate, target)
+      raise "Not allowed anymore" if pid == :self
+      target = target.internal_uri if target.respond_to? :internal_uri
+      subject =  RDF::URI.new(pid)  #TODO cache
+      begin
+        literal = URI.parse(target).scheme.nil?
+      rescue URI::InvalidURIError
+        literal = false
+      end
+      object = literal ? RDF::Literal.new(target) : RDF::URI.new(target)
+
+       RDF::Statement.new(subject, find_graph_predicate(predicate), object)
+    
+    end
+                  
+    def find_graph_predicate(predicate)
+        #TODO, these could be cached
+        case predicate
+        when :has_model, "hasModel", :hasModel
+          xmlns="info:fedora/fedora-system:def/model#"
+          begin
+            rel_predicate = ActiveFedora::Base.predicate_lookup(predicate,xmlns)
+          rescue UnregisteredPredicateError
+            xmlns = nil
+            rel_predicate = nil
+          end
+        else
+          xmlns="info:fedora/fedora-system:def/relations-external#"
+          begin
+            rel_predicate = ActiveFedora::Base.predicate_lookup(predicate,xmlns)
+          rescue UnregisteredPredicateError
+            xmlns = nil
+            rel_predicate = nil
+          end
+        end
+        
+        unless xmlns && rel_predicate
+          rel_predicate, xmlns = ActiveFedora::Base.find_predicate(predicate)
+        end
+        self.class.vocabularies[xmlns][rel_predicate] 
     end
     
-    def register_subject(subject)
-      if !relationships.has_key?(subject) 
-          relationships[subject] = {} 
-      end
-    end
+    # def register_subject(subject)
+    #   if !relationships.has_key?(subject) 
+    #       relationships[subject] = {} 
+    #   end
+    # end
   
-    def register_predicate(subject, predicate)
-      register_subject(subject)
-      if !relationships[subject].has_key?(predicate) 
-        relationships[subject][predicate] = []
-      end
-    end
+    # def register_predicate(subject, predicate)
+    #   register_subject(subject)
+    #   if !relationships[subject].has_key?(predicate) 
+    #     relationships[subject][predicate] = []
+    #   end
+    # end
 
     # ** EXPERIMENTAL **
     #
@@ -59,43 +106,18 @@ module ActiveFedora
     # @param predicate
     # @param object Either a string URI or an object that responds to .pid 
     def remove_relationship(predicate, obj, literal=false)
-      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj, :is_literal=>literal)
-      if unregister_triple(r.subject, r.predicate, r.object)
-        #need to call here to indicate update of named_relationships
-        @relationships_are_dirty = true
-        rels_ext.dirty = true
-      else
-        false
-      end
+      relationships.delete build_statement(internal_uri, predicate, obj)
+      @relationships_are_dirty = true
+      rels_ext.dirty = true
     end
 
-    # ** EXPERIMENTAL **
-    # 
-    # Remove the given ActiveFedora::Relationship from this object
-    # def remove_relationship(relationship)
-    #   @relationships_are_dirty = true
-    #   unregister_triple(relationship.subject, relationship.predicate, relationship.object)
-    # end
 
-    # ** EXPERIMENTAL **
-    # 
-    # Remove the subject, predicate, and object triple from the relationships hash
-    def unregister_triple(subject, predicate, object)
-      if relationship_exists?(subject, predicate, object)
-        relationships[subject][predicate].delete_if {|curObj| curObj == object}
-        relationships[subject].delete(predicate) if relationships[subject][predicate].nil? || relationships[subject][predicate].empty? 
-      else
-        return false
-      end     
-    end
     
     # ** EXPERIMENTAL **
     # 
     # Returns true if a relationship exists for the given subject, predicate, and object triple
     def relationship_exists?(subject, predicate, object)
-      #cache the call in case it is retrieving inbound as well, don't want to hit solr too many times
-      cached_relationships = relationships
-      cached_relationships.has_key?(subject)&&cached_relationships[subject].has_key?(predicate)&&cached_relationships[subject][predicate].include?(object)
+      relationships.has_statement? build_statement(subject, predicate, object)
     end
 
     def inbound_relationships(response_format=:uri)
@@ -121,16 +143,13 @@ module ActiveFedora
     end
     
     def outbound_relationships()
-      if !internal_uri.nil? && !relationships[internal_uri].nil?
-        ##TODO I don't think we ought to have this clause -Justin
-        return relationships[:self].merge(relationships[internal_uri]) 
-      else
-        return relationships[:self]
-      end
+      relationships.statements
     end
     
     def relationships
-      @relationships ||= {:self=>{}}#relationships_from_class
+#      @relationships ||= {:self=>{}}
+      @subject ||=  RDF::URI.new(internal_uri)
+      @relationships ||= RDF::Graph.new
     end
     
     def relationships_from_class
@@ -166,13 +185,18 @@ module ActiveFedora
       end
     end
 
-    def load_outbound_relationship(name, predicate, opts={})
+
+    def ids_for_outbound(predicate)
       id_array = []
-      if !outbound_relationships[predicate].nil? 
-        outbound_relationships[predicate].each do |rel|
-          id_array << rel.gsub("info:fedora/", "")
-        end
+      res = relationships.query(:predicate => find_graph_predicate(predicate))
+      res.each_object do |o|
+        id_array << o.to_s.gsub("info:fedora/", "")
       end
+      id_array
+    end
+
+    def load_outbound_relationship(name, predicate, opts={})
+      id_array = ids_for_outbound(predicate)
       if opts[:response_format] == :id_array  && !self.class.relationship_has_solr_filter_query?(:self,"#{name}")
         return id_array
       else
@@ -195,7 +219,10 @@ module ActiveFedora
     end
     
     module ClassMethods
-      #include ActiveFedora::RelationshipsHelper::ClassMethods
+      def vocabularies
+        @vocabularies ||= {"info:fedora/fedora-system:def/relations-external#" =>  RDF::Vocabulary.new("info:fedora/fedora-system:def/relations-external#"),
+        "info:fedora/fedora-system:def/model#" =>  RDF::Vocabulary.new("info:fedora/fedora-system:def/model#")}
+      end
 
       # Allows for a relationship to be treated like any other attribute of a model class. You define
       # relationships in your model class using this method.  You then have access to several
@@ -451,7 +478,6 @@ module ActiveFedora
       #   ds.relationships # => {:self=>{:has_model=>["afmodel:SimpleThing"],:has_part=>["demo:20"]},:inbound=>{:is_part_of=>["demo:6"]} 
       def relationships
         @class_relationships ||= Hash[:self => {}]
-        #class_relationships
       end
     
     

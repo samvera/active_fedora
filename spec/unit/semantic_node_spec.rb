@@ -347,7 +347,7 @@ describe ActiveFedora::SemanticNode do
       it "should read from relationships array and use Repository.find_model to build an array of objects" do
         SpecNode.create_outbound_relationship_finders("containers", :is_member_of)
         local_node = SpecNode.new
-        local_node.expects(:outbound_relationships).returns({:is_member_of => ["my:_PID1_", "my:_PID2_", "my:_PID3_"]}).times(2)      
+        local_node.expects(:ids_for_outbound).with(:is_member_of).returns(["my:_PID1_", "my:_PID2_", "my:_PID3_"])
         mock_repo = mock("repo")
         solr_result = mock("solr result", :is_a? => true)
         solr_result.expects(:hits).returns(
@@ -373,7 +373,7 @@ describe ActiveFedora::SemanticNode do
       it "(:response_format => :id_array) should read from relationships array" do
         SpecNode.create_outbound_relationship_finders("containers", :is_member_of)
         local_node = SpecNode.new
-        local_node.expects(:outbound_relationships).returns({:is_member_of => []}).times(2)
+        local_node.expects(:ids_for_outbound).with(:is_member_of).returns([])
         local_node.containers_ids
       end
     
@@ -483,8 +483,10 @@ describe ActiveFedora::SemanticNode do
       @local_node.add_relationship(r2.predicate, r2.object)
       r3 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@local_node})
       @local_node2.add_relationship(r3.predicate, r3.object)
-      @local_node.relationships.should == {:self=>{:has_model=>[r.object],:has_part=>[r2.object]}}
-      @local_node2.relationships.should == {:self=>{:has_model=>[r.object],:has_part=>[r3.object]}}
+      @local_node.ids_for_outbound(:has_part).should == [@local_node2.pid]
+      @local_node.ids_for_outbound(:has_model).should == ['afmodel:SpecNode']
+      @local_node2.ids_for_outbound(:has_part).should == [@local_node.pid]
+      @local_node2.ids_for_outbound(:has_model).should == ['afmodel:SpecNode']
       @local_node.relationships_by_name(false).should == {:self=>{"all_parts_outbound"=>[r2.object]},:inbound=>{"all_parts_inbound"=>[]}}
       @local_node2.relationships_by_name(false).should == {:self=>{"all_parts_outbound"=>[r3.object]},:inbound=>{"all_parts_inbound"=>[]}}
     end
@@ -492,12 +494,9 @@ describe ActiveFedora::SemanticNode do
   
   describe ".add_relationship" do
     it "should add relationship to the relationships hash" do
-#      @node.add_relationship(@test_relationship)
       @node.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true))
       @node.add_relationship(@test_relationship.predicate, @test_relationship.object)
-      @node.relationships.should have_key(:self) 
-      @node.relationships[:self].should have_key(@test_relationship.predicate)
-      @node.relationships[:self][@test_relationship.predicate].should include(@test_relationship.object)
+      @node.ids_for_outbound("isMemberOf").should == ['demo:9']
     end
     
     it "adding relationship to an instance should not affect class-level relationships hash" do 
@@ -506,8 +505,8 @@ describe ActiveFedora::SemanticNode do
       local_test_node1.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true))
       local_test_node1.add_relationship(@test_relationship1.predicate, @test_relationship1.object)
       
-      local_test_node1.relationships[:self][:is_member_of].should == ["info:fedora/demo:10"]      
-      local_test_node2.relationships[:self][:is_member_of].should be_nil
+      local_test_node1.ids_for_outbound(:is_member_of).should == ["demo:10"]
+      local_test_node2.ids_for_outbound(:is_member_of).should == []
     end
     
   end
@@ -527,12 +526,10 @@ describe ActiveFedora::SemanticNode do
       
   describe '.register_triple' do
     it 'should add triples to the relationships hash' do
-      @node.register_triple(:self, :is_part_of, "info:fedora/demo:10")
-      @node.register_triple(:self, :is_member_of, "info:fedora/demo:11")
-      @node.relationships[:self].should have_key(:is_part_of)
-      @node.relationships[:self].should have_key(:is_member_of)
-      @node.relationships[:self][:is_part_of].should include("info:fedora/demo:10")
-      @node.relationships[:self][:is_member_of].should include("info:fedora/demo:11")
+      @node.register_triple(@node.internal_uri, :is_part_of, "info:fedora/demo:10")
+      @node.register_triple(@node.internal_uri, :is_member_of, "info:fedora/demo:11")
+      @node.ids_for_outbound(:is_part_of).should == ['demo:10'] 
+      @node.ids_for_outbound(:is_member_of).should == ['demo:11'] 
     end
     
     it "should not be a class level method"
@@ -556,49 +553,24 @@ describe ActiveFedora::SemanticNode do
   end
   
     
-  it 'should provide #unregister_triple' do
-    @test_object.should respond_to(:unregister_triple)
-  end
-  
-  describe '#unregister_triple' do
-    it 'should remove a triple from the relationships hash' do
-      r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>"info:fedora/3"})
-      r2 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>"info:fedora/4"})
-      @test_object.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true)).twice
-      @test_object.add_relationship(r.predicate, r.object)
-      @test_object.add_relationship(r2.predicate, r2.object)
-      #check both are there
-      @test_object.relationships.should == {:self=>{:has_part=>[r.object,r2.object]}}
-      @test_object.unregister_triple(r.subject,r.predicate,r.object)
-      #check returns false if relationship does not exist and does nothing
-      @test_object.unregister_triple(:self,:has_member,r2.object).should == false
-      #check only one item removed
-      @test_object.relationships.should == {:self=>{:has_part=>[r2.object]}}
-      @test_object.unregister_triple(r2.subject,r2.predicate,r2.object)
-      #check last item removed and predicate removed since now emtpy
-      @test_object.relationships.should == {:self=>{}}
-      
-    end
-  end
-
   describe '#remove_relationship' do
     it 'should remove a relationship from the relationships hash' do
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>"info:fedora/3"})
       r2 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>"info:fedora/4"})
-      @test_object.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true)).times(3)
+      @test_object.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true)).times(5)
       @test_object.add_relationship(r.predicate, r.object)
       @test_object.add_relationship(r2.predicate, r2.object)
       #check both are there
-      @test_object.relationships.should == {:self=>{:has_part=>[r.object,r2.object]}}
+      @test_object.ids_for_outbound(:has_part).should include "3", "4"
       @test_object.remove_relationship(r.predicate, r.object)
       #check returns false if relationship does not exist and does nothing with different predicate
       rBad = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_member,:object=>"info:fedora/4"})
-      @test_object.remove_relationship(rBad.predicate, rBad.object).should == false
+      @test_object.remove_relationship(rBad.predicate, rBad.object)
       #check only one item removed
-      @test_object.relationships.should == {:self=>{:has_part=>[r2.object]}}
+      @test_object.ids_for_outbound(:has_part).should == ['4']
       @test_object.remove_relationship(r2.predicate, r2.object)
       #check last item removed and predicate removed since now emtpy
-      @test_object.relationships.should == {:self=>{}}
+      @test_object.ids_for_outbound(:has_part).should == []
       
     end
   end
@@ -608,10 +580,10 @@ describe ActiveFedora::SemanticNode do
       @test_object3 = SpecNode2.new
       @test_object3.pid = increment_pid
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_member,:object=>@test_object3})
-      @test_object.relationship_exists?(r.subject,r.predicate,r.object).should == false
+      @test_object.relationship_exists?(@test_object.internal_uri,r.predicate,r.object).should == false
       @test_object.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true))
       @test_object.add_relationship(r.predicate, r.object)
-      @test_object.relationship_exists?(r.subject,r.predicate,r.object).should == true
+      @test_object.relationship_exists?(@test_object.internal_uri,r.predicate,r.object).should == true
     end
   end
 

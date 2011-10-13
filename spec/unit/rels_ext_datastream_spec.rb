@@ -26,8 +26,11 @@ describe ActiveFedora::RelsExtDatastream do
   describe '#serialize!' do
     
     it "should generate new rdf/xml as the datastream content if the object has been changed" do
-      @test_ds.expects(:model).returns(stub("model", :outbound_relationships=>{:is_member_of=>['demo:10']}, :relationships=>{:self=>{:is_member_of=>['demo:10']}},  :relationships_are_dirty =>true, :relationships_are_dirty= => true)).times(4)
-#register_triple(:self, :is_member_of, "demo:10") 
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_member_of),  RDF::URI.new('demo:10'))
+      
+      @test_ds.expects(:model).returns(stub("model", :outbound_relationships=>graph, :relationships=>graph,  :relationships_are_dirty =>true, :relationships_are_dirty= => true)).times(3)
       @test_ds.serialize!
       EquivalentXml.equivalent?(@test_ds.content, "<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>\n        <rdf:Description rdf:about='info:fedora/test:sample_pid'>\n        <isMemberOf rdf:resource='demo:10' xmlns='info:fedora/fedora-system:def/relations-external#'/></rdf:Description>\n      </rdf:RDF>").should be_true
     end
@@ -52,10 +55,16 @@ describe ActiveFedora::RelsExtDatastream do
     end
     
     it 'should serialize the relationships array to Fedora RELS-EXT rdf/xml' do
-      @test_ds.expects(:model).returns(stub("model", :relationships=>{:self=>{:is_member_of=>['info:fedora/demo:10'], :is_part_of=>['info:fedora/demo:11'], :has_part=>['info:fedora/demo:12'], :has_model=>["info:fedora/afmodel:OtherModel", "info:fedora/afmodel:SampleModel"]}}, 
-                  :outbound_relationships=>{:is_member_of=>['info:fedora/demo:10'], :is_part_of=>['info:fedora/demo:11'], :has_part=>['info:fedora/demo:12'], :has_model=>["info:fedora/afmodel:OtherModel", "info:fedora/afmodel:SampleModel"]},
-                  :relationships_are_dirty= => true)).twice
-      EquivalentXml.equivalent?(@test_ds.to_rels_ext(@pid), @sample_rels_ext_xml).should be_true
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_member_of),  RDF::URI.new('info:fedora/demo:10'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_part_of),  RDF::URI.new('info:fedora/demo:11'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_part),  RDF::URI.new('info:fedora/demo:12'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new("info:fedora/afmodel:OtherModel"))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new("info:fedora/afmodel:SampleModel"))
+
+      @test_ds.expects(:model).returns(stub("model", :relationships=>graph, :relationships_are_dirty= => true))
+      EquivalentXml.equivalent?(@test_ds.to_rels_ext(), @sample_rels_ext_xml).should be_true
     end
     
   end
@@ -72,10 +81,10 @@ describe ActiveFedora::RelsExtDatastream do
       @test_obj.delete
     end
     it "should handle un-mapped predicates gracefully" do
-      @test_obj.relationships.should == {:self=>{:is_member_of=>["info:fedora/demo:10"], :is_part_of=>["info:fedora/demo:11"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"], :conforms_to=>["AnInterface"]}}
       @test_obj.add_relationship("foo", "foo:bar")
       @test_obj.save
-      @test_obj.relationships.should == {:self=>{:is_part_of=>["info:fedora/demo:11"], "foo"=>["foo:bar"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"], :is_member_of=>["info:fedora/demo:10"], :conforms_to=>["AnInterface"]}}
+      @test_obj.relationships.size.should == 5 
+      @test_obj.ids_for_outbound("foo").should == ["foo:bar"]
     end
     it "should handle un-mapped literals" do
       pending
@@ -106,13 +115,23 @@ describe ActiveFedora::RelsExtDatastream do
   describe ".to_solr" do
     
     it "should provide .to_solr and return a SolrDocument" do
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_member_of),  RDF::URI.new('demo:10'))
       @test_ds.should respond_to(:to_solr)
-      @test_ds.expects(:model).returns(stub("model", :relationships=>{:self=>{:is_member_of=>['demo:10']}}, :relationships_are_dirty= => true))
+      @test_ds.expects(:model).returns(stub("model", :relationships=>graph, :relationships_are_dirty= => true))
       @test_ds.to_solr.should be_kind_of(Hash)
     end
     
     it "should serialize the relationships into a Hash" do
-      @test_ds.expects(:model).returns(stub("model", :relationships=>{:self=>{:is_member_of=>['info:fedora/demo:10'], :is_part_of=>['info:fedora/demo:11'], :has_part=>['info:fedora/demo:12'], :conforms_to=>["AnInterface"]}}, :relationships_are_dirty= => true))
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_member_of),  RDF::URI.new('info:fedora/demo:10'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_part_of),  RDF::URI.new('info:fedora/demo:11'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_part),  RDF::URI.new('info:fedora/demo:12'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:conforms_to),  "AnInterface")
+
+      @test_ds.expects(:model).returns(stub("model", :relationships=>graph, :relationships_are_dirty= => true))
       solr_doc = @test_ds.to_solr
       solr_doc["is_member_of_s"].should == ["info:fedora/demo:10"]
       solr_doc["is_part_of_s"].should == ["info:fedora/demo:11"]
