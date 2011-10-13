@@ -39,6 +39,7 @@ module ActiveFedora #:nodoc:
     autoload :RelationshipsHelper
     autoload :SemanticNode
     autoload :NestedAttributes
+    autoload :FixtureLoader
 
   end
   
