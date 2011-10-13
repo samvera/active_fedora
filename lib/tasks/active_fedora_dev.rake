@@ -82,12 +82,12 @@ namespace :active_fedora do
   end
 
   task :load_fixtures => :environment do
-    require 'solrizer'
-    require 'solrizer-fedora'
-    require 'spec/samples/models/hydrangea_article'
-    ENV["FEDORA_HOME"] ||= File.expand_path(File.join(File.dirname(__FILE__),'..','..','jetty','fedora','default'))
-    retval = `$FEDORA_HOME/client/bin/fedora-ingest-demos.sh localhost 8983 fedoraAdmin fedoraAdmin http`
-    puts "loaded demo objects #{retval}"
+    # require 'solrizer'
+    # require 'solrizer-fedora'
+    # require 'spec/samples/models/hydrangea_article'
+    # ENV["FEDORA_HOME"] ||= File.expand_path(File.join(File.dirname(__FILE__),'..','..','jetty','fedora','default'))
+    # retval = `$FEDORA_HOME/client/bin/fedora-ingest-demos.sh localhost 8983 fedoraAdmin fedoraAdmin http`
+    # puts "loaded demo objects #{retval}"
     ActiveFedora.init unless Thread.current[:repo]
     
     ENV["pid"] = "hydrangea:fixture_mods_article1"

@@ -28,7 +28,7 @@ module ActiveFedora
     end
     
     def self.models_asserted_by(obj)
-      Array obj.relationships[:self][:has_model]
+      obj.ids_for_outbound(:has_model)
     end
     
     def self.known_models_for(obj)
