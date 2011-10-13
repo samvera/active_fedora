@@ -1,17 +1,8 @@
-require 'rubygems'
-gem 'solr-ruby'
 require "loggable"
-
-$: << 'lib'
-
+require 'active_fedora/railtie' if defined? Rails
 require 'active_support'
-require 'active_model'
-
 require 'active_fedora/solr_service'
 require 'active_fedora/rubydora_connection'
-require "solrizer"
-
-require 'ruby-fedora'
 
 SOLR_DOCUMENT_ID = ActiveFedora::SolrService.id_field unless defined?(SOLR_DOCUMENT_ID)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
