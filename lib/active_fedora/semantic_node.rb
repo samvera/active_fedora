@@ -438,14 +438,8 @@ module ActiveFedora
         def #{name}(opts={})
           opts = {:rows=>25}.merge(opts)
           if opts[:response_format] == :solr || opts[:response_format] == :load_from_solr
-            outbound_id_array = []
             predicate = outbound_relationship_predicates["#{name}_outbound"]
-            if !outbound_relationships[predicate].nil? 
-              outbound_relationships[predicate].each do |rel|
-                outbound_id_array << rel.gsub("info:fedora/", "")
-              end
-            end
-            #outbound_id_array = #{outbound_method_name}(:response_format=>:id_array)
+            outbound_id_array = ids_for_outbound(predicate)
             query = self.class.bidirectional_relationship_query(self.pid,"#{name}",outbound_id_array)
             solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
             
