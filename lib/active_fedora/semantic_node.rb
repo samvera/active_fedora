@@ -195,6 +195,27 @@ module ActiveFedora
       id_array
     end
 
+    def load_bidirectional(name, inbound_method_name, outbound_method_name, opts) 
+        opts = {:rows=>25}.merge(opts)
+        if opts[:response_format] == :solr || opts[:response_format] == :load_from_solr
+          predicate = outbound_relationship_predicates["#{name}_outbound"]
+          outbound_id_array = ids_for_outbound(predicate)
+          query = self.class.bidirectional_relationship_query(self.pid,"#{name}",outbound_id_array)
+          solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
+          
+          if opts[:response_format] == :solr
+            return solr_result
+          elsif opts[:response_format] == :load_from_solr || self.load_from_solr
+            return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
+          else
+            return ActiveFedora::SolrService.reify_solr_results(solr_result)
+          end
+        else
+          ary = send(inbound_method_name,opts) + send(outbound_method_name, opts)
+          return ary.uniq
+        end
+    end
+
     def load_outbound_relationship(name, predicate, opts={})
       id_array = ids_for_outbound(predicate)
       if opts[:response_format] == :id_array  && !self.class.relationship_has_solr_filter_query?(:self,"#{name}")
@@ -418,6 +439,8 @@ module ActiveFedora
         END
       end
       
+
+
       # Generates relationship finders for predicates that point in both directions
       # and registers predicate relationships for each direction.
       #
@@ -436,24 +459,7 @@ module ActiveFedora
 
         class_eval <<-END
         def #{name}(opts={})
-          opts = {:rows=>25}.merge(opts)
-          if opts[:response_format] == :solr || opts[:response_format] == :load_from_solr
-            predicate = outbound_relationship_predicates["#{name}_outbound"]
-            outbound_id_array = ids_for_outbound(predicate)
-            query = self.class.bidirectional_relationship_query(self.pid,"#{name}",outbound_id_array)
-            solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
-            
-            if opts[:response_format] == :solr
-              return solr_result
-            elsif opts[:response_format] == :load_from_solr || self.load_from_solr
-              return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
-            else
-              return ActiveFedora::SolrService.reify_solr_results(solr_result)
-            end
-          else
-            ary = #{inbound_method_name}(opts) + #{outbound_method_name}(opts)
-            return ary.uniq
-          end
+          load_bidirectional("#{name}", :#{inbound_method_name}, :#{outbound_method_name}, opts)
         end
         def #{name}_ids
           #{name}(:response_format => :id_array)

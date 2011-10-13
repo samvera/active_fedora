@@ -62,7 +62,14 @@ module ActiveFedora
     end
 
     def self.short_predicate(predicate)
-      predicate.to_str.gsub(/^[^#]+#/, '').underscore.to_sym
+      if match = /^([^#]+#)(.+)$/.match(predicate.to_str)
+        namespace = match[1]
+        predicate = match[2]
+        pred = ActiveFedora::Base.predicate_mappings[namespace].invert[predicate]
+        pred
+      else
+        raise "Unable to parse predicate: #{predicate}"
+      end
     end
     
     # Serialize the datastream's RDF relationships to solr

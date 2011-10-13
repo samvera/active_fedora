@@ -430,7 +430,7 @@ describe ActiveFedora::SemanticNode do
     end
     it "(:response_format => :solr) should construct a solr query that combines inbound and outbound searches" do
       # get the id array for outbound relationships then construct solr query by combining id array with inbound relationship search
-      @local_node.expects(:outbound_relationships).returns({:has_part=>["mypid:1"]}).at_least_once()
+      @local_node.expects(:ids_for_outbound).with(:has_part).returns(["mypid:1"])
       id_array_query = ActiveFedora::SolrService.construct_query_for_pids(["mypid:1"])
       solr_result = mock("solr result")
       ActiveFedora::SolrService.instance.conn.expects(:query).with("#{id_array_query} OR (is_part_of_s:info\\:fedora/test\\:sample_pid)", :rows=>25).returns(solr_result)
