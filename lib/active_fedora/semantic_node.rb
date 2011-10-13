@@ -130,7 +130,7 @@ module ActiveFedora
     end
     
     def relationships
-      @relationships ||= relationships_from_class
+      @relationships ||= {:self=>{}}#relationships_from_class
     end
     
     def relationships_from_class

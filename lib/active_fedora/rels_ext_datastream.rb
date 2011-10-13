@@ -7,15 +7,10 @@ require 'rdf'
 module ActiveFedora
   class RelsExtDatastream < Datastream
     
-    #include ActiveFedora::SemanticNode
     include Solrizer::FieldNameMapper
     attr_accessor :model
     
     
-    # def initialize(digital_object, dsid, exists_in_fedora=nil)
-    #   super(digital_object, 'RELS-EXT')
-    # end
-
     def changed?
       (model && model.relationships_are_dirty) || super
     end

@@ -136,16 +136,16 @@ describe ActiveFedora::RelsExtDatastream do
       test_from_solr_object5 = MockAFRelsSolr.new
       test_from_solr_object5.rels_ext.from_solr(solr_doc)
       
-      test_from_solr_object2.relationships.should == {:self=>{:has_part=>[r3.object],:has_member=>[r4.object],:has_model=>[model_rel.object]}, :inbound=>{:has_part=>[], :has_member=>[]}}
-      test_from_solr_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object], "collection_members"=>[], "part_of"=>[], "parts_outbound"=>[r3.object]}, :inbound=>{"parts_inbound"=>[], "testing_inbound2"=>[], "testing_inbound"=>[]}}
-      test_from_solr_object3.relationships.should == {:self=>{:has_model=>[model_rel.object], :has_part=>[], :has_member=>[]}, :inbound=>{:has_part=>[], :has_member=>[]}}
-      test_from_solr_object3.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}, :inbound=>{"parts_inbound"=>[], "testing_inbound2"=>[], "testing_inbound"=>[]}}
-      test_from_solr_object4.relationships.should == {:self=>{:has_model=>[model_rel.object], :has_part=>[], :has_member=>[]}, :inbound=>{:has_part=>[], :has_member=>[]}}
-      test_from_solr_object4.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}, :inbound=>{"parts_inbound"=>[], "testing_inbound2"=>[], "testing_inbound"=>[]}}
+      test_from_solr_object2.relationships.should == {:self=>{:has_part=>[r3.object],:has_member=>[r4.object],:has_model=>[model_rel.object]}}
+      test_from_solr_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object], "collection_members"=>[], "part_of"=>[], "parts_outbound"=>[r3.object]}}
+      test_from_solr_object3.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
+      test_from_solr_object3.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}}
+      test_from_solr_object4.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
+      test_from_solr_object4.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}}
       test_from_solr_object5.relationships.should == {:self=>{:has_model=>[model_rel.object],
                                                              :has_part=>[r2.object],
-                                                             :has_member=>[r3.object]}, :inbound=>{:has_part=>[], :has_member=>[]}}
-      test_from_solr_object5.relationships_by_name.should == {:self=>{"testing2"=>[r3.object], "collection_members"=>[], "part_of"=>[], "testing"=>[r2.object], "parts_outbound"=>[r2.object]}, :inbound=>{"parts_inbound"=>[], "testing_inbound2"=>[], "testing_inbound"=>[]}} 
+                                                             :has_member=>[r3.object]}}
+      test_from_solr_object5.relationships_by_name.should == {:self=>{"testing2"=>[r3.object], "collection_members"=>[], "part_of"=>[], "testing"=>[r2.object], "parts_outbound"=>[r2.object]}} 
     end
   end
 end

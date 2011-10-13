@@ -226,10 +226,10 @@ describe ActiveFedora::Base do
       @test_object3 = ActiveFedora::Base.new
       @test_object.add_relationship(:has_part,@test_object3)
       r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
-      @test_object.relationships.should == {:inbound=>{:is_part_of=>[]}, :self=>{:has_part=>[r.object], :has_collection_member=>[], :is_part_of=>[]}}
+      @test_object.relationships.should == {:self=>{:has_part=>[r.object]}}
       #try adding again and make sure not there twice
       @test_object.add_relationship(:has_part,@test_object3)
-      @test_object.relationships.should == {:inbound=>{:is_part_of=>[]}, :self=>{:has_part=>[r.object], :has_collection_member=>[], :is_part_of=>[]}}
+      @test_object.relationships.should == {:self=>{:has_part=>[r.object]}}
     end
 
     it 'should add literal relationships if requested' do
@@ -253,13 +253,13 @@ describe ActiveFedora::Base do
       r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
       r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
       #check both are there
-      @test_object.relationships.should == {:inbound=>{:is_part_of=>[]}, :self=>{:has_part=>[r.object,r2.object], :has_collection_member=>[], :is_part_of=>[]}}
+      @test_object.relationships.should == {:self=>{:has_part=>[r.object,r2.object]}}
       @test_object.remove_relationship(:has_part,@test_object3)
       #check only one item removed
-      @test_object.relationships.should == {:inbound=>{:is_part_of=>[]}, :self=>{:has_part=>[r2.object], :has_collection_member=>[], :is_part_of=>[]}}
+      @test_object.relationships.should == {:self=>{:has_part=>[r2.object]}}
       @test_object.remove_relationship(:has_part,@test_object4)
       #check last item removed and predicate removed since now emtpy
-      @test_object.relationships.should == {:inbound=>{:is_part_of=>[]}, :self=>{:has_collection_member=>[], :is_part_of=>[]}}
+      @test_object.relationships.should == {:self=>{}}
     end
   end
 
@@ -269,7 +269,7 @@ describe ActiveFedora::Base do
 
   describe '#relationships' do
     it 'should return a hash' do
-      @test_object.relationships.should == {:inbound=>{:is_part_of=>[]}, :self=>{:has_collection_member=>[], :has_part=>[], :is_part_of=>[]}}
+      @test_object.relationships.should == {:self=>{}}
     end
   end
 
@@ -700,10 +700,10 @@ describe ActiveFedora::Base do
       @test_object.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(ActiveFedora::Base))
       #should return expected named relationships
       @test_object2.relationships_by_name
-      @test_object2.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]},:inbound=>{"parts_inbound"=>[], "testing_inbound"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}}
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:dummy,:object=>@test_object})
       @test_object2.add_relationship_by_name("testing",@test_object)
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r.object],"testing2"=>[],"part_of"=>[], "parts_outbound"=>[r.object], "collection_members"=>[]}, :inbound=>{"parts_inbound"=>[], "testing_inbound"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r.object],"testing2"=>[],"part_of"=>[], "parts_outbound"=>[r.object], "collection_members"=>[]}}
     end 
   end
 

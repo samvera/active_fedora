@@ -72,10 +72,10 @@ describe ActiveFedora::RelsExtDatastream do
       @test_obj.delete
     end
     it "should handle un-mapped predicates gracefully" do
-      @test_obj.relationships.should == {:self=>{:is_member_of=>["info:fedora/demo:10"], :is_part_of=>["info:fedora/demo:11"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"], :conforms_to=>["AnInterface"], :has_collection_member=>[], :has_part=>[]},:inbound=>{:is_part_of=>[]}}
+      @test_obj.relationships.should == {:self=>{:is_member_of=>["info:fedora/demo:10"], :is_part_of=>["info:fedora/demo:11"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"], :conforms_to=>["AnInterface"]}}
       @test_obj.add_relationship("foo", "foo:bar")
       @test_obj.save
-      @test_obj.relationships.should == {:self=>{:is_part_of=>["info:fedora/demo:11"], "foo"=>["foo:bar"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"], :is_member_of=>["info:fedora/demo:10"], :conforms_to=>["AnInterface"], :has_collection_member=>[], :has_part=>[]},:inbound=>{:is_part_of=>[]}}
+      @test_obj.relationships.should == {:self=>{:is_part_of=>["info:fedora/demo:11"], "foo"=>["foo:bar"], :has_model=>["info:fedora/afmodel:ActiveFedora_Base"], :is_member_of=>["info:fedora/demo:10"], :conforms_to=>["AnInterface"]}}
     end
     it "should handle un-mapped literals" do
       pending

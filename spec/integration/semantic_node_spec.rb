@@ -452,13 +452,13 @@ describe ActiveFedora::SemanticNode do
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockSemNamedRelationships)}) 
       @test_object2.add_relationship(r.predicate, r.object)
       #should return expected named relationships
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]}}
       r3 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@test_object})
       @test_object2.add_relationship(r3.predicate, r3.object)
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[]},:inbound=>{"testing_inbound"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[]}}
       r4 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_member,:object=>"3"})
       @test_object2.add_relationship(r4.predicate, r4.object)
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]},:inbound=>{"testing_inbound"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]}}
     end
   end
 end

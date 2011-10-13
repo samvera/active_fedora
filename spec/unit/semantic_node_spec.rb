@@ -156,13 +156,13 @@ describe ActiveFedora::SemanticNode do
     it "should add a subject and predicate to the relationships array" do
       SpecNode.has_relationship("parents", :is_part_of)
       SpecNode.relationships.should have_key(:self)
-      @node.relationships[:self].should have_key(:is_part_of)
+      SpecNode.relationships[:self].should have_key(:is_part_of)
     end
     
     it "should use :inbound as the subject if :inbound => true" do
       SpecNode.has_relationship("parents", :is_part_of, :inbound => true)
       SpecNode.relationships.should have_key(:inbound)
-      @node.relationships[:inbound].should have_key(:is_part_of)
+      SpecNode.relationships[:inbound].should have_key(:is_part_of)
     end
     
     it 'should create inbound relationship finders' do
@@ -438,8 +438,8 @@ describe ActiveFedora::SemanticNode do
     end
 
     it "should register both inbound and outbound predicate components" do
-      @local_node.relationships[:inbound].has_key?(:is_part_of).should == true
-      @local_node.relationships[:self].has_key?(:has_part).should == true
+      @local_node.class.relationships[:inbound].has_key?(:is_part_of).should == true
+      @local_node.class.relationships[:self].has_key?(:has_part).should == true
     end
   
     it "should register relationship names for inbound, outbound" do
@@ -483,8 +483,8 @@ describe ActiveFedora::SemanticNode do
       @local_node.add_relationship(r2.predicate, r2.object)
       r3 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@local_node})
       @local_node2.add_relationship(r3.predicate, r3.object)
-      @local_node.relationships.should == {:self=>{:has_model=>[r.object],:has_part=>[r2.object]},:inbound=>{:is_part_of=>[]}}
-      @local_node2.relationships.should == {:self=>{:has_model=>[r.object],:has_part=>[r3.object]},:inbound=>{:is_part_of=>[]}}
+      @local_node.relationships.should == {:self=>{:has_model=>[r.object],:has_part=>[r2.object]}}
+      @local_node2.relationships.should == {:self=>{:has_model=>[r.object],:has_part=>[r3.object]}}
       @local_node.relationships_by_name(false).should == {:self=>{"all_parts_outbound"=>[r2.object]},:inbound=>{"all_parts_inbound"=>[]}}
       @local_node2.relationships_by_name(false).should == {:self=>{"all_parts_outbound"=>[r3.object]},:inbound=>{"all_parts_inbound"=>[]}}
     end

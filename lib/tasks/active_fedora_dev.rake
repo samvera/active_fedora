@@ -18,17 +18,6 @@ APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/../../")
 require 'jettywrapper'
 
 $: << 'lib'
-# def jetty_params 
-#   project_root = File.expand_path("#{File.dirname(__FILE__)}/../../")
-#   {
-#       :quiet => false,
-#       :jetty_home => File.join(project_root,'jetty'),
-#       :jetty_port => 8983,
-#       :solr_home => File.expand_path(File.join(project_root,'jetty','solr')),
-#       :fedora_home => File.expand_path(File.join(project_root,'jetty','fedora','default')),
-#       :startup_wait=>30
-#     }
-# end
 
 desc "Run active-fedora rspec tests"
 task :spec do
@@ -44,7 +33,6 @@ task :hudson do
   jetty_params = Jettywrapper.load_config
   jetty_params[:startup_wait]= 20
   error = Jettywrapper.wrap(jetty_params) do
-    #ENV["FEDORA_HOME"]=File.expand_path(File.join(File.dirname(__FILE__),'..','..','jetty','fedora','default'))
     Rake::Task["active_fedora:load_fixtures"].invoke
     Rake::Task["active_fedora:rspec"].invoke
   end
