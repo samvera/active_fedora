@@ -74,8 +74,7 @@ describe ActiveFedora::Base do
 
   ### Methods for ActiveModel::Conversions
   it "should have to_param once it's saved" do
-    @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
-
+    @mock_repo.expects(:object).raises(RuntimeError)
     @test_object.to_param.should be_nil
     @test_object.expects(:create).returns(true)
     @test_object.save
@@ -84,7 +83,7 @@ describe ActiveFedora::Base do
   end
 
   it "should have to_key once it's saved" do 
-    @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
+    @mock_repo.expects(:object).raises(RuntimeError)
     @test_object.to_key.should be_nil
     @test_object.expects(:create).returns(true)
     @test_object.save
@@ -113,7 +112,7 @@ describe ActiveFedora::Base do
   describe "has_metadata" do
     before :each do
       @mock_repo.expects(:datastreams).with(:pid => "monkey:99").returns("")
-      @mock_repo.expects(:object).with(:pid => "monkey:99").returns("")
+      @mock_repo.expects(:object).with(:pid => "monkey:99").raises(RuntimeError)
       @mock_repo.expects(:ingest).with(:pid => "monkey:99").returns("monkey:99")
       @mock_repo.expects(:datastream_dissemination).with(:dsid => 'someData',:pid => 'monkey:99').returns('asdf') 
       @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'someData'}
@@ -279,7 +278,7 @@ describe ActiveFedora::Base do
       @mock_repo.expects(:datastream_dissemination).with(:dsid => 'RELS-EXT',:pid => @this_pid).returns('asdf') 
 
       @mock_repo.expects(:ingest).with(:pid => @this_pid).returns(@this_pid)
-      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
+      @mock_repo.expects(:object).with(:pid => @this_pid).raises(RuntimeError)
       @mock_repo.expects(:datastreams).with(:pid => @this_pid).returns("")
       @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'RELS-EXT'}
       @test_object.persisted?.should be false 
@@ -309,7 +308,7 @@ describe ActiveFedora::Base do
       to = FooHistory.new
       to.expects(:update_index)
       @mock_repo.expects(:ingest).with(:pid => @this_pid).returns(@this_pid)
-      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
+      @mock_repo.expects(:object).with(:pid => @this_pid).raises(RuntimeError)
       @mock_repo.expects(:datastreams).with(:pid => @this_pid).returns("")
       @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText',:pid => @this_pid).returns('asdf') 
       @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText2',:pid => @this_pid).returns('asdf') 
@@ -336,7 +335,7 @@ describe ActiveFedora::Base do
       ds.expects(:save)
       @test_object.instance_variable_set(:@new_object, false)
       @test_object.expects(:refresh)
-      @mock_repo.expects(:object).with(:pid => @this_pid).returns("").at_least_once
+      @mock_repo.expects(:object).with(:pid => @this_pid).raises(RuntimeError).at_least_once
       @mock_repo.expects(:ingest).with(:pid => @test_object.pid)
       @mock_repo.expects(:datastreams).with(:pid => @test_object.pid).returns("")
       @mock_repo.expects(:add_datastream).with{ |x| x[:dsid] = "RELS-EXT"}
@@ -408,8 +407,6 @@ describe ActiveFedora::Base do
       @test_object.expects(:refresh)
       @test_object.instance_variable_set(:@new_object, false)
 
-      @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
-       
       @test_object.save
     end
     it "should update solr index if relationships have changed" do

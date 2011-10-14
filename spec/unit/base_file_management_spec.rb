@@ -89,9 +89,8 @@ describe ActiveFedora::Base do
     it "should set  :dsid  and :label when supplied" do
       mock_file = stub("File", :path=>'foo')
       mock_ds = stub_everything("Datastream")
-      mock_ds.expects(:dsid=).with('__DSID__')
       mock_ds.expects(:dsLabel=).with('My Label')
-      ActiveFedora::Datastream.expects(:new).with(@base.inner_object, 'DS1').returns(mock_ds)
+      ActiveFedora::Datastream.expects(:new).with(@base.inner_object, '__DSID__').returns(mock_ds)
       @base.expects(:add_datastream).with(mock_ds)
       @base.add_file_datastream(mock_file, :label => "My Label", :dsid => "__DSID__")
     end
