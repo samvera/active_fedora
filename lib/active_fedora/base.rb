@@ -312,8 +312,7 @@ module ActiveFedora
       elsif opts.has_key?(:content_type)
         attrs.merge!({:mimeType=>opts[:content_type]})
       end
-      ds = create_datastream(ActiveFedora::Datastream, nil, attrs)
-      opts.has_key?(:dsid) ? ds.dsid=(opts[:dsid]) : nil
+      ds = create_datastream(ActiveFedora::Datastream, opts[:dsid], attrs)
       add_datastream(ds)
     end
     
