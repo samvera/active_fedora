@@ -13,7 +13,7 @@ PATH
       om (>= 1.0)
       rdf
       rdf-rdfxml
-      rubydora (~> 0.1.7)
+      rubydora (~> 0.1.8)
       solr-ruby (>= 0.0.6)
       solrizer (> 1.0.0)
       xml-simple (>= 1.0.12)
@@ -87,7 +87,7 @@ GEM
       ruby-debug-base (~> 0.10.4.0)
     ruby-debug-base (0.10.4)
       linecache (>= 0.3)
-    rubydora (0.1.7)
+    rubydora (0.1.8)
       activemodel
       activesupport
       fastercsv
@@ -121,7 +121,7 @@ GEM
     wasabi (2.0.0)
       nokogiri (>= 1.4.0)
     xml-simple (1.1.1)
-    yard (0.7.2)
+    yard (0.7.3)
 
 PLATFORMS
   ruby

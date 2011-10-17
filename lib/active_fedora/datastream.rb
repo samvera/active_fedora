@@ -23,30 +23,6 @@ module ActiveFedora
       self.dirty = true
     end
 
-    # def self.delete(parent_pid, dsid)
-    #   Fedora::Repository.instance.delete("%s/datastreams/%s"%[parent_pid, dsid])
-    # end
-
-    # def delete
-    #   self.class.delete(self.pid, self.dsid)
-    # end
-    
-    # #get this datastreams identifier
-    # def pid
-    #   self.attributes[:pid]
-    # end
-  
-    # #set this datastreams parent identifier
-    # def pid=(pid)
-    #   self.attributes[:pid] = pid
-    # end
-    
-    # #set this datastreams identifier (note: sets both dsID and dsid)
-    # def dsid=(dsid)
-    #   self.attributes[:dsID] = dsid
-    #   self.attributes[:dsid] = dsid
-    # end
-
     def size
       self.profile['dsSize']
     end

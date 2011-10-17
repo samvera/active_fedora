@@ -759,11 +759,11 @@ module ActiveFedora
 
     #return the owner id
     def owner_id
-      @inner_object.owner_id
+      @inner_object.ownerId
     end
     
     def owner_id=(owner_id)
-      @inner_object.owner_id=(owner_id)
+      @inner_object.ownerId=(owner_id)
     end
 
     #return the create_date of the inner object (unless it's a new object)
