@@ -28,7 +28,7 @@ describe ActiveFedora::Base do
 
   before(:each) do
     @mock_repo = mock("repository")
-    Rubydora::DigitalObject.any_instance.expects(:repository).returns(@mock_repo).at_least_once
+    ActiveFedora::DigitalObject.any_instance.expects(:repository).returns(@mock_repo).at_least_once
     @this_pid = increment_pid.to_s
     ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(@this_pid)
 
@@ -371,7 +371,7 @@ describe ActiveFedora::Base do
       @test_object.save
     end
     it "should NOT update solr index if no MetadataDatastreams have changed" do
-      Rubydora::DigitalObject.any_instance.stubs(:save)
+      ActiveFedora::DigitalObject.any_instance.stubs(:save)
       mock1 = mock("ds1")
       mock1.expects( :changed?).returns(false).at_least_once
       mock1.expects(:serialize!)

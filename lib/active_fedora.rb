@@ -20,6 +20,7 @@ module ActiveFedora #:nodoc:
     autoload :RelationshipsHelper
     autoload :Datastream
     autoload :Delegating
+    autoload :DigitalObject
     autoload :Model
     autoload :MetadataDatastream
     autoload :MetadataDatastreamHelper

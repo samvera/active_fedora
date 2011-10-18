@@ -89,7 +89,7 @@ describe ActiveFedora do
       @test_object.save
     end
     it "should prevent Base.delete from deleting the corresponding Solr document if false" do
-      Rubydora::DigitalObject.any_instance.expects(:delete)
+      ActiveFedora::DigitalObject.any_instance.expects(:delete)
       ActiveFedora::SolrService.instance.conn.expects(:delete).with(@test_object.pid).never 
       @test_object.delete
     end

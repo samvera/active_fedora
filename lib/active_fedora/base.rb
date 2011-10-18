@@ -85,10 +85,10 @@ module ActiveFedora
           attrs = attrs.merge!({:pid=>RubydoraConnection.instance.nextid})  
         end
         @new_object=true
-        @inner_object = RubydoraConnection.instance.connection.find(attrs[:pid])
+        @inner_object = DigitalObject.find(self.class, attrs[:pid])
       else
         @new_object = attrs[:new_object] == false ? false : true
-        @inner_object = RubydoraConnection.instance.connection.find(attrs[:pid])
+        @inner_object = DigitalObject.find(self.class, attrs[:pid])
         load_datastreams_from_fedora
       end
       configure_defined_datastreams
@@ -96,6 +96,10 @@ module ActiveFedora
       attributes = attrs.dup
       [:pid, :namespace, :new_object,:create_date, :modified_date].each { |k| attributes.delete(k)}
       self.attributes=attributes
+    end
+
+    def self.datastream_class_for_name(dsid)
+      ds_specs[dsid] ? ds_specs[dsid].first : ActiveFedora::Datastream
     end
 
     #This method is used to specify the details of a datastream. 
