@@ -200,19 +200,15 @@ module ActiveFedora
     def load_datastreams_from_fedora
       inner_object.datastreams.each do |dsid, datastream|
         ds_spec = self.class.ds_specs[dsid]
+        datastreams[dsid] = datastream
         if (ds_spec)
           klass = ds_spec.first
-          datastreams[dsid] = klass.new(inner_object, dsid, true)
           datastreams[dsid].model = self if klass == RelsExtDatastream
 
           if ds_spec.last.class == Proc
             ds_spec.last.call(datastreams[dsid])
           end
           klass.from_xml(datastreams[dsid].content, datastreams[dsid])  ### TODO, this is loading eagerly, we could load it as needed
-          ### TODO, if rubydora could know which klass to use, we could probably skip this step.
-        else
-          #TODO, this may be a perfomance hit and we may not need it.
-          datastreams[dsid] =Datastream.new(inner_object, dsid)#, true)
         end
       end
     end

@@ -8,8 +8,7 @@ module ActiveFedora
 
     def [] (key)
       if key == 'DC' && !has_key?(key)
-        ds = Datastream.new(@obj.inner_object, key, true)
-        ds.content
+        ds = Datastream.new(@obj.inner_object, key)
         self[key] = ds
       end
       super

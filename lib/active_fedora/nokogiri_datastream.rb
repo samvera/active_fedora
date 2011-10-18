@@ -18,7 +18,7 @@ module ActiveFedora
     attr_accessor :internal_solr_doc
     attr_reader :ng_xml
 
-    def initialize(digital_object, dsid, exists_in_fedora=false)
+    def initialize(digital_object, dsid)
       super
       self.class.from_xml(nil, self)
     end

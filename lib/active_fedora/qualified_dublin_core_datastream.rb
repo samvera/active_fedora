@@ -15,13 +15,13 @@ module ActiveFedora
     
     #Constructor. this class will call self.field for each DCTERM. In short, all DCTERMS fields will already exist
     #when this method returns. Each term is marked as a multivalue string.
-    def initialize(digital_object, dsid, exists_in_fedora=false )
+    def initialize(digital_object, dsid )
       super(digital_object, dsid)
       DCTERMS.each do |el|
         field el, :string, :multiple=>true
       end
       ###TODO this is loading eagerly, but we could make it lazy
-      self.class.from_xml(exists_in_fedora ? content : nil, self)
+      self.class.from_xml(content, self)
       self
     end
     

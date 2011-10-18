@@ -5,10 +5,10 @@ module ActiveFedora
     
     attr_accessor :dirty, :last_modified, :fields
   
-    def initialize(digital_object, dsid, exists_in_fedora=false )
+    def initialize(digital_object, dsid)
       @fields={}
       @dirty = false
-      super(digital_object, dsid)
+      super
     end
     
     # #Return the xml content representing this Datastream from Fedora

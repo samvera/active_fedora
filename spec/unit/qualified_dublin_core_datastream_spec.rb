@@ -15,7 +15,9 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   
   before(:each) do
     ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns("_nextid_")
+    ActiveFedora::QualifiedDublinCoreDatastream.any_instance.expects(:content).at_least_once
     @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new(nil, nil)
+
   end
   it "from_xml should parse everything correctly" do
     #originally just tested that lcsh encoding and stuff worked, but the other stuff is worth testing
