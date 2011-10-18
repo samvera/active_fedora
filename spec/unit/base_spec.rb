@@ -114,13 +114,9 @@ describe ActiveFedora::Base do
       @mock_repo.expects(:datastreams).with(:pid => "monkey:99").returns("")
       @mock_repo.expects(:object).with(:pid => "monkey:99").raises(RuntimeError)
       @mock_repo.expects(:ingest).with(:pid => "monkey:99").returns("monkey:99")
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'someData',:pid => 'monkey:99').returns('asdf') 
       @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'someData'}
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText',:pid => 'monkey:99').returns('asdf') 
       @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'withText'}
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText2',:pid => 'monkey:99').returns('asdf') 
       @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'withText2'}
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'RELS-EXT',:pid => 'monkey:99').returns('asdf') 
       @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'RELS-EXT'}
 
       @n = FooHistory.new(:pid=>"monkey:99")
@@ -275,8 +271,6 @@ describe ActiveFedora::Base do
     
     
     it "should return true and set persisted if object and datastreams all save successfully" do
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'RELS-EXT',:pid => @this_pid).returns('asdf') 
-
       @mock_repo.expects(:ingest).with(:pid => @this_pid).returns(@this_pid)
       @mock_repo.expects(:object).with(:pid => @this_pid).raises(RuntimeError)
       @mock_repo.expects(:datastreams).with(:pid => @this_pid).returns("")
@@ -310,10 +304,6 @@ describe ActiveFedora::Base do
       @mock_repo.expects(:ingest).with(:pid => @this_pid).returns(@this_pid)
       @mock_repo.expects(:object).with(:pid => @this_pid).raises(RuntimeError)
       @mock_repo.expects(:datastreams).with(:pid => @this_pid).returns("")
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText',:pid => @this_pid).returns('asdf') 
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText2',:pid => @this_pid).returns('asdf') 
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'RELS-EXT',:pid => @this_pid).returns('asdf') 
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'someData',:pid => @this_pid).returns('asdf') 
 
       @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'withText2'}
       @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'withText'}
@@ -327,8 +317,6 @@ describe ActiveFedora::Base do
       to.save
     end
     it "should call .save on any datastreams that are new" do
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'ds_to_add',:pid => @this_pid).returns('asdf') 
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'RELS-EXT',:pid => @this_pid).returns('asdf') 
       ds = ActiveFedora::Datastream.new(@test_object.inner_object, 'ds_to_add')
       ds.content = "DS CONTENT"
       @test_object.add_datastream(ds)
@@ -351,10 +339,6 @@ describe ActiveFedora::Base do
 
       @test_object.inner_object.expects(:new?).returns(true).twice
       @test_object.inner_object.expects(:datastreams).returns({'someData'=>mock('obj', :changed? => false)})
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'someData',:pid => @test_object.pid).returns('asdf') 
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText',:pid => @test_object.pid).returns('asdf') 
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'withText2',:pid => @test_object.pid).returns('asdf') 
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'RELS-EXT',:pid => @test_object.pid).returns('asdf') 
       @test_object.datastreams["someData"].should_not be_nil
       @test_object.datastreams['someData'].stubs(:changed?).returns(false)
       @test_object.datastreams['someData'].stubs(:new?).returns(false)
@@ -367,8 +351,6 @@ describe ActiveFedora::Base do
     it "should update solr index with all metadata if any MetadataDatastreams have changed" do
       @mock_repo.expects(:ingest).with(:pid => nil)
       @mock_repo.expects(:modify_datastream).with{ |x| x[:pid] == nil && x[:dsid] == 'RELS-EXT'}
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'RELS-EXT',:pid => nil).returns('asdf') 
-      @mock_repo.expects(:datastream_dissemination).with(:dsid => 'ds1',:pid => nil).returns('asdf') 
       @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'ds1'}
       @mock_repo.expects(:datastream).with{ |x| x[:dsid] == 'ds1'}.returns("").at_least_once #raises(RuntimeError, "Fake Not found")
       @test_object.inner_object.expects(:new?).returns(true).twice
