@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.add_dependency("mediashelf-loggable")
   s.add_dependency("equivalent-xml")
   s.add_dependency("facets")
-  s.add_dependency("rubydora", '~>0.1.8')
+  s.add_dependency("rubydora", '~>0.1.9')
   s.add_dependency("rdf")
   s.add_dependency("rdf-rdfxml")
   s.add_development_dependency("yard")
