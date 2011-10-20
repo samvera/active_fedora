@@ -95,6 +95,7 @@ module ActiveFedora
     #  Solr must be synchronized with RELS-EXT data in Fedora.
     def from_solr(solr_doc)
       #cycle through all possible predicates
+      model.relationships_loaded = true
       ActiveFedora::Base.predicate_mappings[ActiveFedora::Base.default_predicate_namespace].keys.each do |predicate|
         predicate_symbol = ActiveFedora::SolrService.solr_name(predicate, :symbol)
         value = (solr_doc[predicate_symbol].nil? ? solr_doc[predicate_symbol.to_s]: solr_doc[predicate_symbol]) 

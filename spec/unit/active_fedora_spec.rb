@@ -346,7 +346,7 @@ describe ActiveFedora do
     describe "outside of rails" do
       it "should load the default packaged config/fedora.yml file if no explicit config path is passed" do
         ActiveFedora.init()
-        ActiveFedora.fedora.options[:url].to_s.should == "http://127.0.0.1:8983/fedora"
+        ActiveFedora.fedora.options[:url].to_s.should == "http://127.0.0.1:8983/fedora-test"
       end
       it "should load the passed config if explicit config passed in as a string" do
         ActiveFedora.init(:fedora_config_path=>'./spec/fixtures/rails_root/config/fedora.yml')
@@ -390,7 +390,7 @@ describe ActiveFedora do
           it "should load the default file if no config is found at Rails.root" do
             stub_rails(:root=>File.join(File.dirname(__FILE__),"../fixtures/bad/path/to/rails_root"))
             ActiveFedora.init()
-            ActiveFedora.fedora_config[:url].should == "http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"
+            ActiveFedora.fedora_config[:url].should == "http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora-test"
           end
         end
       end
