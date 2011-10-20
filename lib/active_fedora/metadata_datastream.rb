@@ -48,6 +48,7 @@ module ActiveFedora
     # ds.update_attributes({:myfield=>{"0"=>"a","1"=>"b"},:myotherfield=>{"-1"=>"c"}})
     #
     def update_indexed_attributes(params={}, opts={})
+      ensure_xml_loaded
       
       ##FIX this bug, it should delete it from a copy of params in case passed to another datastream for update since this will modify params
       ##for subsequent calls if updating more than one datastream in a single update_indexed_attributes call
@@ -105,6 +106,7 @@ module ActiveFedora
     
     
     def get_values(field_name, default=[])
+      ensure_xml_loaded  
       field_accessor_method = "#{field_name}_values"
       if respond_to? field_accessor_method
         values = self.send(field_accessor_method)
@@ -123,6 +125,7 @@ module ActiveFedora
     end
     
     def set_value(field_name, values)
+      ensure_xml_loaded  
       field_accessor_method = "#{field_name}_values="
       if respond_to? field_accessor_method
         values = self.send(field_accessor_method, values)
@@ -173,13 +176,16 @@ module ActiveFedora
       @fields[name.to_s.to_sym]={:type=>tupe, :values=>[]}.merge(opts)
       eval <<-EOS
         def #{name}_values=(arg)
+          ensure_xml_loaded  
           @fields["#{name.to_s}".to_sym][:values]=[arg].flatten
           self.dirty=true
         end
         def #{name}_values
+          ensure_xml_loaded  
           @fields["#{name}".to_sym][:values]
         end
         def #{name}_append(arg)
+          ensure_xml_loaded  
           @fields["#{name}".to_sym][:values] << arg
           self.dirty =true
         end

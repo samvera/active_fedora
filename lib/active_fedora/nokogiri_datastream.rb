@@ -23,6 +23,7 @@ module ActiveFedora
       self.class.from_xml(nil, self)
     end
 
+
     
     # Create an instance of this class based on xml content
     # @param [String, File, Nokogiri::XML::Node] xml the xml content to build from
@@ -296,6 +297,7 @@ module ActiveFedora
       if self.class.terminology.nil?
         raise "No terminology is set for this NokogiriDatastream class.  Cannot perform update_indexed_attributes"
       end
+      ensure_xml_loaded
       # remove any fields from params that this datastream doesn't recognize    
       # make sure to make a copy of params so not to modify hash that might be passed to other methods
       current_params = params.clone
@@ -317,6 +319,7 @@ module ActiveFedora
     end
     
     def get_values(field_key,default=[])
+      ensure_xml_loaded
       term_values(*field_key)
     end
 
@@ -342,6 +345,7 @@ module ActiveFedora
         #lazy load values from solr on demand
         get_values_from_solr(*term_pointer)
       else
+        ensure_xml_loaded
         om_term_values(*term_pointer)
       end
     end

@@ -30,6 +30,7 @@ describe ActiveFedora::Base do
     @mock_repo = mock("repository")
     ActiveFedora::DigitalObject.any_instance.expects(:repository).returns(@mock_repo).at_least_once
     @this_pid = increment_pid.to_s
+    @mock_repo.stubs(:datastream_dissemination)
     ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(@this_pid)
 
     @mock_repo.expects(:datastream).with{ |x| x[:dsid] == 'RELS-EXT'}.returns("").at_least_once #raises(RuntimeError, "Fake Not found")
@@ -118,6 +119,7 @@ describe ActiveFedora::Base do
       @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'withText'}
       @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'withText2'}
       @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'RELS-EXT'}
+      @mock_repo.expects(:datastream_dissemination).with(:pid => 'monkey:99', :dsid => 'RELS-EXT')
 
       @n = FooHistory.new(:pid=>"monkey:99")
       @n.expects(:update_index)
@@ -198,10 +200,10 @@ describe ActiveFedora::Base do
 
   describe '#add_relationship' do
     it 'should call #add_relationship on the rels_ext datastream' do
-      mock_rels_ext = mock("rels-ext")#, :add_relationship)
+      mock_rels_ext = mock("rels-ext")
       mock_rels_ext.expects(:dirty=).with(true)
       @test_object.expects(:relationship_exists?).returns(false).once()
-      @test_object.expects(:rels_ext).returns(mock_rels_ext) 
+      @test_object.expects(:rels_ext).returns(mock_rels_ext).at_least_once 
       @test_object.add_relationship("predicate", "object")
     end
 
@@ -392,7 +394,6 @@ describe ActiveFedora::Base do
       @test_object.save
     end
     it "should update solr index if relationships have changed" do
-      @mock_repo = mock('repository')
       @mock_repo.expects(:ingest).with(:pid => @test_object.pid)
       @test_object.inner_object.expects(:repository).returns(@mock_repo).at_least_once
       @test_object.inner_object.expects(:new?).returns(true).twice

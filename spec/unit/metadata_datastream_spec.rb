@@ -226,7 +226,8 @@ describe ActiveFedora::MetadataDatastream do
     end
     
     it "should insert custom element attrs into the xml stream" do
-      sds = SpecDatastream.new(nil, nil)
+      sds = SpecDatastream.new(@test_object.inner_object, nil)
+      sds.stubs(:content=>'')
       sds.mycomplicated_field_values='foo'
       sds.fields[:mycomplicated_field][:element_attrs].should == {:foo=>:bar, :baz=>:bat}
       expected_xml = '<fields><mycomplicated_field baz=\'bat\' foo=\'bar\'>foo</mycomplicated_field></fields>'
@@ -234,7 +235,8 @@ describe ActiveFedora::MetadataDatastream do
     end
     
     it "should add getters and setters and appenders with field name" do
-      local_test_ds = SpecDatastream.new(nil, nil)
+      local_test_ds = SpecDatastream.new(@test_object.inner_object, nil)
+      local_test_ds.stubs(:content=>'')
       local_test_ds.should respond_to(:publisher_values)
       local_test_ds.should respond_to(:publisher_append)
       local_test_ds.should respond_to(:publisher_values=)
@@ -251,8 +253,10 @@ describe ActiveFedora::MetadataDatastream do
     end
     
     it "should track field values at instance level, not at class level" do
-      local_test_ds1 = SpecDatastream.new(nil, nil)
-      local_test_ds2 = SpecDatastream.new(nil, nil)
+      local_test_ds1 = SpecDatastream.new(@test_object.inner_object, nil)
+      local_test_ds1.stubs(:content=>'')
+      local_test_ds2 = SpecDatastream.new(@test_object.inner_object, nil)
+      local_test_ds2.stubs(:content=>'')
       local_test_ds1.publisher_values = ["publisher1", "publisher2"]
       local_test_ds2.publisher_values = ["publisherA", "publisherB"]
       
@@ -261,19 +265,22 @@ describe ActiveFedora::MetadataDatastream do
     end
     
     it "should allow you to add field values using <<" do
-      local_test_ds1 = SpecDatastream.new(nil, nil)
+      local_test_ds1 = SpecDatastream.new(@test_object.inner_object, nil)
+      local_test_ds1.stubs(:content=>'')
       local_test_ds1.publisher_values << "publisher1"
       local_test_ds1.publisher_values.should == ["publisher1"] 
     end
     
     it "should create setter that always turns non-arrays into arrays" do
-      local_test_ds = SpecDatastream.new(nil, nil)
+      local_test_ds = SpecDatastream.new(@test_object.inner_object, nil)
+      local_test_ds.stubs(:content=>'')
       local_test_ds.publisher_values = "Foo"
       local_test_ds.publisher_values.should == ["Foo"]
     end
     
     it "should create setter that sets datastream.dirty? to true" do
-      local_test_ds = SpecDatastream.new(nil, nil)
+      local_test_ds = SpecDatastream.new(@test_object.inner_object, nil)
+      local_test_ds.stubs(:content=>'')
       local_test_ds.should_not be_dirty
       local_test_ds.publisher_values = "Foo"
       local_test_ds.should be_dirty

@@ -3,7 +3,7 @@ require 'solrizer/field_name_mapper'
 #this class represents a MetadataDatastream, a special case of ActiveFedora::Datastream
 module ActiveFedora::MetadataDatastreamHelper 
   
-  attr_accessor :fields
+  attr_accessor :fields, :xml_loaded
   
   module ClassMethods
     
@@ -19,6 +19,12 @@ module ActiveFedora::MetadataDatastreamHelper
   def self.included(klass)
     klass.extend(ClassMethods)
     klass.send(:include, Solrizer::FieldNameMapper)
+  end
+
+  def ensure_xml_loaded
+    return if xml_loaded
+    self.xml_loaded = true
+    self.class.from_xml content, self
   end
   
   def serialize! # :nodoc:

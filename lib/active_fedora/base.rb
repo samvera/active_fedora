@@ -49,8 +49,7 @@ module ActiveFedora
     end
     
     def new_object=(bool)
-      @new_object = bool
-      #inner_object.new_object = bool
+      ActiveSupport::Deprecation.warn("ActiveFedora::Base.new_object= has been deprecated and nolonger has any effect")
     end
 
     ## Required by associations
@@ -84,10 +83,9 @@ module ActiveFedora
         else
           attrs = attrs.merge!({:pid=>RubydoraConnection.instance.nextid})  
         end
-        @new_object=true
+        self.relationships_loaded = true
         @inner_object = DigitalObject.find(self.class, attrs[:pid])
       else
-        @new_object = attrs[:new_object] == false ? false : true
         @inner_object = DigitalObject.find(self.class, attrs[:pid])
         load_datastreams_from_fedora
       end
@@ -135,7 +133,6 @@ module ActiveFedora
       else
         result = update
       end
-      @new_object = false
       self.update_index if @metadata_is_dirty == true && ENABLE_SOLR_UPDATES
       @metadata_is_dirty == false
       return result
@@ -208,7 +205,10 @@ module ActiveFedora
           if ds_spec.last.class == Proc
             ds_spec.last.call(datastreams[dsid])
           end
-          klass.from_xml(datastreams[dsid].content, datastreams[dsid])  ### TODO, this is loading eagerly, we could load it as needed
+          # if klass.respond_to? :from_xml
+          #   ### TODO, this is loading eagerly, we could load it as needed
+          #   klass.from_xml(datastreams[dsid].content, datastreams[dsid])
+          # end
         end
       end
     end
@@ -508,7 +508,7 @@ module ActiveFedora
     #  has_datastream :name=>"external_images", :prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'E'
     #
     # Returns
-    #  {"external_images"=>[],"thumbnails"=>{#<ActiveFedora::Datastream:0x7ffd6512daf8 @new_object=true,...}} 
+    #  {"external_images"=>[],"thumbnails"=>{#<ActiveFedora::Datastream:0x7ffd6512daf8 ...}} 
     def named_datastreams
       ds_values = {}
       self.class.named_datastreams_desc.keys.each do |name|
@@ -872,7 +872,6 @@ module ActiveFedora
       create_date = solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date).to_s] : solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)]
       modified_date = solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrService.solr_name(:system_modified, :date).to_s] : solr_doc[ActiveFedora::SolrService.solr_name(:system_modified, :date)]
       obj = self.new({:pid=>solr_doc[SOLR_DOCUMENT_ID],:create_date=>create_date,:modified_date=>modified_date})
-      #obj.new_object = false
       #set by default to load any dependent relationship objects from solr as well
       #need to call rels_ext once so it exists when iterating over datastreams
       obj.rels_ext

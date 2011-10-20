@@ -5,17 +5,17 @@ require 'active_fedora'
 describe ActiveFedora::SemanticNode do
   
   before(:all) do 
-    class SpecNode
-      include ActiveFedora::RelationshipsHelper
-      include ActiveFedora::SemanticNode
-      has_relationship "collection_members", :has_collection_member
-      attr_accessor :rels_ext
-      def initialize
-        self.rels_ext = ActiveFedora::RelsExtDatastream.new(nil, nil)
-        rels_ext.model = self
-      end
+    class SNSpecNode < ActiveFedora::Base
+      # include ActiveFedora::RelationshipsHelper
+      # include ActiveFedora::SemanticNode
+      # has_relationship "collection_members", :has_collection_member
+      # attr_accessor :rels_ext
+      # def initialize
+      #   self.rels_ext = ActiveFedora::RelsExtDatastream.new(nil, nil)
+      #   rels_ext.model = self
+      # end
     end
-    @node = SpecNode.new
+    @node = SNSpecNode.new
     class SNSpecModel < ActiveFedora::Base
       has_relationship("parts", :is_part_of, :inbound => true)
       has_relationship("containers", :is_member_of)
@@ -148,7 +148,7 @@ describe ActiveFedora::SemanticNode do
   
   describe '#has_relationship' do
     it "should create useable finders" do
-      spec_node = SpecNode.new
+      spec_node = SNSpecNode.new
       spec_node.collection_members.should == []
       rel = ActiveFedora::Relationship.new(:subject => :self, :predicate => :has_collection_member, :object => @test_object.pid)  
       
@@ -434,17 +434,17 @@ describe ActiveFedora::SemanticNode do
 
   #putting this test here instead of relationships_helper because testing that relationships_by_name hash gets refreshed if the relationships hash is changed
   describe "relationships_by_name" do
-    class MockSemNamedRelationships 
-      include ActiveFedora::RelationshipsHelper
-      include ActiveFedora::SemanticNode
+    class MockSemNamedRelationships  < ActiveFedora::Base
+      # include ActiveFedora::RelationshipsHelper
+      # include ActiveFedora::SemanticNode
       has_relationship "testing", :has_part
       has_relationship "testing2", :has_member
       has_relationship "testing_inbound", :has_part, :inbound=>true
-      attr_accessor :rels_ext
-      def initialize
-        self.rels_ext = ActiveFedora::RelsExtDatastream.new(nil, nil)
-        rels_ext.model = self
-      end
+      # attr_accessor :rels_ext
+      # def initialize
+      #   self.rels_ext = ActiveFedora::RelsExtDatastream.new(nil, nil)
+      #   rels_ext.model = self
+      # end
     end
 
     it 'should automatically update the relationships_by_name if relationships has changed (no refresh of relationships_by_name hash unless relationships hash has changed' do
@@ -452,13 +452,13 @@ describe ActiveFedora::SemanticNode do
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockSemNamedRelationships)}) 
       @test_object2.add_relationship(r.predicate, r.object)
       #should return expected named relationships
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[], "collection_members"=>[], "part_of"=>[], "parts_outbound"=>[]}}
       r3 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@test_object})
       @test_object2.add_relationship(r3.predicate, r3.object)
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[], "collection_members"=>[], "part_of"=>[],  "parts_outbound"=>[r3.object]}}
       r4 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_member,:object=>"3"})
       @test_object2.add_relationship(r4.predicate, r4.object)
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object]}}
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object], "collection_members"=>[], "part_of"=>[],  "parts_outbound"=>[r3.object]}}
     end
   end
 end

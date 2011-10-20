@@ -1,6 +1,6 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
-# require File.join( File.dirname(__FILE__), "..", "samples", "models", "mods_article" )
 require "active_fedora/samples"
+
 describe ActiveFedora::Base do
 
   before(:all) do

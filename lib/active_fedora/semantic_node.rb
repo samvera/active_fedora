@@ -8,7 +8,7 @@ module ActiveFedora
       self.class_relationships = {}
       self.class_named_relationships_desc = {}
     end
-    attr_accessor :named_relationship_desc, :relationships_are_dirty, :load_from_solr, :subject #:internal_uri
+    attr_accessor :named_relationship_desc, :relationships_are_dirty, :relationships_loaded, :load_from_solr, :subject #:internal_uri
 
     #TODO I think we can remove named_relationship_desc from attr_accessor  - jcoyne
 
@@ -147,9 +147,17 @@ module ActiveFedora
     end
     
     def relationships
-#      @relationships ||= {:self=>{}}
       @subject ||=  RDF::URI.new(internal_uri)
       @relationships ||= RDF::Graph.new
+      load_relationships if !relationships_loaded
+      @relationships
+    end
+
+    def load_relationships
+      self.relationships_loaded = true
+      content = rels_ext.content
+      return unless content.present?
+      RelsExtDatastream.from_xml content, rels_ext
     end
     
     def relationships_from_class

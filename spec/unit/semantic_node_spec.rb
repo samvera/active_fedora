@@ -44,9 +44,11 @@ describe ActiveFedora::SemanticNode do
     end
     
     @node = SpecNode.new
+    @node.stubs(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>''))
     @node.pid = increment_pid
     @test_object = SpecNode2.new
     @test_object.pid = increment_pid    
+    @test_object.stubs(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>''))
     @stub_relationship = stub("mock_relationship", :subject => @pid, :predicate => "isMemberOf", :object => "demo:8", :class => ActiveFedora::Relationship)  
     @test_relationship = ActiveFedora::Relationship.new(:subject => @pid, :predicate => "isMemberOf", :object => "demo:9")  
     @test_relationship1 = ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "demo:10")  
@@ -183,7 +185,7 @@ describe ActiveFedora::SemanticNode do
       
       # local_node.add_relationship(ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "info:fedora/container:A") )
       # local_node.add_relationship(ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "info:fedora/container:B") )
-      local_node.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true)).twice
+      local_node.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).at_least_once
       local_node.add_relationship(:is_member_of, "info:fedora/container:A")
       local_node.add_relationship(:is_member_of, "info:fedora/container:B")
 
@@ -231,7 +233,7 @@ describe ActiveFedora::SemanticNode do
       @test_object2 = MockHasRelationship.new
       @test_object2.pid = increment_pid
       @test_object2.stubs(:testing_inbound).returns({})
-      @test_object2.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true))
+      @test_object2.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content =>'')).at_least_once
       @test_object2.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(SpecNode2))
       @test_object2.should respond_to(:testing_append)
       @test_object2.should respond_to(:testing_remove)
@@ -366,6 +368,7 @@ describe ActiveFedora::SemanticNode do
         mock_repo = mock("repo")
         mock_repo.expects(:find_model).never
         local_node.stubs(:internal_uri)
+        local_node.expects(:rels_ext).returns(stub('rels-ext', :content=>''))
         ActiveFedora::SolrService.instance.conn.expects(:query).returns(solr_result)
         local_node.constituents(:response_format => :solr).should equal(solr_result)
       end
@@ -380,7 +383,7 @@ describe ActiveFedora::SemanticNode do
       it "(:response_format => :id_array) should return an array of fedora PIDs" do
         SpecNode.create_outbound_relationship_finders("containers", :is_member_of)
         local_node = SpecNode.new
-        local_node.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true))
+        local_node.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).at_least_once
         local_node.add_relationship(@test_relationship1.predicate, @test_relationship1.object)
         result = local_node.containers_ids
         result.should be_instance_of(Array)
@@ -475,9 +478,9 @@ describe ActiveFedora::SemanticNode do
       @local_node2 = SpecNode.new
       @local_node2.pid = "mypid2"
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(SpecNode)}) 
-      @local_node.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true)).twice
+      @local_node.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).at_least_once
       @local_node.add_relationship(r.predicate, r.object)
-      @local_node2.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true)).twice
+      @local_node2.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).at_least_once
       @local_node2.add_relationship(r.predicate, r.object)
       r2 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@local_node2})
       @local_node.add_relationship(r2.predicate, r2.object)
@@ -494,7 +497,6 @@ describe ActiveFedora::SemanticNode do
   
   describe ".add_relationship" do
     it "should add relationship to the relationships hash" do
-      @node.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true))
       @node.add_relationship(@test_relationship.predicate, @test_relationship.object)
       @node.ids_for_outbound("isMemberOf").should == ['demo:9']
     end
@@ -502,8 +504,9 @@ describe ActiveFedora::SemanticNode do
     it "adding relationship to an instance should not affect class-level relationships hash" do 
       local_test_node1 = SpecNode.new
       local_test_node2 = SpecNode.new
-      local_test_node1.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true))
+      local_test_node1.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).at_least_once
       local_test_node1.add_relationship(@test_relationship1.predicate, @test_relationship1.object)
+      local_test_node2.expects(:rels_ext).returns(stub('rels-ext', :content=>''))
       
       local_test_node1.ids_for_outbound(:is_member_of).should == ["demo:10"]
       local_test_node2.ids_for_outbound(:is_member_of).should == []
@@ -557,7 +560,7 @@ describe ActiveFedora::SemanticNode do
     it 'should remove a relationship from the relationships hash' do
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>"info:fedora/3"})
       r2 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>"info:fedora/4"})
-      @test_object.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true)).times(5)
+      @test_object.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).times(6)
       @test_object.add_relationship(r.predicate, r.object)
       @test_object.add_relationship(r2.predicate, r2.object)
       #check both are there

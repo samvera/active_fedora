@@ -76,8 +76,6 @@ module ActiveFedora
         end
         results = hits.map do |hit|
           obj = RubydoraConnection.instance.find_model(hit[SOLR_DOCUMENT_ID], self)
-          #obj.inner_object.new_object = false
-          #return obj
         end
         if return_multiple == true
           return results

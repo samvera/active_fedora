@@ -19,7 +19,6 @@ describe ActiveFedora::Base do
   
   before(:each) do
     @test_object = ActiveFedora::Base.new
-    @test_object.new_object = true
   end
 
   after(:each) do
@@ -49,7 +48,6 @@ describe ActiveFedora::Base do
     it 'should return fedora objects of the model of self that match the given solr query, queries the active_fedora solr instance' do
       #get objects into fedora and solr
       @test_object2 = MockAFBaseQuerySolr.new
-      @test_object2.new_object = true
       attributes = {"holding_id"=>{0=>"Holding 1"},
                     "language"=>{0=>"Italian"},
                     "creator"=>{0=>"Linguist, A."},
@@ -59,7 +57,6 @@ describe ActiveFedora::Base do
       @test_object2.save
       
       @test_object3 = MockAFBaseQuerySolr.new
-      @test_object3.new_object = true
       attributes = {"holding_id"=>{0=>"Holding 2"},
                     "language"=>{0=>"Spanish;Latin"},
                     "creator"=>{0=>"Linguist, A."},
@@ -69,7 +66,6 @@ describe ActiveFedora::Base do
       @test_object3.save      
 
       @test_object4 = MockAFBaseQuerySolr.new
-      @test_object4.new_object = true
       attributes = {"holding_id"=>{0=>"Holding 3"},
                     "language"=>{0=>"Spanish;Latin"},
                     "creator"=>{0=>"Linguist, A."},
