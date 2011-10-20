@@ -7,10 +7,12 @@ $: << 'lib'
 require 'active_support'
 require 'active_model'
 
+
 require 'active_fedora/solr_service.rb'
 require "solrizer"
 
 require 'ruby-fedora'
+require 'active_fedora/railtie' if defined? Rails
 
 SOLR_DOCUMENT_ID = ActiveFedora::SolrService.id_field unless defined?(SOLR_DOCUMENT_ID)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
