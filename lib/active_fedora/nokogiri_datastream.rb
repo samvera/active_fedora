@@ -32,7 +32,7 @@ module ActiveFedora
     def self.from_xml(xml, tmpl=nil)
       tmpl = self.new(nil, nil) if tmpl.nil?  ## This path is used only for unit testing (e.g. MarpaDCDatastream.from_xml(fixture("data.xml")) )
 
-      if xml.nil?
+      if !xml.present?
         tmpl.ng_xml = self.xml_template
       elsif xml.kind_of? Nokogiri::XML::Node || xml.kind_of?(Nokogiri::XML::Document)
         tmpl.ng_xml = xml

@@ -20,16 +20,14 @@ module ActiveFedora
       DCTERMS.each do |el|
         field el, :string, :multiple=>true
       end
-      ###TODO this is loading eagerly, but we could make it lazy
-      self.class.from_xml(content, self)
-      self
+      self.class.from_xml(nil, self)
     end
     
     # Populate a QualifiedDublinCoreDatastream object based on the "datastream" node from a FOXML file
     # @param [String] node the xml from the content.  Assumes that the content of this datastream is that of an ActiveFedora QualifiedDublinCoreDatastream 
     # @param [ActiveFedora::Datastream] tmpl the Datastream object that you are building
     def self.from_xml(xml, tmpl) # :nodoc:
-      return if xml.nil?
+      return if !xml.present?
       node = Nokogiri::XML::Document.parse(xml)
       tmpl.fields.each do |z|
         fname = z.first
@@ -47,9 +45,13 @@ module ActiveFedora
       tmpl
     end
 
-  def to_xml() 
-    to_dc_xml() 
-  end
+    def to_xml() 
+      to_dc_xml() 
+    end
+
+    def self.xml_template
+       Nokogiri::XML::Document.parse("<dc xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'/>")
+    end
 
    #Render self as a Fedora DC xml document.
    def to_dc_xml
