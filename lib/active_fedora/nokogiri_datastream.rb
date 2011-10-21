@@ -17,13 +17,6 @@ module ActiveFedora
     
     attr_accessor :internal_solr_doc
     attr_reader :ng_xml
-
-    def initialize(digital_object, dsid)
-      super
-      self.class.from_xml(nil, self)
-    end
-
-
     
     # Create an instance of this class based on xml content
     # @param [String, File, Nokogiri::XML::Node] xml the xml content to build from
@@ -64,7 +57,9 @@ module ActiveFedora
     end
     
     
-    def to_xml(xml = self.ng_xml)
+    def to_xml(xml = nil)
+      ensure_xml_loaded
+      xml = self.ng_xml if xml.nil?
       ng_xml = self.ng_xml
       if ng_xml.respond_to?(:root) && ng_xml.root.nil? && self.class.respond_to?(:root_property_ref) && !self.class.root_property_ref.nil?
         ng_xml = self.class.generate(self.class.root_property_ref, "")
@@ -321,6 +316,12 @@ module ActiveFedora
     def get_values(field_key,default=[])
       ensure_xml_loaded
       term_values(*field_key)
+    end
+
+
+    def find_by_terms(*termpointer)
+      ensure_xml_loaded
+      super
     end
 
     # Update values in the datastream's xml

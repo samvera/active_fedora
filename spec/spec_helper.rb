@@ -1,6 +1,8 @@
 ENV["environment"] ||= 'test'
 require 'active-fedora'
 require 'spec'
+require 'equivalent-xml/rspec_matchers'
+
 
 logger.level = Logger::WARN if logger.respond_to? :level ###MediaShelf StubLogger doesn't have a level= method
 

@@ -15,8 +15,8 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   
   before(:each) do
     ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns("_nextid_")
-    ActiveFedora::QualifiedDublinCoreDatastream.any_instance.expects(:content).at_least_once
     @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new(nil, nil)
+    @test_ds.stubs(:content).returns('')
 
   end
   it "from_xml should parse everything correctly" do
@@ -64,6 +64,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   it "should have identity in and out" do
     sample = fixture('oh_qdc.xml')
     tmpl = OralHistorySampleModel.new.datastreams['dublin_core']
+    tmpl.expects(:content).returns('')
     x1 = Nokogiri::XML::Document.parse(sample).xpath('/wrapper/foxml:datastream/foxml:datastreamVersion/foxml:xmlContent/dc').first.to_xml
     z = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(x1, tmpl)
     y = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(z.to_dc_xml, tmpl)
@@ -72,6 +73,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
 
   it "should handle arbitrary attribs" do
     tmpl = OralHistorySampleModel.new.datastreams['dublin_core']
+    tmpl.expects(:content).returns('')
     tmpl.field :mycomplicated, :string, :xml_node=>'alt', :element_attrs=>{:foo=>'bar'}
     tmpl.mycomplicated_values='fubar'
     tmpl.to_dc_xml.should == '<dc xmlns:xsi=\'http://www.w3.org/2001/XMLSchema-instance\' xmlns:dcterms=\'http://purl.org/dc/terms/\'><dcterms:alt foo=\'bar\'>fubar</dcterms:alt></dc>'
@@ -83,7 +85,9 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   it "should parse dcterms and dcelements from xml" do
     doc = Nokogiri::XML::Document.parse(File.open( File.dirname(__FILE__)+'/../fixtures/changeme155.xml') )
     stream = doc.xpath('//foxml:datastream[@ID=\'dublin_core\']/foxml:datastreamVersion/foxml:xmlContent/dc')
-    n = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(stream.to_xml, ActiveFedora::QualifiedDublinCoreDatastream.new(nil, nil))
+    ds = ActiveFedora::QualifiedDublinCoreDatastream.new(nil, nil)
+    ds.expects(:content).returns('')
+    n = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(stream.to_xml, ds)
     n.spatial_values.should == ["Boston [7013445]", "Dorchester [7013575]", "Roxbury [7015002]"] 
     n.title_values.should ==  ["Oral history with Frances Addelson, 1997 November 14"]
     n.dirty?.should == false

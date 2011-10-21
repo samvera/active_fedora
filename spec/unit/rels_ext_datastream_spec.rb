@@ -1,7 +1,5 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
 
-require 'equivalent-xml'
-
 describe ActiveFedora::RelsExtDatastream do
   
   before(:all) do

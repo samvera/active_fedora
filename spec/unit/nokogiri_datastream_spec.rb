@@ -9,7 +9,6 @@ describe ActiveFedora::NokogiriDatastream do
                       :mydate => {:values => "fake-date", :type => :date},
                       :empty_field => {:values => {}}
                       } 
-    @sample_xml = XmlSimple.xml_in("<fields><coverage>coverage1</coverage><coverage>coverage2</coverage><creation_date>fake-date</creation_date><mydate>fake-date</mydate><publisher>publisher1</publisher></fields>")
     @sample_raw_xml = "<foo><xmlelement/></foo>"
     @solr_doc = {"id"=>"hydrange_article1","name_role_roleTerm_t"=>["creator","submitter","teacher"],"name_0_role_t"=>"\r\ncreator\r\nsubmitter\r\n","name_1_role_t"=>"\r\n teacher \r\n","name_0_role_0_roleTerm_t"=>"creator","name_0_role_1_roleTerm_t"=>"submitter","name_1_role_0_roleTerm_t"=>["teacher"]}
   end
@@ -43,7 +42,10 @@ describe ActiveFedora::NokogiriDatastream do
     end
     it "should initialize from #xml_template if no xml is provided" do
       ActiveFedora::NokogiriDatastream.expects(:xml_template).returns("<fake template/>")
-      ActiveFedora::NokogiriDatastream.new(nil, nil).ng_xml.should be_equivalent_to("<fake template/>")
+      n = ActiveFedora::NokogiriDatastream.new(nil, nil)
+      n.expects(:content).returns('')
+      n.ensure_xml_loaded
+      n.ng_xml.should be_equivalent_to("<fake template/>")
     end
   end
   
@@ -88,14 +90,6 @@ describe ActiveFedora::NokogiriDatastream do
     
     ### Examples copied over form metadata_datastream_spec
     
-    # it "should support single-value arguments (as opposed to a hash of values with array indexes as keys)" do
-    #   # In other words, { "fubar"=>"dork" } should have the same effect as { "fubar"=>{"0"=>"dork"} }
-    #   pending "this should be working, but for some reason, the updates don't stick"
-    #   result = @test_ds.update_indexed_attributes( { "fubar"=>"dork" } )
-    #   result.should == {"fubar"=>{"0"=>"dork"}}
-    #   @test_ds.fubar_values.should == ["dork"]
-    # end
-    # 
     it "should work for text fields" do 
       pending if ENV['HUDSON_BUILD'] == 'true'  # This test fails en suite in hudson
       att= {[{"person"=>"0"},"description"]=>{"-1"=>"mork", "1"=>"york"}}
@@ -113,43 +107,7 @@ describe ActiveFedora::NokogiriDatastream do
       result = @mods_ds.update_indexed_attributes [{"title_info"=>"0"},"main_title"]=>{"-1"=>"mork"}
       result.should == {"title_info_0_main_title"=>{"2"=>"mork"}}
     end
-    # 
-    # it "should return accurate response when multiple values have been added in a single run" do
-    #   pending
-    #   att= {"swank"=>{"-1"=>"mork", "0"=>"york"}}
-    #   @test_ds.update_indexed_attributes(att).should == {"swank"=>{"0"=>"york", "1"=>"mork"}}
-    # end
-    
-    # it "should deal gracefully with adding new values at explicitly declared indexes" do
-    #   @mods_ds.update_indexed_attributes([:journal, :title]=>["all", "for", "the"]
-    #   att = {"fubar"=>{"3"=>'glory'}}
-    #   result = @test_ds.update_indexed_attributes(att)
-    #   result.should == {"fubar"=>{"3"=>"glory"}}
-    #   @test_ds.fubar_values.should == ["all", "for", "the", "glory"]
-    #   
-    #   @test_ds.fubar_values = []
-    #   result = @test_ds.update_indexed_attributes(att)
-    #   result.should == {"fubar"=>{"0"=>"glory"}}
-    #   @test_ds.fubar_values.should == ["glory"]
-    # end
-    # 
-    # it "should allow deleting of values and should delete values so that to_xml does not return emtpy nodes" do
-    #   att= {[{"person"=>"0"},"description"]=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}} 
-    #   @mods_ds.update_indexed_attributes(att)
-    #   @mods_ds.fubar_values.should == ['mork', 'york', 'mangle']
-    #   rexml = REXML::Document.new(@test_ds.to_xml)
-    #   #puts rexml.root.elements.each {|el| el.to_s}
-    #   #puts rexml.root.elements.to_a.inspect
-    #   rexml.root.elements.to_a.length.should == 3
-    #   @mods_ds.update_indexed_attributes({[{"person"=>"0"},"description"]=>{"1"=>""}})
-    #   @mods_ds.fubar_values.should == ['mork', 'mangle']
-    #   rexml = REXML::Document.new(@test_ds.to_xml)
-    #   rexml.root.elements.to_a.length.should == 2
-    #   @mods_ds.update_indexed_attributes({[{"person"=>"0"},"description"]=>{"0"=>:delete}})
-    #   @mods_ds.fubar_values.should == ['mangle']
-    #   rexml = REXML::Document.new(@test_ds.to_xml)
-    #   rexml.root.elements.to_a.length.should == 1
-    # end
+
     it "should allow deleting of values and should delete values so that to_xml does not return emtpy nodes" do
       pending if ENV['HUDSON_BUILD'] == 'true'  # This test fails en suite in hudson
       att= {[{"person"=>"0"},"description"]=>{"0"=>"york", "1"=>"mangle","2"=>"mork"}}
@@ -191,20 +149,6 @@ describe ActiveFedora::NokogiriDatastream do
       @mods_ds.expects(:term_values).with("--my xpath--").returns(["abstract1", "abstract2"])
       @mods_ds.get_values("--my xpath--").should == ["abstract1", "abstract2"]
     end
-    it "should assume field_names that are symbols or arrays are pointers to accessors declared in this datastreams model" do
-      pending "This shouldn't be necessary -- OX::XML::PropertyValueOpertators.property_values deals with it internally..."
-      ActiveFedora::NokogiriDatastream.expects(:accessor_xpath).with(:abstract).returns("--abstract xpath--")
-      ActiveFedora::NokogiriDatastream.expects(:accessor_xpath).with(*[{:person=>1}]).returns("--person xpath--")
-      ActiveFedora::NokogiriDatastream.expects(:accessor_xpath).with(*[{:person=>1},{:role=>1},:text]).returns("--person role text xpath--")     
-      
-      @mods_ds.expects(:property_values).with("--abstract xpath--").returns(["abstract1", "abstract2"])
-      @mods_ds.expects(:property_values).with("--person xpath--").returns(["person1", "person2"])
-      @mods_ds.expects(:property_values).with("--person role text xpath--").returns(["text1"])
-      
-      @mods_ds.get_values(:abstract).should == ["abstract1", "abstract2"]
-      @mods_ds.get_values([{:person=>1}]).should == ["person1", "person2"]
-      @mods_ds.get_values([{:person=>1},{:role=>1},:text]).should == ["text1"]
-    end
   end
   
   describe '#from_xml' do
@@ -213,12 +157,6 @@ describe ActiveFedora::NokogiriDatastream do
       tmpl = Hydra::ModsArticleDatastream.new(nil, nil)
       Hydra::ModsArticleDatastream.from_xml(mods_xml,tmpl).ng_xml.root.to_xml.should == mods_xml.root.to_xml
       tmpl.dirty?.should be_false
-    end
-    it "should work when foxml datastream xml is passed in" do
-      pending "at least for now, just updated Base.deserialize to feed in the xml content rather than the foxml datstream xml.  Possibly we can update MetadataDatstream to assume the same and leave it at that? -MZ 23-06-2010"
-      hydrangea_article_foxml = Nokogiri::XML::Document.parse( fixture("hydrangea_fixture_mods_article1.foxml.xml") )
-      ds_xml = hydrangea_article_foxml.at_xpath("//foxml:datastream[@ID='descMetadata']")
-      Hydra::ModsArticleDatastream.from_xml(ds_xml).ng_xml.to_xml.should == hydrangea_article_foxml.at_xpath("//foxml:datastream[@ID='descMetadata']/foxml:datastreamVersion[last()]/foxml:xmlContent").first_element_child.to_xml
     end
   end
   
@@ -272,34 +210,29 @@ describe ActiveFedora::NokogiriDatastream do
     end
     
     it "should ng_xml.to_xml" do
-      @test_ds.ng_xml.expects(:to_xml).returns("xml")
-      @test_ds.to_xml.should == "xml"       
+      @test_ds.expects(:ng_xml).returns(Nokogiri::XML::Document.parse("<text_document/>")).twice
+      @test_ds.to_xml.should == "<text_document/>\n"       
     end
     
     it 'should accept an optional Nokogiri::XML Document as an argument and insert its fields into that (mocked test)' do
       doc = Nokogiri::XML::Document.parse("<test_document/>")
-      doc.root.expects(:add_child).with(@test_ds.ng_xml.root)
+      doc.root.expects(:add_child)#.with(@test_ds.ng_xml.root)
       @test_ds.to_xml(doc)
     end
     
     it 'should accept an optional Nokogiri::XML Document as an argument and insert its fields into that (functional test)' do
-      expected_result = XmlSimple.xml_in("<test_document><foo/><test_xml/></test_document>")
+      expected_result = "<test_document><foo/><test_xml/></test_document>"
       doc = Nokogiri::XML::Document.parse("<test_document><foo/></test_document>")
       result = @test_ds.to_xml(doc)
-      XmlSimple.xml_in(doc.to_s).should == expected_result
-      XmlSimple.xml_in(result).should == expected_result
+      doc.should be_equivalent_to expected_result
+      result.should be_equivalent_to expected_result
     end
     
     it 'should add to root of Nokogiri::XML::Documents, but add directly to the elements if a Nokogiri::XML::Node is passed in' do
-      mock_new_node = mock("new node")
-      mock_new_node.stubs(:to_xml).returns("foo")
-      
       doc = Nokogiri::XML::Document.parse("<test_document/>")
       el = Nokogiri::XML::Node.new("test_element", Nokogiri::XML::Document.new)
-      doc.root.expects(:add_child).with(@test_ds.ng_xml.root).returns(mock_new_node)
-      el.expects(:add_child).with(@test_ds.ng_xml.root).returns(mock_new_node)
-      @test_ds.to_xml(doc).should 
-      @test_ds.to_xml(el)
+      @test_ds.to_xml(doc).should be_equivalent_to "<test_document><test_xml/></test_document>"
+      @test_ds.to_xml(el).should be_equivalent_to "<test_element/>"
     end
     
   end

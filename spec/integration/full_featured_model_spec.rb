@@ -114,25 +114,6 @@ describe ActiveFedora::Base do
     @test_history.should be_kind_of(ActiveFedora::Base)
   end
   
-  it "should reflect all of the metadata fields" do
-    pending
-    properties_ds = @test_history.datastreams["properties"]
-    dublin_core_ds = @test_history.datastreams["dublin_core"]
-    
-    @properties_sample_values.each do |field, value|
-      properties_ds.send("#{field.to_s}_values=",value)
-    end
-    
-    @dublin_core_sample_values.each do |field, value|
-      dublin_core_ds.send("#{field.to_s}_values=",[value])
-    end
-    
-    @test_history.save
-    
-    retrieved_obj = OralHistory.find(@test_history.pid)
-    retrieved_obj.inner_object.should_not be_new_object
-    
-  end
 
   it "should create proxies to all the datastreams" do
     properties_ds = @test_history.datastreams["properties"]
@@ -143,35 +124,6 @@ describe ActiveFedora::Base do
     OralHistory.new.should respond_to(:properties)
   end 
 
-  it "t1" do# should load all of the metadata fields from fedora xml" do
-    pending
-    properties_ds = @test_history.datastreams["properties"]
-    dublin_core_ds = @test_history.datastreams["dublin_core"]
-    
-    
-    @properties_sample_values.each do |field, value|
-      properties_ds.send("#{field.to_s}_values=", [value])
-    end
-    
-    @dublin_core_sample_values.each do |field, value|
-      dublin_core_ds.send("#{field.to_s}_values=", [value])
-    end
-    
-    @test_history.save
-    
-    @retrieved_history = OralHistory.find(@test_history.pid).first
-    retrieved_properties_ds = @retrieved_history.datastreams["properties"]
-    retrieved_dublin_core_ds = @retrieved_history.datastreams["dublin_core"]
-    retrieved_properties_ds.should_not be_nil
-    retrieved_dublin_core_ds.should_not be_nil
-    @properties_sample_values.each do |field, value|
-      retrieved_properties_ds.send("#{field.to_s}_values").should == [value]
-    end
-    
-    @dublin_core_sample_values.each do |field, value|
-      retrieved_dublin_core_ds.send("#{field.to_s}_values").should == [value]
-    end    
-  end
     
   it "should push all of the metadata fields into solr" do
     # TODO: test must test values using solr symbol names (ie. _field, _text and _date)
