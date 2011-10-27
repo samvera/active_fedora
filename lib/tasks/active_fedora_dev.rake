@@ -31,7 +31,7 @@ task :hudson do
   Rake::Task["active_fedora:doc"].invoke
   Rake::Task["active_fedora:configure_jetty"].invoke
   jetty_params = Jettywrapper.load_config
-  jetty_params[:startup_wait]= 20
+  jetty_params[:startup_wait]= 30
   error = Jettywrapper.wrap(jetty_params) do
     Rake::Task["active_fedora:load_fixtures"].invoke
     Rake::Task["active_fedora:rspec"].invoke
