@@ -520,7 +520,7 @@ describe ActiveFedora::Base do
     end
     it "should call .to_solr on the RELS-EXT datastream if it is dirty" do
       @mock_repo.expects(:object).with(:pid => @this_pid).returns("")
-      @test_object.add_relationship(:has_collection_member, "foo member")
+      @test_object.add_relationship(:has_collection_member, "info:fedora/foo:member")
       rels_ext = @test_object.rels_ext
       rels_ext.dirty?.should == true
       rels_ext.expects(:to_solr)

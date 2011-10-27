@@ -79,7 +79,7 @@ describe ActiveFedora::RelsExtDatastream do
       @test_obj.delete
     end
     it "should handle un-mapped predicates gracefully" do
-      @test_obj.add_relationship("foo", "foo:bar")
+      @test_obj.add_relationship("foo", "info:fedora/foo:bar")
       @test_obj.save
       @test_obj.relationships.size.should == 5 
       @test_obj.ids_for_outbound("foo").should == ["foo:bar"]

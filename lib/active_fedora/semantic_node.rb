@@ -47,7 +47,6 @@ module ActiveFedora
     # @param target an object to store
     def build_statement(uri, predicate, target)
       raise "Not allowed anymore" if uri == :self
-      raise "Doesn't seem to be a URI(#{uri})" unless /^info/.match(uri)
       target = target.internal_uri if target.respond_to? :internal_uri
       subject =  RDF::URI.new(uri)  #TODO cache
       begin
@@ -55,6 +54,7 @@ module ActiveFedora
       rescue URI::InvalidURIError
         literal = false
       end
+      raise ArgumentError, "Invalid target \"#{target}\". Must have namespace." unless literal || /^info/.match(target)
       object = literal ? RDF::Literal.new(target) : RDF::URI.new(target)
 
        RDF::Statement.new(subject, find_graph_predicate(predicate), object)

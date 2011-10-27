@@ -4,7 +4,7 @@ describe ActiveFedora::Base do
   
   before(:each) do
     @test_container = ActiveFedora::Base.new
-    @test_container.add_relationship(:has_collection_member, "foo:2")
+    @test_container.add_relationship(:has_collection_member, "info:fedora/foo:2")
     @test_container.save
   end
   
