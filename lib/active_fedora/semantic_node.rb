@@ -42,13 +42,14 @@ module ActiveFedora
     end
 
     # Create an RDF statement
-    # @param pid a string represending the pid of the subject
+    # @param uri a string represending the subject
     # @param predicate a predicate symbol
     # @param target an object to store
-    def build_statement(pid, predicate, target)
-      raise "Not allowed anymore" if pid == :self
+    def build_statement(uri, predicate, target)
+      raise "Not allowed anymore" if uri == :self
+      raise "Doesn't seem to be a URI(#{uri})" unless /^info/.match(uri)
       target = target.internal_uri if target.respond_to? :internal_uri
-      subject =  RDF::URI.new(pid)  #TODO cache
+      subject =  RDF::URI.new(uri)  #TODO cache
       begin
         literal = URI.parse(target).scheme.nil?
       rescue URI::InvalidURIError
@@ -147,7 +148,10 @@ module ActiveFedora
     end
     
     def relationships
-      @subject ||=  RDF::URI.new(internal_uri)
+      unless @subject 
+        raise "Must have internal_uri" unless internal_uri
+        @subject =  RDF::URI.new(internal_uri)
+      end
       @relationships ||= RDF::Graph.new
       load_relationships if !relationships_loaded
       @relationships

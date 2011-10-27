@@ -56,7 +56,6 @@ module ActiveFedora
           writer << statement
         end
       end
-
       xml
 
     end

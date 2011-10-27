@@ -9,6 +9,9 @@ class SpecNode2
   include ActiveFedora::SemanticNode
   
   attr_accessor :pid
+  def internal_uri
+    'info:fedora/' + pid.to_s
+  end
 end
 
 describe ActiveFedora::SemanticNode do
@@ -34,12 +37,18 @@ describe ActiveFedora::SemanticNode do
       def initialize (params={}) 
         self.pid = params[:pid]
       end
+      def internal_uri
+        'info:fedora/' + pid.to_s
+      end
     end
   
     class AudioRecord
       attr_accessor :pid
       def initialize (params={}) 
         self.pid = params[:pid]
+      end
+      def internal_uri
+        'info:fedora/' + pid.to_s
       end
     end
     
@@ -367,7 +376,6 @@ describe ActiveFedora::SemanticNode do
         local_node = SpecNode.new
         mock_repo = mock("repo")
         mock_repo.expects(:find_model).never
-        local_node.stubs(:internal_uri)
         local_node.expects(:rels_ext).returns(stub('rels-ext', :content=>''))
         ActiveFedora::SolrService.instance.conn.expects(:query).returns(solr_result)
         local_node.constituents(:response_format => :solr).should equal(solr_result)
