@@ -577,7 +577,7 @@ module ActiveFedora
           ##TODO, this is all done by rubydora -- remove
           ds.mimeType = blob.respond_to?(:content_type) ? blob.content_type : "application/octet-stream"
         end
-        if !ds.dsLabel.present?
+        if !ds.dsLabel.present? && blob.respond_to?(:path)
           ds.dsLabel = File.basename(blob.path)
 #          ds.dsLabel = blob.original_filename
         end

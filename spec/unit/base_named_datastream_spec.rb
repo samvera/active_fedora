@@ -240,6 +240,12 @@ describe ActiveFedora::Base do
       ds.dsLabel.should == "minivan.jpg"
       ds.mimeType.should == "image/jpeg"
     end
+    it 'should create a datastream object from a string' do
+      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:blob=>"My file data"})
+      ds.class.should == ActiveFedora::Datastream
+      ds.dsLabel.should == ""
+      ds.mimeType.should == "application/octet-stream"
+    end
   end
   
   it 'should provide #is_named_datastream?' do

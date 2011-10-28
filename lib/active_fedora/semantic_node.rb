@@ -253,8 +253,10 @@ module ActiveFedora
     
     module ClassMethods
       def vocabularies
-        @vocabularies ||= {"info:fedora/fedora-system:def/relations-external#" =>  RDF::Vocabulary.new("info:fedora/fedora-system:def/relations-external#"),
-        "info:fedora/fedora-system:def/model#" =>  RDF::Vocabulary.new("info:fedora/fedora-system:def/model#")}
+        return @vocabularies if @vocabularies
+        @vocabularies = {}
+        predicate_mappings.keys.each { |ns| @vocabularies[ns] = RDF::Vocabulary.new(ns)}
+        @vocabularies
       end
 
       # Allows for a relationship to be treated like any other attribute of a model class. You define

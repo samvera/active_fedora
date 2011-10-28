@@ -1,6 +1,11 @@
 require File.join( File.dirname(__FILE__), "../spec_helper" )
 
 describe ActiveFedora::RelsExtDatastream do
+  describe "short_predicate" do
+    it 'should parse' do
+      ActiveFedora::RelsExtDatastream.short_predicate('http://www.openarchives.org/OAI/2.0/itemID').should == :oai_item_id
+    end
+  end
   
   before(:all) do
     @pid = "test:sample_pid"
@@ -20,6 +25,7 @@ describe ActiveFedora::RelsExtDatastream do
   it 'should respond to #save' do
     @test_ds.should respond_to(:save)
   end
+  
   
   describe '#serialize!' do
     

@@ -16,7 +16,6 @@ module ActiveFedora
     alias_method(:om_update_values, :update_values) unless method_defined?(:om_update_values)
     
     attr_accessor :internal_solr_doc
-    attr_reader :ng_xml
     
     # Create an instance of this class based on xml content
     # @param [String, File, Nokogiri::XML::Node] xml the xml content to build from
@@ -39,8 +38,14 @@ module ActiveFedora
     def self.xml_template
       Nokogiri::XML::Document.parse("<xml/>")
     end
+
+    def ng_xml 
+      ensure_xml_loaded
+      return @ng_xml
+    end
     
     def ng_xml=(new_xml)
+      self.xml_loaded=true
       case new_xml 
       when Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node
         @ng_xml = new_xml
