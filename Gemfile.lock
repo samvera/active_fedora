@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active-fedora (3.1.0.pre10)
+    active-fedora (3.1.0.rc2)
       activeresource (~> 3.0.0)
       activesupport (~> 3.0.0)
       equivalent-xml
@@ -13,7 +13,7 @@ PATH
       om (>= 1.4.3)
       rdf
       rdf-rdfxml
-      rubydora (~> 0.1.9)
+      rubydora (= 0.2.1)
       solr-ruby (>= 0.0.6)
       solrizer (> 1.0.0)
       xml-simple (>= 1.0.12)
@@ -59,7 +59,7 @@ GEM
     logger (1.2.8)
     mediashelf-loggable (0.4.7)
     metaclass (0.0.1)
-    mime-types (1.16)
+    mime-types (1.17.2)
     mocha (0.10.0)
       metaclass (~> 0.0.1)
     multipart-post (1.1.2)
@@ -87,7 +87,7 @@ GEM
       ruby-debug-base (~> 0.10.4.0)
     ruby-debug-base (0.10.4)
       linecache (>= 0.3)
-    rubydora (0.1.9)
+    rubydora (0.2.1)
       activemodel
       activesupport
       fastercsv

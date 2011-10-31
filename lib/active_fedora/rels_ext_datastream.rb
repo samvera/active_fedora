@@ -10,7 +10,6 @@ module ActiveFedora
     include Solrizer::FieldNameMapper
     attr_accessor :model
     
-    
     def changed?
       (model && model.relationships_are_dirty) || super
     end

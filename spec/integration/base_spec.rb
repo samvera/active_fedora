@@ -36,6 +36,31 @@ class MockAFBaseFromSolr < ActiveFedora::Base
   end
 end
 
+describe "Datastreams synched together" do
+  before do
+    class DSTest < ActiveFedora::Base
+      def configure_defined_datastreams
+        super
+        unless self.datastreams.keys.include? 'test_ds'
+         add_file_datastream("XXX",:dsid=>'test_ds', :mimeType=>'text/html')
+        end
+      end
+    end
+  end
+  it "Should update datastream" do
+    @nc = DSTest.new
+    @nc.save
+    @nc.test_ds.content.should == 'XXX'
+    ds  = @nc.datastreams['test_ds']
+    ds.content = "Foobar"
+    @nc.save
+    DSTest.find(@nc.pid).datastreams['test_ds'].content.should == 'Foobar'
+    DSTest.find(@nc.pid).test_ds.content.should == 'Foobar'
+  end
+
+end
+
+
 describe ActiveFedora::Base do
   
   before(:all) do
@@ -738,8 +763,8 @@ describe ActiveFedora::Base do
       minivan = f.read
       f.rewind
       f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
-      dino = f.read
-      f.rewind
+      dino = f2.read
+      f2.rewind
       f.stubs(:content_type).returns("image/jpeg")
       f.stubs(:original_filename).returns("minivan.jpg")
       f2.stubs(:content_type).returns("image/jpeg")
