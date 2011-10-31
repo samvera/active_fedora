@@ -355,13 +355,13 @@ describe ActiveFedora::Base do
       @mock_repo.expects(:modify_datastream).with{ |x| x[:pid] == nil && x[:dsid] == 'RELS-EXT'}
       @mock_repo.expects(:add_datastream).with {|params| params[:dsid] == 'ds1'}
       @mock_repo.expects(:datastream).with{ |x| x[:dsid] == 'ds1'}.returns("").at_least_once #raises(RuntimeError, "Fake Not found")
-      @test_object.inner_object.expects(:new?).returns(true).twice
+      @test_object.inner_object.expects(:new?).returns(true).times(2)
       @test_object.inner_object.expects(:datastreams).returns([])
       @test_object.inner_object.expects(:pid).at_least_once
 
       dirty_ds = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, 'ds1')
       rels_ds = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
-      rels_ds.expects(:new?).returns(false)
+      rels_ds.expects(:new?).returns(false).twice
       rels_ds.model = @test_object
       mock2 = mock("ds2")
       mock2.stubs(:changed? => false)

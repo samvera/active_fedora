@@ -10,10 +10,6 @@ module ActiveFedora
     include Solrizer::FieldNameMapper
     attr_accessor :model
     
-    def changed?
-      (model && model.relationships_are_dirty) || super
-    end
-
     def serialize!
       self.content = to_rels_ext() if model.relationships_are_dirty
       model.relationships_are_dirty = false

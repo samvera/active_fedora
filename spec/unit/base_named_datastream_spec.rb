@@ -243,7 +243,7 @@ describe ActiveFedora::Base do
     it 'should create a datastream object from a string' do
       ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:blob=>"My file data"})
       ds.class.should == ActiveFedora::Datastream
-      ds.dsLabel.should == ""
+      ds.dsLabel.should == nil
       ds.mimeType.should == "application/octet-stream"
     end
   end

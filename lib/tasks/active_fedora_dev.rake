@@ -69,6 +69,7 @@ namespace :active_fedora do
     t.rcov_opts << ['--exclude', 'spec']
   end
 
+  desc "Refresh test fixtres"
   task :refresh_fixtures do
     Rake::Task["active_fedora:clean_jetty"].invoke
     Rake::Task["active_fedora:load_fixtures"].invoke
