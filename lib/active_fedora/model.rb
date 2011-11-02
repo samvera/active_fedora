@@ -226,7 +226,7 @@ module ActiveFedora
     end
     def create_property_getter(property) # :nodoc:
 
-      class_eval <<-END
+      class_eval <<-END, __FILE__, __LINE__
           def #{property.name}
             attribute_get("#{property.name}")
           end
@@ -234,7 +234,7 @@ module ActiveFedora
     end
 
     def create_property_setter(property)# :nodoc:
-      class_eval <<-END
+      class_eval <<-END, __FILE__, __LINE__  
           def #{property.name}=(value)
             attribute_set("#{property.name}", value)
           end

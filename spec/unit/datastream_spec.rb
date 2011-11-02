@@ -18,33 +18,15 @@ describe ActiveFedora::Datastream do
     @test_datastream.to_param.should == 'foo%2ebar'
   end
   
-  it 'should provide #save, #before_save and #after_save' do
-    @test_datastream.should respond_to(:save)
-    @test_datastream.should respond_to(:before_save)
-    @test_datastream.should respond_to(:after_save)
-  end
-  
   describe '#save' do
-    it 'should call #before_save and #after_save' do
-      @mock_repo = mock('repository')
-      @mock_repo.stubs(:add_datastream).with(:versionable => true, :pid => nil, :dsid => 'abcd', :controlGroup => 'M', :dsState => 'A', :content => 'hi there', :checksumType => 'DISABLED')
-      @mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => nil)
-      @test_object.inner_object.stubs(:repository).returns(@mock_repo)
-      @test_object.inner_object.stubs(:pid).returns(@pid)
-
-      @test_datastream.stubs(:last_modified_in_repository)
-      @test_datastream.expects(:before_save)
-      @test_datastream.expects(:after_save)
-      @test_datastream.save
-    end
-    
-    it "should set @dirty to false" do
+    it "should set dirty? to false" do
       @mock_repo = mock('repository')
       @mock_repo.stubs(:add_datastream).with(:versionable => true, :pid => @test_object.pid, :dsid => 'abcd', :controlGroup => 'M', :dsState => 'A', :content => 'hi there', :checksumType => 'DISABLED')
       @mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid)
       @test_object.inner_object.stubs(:repository).returns(@mock_repo)
-      @test_datastream.expects(:dirty=).with(false)
+      @test_datastream.dirty?.should be_true
       @test_datastream.save
+      @test_datastream.dirty?.should be_false
     end
   end
   
@@ -61,10 +43,11 @@ describe ActiveFedora::Datastream do
   end
   
   describe ".dirty?" do
-    it "should return the value of the @dirty attribute" do
-      @test_datastream.dirty.should equal(@test_datastream.dirty?)
+    it "should return the value of the @dirty attribute or changed?" do
+      @test_datastream.expects(:changed?).returns(false)
+      @test_datastream.dirty?.should be_false  
       @test_datastream.dirty = "boo"
-      @test_datastream.dirty?.should == "boo"    
+      @test_datastream.dirty?.should be_true   
     end
   end 
   

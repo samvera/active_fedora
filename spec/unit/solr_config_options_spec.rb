@@ -80,8 +80,9 @@ describe ActiveFedora do
     
     it "should prevent Base.save from calling update_index if false" do
       dirty_ds = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, 'ds1')
+      @test_object.datastreams['ds1'] = dirty_ds
       repo = @test_object.inner_object.repository
-      repo.expects(:add_datastream).twice
+      repo.expects(:add_datastream)
       repo.expects(:ingest)
       @test_object.stubs(:datastreams).returns({:ds1 => dirty_ds})
       @test_object.expects(:update_index).never

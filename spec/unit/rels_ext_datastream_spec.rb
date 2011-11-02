@@ -116,33 +116,6 @@ describe ActiveFedora::RelsExtDatastream do
   end
   
   
-  describe ".to_solr" do
-    
-    it "should provide .to_solr and return a SolrDocument" do
-      graph = RDF::Graph.new
-      subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_member_of),  RDF::URI.new('demo:10'))
-      @test_ds.should respond_to(:to_solr)
-      @test_ds.expects(:model).returns(stub("model", :relationships=>graph, :relationships_are_dirty= => true))
-      @test_ds.to_solr.should be_kind_of(Hash)
-    end
-    
-    it "should serialize the relationships into a Hash" do
-      graph = RDF::Graph.new
-      subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_member_of),  RDF::URI.new('info:fedora/demo:10'))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_part_of),  RDF::URI.new('info:fedora/demo:11'))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_part),  RDF::URI.new('info:fedora/demo:12'))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:conforms_to),  "AnInterface")
-
-      @test_ds.expects(:model).returns(stub("model", :relationships=>graph, :relationships_are_dirty= => true))
-      solr_doc = @test_ds.to_solr
-      solr_doc["is_member_of_s"].should == ["info:fedora/demo:10"]
-      solr_doc["is_part_of_s"].should == ["info:fedora/demo:11"]
-      solr_doc["has_part_s"].should == ["info:fedora/demo:12"]
-      solr_doc["conforms_to_s"].should == ["AnInterface"]
-    end
-  end
   
   it "should treat :self and self.pid as equivalent subjects"
   

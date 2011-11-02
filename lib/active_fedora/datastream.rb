@@ -11,18 +11,6 @@ module ActiveFedora
       super
     end
     
-    # #Return the xml content representing this Datastream from Fedora
-    # def content
-    #   result = Fedora::Repository.instance.fetch_custom(self.attributes[:pid], "datastreams/#{self.dsid}/content")
-    #   return result
-    # end
-  
-    #set this Datastream's content
-    def content=(content)
-      super
-      self.dirty = true
-    end
-
     def size
       self.profile['dsSize']
     end
@@ -35,6 +23,7 @@ module ActiveFedora
     end
     
     # Test whether this datastream been modified since it was last saved?
+    # TODO deprecate this, just use changed?
     def dirty?
       @dirty || changed?
     end
@@ -42,22 +31,27 @@ module ActiveFedora
     def new_object?
       new?
     end
-  
-    # Save the datastream into fedora.
-    # Also triggers {#before_save} and {#after_save} callbacks
+
     def save
-      before_save
       raise "No content #{dsid}" if @content.nil?
-      result = super
-      after_save
-      result
+      run_callbacks :save do
+        return create if new?
+        repository.modify_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
+        reset_profile_attributes
+        #Datastream.new(digital_object, dsid)
+        self
+      end
     end
-    
-    # Callback.  Does nothing by default.  Override this to insert behaviors before the save method.
-    def before_save 
-      #check_concurrency
+
+    def create
+      run_callbacks :create do
+        repository.add_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
+        reset_profile_attributes
+        self
+      end
     end
-    
+
+
     # serializes any changed data into the content field
     def serialize!
     end
@@ -70,10 +64,10 @@ module ActiveFedora
       tmpl
     end
     
-    # Callback.  Override this to insert behaviors after the save method.  By default, sets self.dirty = false
-    def after_save
-      self.dirty = false
-    end
+    # # Callback.  Override this to insert behaviors after the save method.  By default, sets self.dirty = false
+    # def after_save
+    #   self.dirty = false
+    # end
     
     # returns a datetime in the standard W3C DateTime Format.  
     # ie 2008-10-17T00:17:18.194Z

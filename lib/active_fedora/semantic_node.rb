@@ -420,7 +420,7 @@ module ActiveFedora
 
     
       def create_inbound_relationship_finders(name, predicate, opts = {})
-        class_eval <<-END
+        class_eval <<-END, __FILE__, __LINE__
         def #{name}(opts={})
           load_inbound_relationship('#{name}', '#{predicate}', opts)
         end
@@ -437,7 +437,7 @@ module ActiveFedora
       end
     
       def create_outbound_relationship_finders(name, predicate, opts = {})
-        class_eval <<-END
+        class_eval <<-END, __FILE__, __LINE__
         def #{name}(opts={})
           load_outbound_relationship(#{name.inspect}, #{predicate.inspect}, opts)
         end
@@ -471,7 +471,7 @@ module ActiveFedora
         #create methods that mirror the outbound append and remove with our bidirectional name, assume just add and remove locally        
         create_bidirectional_relationship_name_methods(name,outbound_method_name)
 
-        class_eval <<-END
+        class_eval <<-END, __FILE__, __LINE__
         def #{name}(opts={})
           load_bidirectional("#{name}", :#{inbound_method_name}, :#{outbound_method_name}, opts)
         end

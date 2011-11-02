@@ -1,6 +1,8 @@
 require 'rake/clean'
 require 'rubygems'
 require 'bundler'
+require "bundler/setup"
+
 
 $: << 'lib'
 

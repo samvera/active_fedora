@@ -66,17 +66,6 @@ module ActiveFedora
       end
     end
     
-    # Serialize the datastream's RDF relationships to solr
-    # @param [Hash] solr_doc @deafult an empty Hash
-    def to_solr(solr_doc = Hash.new)
-      model.relationships.each_statement do |statement|
-        predicate = self.class.short_predicate(statement.predicate)
-        literal = statement.object.kind_of?(RDF::Literal)
-        val = literal ? statement.object.value : statement.object.to_str
-        ::Solrizer::Extractor.insert_solr_field_value(solr_doc, solr_name(predicate, :symbol), val )
-      end
-      return solr_doc
-    end
     
     # ** EXPERIMENTAL **
     # 

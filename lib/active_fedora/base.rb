@@ -112,7 +112,7 @@ module ActiveFedora
     def method_missing(name, *args)
       if datastreams.has_key? name.to_s
         ### Create and invoke a proxy method 
-        self.class.class_eval <<-end_eval
+        self.class.class_eval <<-end_eval, __FILE__, __LINE__
           def #{name.to_s}()
             datastreams["#{name.to_s}"]
           end
@@ -673,7 +673,7 @@ module ActiveFedora
     #  thumbnails        -  Get array of thumbnail datastreams
     #  thumbnails_ids    -  Get array of dsid's for thumbnail datastreams
     def self.create_named_datastream_finders(name, prefix)
-      class_eval <<-END
+      class_eval <<-END,  __FILE__, __LINE__
       def #{name}(opts={})
         id_array = []
         keys = datastreams.keys
@@ -735,7 +735,8 @@ module ActiveFedora
     # if there is no fedora object (loaded from solr) get the instance var
     # TODO make inner_object a proxy that can hold the pid
     def pid
-      @inner_object ?  @inner_object.pid : @pid
+      @pid ||= @inner_object.pid
+#      @inner_object ?  @inner_object.pid : @pid
     end
 
 
@@ -768,12 +769,12 @@ module ActiveFedora
 
     #return the create_date of the inner object (unless it's a new object)
     def create_date
-      @inner_object.profile["objCreateDate"] unless @inner_object.new?
+      @inner_object.new? ? Time.now : @inner_object.profile["objCreateDate"]
     end
 
     #return the modification date of the inner object (unless it's a new object)
     def modified_date
-      @inner_object.profile["objLastModDate"] unless @inner_object.new?
+      @inner_object.new? ? Time.now : @inner_object.profile["objLastModDate"]
     end
 
     #return the error list of the inner object (unless it's a new object)
@@ -835,12 +836,25 @@ module ActiveFedora
       end
       datastreams.each_value do |ds|
         ds.ensure_xml_loaded if ds.respond_to? :ensure_xml_loaded  ### Can't put this in the model because it's often implemented in Solrizer::XML::TerminologyBasedSolrizer 
-        solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ( ds.kind_of?(ActiveFedora::RelsExtDatastream) && !opts[:model_only] )
+        solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) 
       end
+      solr_doc = solrize_relationships(solr_doc) unless opts[:model_only]
       begin
         #logger.info("PID: '#{pid}' solr_doc put into solr: #{solr_doc.inspect}")
       rescue
         logger.info("Error encountered trying to output solr_doc details for pid: #{pid}")
+      end
+      return solr_doc
+    end
+
+    # Serialize the datastream's RDF relationships to solr
+    # @param [Hash] solr_doc @deafult an empty Hash
+    def solrize_relationships(solr_doc = Hash.new)
+      relationships.each_statement do |statement|
+        predicate = RelsExtDatastream.short_predicate(statement.predicate)
+        literal = statement.object.kind_of?(RDF::Literal)
+        val = literal ? statement.object.value : statement.object.to_str
+        ::Solrizer::Extractor.insert_solr_field_value(solr_doc, solr_name(predicate, :symbol), val )
       end
       return solr_doc
     end
@@ -986,7 +1000,7 @@ module ActiveFedora
           else
             ds = ar.first.new(inner_object, name)
             ds.model = self if ar.first == RelsExtDatastream
-            ds.dsLabel = ar[1]
+            ds.dsLabel = ar[1] if ar[1].present?
             # If you called has_metadata with a block, pass the block into the Datastream class
             if ar.last.class == Proc
               ar.last.call(ds)
@@ -1007,11 +1021,16 @@ module ActiveFedora
     
     # Pushes the object and all of its new or dirty datastreams into Fedora
     def update
-      result = @inner_object.save
       datastreams.each {|k, ds| ds.serialize! }
       @metadata_is_dirty = datastreams.any? {|k,ds| ds.changed? && (ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.instance_of?(ActiveFedora::RelsExtDatastream))}
-      ## TODO rubydora is saving datastreams, but not of our subclasses
-      datastreams.select {|k, ds| ds.changed? }.each do |k, ds| ds.save end  
+
+      result = @inner_object.save
+
+      ### Rubydora re-inits the datastreams after a save, so ensure our copy stays in synch
+      @inner_object.datastreams.each do |dsid, ds|
+        datastreams[dsid] = ds
+        ds.model = self if ds.kind_of? RelsExtDatastream
+      end 
       refresh
       return !!result
     end

@@ -74,7 +74,7 @@ describe ActiveFedora::Base do
   
   after(:each) do
     begin
-    @test_object.delete
+      @test_object.delete
     rescue
     end
     begin
@@ -758,7 +758,6 @@ describe ActiveFedora::Base do
   describe '#update_named_datastream' do
     it 'should update a named datastream to have a new file' do
       @test_object2 = MockAFBaseDatastream.new
-#      @test_object2.new_object = true
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
       minivan = f.read
       f.rewind
@@ -814,6 +813,7 @@ describe ActiveFedora::Base do
       @test_object2.named_datastreams_ids.should == {"high"=>[], "thumbnail"=>["THUMB1", "THUMB2"]}
     end
   end
+
   
 #   describe '#load_instance_from_solr' do
 #     it 'should populate an instance of an ActiveFedora::Base object using solr instead of Fedora' do
