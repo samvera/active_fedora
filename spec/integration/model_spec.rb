@@ -17,6 +17,9 @@ describe ActiveFedora::Model do
       
       class Basic < ActiveFedora::Base
         include ActiveFedora::Model
+        def self.pid_namespace
+          "foo"
+        end
       end
       
     end
@@ -34,9 +37,10 @@ describe ActiveFedora::Model do
   
   describe '#find' do
     it "should return an array of instances of the calling Class" do
-      pending
       result = ModelIntegrationSpec::Basic.find(:all)
       result.should be_instance_of(Array)
+      # this test is meaningless if the array length is zero
+      result.length.should > 0
       result.each do |obj|
         obj.class.should == ModelIntegrationSpec::Basic
       end

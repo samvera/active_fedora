@@ -8,10 +8,35 @@ module ActiveFedora
   # much in the way ActiveRecord does.  
   module Model 
     extend ActiveFedora::FedoraObject
-
+    DEFAULT_NS = 'afmodel'
 
     def self.included(klass) # :nodoc:
       klass.extend(ClassMethods)
+    end
+    
+    # Takes a Fedora URI for a cModel, and returns a 
+    # corresponding Model if available
+    # This method should reverse ClassMethods#to_class_uri
+    def self.from_class_uri(uri)
+      if match_data = /info:fedora\/([a-zA-z0-9\-_]+):(.+)$/.match(uri)
+        pid_ns = match_data[1]
+        model_value = match_data[2]
+        model_value.gsub!('_', '::')
+      else
+        raise "model URI incorrectly formatted: #{uri}"
+      end
+      if model_value.include?("::")
+        result = eval(model_value)
+      else
+        result = Kernel.const_get(model_value)
+      end
+      unless result.nil?
+        model_ns = (result.respond_to? :pid_namespace) ? result.pid_namespace : DEFAULT_NS
+        if model_ns != pid_ns
+          logger.warn "Model class namespace (#{model_ns}) and uri namespace (#{pid_ns}) do not match!"
+        end
+      end
+      result
     end
 
     def add_metadata
@@ -52,7 +77,15 @@ module ActiveFedora
       def load_instance(pid)
         RubydoraConnection.instance.find_model(pid, self)
       end
-
+      
+      # Returns a suitable uri object for :has_model
+      # Should reverse Model#from_class_uri
+      def to_class_uri
+        ns = (self.respond_to? :pid_namespace) ? self.pid_namespace : Model::DEFAULT_NS
+        pid = self.name.gsub(/::/,'_')
+        "info:fedora/#{ns}:#{pid}"
+      end
+      
       # Takes :all or a pid as arguments
       # Returns an Array of objects of the Class that +find+ is being 
       # called on
@@ -62,7 +95,7 @@ module ActiveFedora
         if args == :all
           return_multiple = true
           # escaped_class_name = self.name.gsub(/(:)/, '\\:')
-          escaped_class_uri = "info:fedora/afmodel:#{self.name}".gsub(/(:)/, '\\:')
+          escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
           # q = "#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}"
           q = "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
         elsif args.class == String
