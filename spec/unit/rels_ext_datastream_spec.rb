@@ -92,25 +92,20 @@ describe ActiveFedora::RelsExtDatastream do
     end
     it "should handle un-mapped literals" do
       xml = "
-              <foxml:datastream ID=\"RELS-EXT\" STATE=\"A\" CONTROL_GROUP=\"X\" VERSIONABLE=\"true\" xmlns:foxml=\"info:fedora/fedora-system:def/foxml#\">
-              <foxml:datastreamVersion ID=\"RELS-EXT.0\" LABEL=\"\" CREATED=\"2011-09-20T19:48:43.714Z\" MIMETYPE=\"text/xml\" SIZE=\"622\">
-                <foxml:xmlContent>
-                <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\">
+                <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"  xmlns:oai=\"http://www.openarchives.org/OAI/2.0/\">
                   <rdf:Description rdf:about=\"info:fedora/changeme:3489\">
                     <hasModel xmlns=\"info:fedora/fedora-system:def/model#\" rdf:resource=\"info:fedora/afmodel:ActiveFedora_Base\"/>
                     <isPartOf xmlns=\"info:fedora/fedora-system:def/relations-external#\" rdf:resource=\"info:fedora/demo:11\"/>
                     <isMemberOf xmlns=\"info:fedora/fedora-system:def/relations-external#\" rdf:resource=\"info:fedora/demo:10\"/>
-                    <hasMetadata xmlns=\"info:fedora/fedora-system:def/relations-external#\">oai:hull.ac.uk:hull:2708</hasMetadata>
+                    <oai:itemID>oai:hull.ac.uk:hull:2708</oai:itemID>
                   </rdf:Description>
-                </rdf:RDF>
-              </foxml:xmlContent>
-            </foxml:datastreamVersion>\n</foxml:datastream>\n"
+                </rdf:RDF>"
       model = ActiveFedora::Base.new
       new_ds = ActiveFedora::RelsExtDatastream.new(nil, nil)
       new_ds.model = model
       ActiveFedora::RelsExtDatastream.from_xml(xml, new_ds)
       new_ext = new_ds.to_rels_ext()
-      new_ext.should match "<ns1:hasMetadata>oai:hull.ac.uk:hull:2708</ns1:hasMetadata>"
+      new_ext.should match "<ns0:itemID>oai:hull.ac.uk:hull:2708</ns0:itemID>"
       
     end
   end

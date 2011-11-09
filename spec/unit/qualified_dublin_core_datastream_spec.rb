@@ -14,7 +14,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   end
   
   before(:each) do
-    stub_get("_nextid_")
+    stub_get("_nextid_", ['RELS-EXT', 'sensitive_passages', 'significant_passages', 'dublin_core', 'properties'])
     Rubydora::Repository.any_instance.stubs(:client).returns(@mock_client)
     ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns("_nextid_")
     @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new(nil, nil)
@@ -23,7 +23,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   end
   it "from_xml should parse everything correctly" do
     #originally just tested that lcsh encoding and stuff worked, but the other stuff is worth testing
-    stub_get("meh:leh")
+    stub_get("meh:leh", ['RELS-EXT', 'sensitive_passages', 'significant_passages', 'dublin_core', 'properties'])
     stub_get_content("meh:leh", ['dublin_core'])
     ActiveFedora::RubydoraConnection.instance.expects(:nextid).returns("meh:leh")
     tmpl = OralHistorySampleModel.new.datastreams['dublin_core']

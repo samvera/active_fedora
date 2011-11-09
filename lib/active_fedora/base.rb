@@ -34,7 +34,9 @@ module ActiveFedora
     include SemanticNode
     class_inheritable_accessor  :ds_specs, :class_named_datastreams_desc
     self.class_named_datastreams_desc = {}
-    self.ds_specs = {'RELS-EXT'=> [ActiveFedora::RelsExtDatastream, "", nil]}#, 'DC'=> [ActiveFedora::Datastream, "", nil]}
+    
+    self.ds_specs = {'RELS-EXT'=> {:type=> ActiveFedora::RelsExtDatastream, :label=>"", :block=>nil}}
+
     attr_accessor :named_datastreams_desc
     
 
@@ -97,7 +99,7 @@ module ActiveFedora
     end
 
     def self.datastream_class_for_name(dsid)
-      ds_specs[dsid] ? ds_specs[dsid].first : ActiveFedora::Datastream
+      ds_specs[dsid] ? ds_specs[dsid][:type] : ActiveFedora::Datastream
     end
 
     #This method is used to specify the details of a datastream. 
@@ -105,7 +107,7 @@ module ActiveFedora
     #execute the block, but stores it at the class level, to be executed
     #by any future instantiations.
     def self.has_metadata(args, &block)
-      ds_specs[args[:name]]= [args[:type], args.fetch(:label,""), block]
+      ds_specs[args[:name]]= {:type => args[:type], :label =>  args.fetch(:label,""), :control_group => args.fetch(:control_group,"X"), :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
     end
 
     def method_missing(name, *args)
@@ -126,6 +128,7 @@ module ActiveFedora
     #Saves a Base object, and any dirty datastreams, then updates 
     #the Solr index for this object.
     def save
+
       # If it's a new object, set the conformsTo relationship for Fedora CMA
       if new_object? 
         result = create
@@ -198,15 +201,16 @@ module ActiveFedora
         ds_spec = self.class.ds_specs[dsid]
         datastreams[dsid] = datastream
         if (ds_spec)
-          klass = ds_spec.first
+          klass = ds_spec[:type]
           datastreams[dsid].model = self if klass == RelsExtDatastream
 
-          if ds_spec.last.class == Proc
-            ds_spec.last.call(datastreams[dsid])
+          if ds_spec[:block].class == Proc
+            ds_spec[:block].call(datastreams[dsid])
           end
         end
       end
     end
+
 
     # Adds datastream to the object.  Saves the datastream to fedora upon adding.
     # If datastream does not have a DSID, a unique DSID is generated
@@ -989,23 +993,46 @@ module ActiveFedora
     private
     def configure_defined_datastreams
       if self.class.ds_specs
-        self.class.ds_specs.each do |name,ar|
+        self.class.ds_specs.each do |name,ds_config|
           if self.datastreams.has_key?(name)
             #attributes = self.datastreams[name].attributes
           else
-            ds = ar.first.new(inner_object, name)
-            ds.model = self if ar.first == RelsExtDatastream
-            ds.dsLabel = ar[1] if ar[1].present?
+            ds = ds_config[:type].new(inner_object, name)
+            ds.model = self if ds_config[:type] == RelsExtDatastream
+            ds.dsLabel = ds_config[:label] if ds_config[:label].present?
+            ds.controlGroup = ds_config[:control_group]
             # If you called has_metadata with a block, pass the block into the Datastream class
-            if ar.last.class == Proc
-              ar.last.call(ds)
+            if ds_config[:block].class == Proc
+              ds_config[:block].call(ds)
             end
-            #ds.attributes = attributes.merge(ds.attributes)
+            additional_attributes_for_external_and_redirect_control_groups(ds, ds_config)
             self.add_datastream(ds)
           end
         end
       end
     end
+
+
+    # This method provides validation of proper options for control_group 'E' and 'R' and builds an attribute hash to be merged back into ds.attributes prior to saving
+    #
+    # @param [Object] ds The datastream
+    # @param [Object] ds_config hash of options which may contain :disseminator and :url
+    def additional_attributes_for_external_and_redirect_control_groups(ds,ds_config)
+      if ds.controlGroup=='E'
+        raise "Must supply either :disseminator or :url if you specify :control_group => 'E'" if (ds_config[:disseminator].empty? && ds_config[:url].empty?)
+        if !ds_config[:disseminator].empty?
+          ds.dsLocation= "#{RubydoraConnection.instance.options[:url]}/objects/#{pid}/methods/#{ds_config[:disseminator]}"
+        elsif !ds_config[:url].empty?
+          ds.dsLocation= ds_config[:url]
+        end
+      elsif ds.controlGroup=='R'
+        raise "Must supply a :url if you specify :control_group => 'R'" if (ds_config[:url].empty?)
+        ds.dsLocation= ds_config[:url]
+      end
+    end
+
+
+
     
     # Deals with preparing new object to be saved to Fedora, then pushes it and its datastreams into Fedora. 
     def create

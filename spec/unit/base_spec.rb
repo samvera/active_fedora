@@ -106,30 +106,132 @@ describe ActiveFedora::Base do
   end
 
   describe "has_metadata" do
-    before :each do
-      @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams?format=xml").returns(@getter)
-      @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams/RELS-EXT/content").returns(@getter)
+    describe "creates datastreams" do
+      before :each do
+        @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams?format=xml").returns(@getter)
+        @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams/RELS-EXT/content").returns(@getter)
 
-      #Update record
-      @mock_client.stubs(:[]).with("objects/monkey%3A99").returns(stub('post', :post=>'monkey:99'))
-      #Update datastream
-      ['someData', 'withText', 'withText2', 'RELS-EXT'].each do |dsid|
-        @mock_client.stubs(:[]).with {|params| /objects\/monkey%3A99\/datastreams\/#{dsid}/.match(params)}.returns(stub('post', :post=>'monkey:99', :get=>''))
+        #Update record
+        @mock_client.stubs(:[]).with("objects/monkey%3A99").returns(stub('post', :post=>'monkey:99'))
+        #Update datastream
+        ['someData', 'withText', 'withText2', 'RELS-EXT'].each do |dsid|
+          @mock_client.stubs(:[]).with {|params| /objects\/monkey%3A99\/datastreams\/#{dsid}/.match(params)}.returns(stub('post', :post=>'monkey:99', :get=>''))
+        end
+
+        @n = FooHistory.new(:pid=>"monkey:99")
+        @n.datastreams['RELS-EXT'].expects(:changed?).returns(true).at_least_once
+        @n.expects(:update_index)
+        @n.save
       end
 
-      @n = FooHistory.new(:pid=>"monkey:99")
-      @n.datastreams['RELS-EXT'].expects(:changed?).returns(true).at_least_once
-      @n.expects(:update_index)
+      it "should create specified datastreams with specified fields" do
+        @n.datastreams["someData"].should_not be_nil
+        @n.datastreams["someData"].fubar_values='bar'
+        @n.datastreams["someData"].fubar_values.should == ['bar']
+        @n.datastreams["withText2"].dsLabel.should == "withLabel"
+      end
+    end
+
+
+    it "should create specified datastreams with appropriate control group" do
+      stub_ingest('monkey:99')
+      stub_add_ds('monkey:99', ['RELS-EXT', 'DC', 'rightsMetadata', 'properties', 'descMetadata', 'UKETD_DC'])
+      stub_get('monkey:99', ['RELS-EXT', 'DC', 'rightsMetadata', 'properties', 'descMetadata', 'UKETD_DC'])
+      class UketdObject < ActiveFedora::Base
+        has_metadata :name => "rightsMetadata", :label=>"Rights metadata", :type => ActiveFedora::NokogiriDatastream 
+        
+        # Uses the Hydra MODS Article profile for tracking most of the descriptive metadata
+        # TODO: define terminology for ETD
+        has_metadata :name => "descMetadata", :label=>"MODS metadata", :control_group=>"M", :type => ActiveFedora::NokogiriDatastream
+
+        has_metadata :name => "UKETD_DC", :label=>"UKETD_DC metadata", :control_group => "E", :disseminator=>"hull-sDef:uketdObject/getUKETDMetadata", :type => ActiveFedora::NokogiriDatastream
+
+        has_metadata :name => "DC", :type => ActiveFedora::NokogiriDatastream, :label=>"DC admin metadata"
+
+        # A place to put extra metadata values
+        has_metadata :name => "properties", :label=>"Workflow properties", :type => ActiveFedora::MetadataDatastream do |m|
+          m.field 'collection', :string
+          m.field 'depositor', :string
+        end
+
+      end
+      @n = UketdObject.new(:pid=>"monkey:99")
       @n.save
+      @n.datastreams["DC"].controlGroup.should eql("X")
+      @n.datastreams["rightsMetadata"].controlGroup.should eql("X")
+      @n.datastreams["properties"].controlGroup.should eql("X")
+      @n.datastreams["descMetadata"].controlGroup.should eql("M")
+      @n.datastreams["UKETD_DC"].controlGroup.should eql("E")
     end
 
-    it "should create specified datastreams with specified fields" do
-      @n.datastreams["someData"].should_not be_nil
-      @n.datastreams["someData"].fubar_values='bar'
-      @n.datastreams["someData"].fubar_values.should == ['bar']
-      @n.datastreams["withText2"].dsLabel.should == "withLabel"
+    context ":control_group => 'E'" do
+      before do
+        stub_ingest(@this_pid)
+        stub_add_ds(@this_pid, ['RELS-EXT', 'externalDisseminator', 'externalUrl'])
+      end
+      it "should raise an error without :disseminator or :url option" do
+        class MoreFooHistory < ActiveFedora::Base
+          has_metadata :type=>ActiveFedora::NokogiriDatastream, :name=>"externalDisseminator", :control_group => "E"
+        end
+        lambda { @n = MoreFooHistory.new }.should raise_exception
+      end
+      
+      it "should allow :control_group => 'E' with a :url option" do
+        class MoreFooHistory < ActiveFedora::Base
+          has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "E", :url => "http://exampl.com/mypic.jpg"
+        end
+        @n = MoreFooHistory.new
+        @n.save
+      end
+      it "should raise an error if :url is malformed" do
+        class MoreFooHistory < ActiveFedora::Base
+          has_metadata :type => ActiveFedora::NokogiriDatastream, :name=>"externalUrl", :url=>"my_rul", :control_group => "E"
+        end
+        client = mock_client.stubs(:[]).with do |params|
+          /objects\/#{@this_pid}\/datastreams\/externalUrl/.match(params)
+        end
+        client.raises(RuntimeError, "Error adding datastream externalUrl for object changeme:4020. See logger for details")
+        @n = MoreFooHistory.new
+        lambda {@n.save }.should raise_exception
+      end
     end
 
+    context ":control_group => 'R'" do
+      before do
+        stub_ingest(@this_pid)
+        stub_add_ds(@this_pid, ['RELS-EXT', 'externalDisseminator' ])
+      end
+      it "should raise an error without :url option" do
+        class MoreFooHistory < ActiveFedora::Base
+          has_metadata :type=>ActiveFedora::NokogiriDatastream, :name=>"externalDisseminator", :control_group => "R"
+        end
+        lambda { @n = MoreFooHistory.new }.should raise_exception
+      end
+      
+      it "should work with a valid  :url option" do
+        class MoreFooHistory < ActiveFedora::Base
+          has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "R", :url => "http://exampl.com/mypic.jpg"
+        end
+        @n = MoreFooHistory.new
+        @n.save
+      end
+      it "should not take a :disseminator option without a :url option" do
+        class MoreFooHistory < ActiveFedora::Base
+          has_metadata :type=>ActiveFedora::NokogiriDatastream, :name=>"externalDisseminator", :control_group => "R", :disseminator => "foo:s-def/hull-cModel:Foo"
+        end
+        lambda { @n = MoreFooHistory.new }.should raise_exception
+      end
+      it "should raise an error if :url is malformed" do
+        class MoreFooHistory < ActiveFedora::Base
+          has_metadata :type => ActiveFedora::NokogiriDatastream, :name=>"externalUrl", :url=>"my_rul", :control_group => "R"
+        end
+        client = mock_client.stubs(:[]).with do |params|
+          /objects\/#{@this_pid}\/datastreams\/externalUrl/.match(params)
+        end
+        client.raises(RuntimeError, "Error adding datastream externalUrl for object changeme:4020. See logger for details")
+        lambda {MoreFooHistory.new }.should raise_exception
+      end
+    end
   end
 
 
@@ -277,7 +379,7 @@ describe ActiveFedora::Base do
       stub_add_ds(@this_pid, ['RELS-EXT'])
       @test_object.persisted?.should be false
       @test_object.expects(:update_index)
-      stub_get(@this_pid, true)
+      stub_get(@this_pid, nil, true)
       @test_object.save.should == true
       @test_object.persisted?.should be true
     end

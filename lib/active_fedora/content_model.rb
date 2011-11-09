@@ -13,7 +13,7 @@ module ActiveFedora
     end
     
     def self.pid_from_ruby_class(klass,attrs={})
-      sanitized_class_name = klass.name.gsub(/(::)/, '_')
+
       unless klass.respond_to? :pid_suffix
         pid_suffix = attrs.has_key?(:pid_suffix) ? attrs[:pid_suffix] : CMODEL_PID_SUFFIX
       else
@@ -24,7 +24,12 @@ module ActiveFedora
       else
         namespace = klass.pid_namespace
       end
-      return "info:fedora/#{namespace}:#{sanitized_class_name}#{pid_suffix}" 
+      return "info:fedora/#{namespace}:#{sanitized_class_name(klass)}#{pid_suffix}" 
+    end
+    
+    ###Override this, if you prefer your class names serialized some other way
+    def self.sanitized_class_name(klass)
+      klass.name.gsub(/(::)/, '_')
     end
     
     def self.models_asserted_by(obj)
@@ -41,10 +46,16 @@ module ActiveFedora
       end
       
       if models_array.empty?
-        models_array = [ActiveFedora::Base]
+        models_array = [default_model(obj)]
       end
       
       return models_array
+    end
+
+    ### Returns a ruby class to use if no other class could be find to instantiate
+    ### Override this method if you need something other than the default strategy
+    def self.default_model(obj)
+      ActiveFedora::Base
     end
     
     # Returns a ruby class corresponding to the given uri if one can be found.
