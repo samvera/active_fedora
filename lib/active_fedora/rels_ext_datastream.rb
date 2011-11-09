@@ -33,7 +33,7 @@ module ActiveFedora
             literal = statement.object.kind_of?(RDF::Literal)
             predicate = self.short_predicate(statement.predicate)
             object = literal ? statement.object.value : statement.object.to_str
-            tmpl.model.add_relationship(predicate, object)
+            tmpl.model.add_relationship(predicate, object, literal)
           end
         end
         tmpl.model.relationships_are_dirty = false

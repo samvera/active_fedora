@@ -105,7 +105,6 @@ module ActiveFedora
     #execute the block, but stores it at the class level, to be executed
     #by any future instantiations.
     def self.has_metadata(args, &block)
-      #@ds_specs ||= Hash.new
       ds_specs[args[:name]]= [args[:type], args.fetch(:label,""), block]
     end
 
@@ -205,10 +204,6 @@ module ActiveFedora
           if ds_spec.last.class == Proc
             ds_spec.last.call(datastreams[dsid])
           end
-          # if klass.respond_to? :from_xml
-          #   ### TODO, this is loading eagerly, we could load it as needed
-          #   klass.from_xml(datastreams[dsid].content, datastreams[dsid])
-          # end
         end
       end
     end

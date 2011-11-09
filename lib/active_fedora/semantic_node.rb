@@ -19,40 +19,29 @@ module ActiveFedora
     # Add a relationship to the Object.
     # @param predicate
     # @param object Either a string URI or an object that is a kind of ActiveFedora::Base 
-    def add_relationship(predicate, obj, literal=false)
-      unless relationship_exists?(internal_uri, predicate, obj)
-        register_triple(internal_uri, predicate, obj)
-        #need to call here to indicate update of named_relationships
+    def add_relationship(predicate, target, literal=false)
+      stmt = build_statement(internal_uri, predicate, target, literal)
+      unless relationships.has_statement? stmt
+        relationships.insert stmt
         @relationships_are_dirty = true
         rels_ext.dirty = true
       end
-    end
-
-    # Add a RDF triple to the relationship graph
-    # @param pid a string represending the pid of the subject
-    # @param predicate a predicate symbol
-    # @param target an object to store
-    def register_triple(pid, predicate, target)
-      self.relationships_are_dirty = true
-      relationships.insert build_statement(pid, predicate, target)
-
-      # register_subject(subject)
-      # register_predicate(subject, predicate)
-      # relationships[subject][predicate] << object
     end
 
     # Create an RDF statement
     # @param uri a string represending the subject
     # @param predicate a predicate symbol
     # @param target an object to store
-    def build_statement(uri, predicate, target)
+    def build_statement(uri, predicate, target, literal=nil)
       raise "Not allowed anymore" if uri == :self
       target = target.internal_uri if target.respond_to? :internal_uri
       subject =  RDF::URI.new(uri)  #TODO cache
-      begin
-        literal = URI.parse(target).scheme.nil?
-      rescue URI::InvalidURIError
-        literal = false
+      if literal.nil?
+        begin
+          literal = URI.parse(target).scheme.nil?
+        rescue URI::InvalidURIError
+          literal = false
+        end
       end
       raise ArgumentError, "Invalid target \"#{target}\". Must have namespace." unless literal || /^info/.match(target)
       object = literal ? RDF::Literal.new(target) : RDF::URI.new(target)
@@ -88,18 +77,6 @@ module ActiveFedora
         self.class.vocabularies[xmlns][rel_predicate] 
     end
     
-    # def register_subject(subject)
-    #   if !relationships.has_key?(subject) 
-    #       relationships[subject] = {} 
-    #   end
-    # end
-  
-    # def register_predicate(subject, predicate)
-    #   register_subject(subject)
-    #   if !relationships[subject].has_key?(predicate) 
-    #     relationships[subject][predicate] = []
-    #   end
-    # end
 
     # ** EXPERIMENTAL **
     #
@@ -110,15 +87,6 @@ module ActiveFedora
       relationships.delete build_statement(internal_uri, predicate, obj)
       @relationships_are_dirty = true
       rels_ext.dirty = true
-    end
-
-
-    
-    # ** EXPERIMENTAL **
-    # 
-    # Returns true if a relationship exists for the given subject, predicate, and object triple
-    def relationship_exists?(subject, predicate, object)
-      relationships.has_statement? build_statement(subject, predicate, object)
     end
 
     def inbound_relationships(response_format=:uri)
@@ -147,14 +115,22 @@ module ActiveFedora
       relationships.statements
     end
     
-    def relationships
+    # If no arguments are supplied, return the whole RDF::Graph.
+    # if a predicate is supplied as a parameter, then it returns the result of quering the graph with that predicate
+    def relationships(*args)
       unless @subject 
         raise "Must have internal_uri" unless internal_uri
         @subject =  RDF::URI.new(internal_uri)
       end
       @relationships ||= RDF::Graph.new
       load_relationships if !relationships_loaded
-      @relationships
+
+      return @relationships if args.empty?
+      rels = @relationships.query(:predicate => find_graph_predicate(args.first))
+      results = []
+      rels.each_object {|o| results << o.to_s }
+      results
+      
     end
 
     def load_relationships
@@ -201,8 +177,8 @@ module ActiveFedora
     def ids_for_outbound(predicate)
       id_array = []
       res = relationships.query(:predicate => find_graph_predicate(predicate))
-      res.each_object do |o|
-        id_array << o.to_s.gsub("info:fedora/", "")
+      relationships(predicate).each do |o|
+        id_array << o.gsub("info:fedora/", "")
       end
       id_array
     end

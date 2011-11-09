@@ -316,8 +316,6 @@ describe ActiveFedora::SemanticNode do
         local_node.expects(:relationship_query).with("parts")
         local_node.parts_query
       end
-      
-      it "resulting finder should provide option of filtering results by :type"
     end
     
     describe '#create_outbound_relationship_finders' do
@@ -383,7 +381,6 @@ describe ActiveFedora::SemanticNode do
           result.should include("demo:10")
         end
         
-        it "should provide option of filtering results by :type"
       end
       
       describe " resulting _ids finder" do
@@ -489,8 +486,13 @@ describe ActiveFedora::SemanticNode do
     end
     
     describe ".add_relationship" do
-      it "should add relationship to the relationships hash" do
+      it "should add relationship to the relationships graph" do
         @node.add_relationship(@test_relationship.predicate, @test_relationship.object)
+        @node.ids_for_outbound("isMemberOf").should == ['demo:9']
+      end
+
+      it "should add a literal relationship to the relationships graph" do
+        @node.add_relationship(@test_relationship.predicate, @test_relationship.object, true)
         @node.ids_for_outbound("isMemberOf").should == ['demo:9']
       end
       
@@ -516,20 +518,6 @@ describe ActiveFedora::SemanticNode do
     end
 
       
-    it "should provide a relationship setter"
-    it "should provide a relationship getter"
-    it "should provide a relationship deleter"
-        
-    describe '.register_triple' do
-      it 'should add triples to the relationships hash' do
-        @node.register_triple(@node.internal_uri, :is_part_of, "info:fedora/demo:10")
-        @node.register_triple(@node.internal_uri, :is_member_of, "info:fedora/demo:11")
-        @node.ids_for_outbound(:is_part_of).should == ['demo:10'] 
-        @node.ids_for_outbound(:is_member_of).should == ['demo:11'] 
-      end
-      
-      it "should not be a class level method"
-    end
     
     it 'should provide #predicate_lookup that maps symbols to common RELS-EXT predicates' do
       SpecNode.should respond_to(:predicate_lookup)
@@ -568,18 +556,6 @@ describe ActiveFedora::SemanticNode do
         #check last item removed and predicate removed since now emtpy
         @test_object.ids_for_outbound(:has_part).should == []
         
-      end
-    end
-    
-    describe '#relationship_exists?' do
-      it 'should return true if a relationship does exist' do
-        @test_object3 = SpecNode2.new
-        @test_object3.pid = increment_pid
-        r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_member,:object=>@test_object3})
-        @test_object.relationship_exists?(@test_object.internal_uri,r.predicate,r.object).should == false
-        @test_object.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true))
-        @test_object.add_relationship(r.predicate, r.object)
-        @test_object.relationship_exists?(@test_object.internal_uri,r.predicate,r.object).should == true
       end
     end
 

@@ -195,11 +195,9 @@ describe ActiveFedora::Base do
 
   describe '#add_relationship' do
     it 'should call #add_relationship on the rels_ext datastream' do
-      mock_rels_ext = mock("rels-ext")
-      mock_rels_ext.expects(:dirty=).with(true)
-      @test_object.expects(:relationship_exists?).returns(false).once()
-      @test_object.expects(:rels_ext).returns(mock_rels_ext).at_least_once 
-      @test_object.add_relationship("predicate", "object")
+      @test_object.add_relationship("predicate", "info:fedora/object")
+      pred = @test_object.class.vocabularies["info:fedora/fedora-system:def/relations-external#"]["predicate"] 
+      @test_object.relationships.should have_statement(RDF::Statement.new(RDF::URI.new(@test_object.internal_uri), pred, RDF::URI.new("info:fedora/object")))
     end
 
     it "should update the RELS-EXT datastream and set the datastream as dirty when relationships are added" do
@@ -418,12 +416,6 @@ describe ActiveFedora::Base do
   end
   
   describe ".to_solr" do
-    
-    # before(:all) do
-    #   # Revert to default mappings after running tests
-    #   ActiveFedora::SolrService.load_mappings
-    # end
-    
     after(:all) do
       # Revert to default mappings after running tests
       ActiveFedora::SolrService.load_mappings
@@ -443,8 +435,7 @@ describe ActiveFedora::Base do
     end
 
     it "should omit base metadata and RELS-EXT if :model_only==true" do
-      @test_object.add_relationship(:has_part, "foo")
-      # @test_object.expects(:modified_date).returns("mDate")
+      @test_object.add_relationship(:has_part, "foo", true)
       solr_doc = @test_object.to_solr(Hash.new, :model_only => true)
       solr_doc["system_create_dt"].should be_nil
       solr_doc["system_modified_dt"].should be_nil

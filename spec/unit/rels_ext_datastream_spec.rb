@@ -91,7 +91,6 @@ describe ActiveFedora::RelsExtDatastream do
       @test_obj.ids_for_outbound("foo").should == ["foo:bar"]
     end
     it "should handle un-mapped literals" do
-      pending
       xml = "
               <foxml:datastream ID=\"RELS-EXT\" STATE=\"A\" CONTROL_GROUP=\"X\" VERSIONABLE=\"true\" xmlns:foxml=\"info:fedora/fedora-system:def/foxml#\">
               <foxml:datastreamVersion ID=\"RELS-EXT.0\" LABEL=\"\" CREATED=\"2011-09-20T19:48:43.714Z\" MIMETYPE=\"text/xml\" SIZE=\"622\">
@@ -106,17 +105,13 @@ describe ActiveFedora::RelsExtDatastream do
                 </rdf:RDF>
               </foxml:xmlContent>
             </foxml:datastreamVersion>\n</foxml:datastream>\n"
-      doc = Nokogiri::XML::Document.parse(xml)
-      new_ds = ActiveFedora::RelsExtDatastream.new
-      ActiveFedora::RelsExtDatastream.from_xml(new_ds,doc.root)
-      new_ext = new_ds.to_rels_ext('changeme:3489')
-      new_ext.should match "<hasMetadata xmlns=\"info:fedora/fedora-system:def/relations-external#\">oai:hull.ac.uk:hull:2708</hasMetadata>"
+      model = ActiveFedora::Base.new
+      new_ds = ActiveFedora::RelsExtDatastream.new(nil, nil)
+      new_ds.model = model
+      ActiveFedora::RelsExtDatastream.from_xml(xml, new_ds)
+      new_ext = new_ds.to_rels_ext()
+      new_ext.should match "<ns1:hasMetadata>oai:hull.ac.uk:hull:2708</ns1:hasMetadata>"
       
     end
   end
-  
-  
-  
-  it "should treat :self and self.pid as equivalent subjects"
-  
 end
