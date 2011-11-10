@@ -44,18 +44,7 @@ module ActiveFedora
   
     def self.class_from_solr_document(hit)
         model_value = hit[solr_name("has_model", :symbol)].first
-        if match_data = /info:fedora\/afmodel:(.+)$/.match(model_value)
-          model_value = match_data[1]
-          model_value.gsub!('_', '::')
-        else
-          raise "has_model assertion incorrectly formatted: #{model_value}"
-        end
-
-        if model_value.include?("::")
-          eval(model_value)
-        else
-          Kernel.const_get(model_value)
-        end
+        Model.from_class_uri(model_value)
     end
     
     # Construct a solr query for a list of pids

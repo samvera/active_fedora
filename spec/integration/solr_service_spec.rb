@@ -6,6 +6,9 @@ describe ActiveFedora::SolrService do
   describe "#reify_solr_results" do
     before(:all) do
       class FooObject < ActiveFedora::Base
+        def self.pid_namespace
+          "foo"
+        end
         has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|
           m.field "holding_id", :string
         end
