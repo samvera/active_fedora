@@ -32,21 +32,31 @@ module ActiveFedora
     # @param uri a string represending the subject
     # @param predicate a predicate symbol
     # @param target an object to store
-    def build_statement(uri, predicate, target, literal=nil)
+    def build_statement(uri, predicate, target, literal=false)
       raise "Not allowed anymore" if uri == :self
       target = target.internal_uri if target.respond_to? :internal_uri
       subject =  RDF::URI.new(uri)  #TODO cache
-      if literal.nil?
+      unless literal or target.is_a? RDF::Resource
         begin
-          literal = URI.parse(target).scheme.nil?
+          target_uri = (target.is_a? URI) ? target : URI.parse(target)
+          if target_uri.scheme.nil?
+            raise ArgumentError, "Invalid target \"#{target}\". Must have namespace."
+          end
+          if target_uri.to_s =~ /\A[\w\-]+:[\w\-]+\Z/
+            raise ArgumentError, "Invalid target \"#{target}\". Target should be a complete URI, and not a pid."
+          end
         rescue URI::InvalidURIError
-          literal = false
+          raise ArgumentError, "Invalid target \"#{target}\". Target must be specified as a literal, or be a valid URI."
         end
       end
-      raise ArgumentError, "Invalid target \"#{target}\". Must have namespace." unless literal || /^info/.match(target)
-      object = literal ? RDF::Literal.new(target) : RDF::URI.new(target)
-
-       RDF::Statement.new(subject, find_graph_predicate(predicate), object)
+      if literal
+        object = RDF::Literal.new(target)
+      elsif target.is_a? RDF::Resource
+        object = target
+      else
+        object = RDF::URI.new(target)
+      end
+      RDF::Statement.new(subject, find_graph_predicate(predicate), object)
     
     end
                   

@@ -3,6 +3,7 @@ require 'solrizer/field_name_mapper'
 require 'uri'
 require 'rdf/rdfxml'
 require 'rdf'
+require 'active_fedora/rdf_xml_writer'
 
 module ActiveFedora
   class RelsExtDatastream < Datastream
@@ -46,7 +47,7 @@ module ActiveFedora
     # @param [Hash] relationships (optional) @default self.relationships
     # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
     def to_rels_ext()
-      xml = RDF::RDFXML::Writer.buffer do |writer|
+      xml = ActiveFedora::RDFXMLWriter.buffer do |writer|
         model.relationships.each_statement do |statement|
           writer << statement
         end
