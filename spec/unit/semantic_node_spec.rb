@@ -26,6 +26,14 @@ describe ActiveFedora::SemanticNode do
       stm = @node.build_statement('info:fedora/spec:9', :is_part_of, 'info:fedora/spec:7')
       stm.object.to_s.should == "info:fedora/spec:7"
     end
+    it "should also be happy with non-info URIs" do
+      stm = @node.build_statement('info:fedora/spec:9', :is_annotation_of, 'http://www.w3.org/standards/techs/rdf')
+      stm.object.to_s.should == "http://www.w3.org/standards/techs/rdf"
+    end
+    it "should also be happy with targets that are URI::Generics" do
+      stm = @node.build_statement('info:fedora/spec:9', :is_annotation_of, URI.parse('http://www.w3.org/standards/techs/rdf'))
+      stm.object.to_s.should == "http://www.w3.org/standards/techs/rdf"
+    end
   end
   
   describe "with a bunch of objects" do
