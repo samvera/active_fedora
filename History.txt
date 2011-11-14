@@ -1,3 +1,17 @@
+3.1.2
+correctly handling non-default pid_namespace
+info uri support; rdf:type predicate compatibility with Fedora
+
+3.1.1
+adds support for better handling of literal values in the RELS-EXT datastream.
+adds support for setting the controlGroup via a parameter to has_metadata.
+ability to pass a predicate as a parameter to AF::Base#relationships to get a list of the matching targets. This reads a bit better than ids_for_outbound().
+refactoring to support overriding certain sections (ContentModel) by consumers of active-fedora.
+
+3.1.0
+Based on rubydora for fedora interface
+RDF-xml for the relationships
+
 3.0.4
 
 HYDRA-663 -- Passing an empty string to a id setter should clear the belongs to association
