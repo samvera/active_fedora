@@ -141,7 +141,15 @@ Use the relationships method to list the object's relationships:
 
 <pre>
 newthing.relationships
-=> {:self=>{}}
+=> #<RDF::Graph:0x83a53088(<>)> 
+
+newthing.relationships.statements.map(&:inspect)
+=> ["#<RDF::Statement:0x8371a858(<info:fedora/changeme:30> <info:fedora/fedora-system:def/model#hasModel> <info:fedora/hydra-cModel:DisplaySet> .)>",
+    "#<RDF::Statement:0x8371a6f0(<info:fedora/changeme:30> <info:fedora/fedora-system:def/model#hasModel> <info:fedora/hydra-cModel:CommonMetadata> .)>",
+    "#<RDF::Statement:0x8371a3e4(<info:fedora/changeme:30> <info:fedora/fedora-system:def/relations-external#isMemberOf> <info:fedora/changeme:parentSet> .)>"]
+
+newthing.relationships(:is_member_of)
+ => ["info:fedora/changeme:parentSet"] 
 </pre>
 
 The SpecialThing class definition contains these lines:
@@ -174,8 +182,17 @@ Now we'll create another Fedora object (using the default ActiveFedora object mo
 newobj = ActiveFedora::Base.new
 newobj.add_relationship(:has_derivation, newthing)
 => true
+
 newobj.relationships
-=> {:self=>{:has_derivation=>["info:fedora/changeme:30"]}}
+=> #<RDF::Graph:0x83a53088(<>)> 
+
+newobj.relationships.statements.map(&:inspect)
+=> ["#<RDF::Statement:0x8371a3e4(<info:fedora/changeme:30> <info:fedora/fedora-system:def/relations-external#hasDerivation> <info:fedora/changeme:30> .)>"]
+
+newobj.relationships(:has_derivation)
+ => ["info:fedora/changeme:30"] 
+
+
 newobj.save
 => ...
 newobj.pid
@@ -256,10 +273,6 @@ newthing.pid
 copy_as_base = ActiveFedora::Base.load_instance("changeme:30")
 copy_as_base.pid
 => "changeme:30"
-newthing.relationships
-=> {:self=>{:has_model=>["info:fedora/afmodel:SpecialThing"]}} 
-copy_as_base.relationships
-=> {:self=>{:has_model=>["info:fedora/afmodel:SpecialThing"]}} 
 newthing.datastreams.keys
 => ["DS1", "descMetadata", "Foo1", "minivan", "RELS-EXT", "rightsMetadata", "DC", "extraMetadataForFun"] 
 copy_as_base.datastreams.keys
