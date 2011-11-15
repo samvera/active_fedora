@@ -107,3 +107,187 @@ After calling add_datastream, then everything will be ready to save to Fedora.  
 <pre>
 st.datastreams["descMetadata"].save
 </pre>
+
+h2. (Rails3) Using ActiveModel methods and delegate to treat xml nodes like regular ActiveModel attributes
+
+h3. Handling most xml fields with delegate method
+
+Say you want to treat a mods title like a regular ActiveModel attribute so that you can use all of the Rails helpers and methods like form_for.
+
+The Datastream definition:
+
+
+<pre>
+  # app/models/mods_generic_content.rb
+  class ModsGenericContent < ObjectMods
+
+    set_terminology do |t|
+      t.root(:path=>"mods", :xmlns=>"http://www.loc.gov/mods/v3", :schema=>"http://www.loc.gov/standards/mods/v3/mods-3-2.xsd")
+
+      t.title_info(:path=>"titleInfo") {
+        t.main_title(:path=>"title", :label=>"title", :index_as=>[:facetable])
+      }
+      
+      # Proxy Terms (delegate can only reference root terms, so you have to create a root term "title" that proxies to the correct spot in the Terminology)
+      t.title(:proxy=>[:title_info, :main_title]) 
+    end
+  end
+</pre>
+
+The Model: 
+
+# app/models/generic_content.rb
+<pre>
+  class GenericContent < ActiveFedora::Base
+
+    include Hydra::ModelMethods
+    has_metadata :name => "descMetadata", :label=>"MODS metadata", :type => ModsGenericContent
+    
+    delegate :title, :to=>:descMetadata
+  end
+</pre>
+
+Example form:
+
+
+<pre>
+  # app/views/generic_contents.html.erb
+  <%= form_for @generic_content do |f| %>
+    <dl>
+      <dt class="title">
+        <%= f.label "Title:" %>
+      </dt>
+      <dd class="title">
+        <%= f.text_field :title %>
+      </dd>
+    </dl>
+    <%= f.submit "Save Changes" %>
+  <% end %>
+</pre>
+
+The Controller that processes updates:
+
+<pre>
+  # app/controllers/generic_contents_controller.rb
+  class GenericContentsController < ApplicationController 
+  
+    # This renders the edit form
+    def edit
+      @generic_content = GenericContent.find(params[:id])
+    end
+
+    # This updates the object based on the info submitted by your form, which puts the Hash of new values into params["generic_content"]
+    def update
+      @generic_content = GenericContent.find(params[:id])
+      @generic_content.update_attributes(params[:generic_content])
+      if @generic_content.save
+        flash[:notice] = "Saved changes to #{@generic_content.title}"
+      else
+        flash[:error] = "Failed to save your changes!"
+      end
+      redirect_to edit_generic_content_path(@generic_content)
+    end
+  end
+</pre>
+
+h3. Handling complex xml structures in attributes= method
+
+This approach complements the usage of the delegate method to handle most xml nodes in your datasreams.
+
+With this approach, you can still create relatively normal Rails forms while updating complex xml structures (ie. MODS name entries) internally without creating a separate controller & model for those structures.
+
+Example: You want to create/edit xml like this in a descMetadata datastream that uses the GenericContentXml datatstream definition.
+
+  <pre>
+    <subject>
+      <topic>Subject 1</topic>
+      <catgegory>topic</category>
+    </subject>
+    <subject>
+      <topic>Subject 2</topic>
+      <catgegory>geographic</category>
+    </subject>
+  </pre>
+
+  You have a form that submits parameters like this:
+  
+  <pre>
+    {
+      "generic_content" => {
+        "subjects" =>[
+          {
+              "topic" => "Subject 1",
+              "category" => "topic"
+            },{
+              "topic" => "Subject 2",
+              "category" => "geographic"      
+          }
+          ]
+    }}
+  </pre>
+
+  Here's the test:
+  
+  <pre>
+    # spec/models/generic_content_spec.rb
+    describe "attributes=" do
+      before do
+        @node = GenericContent.new
+        @sample_post_params = {
+          "generic_content" => {
+            "subjects" =>[
+              {
+                  "topic" => "Subject 1",
+                  "category" => "topic"
+                },{
+                  "topic" => "Subject 2",
+                  "category" => "geographic"      
+              }
+              ]
+        }}
+
+      end
+      it "with subjects" do
+        @node.attributes = @sample_post_params["generic_content"]
+        @node.descMetadata.subject.length.should == 2
+        @node.descMetadata.subject(0).topic.should == ["Subject 1"]
+        @node.descMetadata.subject(0).category.should == ["topic"]
+        @node.descMetadata.subject(1).topic.should == ["Subject 2"]
+        @node.descMetadata.subject(1).category.should == ["geographic"]
+      end
+    end
+  </pre>
+
+  In the OM terminology of the Datasream definition:
+  
+  <pre>
+    # app/models/generic_content_xml.rb
+    ...
+    t.subject(:path=>"subject", :attributes=>{:authority=>"UoH"}) {
+     t.topic(:index_as=>[:facetable])
+     t.category
+    }
+    ...
+  </pre>
+
+  The Model:
+  
+  <pre>
+    # app/models/generic_content.rb
+    class GenericContent < ActiveFedora::Base
+
+      include Hydra::ModelMethods
+      has_metadata :name => "descMetadata", :label=>"generic metadata", :type => GenericContentXml
+
+      def attributes=(properties)
+        if (properties["subjects"])
+          self.descMetadata.subject.nodeset.remove  # wipe out existing values
+          properties["subjects"].each_with_index do |subject_hash, index|
+            self.descMetadata.subject(index).topic = subject_hash["topic"]
+            self.descMetadata.subject(index).category = subject_hash["category"]
+          end
+          properties.delete("subjects")
+        end
+        super
+    end
+  </pre>
