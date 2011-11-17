@@ -9,6 +9,7 @@ module ActiveFedora
     attr_accessor :options
 
     def self.connect(params={})
+      params = params.dup
       if params.kind_of? String
         u = URI.parse params
         params = {}
@@ -17,13 +18,14 @@ module ActiveFedora
         params[:url] = "#{u.scheme}://#{u.host}:#{u.port}#{u.path}"
       end
       instance = self.instance
+      force = params.delete(:force)
       instance.options = params
-      instance.connect
+      instance.connect force
       instance
     end
 
-    def connect()
-      return unless @connection.nil?
+    def connect(force=false)
+      return unless @connection.nil? or force
       allowable_options = [:url, :user, :password, :timeout, :open_timeout, :ssl_client_cert, :ssl_client_key]
       client_options = options.reject { |k,v| not allowable_options.include?(k) }
       @connection = Rubydora.connect client_options
