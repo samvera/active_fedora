@@ -24,7 +24,9 @@ module ActiveFedora
 
     def connect()
       return unless @connection.nil?
-      @connection = Rubydora.connect :url => options[:url], :user => options[:user], :password => options[:password]
+      allowable_options = [:url, :user, :password, :timeout, :open_timeout, :ssl_client_cert, :ssl_client_key]
+      client_options = options.reject { |k,v| not allowable_options.include?(k) }
+      @connection = Rubydora.connect client_options
     end
 
     def nextid(attrs={})
