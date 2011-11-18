@@ -17,12 +17,6 @@ module ActiveFedora
     
     attr_accessor :internal_solr_doc
 
-    before_create :add_mime_type
-
-    def add_mime_type
-      self.mimeType= 'text/xml'
-    end
-    
     # Create an instance of this class based on xml content
     # @param [String, File, Nokogiri::XML::Node] xml the xml content to build from
     # @param [ActiveFedora::MetadataDatastream] tmpl the Datastream object that you are building @default a new instance of this class

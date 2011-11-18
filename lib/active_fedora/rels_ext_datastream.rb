@@ -11,8 +11,6 @@ module ActiveFedora
     include Solrizer::FieldNameMapper
     attr_accessor :model
 
-    before_create :add_mime_type
-
     def add_mime_type
       self.mimeType= 'application/rdf+xml'
     end

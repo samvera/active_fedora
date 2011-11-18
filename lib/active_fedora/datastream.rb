@@ -4,6 +4,7 @@ module ActiveFedora
   class Datastream < Rubydora::Datastream
     
     attr_accessor :dirty, :last_modified, :fields
+    before_create :add_mime_type
   
     def initialize(digital_object, dsid)
       @fields={}
@@ -13,6 +14,10 @@ module ActiveFedora
     
     def size
       self.profile['dsSize']
+    end
+
+    def add_mime_type
+      self.mimeType = 'text/xml' unless self.mimeType
     end
 
     #compatibility method for rails' url generators. This method will 

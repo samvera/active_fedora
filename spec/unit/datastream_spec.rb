@@ -21,7 +21,7 @@ describe ActiveFedora::Datastream do
   describe '#save' do
     it "should set dirty? to false" do
       @mock_repo = mock('repository')
-      @mock_repo.stubs(:add_datastream).with(:versionable => true, :pid => @test_object.pid, :dsid => 'abcd', :controlGroup => 'M', :dsState => 'A', :content => 'hi there', :checksumType => 'DISABLED')
+      @mock_repo.stubs(:add_datastream).with(:mimeType=>'text/xml', :versionable => true, :pid => @test_object.pid, :dsid => 'abcd', :controlGroup => 'M', :dsState => 'A', :content => 'hi there', :checksumType => 'DISABLED')
       @mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid)
       @test_object.inner_object.stubs(:repository).returns(@mock_repo)
       @test_datastream.dirty?.should be_true

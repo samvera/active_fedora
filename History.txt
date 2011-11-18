@@ -1,3 +1,7 @@
+3.1.3
+Set mimeType for all datastreams, default to text/xml
+Update rubydora to 0.2.4
+
 3.1.2
 correctly handling non-default pid_namespace (Benjamin Armintor)
 info uri support; rdf:type predicate compatibility with Fedora(Benjamin Armintor)

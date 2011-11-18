@@ -18,11 +18,13 @@ describe ActiveFedora::MetadataDatastream do
   end
   
   before(:each) do
+    mock_inner = mock('inner object')
     @test_object = ActiveFedora::Base.new
-    @test_ds = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, 'mdDs')
-  end
-  
-  after(:each) do
+    @mock_repo = mock('repository')
+    @mock_repo.stubs(:datastream_dissemination=>'My Content')
+    mock_inner.stubs(:repository).returns(@mock_repo)
+    mock_inner.stubs(:pid)
+    @test_ds = ActiveFedora::MetadataDatastream.new(mock_inner, 'mdDs')
   end
   
   describe '#new' do
@@ -37,8 +39,14 @@ describe ActiveFedora::MetadataDatastream do
   end
   
   describe '.save' do
-    it "should provide .save" do
-      @test_ds.should respond_to(:save)
+    it "should persist the product of .to_xml in fedora" do
+      @test_ds.expects(:new?).returns(true).twice
+      @mock_repo.expects(:datastream).with(:pid => nil, :dsid => 'mdDs')
+      @mock_repo.expects(:add_datastream).with(:pid => nil, :dsid => 'mdDs', :checksumType => 'DISABLED', :versionable => true, :content => 'fake xml', :controlGroup => 'M', :dsState => 'A', :mimeType=>'text/xml')
+      @test_ds.expects(:to_xml).returns("fake xml")
+      @test_ds.serialize!
+      @test_ds.save
+      @test_ds.mimeType.should == 'text/xml'
     end
   end
   
