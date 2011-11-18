@@ -21,12 +21,14 @@ describe ActiveFedora::NokogiriDatastream do
       end
     end
 
-    @pid = "hydrangea:fixture_mods_article1"
-    @test_solr_object = HydrangeaArticle2.load_instance_from_solr(@pid)
-    @test_object = HydrangeaArticle2.load_instance(@pid)
   end
 
   describe '.term_values' do
+    before do
+      @pid = "hydrangea:fixture_mods_article1"
+      @test_solr_object = HydrangeaArticle2.load_instance_from_solr(@pid)
+      @test_object = HydrangeaArticle2.load_instance(@pid)
+    end
 
     it "should return the same values whether getting from solr or Fedora" do
       @test_solr_object.datastreams["descMetadata"].term_values(:name,:role,:text).should == ["Creator","Contributor","Funder","Host"]

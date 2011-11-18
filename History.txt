@@ -1,6 +1,9 @@
 3.1.2
-correctly handling non-default pid_namespace
-info uri support; rdf:type predicate compatibility with Fedora
+correctly handling non-default pid_namespace (Benjamin Armintor)
+info uri support; rdf:type predicate compatibility with Fedora(Benjamin Armintor)
+more flexibility for initializing Rubydora (Michael B. Klein)
+NokogiriDatastream and RELS-EXT datastream set mimeType (Justin Coyne)
+
 
 3.1.1
 adds support for better handling of literal values in the RELS-EXT datastream.

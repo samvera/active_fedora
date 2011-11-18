@@ -10,7 +10,13 @@ module ActiveFedora
     
     include Solrizer::FieldNameMapper
     attr_accessor :model
-    
+
+    before_create :add_mime_type
+
+    def add_mime_type
+      self.mimeType= 'application/rdf+xml'
+    end
+
     def serialize!
       self.content = to_rels_ext() if model.relationships_are_dirty
       model.relationships_are_dirty = false
