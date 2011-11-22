@@ -12,6 +12,7 @@ module ActiveFedora
       super
     end
     
+    ### TODO: Shouldn't this be the same as: klass.to_class_uri ?  - Justin
     def self.pid_from_ruby_class(klass,attrs={})
 
       unless klass.respond_to? :pid_suffix

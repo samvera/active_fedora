@@ -80,6 +80,7 @@ module ActiveFedora
       
       # Returns a suitable uri object for :has_model
       # Should reverse Model#from_class_uri
+      ### TODO: shouldn't this reverse ContentModel.pid_from_ruby_class
       def to_class_uri
         ns = (self.respond_to? :pid_namespace) ? self.pid_namespace : Model::DEFAULT_NS
         pid = self.name.gsub(/::/,'_')
