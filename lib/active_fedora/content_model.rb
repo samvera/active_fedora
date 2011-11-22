@@ -34,7 +34,7 @@ module ActiveFedora
     end
     
     def self.models_asserted_by(obj)
-      obj.ids_for_outbound(:has_model)
+      obj.relationships(:has_model)
     end
     
     def self.known_models_for(obj)
@@ -59,36 +59,16 @@ module ActiveFedora
       ActiveFedora::Base
     end
     
-    # Returns a ruby class corresponding to the given uri if one can be found.
-    # Returns false if no corresponding class can be found.
-    def self.uri_to_ruby_class( uri )
-      classname = Model.classname_from_uri(uri)
-      
-      if class_exists?(classname)
-        Kernel.const_get(classname)
-      else
-        false
-      end
-    end
     
     # Returns an ActiveFedora Model class corresponding to the given uri if one can be found.
     # Returns false if no corresponding model can be found.
     def self.uri_to_model_class( uri )
-      rc = uri_to_ruby_class(uri)
+      rc = Model.from_class_uri(uri)
       if rc && rc.superclass == ActiveFedora::Base
         rc
       else
         false
       end
-    end
-    
-    private 
-    
-    def self.class_exists?(class_name)
-      klass = Module.const_get(class_name)
-      return klass.is_a?(Class)
-    rescue NameError
-      return false
     end
     
   end

@@ -14,28 +14,35 @@ module ActiveFedora
       klass.extend(ClassMethods)
     end
     
-    #returns namespace, classname
+    # Takes a Fedora URI for a cModel and returns classname, namespace
     def self.classname_from_uri(uri)
-      uri.split(':')[-1].gsub('_','/').classify
+      local_path = uri.split('/')[1]
+      parts = local_path.split(':')
+      return parts[-1].gsub('_','/').classify, parts[0]
     end
 
     # Takes a Fedora URI for a cModel, and returns a 
     # corresponding Model if available
     # This method should reverse ClassMethods#to_class_uri
     def self.from_class_uri(uri)
-      model_value = classname_from_uri(uri)
+      model_value, pid_ns = classname_from_uri(uri)
       raise "model URI incorrectly formatted: #{uri}" unless model_value
+
+      unless class_exists?(model_value)
+        logger.warn "#{model_value} is not a real class"
+        return false
+      end
       if model_value.include?("::")
         result = eval(model_value)
       else
         result = Kernel.const_get(model_value)
       end
-      # unless result.nil?
-      #   model_ns = (result.respond_to? :pid_namespace) ? result.pid_namespace : DEFAULT_NS
-      #   if model_ns != pid_ns
-      #     logger.warn "Model class namespace (#{model_ns}) and uri namespace (#{pid_ns}) do not match!"
-      #   end
-      # end
+      unless result.nil?
+        model_ns = (result.respond_to? :pid_namespace) ? result.pid_namespace : DEFAULT_NS
+        if model_ns != pid_ns
+          logger.warn "Model class namespace '#{model_ns}' does not match uri: '#{uri}'"
+        end
+      end
       result
     end
 
@@ -275,5 +282,14 @@ module ActiveFedora
           END
     end
 
+    private 
+    
+    def self.class_exists?(class_name)
+      klass = class_name.constantize
+      return klass.is_a?(Class)
+    rescue NameError
+      return false
+    end
+    
   end
 end

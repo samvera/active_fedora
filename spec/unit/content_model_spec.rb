@@ -73,12 +73,12 @@ describe ActiveFedora::ContentModel do
   describe "models_asserted_by" do
     it "should return an array of all of the content models asserted by the given object" do
       mock_object = mock("ActiveFedora Object")
-      mock_object.expects(:ids_for_outbound).with(:has_model).returns(["info:fedora/fedora-system:ServiceDefinition-3.0", "info:fedora/afmodel:SampleModel", "info:fedora/afmodel:NonDefinedModel"])
+      mock_object.expects(:relationships).with(:has_model).returns(["info:fedora/fedora-system:ServiceDefinition-3.0", "info:fedora/afmodel:SampleModel", "info:fedora/afmodel:NonDefinedModel"])
       ActiveFedora::ContentModel.models_asserted_by(mock_object).should == ["info:fedora/fedora-system:ServiceDefinition-3.0", "info:fedora/afmodel:SampleModel", "info:fedora/afmodel:NonDefinedModel"]
     end
     it "should return an empty array if the object doesn't have a RELS-EXT datastream" do
       mock_object = mock("ActiveFedora Object")
-      mock_object.expects(:ids_for_outbound).with(:has_model).returns([])
+      mock_object.expects(:relationships).with(:has_model).returns([])
       ActiveFedora::ContentModel.models_asserted_by(mock_object).should == []
     end
   end
@@ -86,33 +86,24 @@ describe ActiveFedora::ContentModel do
   describe "known_models_asserted_by" do
     it "should figure out the applicable models to load" do
       mock_object = mock("ActiveFedora Object")
-      mock_object.expects(:ids_for_outbound).with(:has_model).returns(["info:fedora/fedora-system:ServiceDefinition-3.0", "info:fedora/afmodel:SampleModel", "info:fedora/afmodel:NonDefinedModel"])
+      mock_object.expects(:relationships).with(:has_model).returns(["info:fedora/fedora-system:ServiceDefinition-3.0", "info:fedora/afmodel:SampleModel", "info:fedora/afmodel:NonDefinedModel"])
       ActiveFedora::ContentModel.known_models_for(mock_object).should == [SampleModel]
     end
     it "should support namespaced models" do
       pending "This is harder than it looks."
       mock_object = mock("ActiveFedora Object")
-      mock_object.expects(:ids_for_outbound).with(:has_model).returns(["info:fedora/afmodel:Sample_NamespacedModel"])
+      mock_object.expects(:relationships).with(:has_model).returns(["info:fedora/afmodel:Sample_NamespacedModel"])
       ActiveFedora::ContentModel.known_models_for(mock_object).should == [Sample::NamespacedModel]
     end
     it "should default to using ActiveFedora::Base as the model" do
       mock_object = mock("ActiveFedora Object")
-      mock_object.expects(:ids_for_outbound).with(:has_model).returns(["info:fedora/afmodel:NonDefinedModel"])
+      mock_object.expects(:relationships).with(:has_model).returns(["info:fedora/afmodel:NonDefinedModel"])
       ActiveFedora::ContentModel.known_models_for(mock_object).should == [ActiveFedora::Base]
     end
     it "should still work even if the object doesn't have a RELS-EXT datastream" do
       mock_object = mock("ActiveFedora Object")
-      mock_object.expects(:ids_for_outbound).with(:has_model).returns([])
+      mock_object.expects(:relationships).with(:has_model).returns([])
       ActiveFedora::ContentModel.known_models_for(mock_object).should == [ActiveFedora::Base]
-    end
-  end
-  
-  describe "uri_to_ruby_class" do
-    it "should return ruby class corresponding to the given uri if a valid class can be found" do
-      ActiveFedora::ContentModel.uri_to_ruby_class("info:fedora/afmodel:SampleModel").should == SampleModel
-      ActiveFedora::ContentModel.uri_to_ruby_class("info:fedora/afmodel:NonDefinedModel").should == false
-      ActiveFedora::ContentModel.uri_to_ruby_class("info:fedora/afmodel:String").should == String
-      ActiveFedora::ContentModel.uri_to_ruby_class("info:fedora/hydra-cModel:genericContent").should == GenericContent
     end
   end
   
