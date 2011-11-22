@@ -14,28 +14,28 @@ module ActiveFedora
       klass.extend(ClassMethods)
     end
     
+    #returns namespace, classname
+    def self.classname_from_uri(uri)
+      uri.split(':')[-1].gsub('_','/').classify
+    end
+
     # Takes a Fedora URI for a cModel, and returns a 
     # corresponding Model if available
     # This method should reverse ClassMethods#to_class_uri
     def self.from_class_uri(uri)
-      if match_data = /info:fedora\/([a-zA-z0-9\-_]+):(.+)$/.match(uri)
-        pid_ns = match_data[1]
-        model_value = match_data[2]
-        model_value.gsub!('_', '::')
-      else
-        raise "model URI incorrectly formatted: #{uri}"
-      end
+      model_value = classname_from_uri(uri)
+      raise "model URI incorrectly formatted: #{uri}" unless model_value
       if model_value.include?("::")
         result = eval(model_value)
       else
         result = Kernel.const_get(model_value)
       end
-      unless result.nil?
-        model_ns = (result.respond_to? :pid_namespace) ? result.pid_namespace : DEFAULT_NS
-        if model_ns != pid_ns
-          logger.warn "Model class namespace (#{model_ns}) and uri namespace (#{pid_ns}) do not match!"
-        end
-      end
+      # unless result.nil?
+      #   model_ns = (result.respond_to? :pid_namespace) ? result.pid_namespace : DEFAULT_NS
+      #   if model_ns != pid_ns
+      #     logger.warn "Model class namespace (#{model_ns}) and uri namespace (#{pid_ns}) do not match!"
+      #   end
+      # end
       result
     end
 

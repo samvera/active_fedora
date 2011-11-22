@@ -62,7 +62,7 @@ module ActiveFedora
     # Returns a ruby class corresponding to the given uri if one can be found.
     # Returns false if no corresponding class can be found.
     def self.uri_to_ruby_class( uri )
-      classname = uri.split(':')[-1].titlecase.gsub(' ','')
+      classname = Model.classname_from_uri(uri)
       
       if class_exists?(classname)
         Kernel.const_get(classname)
