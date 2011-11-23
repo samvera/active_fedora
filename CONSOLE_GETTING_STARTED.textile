@@ -75,7 +75,7 @@ As you can see, ActiveFedora.init defaults to using the fedora.yml included in t
 
 If you want to use a different yml file, put your info (pointing ActiveFedora to specific Fedora & Solr URLs) into the file and pass its path to ActiveFedora.init:
 
-<pre>ActiveFedora.init("path/to/fedora.yml")</pre>
+<pre>ActiveFedora.init(:fedora_config_path=>"path/to/fedora.yml")</pre>
 
 h4. ActiveFedora within Rails
 
