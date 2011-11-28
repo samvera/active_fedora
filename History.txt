@@ -1,3 +1,7 @@
+3.1.4
+Update rubydora to 0.2.6
+Created a consistent implementation of Model.classname_from_uri
+
 3.1.3
 Set mimeType for all datastreams, default to text/xml
 Update rubydora to 0.2.4
