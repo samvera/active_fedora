@@ -371,6 +371,16 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe '.assert_content_model' do
+    it "should default to the name of the class" do
+      stub_ingest(@this_pid)
+      stub_add_ds(@this_pid, ['RELS-EXT'])
+      @test_object.assert_content_model
+      @test_object.relationships(:has_model).should == ["info:fedora/afmodel:ActiveFedora_Base"]
+      
+    end
+  end
+
   describe '.save' do
     
     
@@ -384,20 +394,13 @@ describe ActiveFedora::Base do
       @test_object.persisted?.should be true
     end
 
-    
-    it "should raise an exception if object fails to save" do
-      pending # Not using Fedora::Repository anymore
-      server_response = mock("Server Error")
-      Fedora::Repository.instance.expects(:save).with(@test_object.inner_object).raises(Fedora::ServerError, server_response)
-      lambda {@test_object.save}.should raise_error(Fedora::ServerError)
-      #lambda {@test_object.save}.should raise_error(Fedora::ServerError, "Error Saving object #{@test_object.pid}. Server Error: RubyFedora Error Msg")
-    end
-    
-    it "should raise an exception if any of the datastreams fail to save" do
-      pending # Not using Fedora::Repository anymore
-      Fedora::Repository.instance.expects(:save).with(@test_object.inner_object).returns(true)
-      Fedora::Repository.instance.expects(:save).with(kind_of(ActiveFedora::RelsExtDatastream)).raises(Fedora::ServerError,  mock("Server Error")) 
-      lambda {@test_object.save}.should raise_error(Fedora::ServerError)
+    it "should call assert_content_model" do
+      stub_ingest(@this_pid)
+      stub_add_ds(@this_pid, ['RELS-EXT'])
+      @test_object.expects(:assert_content_model)
+      @test_object.save.should == true
+      
+      
     end
     
     it "should call .save on any datastreams that are dirty" do

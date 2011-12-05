@@ -990,6 +990,12 @@ module ActiveFedora
       end
     end
     
+    # This can be overriden to assert a different model
+    # It's normally called once in the lifecycle, by #create#
+    def assert_content_model
+      add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(self.class))
+    end
+
     private
     def configure_defined_datastreams
       if self.class.ds_specs
@@ -1032,11 +1038,10 @@ module ActiveFedora
     end
 
 
-
     
     # Deals with preparing new object to be saved to Fedora, then pushes it and its datastreams into Fedora. 
     def create
-      add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(self.class))
+      assert_content_model
       @metadata_is_dirty = true
       update
     end
