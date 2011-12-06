@@ -495,6 +495,29 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe ".add_file_datastream" do
+    before do
+      @mock_file = mock('file')
+    end
+    it "should pass prefix" do
+      #@test_object.expects(:create_datastream).with(ActiveFedora::Datastream, nil, attrs)
+      stub_add_ds(@test_object.pid, ['content1'])
+      @test_object.add_file_datastream(@mock_file, :prefix=>'content' )
+      @test_object.datastreams.keys.should include 'content1'
+    end
+    it "should pass dsid" do
+      #@test_object.expects(:create_datastream).with(ActiveFedora::Datastream, "MY_DSID", attrs)
+      stub_add_ds(@test_object.pid, ['MY_DSID'])
+      @test_object.add_file_datastream(@mock_file, :dsid=>'MY_DSID')
+      @test_object.datastreams.keys.should include 'MY_DSID'
+    end
+    it "without dsid or prefix" do
+      #@test_object.expects(:create_datastream).with(ActiveFedora::Datastream, nil, attrs)
+      stub_add_ds(@test_object.pid, ['DS1'])
+      @test_object.add_file_datastream(@mock_file, {} )
+      @test_object.datastreams.keys.should include 'DS1'
+    end
+  end
 
   describe ".to_xml" do
     it "should provide .to_xml" do

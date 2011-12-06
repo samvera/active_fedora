@@ -300,10 +300,10 @@ module ActiveFedora
     # Add the given file as a datastream in the object
     #
     # @param [File] file the file to add
-    # @param [Hash] opts options: :dsid, :label, :mimeType
+    # @param [Hash] opts options: :dsid, :label, :mimeType, :prefix
     def add_file_datastream(file, opts={})
       label = opts.has_key?(:label) ? opts[:label] : ""
-      attrs = {:dsLabel => label, :controlGroup => 'M', :blob => file}
+      attrs = {:dsLabel => label, :controlGroup => 'M', :blob => file, :prefix=>opts[:prefix]}
       if opts.has_key?(:mime_type)
         attrs.merge!({:mimeType=>opts[:mime_type]})
       elsif opts.has_key?(:mimeType)
