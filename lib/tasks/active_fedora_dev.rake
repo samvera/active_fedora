@@ -1,32 +1,9 @@
-begin
-  require 'spec'
-rescue LoadError
-  require 'rubygems'
-  require 'spec'
-end
-begin
-  require 'spec/rake/spectask'
-rescue LoadError
-  puts <<-EOS
-To use rspec for testing you must install rspec gem:
-    gem install rspec
-EOS
-  exit(0)
-end
-
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/../../")
+
 require 'jettywrapper'
-
-$: << 'lib'
-
-desc "Run active-fedora rspec tests"
-task :spec do
-  Rake::Task["active_fedora:rspec"].invoke
-end
 
 desc "Hudson build"
 task :hudson do
-  
   ENV['environment'] = "test"
   Rake::Task["active_fedora:doc"].invoke
   Rake::Task["active_fedora:configure_jetty"].invoke
@@ -46,7 +23,7 @@ namespace :active_fedora do
   begin
     require 'yard'
     require 'yard/rake/yardoc_task'
-    project_root = File.expand_path("#{File.dirname(__FILE__)}/../../")
+    project_root = APP_ROOT
     doc_destination = File.join(project_root, 'doc')
 
     YARD::Rake::YardocTask.new(:doc) do |yt|
@@ -61,12 +38,16 @@ namespace :active_fedora do
     end
   end
 
+require 'rspec/core/rake_task'
+  RSpec::Core::RakeTask.new(:rspec) do |spec|
+    spec.pattern = FileList['spec/**/*_spec.rb']
+    spec.pattern += FileList['spec/*_spec.rb']
+  end
 
-  Spec::Rake::SpecTask.new(:rspec) do |t|
-    t.spec_files = FileList['spec/**/*_spec.rb']
-    t.rcov = true
-    t.rcov_opts << ['--exclude', 'gems']
-    t.rcov_opts << ['--exclude', 'spec']
+  RSpec::Core::RakeTask.new(:rcov) do |spec|
+    spec.pattern = FileList['spec/**/*_spec.rb']
+    spec.pattern += FileList['spec/*_spec.rb']
+    spec.rcov = true
   end
 
   task :clean_jetty do

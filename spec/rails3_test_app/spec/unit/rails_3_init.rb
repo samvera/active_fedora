@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '../spec_helper')
+require 'spec_helper'
 
 describe "initializing active-fedora in a rails 3 app" do
   it "should include ActiveFedora::Railtie" do
