@@ -6,7 +6,6 @@ describe ActiveFedora do
   
   after :all do
     unstub_rails
-    unstub_blacklight
     # Restore to default fedora configs
     fedora_config_path = File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml")
     ActiveFedora.init(:environment=>"test", :fedora_config_path=>fedora_config_path)
@@ -339,8 +338,7 @@ describe ActiveFedora do
     
     after(:all) do
       # Restore to default fedora configs
-      ActiveFedora.init(:fedora_config_path => File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml"))
-
+      ActiveFedora.init(:environment => "test", :fedora_config_path => File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml"))
     end
 
     describe "outside of rails" do
@@ -400,6 +398,11 @@ end
 
 
 describe ActiveFedora do
+    after(:all) do
+      # Restore to default fedora configs
+      ActiveFedora.init(:environment => "test", :fedora_config_path => File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml"))
+    end
+
   # Put methods whose tests require registering Fedora & Solr here.
   # to allow tests to run fast, keep these to a minimum.
   describe "register_solr_and_fedora" do
@@ -435,19 +438,6 @@ def unstub_rails
   Object.send(:remove_const,:Rails) if defined?(Rails)
 end
     
-def stub_blacklight(opts={})
-  Object.const_set("Blacklight",Class)
-  Blacklight.send(:undef_method,:solr_config) if Blacklight.respond_to?(:solr_config)
-  if opts[:solr_config]
-    Blacklight.send(:define_method,:solr_config) do
-      opts[:solr_config]
-    end
-  end
-end
-
-def unstub_blacklight
-  Object.send(:remove_const,:Blacklight) if defined?(Blacklight)
-end
 
 def setup_pretest_env
   ENV['RAILS_ENV']='test'
