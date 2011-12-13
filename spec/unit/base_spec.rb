@@ -169,6 +169,11 @@ describe ActiveFedora::Base do
         stub_ingest(@this_pid)
         stub_add_ds(@this_pid, ['RELS-EXT', 'externalDisseminator', 'externalUrl'])
       end
+
+      after(:all) do
+        # clean up test class
+        Object.send(:remove_const, :MoreFooHistory)
+      end
       it "should raise an error without :disseminator or :url option" do
         class MoreFooHistory < ActiveFedora::Base
           has_metadata :type=>ActiveFedora::NokogiriDatastream, :name=>"externalDisseminator", :control_group => "E"
