@@ -1,4 +1,4 @@
-require File.join( File.dirname(__FILE__), "..", "spec_helper" )
+require 'spec_helper'
 
 class MockAFBaseQuerySolr < ActiveFedora::Base
   has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|

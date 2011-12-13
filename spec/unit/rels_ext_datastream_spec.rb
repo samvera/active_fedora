@@ -1,4 +1,4 @@
-require File.join( File.dirname(__FILE__), "../spec_helper" )
+require 'spec_helper'
 
 describe ActiveFedora::RelsExtDatastream do
   describe "short_predicate" do

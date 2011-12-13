@@ -1,4 +1,4 @@
-require File.join( File.dirname(__FILE__), "../spec_helper" )
+require 'spec_helper'
 require File.join( File.dirname(__FILE__), "../../lib/active_fedora/rdf_xml_writer" )
 
 describe ActiveFedora::RDFXMLWriter do

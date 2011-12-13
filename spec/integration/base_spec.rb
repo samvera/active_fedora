@@ -1,4 +1,4 @@
-require File.join( File.dirname(__FILE__), "../spec_helper" )
+require 'spec_helper'
 
 class MockAFBaseRelationship < ActiveFedora::Base
   has_relationship "testing", :has_part, :type=>MockAFBaseRelationship
