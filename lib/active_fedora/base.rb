@@ -786,7 +786,7 @@ module ActiveFedora
     end
     
     def label=(new_label)
-      @inner_object.profile["objLabel"] = new_label
+      @inner_object.label = new_label
     end
 
     #Return a hash of all available metadata fields for all 
