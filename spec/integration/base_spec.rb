@@ -700,8 +700,8 @@ describe ActiveFedora::Base do
     it 'should add a datastream with the given name to the object in fedora' do
       @test_object2 = MockAFBaseDatastream.new
 #      @test_object2.new_object = true
-      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
-      f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
+      f = File.open(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"), 'rb')
+      f2 = File.open(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ), 'rb')
       f2.stubs(:original_filename).returns("dino.jpg")
       f.stubs(:content_type).returns("image/jpeg")
       @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f, :label=>"testDS"})
@@ -734,7 +734,7 @@ describe ActiveFedora::Base do
     it 'should add a file datastream with the given name to the object in fedora' do
       @test_object2 = MockAFBaseDatastream.new
 #      @test_object2.new_object = true
-      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
+      f = File.open(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"), 'rb')
       f.stubs(:content_type).returns("image/jpeg")
       @test_object2.add_named_file_datastream("thumbnail",f)
       ds = @test_object2.thumbnail.first
@@ -758,10 +758,10 @@ describe ActiveFedora::Base do
   describe '#update_named_datastream' do
     it 'should update a named datastream to have a new file' do
       @test_object2 = MockAFBaseDatastream.new
-      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
+      f = File.open(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"), 'rb')
       minivan = f.read
       f.rewind
-      f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
+      f2 = File.open(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ), 'rb')
       dino = f2.read
       f2.rewind
       f.stubs(:content_type).returns("image/jpeg")
@@ -802,8 +802,8 @@ describe ActiveFedora::Base do
     it 'should return a hash of datastream name to an array of dsids' do
       @test_object2 = MockAFBaseDatastream.new
 #      @test_object2.new_object = true
-      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
-      f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
+      f = File.open(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"), 'rb')
+      f2 = File.open(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ), 'rb')
       f2.stubs(:original_filename).returns("dino.jpg")
       f.stubs(:content_type).returns("image/jpeg")
       @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f, :label=>"testDS"})
