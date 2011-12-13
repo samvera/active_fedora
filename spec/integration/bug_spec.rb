@@ -3,7 +3,6 @@ require 'spec_helper'
 require 'active_fedora'
 require 'active_fedora/model'
 require "rexml/document"
-require 'ftools'
 require 'mocha'
 
 include ActiveFedora::Model
@@ -37,13 +36,13 @@ end
 
     @test_object.pid.should_not be_nil
 
-    x = *FooHistory.find(@test_object.pid)
+    x = FooHistory.find(@test_object.pid)
     ds2 = x.datastreams["someData"]
     ds2.fubar_values.should == ['bar']
     ds2.fubar_values = ["meh"]
     ds2.fubar_values.should == ["meh"]
     x.save
-    x = *FooHistory.find(@test_object.pid)
+    x = FooHistory.find(@test_object.pid)
     x.datastreams['someData'].fubar_values.should == ["meh"]
     x.save
   end

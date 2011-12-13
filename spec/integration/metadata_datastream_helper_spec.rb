@@ -2,7 +2,6 @@ require 'spec_helper'
 
 require 'active-fedora'
 require "rexml/document"
-require 'ftools'
 
 class MockMetaHelperSolr < ActiveFedora::Base
   has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|

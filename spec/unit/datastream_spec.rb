@@ -2,7 +2,6 @@ require 'spec_helper'
 
 require 'active_fedora'
 require "nokogiri"
-require 'ftools'
 
 describe ActiveFedora::Datastream do
   

@@ -1,3 +1,4 @@
+# encoding: WINDOWS-1252
 require 'spec_helper'
 require 'rexml/document'
 require "active_fedora/samples"

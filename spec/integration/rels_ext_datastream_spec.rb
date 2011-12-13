@@ -2,7 +2,6 @@ require 'spec_helper'
 
 require 'active_fedora'
 require "rexml/document"
-require 'ftools'
 
 class MockAFRelsSolr < ActiveFedora::Base
   has_relationship "testing", :has_part, :type=>MockAFRelsSolr
