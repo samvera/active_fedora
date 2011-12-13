@@ -655,10 +655,8 @@ module ActiveFedora
       end
       
       self.send(:define_method,:"#{append_method_name}") do |*args| 
-        opts = *args
-        opts ||= {}
         #call add_named_datastream instead of add_file_named_datastream in case not managed datastream
-        add_named_datastream(name,opts)
+        add_named_datastream(name,*args)
       end
     end 
     
