@@ -61,7 +61,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   end
 
   it "should have unmodifiable constants" do
-    proc {ActiveFedora::QualifiedDublinCoreDatastream::DCTERMS<<:foo}.should raise_error(TypeError, 'can\'t modify frozen array')
+    proc {ActiveFedora::QualifiedDublinCoreDatastream::DCTERMS<<:foo}.should raise_error((TypeError if RUBY_VERSION < "1.9.0") || RuntimeError, /can't modify frozen array/i)
 
   end
 
