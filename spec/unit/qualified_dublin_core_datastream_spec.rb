@@ -3,6 +3,7 @@ require 'spec_helper'
 require 'active_fedora'
 require 'xmlsimple'
 require 'nokogiri'
+require 'equivalent-xml'
 
 describe ActiveFedora::QualifiedDublinCoreDatastream do
 
@@ -80,8 +81,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
     tmpl.expects(:content).returns('')
     tmpl.field :mycomplicated, :string, :xml_node=>'alt', :element_attrs=>{:foo=>'bar'}
     tmpl.mycomplicated_values='fubar'
-    tmpl.to_dc_xml.should == '<dc xmlns:xsi=\'http://www.w3.org/2001/XMLSchema-instance\' xmlns:dcterms=\'http://purl.org/dc/terms/\'><dcterms:alt foo=\'bar\'>fubar</dcterms:alt></dc>'
-
+    Nokogiri::XML(tmpl.to_dc_xml).should be_equivalent_to('<dc xmlns:xsi=\'http://www.w3.org/2001/XMLSchema-instance\' xmlns:dcterms=\'http://purl.org/dc/terms/\'><dcterms:alt foo=\'bar\'>fubar</dcterms:alt></dc>')
   end
 
 
