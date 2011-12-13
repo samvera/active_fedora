@@ -35,7 +35,9 @@ module ActiveFedora::MetadataDatastreamHelper
     fields.each do |field_key, field_info|
       if field_info.has_key?(:values) && !field_info[:values].nil?
         field_symbol = ActiveFedora::SolrService.solr_name(field_key, field_info[:type])
-        field_info[:values].each do |val|    
+        values = field_info[:values]
+        values = [values] unless values.respond_to? :each
+        values.each do |val|    
           ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val )         
         end
       end
@@ -80,7 +82,9 @@ module ActiveFedora::MetadataDatastreamHelper
     builder = Nokogiri::XML::Builder.with(xml_insertion_point) do |xml|
       fields.each_pair do |field,field_info|
         element_attrs = field_info[:element_attrs].nil? ? {} : field_info[:element_attrs]
-        field_info[:values].each do |val|
+        values = field_info[:values]
+        values = [values] unless values.respond_to? :each
+        values.each do |val|
           builder_arg = "xml.#{field}(val, element_attrs)"
           eval(builder_arg)
         end

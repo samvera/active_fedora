@@ -17,7 +17,7 @@ task :hudson do
 end
 
 namespace :active_fedora do
-  require 'lib/active-fedora'
+  require 'active-fedora'
 
   # Use yard to build docs
   begin
@@ -80,6 +80,6 @@ end
 desc 'Set up ActiveFedora environment.  !! Only for use while working within a working copy of active-fedora'
 task :environment do
   puts "Initializing ActiveFedora Rake environment.  This should only be called when working within a workign copy of the active-fedora code."
-  require 'spec/samples/models/hydrangea_article'
+  require "#{APP_ROOT}/spec/samples/models/hydrangea_article"
   require 'active_fedora/samples'
 end

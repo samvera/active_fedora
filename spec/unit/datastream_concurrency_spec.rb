@@ -2,7 +2,6 @@ require 'spec_helper'
 
 require 'active_fedora'
 require "rexml/document"
-require 'ftools'
 
 describe ActiveFedora::Datastream do
   

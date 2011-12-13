@@ -3,7 +3,6 @@ require 'spec_helper'
 require 'active_fedora'
 require 'active_fedora/model'
 require "rexml/document"
-require 'ftools'
 require 'mocha'
 
 include ActiveFedora::Model

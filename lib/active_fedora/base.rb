@@ -655,10 +655,8 @@ module ActiveFedora
       end
       
       self.send(:define_method,:"#{append_method_name}") do |*args| 
-        opts = *args
-        opts ||= {}
         #call add_named_datastream instead of add_file_named_datastream in case not managed datastream
-        add_named_datastream(name,opts)
+        add_named_datastream(name,*args)
       end
     end 
     
@@ -933,9 +931,10 @@ module ActiveFedora
     #  m.update_attributes({"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}, :datastreams=>["my_ds", "my_other_ds"])
     #
     def update_indexed_attributes(params={}, opts={})
-      if opts[:datastreams]
+      if ds = opts[:datastreams]
         ds_array = []
-        opts[:datastreams].each do |dsname|
+        ds = [ds] unless ds.respond_to? :each
+        ds.each do |dsname|
           ds_array << datastreams[dsname]
         end
       else

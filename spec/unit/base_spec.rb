@@ -755,7 +755,7 @@ describe ActiveFedora::Base do
     sinmock = mock('solr instance')
     conmock = mock("solr conn")
     sinmock.expects(:conn).returns(conmock)
-    conmock.expects(:query).with('pid: foobar', {:ding, :dang}).returns({:baz=>:bif})
+    conmock.expects(:query).with('pid: foobar', {:ding => :dang}).returns({:baz=>:bif})
     ActiveFedora::SolrService.expects(:instance).returns(sinmock)
     FooHistory.solr_search("pid: foobar", {:ding=>:dang}).should == {:baz=>:bif}
   end
