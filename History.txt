@@ -1,3 +1,11 @@
+3.1.5
+HYDRA-722 updating AF::Base#label= and then saving doesn't persist the change
+JettyWrapper to 1.2.0
+Upgrade to rspec2
+add_file_datastream should take a prefix option.
+Added assert_content_model method 
+Updates for ruby 1.9 compatibility
+
 3.1.4
 Update rubydora to 0.2.6
 Created a consistent implementation of Model.classname_from_uri
