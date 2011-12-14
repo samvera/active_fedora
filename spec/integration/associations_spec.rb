@@ -6,7 +6,11 @@ end
 
 class Book < ActiveFedora::Base 
   belongs_to :library, :property=>:has_constituent
+  belongs_to :author, :property=>:has_member, :class_name=>'Person'
   has_and_belongs_to_many :topics, :property=>:is_topic_of
+end
+
+class Person < ActiveFedora::Base
 end
 
 class Topic < ActiveFedora::Base 
@@ -112,6 +116,8 @@ describe ActiveFedora::Base do
         @library.save()
         @book = Book.new
         @book.save
+        @person = Person.new
+        @person.save
       end
       it "should have many books once it has been saved" do
         @library.books << @book
@@ -124,6 +130,14 @@ describe ActiveFedora::Base do
         @library2 = Library.find(@library.pid)
         @library2.books.map(&:pid).should == [@book.pid]
       end
+
+      it "should respect the :class_name parameter" do
+        @book.author = @person
+        @book.save
+        Book.find(@book.id).author_id.should == @person.pid
+        Book.find(@book.id).author.send(:find_target).should be_kind_of Person
+      end
+
       after do
         @library.delete
         @book.delete

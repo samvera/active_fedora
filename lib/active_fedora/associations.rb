@@ -40,6 +40,39 @@ module ActiveFedora
       end
 
   
+      # Specifies a one-to-one association with another class. This method should only be used
+      # if this class contains the foreign key.
+      #
+      # Methods will be added for retrieval and query for a single associated object, for which
+      # this object holds an id:
+      #
+      # [association()]
+      #   Returns the associated object. +nil+ is returned if none is found.
+      # [association=(associate)]
+      #   Assigns the associate object, extracts the primary key, and sets it as the foreign key.
+      #
+      # (+association+ is replaced with the symbol passed as the first argument, so
+      # <tt>belongs_to :author</tt> would add among others <tt>author.nil?</tt>.)
+      #
+      # === Example
+      #
+      # A Post class declares <tt>belongs_to :author</tt>, which will add:
+      # * <tt>Post#author</tt> (similar to <tt>Author.find(author_id)</tt>)
+      # * <tt>Post#author=(author)</tt> 
+      # The declaration can also include an options hash to specialize the behavior of the association.
+      #
+      # === Options
+      #
+      # [:property]
+      #   the association predicate to use when storing the association +REQUIRED+
+      # [:class_name]
+      #   Specify the class name of the association. Use it only if that name can't be inferred
+      #   from the association name. So <tt>has_one :author</tt> will by default be linked to the Author class, but
+      #   if the real class name is Person, you'll have to specify it with this option.
+      #
+      # Option examples:
+      #   belongs_to :firm, :property => :client_of
+      #   belongs_to :author, :class_name => "Person", :property => :author_of
       def belongs_to(association_id, options = {})
         raise "You must specify a property name for #{name}" if !options[:property]
         has_relationship association_id.to_s, options[:property]
