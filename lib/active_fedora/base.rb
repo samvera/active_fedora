@@ -110,19 +110,27 @@ module ActiveFedora
       ds_specs[args[:name]]= {:type => args[:type], :label =>  args.fetch(:label,""), :control_group => args.fetch(:control_group,"X"), :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
     end
 
-    def method_missing(name, *args)
-      if datastreams.has_key? name.to_s
-        ### Create and invoke a proxy method 
-        self.class.class_eval <<-end_eval, __FILE__, __LINE__
-          def #{name.to_s}()
-            datastreams["#{name.to_s}"]
-          end
-        end_eval
 
+    def method_missing(name, *args)
+      dsid = corresponding_datastream_name(name)
+      if dsid
+        ### Create and invoke a proxy method 
+        self.class.send :define_method, name do
+            datastreams[dsid]
+        end
         self.send(name)
       else 
         super
       end
+    end
+
+    ## Given a method name, return the best-guess dsid
+    def corresponding_datastream_name(method_name)
+      dsid = method_name.to_s
+      return dsid if datastreams.has_key? dsid
+      unescaped_name = method_name.to_s.gsub('_', '-')
+      return unescaped_name if datastreams.has_key? unescaped_name
+      nil
     end
 
     #Saves a Base object, and any dirty datastreams, then updates 
