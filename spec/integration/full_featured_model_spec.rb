@@ -1,4 +1,3 @@
-# encoding: WINDOWS-1252
 require 'spec_helper'
 require 'rexml/document'
 require "active_fedora/samples"
@@ -69,7 +68,7 @@ describe ActiveFedora::Base do
 
     end
     sample_location = "Boston, Massachusetts"
-    sample_notes = 'Addelson, Frances. (1973?) The Induced Abortion, American Journal of Ortho-Psychiatry,  Addelson, Frances. Abortion: Source of Guilt or Growth, National Journal of Gynecology and Obstetrics., Addelson, Frances. First Zionist Novel, Jewish Frontier.'
+    sample_notes = 'Addelson, Frances. (1973?) "The Induced Abortion," American Journal of Ortho-Psychiatry,  Addelson, Frances. "Abortion: Source of Guilt or Growth," National Journal of Gynecology and Obstetrics., Addelson, Frances. "First Zionist Novel," Jewish Frontier.'
     sample_other_contributor = 'any other contributors, people or corporate names (eg. Temple Israel)'
     sample_transcript_editor = 'Siegel, Cheryl'
     sample_hard_copy_availability = <<-END
@@ -77,7 +76,7 @@ describe ActiveFedora::Base do
     END
     sample_narrator = 'Addelson, Frances'
     sample_bio = <<-END
-    Rochelle Ruthchild interviewed Frances Addleson on October 18, November 14, and December 10, 1997.   The interview thoroughly examined the trajectory of Frances life from birth until the time of the interview. As a young child, Frances father died during the influenza epidemic, and her mother was not equipped to care for her and her siblings.  Consequently, they were placed in a Jewish foster home. Although her experience was mostly positive, this experience would leave life-long effects.  Frances attended Radcliffe upon the urging of a mentor and later obtained her Masters degree in social work from Simmons College in 1954.  In the 1940s, she returned to work while her children were still young; a rather unusual event for that time period.  While working as a social worker at Beth Israel Hospital in the early 1970s, she helped counsel countless women who came to the hospital seeking abortions before the procedure was officially legalized during the landmark Roe vs. Wade decision in 1973.  Frances would later write two articles that were published in medical journals about her experience during this time.  Although not a very religious person, Frances felt connected to the Jewish notion of social justice and remained very active until an accident in the late 1990s.
+    Rochelle Ruthchild interviewed Frances Addleson on October 18, November 14, and December 10, 1997.   The interview thoroughly examined the trajectory of Frances\' life from birth until the time of the interview. As a young child, Frances\' father died during the influenza epidemic, and her mother was not equipped to care for her and her siblings.  Consequently, they were placed in a Jewish foster home. Although her experience was mostly positive, this experience would leave life-long effects.  Frances attended Radcliffe upon the urging of a mentor and later obtained her Master\'s degree in social work from Simmons College in 1954.  In the 1940\'s, she returned to work while her children were still young; a rather unusual event for that time period.  While working as a social worker at Beth Israel Hospital in the early 1970\'s, she helped counsel countless women who came to the hospital seeking abortions before the procedure was officially legalized during the landmark Roe vs. Wade decision in 1973.  Frances would later write two articles that were published in medical journals about her experience during this time.  Although not a very religious person, Frances felt connected to the Jewish notion of social justice and remained very active until an accident in the late 1990\'s.
     END
     sample_interviewer = "Ruthchild, & Rochelle"
     
