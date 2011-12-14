@@ -59,82 +59,84 @@ describe ActiveFedora::Base do
       has_datastream :name=>"anymime", :type=>ActiveFedora::Datastream, :controlGroup=>'M' 
       has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E'
     end
-      
-    it 'should add a named datastream to a fedora object' do
+
+    before do
       @test_object2 = MockAddNamedDatastream.new
-      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
-      f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
-      f2.stubs(:original_filename).returns("dino.jpg")
-      f.stubs(:content_type).returns("image/jpeg")
-      #check cannot add a datastream with name that does not exist
-      had_exception = false
-      begin  
-        @test_object2.add_named_datastream("thumb",{:content_type=>"image/jpeg",:blob=>f})
-      rescue
-        had_exception = true
-      end
-      raise "Did not raise exception with datastream name that does not exist" unless had_exception 
-      #check that either blob or file opt must be set
-      had_exception = false
-      begin  
-        @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg"})
-      rescue
-        had_exception = true
-      end
-      raise "Did not raise exception with blob not set" unless had_exception 
+      @f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
+      @f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
+      @f.stubs(:content_type).returns("image/jpeg")
+      @f2.stubs(:original_filename).returns("dino.jpg")
+    end
       
-      @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f})
-      @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:file=>f})
-      #check dslabel set from either opt[label] or opt[blob].original_file_name
-      @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2, :label=>"my_image"})
+    it 'cannot add a datastream with name that does not exist' do
+      expect { @test_object2.add_named_datastream("thumb",{:content_type=>"image/jpeg",:blob=>f}) }.to raise_error
+    end
+
+    it "should accept a file blob" do
+      @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>@f})
+    end
+
+    it "should accept a file handle" do
+      @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:file=>@f})
+    end
+
+    it "should raise an error if neither a blob nor file is set" do
+      expect { @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg"}) }.to raise_error
+    end
+
+    it "should use the given label for the dsLabel" do
+      @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>@f2, :label=>"my_image"})
       @test_object2.high.first.dsLabel.should == "my_image"
-      @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2})
+    end
+
+    it "should fallback on using the file name" do
+      @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>@f2})
       @test_object2.high.first.dsLabel.should == "dino.jpg"
-      #check opt[content_type] must be set or opt[blob] responds to content_type, already checking if content_type option set above
-      f.expects(:content_type).returns("image/jpeg")
-      @test_object2.add_named_datastream("thumbnail",{:file=>f})
-      had_exception = false
-      begin
-        @test_object2.add_named_datastream("thumbnail",{:file=>f2})
-      rescue
-        had_exception = true
-      end
-      raise "Did not raise exception if content_type not set" unless had_exception
-      #check mimetype and content type must match if mimetype is specified (if not specified can be anything)
-      f.stubs(:content_type).returns("image/tiff")
-      had_exception = false
-      begin
-        @test_object2.add_named_datastream("thumbnail",{:file=>f})
-      rescue
-        had_exception = true
-      end
-      raise "Did not raise exception on content type and mime type mismatch" unless had_exception
+    end 
+
+    it "should check the file for a content type" do
+      @f.expects(:content_type).returns("image/jpeg")
+      @test_object2.add_named_datastream("thumbnail",{:file=>@f})
+    end
+
+    it "should raise an error if no content type is avialable" do
+      expect { @test_object2.add_named_datastream("thumbnail",{:file=>@f2}) }.to raise_error
+    end
+
+    it "should encsure mimetype and content type match" do
+      @f.stubs(:content_type).returns("image/tiff")
+      expect { @test_object2.add_named_datastream("thumbnail",{:file=>f}) }.to raise_error
+    end
       
+    it "should allow any mime type" do
       #check for if any mime type allowed
-      @test_object2.add_named_datastream("anymime",{:file=>f})
+      @test_object2.add_named_datastream("anymime",{:file=>@f})
       #check datastream created is of type ActiveFedora::Datastream
       @test_object2.anymime.first.class.should == ActiveFedora::Datastream
+    end
+
+    it "should cgecj that a dsid forms to the prefix" do
       #if dsid supplied check that conforms to prefix
-      f.stubs(:content_type).returns("image/jpeg")
-      had_exception = false
-      begin
-        @test_object2.add_named_datastream("thumbnail",{:file=>f,:dsid=>"DS1"})
-      rescue
-        had_exception = true
-      end
-      raise "Did not raise exception with dsid that does not conform to prefix" unless had_exception
+      @f.stubs(:content_type).returns("image/jpeg")
+      expect { @test_object2.add_named_datastream("thumbnail",{:file=>@f,:dsid=>"DS1"}) }.to raise_error
+    end
+
+    it "should have the right properties" do
+      @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>@f2})
       #if prefix not set check uses name in CAPS and dsid uses prefix
       #@test_object2.high.first.attributes[:prefix].should == "HIGH"
       @test_object2.high.first.dsid.match(/HIGH[0-9]/)
       #check datastreams added with other right properties
       @test_object2.high.first.controlGroup.should == "M"
+    end
+
+    it "should work with external datastreams" do
       
       #check external datastream
       @test_object2.add_named_datastream("external",{:dsLocation=>"http://myreasource.com"})
       #check dslocation goes to dslabel
       @test_object2.external.first.dsLabel.should == "http://myreasource.com"
       #check datastreams added to fedora (may want to stub this at first)
-      
     end
   end
   
