@@ -232,8 +232,9 @@ module ActiveFedora
       datastreams[datastream.dsid] = datastream
       return datastream.dsid
     end
+
     def add(datastream) # :nodoc:
-      warn "Warning: ActiveFedora::Base.add has been deprected.  Use add_datastream"
+      warn "Warning: ActiveFedora::Base.add has been deprecated.  Use add_datastream"
       add_datastream(datastream)
     end
     
@@ -266,21 +267,16 @@ module ActiveFedora
     # return a valid dsid that is not currently in use.  Uses a prefix (default "DS") and an auto-incrementing integer
     # Example: if there are already datastreams with IDs DS1 and DS2, this method will return DS3.  If you specify FOO as the prefix, it will return FOO1.
     def generate_dsid(prefix="DS")
-      keys = datastreams.keys
-      next_index = keys.select {|v| v =~ /(#{prefix}\d*$)/}.length + 1
-      new_dsid = prefix.to_s + next_index.to_s
-      while keys.include?(new_dsid)
-        next_index += 1
-        new_dsid = prefix.to_s + next_index.to_s
-      end
-      new_dsid
-
-      # while keys.include?(new_dsid)
-      #         next_index += 1
-      #         new_dsid = prefix.to_s + rand(range).to_s
-      #       end
+      matches = datastreams.keys.map {|d| data = /^#{prefix}(\d+)$/.match(d); data && data[1].to_i}.compact
+      val = matches.empty? ? 1 : matches.max + 1
+      format_dsid(prefix, val)
     end
     
+    ### Provided so that an application can override how generated pids are formatted (e.g DS01 instead of DS1)
+    def format_dsid(prefix, suffix)
+      sprintf("%s%i", prefix,suffix)
+    end    
+
     # Return the Dublin Core (DC) Datastream. You can also get at this via 
     # the +datastreams["DC"]+.
     def dc
