@@ -22,19 +22,19 @@ Gem::Specification.new do |s|
   s.add_dependency('nokogiri')
   s.add_dependency('om', '>= 1.4.4')
   s.add_dependency('solrizer', '>1.0.0')
-  s.add_dependency("activeresource", '~> 3.0.0')
-  s.add_dependency("activesupport", '~> 3.0.0')
+  s.add_dependency("activeresource", '~> 3.1.3')
+  s.add_dependency("activesupport", '~> 3.1.3')
   s.add_dependency("mediashelf-loggable")
   s.add_dependency("equivalent-xml")
   s.add_dependency("facets")
-  s.add_dependency("rubydora", '~>0.2.6')
+  s.add_dependency("rubydora", '~>0.3.0')
   s.add_dependency("rdf")
   s.add_dependency("rdf-rdfxml")
   s.add_development_dependency("yard")
   s.add_development_dependency("RedCloth") # for RDoc formatting
   s.add_development_dependency("rake")
   s.add_development_dependency("rcov")
-  s.add_development_dependency("solrizer-fedora", ">=1.1.3") # used by the fixtures rake tasks
+  s.add_development_dependency("solrizer-fedora", ">=1.2.0") # used by the fixtures rake tasks
   s.add_development_dependency("jettywrapper", ">=1.2.0")
   s.add_development_dependency("rspec", "~> 2.0")
   s.add_development_dependency("mocha", ">= 0.9.8")

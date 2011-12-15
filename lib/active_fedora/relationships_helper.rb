@@ -25,10 +25,8 @@ module ActiveFedora
   module RelationshipsHelper
     extend ActiveSupport::Concern
 
-#    ms_inheritable_attributes :class_relationships_desc
     included do
-      class_inheritable_accessor  :class_relationships_desc
-#    self.class_relationships_desc = {}
+      class_attribute  :class_relationships_desc
     end
 
     # def self.included(klass)
