@@ -33,6 +33,7 @@ module ActiveFedora
   class Base
     include RelationshipsHelper
     include SemanticNode
+
     class_attribute  :ds_specs
     
    def self.inherited(p)
@@ -85,13 +86,8 @@ module ActiveFedora
     def initialize(attrs = nil)
       attrs = {} if attrs.nil?
       unless attrs[:pid]
-        if attrs[:namespace]
-          attrs = attrs.merge!({:pid=>RubydoraConnection.instance.nextid({:namespace=>attrs[:namespace]})})
-        else
-          attrs = attrs.merge!({:pid=>RubydoraConnection.instance.nextid})  
-        end
         self.relationships_loaded = true
-        @inner_object = DigitalObject.find(self.class, attrs[:pid])
+        @inner_object = UnsavedDigitalObject.new(self.class, attrs.delete(:namespace))
       else
         @inner_object = DigitalObject.find(self.class, attrs[:pid])
         load_datastreams_from_fedora
@@ -99,7 +95,7 @@ module ActiveFedora
       configure_defined_datastreams
 
       attributes = attrs.dup
-      [:pid, :namespace, :new_object,:create_date, :modified_date].each { |k| attributes.delete(k)}
+      [:pid, :new_object,:create_date, :modified_date].each { |k| attributes.delete(k)}
       self.attributes=attributes
     end
 
@@ -177,6 +173,7 @@ module ActiveFedora
       end
       
       #Fedora::Repository.instance.delete(@inner_object)
+      pid = self.pid ## cache so it's still available after delete
       begin
         @inner_object.delete
       rescue RestClient::ResourceNotFound =>e
@@ -433,7 +430,7 @@ module ActiveFedora
     # if there is no fedora object (loaded from solr) get the instance var
     # TODO make inner_object a proxy that can hold the pid
     def pid
-      @pid ||= @inner_object.pid
+       @inner_object.pid
 #      @inner_object ?  @inner_object.pid : @pid
     end
 
@@ -741,6 +738,8 @@ module ActiveFedora
     
     # Deals with preparing new object to be saved to Fedora, then pushes it and its datastreams into Fedora. 
     def create
+      @inner_object = @inner_object.save #replace the unsaved digital object with a saved digital object
+      write_relationships_subject
       assert_content_model
       @metadata_is_dirty = true
       update

@@ -33,7 +33,6 @@ describe ActiveFedora::Base do
     ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(@this_pid)
 
     @test_object = ActiveFedora::Base.new
-    @test_history = FooHistory.new
   end
 
   after(:each) do
@@ -47,14 +46,9 @@ describe ActiveFedora::Base do
   describe '#new' do
     it "should create a new inner object" do
       Rubydora::DigitalObject.any_instance.expects(:save).never
-      #@mock_repo.expects(:datastreams).with(:pid => "test:1").returns("")
-      @mock_client.stubs(:[]).with("objects/test%3A1/datastreams?format=xml").returns(@getter)
-      ['someData', 'withText', 'withText2', 'RELS-EXT'].each do |dsid|
-        @mock_client.stubs(:[]).with {|params| /objects\/test%3A1\/datastreams\/#{dsid}/.match(params)}.returns(@getter)
-#        @mock_client.stubs(:[]).with {|params| /objects\/test%3A1\/datastreams\/#{dsid}\/content/.match(params)}.returns(stub(:post=>'test:1'))
-      end
+      stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
 
-      result = ActiveFedora::Base.new(:pid=>"test:1")  
+      result = ActiveFedora::Base.new(:pid=>@this_pid)  
       result.inner_object.should be_kind_of(Rubydora::DigitalObject)    
     end
 
@@ -62,7 +56,7 @@ describe ActiveFedora::Base do
       # for doing AFObject.new(params[:foo]) when nothing is in params[:foo]
       Rubydora::DigitalObject.any_instance.expects(:save).never
       result = ActiveFedora::Base.new(nil)  
-      result.inner_object.should be_kind_of(Rubydora::DigitalObject)    
+      result.inner_object.should be_kind_of(ActiveFedora::UnsavedDigitalObject)    
     end
 
   end
@@ -241,6 +235,9 @@ describe ActiveFedora::Base do
 
 
   describe ".datastreams" do
+    before do
+      @test_history = FooHistory.new
+    end
     it "should create dynamic accessors" do
       @test_history.withText.should == @test_history.datastreams['withText']
     end
@@ -364,11 +361,11 @@ describe ActiveFedora::Base do
       next_pid = increment_pid.to_s
       ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(next_pid)
       stub_get(next_pid)
-      @test_object3 = ActiveFedora::Base.new
+      @test_object3 = ActiveFedora::Base.new(:pid=>next_pid)
       next_pid = increment_pid.to_s
       ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(next_pid)
       stub_get(next_pid)
-      @test_object4 = ActiveFedora::Base.new
+      @test_object4 = ActiveFedora::Base.new(:pid=>next_pid)
       @test_object.add_relationship(:has_part,@test_object3)
       @test_object.add_relationship(:has_part,@test_object4)
       #check both are there
@@ -426,8 +423,8 @@ describe ActiveFedora::Base do
     end
     
     it "should call .save on any datastreams that are dirty" do
-      stub_ingest(@test_object.pid)
-      stub_add_ds(@test_object.pid, ['withText2', 'withText', 'RELS-EXT'])
+      stub_ingest(@this_pid)
+      stub_add_ds(@this_pid, ['withText2', 'withText', 'RELS-EXT'])
       to = FooHistory.new
       to.expects(:update_index)
 
@@ -438,8 +435,8 @@ describe ActiveFedora::Base do
       to.save
     end
     it "should call .save on any datastreams that are new" do
-      stub_ingest(@test_object.pid)
-      stub_add_ds(@test_object.pid, ['RELS-EXT'])
+      stub_ingest(@this_pid)
+      stub_add_ds(@this_pid, ['RELS-EXT'])
       ds = ActiveFedora::Datastream.new(@test_object.inner_object, 'ds_to_add')
       ds.content = "DS CONTENT"
       @test_object.add_datastream(ds)
@@ -450,7 +447,7 @@ describe ActiveFedora::Base do
       @test_object.save
     end
     it "should not call .save on any datastreams that are not dirty" do
-      stub_ingest(@test_object.pid)
+      stub_ingest(@this_pid)
       @test_object = FooHistory.new
       @test_object.expects(:update_index)
       @test_object.expects(:refresh)
@@ -465,9 +462,8 @@ describe ActiveFedora::Base do
       @test_object.save
     end
     it "should update solr index with all metadata if any MetadataDatastreams have changed" do
-#      rels_ds.expects(:new?).returns(false).twice
-      stub_ingest(@test_object.pid)
-      stub_add_ds(@test_object.pid, ['ds1', 'RELS-EXT'])
+      stub_ingest(@this_pid)
+      stub_add_ds(@this_pid, ['ds1', 'RELS-EXT'])
 
       dirty_ds = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, 'ds1')
       rels_ds = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
@@ -495,20 +491,20 @@ describe ActiveFedora::Base do
       @test_object.save
     end
     it "should update solr index if relationships have changed" do
-      @mock_repo.expects(:ingest).with(:pid => @test_object.pid)
-      @test_object.inner_object.expects(:repository).returns(@mock_repo).at_least_once
-      @test_object.inner_object.expects(:new?).returns(true).twice
+      stub_ingest(@this_pid)
 
       rels_ext = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
       rels_ext.model = @test_object
-      rels_ext.expects(:changed?).returns(true).twice  
+      rels_ext.expects(:changed?).returns(true).twice
       rels_ext.expects(:save).returns(true)
       rels_ext.expects(:serialize!)
-      clean_ds = mock("ds2")
+      clean_ds = mock("ds2", :digital_object=)
       clean_ds.stubs(:dirty? => false, :changed? => false, :new? => false)
       clean_ds.expects(:serialize!)
-      @test_object.inner_object.stubs(:datastreams).returns({"RELS-EXT" => rels_ext, :clean_ds => clean_ds})
-      @test_object.stubs(:datastreams).returns({"RELS-EXT" => rels_ext, :clean_ds => clean_ds})
+      @test_object.datastreams["RELS-EXT"] = rels_ext
+      @test_object.datastreams[:clean_ds] = clean_ds
+#      @test_object.inner_object.stubs(:datastreams).returns({"RELS-EXT" => rels_ext, :clean_ds => clean_ds})
+#      @test_object.stubs(:datastreams).returns({"RELS-EXT" => rels_ext, :clean_ds => clean_ds})
       @test_object.instance_variable_set(:@new_object, false)
       @test_object.expects(:refresh)
       @test_object.expects(:update_index)
@@ -594,7 +590,9 @@ describe ActiveFedora::Base do
     end
     
     it "should add self.class as the :active_fedora_model" do
-      stub_get_content(@this_pid, ['someData', 'withText2', 'withText'])
+      stub_get(@this_pid)
+      stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
+      @test_history = FooHistory.new(:pid=>@this_pid)
       solr_doc = @test_history.to_solr
       solr_doc["active_fedora_model_s"].should eql("FooHistory")
     end
@@ -664,16 +662,10 @@ describe ActiveFedora::Base do
     end
   end
   
-  it "should get a pid but not save on init" do
+  it "should not save or get an pid on init" do
     Rubydora::DigitalObject.any_instance.expects(:save).never
-    ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns('mooshoo:24')
-    @mock_client.stubs(:[]).with("objects/mooshoo%3A24/datastreams?format=xml").returns(@getter)
-    ['someData', 'withText', 'withText2', 'RELS-EXT'].each do |dsid|
-      @mock_client.stubs(:[]).with {|params| /objects\/mooshoo%3A24\/datastreams\/#{dsid}/.match(params)}.returns(@getter)
-    end
+    ActiveFedora::RubydoraConnection.instance.expects(:nextid).never
     f = FooHistory.new
-    f.pid.should_not be_nil
-    f.pid.should == 'mooshoo:24'
   end
   it "should not clobber a pid if i'm creating!" do
     @mock_client.stubs(:[]).with("objects/numbnuts%3A1/datastreams?format=xml").returns(@getter)
@@ -746,10 +738,9 @@ describe ActiveFedora::Base do
     end
     it "should take a :datastreams argument" do 
       att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
-      m = FooHistory.new
-      ['withText', 'someData', 'withText2'].each do |dsid|
-        @mock_client.stubs(:[]).with {|params| /objects\/#{@this_pid}\/datastreams\/#{dsid}\/content/.match(params)}.returns(stub('getter/setter', :get=>'', :post=>@this_pid))
-      end
+      stub_get(@this_pid)
+      stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
+      m = FooHistory.new(:pid=>@this_pid)
       m.update_indexed_attributes(att, :datastreams=>"withText")
       m.should_not be_nil
       m.datastreams['someData'].fubar_values.should == []

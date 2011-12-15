@@ -3,9 +3,6 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   
   before(:each) do
-    stub_get('__nextid__')
-    ActiveFedora::RubydoraConnection.instance.expects(:nextid).returns("__nextid__")
-    Rubydora::Repository.any_instance.stubs(:client).returns(@mock_client)
     @test_object = ActiveFedora::Base.new
   end
   

@@ -101,12 +101,6 @@ describe ActiveFedora::Base do
       @test_object.pid.should_not be_nil
     end
 
-    it "passing namespace to constructor with no pid should generate a pid with the supplied namespace" do
-      @test_object2 = ActiveFedora::Base.new({:namespace=>"randomNamespace"})
-      #@test_object2.pid.match('changeme:\d+').to_a.first.should == @test_object2.pid
-      # will be nil if match failed, otherwise will equal pid
-      @test_object2.pid.match('randomNamespace:\d+').to_a.first.should == @test_object2.pid
-    end
   end
   
   describe ".save" do
@@ -118,6 +112,13 @@ describe ActiveFedora::Base do
       @test_object2.delete
     end
     
+    it "passing namespace to constructor with no pid should generate a pid with the supplied namespace" do
+      @test_object2 = ActiveFedora::Base.new({:namespace=>"randomNamespace"})
+      # will be nil if match failed, otherwise will equal pid
+      @test_object2.save
+      @test_object2.pid.match('randomNamespace:\d+').to_a.first.should == @test_object2.pid
+    end
+
     it "should set the CMA hasModel relationship in the Rels-EXT" do 
       @test_object2.save
       rexml = REXML::Document.new(@test_object2.datastreams["RELS-EXT"].content)
@@ -125,9 +126,9 @@ describe ActiveFedora::Base do
       rexml.root.elements["rdf:Description/ns0:hasModel"].attributes["rdf:resource"].should == 'info:fedora/afmodel:ActiveFedora_Base'
     end
     it "should merge attributes from fedora into attributes hash" do
+      @test_object2.save
       inner_object = @test_object2.inner_object
       inner_object.pid.should == @test_object2.pid
-      @test_object2.save
       inner_object.should respond_to(:state)
       inner_object.should respond_to(:lastModifiedDate)
       inner_object.should respond_to(:ownerId)
@@ -321,9 +322,11 @@ describe ActiveFedora::Base do
   describe "delete" do
     
     it "should delete the object from Fedora and Solr" do
+      @test_object.save
       ActiveFedora::Base.find_by_solr(@test_object.pid).hits.first["id"].should == @test_object.pid
+      pid = @test_object.pid # store so we can access it after deletion
       @test_object.delete
-      ActiveFedora::Base.find_by_solr(@test_object.pid).hits.should be_empty
+      ActiveFedora::Base.find_by_solr(pid).hits.should be_empty
     end
 
     describe '#delete' do

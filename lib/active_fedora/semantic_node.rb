@@ -27,6 +27,18 @@ module ActiveFedora
       end
     end
 
+    def write_relationships_subject ()
+      # need to destroy relationships and rewrite it.
+      subject =  RDF::URI.new(internal_uri)
+      old_rels = relationships.statements.to_a
+      @relationships = RDF::Graph.new
+      old_rels.each do |stmt|
+        stmt.subject = subject
+        @relationships.insert stmt
+      end
+
+    end
+
     # Create an RDF statement
     # @param uri a string represending the subject
     # @param predicate a predicate symbol

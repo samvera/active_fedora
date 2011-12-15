@@ -3,6 +3,7 @@ module ActiveFedora
   #This class represents a Fedora datastream
   class Datastream < Rubydora::Datastream
     
+    attr_writer :digital_object
     attr_accessor :dirty, :last_modified, :fields
     before_create :add_mime_type
   
@@ -37,7 +38,8 @@ module ActiveFedora
     end
 
     def save
-      raise "No content #{dsid}" if @content.nil?
+      #raise "No content #{dsid}" if @content.nil?
+      return if @content.nil?
       run_callbacks :save do
         return create if new?
         repository.modify_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })

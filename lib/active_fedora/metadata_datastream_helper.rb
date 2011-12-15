@@ -20,9 +20,14 @@ module ActiveFedora::MetadataDatastreamHelper
   end
 
   def ensure_xml_loaded
-    return if xml_loaded
+    return if xml_loaded 
     self.xml_loaded = true
-    self.class.from_xml content, self
+    if new?
+      ## Load up the template
+      self.class.from_xml nil, self
+    else
+      self.class.from_xml content, self
+    end
   end
   
   def serialize! # :nodoc:

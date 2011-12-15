@@ -6,9 +6,9 @@ require 'active_fedora/metadata_datastream'
 describe ActiveFedora::Base do
   
   before(:each) do
-    stub_get('__nextid__')
-    ActiveFedora::RubydoraConnection.instance.expects(:nextid).returns("__nextid__")
-    Rubydora::Repository.any_instance.stubs(:client).returns(@mock_client)
+    # stub_get('__nextid__')
+    # ActiveFedora::RubydoraConnection.instance.expects(:nextid).returns("__nextid__")
+    # Rubydora::Repository.any_instance.stubs(:client).returns(@mock_client)
     @test_object = ActiveFedora::Base.new
   end
   
@@ -100,12 +100,8 @@ describe ActiveFedora::Base do
     end
     
     it "should delete object from repository and index" do
-      @test_object.stubs(:pid).returns("foo")
-      ActiveFedora::SolrService.instance.conn.expects(:delete).with("foo")      
-      #@test_object.inner_object.stubs(:delete)
-      mock_repository = mock('repo')
-      @test_object.inner_object.expects(:repository).returns(mock_repository)
-      mock_repository.expects :purge_object
+      ActiveFedora::SolrService.instance.conn.expects(:delete).with("__DO_NOT_USE__")      
+      @test_object.inner_object.stubs(:delete)
       @test_object.expects(:inbound_relationships).returns({})
       @test_object.delete
     end

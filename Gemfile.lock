@@ -13,7 +13,7 @@ PATH
       om (>= 1.4.4)
       rdf
       rdf-rdfxml
-      rubydora (~> 0.2.6)
+      rubydora (~> 0.3.0)
       solr-ruby (>= 0.0.6)
       solrizer (> 1.0.0)
       xml-simple (>= 1.0.12)
@@ -108,7 +108,7 @@ GEM
       ruby-debug-base19 (>= 0.11.19)
     ruby_core_source (0.1.5)
       archive-tar-minitar (>= 0.5.2)
-    rubydora (0.2.6)
+    rubydora (0.3.0)
       activemodel
       activesupport
       fastercsv
