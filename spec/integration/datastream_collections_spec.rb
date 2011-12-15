@@ -12,7 +12,6 @@ describe ActiveFedora::DatastreamCollections do
   describe '#add_named_datastream' do
     it 'should add a datastream with the given name to the object in fedora' do
       @test_object2 = MockAFBaseDatastream.new
-#      @test_object2.new_object = true
       f = File.open(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"), 'rb')
       f2 = File.open(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ), 'rb')
       f2.stubs(:original_filename).returns("dino.jpg")
@@ -46,7 +45,6 @@ describe ActiveFedora::DatastreamCollections do
   describe '#add_named_file_datastream' do
     it 'should add a file datastream with the given name to the object in fedora' do
       @test_object2 = MockAFBaseDatastream.new
-#      @test_object2.new_object = true
       f = File.open(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"), 'rb')
       f.stubs(:content_type).returns("image/jpeg")
       @test_object2.add_named_file_datastream("thumbnail",f)
@@ -61,10 +59,6 @@ describe ActiveFedora::DatastreamCollections do
       t2_thumb1.dsLabel.should == "minivan.jpg"
       t2_thumb1.controlGroup.should == "M"
 
-# .attributes.should == {"label"=>ds.label,"dsid"=>ds.dsid,
-#                                                                                  "mimeType"=>ds.attributes[:mimeType],
-#                                                                                  :controlGroup=>ds.attributes[:controlGroup],
-#                                                                                  :pid=>ds.pid, :dsID=>ds.dsid, :dsLabel=>ds.attributes[:dsLabel]}
     end
   end
   
@@ -114,7 +108,6 @@ describe ActiveFedora::DatastreamCollections do
   describe '#named_datastreams_ids' do
     it 'should return a hash of datastream name to an array of dsids' do
       @test_object2 = MockAFBaseDatastream.new
-#      @test_object2.new_object = true
       f = File.open(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"), 'rb')
       f2 = File.open(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ), 'rb')
       f2.stubs(:original_filename).returns("dino.jpg")
