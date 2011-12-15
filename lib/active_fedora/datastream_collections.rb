@@ -2,9 +2,16 @@ module DatastreamCollections
   extend ActiveSupport::Concern
 
   included do
-    class_inheritable_accessor :class_named_datastreams_desc
+    class_attribute :class_named_datastreams_desc
     self.class_named_datastreams_desc = {}
-    #attr_accessor :named_datastreams_desc
+    class << self
+      def inherited_with_datastream_collections(kls) #:nodoc:
+        ## Do some inheritance logic that doesn't override Base.inherited
+        inherited_without_datastream_collections kls
+        kls.class_named_datastreams_desc = kls.class_named_datastreams_desc.dup
+      end
+      alias_method_chain :inherited, :datastream_collections
+    end
   end
 
   module ClassMethods
