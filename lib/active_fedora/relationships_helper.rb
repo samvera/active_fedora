@@ -1,4 +1,3 @@
-require 'active_support/core_ext/class/inheritable_attributes'
 module ActiveFedora
   # This module is meant to extend semantic node to add functionality based on a relationship's name
   # It is meant to turn a relationship into just another attribute in a model.
@@ -25,16 +24,10 @@ module ActiveFedora
   module RelationshipsHelper
     extend ActiveSupport::Concern
 
-#    ms_inheritable_attributes :class_relationships_desc
     included do
-      class_inheritable_accessor  :class_relationships_desc
-#    self.class_relationships_desc = {}
+      class_attribute  :class_relationships_desc
     end
 
-    # def self.included(klass)
-    #   klass.extend(ClassMethods)
-    # end
-    
 
     # ** EXPERIMENTAL **
     # 

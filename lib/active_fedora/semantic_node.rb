@@ -1,10 +1,9 @@
 require 'rdf'
-require 'active_support/core_ext/class/inheritable_attributes'
 module ActiveFedora
   module SemanticNode 
     extend ActiveSupport::Concern
     included do
-      class_inheritable_accessor  :class_relationships, :internal_uri, :class_named_relationships_desc
+      class_attribute  :class_relationships, :internal_uri, :class_named_relationships_desc
       self.class_relationships = {}
       self.class_named_relationships_desc = {}
     end

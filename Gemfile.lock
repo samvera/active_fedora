@@ -2,8 +2,8 @@ PATH
   remote: .
   specs:
     active-fedora (3.1.5)
-      activeresource (~> 3.0.0)
-      activesupport (~> 3.0.0)
+      activeresource (>= 3.0.0)
+      activesupport (>= 3.0.0)
       equivalent-xml
       facets
       mediashelf-loggable
