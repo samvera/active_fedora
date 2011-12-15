@@ -2,9 +2,8 @@ module DatastreamCollections
   extend ActiveSupport::Concern
 
   included do
-    class_inheritable_accessor  :ds_specs, :class_named_datastreams_desc
+    class_inheritable_accessor :class_named_datastreams_desc
     self.class_named_datastreams_desc = {}
-    #attr_accessor :named_datastreams_desc
   end
 
   module ClassMethods
