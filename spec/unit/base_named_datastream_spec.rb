@@ -11,15 +11,7 @@ describe ActiveFedora::Base do
     @@last_pid += 1    
   end
   
-  before(:each) do
-    @test_object = ActiveFedora::Base.new
-  end
-
   after(:each) do
-    begin
-    @test_object.delete
-    rescue
-    end
   
     begin
     @test_object2.delete
@@ -32,12 +24,9 @@ describe ActiveFedora::Base do
     end
   end
   
-  it 'should provide #datastream_names' do
-    @test_object.should respond_to(:datastream_names)
-  end
-  
   describe '#datastream_names' do
     class MockDatastreamNames < ActiveFedora::Base
+      include ActiveFedora::DatastreamCollections
       has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
       has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
     end
@@ -48,12 +37,10 @@ describe ActiveFedora::Base do
     end
   end
   
-  it 'should provide #add_named_datastream' do
-    @test_object.should respond_to(:add_named_datastream)
-  end
   
   describe '#add_named_datastream' do
     class MockAddNamedDatastream < ActiveFedora::Base
+      include ActiveFedora::DatastreamCollections
       has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
       has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
       has_datastream :name=>"anymime", :type=>ActiveFedora::Datastream, :controlGroup=>'M' 
@@ -140,12 +127,9 @@ describe ActiveFedora::Base do
     end
   end
   
-  it 'should provide #add_named_file_datastream' do
-    @test_object.should respond_to(:add_named_file_datastream)
-  end
-  
   describe '#add_named_file_datastream' do
     class MockAddNamedFileDatastream < ActiveFedora::Base
+      include ActiveFedora::DatastreamCollections
       has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
       has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
       has_datastream :name=>"anymime", :type=>ActiveFedora::Datastream, :controlGroup=>'M' 
@@ -171,12 +155,9 @@ describe ActiveFedora::Base do
     end
   end
   
-  it 'should provide #update_named_datastream' do
-    @test_object.should respond_to(:update_named_datastream)
-  end
-  
   describe '#update_named_datastream' do
     class MockUpdateNamedDatastream < ActiveFedora::Base
+      include ActiveFedora::DatastreamCollections
       has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
     end
     
@@ -232,30 +213,9 @@ describe ActiveFedora::Base do
     end
   end
   
-  describe '#create_datastream' do
-    it 'should create a datastream object using the type of object supplied in the string (does reflection)' do
-      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
-      f.stubs(:content_type).returns("image/jpeg")
-      f.stubs(:original_filename).returns("minivan.jpg")
-      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:blob=>f})
-      ds.class.should == ActiveFedora::Datastream
-      ds.dsLabel.should == "minivan.jpg"
-      ds.mimeType.should == "image/jpeg"
-    end
-    it 'should create a datastream object from a string' do
-      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:blob=>"My file data"})
-      ds.class.should == ActiveFedora::Datastream
-      ds.dsLabel.should == nil
-      ds.mimeType.should == "application/octet-stream"
-    end
-  end
-  
-  it 'should provide #is_named_datastream?' do
-    @test_object.should respond_to(:is_named_datastream?)
-  end
-  
   describe '#is_named_datastream?' do
     class MockIsNamedDatastream < ActiveFedora::Base
+      include ActiveFedora::DatastreamCollections
       has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
     end
     
@@ -266,12 +226,9 @@ describe ActiveFedora::Base do
     end
   end
   
-  it 'should provide #named_datastreams' do
-    @test_object.should respond_to(:named_datastreams)
-  end
-  
   describe '#named_datastreams' do
     class MockNamedDatastreams < ActiveFedora::Base
+      include ActiveFedora::DatastreamCollections
       has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
       has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
       has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
@@ -315,13 +272,9 @@ describe ActiveFedora::Base do
     end
   end
   
-  
-  it 'should provide #named_datastreams_ids' do
-    @test_object.should respond_to(:named_datastreams_ids)
-  end
-  
   describe '#named_datastreams_ids' do
     class MockNamedDatastreamsIds < ActiveFedora::Base
+      include ActiveFedora::DatastreamCollections
       has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
       has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
       has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
@@ -348,11 +301,11 @@ describe ActiveFedora::Base do
   describe '#named_datastreams_desc' do
       
     class MockNamedDatastreamsDesc < ActiveFedora::Base
+      include ActiveFedora::DatastreamCollections
       has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
     end
     
     it 'should intialize a value to an empty hash and then not modify afterward' do
-      @test_object.named_datastreams_desc.should == {}
       @test_object2 = MockNamedDatastreamsDesc.new
       @test_object2.named_datastreams_desc.should == {"thumbnail"=>{:name=>"thumbnail",:prefix => "THUMB", 
                                                                     :type=>"ActiveFedora::Datastream", :mimeType=>"image/jpeg", 
@@ -362,6 +315,7 @@ describe ActiveFedora::Base do
     
   describe '#create_named_datastream_finders' do
     class MockCreateNamedDatastreamFinder < ActiveFedora::Base
+      include ActiveFedora::DatastreamCollections
       has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
       has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
     end
@@ -399,6 +353,7 @@ describe ActiveFedora::Base do
     
   describe '#create_named_datastream_update_methods' do
     class MockCreateNamedDatastreamUpdateMethods < ActiveFedora::Base
+      include ActiveFedora::DatastreamCollections
       has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
       has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
       has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
@@ -436,6 +391,7 @@ describe ActiveFedora::Base do
     
   describe '#has_datastream' do
     class MockHasDatastream < ActiveFedora::Base
+      include ActiveFedora::DatastreamCollections
       has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
       has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
       has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E'

@@ -517,6 +517,8 @@ describe ActiveFedora::Base do
     end
   end
 
+  
+
   describe ".add_file_datastream" do
     before do
       @mock_file = mock('file')
