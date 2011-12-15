@@ -43,7 +43,6 @@ describe ActiveFedora::NokogiriDatastream do
     it "should initialize from #xml_template if no xml is provided" do
       ActiveFedora::NokogiriDatastream.expects(:xml_template).returns("<fake template/>")
       n = ActiveFedora::NokogiriDatastream.new(nil, nil)
-      n.expects(:content).returns('')
       n.ensure_xml_loaded
       n.ng_xml.should be_equivalent_to("<fake template/>")
     end

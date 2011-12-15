@@ -21,6 +21,7 @@ module ActiveFedora #:nodoc:
     autoload :Datastream
     autoload :Delegating
     autoload :DigitalObject
+    autoload :UnsavedDigitalObject
     autoload :Model
     autoload :MetadataDatastream
     autoload :MetadataDatastreamHelper
