@@ -3,7 +3,8 @@ require 'nokogiri'
 require "loggable"
 require 'active_fedora/datastream_hash'
 
-require 'active_support/core_ext/class/inheritable_attributes'
+require 'active_support/core_ext/class/attribute'
+
 SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 
@@ -32,7 +33,13 @@ module ActiveFedora
   class Base
     include RelationshipsHelper
     include SemanticNode
-    class_inheritable_accessor  :ds_specs
+    class_attribute  :ds_specs
+    
+   def self.inherited(p)
+      # each subclass should get a copy of the parent's datastream definitions, it should not add to the parent's definition table.
+      p.ds_specs = p.ds_specs.dup
+      super
+    end
     
     self.ds_specs = {'RELS-EXT'=> {:type=> ActiveFedora::RelsExtDatastream, :label=>"", :block=>nil}}
 
