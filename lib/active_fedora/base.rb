@@ -85,16 +85,18 @@ module ActiveFedora
     # we configure any defined datastreams.
     def initialize(attrs = nil)
       attrs = {} if attrs.nil?
-      unless attrs[:pid]
-        self.relationships_loaded = true
-        @inner_object = UnsavedDigitalObject.new(self.class, attrs.delete(:namespace))
-      else
-        @inner_object = DigitalObject.find(self.class, attrs[:pid])
-        load_datastreams_from_fedora
-      end
-      configure_defined_datastreams
-
       attributes = attrs.dup
+      @inner_object = attributes.delete(:inner_object)
+      unless @inner_object
+        if attributes[:pid]
+          @inner_object = DigitalObject.find(self.class, attributes[:pid])
+        else
+          @inner_object = UnsavedDigitalObject.new(self.class, attributes.delete(:namespace))
+          self.relationships_loaded = true
+        end
+      end
+      load_datastreams
+
       [:pid, :new_object,:create_date, :modified_date].each { |k| attributes.delete(k)}
       self.attributes=attributes
     end
@@ -206,21 +208,38 @@ module ActiveFedora
       datastreams
     end
 
-    def load_datastreams_from_fedora
-      inner_object.datastreams.each do |dsid, datastream|
-        ds_spec = self.class.ds_specs[dsid]
-        datastreams[dsid] = datastream
-        if (ds_spec)
-          klass = ds_spec[:type]
-          datastreams[dsid].model = self if klass == RelsExtDatastream
-
-          if ds_spec[:block].class == Proc
-            ds_spec[:block].call(datastreams[dsid])
-          end
+    def configure_datastream(ds, ds_spec=nil)
+      ds_spec ||= self.class.ds_specs[ds.instance_variable_get(:@dsid)]
+      if ds_spec
+        ds.model = self if ds_spec[:type] == RelsExtDatastream
+        # If you called has_metadata with a block, pass the block into the Datastream class
+        if ds_spec[:block].class == Proc
+          ds_spec[:block].call(ds)
         end
       end
     end
 
+    def datastream_from_spec(ds_spec, name)
+      ds = ds_spec[:type].new(inner_object, name)
+      ds.dsLabel = ds_spec[:label] if ds_spec[:label].present?
+      ds.controlGroup = ds_spec[:control_group]
+      additional_attributes_for_external_and_redirect_control_groups(ds, ds_spec)
+      ds
+    end
+
+    def load_datastreams
+      ds_specs = self.class.ds_specs.dup
+      inner_object.datastreams.each do |dsid, ds|
+        self.add_datastream(ds)
+        configure_datastream(datastreams[dsid])
+        ds_specs.delete(dsid)
+      end
+      ds_specs.each do |name,ds_spec|
+        ds = datastream_from_spec(ds_spec, name)
+        self.add_datastream(ds)
+        configure_datastream(ds, ds_spec)
+      end
+    end      
 
     # Adds datastream to the object.  Saves the datastream to fedora upon adding.
     # If datastream does not have a DSID, a unique DSID is generated
@@ -245,7 +264,7 @@ module ActiveFedora
       results = []
       datastreams.each_value do |ds|
         if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream)
-          results<<ds
+          results << ds
         end
       end
       return results
@@ -259,7 +278,7 @@ module ActiveFedora
         if !ds.kind_of?(ActiveFedora::MetadataDatastream) 
           dsid = ds.dsid
           if dsid != "DC" && dsid != "RELS-EXT"
-            results<<ds
+            results << ds
           end
         end
       end
@@ -555,6 +574,15 @@ module ActiveFedora
     end
 
     
+    # ** EXPERIMENTAL **
+    # This method adapts the inner_object to a new ActiveFedora::Base implementation
+    # This is intended to minimize redundant interactions with Fedora
+    def adapt_to(klass)
+      unless klass.ancestors.include? ActiveFedora::Base
+        raise "Cannot adapt #{self.class.name} to #{klass.name}: Not a ActiveFedora::Base subclass"
+      end
+      klass.new({:inner_object=>inner_object})
+    end
     # ** EXPERIMENTAL **
     #
     # This method can be used instead of ActiveFedora::Model::ClassMethods.load_instance.  
