@@ -39,7 +39,7 @@ end
 describe "Datastreams synched together" do
   before do
     class DSTest < ActiveFedora::Base
-      def configure_defined_datastreams
+      def load_datastreams
         super
         unless self.datastreams.keys.include? 'test_ds'
          add_file_datastream("XXX",:dsid=>'test_ds', :mimeType=>'text/html')
