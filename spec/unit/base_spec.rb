@@ -17,6 +17,8 @@ class FooHistory < ActiveFedora::Base
     m.field "fubar", :text
   end 
 end
+class FooAdaptation < ActiveFedora::Base
+end
 
 @@last_pid = 0  
 
@@ -534,6 +536,47 @@ describe ActiveFedora::Base do
       stub_add_ds(@test_object.pid, ['DS1'])
       @test_object.add_file_datastream(@mock_file, {} )
       @test_object.datastreams.keys.should include 'DS1'
+    end
+  end
+
+  describe ".adapt_to" do
+    before(:each) do
+      @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams?format=xml").returns(@getter)
+      @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams/MY_DSID?format=xml").returns(@getter)
+      @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams/RELS-EXT/content").returns(@getter)
+      @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams/MY_DSID/content").returns("XXX")
+      #Update record
+      @mock_client.stubs(:[]).with("objects/monkey%3A99").returns(stub('post', :post=>'monkey:99'))
+      #Update datastream
+      ['someData', 'withText', 'withText2', 'RELS-EXT'].each do |dsid|
+        @mock_client.stubs(:[]).with {|params| /objects\/monkey%3A99\/datastreams\/#{dsid}/.match(params)}.returns(stub('post', :post=>'monkey:99', :get=>''))
+      end
+      @mock_file = mock('file')
+    end
+    it "should return an adapted object of the requested type" do
+      @test_object = FooHistory.new(:pid=>"monkey:99")
+      @test_object.adapt_to(FooAdaptation).class.should == FooAdaptation
+    end
+    it "should not make an additional call to fedora to create the adapted object" do
+      @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams?format=xml").returns(@getter).once
+      @test_object = FooHistory.new(:pid=>"monkey:99")
+      adapted = @test_object.adapt_to(FooAdaptation)
+    end
+    it "should propagate new datastreams to the adapted object" do
+      @test_object = FooHistory.new(:pid=>"monkey:99")
+      @test_object.add_file_datastream("XXX", :dsid=>'MY_DSID')
+      adapted = @test_object.adapt_to(FooAdaptation)
+      adapted.datastreams.keys.should include 'MY_DSID'
+      adapted.datastreams['MY_DSID'].content.should == "XXX"
+      adapted.datastreams['MY_DSID'].changed?.should be_true
+    end
+    it "should propagate modified datastreams to the adapted object" do
+      @test_object = FooHistory.new(:pid=>"monkey:99")
+      @test_object.datastreams['someData'].content="YYY"
+      adapted = @test_object.adapt_to(FooAdaptation)
+      adapted.datastreams.keys.should include 'someData'
+      adapted.datastreams['someData'].content.should == "YYY"
+      adapted.datastreams['someData'].changed?.should be_true
     end
   end
 
