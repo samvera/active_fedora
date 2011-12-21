@@ -6,6 +6,7 @@ Deprecate datastream_collections
 Rails 3.1 compatibility
 Disseminators have been added
 Adapt To
+ActiveFedora::Relationship is deprecated
 
 3.1.5
 HYDRA-722 updating AF::Base#label= and then saving doesn't persist the change

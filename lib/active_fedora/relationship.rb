@@ -5,6 +5,7 @@ module ActiveFedora
     
     attr_accessor :subject, :predicate, :object, :is_literal, :data_type
     def initialize(attr={})
+      ActiveSupport::Deprecation.warn("ActiveFedora::Releationship is deprecated and will be removed in the next release")
       attr = {:is_literal => false}.merge(attr)
       @is_literal = attr[:is_literal] # must happen first
       self.subject = attr[:subject]

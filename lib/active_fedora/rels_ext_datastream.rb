@@ -89,15 +89,9 @@ module ActiveFedora
         unless value.nil? 
           if value.is_a? Array
             value.each do |obj|
-              #o_uri = URI.parse(obj)
-              #literal = o_uri.scheme.nil?
-              #r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>obj, :is_literal=>literal)
               model.add_relationship(predicate, obj)
             end
           else
-            #o_uri = URI.parse(value)
-            #literal = o_uri.scheme.nil?
-            #r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>value, :is_literal=>literal)
             model.add_relationship(predicate, value)
           end
         end

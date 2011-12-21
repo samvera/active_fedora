@@ -10,6 +10,9 @@ class SpecNamedNode
   include ActiveFedora::RelationshipsHelper
   
   attr_accessor :pid
+  def internal_uri
+    'info:fedora/' + pid.to_s
+  end
 end
 
 describe ActiveFedora::RelationshipsHelper do
@@ -51,10 +54,9 @@ describe ActiveFedora::RelationshipsHelper do
     
     it 'should check if current object is the kind of model class supplied' do
       #has_model relationship does not get created until save called
-      r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(SpecNamedNode)})
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(ActiveFedora::ContentModel.pid_from_ruby_class(SpecNamedNode)))
       @test_object.expects(:relationships).returns(graph).at_least_once
       @test_object.conforms_to?(SpecNamedNode).should == true
     end
@@ -69,10 +71,9 @@ describe ActiveFedora::RelationshipsHelper do
       @test_object3 = SpecNamedNode.new
       @test_object3.pid = increment_pid
       #has_model relationship does not get created until save called so need to add the has model rel here, is fine since not testing save
-      r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(SpecNamedNode)}) 
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(ActiveFedora::ContentModel.pid_from_ruby_class(SpecNamedNode)))
       @test_object.expects(:relationships).returns(graph).at_least_once
       @test_object3.assert_conforms_to('object',@test_object,SpecNamedNode)
     end
@@ -107,20 +108,19 @@ describe ActiveFedora::RelationshipsHelper do
       @test_object2.pid = increment_pid
       @test_object3 = MockNamedRelationships3.new
       @test_object3.pid = increment_pid
-      r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockNamedRelationships3)}) 
+      model_pid = ActiveFedora::ContentModel.pid_from_ruby_class(MockNamedRelationships3)
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(model_pid))
       @test_object2.expects(:relationships).returns(graph).at_least_once
       #should return expected named relationships
       @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]}}
-      r3 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@test_object})
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new(r3.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(model_pid))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new(@test_object.internal_uri))
       @test_object3.expects(:relationships).returns(graph).at_least_once
-      @test_object3.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[]}}
+      @test_object3.relationships_by_name.should == {:self=>{"testing"=>[@test_object.internal_uri],"testing2"=>[]}}
     end 
   end
 
@@ -206,21 +206,18 @@ describe ActiveFedora::RelationshipsHelper do
     it 'should return an array of object uri for a given relationship name' do
       @test_object2 = MockRelationshipNames.new
       @test_object2.pid = increment_pid
-      r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_model, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockRelationshipNames))
       @test_object3 = SpecNamedNode.new 
       @test_object3.pid = increment_pid
       @test_object4 = SpecNamedNode.new 
       @test_object4.pid = increment_pid
       #add relationships that mirror 'testing' and 'testing2'
-      r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_part, :object=>@test_object3)
-      r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_member, :object=>@test_object4)      
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_member),  RDF::URI.new(r4.object))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new(r3.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(ActiveFedora::ContentModel.pid_from_ruby_class(MockRelationshipNames)))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_member),  RDF::URI.new(@test_object4.internal_uri))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new(@test_object3.internal_uri))
       @test_object2.expects(:relationships).returns(graph).at_least_once
-     @test_object2.find_relationship_by_name("testing").should == [r3.object] 
+     @test_object2.find_relationship_by_name("testing").should == [@test_object3.internal_uri] 
     end
   end
 

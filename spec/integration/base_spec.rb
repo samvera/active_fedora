@@ -227,12 +227,9 @@ describe ActiveFedora::Base do
 
   describe '.add_relationship' do
     it "should update the RELS-EXT datastream and relationships should end up in Fedora when the object is saved" do
-      test_relationships = [ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "info:fedora/demo:5"), 
-                                ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "info:fedora/demo:10"),
-                                ActiveFedora::Relationship.new(:subject => :self, :predicate => :conforms_to, :object => "info:fedora/afmodel:OralHistory")]
-      test_relationships.each do |rel|
-        @test_object.add_relationship(rel.predicate, rel.object)
-      end
+      @test_object.add_relationship(:is_member_of, "info:fedora/demo:5")
+      @test_object.add_relationship(:is_member_of, "info:fedora/demo:10")
+      @test_object.add_relationship(:conforms_to, "info:fedora/afmodel:OralHistory")
       @test_object.save
       rexml = REXML::Document.new(@test_object.datastreams["RELS-EXT"].content)
       # Purpose: confirm that the isMemberOf entries exist and have real RDF in them

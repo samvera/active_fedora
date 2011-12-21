@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 require 'active_fedora'
+require 'active_fedora/relationship'
 require "rexml/document"
 require 'mocha'
 require 'uri'
@@ -24,6 +25,8 @@ describe ActiveFedora::Relationship do
   end
   /%
   before(:each) do
+    ActiveSupport::Deprecation.expects(:warn).with("ActiveFedora::Releationship is deprecated and will be removed in the next release").twice
+    
     @test_relationship = ActiveFedora::Relationship.new
     @test_literal = ActiveFedora::Relationship.new(:is_literal=>true)
   end
@@ -33,6 +36,7 @@ describe ActiveFedora::Relationship do
   end
   
   describe "#new" do
+    ActiveSupport::Deprecation.expects(:warn).with("ActiveFedora::Releationship is deprecated and will be removed in the next release").twice
     test_relationship = ActiveFedora::Relationship.new(:subject => "demo:5", :predicate => "isMemberOf", :object => "demo:10")
     
     test_relationship.subject.should == "info:fedora/demo:5"
@@ -82,10 +86,6 @@ describe ActiveFedora::Relationship do
       @test_relationship.predicate = "isComponentOf"
       @test_relationship.predicate.should == "isComponentOf"
     end
-  end
-  
-  describe "#to_hash" do
-    it "should return a hash of structure {subject => {predicate => [object]}}"
   end
   
 end

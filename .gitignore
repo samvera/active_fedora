@@ -26,6 +26,7 @@ pkg
 #/.rvmrc
 .yardoc
 doc
+tmp
 
 ## PROJECT::SPECIFIC
 hydra-jetty

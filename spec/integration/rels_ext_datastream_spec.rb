@@ -31,8 +31,6 @@ describe ActiveFedora::RelsExtDatastream do
     @test_datastream = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
     @test_datastream.model = @test_object
     @test_object.save
-    @test_relationships = [ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "info:fedora/demo:5"), 
-                              ActiveFedora::Relationship.new(:subject => :self, :predicate => :is_member_of, :object => "info:fedora/demo:10")]
   end
   
   after(:each) do
@@ -63,9 +61,8 @@ describe ActiveFedora::RelsExtDatastream do
     
     it "should generate new rdf/xml as the datastream content" do
       @test_object.add_datastream(@test_datastream)
-      @test_relationships.each do |rel|
-        @test_object.add_relationship(rel.predicate, rel.object)
-      end
+      @test_object.add_relationship(:is_member_of, "info:fedora/demo:5")
+      @test_object.add_relationship(:is_member_of, "info:fedora/demo:10")
       rexml1 = REXML::Document.new(@test_datastream.to_rels_ext())
       @test_datastream.serialize!
       rexml2 = REXML::Document.new(@test_object.datastreams["RELS-EXT"].content)
