@@ -422,121 +422,121 @@ module ActiveFedora
 
     # @deprecated Please use {#find_relationship_by_name} instead.
     def named_relationship(name)
-      logger.warn("Deprecation: named_relationship has been deprecated.  Please call find_relationship_by_name instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: named_relationship has been deprecated.  Please call find_relationship_by_name instead.")
       find_relationship_by_name(name)
     end
 
     # @deprecated Please use {#register_relationship_desc_subject} instead.
     def register_named_subject(subject)
-      logger.warn("Deprecation: register_named_subject has been deprecated.  Please call register_relationship_desc_subject instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: register_named_subject has been deprecated.  Please call register_relationship_desc_subject instead.")
       register_relationship_desc_subject(subject)
     end 
     
     # @deprecated Please use {#register_relationship_desc} instead.
     def register_named_relationship(subject, name, predicate, opts)
-      logger.warn("Deprecation: register_named_relationship has been deprecated.  Please call register_relationship_desc instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: register_named_relationship has been deprecated.  Please call register_relationship_desc instead.")
       register_relationship_desc(subject, name, predicate, opts)
     end 
 
     # @deprecated Please use {#relationships_by_name} instead.
     def named_relationships(outbound_only=true)
-      logger.warn("Deprecation: named_relationships has been deprecated.  Please call relationships_by_name instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: named_relationships has been deprecated.  Please call relationships_by_name instead.")
       relationships_by_name(outbound_only)
     end 
 
     # @deprecated Please use {#relationships_by_name_from_class} instead.
     def named_relationships_from_class
-      logger.warn("Deprecation: named_relationships_from_class has been deprecated.  Please call relationships_by_name_from_class instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: named_relationships_from_class has been deprecated.  Please call relationships_by_name_from_class instead.")
       relationships_by_name_from_class
     end 
 
     # @deprecated Please use {#inbound_relationships_by_name} instead.
     def named_inbound_relationships
-      logger.warn("Deprecation: named_inbound_relationships has been deprecated.  Please call inbound_relationships_by_name instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: named_inbound_relationships has been deprecated.  Please call inbound_relationships_by_name instead.")
       inbound_relationships_by_name
     end 
 
     # @deprecated Please use {#outbound_relationships_by_name} instead.
     def named_outbound_relationships
-      logger.warn("Deprecation: named_outbound_relationships has been deprecated.  Please call outbound_relationships_by_name instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: named_outbound_relationships has been deprecated.  Please call outbound_relationships_by_name instead.")
       outbound_relationships_by_name
     end 
 
     # @deprecated Please use {#outbound_relationship_predicates} instead.
     def outbound_named_relationship_predicates
-      logger.warn("Deprecation: outbound_named_relationship_predicates has been deprecated.  Please call outbound_relationship_predicates instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: outbound_named_relationship_predicates has been deprecated.  Please call outbound_relationship_predicates instead.")
       outbound_relationship_predicates
     end 
 
     # @deprecated Please use {#inbound_relationship_predicates} instead.
     def inbound_named_relationship_predicates
-      logger.warn("Deprecation: inbound_named_relationship_predicates has been deprecated.  Please call inbound_relationship_predicates instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: inbound_named_relationship_predicates has been deprecated.  Please call inbound_relationship_predicates instead.")
       inbound_relationship_predicates
     end 
 
     # @deprecated Please use {#relationship_predicates} instead.
     def named_relationship_predicates
-      logger.warn("Deprecation: named_relationship_predicates has been deprecated.  Please call relationship_predicates instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: named_relationship_predicates has been deprecated.  Please call relationship_predicates instead.")
       relationship_predicates
     end 
 
     # @deprecated Please use {#relationship_predicates_from_class} instead.
     def named_relationship_predicates_from_class
-      logger.warn("Deprecation: named_relationship_predicates_from_class has been deprecated.  Please call relationship_predicates_from_class instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: named_relationship_predicates_from_class has been deprecated.  Please call relationship_predicates_from_class instead.")
       relationship_predicates_from_class
     end 
 
     # @deprecated Please use {#is_relationship_name?} instead.
     def is_named_relationship?(name, outbound_only=true)
-      logger.warn("Deprecation: is_named_relationship? has been deprecated.  Please call is_relationship_name? instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: is_named_relationship? has been deprecated.  Please call is_relationship_name? instead.")
       is_relationship_name?(name,outbound_only)
     end 
 
     # @deprecated Please use {#relationships_desc} instead.
     def named_relationships_desc
-      logger.warn("Deprecation: named_relationships_desc has been deprecated.  Please call relationships_desc instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: named_relationships_desc has been deprecated.  Please call relationships_desc instead.")
       relationships_desc
     end 
 
     # @deprecated Please use {#relationships_desc_from_class} instead.
     def named_relationships_desc_from_class
-      logger.warn("Deprecation: named_relationships_desc_from_class has been deprecated.  Please call relationships_desc_from_class instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: named_relationships_desc_from_class has been deprecated.  Please call relationships_desc_from_class instead.")
       relationships_desc_from_class
     end 
 
     # @deprecated Please use {#relationship_model_type} instead.
     def named_relationship_type(name)
-      logger.warn("Deprecation: named_relationship_type has been deprecated.  Please call relationship_model_type instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: named_relationship_type has been deprecated.  Please call relationship_model_type instead.")
       relationship_model_type(name)
     end 
 
     # @deprecated Please use {#add_relationship_by_name} instead.
     def add_named_relationship(name,object)
-      logger.warn("Deprecation: add_named_relationship has been deprecated.  Please call add_relationship_by_name instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: add_named_relationship has been deprecated.  Please call add_relationship_by_name instead.")
       add_relationship_by_name(name,object)
     end 
 
     # @deprecated Please use {#remove_relationship_by_name} instead.
     def remove_named_relationship(name,object)
-      logger.warn("Deprecation: remove_named_relationship has been deprecated.  Please call remove_relationship_by_name instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: remove_named_relationship has been deprecated.  Please call remove_relationship_by_name instead.")
       remove_relationship_by_name(name,object)
     end 
 
     # @deprecated Please use {#assert_conforms_to} instead.
     def assert_kind_of_model(name,object,model_class)
-      logger.warn("Deprecation: assert_kind_of_model has been deprecated.  Please call assert_conforms_to instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: assert_kind_of_model has been deprecated.  Please call assert_conforms_to instead.")
       assert_conforms_to(name,object,model_class)
     end 
 
     # @deprecated Please use {#conforms_to?} instead.
     def kind_of_model?(model_class)
-      logger.warn("Deprecation: kind_of_model? has been deprecated.  Please call conforms_to? instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: kind_of_model? has been deprecated.  Please call conforms_to? instead.")
       conforms_to?(model_class)
     end 
 
     # @deprecated Please use {#relationship_query} instead.
     def named_relationship_query(relationship_name)
-      logger.warn("Deprecation: named_relationship_query has been deprecated.  Please call relationship_query instead.")
+      ActiveSupport::Deprecation.warn("Deprecation: named_relationship_query has been deprecated.  Please call relationship_query instead.")
       relationship_query(relationship_name)
     end 
 
@@ -827,55 +827,55 @@ module ActiveFedora
 
       # @deprecated Please use {#relationships_desc} instead.
       def named_relationships_desc
-        logger.warn("Deprecation: named_relationships_desc has been deprecated.  Please call relationships_desc instead.")
+        ActiveSupport::Deprecation.warn("Deprecation: named_relationships_desc has been deprecated.  Please call relationships_desc instead.")
         relationships_desc
       end
 
       # @deprecated Please use {#register_relationship_desc_subject} instead.
       def register_named_subject(subject)
-        logger.warn("Deprecation: register_named_subject has been deprecated.  Please call register_relationship_desc_subject instead.")
+        ActiveSupport::Deprecation.warn("Deprecation: register_named_subject has been deprecated.  Please call register_relationship_desc_subject instead.")
         register_relationship_desc_subject(subject)
       end
 
       # @deprecated Please use {#register_relationship_desc} instead.
       def register_named_relationship(subject, name, predicate, opts)
-        logger.warn("Deprecation: register_named_relationship has been deprecated.  Please call register_relationship_desc instead.")
+        ActiveSupport::Deprecation.warn("Deprecation: register_named_relationship has been deprecated.  Please call register_relationship_desc instead.")
         register_relationship_desc(subject, name, predicate, opts)
       end
 
       # @deprecated Please use {#create_relationship_name_methods} instead.
       def create_named_relationship_methods(name)
-        logger.warn("Deprecation: create_named_relationship_methods has been deprecated.  Please call create_relationship_name_methods instead.")
+        ActiveSupport::Deprecation.warn("Deprecation: create_named_relationship_methods has been deprecated.  Please call create_relationship_name_methods instead.")
         create_relationship_name_methods(name)
       end
 
       # @deprecated Please use {#create_bidirectional_relationship_name_methods} instead.
       def create_bidirectional_named_relationship_methods(name,outbound_name)
-        logger.warn("Deprecation: create_bidirectional_named_relationship_methods has been deprecated.  Please call create_bidirectional_relationship_name_methods instead.")
+        ActiveSupport::Deprecation.warn("Deprecation: create_bidirectional_named_relationship_methods has been deprecated.  Please call create_bidirectional_relationship_name_methods instead.")
         create_bidirectional_relationship_name_methods(name,outbound_name)
       end
 
       # @deprecated Please use {#outbound_relationship_query} instead.
       def outbound_named_relationship_query(relationship_name,outbound_pids)
-        logger.warn("Deprecation: outbound_named_relationship_query has been deprecated.  Please call outbound_relationship_query instead.")
+        ActiveSupport::Deprecation.warn("Deprecation: outbound_named_relationship_query has been deprecated.  Please call outbound_relationship_query instead.")
         outbound_relationship_query(relationship_name,outbound_pids)
       end
 
       # @deprecated Please use {#inbound_relationship_query} instead.
       def inbound_named_relationship_query(pid,relationship_name)
-        logger.warn("Deprecation: inbound_named_relationship_query has been deprecated.  Please call inbound_relationship_query instead.")
+        ActiveSupport::Deprecation.warn("Deprecation: inbound_named_relationship_query has been deprecated.  Please call inbound_relationship_query instead.")
         inbound_relationship_query(pid,relationship_name)
       end
 
       # @deprecated Please use {#bidirectional_relationship_query} instead.
       def bidirectional_named_relationship_query(pid,relationship_name,outbound_pids)
-        logger.warn("Deprecation: bidirectional_named_relationship_query has been deprecated.  Please call bidirectional_relationship_query instead.")
+        ActiveSupport::Deprecation.warn("Deprecation: bidirectional_named_relationship_query has been deprecated.  Please call bidirectional_relationship_query instead.")
         bidirectional_relationship_query(pid,relationship_name,outbound_pids)
       end
 
       # @deprecated Please use {#predicate_exists_with_different_relationship_name?} instead.
       def named_predicate_exists_with_different_name?(subject,name,predicate)
-        logger.warn("Deprecation: named_predicate_exists_with_different_name? has been deprecated.  Please call predicate_exists_with_different_relationship_name? instead.")
+        ActiveSupport::Deprecation.warn("Deprecation: named_predicate_exists_with_different_name? has been deprecated.  Please call predicate_exists_with_different_relationship_name? instead.")
         predicate_exists_with_different_relationship_name?(subject,name,predicate)
       end
     end

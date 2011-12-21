@@ -1,45 +1,50 @@
 require 'spec_helper'
-require "active_fedora"
 
-# Some tentative extensions to ActiveFedora::Base
 
-describe ActiveFedora::Base do
-  
-  @@last_pid = 0
+DEPRECATION_MSG = "Deprecation: DatastreamCollections will not be included by default in the next version.   To use has_datastream add 'include ActiveFedora::DatastreamCollections' to your model"
 
-  def increment_pid
-    @@last_pid += 1    
-  end
-  
-  before(:each) do
-    @test_object = ActiveFedora::Base.new
-  end
-
-  after(:each) do
-    begin
-    @test_object.delete
-    rescue
-    end
-  
-    begin
-    @test_object2.delete
-    rescue
+describe ActiveFedora::DatastreamCollections do
+  describe '.has_datastream' do
+    before(:all) do
+      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
+      
+      class MockHasDatastream < ActiveFedora::Base
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+        has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
+        has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E'
+      end
     end
     
-    begin
-    @test_object3.delete
-    rescue
+    it 'should cache a definition of named datastream and create helper methods to add/remove/access them' do
+      @test_object2 = MockHasDatastream.new
+      #prefix should default to name in caps if not specified in has_datastream call
+      @test_object2.named_datastreams_desc.should == {"thumbnail"=>{:name=>"thumbnail",:prefix => "THUMB", 
+                                                                    :type=>"ActiveFedora::Datastream", :mimeType=>"image/jpeg", 
+                                                                    :controlGroup=>'M'},
+                                                      "EAD"=>       {:name=>"EAD", :prefix=>"EAD",
+                                                                    :type=>"ActiveFedora::Datastream", :mimeType=>"application/xml", 
+                                                                    :controlGroup=>'M' },
+                                                      "external"=>  {:name=>"external", :prefix=>"EXTERNAL",
+                                                                    :type=>"ActiveFedora::Datastream", :controlGroup=>'E' }}
+      @test_object2.should respond_to(:thumbnail_append)
+      @test_object2.should respond_to(:thumbnail_file_append)
+      @test_object2.should respond_to(:thumbnail)
+      @test_object2.should respond_to(:thumbnail_ids)
+      @test_object2.should respond_to(:ead_append)
+      @test_object2.should respond_to(:ead_file_append)
+      @test_object2.should respond_to(:EAD)
+      @test_object2.should respond_to(:EAD_ids)
+      @test_object2.should respond_to(:external)
+      @test_object2.should respond_to(:external_ids)
     end
   end
-  
-  it 'should provide #datastream_names' do
-    @test_object.should respond_to(:datastream_names)
-  end
-  
   describe '#datastream_names' do
-    class MockDatastreamNames < ActiveFedora::Base
-      has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
-      has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
+    before(:all) do
+      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
+      class MockDatastreamNames < ActiveFedora::Base
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+        has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
+      end
     end
     
     it 'should return an array of datastream names defined by has_datastream' do
@@ -48,19 +53,18 @@ describe ActiveFedora::Base do
     end
   end
   
-  it 'should provide #add_named_datastream' do
-    @test_object.should respond_to(:add_named_datastream)
-  end
-  
   describe '#add_named_datastream' do
-    class MockAddNamedDatastream < ActiveFedora::Base
-      has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
-      has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
-      has_datastream :name=>"anymime", :type=>ActiveFedora::Datastream, :controlGroup=>'M' 
-      has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E'
+    before(:all) do
+      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
+      class MockAddNamedDatastream < ActiveFedora::Base
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+        has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
+        has_datastream :name=>"anymime", :type=>ActiveFedora::Datastream, :controlGroup=>'M' 
+        has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E'
+      end
     end
-
     before do
+
       @test_object2 = MockAddNamedDatastream.new
       @f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
       @f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
@@ -140,15 +144,14 @@ describe ActiveFedora::Base do
     end
   end
   
-  it 'should provide #add_named_file_datastream' do
-    @test_object.should respond_to(:add_named_file_datastream)
-  end
-  
   describe '#add_named_file_datastream' do
-    class MockAddNamedFileDatastream < ActiveFedora::Base
-      has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
-      has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
-      has_datastream :name=>"anymime", :type=>ActiveFedora::Datastream, :controlGroup=>'M' 
+    before do
+      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
+      class MockAddNamedFileDatastream < ActiveFedora::Base
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+        has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
+        has_datastream :name=>"anymime", :type=>ActiveFedora::Datastream, :controlGroup=>'M' 
+      end
     end
     
     it 'should add a datastream as controlGroup M with blob set to file' do
@@ -170,14 +173,13 @@ describe ActiveFedora::Base do
       
     end
   end
-  
-  it 'should provide #update_named_datastream' do
-    @test_object.should respond_to(:update_named_datastream)
-  end
-  
+
   describe '#update_named_datastream' do
-    class MockUpdateNamedDatastream < ActiveFedora::Base
-      has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+    before do
+      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
+      class MockUpdateNamedDatastream < ActiveFedora::Base
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+      end
     end
     
     it 'should update a datastream and not increment the dsid' do
@@ -231,32 +233,29 @@ describe ActiveFedora::Base do
       @test_object2.thumbnail.first.content.should == f2.read
     end
   end
-  
-  describe '#create_datastream' do
-    it 'should create a datastream object using the type of object supplied in the string (does reflection)' do
-      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
-      f.stubs(:content_type).returns("image/jpeg")
-      f.stubs(:original_filename).returns("minivan.jpg")
-      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:blob=>f})
-      ds.class.should == ActiveFedora::Datastream
-      ds.dsLabel.should == "minivan.jpg"
-      ds.mimeType.should == "image/jpeg"
+  describe '#named_datastreams_desc' do
+      
+    before do
+      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
+      class MockNamedDatastreamsDesc < ActiveFedora::Base
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+      end
     end
-    it 'should create a datastream object from a string' do
-      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:blob=>"My file data"})
-      ds.class.should == ActiveFedora::Datastream
-      ds.dsLabel.should == nil
-      ds.mimeType.should == "application/octet-stream"
+    
+    it 'should intialize a value to an empty hash and then not modify afterward' do
+      @test_object2 = MockNamedDatastreamsDesc.new
+      @test_object2.named_datastreams_desc.should == {"thumbnail"=>{:name=>"thumbnail",:prefix => "THUMB", 
+                                                                    :type=>"ActiveFedora::Datastream", :mimeType=>"image/jpeg", 
+                                                                    :controlGroup=>'M'}}
     end
   end
-  
-  it 'should provide #is_named_datastream?' do
-    @test_object.should respond_to(:is_named_datastream?)
-  end
-  
+
   describe '#is_named_datastream?' do
-    class MockIsNamedDatastream < ActiveFedora::Base
-      has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+    before do
+      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
+      class MockIsNamedDatastream < ActiveFedora::Base
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+      end
     end
     
     it 'should return true if a named datastream exists in model' do
@@ -266,15 +265,15 @@ describe ActiveFedora::Base do
     end
   end
   
-  it 'should provide #named_datastreams' do
-    @test_object.should respond_to(:named_datastreams)
-  end
   
   describe '#named_datastreams' do
-    class MockNamedDatastreams < ActiveFedora::Base
-      has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
-      has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
-      has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
+    before do
+      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
+      class MockNamedDatastreams < ActiveFedora::Base
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+        has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
+        has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
+      end
     end
     
     it 'should return a hash of datastream names to arrays of datastreams' do
@@ -316,15 +315,15 @@ describe ActiveFedora::Base do
   end
   
   
-  it 'should provide #named_datastreams_ids' do
-    @test_object.should respond_to(:named_datastreams_ids)
-  end
-  
+    
   describe '#named_datastreams_ids' do
-    class MockNamedDatastreamsIds < ActiveFedora::Base
-      has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
-      has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
-      has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
+    before do
+      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
+      class MockNamedDatastreamsIds < ActiveFedora::Base
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+        has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
+        has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
+      end
     end
     
     it 'should provide a hash of datastreams names to array of datastream ids' do
@@ -342,28 +341,14 @@ describe ActiveFedora::Base do
     end
   end
   
-  #
-  # Class level methods
-  #
-  describe '#named_datastreams_desc' do
-      
-    class MockNamedDatastreamsDesc < ActiveFedora::Base
-      has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
-    end
-    
-    it 'should intialize a value to an empty hash and then not modify afterward' do
-      @test_object.named_datastreams_desc.should == {}
-      @test_object2 = MockNamedDatastreamsDesc.new
-      @test_object2.named_datastreams_desc.should == {"thumbnail"=>{:name=>"thumbnail",:prefix => "THUMB", 
-                                                                    :type=>"ActiveFedora::Datastream", :mimeType=>"image/jpeg", 
-                                                                    :controlGroup=>'M'}}
-    end
-  end
     
   describe '#create_named_datastream_finders' do
-    class MockCreateNamedDatastreamFinder < ActiveFedora::Base
-      has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
-      has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
+    before do
+      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
+      class MockCreateNamedDatastreamFinder < ActiveFedora::Base
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+        has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
+      end
     end
     
     it 'should create helper methods to get named datastreams or dsids' do
@@ -398,10 +383,13 @@ describe ActiveFedora::Base do
   end
     
   describe '#create_named_datastream_update_methods' do
-    class MockCreateNamedDatastreamUpdateMethods < ActiveFedora::Base
-      has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
-      has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
-      has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
+    before do
+      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
+      class MockCreateNamedDatastreamUpdateMethods < ActiveFedora::Base
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+        has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
+        has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
+      end
     end
     
     it 'should create append method for each has_datastream entry' do
@@ -431,37 +419,6 @@ describe ActiveFedora::Base do
       t3_external1.pid.should == @test_object3.pid 
       t3_external1.dsid.should == "EXTERNAL1"
       t3_external1.controlGroup == 'E'
-    end
-  end
-    
-  describe '#has_datastream' do
-    class MockHasDatastream < ActiveFedora::Base
-      has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
-      has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
-      has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E'
-    end
-    
-    it 'should cache a definition of named datastream and create helper methods to add/remove/access them' do
-      @test_object2 = MockHasDatastream.new
-      #prefix should default to name in caps if not specified in has_datastream call
-      @test_object2.named_datastreams_desc.should == {"thumbnail"=>{:name=>"thumbnail",:prefix => "THUMB", 
-                                                                    :type=>"ActiveFedora::Datastream", :mimeType=>"image/jpeg", 
-                                                                    :controlGroup=>'M'},
-                                                      "EAD"=>       {:name=>"EAD", :prefix=>"EAD",
-                                                                    :type=>"ActiveFedora::Datastream", :mimeType=>"application/xml", 
-                                                                    :controlGroup=>'M' },
-                                                      "external"=>  {:name=>"external", :prefix=>"EXTERNAL",
-                                                                    :type=>"ActiveFedora::Datastream", :controlGroup=>'E' }}
-      @test_object2.should respond_to(:thumbnail_append)
-      @test_object2.should respond_to(:thumbnail_file_append)
-      @test_object2.should respond_to(:thumbnail)
-      @test_object2.should respond_to(:thumbnail_ids)
-      @test_object2.should respond_to(:ead_append)
-      @test_object2.should respond_to(:ead_file_append)
-      @test_object2.should respond_to(:EAD)
-      @test_object2.should respond_to(:EAD_ids)
-      @test_object2.should respond_to(:external)
-      @test_object2.should respond_to(:external_ids)
     end
   end
 end

@@ -515,6 +515,24 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe "#create_datastream" do
+    it 'should create a datastream object using the type of object supplied in the string (does reflection)' do
+      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
+      f.stubs(:content_type).returns("image/jpeg")
+      f.stubs(:original_filename).returns("minivan.jpg")
+      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:blob=>f})
+      ds.class.should == ActiveFedora::Datastream
+      ds.dsLabel.should == "minivan.jpg"
+      ds.mimeType.should == "image/jpeg"
+    end
+    it 'should create a datastream object from a string' do
+      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:blob=>"My file data"})
+      ds.class.should == ActiveFedora::Datastream
+      ds.dsLabel.should == nil
+      ds.mimeType.should == "application/octet-stream"
+    end
+  end
+
   describe ".add_file_datastream" do
     before do
       @mock_file = mock('file')
