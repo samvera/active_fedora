@@ -782,6 +782,7 @@ module ActiveFedora
     include Associations
     include NestedAttributes
     include Reflection
+    include NamedRelationships
     include DatastreamCollections
   end
 

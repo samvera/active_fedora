@@ -54,7 +54,7 @@ describe ActiveFedora::RelationshipsHelper do
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(SpecNamedNode)})
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
       @test_object.expects(:relationships).returns(graph).at_least_once
       @test_object.conforms_to?(SpecNamedNode).should == true
     end
@@ -72,7 +72,7 @@ describe ActiveFedora::RelationshipsHelper do
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(SpecNamedNode)}) 
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
       @test_object.expects(:relationships).returns(graph).at_least_once
       @test_object3.assert_conforms_to('object',@test_object,SpecNamedNode)
     end
@@ -110,15 +110,15 @@ describe ActiveFedora::RelationshipsHelper do
       r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockNamedRelationships3)}) 
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
       @test_object2.expects(:relationships).returns(graph).at_least_once
       #should return expected named relationships
       @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]}}
       r3 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@test_object})
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_part),  RDF::URI.new(r3.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new(r3.object))
       @test_object3.expects(:relationships).returns(graph).at_least_once
       @test_object3.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[]}}
     end 
@@ -216,9 +216,9 @@ describe ActiveFedora::RelationshipsHelper do
       r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:has_member, :object=>@test_object4)      
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_member),  RDF::URI.new(r4.object))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_part),  RDF::URI.new(r3.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(r.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_member),  RDF::URI.new(r4.object))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new(r3.object))
       @test_object2.expects(:relationships).returns(graph).at_least_once
      @test_object2.find_relationship_by_name("testing").should == [r3.object] 
     end

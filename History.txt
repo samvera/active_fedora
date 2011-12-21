@@ -1,3 +1,10 @@
+3.2.0
+
+Don't create pids until save
+inspect and equality methods
+Deprecate datastream_collections
+Rails 3.1 compatibility
+
 3.1.5
 HYDRA-722 updating AF::Base#label= and then saving doesn't persist the change
 JettyWrapper to 1.2.0

@@ -317,7 +317,7 @@ describe ActiveFedora::Base do
   describe '#add_relationship' do
     it 'should call #add_relationship on the rels_ext datastream' do
       @test_object.add_relationship("predicate", "info:fedora/object")
-      pred = @test_object.class.vocabularies["info:fedora/fedora-system:def/relations-external#"]["predicate"] 
+      pred = ActiveFedora::Predicates.vocabularies["info:fedora/fedora-system:def/relations-external#"]["predicate"] 
       @test_object.relationships.should have_statement(RDF::Statement.new(RDF::URI.new(@test_object.internal_uri), pred, RDF::URI.new("info:fedora/object")))
     end
 
@@ -832,10 +832,10 @@ describe ActiveFedora::Base do
     it "should serialize the relationships into a Hash" do
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_member_of),  RDF::URI.new('info:fedora/demo:10'))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_part_of),  RDF::URI.new('info:fedora/demo:11'))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_part),  RDF::URI.new('info:fedora/demo:12'))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:conforms_to),  "AnInterface")
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:is_member_of),  RDF::URI.new('info:fedora/demo:10'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:is_part_of),  RDF::URI.new('info:fedora/demo:11'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new('info:fedora/demo:12'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:conforms_to),  "AnInterface")
 
       @test_object.expects(:relationships).returns(graph)
       solr_doc = @test_object.solrize_relationships

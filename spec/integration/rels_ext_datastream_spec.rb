@@ -76,7 +76,7 @@ describe ActiveFedora::RelsExtDatastream do
   
   it "should load relationships from fedora into parent object" do
     class SpecNode; include ActiveFedora::SemanticNode; end
-    SpecNode.predicate_mappings[SpecNode.default_predicate_namespace].each_key do |p| 
+    ActiveFedora::Predicates.predicate_mappings[ActiveFedora::Predicates.default_predicate_namespace].each_key do |p| 
       @test_object.add_relationship(p, "info:fedora/demo:#{rand(100)}")
     end
     @test_object.save

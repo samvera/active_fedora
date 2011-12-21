@@ -60,10 +60,10 @@ module ActiveFedora
     end
 
     def self.short_predicate(predicate)
-      if match = /^(#{ActiveFedora::Base.predicate_mappings.keys.join('|')})(.+)$/.match(predicate.to_str)
+      if match = /^(#{Predicates.predicate_mappings.keys.join('|')})(.+)$/.match(predicate.to_str)
         namespace = match[1]
         predicate = match[2]
-        pred = ActiveFedora::Base.predicate_mappings[namespace].invert[predicate]
+        pred = Predicates.predicate_mappings[namespace].invert[predicate]
         pred
       else
         raise "Unable to parse predicate: #{predicate}"
@@ -83,7 +83,7 @@ module ActiveFedora
     def from_solr(solr_doc)
       #cycle through all possible predicates
       model.relationships_loaded = true
-      ActiveFedora::Base.predicate_mappings[ActiveFedora::Base.default_predicate_namespace].keys.each do |predicate|
+      Predicates.predicate_mappings[Predicates.default_predicate_namespace].keys.each do |predicate|
         predicate_symbol = ActiveFedora::SolrService.solr_name(predicate, :symbol)
         value = (solr_doc[predicate_symbol].nil? ? solr_doc[predicate_symbol.to_s]: solr_doc[predicate_symbol]) 
         unless value.nil? 

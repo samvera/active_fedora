@@ -1,3 +1,4 @@
+require 'active_support/core_ext/module/aliasing'
 module ActiveFedora
   module DatastreamCollections
     extend ActiveSupport::Concern

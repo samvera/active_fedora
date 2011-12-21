@@ -40,7 +40,7 @@ describe ActiveFedora::RelsExtDatastream do
     it "should generate new rdf/xml as the datastream content if the object has been changed" do
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_member_of),  RDF::URI.new('demo:10'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:is_member_of),  RDF::URI.new('demo:10'))
       
       @test_ds.expects(:model).returns(stub("model", :outbound_relationships=>graph, :relationships=>graph,  :relationships_are_dirty =>true, :relationships_are_dirty= => true)).times(3)
       @test_ds.serialize!
@@ -69,11 +69,11 @@ describe ActiveFedora::RelsExtDatastream do
     it 'should serialize the relationships array to Fedora RELS-EXT rdf/xml' do
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_member_of),  RDF::URI.new('info:fedora/demo:10'))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:is_part_of),  RDF::URI.new('info:fedora/demo:11'))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_part),  RDF::URI.new('info:fedora/demo:12'))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new("info:fedora/afmodel:OtherModel"))
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Base.new.find_graph_predicate(:has_model),  RDF::URI.new("info:fedora/afmodel:SampleModel"))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:is_member_of),  RDF::URI.new('info:fedora/demo:10'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:is_part_of),  RDF::URI.new('info:fedora/demo:11'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new('info:fedora/demo:12'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new("info:fedora/afmodel:OtherModel"))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new("info:fedora/afmodel:SampleModel"))
 
       @test_ds.expects(:model).returns(stub("model", :relationships=>graph, :relationships_are_dirty= => true))
       EquivalentXml.equivalent?(@test_ds.to_rels_ext(), @sample_rels_ext_xml).should be_true

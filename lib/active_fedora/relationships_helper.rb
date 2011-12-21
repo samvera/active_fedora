@@ -96,7 +96,7 @@ module ActiveFedora
           rels[:self] = {}
           names.each_pair do |name, predicate|
             set = []
-            res = relationships.query(:predicate => find_graph_predicate(predicate))
+            res = relationships.query(:predicate => Predicates.find_graph_predicate(predicate))
             res.each_object do |o|
               set << o.to_s
             end
@@ -323,7 +323,7 @@ module ActiveFedora
     def conforms_to?(model_class)
       if self.kind_of?(model_class)
         #check has model and class match
-        mod = relationships.first(:predicate=>find_graph_predicate(:has_model))
+        mod = relationships.first(:predicate=>Predicates.find_graph_predicate(:has_model))
         if mod
           expected = ActiveFedora::ContentModel.pid_from_ruby_class(self.class)
           if mod.object.to_s == expected
