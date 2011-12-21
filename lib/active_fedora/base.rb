@@ -3,7 +3,6 @@ require 'nokogiri'
 require "loggable"
 require 'active_fedora/datastream_hash'
 
-require 'active_support/core_ext/class/attribute'
 
 SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
@@ -145,7 +144,7 @@ module ActiveFedora
         result = update
       end
       self.update_index if @metadata_is_dirty == true && ENABLE_SOLR_UPDATES
-      @metadata_is_dirty == false
+      @metadata_is_dirty = false
       return result
     end
 
@@ -521,6 +520,17 @@ module ActiveFedora
       return xml.to_s
     end
 
+    def ==(comparison_object)
+         comparison_object.equal?(self) ||
+           (comparison_object.instance_of?(self.class) &&
+             comparison_object.pid == pid &&
+             !comparison_object.new_record?)
+    end
+  
+    def inspect
+      "#<#{self.class}:#{self.hash} @pid=\"#{pid}\" >"
+    end
+
     # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.
     # @param [Hash] solr_doc (optional) Hash to insert the fields into
     # @param [Hash] opts (optional) 
@@ -739,7 +749,6 @@ module ActiveFedora
     # Deals with preparing new object to be saved to Fedora, then pushes it and its datastreams into Fedora. 
     def create
       @inner_object = @inner_object.save #replace the unsaved digital object with a saved digital object
-      write_relationships_subject
       assert_content_model
       @metadata_is_dirty = true
       update

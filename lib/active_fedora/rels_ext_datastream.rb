@@ -1,4 +1,3 @@
-require 'active_support/core_ext/class/inheritable_attributes'
 require 'solrizer/field_name_mapper'
 require 'uri'
 require 'rdf/rdfxml'
