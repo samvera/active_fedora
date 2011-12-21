@@ -112,6 +112,16 @@ module ActiveFedora
       ds_specs[args[:name]]= {:type => args[:type], :label =>  args.fetch(:label,""), :control_group => args.fetch(:control_group,"X"), :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
     end
 
+    def self.method_missing (name, args)
+      if name == :has_datastream
+        ActiveSupport::Deprecation.warn("Deprecation: DatastreamCollections will not be included by default in the next version.   To use has_datastream add 'include ActiveFedora::DatastreamCollections' to your model")
+        include DatastreamCollections
+        has_datastream(args)
+      else 
+        super
+      end
+
+    end
 
     def method_missing(name, *args)
       dsid = corresponding_datastream_name(name)
@@ -811,7 +821,7 @@ module ActiveFedora
     include NestedAttributes
     include Reflection
     include NamedRelationships
-    include DatastreamCollections
+#    include DatastreamCollections
   end
 
 end
