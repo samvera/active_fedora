@@ -113,11 +113,7 @@ describe ActiveFedora::RelsExtDatastream do
       @test_object5.testing2_append(@test_object3)
       @test_object2.save
       @test_object5.save
-      r2 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object2)
-      r3 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object3)
-      r4 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object4)
-      r5 = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>@test_object5)
-      model_rel = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>:dummy, :object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockAFRelsSolr))
+      model_rel = ActiveFedora::ContentModel.pid_from_ruby_class(MockAFRelsSolr)
       #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
       #get solr doc for @test_object2
       solr_doc = MockAFRelsSolr.find_by_solr(@test_object2.pid).hits.first
@@ -133,35 +129,21 @@ describe ActiveFedora::RelsExtDatastream do
       test_from_solr_object5 = MockAFRelsSolr.new
       test_from_solr_object5.rels_ext.from_solr(solr_doc)
       
-      stmt = test_from_solr_object2.build_statement(test_from_solr_object2.internal_uri, :has_part, r3.object)
-      test_from_solr_object2.relationships.has_statement?(stmt).should be_true
-      stmt = test_from_solr_object2.build_statement(test_from_solr_object2.internal_uri, :has_member, r4.object)
-      test_from_solr_object2.relationships.has_statement?(stmt).should be_true
-      stmt = test_from_solr_object2.build_statement(test_from_solr_object2.internal_uri, :has_model, model_rel.object)
-      test_from_solr_object2.relationships.has_statement?(stmt).should be_true
+      test_from_solr_object2.object_relations[:has_part].should include @test_object3.internal_uri
+      test_from_solr_object2.object_relations[:has_member].should include @test_object4.internal_uri
+      test_from_solr_object2.object_relations[:has_model].should include model_rel
 
-#      test_from_solr_object2.relationships.should == {:self=>{:has_part=>[r3.object],:has_member=>[r4.object],:has_model=>[model_rel.object]}}
-      test_from_solr_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object], "collection_members"=>[], "part_of"=>[], "parts_outbound"=>[r3.object]}}
-      #test_from_solr_object3.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
-      stmt = test_from_solr_object3.build_statement(test_from_solr_object3.internal_uri, :has_model, model_rel.object)
-      test_from_solr_object3.relationships.has_statement?(stmt).should be_true
+      test_from_solr_object2.relationships_by_name.should == {:self=>{"testing"=>[@test_object3.internal_uri],"testing2"=>[@test_object4.internal_uri], "collection_members"=>[], "part_of"=>[], "parts_outbound"=>[@test_object3.internal_uri]}}
+      test_from_solr_object3.object_relations[:has_model].should include model_rel
       test_from_solr_object3.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}}
-      #test_from_solr_object4.relationships.should == {:self=>{:has_model=>[model_rel.object]}}
-      stmt = test_from_solr_object4.build_statement(test_from_solr_object4.internal_uri, :has_model, model_rel.object)
-      test_from_solr_object4.relationships.has_statement?(stmt).should be_true
+      test_from_solr_object4.object_relations[:has_model].should include model_rel
       test_from_solr_object4.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}}
 
-      stmt = test_from_solr_object5.build_statement(test_from_solr_object5.internal_uri, :has_model, model_rel.object)
-      test_from_solr_object5.relationships.has_statement?(stmt).should be_true
-      stmt = test_from_solr_object5.build_statement(test_from_solr_object5.internal_uri, :has_part, r2.object)
-      test_from_solr_object5.relationships.has_statement?(stmt).should be_true
-      stmt = test_from_solr_object5.build_statement(test_from_solr_object5.internal_uri, :has_member, r3.object)
-      test_from_solr_object5.relationships.has_statement?(stmt).should be_true
+      test_from_solr_object5.object_relations[:has_model].should include model_rel
+      test_from_solr_object5.object_relations[:has_part].should include @test_object2.internal_uri
+      test_from_solr_object5.object_relations[:has_member].should include @test_object3.internal_uri
 
-      # test_from_solr_object5.relationships.should == {:self=>{:has_model=>[model_rel.object],
-      #                                                        :has_part=>[r2.object],
-      #                                                        :has_member=>[r3.object]}}
-      test_from_solr_object5.relationships_by_name.should == {:self=>{"testing2"=>[r3.object], "collection_members"=>[], "part_of"=>[], "testing"=>[r2.object], "parts_outbound"=>[r2.object]}} 
+      test_from_solr_object5.relationships_by_name.should == {:self=>{"testing2"=>[@test_object3.internal_uri], "collection_members"=>[], "part_of"=>[], "testing"=>[@test_object2.internal_uri], "parts_outbound"=>[@test_object2.internal_uri]}} 
     end
   end
 end

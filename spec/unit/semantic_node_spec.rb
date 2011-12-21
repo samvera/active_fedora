@@ -15,26 +15,7 @@ class SpecNode2
 end
 
 describe ActiveFedora::SemanticNode do
-  describe "build_statement" do
-    before do
-      @node = SpecNode2.new
-    end
-    it "should raise an error when the target is a pid, not a uri" do
-      lambda { @node.build_statement('info:fedora/spec:9', :is_part_of, 'spec:7') }.should raise_error ArgumentError
-    end
-    it "should run the happy path" do
-      stm = @node.build_statement('info:fedora/spec:9', :is_part_of, 'info:fedora/spec:7')
-      stm.object.to_s.should == "info:fedora/spec:7"
-    end
-    it "should also be happy with non-info URIs" do
-      stm = @node.build_statement('info:fedora/spec:9', :is_annotation_of, 'http://www.w3.org/standards/techs/rdf')
-      stm.object.to_s.should == "http://www.w3.org/standards/techs/rdf"
-    end
-    it "should also be happy with targets that are URI::Generics" do
-      stm = @node.build_statement('info:fedora/spec:9', :is_annotation_of, URI.parse('http://www.w3.org/standards/techs/rdf'))
-      stm.object.to_s.should == "http://www.w3.org/standards/techs/rdf"
-    end
-  end
+
   
   describe "with a bunch of objects" do
     def increment_pid
@@ -498,6 +479,13 @@ describe ActiveFedora::SemanticNode do
         @node.add_relationship(@test_relationship.predicate, @test_relationship.object)
         @node.ids_for_outbound("isMemberOf").should == ['demo:9']
       end
+      it "should not be written into the graph until it is saved" do
+        @n1 = ActiveFedora::Base.new
+        @node.add_relationship(:has_part, @n1)
+        @node.relationships.statements.to_a.first.object.to_s.should == 'info:fedora/__DO_NOT_USE__' 
+        @n1.save
+        @node.relationships.statements.to_a.first.object.to_s.should == @n1.internal_uri
+      end
 
       it "should add a literal relationship to the relationships graph" do
         @node.add_relationship(@test_relationship.predicate, @test_relationship.object, true)
@@ -549,7 +537,7 @@ describe ActiveFedora::SemanticNode do
       it 'should remove a relationship from the relationships hash' do
         r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>"info:fedora/3"})
         r2 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>"info:fedora/4"})
-        @test_object.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).times(6)
+        @test_object.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).times(4)
         @test_object.add_relationship(r.predicate, r.object)
         @test_object.add_relationship(r2.predicate, r2.object)
         #check both are there
@@ -563,6 +551,8 @@ describe ActiveFedora::SemanticNode do
         @test_object.remove_relationship(r2.predicate, r2.object)
         #check last item removed and predicate removed since now emtpy
         @test_object.ids_for_outbound(:has_part).should == []
+
+        @test_object.relationships_are_dirty.should == true
         
       end
     end

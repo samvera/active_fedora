@@ -7,36 +7,30 @@ module ActiveFedora
       self.class_relationships = {}
       self.class_named_relationships_desc = {}
     end
-    attr_accessor :named_relationship_desc, :relationships_are_dirty, :relationships_loaded, :load_from_solr, :subject #:internal_uri
-
-    #TODO I think we can remove named_relationship_desc from attr_accessor  - jcoyne
+    attr_accessor :relationships_loaded, :load_from_solr, :subject
 
     def assert_kind_of(n, o,t)
       raise "Assertion failure: #{n}: #{o} is not of type #{t}" unless o.kind_of?(t)
     end
+
+    def object_relations
+      load_relationships if !relationships_loaded
+      @object_relations ||= RelationshipGraph.new
+    end
     
+    def relationships_are_dirty
+      object_relations.dirty
+    end
+    def relationships_are_dirty=(val)
+      object_relations.dirty = val
+    end
+
     # Add a relationship to the Object.
     # @param predicate
     # @param object Either a string URI or an object that is a kind of ActiveFedora::Base 
     def add_relationship(predicate, target, literal=false)
-      stmt = build_statement(internal_uri, predicate, target, literal)
-      unless relationships.has_statement? stmt
-        relationships.insert stmt
-        @relationships_are_dirty = true
-        rels_ext.dirty = true
-      end
-    end
-
-    def write_relationships_subject ()
-      # need to destroy relationships and rewrite it.
-      subject =  RDF::URI.new(internal_uri)
-      old_rels = relationships.statements.to_a
-      @relationships = RDF::Graph.new
-      old_rels.each do |stmt|
-        stmt.subject = subject
-        @relationships.insert stmt
-      end
-
+      object_relations.add(predicate, target, literal)
+      rels_ext.dirty = true
     end
 
     # Create an RDF statement
@@ -44,6 +38,7 @@ module ActiveFedora
     # @param predicate a predicate symbol
     # @param target an object to store
     def build_statement(uri, predicate, target, literal=false)
+      ActiveSupport::Deprecation.warn("ActiveFedora::Base#build_statement has been deprecated.")
       raise "Not allowed anymore" if uri == :self
       target = target.internal_uri if target.respond_to? :internal_uri
       subject =  RDF::URI.new(uri)  #TODO cache
@@ -105,8 +100,8 @@ module ActiveFedora
     # @param predicate
     # @param object Either a string URI or an object that responds to .pid 
     def remove_relationship(predicate, obj, literal=false)
-      relationships.delete build_statement(internal_uri, predicate, obj)
-      @relationships_are_dirty = true
+      object_relations.delete(predicate, obj)
+      self.relationships_are_dirty = true
       rels_ext.dirty = true
     end
 
@@ -117,10 +112,8 @@ module ActiveFedora
         items = []
         objects.each do |object|
           if (response_format == :uri)    
-            #create a Relationship object so that it generates the appropriate uri
             #inbound relationships are always object properties
-            r = ActiveFedora::Relationship.new(:subject=>:self, :predicate=>predicate, :object=>object)
-            items.push(r.object)
+            items.push(object.internal_uri)
           else
             items.push(object)
           end
@@ -139,19 +132,14 @@ module ActiveFedora
     # If no arguments are supplied, return the whole RDF::Graph.
     # if a predicate is supplied as a parameter, then it returns the result of quering the graph with that predicate
     def relationships(*args)
-      unless @subject 
-        raise "Must have internal_uri" unless internal_uri
-        @subject =  RDF::URI.new(internal_uri)
-      end
-      @relationships ||= RDF::Graph.new
       load_relationships if !relationships_loaded
 
-      return @relationships if args.empty?
-      rels = @relationships.query(:predicate => find_graph_predicate(args.first))
-      results = []
-      rels.each_object {|o| results << o.to_s }
-      results
-      
+      if args.empty?
+        raise "Must have internal_uri" unless internal_uri
+        return object_relations.to_graph(internal_uri)
+      end
+      rels = object_relations[args.first] || []
+      rels.map {|o| o.respond_to?(:internal_uri) ? o.internal_uri : o }   #TODO, could just return the object
     end
 
     def load_relationships
@@ -196,12 +184,10 @@ module ActiveFedora
 
 
     def ids_for_outbound(predicate)
-      id_array = []
-      res = relationships.query(:predicate => find_graph_predicate(predicate))
-      relationships(predicate).each do |o|
-        id_array << o.gsub("info:fedora/", "")
+      (object_relations[predicate] || []).map do |o|
+        o = o.to_s if o.kind_of? RDF::Literal
+        o.kind_of?(String) ? o.gsub("info:fedora/", "") : o.pid
       end
-      id_array
     end
 
     def load_bidirectional(name, inbound_method_name, outbound_method_name, opts) 
@@ -230,7 +216,7 @@ module ActiveFedora
       if opts[:response_format] == :id_array  && !self.class.relationship_has_solr_filter_query?(:self,"#{name}")
         return id_array
       else
-        query = self.class.outbound_relationship_query("#{name}",id_array)
+        query = self.class.outbound_relationship_query(name,id_array)
         solr_result = SolrService.instance.conn.query(query)
         if opts[:response_format] == :solr
           return solr_result

@@ -150,9 +150,8 @@ describe ActiveFedora::SemanticNode do
     it "should create useable finders" do
       spec_node = SNSpecNode.new
       spec_node.collection_members.should == []
-      rel = ActiveFedora::Relationship.new(:subject => :self, :predicate => :has_collection_member, :object => @test_object.pid)  
       
-      spec_node.add_relationship(rel.predicate, rel.object)
+      spec_node.add_relationship(:has_collection_member, @test_object.pid)
       collection_members = spec_node.collection_members
       collection_members.length.should == 1
       collection_members.first.pid.should == @test_object.pid

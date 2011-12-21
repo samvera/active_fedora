@@ -3,6 +3,7 @@ require 'active_fedora/railtie' if defined? Rails
 require 'active_support'
 require 'active_fedora/solr_service'
 require 'active_fedora/rubydora_connection'
+require 'active_support/core_ext/class/attribute'
 
 SOLR_DOCUMENT_ID = ActiveFedora::SolrService.id_field unless defined?(SOLR_DOCUMENT_ID)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
@@ -17,6 +18,7 @@ module ActiveFedora #:nodoc:
     autoload :ContentModel
     autoload :Reflection
     autoload :Relationship
+    autoload :RelationshipGraph
     autoload :RelationshipsHelper
     autoload :Datastream
     autoload :Delegating
