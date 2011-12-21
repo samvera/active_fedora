@@ -1,3 +1,3 @@
 module ActiveFedora
-    VERSION = "3.1.6"
+    VERSION = "3.2.0.pre1"
 end

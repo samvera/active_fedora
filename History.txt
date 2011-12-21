@@ -1,5 +1,11 @@
-3.1.6
+3.2.0
 
+Don't create pids until save
+inspect and equality methods
+Deprecate datastream_collections
+Rails 3.1 compatibility
+
+3.1.6
 HYDRA-733 When serializing, MetadataDatastream does not load the existing content, so it can overwrite with blank
 
 3.1.5

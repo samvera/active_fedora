@@ -37,6 +37,8 @@ module ActiveFedora #:nodoc:
     autoload :NestedAttributes
     autoload :FixtureLoader
     autoload :DatastreamCollections
+    autoload :NamedRelationships
+    autoload :Predicates
 
   end
   

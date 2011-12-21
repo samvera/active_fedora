@@ -2,6 +2,13 @@ module ActiveFedora
   module Reflection # :nodoc:
     extend ActiveSupport::Concern
 
+    included do
+      class_attribute :reflections
+      self.reflections = {}
+    end
+
+
+
     module ClassMethods
       def create_reflection(macro, name, options, active_fedora)
         case macro
@@ -9,7 +16,8 @@ module ActiveFedora
             klass = AssociationReflection
             reflection = klass.new(macro, name, options, active_fedora)
         end
-        write_inheritable_hash :reflections, name => reflection
+
+        self.reflections = self.reflections.merge(name => reflection)
         reflection
       end
 
