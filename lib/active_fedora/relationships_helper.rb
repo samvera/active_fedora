@@ -278,8 +278,6 @@ module ActiveFedora
             (assert_conforms_to 'object', object, klass)
           end
         end
-        #r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>outbound_relationship_predicates[name],:object=>object})
-        #add_relationship(r)
         add_relationship(outbound_relationship_predicates[name],object)
       else
         false

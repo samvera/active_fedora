@@ -6,6 +6,7 @@ Deprecate datastream_collections
 Rails 3.1 compatibility
 Disseminators have been added
 Adapt To
+ActiveFedora::Relationship is deprecated
 
 3.1.6
 HYDRA-733 When serializing, MetadataDatastream does not load the existing content, so it can overwrite with blank

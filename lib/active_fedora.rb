@@ -17,7 +17,7 @@ module ActiveFedora #:nodoc:
     autoload :Base
     autoload :ContentModel
     autoload :Reflection
-    autoload :Relationship
+    #autoload :Relationship
     autoload :RelationshipGraph
     autoload :RelationshipsHelper
     autoload :Datastream

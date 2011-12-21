@@ -448,16 +448,13 @@ describe ActiveFedora::SemanticNode do
 
     it 'should automatically update the relationships_by_name if relationships has changed (no refresh of relationships_by_name hash unless relationships hash has changed' do
       @test_object2 = MockSemNamedRelationships.new
-      r = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_model,:object=>ActiveFedora::ContentModel.pid_from_ruby_class(MockSemNamedRelationships)}) 
-      @test_object2.add_relationship(r.predicate, r.object)
+      @test_object2.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(MockSemNamedRelationships))
       #should return expected named relationships
       @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[], "collection_members"=>[], "part_of"=>[], "parts_outbound"=>[]}}
-      r3 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_part,:object=>@test_object})
-      @test_object2.add_relationship(r3.predicate, r3.object)
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[], "collection_members"=>[], "part_of"=>[],  "parts_outbound"=>[r3.object]}}
-      r4 = ActiveFedora::Relationship.new({:subject=>:self,:predicate=>:has_member,:object=>"3"})
-      @test_object2.add_relationship(r4.predicate, r4.object)
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[r3.object],"testing2"=>[r4.object], "collection_members"=>[], "part_of"=>[],  "parts_outbound"=>[r3.object]}}
+      @test_object2.add_relationship(:has_part, @test_object.internal_uri)
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[@test_object.internal_uri],"testing2"=>[], "collection_members"=>[], "part_of"=>[],  "parts_outbound"=>[@test_object.internal_uri]}}
+      @test_object2.add_relationship(:has_member, "3", true)
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[@test_object.internal_uri],"testing2"=>["3"], "collection_members"=>[], "part_of"=>[],  "parts_outbound"=>[@test_object.internal_uri]}}
     end
   end
 end
