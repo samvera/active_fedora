@@ -41,5 +41,6 @@
     :is_topic_of: isTopicOf
   info:fedora/fedora-system:def/model#:
     :has_model: hasModel
+    :has_service: hasService
   http://www.openarchives.org/OAI/2.0/: 
     :oai_item_id: itemID

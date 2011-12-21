@@ -1,0 +1,9 @@
+:service_mapping:
+ "fedora-system:3":
+   :object_profile: viewObjectProfile
+   :method_index: viewMethodIndex
+   :item_index: viewItemIndex
+   :dc_view: viewDublinCore
+ "test:12":
+   :document_style_1: getDocumentStyle1
+   :document_style_2: getDocumentStyle2
