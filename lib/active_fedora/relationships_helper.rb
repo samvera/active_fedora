@@ -24,10 +24,6 @@ module ActiveFedora
   module RelationshipsHelper
     extend ActiveSupport::Concern
 
-    included do
-      class_attribute  :class_relationships_desc
-    end
-
 
     # ** EXPERIMENTAL **
     # 
@@ -210,6 +206,7 @@ module ActiveFedora
     # It returns a hash of relationship name to arrays of objects
     # @return [Hash] Return hash of each relationship name mapped to an Array of objects linked to this object via outbound relationships
     def outbound_relationships_by_name
+      ActiveSupport::Deprecation.warn("outbound_relationships_by_name has been deprecated")
         relationships_desc.has_key?(:self) ? relationships_by_name[:self] : {}
     end
   
@@ -254,6 +251,7 @@ module ActiveFedora
     # It defaults to ActiveFedora::Base.
     # @return [Class] the name of the class defined for a relationship by the :type option if present
     def relationship_model_type(name)
+      ActiveSupport::Deprecation.warn("relationship_model_type has been deprecated")
       if is_relationship_name?(name,true)
         subject = outbound_relationship_names.include?(name)? :self : :inbound
         if relationships_desc[subject][name].has_key?(:type)
@@ -261,41 +259,6 @@ module ActiveFedora
         end
       end
       return nil  
-    end
-
-    # ** EXPERIMENTAL **
-    # 
-    # Add an outbound relationship for given relationship name
-    # See ActiveFedora::SemanticNode::ClassMethods.has_relationship
-    # @param [String] Name of relationship
-    # @param [ActiveFedora::Base] object to add to the relationship (expects ActvieFedora::Base to be an ancestor)
-    # @return [Boolean] returns true if add operation successful
-    def add_relationship_by_name(name, object)
-      if is_relationship_name?(name,true)
-        if relationships_desc[:self][name].has_key?(:type)
-          klass = class_from_name(relationships_desc[:self][name][:type])
-          unless klass.nil?
-            (assert_conforms_to 'object', object, klass)
-          end
-        end
-        add_relationship(outbound_relationship_predicates[name],object)
-      else
-        false
-      end
-    end
-    
-    # ** EXPERIMENTAL **
-    # 
-    # Remove an object for the given relationship name
-    # @param [String] Relationship name
-    # @param [ActiveFedora::Base] object to remove
-    # @return [Boolean] return true if remove operation successful
-    def remove_relationship_by_name(name, object)
-      if is_relationship_name?(name,true)
-        remove_relationship(outbound_relationship_predicates[name],object)
-      else
-        return false
-      end
     end
 
     # ** EXPERIMENTAL **
@@ -540,71 +503,7 @@ module ActiveFedora
 
     module ClassMethods
 
-      # ** EXPERIMENTAL **
-      #  
-      # Return hash that persists relationship metadata defined by has_relationship calls.  If you implement a child class of ActiveFedora::Base it will inherit
-      # the relationship descriptions defined there by merging in the class
-      # instance variable values.  It will also do this for any level of 
-      # ancestors.
-      # @return [Hash] Hash of relationship subject (:self or :inbound) mapped to nested hashs of each relationship name mapped to another hash relationship options
-      # @example
-      #  For the following relationship
-      #
-      #  has_relationship "audio_records", :has_part, :type=>AudioRecord
-      #  
-      #  Results in the following returned by relationships_desc
-      #  {:self=>{"audio_records"=>{:type=>AudioRecord, :singular=>nil, :predicate=>:has_part, :inbound=>false}}}
-      def relationships_desc
-        #get any relationship descriptions from superclasses
-        if @class_relationships_desc.nil?
-          @class_relationships_desc ||= Hash[:self => {}]
 
-          #get super classes
-          super_klasses = []
-          #insert in reverse order so the child overwrites anything in parent
-          super_klass = self.superclass
-          while !super_klass.nil?
-            super_klasses.insert(0,super_klass)
-            super_klass = super_klass.superclass
-          end
-        
-          super_klasses.each do |super_klass|
-            if super_klass.respond_to?(:relationships_desc)
-              super_rels = super_klass.relationships_desc
-              super_rels.each_pair do |subject,rels|
-                @class_relationships_desc[subject] = {} unless @class_relationships_desc.has_key?(subject)
-                @class_relationships_desc[subject].merge!(rels)
-              end
-            end
-          end
-        end
-        @class_relationships_desc
-      end
-
-      # ** EXPERIMENTAL **
-      #   
-      # Internal method that ensures a relationship subject such as :self and :inbound
-      # exist within the relationships_desc hash tracking relationships metadata. 
-      # @param [Symbol] Subject name to register (will probably be something like :self or :inbound)
-      def register_relationship_desc_subject(subject)
-        unless relationships_desc.has_key?(subject) 
-          relationships_desc[subject] = {} 
-        end
-      end
-  
-      # ** EXPERIMENTAL **
-      # 
-      # Internal method that adds relationship name and predicate pair to either an outbound (:self)
-      # or inbound (:inbound) relationship types. Refer to ActiveFedora::SemanticNode.has_relationship for information on what metadata will be persisted.
-      # @param [Symbol] Subject name to register
-      # @param [String] Name of relationship being registered
-      # @param [Symbol] Fedora ontology predicate to use
-      # @param [Hash] Any options passed to has_relationship such as :type, :solr_fq, etc.
-      def register_relationship_desc(subject, name, predicate, opts={})
-        register_relationship_desc_subject(subject)
-        opts.merge!({:predicate=>predicate})
-        relationships_desc[subject][name] = opts
-      end
 
       # Tests if the relationship name passed is in bidirectional
       # @param [String] relationship name to test
@@ -613,42 +512,6 @@ module ActiveFedora
         (relationships_desc.has_key?(:self)&&relationships_desc.has_key?(:inbound)&&relationships_desc[:self].has_key?("#{relationship_name}_outbound") && relationships_desc[:inbound].has_key?("#{relationship_name}_inbound")) 
       end
 
-      # ** EXPERIMENTAL **
-      #   
-      # Used in has_relationship call to create dynamic helper methods to 
-      # append and remove objects to and from a relationship
-      # @param [String] relationship name to create helper methods for
-      # @example
-      #   For the following relationship
-      #
-      #   has_relationship "audio_records", :has_part, :type=>AudioRecord
-      #
-      #   Methods audio_records_append and audio_records_remove are created.
-      #   Boths methods take an object that is kind_of? ActiveFedora::Base as a parameter
-      def create_relationship_name_methods(name)
-        append_method_name = "#{name.to_s.downcase}_append"
-        remove_method_name = "#{name.to_s.downcase}_remove"
-        self.send(:define_method,:"#{append_method_name}") {|object| add_relationship_by_name(name,object)}
-        self.send(:define_method,:"#{remove_method_name}") {|object| remove_relationship_by_name(name,object)}
-      end 
-
-      #  ** EXPERIMENTAL **
-      #  Similar to +create_relationship_name_methods+ except it is used when an ActiveFedora::Base model class
-      #  declares has_bidirectional_relationship.  we are merely creating an alias for outbound portion of bidirectional
-      #  @param [String] bidirectional relationship name
-      #  @param [String] outbound relationship method name associated with the bidirectional relationship ([bidirectional_name]_outbound)
-      #  @example
-      #    has_bidirectional_relationship "members", :has_collection_member, :is_member_of_collection
-      #    
-      #    Method members_outbound_append and members_outbound_remove added
-      #    This method will create members_append which does same thing as members_outbound_append
-      #    and will create members_remove which does same thing as members_outbound_remove
-      def create_bidirectional_relationship_name_methods(name,outbound_name)
-        append_method_name = "#{name.to_s.downcase}_append"
-        remove_method_name = "#{name.to_s.downcase}_remove"
-        self.send(:define_method,:"#{append_method_name}") {|object| add_relationship_by_name(outbound_name,object)}
-        self.send(:define_method,:"#{remove_method_name}") {|object| remove_relationship_by_name(outbound_name,object)}
-      end
 
       # Returns a solr query for retrieving objects specified in an outbound relationship.
       # This method is mostly used by internal method calls.
