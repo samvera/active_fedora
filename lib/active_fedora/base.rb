@@ -45,6 +45,7 @@ module ActiveFedora
     self.ds_specs = {'RELS-EXT'=> {:type=> ActiveFedora::RelsExtDatastream, :label=>"", :block=>nil}}
 
     
+#TODO See if AF can run without these
 
     has_relationship "collection_members", :has_collection_member
     has_relationship "part_of", :is_part_of
