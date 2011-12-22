@@ -129,9 +129,23 @@ module ActiveFedora
       end
 
       def find_target
-        @owner.load_inbound_relationship(@reflection.name.to_s, @reflection.options[:property])
+        load_inbound_relationship(@owner.pid, @reflection.options[:property])
       end
 
+      def load_inbound_relationship(pid, predicate, opts={})
+        opts = {:rows=>25}.merge(opts)
+        query = inbound_relationship_query(pid, predicate)
+        return [] if query.empty?
+        solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
+#TODO, don't reify, just store the solr results and lazily reify.
+        return ActiveFedora::SolrService.reify_solr_results(solr_result)
+      end
+
+      def inbound_relationship_query(pid,predicate)
+        internal_uri = "info:fedora/#{pid}"
+        escaped_uri = internal_uri.gsub(/(:)/, '\\:')
+        "#{predicate}_s:#{escaped_uri}" 
+      end
 
       def add_record_to_target_with_callbacks(record)
       #  callback(:before_add, record)
