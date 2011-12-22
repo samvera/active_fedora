@@ -4,6 +4,7 @@ require 'active_support'
 require 'active_fedora/solr_service'
 require 'active_fedora/rubydora_connection'
 require 'active_support/core_ext/class/attribute'
+require 'active_support/core_ext/object'
 
 SOLR_DOCUMENT_ID = ActiveFedora::SolrService.id_field unless defined?(SOLR_DOCUMENT_ID)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
@@ -17,7 +18,7 @@ module ActiveFedora #:nodoc:
     autoload :Base
     autoload :ContentModel
     autoload :Reflection
-    #autoload :Relationship
+    autoload :Relationships
     autoload :RelationshipGraph
     autoload :RelationshipsHelper
     autoload :Datastream

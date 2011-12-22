@@ -7,6 +7,7 @@ require 'xmlsimple'
 
 class SpecNamedNode
   include ActiveFedora::SemanticNode
+  include ActiveFedora::Relationships
   include ActiveFedora::RelationshipsHelper
   
   attr_accessor :pid

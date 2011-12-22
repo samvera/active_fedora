@@ -34,6 +34,7 @@ module ActiveFedora
 
       def has_many(association_id, options={})
         raise "You must specify a property name for #{name}" if !options[:property]
+          ##TODO has_relationship is heavy handed, re-implement
         has_relationship association_id.to_s, options[:property], :inbound => true
         reflection = create_has_many_reflection(association_id, options)
         collection_accessor_methods(reflection, HasManyAssociation)
@@ -75,6 +76,7 @@ module ActiveFedora
       #   belongs_to :author, :class_name => "Person", :property => :author_of
       def belongs_to(association_id, options = {})
         raise "You must specify a property name for #{name}" if !options[:property]
+          ##TODO has_relationship is heavy handed, re-implement
         has_relationship association_id.to_s, options[:property]
         reflection = create_belongs_to_reflection(association_id, options)
 

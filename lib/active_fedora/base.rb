@@ -32,10 +32,11 @@ module ActiveFedora
   class Base
     include RelationshipsHelper
     include SemanticNode
+    include Relationships
 
     class_attribute  :ds_specs
     
-   def self.inherited(p)
+    def self.inherited(p)
       # each subclass should get a copy of the parent's datastream definitions, it should not add to the parent's definition table.
       p.ds_specs = p.ds_specs.dup
       super
