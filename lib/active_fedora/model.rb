@@ -118,7 +118,7 @@ module ActiveFedora
              RubydoraConnection.instance.find_model(hit[SOLR_DOCUMENT_ID], self)
           end
         else
-          return RubydoraConnection.instance.find_model(hits.first[SOLR_DOCUMENT_ID], self)
+          return RubydoraConnection.instance.find_model(hits.first[SOLR_DOCUMENT_ID], self) if hits.first
         end
       end
 
