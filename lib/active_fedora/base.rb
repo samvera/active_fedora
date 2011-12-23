@@ -50,7 +50,7 @@ puts "Class MM #{self.name} #{name.inspect}"
 
     def method_missing(name, *args)
 puts "Object MM #{self.class.name} #{name.inspect}"
-      if [:collection_members, :part_of, :parts].include? name 
+      if [:collection_members, :part_of, :parts, :part_of_append, :file_objects].include? name 
         ActiveSupport::Deprecation.warn("Deprecation: FileManagement will not be included by default in the next version.   To use #{name} add 'include ActiveFedora::FileManagement' to your model")
         self.class.send :include, FileManagement
         send name, *args
