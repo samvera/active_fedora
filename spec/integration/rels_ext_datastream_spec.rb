@@ -4,6 +4,7 @@ require 'active_fedora'
 require "rexml/document"
 
 class MockAFRelsSolr < ActiveFedora::Base
+  include ActiveFedora::FileManagement
   has_relationship "testing", :has_part, :type=>MockAFRelsSolr
   has_relationship "testing2", :has_member, :type=>MockAFRelsSolr
   has_relationship "testing_inbound", :has_part, :type=>MockAFRelsSolr, :inbound=>true
