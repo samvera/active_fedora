@@ -9,7 +9,6 @@ describe ActiveFedora::Relationships do
 
     before(:each) do
       class SpecNode
-        include ActiveFedora::RelationshipsHelper
         include ActiveFedora::Relationships
         include ActiveFedora::SemanticNode
         
@@ -325,11 +324,6 @@ describe ActiveFedora::Relationships do
         @local_node.class.relationships[:self].has_key?(:has_part).should == true
       end
     
-      it "should register relationship names for inbound, outbound" do
-        @local_node.relationship_names.include?("all_parts_inbound").should == true
-        @local_node.relationship_names.include?("all_parts_outbound").should == true
-      end
-
       it "should register finder methods for the bidirectional relationship name" do
         @local_node.should respond_to(:all_parts)
         @local_node.should respond_to(:all_parts_ids)
@@ -373,4 +367,480 @@ describe ActiveFedora::Relationships do
       end
     end
 
+  
+  it 'should provide #inbound_relationship_names' do
+    SpecNode.new.should respond_to(:inbound_relationship_names)
+  end
+  
+  describe '#inbound_relationship_names' do
+    before do
+      class MockRelationshipNames < SpecNode
+        register_relationship_desc(:self, "testing", :has_part, :type=>SpecNode)
+        create_relationship_name_methods("testing")
+        register_relationship_desc(:self, "testing2", :has_member, :type=>SpecNode)
+        create_relationship_name_methods("testing2")
+        register_relationship_desc(:inbound, "testing_inbound", :has_part, :type=>SpecNode)
+        register_relationship_desc(:inbound, "testing_inbound2", :has_member, :type=>SpecNode)
+      end
+    end
+    it 'should return an array of inbound relationship names for this model' do
+      @test_object2 = MockRelationshipNames.new
+      @test_object2.pid = increment_pid
+      @test_object2.inbound_relationship_names.include?("testing_inbound").should == true
+      @test_object2.inbound_relationship_names.include?("testing_inbound2").should == true
+      @test_object2.inbound_relationship_names.size.should == 2
+    end
+  end
+  
+  it 'should provide #outbound_relationship_names' do
+    SpecNode.new.should respond_to(:outbound_relationship_names)
+  end
+  
+  describe '#outbound_relationship_names' do
+    it 'should return an array of outbound relationship names for this model' do
+      @test_object2 = MockRelationshipNames.new
+      @test_object2.pid = increment_pid
+      @test_object2.outbound_relationship_names.include?("testing").should == true
+      @test_object2.outbound_relationship_names.include?("testing2").should == true
+      @test_object2.outbound_relationship_names.size.should == 2
+    end
+  end
+  
+  it 'should provide #inbound_relationships_by_name' do
+    #testing execution of this in integration since touches solr
+    SpecNode.new.should respond_to(:inbound_relationships_by_name)
+  end
+  
+  it 'should provide #find_relationship_by_name' do
+    SpecNode.new.should respond_to(:find_relationship_by_name)
+  end
+  
+  describe '#find_relationship_by_name' do
+    it 'should return an array of object uri for a given relationship name' do
+      @test_object2 = MockRelationshipNames.new
+      @test_object2.pid = increment_pid
+      @test_object3 = SpecNode.new 
+      @test_object3.pid = increment_pid
+      @test_object4 = SpecNode.new 
+      @test_object4.pid = increment_pid
+      #add relationships that mirror 'testing' and 'testing2'
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(ActiveFedora::ContentModel.pid_from_ruby_class(MockRelationshipNames)))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_member),  RDF::URI.new(@test_object4.internal_uri))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new(@test_object3.internal_uri))
+      @test_object2.expects(:relationships).returns(graph).at_least_once
+     @test_object2.find_relationship_by_name("testing").should == [@test_object3.internal_uri] 
+    end
+  end
+
+  describe "relationship_query" do
+    before do
+      class MockNamedRelationshipQuery < SpecNode
+        register_relationship_desc(:inbound, "testing_inbound_query", :is_part_of, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+        register_relationship_desc(:inbound, "testing_inbound_no_solr_fq", :is_part_of, :type=>SpecNode)
+        register_relationship_desc(:self, "testing_outbound_query", :is_part_of, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+        register_relationship_desc(:self, "testing_outbound_no_solr_fq", :is_part_of, :type=>SpecNode)
+        #for bidirectional relationship testing need to register both outbound and inbound names
+        register_relationship_desc(:self, "testing_bi_query_outbound", :has_part, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+        register_relationship_desc(:inbound, "testing_bi_query_inbound", :is_part_of, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+        register_relationship_desc(:self, "testing_bi_no_solr_fq_outbound", :has_part, :type=>SpecNode)
+        register_relationship_desc(:inbound, "testing_bi_no_solr_fq_inbound", :is_part_of, :type=>SpecNode)
+      end
+    end
+    after do
+      Object.send(:remove_const, :MockNamedRelationshipQuery)
+    end
+    
+    before(:each) do
+      @mockrelsquery = MockNamedRelationshipQuery.new
+    end
+    
+    it "should call bidirectional_relationship_query if a bidirectional relationship" do
+      ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
+      @mockrelsquery.expects(:ids_for_outbound).with(:has_part).returns(ids).at_least_once
+      @mockrelsquery.expects(:pid).returns("changeme:5")
+      MockNamedRelationshipQuery.expects(:bidirectional_relationship_query).with("changeme:5","testing_bi_query",ids)
+      @mockrelsquery.relationship_query("testing_bi_query")
+    end
+    
+    it "should call outbound_relationship_query if an outbound relationship" do
+      ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
+      @mockrelsquery.expects(:ids_for_outbound).with(:is_part_of).returns(ids).at_least_once
+      MockNamedRelationshipQuery.expects(:outbound_relationship_query).with("testing_outbound_no_solr_fq",ids)
+      @mockrelsquery.relationship_query("testing_outbound_no_solr_fq")
+    end
+    
+    it "should call inbound_relationship_query if an inbound relationship" do
+      @mockrelsquery.expects(:pid).returns("changeme:5")
+      MockNamedRelationshipQuery.expects(:inbound_relationship_query).with("changeme:5","testing_inbound_query")
+      @mockrelsquery.relationship_query("testing_inbound_query")
+    end
+  end
+
+  describe '#relationship_predicates' do
+    before do
+      class MockNamedRelationshipPredicates < SpecNode
+        register_relationship_desc(:self, "testing", :has_part, :type=>SpecNode)
+        create_relationship_name_methods("testing")
+        register_relationship_desc(:self, "testing2", :has_member, :type=>SpecNode)
+        create_relationship_name_methods("testing2")
+        register_relationship_desc(:inbound, "testing_inbound", :has_part, :type=>SpecNode)
+      end
+    end
+    after do
+      Object.send(:remove_const, :MockNamedRelationshipPredicates)
+    end
+
+    it 'should provide #relationship_predicates' do
+      SpecNode.new.should respond_to(:relationship_predicates)
+    end
+    
+    it 'should return a map of subject to relationship name to fedora ontology relationship predicate' do
+      @test_object2 = MockNamedRelationshipPredicates.new
+      @test_object2.relationship_predicates.should == {:self=>{"testing"=>:has_part,"testing2"=>:has_member},
+                                                            :inbound=>{"testing_inbound"=>:has_part}}
+      
+    end 
+  end
+  
+  describe '#conforms_to?' do
+    before do
+      @test_object = SpecNode.new
+    end
+    it 'should provide #conforms_to?' do
+      @test_object.should respond_to(:conforms_to?)
+    end
+    
+    it 'should check if current object is the kind of model class supplied' do
+      #has_model relationship does not get created until save called
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(ActiveFedora::ContentModel.pid_from_ruby_class(SpecNode)))
+      @test_object.expects(:relationships).returns(graph).at_least_once
+      @test_object.conforms_to?(SpecNode).should == true
+    end
+  end
+  
+  describe '#assert_conforms_to' do
+    before do
+      @test_object = SpecNode.new
+    end
+    it 'should provide #assert_conforms_to' do
+      @test_object.should respond_to(:assert_conforms_to)
+    end
+
+    it 'should correctly assert if an object is the type of model supplied' do
+      @test_object3 = SpecNode.new
+      @test_object3.pid = increment_pid
+      #has_model relationship does not get created until save called so need to add the has model rel here, is fine since not testing save
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(ActiveFedora::ContentModel.pid_from_ruby_class(SpecNode)))
+      @test_object.expects(:relationships).returns(graph).at_least_once
+      @test_object3.assert_conforms_to('object',@test_object,SpecNode)
+    end
+  end
+  
+  it 'should provide #class_from_name' do
+    SpecNode.new.should respond_to(:class_from_name)
+  end
+  
+  describe '#class_from_name' do
+    it 'should return a class constant for a string passed in' do
+      SpecNode.new.class_from_name("SpecNode").should == SpecNode
+    end
+  end
+
+  describe '#relationships_by_name' do
+    
+    before do
+      class MockNamedRelationships3 < SpecNode
+        register_relationship_desc(:self, "testing", :has_part, :type=>SpecNode)
+        create_relationship_name_methods("testing")
+        register_relationship_desc(:self, "testing2", :has_member, :type=>SpecNode)
+        create_relationship_name_methods("testing2")
+        register_relationship_desc(:inbound, "testing_inbound", :has_part, :type=>SpecNode)
+      end
+    end
+    after do
+      Object.send(:remove_const, :MockNamedRelationships3)
+    end
+
+    it 'should provide #relationships_by_name' do
+      @test_object = SpecNode.new
+      @test_object.should respond_to(:relationships_by_name)
+    end
+    
+    it 'should return current named relationships' do
+      @test_object = SpecNode.new
+      @test_object.pid = increment_pid
+      @test_object2 = MockNamedRelationships3.new
+      @test_object2.pid = increment_pid
+      @test_object3 = MockNamedRelationships3.new
+      @test_object3.pid = increment_pid
+      model_pid = ActiveFedora::ContentModel.pid_from_ruby_class(MockNamedRelationships3)
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(model_pid))
+      @test_object2.expects(:relationships).returns(graph).at_least_once
+      #should return expected named relationships
+      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]}}
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(model_pid))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new(@test_object.internal_uri))
+      @test_object3.expects(:relationships).returns(graph).at_least_once
+      @test_object3.relationships_by_name.should == {:self=>{"testing"=>[@test_object.internal_uri],"testing2"=>[]}}
+    end 
+  end
+  describe '#relationship_has_solr_filter_query' do
+    before do
+      class RelsHasSolrFilter < SpecNode
+        register_relationship_desc :self, "testing", :is_part_of, :solr_fq=>"testing:value"
+        register_relationship_desc :self, "no_query_testing", :is_part_of
+        register_relationship_desc :inbound, "inbound_testing", :has_part, :solr_fq=>"in_testing:value_in"
+        register_relationship_desc :inbound, "inbound_testing_no_query", :has_part
+      end
+      @test_object = RelsHasSolrFilter.new
+    end
+    after do
+      Object.send(:remove_const, :RelsHasSolrFilter)
+    end
+
+    it 'should return true if an object has an inbound relationship with solr filter query' do
+      @test_object.relationship_has_solr_filter_query?(:inbound,"inbound_testing").should == true
+    end
+
+    it 'should return false if an object does not have inbound relationship with solr filter query' do
+      @test_object.relationship_has_solr_filter_query?(:inbound,"inbound_testing_no_query").should == false
+    end
+
+    it 'should return true if an object has an outbound relationship with solr filter query' do
+      @test_object.relationship_has_solr_filter_query?(:self,"testing").should == true
+    end
+
+    it 'should return false if an object does not have outbound relationship with solr filter query' do
+      @test_object.relationship_has_solr_filter_query?(:self,"testing_no_query").should == false
+    end
+  end
+
+  describe ActiveFedora::Relationships::ClassMethods do
+
+     after(:each) do
+      begin
+        @test_object2.delete
+      rescue
+      end
+    end
+
+    describe '#relationships_desc' do
+      it 'should initialize relationships_desc to a new hash containing self' do
+        @test_object2 = SpecNode.new
+        @test_object2.pid = increment_pid
+        @test_object2.relationships_desc.should == {:self=>{}}
+      end
+    end
+      
+    describe '#register_relationship_desc_subject' do
+    
+      before do
+        class MockRegisterNamedSubject < SpecNode
+          register_relationship_desc_subject :test
+        end
+      end
+    
+      it 'should add a new named subject to the named relationships only if it does not already exist' do
+        @test_object2 = MockRegisterNamedSubject.new
+        @test_object2.pid = increment_pid
+        @test_object2.relationships_desc.should == {:self=>{}, :test=>{}}
+      end 
+    end
+  
+    describe '#register_relationship_desc' do
+    
+      before do
+        class MockRegisterNamedRelationship < SpecNode
+          register_relationship_desc :self, "testing", :is_part_of, :type=>SpecNode
+          register_relationship_desc :inbound, "testing2", :has_part, :type=>SpecNode
+        end
+      end
+    
+      it 'should add a new named subject to the named relationships only if it does not already exist' do
+        @test_object2 = MockRegisterNamedRelationship.new 
+        @test_object2.pid = increment_pid
+        @test_object2.relationships_desc.should == {:inbound=>{"testing2"=>{:type=>SpecNode, :predicate=>:has_part}}, :self=>{"testing"=>{:type=>SpecNode, :predicate=>:is_part_of}}}
+      end 
+    end
+
+    describe "#is_bidirectional_relationship?" do
+      
+      before do
+        class MockIsBiRegisterNamedRelationship < SpecNode
+          register_relationship_desc(:self, "testing_outbound", :is_part_of, :type=>SpecNode)
+          register_relationship_desc(:inbound, "testing_inbound", :has_part, :type=>SpecNode)
+          register_relationship_desc(:self, "testing2", :is_member_of,{})
+        end
+      end
+
+      it "should return true if both inbound and outbound predicates exist, otherwise false" do
+        MockIsBiRegisterNamedRelationship.is_bidirectional_relationship?("testing").should == true
+        MockIsBiRegisterNamedRelationship.is_bidirectional_relationship?("testing2").should == false
+        #the inbound and outbound internal relationships will not be bidirectional by themselves
+        MockIsBiRegisterNamedRelationship.is_bidirectional_relationship?("testing_inbound").should == false
+        MockIsBiRegisterNamedRelationship.is_bidirectional_relationship?("testing_outbound").should == false
+      end
+    end
+
+
+    describe '#create_relationship_name_methods' do
+      before do
+        class MockCreateNamedRelationshipMethods < SpecNode
+          register_relationship_desc :self, "testing", :is_part_of, :type=>SpecNode
+          create_relationship_name_methods "testing"
+        end
+      end
+      after do
+        Object.send(:remove_const, :MockCreateNamedRelationshipMethods)
+      end
+      
+      it 'should create an append and remove method for each outbound relationship' do
+        @test_object2 = MockCreateNamedRelationshipMethods.new
+        @test_object2.pid = increment_pid 
+        @test_object2.should respond_to(:testing_append)
+        @test_object2.should respond_to(:testing_remove)
+        #test execution in base_spec since method definitions include methods in ActiveFedora::Base
+      end
+    end
+
+    describe '#create_bidirectional_relationship_name_methods' do
+      before do
+        class MockCreateNamedRelationshipMethods < SpecNode
+          register_relationship_desc(:self, "testing_outbound", :is_part_of, :type=>SpecNode)
+          create_bidirectional_relationship_name_methods "testing", "testing_outbound"
+        end
+      end
+      after do
+        Object.send(:remove_const, :MockCreateNamedRelationshipMethods)
+      end
+      
+      it 'should create an append and remove method for each outbound relationship' do
+        @test_object2 = MockCreateNamedRelationshipMethods.new
+        @test_object2.pid = increment_pid 
+        @test_object2.should respond_to(:testing_append)
+        @test_object2.should respond_to(:testing_remove)
+        #test execution in base_spec since method definitions include methods in ActiveFedora::Base
+      end
+    end
+    
+
+     #
+    # HYDRA-541
+    #
+      
+    describe "bidirectional_relationship_query" do
+      before do
+        class MockBiNamedRelationshipQuery < SpecNode
+          register_relationship_desc(:self, "testing_query_outbound", :has_part, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+          register_relationship_desc(:inbound, "testing_query_inbound", :is_part_of, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+          create_bidirectional_relationship_name_methods("testing","testing_outbound")
+          register_relationship_desc(:self, "testing_no_solr_fq_outbound", :has_part, :type=>SpecNode)
+          register_relationship_desc(:inbound, "testing_no_solr_fq_inbound", :is_part_of, :type=>SpecNode)
+          create_bidirectional_relationship_name_methods("testing_no_solr_fq","testing_no_solr_fq_outbound")
+        end
+      end
+      after do
+        Object.send(:remove_const, :MockBiNamedRelationshipQuery)
+      end
+
+      #
+      # HYDRA-541
+      #
+      it "should rely on outbound query if inbound query is empty" do
+        query = MockBiNamedRelationshipQuery.bidirectional_relationship_query("PID",:testing_query,[])
+        query.should_not include("OR ()")
+        query2 = MockBiNamedRelationshipQuery.bidirectional_relationship_query("PID",:testing_no_solr_fq,[])
+        query2.should_not include("OR ()")
+      end
+
+      it "should return a properly formatted query for a relationship that has a solr filter query defined" do
+        expected_string = ""
+        ids = ["changeme:1","changeme:2","changeme:3","changeme:4","changeme:5"]
+        ids.each_with_index do |id,index|
+          expected_string << " OR " if index > 0
+          expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialPart)"
+        end
+        expected_string << " OR "
+        expected_string << "(is_part_of_s:info\\:fedora/changeme\\:6 AND has_model_s:info\\:fedora/SpecialPart)"
+        MockBiNamedRelationshipQuery.bidirectional_relationship_query("changeme:6","testing_query",ids).should == expected_string
+      end
+
+      it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
+        expected_string = ""
+        ids = ["changeme:1","changeme:2","changeme:3","changeme:4","changeme:5"]
+        ids.each_with_index do |id,index|
+          expected_string << " OR " if index > 0
+          expected_string << "id:" + id.gsub(/(:)/, '\\:')
+        end
+        expected_string << " OR "
+        expected_string << "(is_part_of_s:info\\:fedora/changeme\\:6)"
+        MockBiNamedRelationshipQuery.bidirectional_relationship_query("changeme:6","testing_no_solr_fq",ids).should == expected_string
+      end
+    end
+
+    describe "inbound_relationship_query" do
+      before do
+        class MockInboundNamedRelationshipQuery < SpecNode
+          register_relationship_desc(:inbound, "testing_inbound_query", :is_part_of, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+          register_relationship_desc(:inbound, "testing_inbound_no_solr_fq", :is_part_of, :type=>SpecNode)
+        end
+      end
+      after(:each) do
+        Object.send(:remove_const, :MockInboundNamedRelationshipQuery)
+      end
+
+      it "should return a properly formatted query for a relationship that has a solr filter query defined" do
+        MockInboundNamedRelationshipQuery.inbound_relationship_query("changeme:1","testing_inbound_query").should == "is_part_of_s:info\\:fedora/changeme\\:1 AND has_model_s:info\\:fedora/SpecialPart"
+      end
+      
+      it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
+        MockInboundNamedRelationshipQuery.inbound_relationship_query("changeme:1","testing_inbound_no_solr_fq").should == "is_part_of_s:info\\:fedora/changeme\\:1"
+      end
+    end
+
+
+
+
+    describe "outbound_relationship_query" do
+      before do
+        class MockOutboundNamedRelationshipQuery < SpecNode
+          register_relationship_desc(:self, "testing_query", :is_part_of, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+          register_relationship_desc(:self,"testing_no_solr_fq", :is_part_of, :type=>SpecNode)
+        end
+      end
+      after(:each) do
+        Object.send(:remove_const, :MockOutboundNamedRelationshipQuery)
+      end
+
+      it "should return a properly formatted query for a relationship that has a solr filter query defined" do
+        ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
+        expected_string = ""
+        ids.each_with_index do |id,index|
+          expected_string << " OR " if index > 0
+          expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialPart)"
+        end
+        MockOutboundNamedRelationshipQuery.outbound_relationship_query("testing_query",ids).should == expected_string
+      end
+
+      it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
+        expected_string = ""
+        ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
+        ids.each_with_index do |id,index|
+          expected_string << " OR " if index > 0
+          expected_string << "id:" + id.gsub(/(:)/, '\\:')
+        end
+        MockOutboundNamedRelationshipQuery.outbound_relationship_query("testing_no_solr_fq",ids).should == expected_string
+      end
+    end 
+  end
 end

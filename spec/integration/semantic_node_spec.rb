@@ -6,8 +6,6 @@ describe ActiveFedora::SemanticNode do
   
   before(:all) do 
     class SNSpecNode < ActiveFedora::Base
-      # include ActiveFedora::RelationshipsHelper
-      # include ActiveFedora::SemanticNode
       # has_relationship "collection_members", :has_collection_member
       # attr_accessor :rels_ext
       # def initialize
@@ -434,8 +432,6 @@ describe ActiveFedora::SemanticNode do
   #putting this test here instead of relationships_helper because testing that relationships_by_name hash gets refreshed if the relationships hash is changed
   describe "relationships_by_name" do
     class MockSemNamedRelationships  < ActiveFedora::Base
-      # include ActiveFedora::RelationshipsHelper
-      # include ActiveFedora::SemanticNode
       has_relationship "testing", :has_part
       has_relationship "testing2", :has_member
       has_relationship "testing_inbound", :has_part, :inbound=>true

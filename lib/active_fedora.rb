@@ -21,7 +21,6 @@ module ActiveFedora #:nodoc:
     autoload :Relationships
     autoload :FileManagement
     autoload :RelationshipGraph
-    autoload :RelationshipsHelper
     autoload :Datastream
     autoload :Delegating
     autoload :DigitalObject
@@ -33,7 +32,6 @@ module ActiveFedora #:nodoc:
     autoload :Property
     autoload :QualifiedDublinCoreDatastream
     autoload :RelsExtDatastream
-    autoload :RelationshipsHelper
     autoload :ServiceDefinitions
     autoload :SemanticNode
     autoload :NestedAttributes

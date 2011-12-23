@@ -30,11 +30,7 @@ module ActiveFedora
   # =Implementation
   # This class is really a facade for a basic Fedora::FedoraObject, which is stored internally.
   class Base
-    include RelationshipsHelper
     include SemanticNode
-    include Relationships
-    include FileManagement
-
 
     def self.method_missing (name, args)
       if name == :has_datastream
@@ -749,6 +745,7 @@ module ActiveFedora
   end
 
   Base.class_eval do
+    include Relationships
     include Model
     include Solrizer::FieldNameMapper
     include Loggable
@@ -759,7 +756,7 @@ module ActiveFedora
     include NestedAttributes
     include Reflection
     include NamedRelationships
-#    include DatastreamCollections
+    include FileManagement
   end
 
 end
