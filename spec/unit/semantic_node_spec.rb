@@ -5,7 +5,7 @@ require 'xmlsimple'
 @@last_pid = 0
 
 class SpecNode2
-  include ActiveFedora::RelationshipsHelper
+  include ActiveFedora::Relationships
   include ActiveFedora::SemanticNode
   
   attr_accessor :pid
@@ -24,7 +24,7 @@ describe ActiveFedora::SemanticNode do
     
     before(:each) do
       class SpecNode
-        include ActiveFedora::RelationshipsHelper
+        include ActiveFedora::Relationships
         include ActiveFedora::SemanticNode
         
         attr_accessor :pid

@@ -87,5 +87,6 @@ describe ActiveFedora::Relationship do
       @test_relationship.predicate.should == "isComponentOf"
     end
   end
+
   
 end

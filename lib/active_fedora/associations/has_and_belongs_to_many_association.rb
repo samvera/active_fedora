@@ -7,7 +7,11 @@ module ActiveFedora
       end
 
       def find_target
-          @owner.load_outbound_relationship(@reflection.name.to_s, @reflection.options[:property])
+          pids = @owner.ids_for_outbound(@reflection.options[:property])
+          return [] if pids.empty?
+          query = ActiveFedora::SolrService.construct_query_for_pids(pids)
+          solr_result = SolrService.instance.conn.query(query)
+          return ActiveFedora::SolrService.reify_solr_results(solr_result)
       end
 
 

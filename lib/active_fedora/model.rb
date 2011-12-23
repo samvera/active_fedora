@@ -102,9 +102,7 @@ module ActiveFedora
         return_multiple = false
         if args == :all
           return_multiple = true
-          # escaped_class_name = self.name.gsub(/(:)/, '\\:')
           escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
-          # q = "#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}"
           q = "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
         elsif args.class == String
           escaped_id = args.gsub(/(:)/, '\\:')
@@ -115,13 +113,12 @@ module ActiveFedora
         else
           hits = SolrService.instance.conn.query(q).hits 
         end
-        results = hits.map do |hit|
-          obj = RubydoraConnection.instance.find_model(hit[SOLR_DOCUMENT_ID], self)
-        end
-        if return_multiple == true
-          return results
+        if return_multiple
+          return hits.map do |hit|
+             RubydoraConnection.instance.find_model(hit[SOLR_DOCUMENT_ID], self)
+          end
         else
-          return results.first
+          return RubydoraConnection.instance.find_model(hits.first[SOLR_DOCUMENT_ID], self)
         end
       end
 
@@ -233,16 +230,7 @@ module ActiveFedora
         end
 
         logger.debug "Querying solr for #{self.name} objects with query: '#{query}'"
-    	results = ActiveFedora::SolrService.instance.conn.query(query,query_opts)
-    	#objects = []
-        #  results.hits.each do |hit|
-        #    puts "get object for #{hit[SOLR_DOCUMENT_ID]}"
-        #    obj = Fedora::Repository.instance.find_model(hit[SOLR_DOCUMENT_ID], self)
-        #    obj.inner_object.new_object = false
-        #    objects.push(obj)
-        #end
-        #objects
-        #ActiveFedora::SolrService.reify_solr_results(results)
+    	  results = ActiveFedora::SolrService.instance.conn.query(query,query_opts)
       end
     
       def class_fields
