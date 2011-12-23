@@ -32,16 +32,42 @@ module ActiveFedora
   class Base
     include SemanticNode
 
-    def self.method_missing (name, args)
-      if name == :has_datastream
+    def self.method_missing (name, *args)
+puts "Class MM #{self.name} #{name.inspect}"
+      if [:has_relationship, :has_bidirectional_relationship, :register_relationship_desc].include? name 
+        ActiveSupport::Deprecation.warn("Deprecation: Relationships will not be included by default in the next version.   To use #{name} add 'include ActiveFedora::Relationships' to your model")
+        include Relationships
+        send name, *args
+      elsif name == :has_datastream
         ActiveSupport::Deprecation.warn("Deprecation: DatastreamCollections will not be included by default in the next version.   To use has_datastream add 'include ActiveFedora::DatastreamCollections' to your model")
         include DatastreamCollections
-        has_datastream(args)
+        has_datastream(*args)
       else 
         super
       end
-
     end
+
+
+    def method_missing(name, *args)
+puts "Object MM #{self.class.name} #{name.inspect}"
+      if [:collection_members, :part_of, :parts].include? name 
+        ActiveSupport::Deprecation.warn("Deprecation: FileManagement will not be included by default in the next version.   To use #{name} add 'include ActiveFedora::FileManagement' to your model")
+        self.class.send :include, FileManagement
+        send name, *args
+      else 
+        dsid = corresponding_datastream_name(name)
+        if dsid
+          ### Create and invoke a proxy method 
+          self.class.send :define_method, name do
+              datastreams[dsid]
+          end
+          self.send(name)
+        else 
+          super
+        end
+      end
+    end
+
 
     class_attribute  :ds_specs
     
@@ -115,19 +141,6 @@ module ActiveFedora
       ds_specs[args[:name]]= {:type => args[:type], :label =>  args.fetch(:label,""), :control_group => args.fetch(:control_group,"X"), :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
     end
 
-
-    def method_missing(name, *args)
-      dsid = corresponding_datastream_name(name)
-      if dsid
-        ### Create and invoke a proxy method 
-        self.class.send :define_method, name do
-            datastreams[dsid]
-        end
-        self.send(name)
-      else 
-        super
-      end
-    end
 
     ## Given a method name, return the best-guess dsid
     def corresponding_datastream_name(method_name)
@@ -745,7 +758,6 @@ module ActiveFedora
   end
 
   Base.class_eval do
-    include Relationships
     include Model
     include Solrizer::FieldNameMapper
     include Loggable
@@ -756,7 +768,6 @@ module ActiveFedora
     include NestedAttributes
     include Reflection
     include NamedRelationships
-    include FileManagement
   end
 
 end

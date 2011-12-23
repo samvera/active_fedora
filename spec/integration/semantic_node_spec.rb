@@ -161,11 +161,11 @@ describe ActiveFedora::SemanticNode do
   describe "inbound relationship finders" do
     describe "when inheriting from parents" do
       before do
+        @part4 = ActiveFedora::Base.new()
+        @part4.parts  ## Includes the FileManagement onto AF::Base. This happens in another test (and caries into this one) if you run the whole suite, but it doesn't get set up if you just run this test.
         class Test2 < ActiveFedora::Base
-          # has_bidirectional_relationship "components", :has_component, :is_component_of
         end
         class Test3 < Test2
-          # has_bidirectional_relationship "components", :has_component, :is_component_of
           has_relationship "testing", :has_member
         end
 
@@ -179,7 +179,6 @@ describe ActiveFedora::SemanticNode do
  
         @test_object2 = Test2.new
         @test_object2.save
-        @part4 = ActiveFedora::Base.new()
       end
       it "should have relationships defined" do
         # puts "Test2 relationships_desc:"
@@ -432,6 +431,7 @@ describe ActiveFedora::SemanticNode do
   #putting this test here instead of relationships_helper because testing that relationships_by_name hash gets refreshed if the relationships hash is changed
   describe "relationships_by_name" do
     class MockSemNamedRelationships  < ActiveFedora::Base
+      include ActiveFedora::FileManagement
       has_relationship "testing", :has_part
       has_relationship "testing2", :has_member
       has_relationship "testing_inbound", :has_part, :inbound=>true

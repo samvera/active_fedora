@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 class MockAFBaseRelationship < ActiveFedora::Base
+  include ActiveFedora::FileManagement
   has_relationship "testing", :has_part, :type=>MockAFBaseRelationship
   has_relationship "testing2", :has_member, :type=>MockAFBaseRelationship
   has_relationship "testing_inbound", :has_part, :type=>MockAFBaseRelationship, :inbound=>true

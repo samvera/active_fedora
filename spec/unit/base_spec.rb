@@ -837,6 +837,7 @@ describe ActiveFedora::Base do
   describe '#relationships_by_name' do
     
     class MockNamedRelationships < ActiveFedora::Base
+      include ActiveFedora::FileManagement
       has_relationship "testing", :has_part, :type=>ActiveFedora::Base
       has_relationship "testing2", :has_member, :type=>ActiveFedora::Base
       has_relationship "testing_inbound", :has_part, :type=>ActiveFedora::Base, :inbound=>true
