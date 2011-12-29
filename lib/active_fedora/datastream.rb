@@ -28,8 +28,7 @@ module ActiveFedora
       dsid.gsub(/\./, '%2e')
     end
     
-    # Test whether this datastream been modified since it was last saved?
-    # TODO deprecate this, just use changed?
+    # Test whether this datastream been modified since it was last saved
     def dirty?
       @dirty || changed?
     end

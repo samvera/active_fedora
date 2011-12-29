@@ -33,7 +33,9 @@ module ActiveFedora::MetadataDatastreamHelper
   end
   
   def serialize! # :nodoc:
-    self.content = self.to_xml  ##TODO only do this when the xml will have changed to avoid a load of the datastream content. 
+    if dirty?
+      self.content = self.to_xml  ##TODO only do this when the xml will have changed to avoid a load of the datastream content. 
+    end
   end
 
   def to_solr(solr_doc = Hash.new) # :nodoc:
