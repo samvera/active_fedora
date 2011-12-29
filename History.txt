@@ -4,6 +4,7 @@ Don't create pids until save
 inspect and equality methods
 Deprecate datastream_collections
 Disseminators have been added
+HYDRA-729 don't update xml datastreams unless they've changed
 Adapt To
 ActiveFedora::Relationship is deprecated
 Rails 3.1 compatibility
