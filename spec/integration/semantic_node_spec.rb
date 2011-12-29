@@ -430,16 +430,14 @@ describe ActiveFedora::SemanticNode do
 
   #putting this test here instead of relationships_helper because testing that relationships_by_name hash gets refreshed if the relationships hash is changed
   describe "relationships_by_name" do
-    class MockSemNamedRelationships  < ActiveFedora::Base
-      include ActiveFedora::FileManagement
-      has_relationship "testing", :has_part
-      has_relationship "testing2", :has_member
-      has_relationship "testing_inbound", :has_part, :inbound=>true
-      # attr_accessor :rels_ext
-      # def initialize
-      #   self.rels_ext = ActiveFedora::RelsExtDatastream.new(nil, nil)
-      #   rels_ext.model = self
-      # end
+    before do
+      ActiveSupport::Deprecation.stubs(:warn)
+      class MockSemNamedRelationships  < ActiveFedora::Base
+        include ActiveFedora::FileManagement
+        has_relationship "testing", :has_part
+        has_relationship "testing2", :has_member
+        has_relationship "testing_inbound", :has_part, :inbound=>true
+      end
     end
 
     it 'should automatically update the relationships_by_name if relationships has changed (no refresh of relationships_by_name hash unless relationships hash has changed' do

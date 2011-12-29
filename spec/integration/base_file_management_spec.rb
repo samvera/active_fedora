@@ -13,6 +13,7 @@ describe ActiveFedora::Base do
   end
   
   it "should persist and re-load collection members" do
+    ActiveSupport::Deprecation.stubs(:warn)
     container_copy = ActiveFedora::Base.load_instance(@test_container.pid)
     container_copy.collection_members(:response_format=>:id_array).should == ["foo:2"]
   end

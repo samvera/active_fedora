@@ -1,36 +1,5 @@
 require 'spec_helper'
 
-class MockAFBaseRelationship < ActiveFedora::Base
-  include ActiveFedora::FileManagement
-  has_relationship "testing", :has_part, :type=>MockAFBaseRelationship
-  has_relationship "testing2", :has_member, :type=>MockAFBaseRelationship
-  has_relationship "testing_inbound", :has_part, :type=>MockAFBaseRelationship, :inbound=>true
-  has_relationship "testing_inbound2", :has_member, :type=>MockAFBaseRelationship, :inbound=>true
-  has_bidirectional_relationship "testing_bidirectional", :has_collection_member, :is_member_of_collection
-  #next 2 used to test objects on opposite end of bidirectional relationship
-  has_relationship "testing_inbound3", :has_collection_member, :inbound=>true
-  has_relationship "testing3", :is_member_of_collection
-end
-
-class MockAFBaseFromSolr < ActiveFedora::Base
-  has_relationship "testing", :has_part, :type=>MockAFBaseFromSolr
-  has_relationship "testing2", :has_member, :type=>MockAFBaseFromSolr
-  has_relationship "testing_inbound", :has_part, :type=>MockAFBaseFromSolr, :inbound=>true
-  has_relationship "testing_inbound2", :has_member, :type=>MockAFBaseFromSolr, :inbound=>true
-  
-  has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|
-    m.field "holding_id", :string
-  end
-  
-  has_metadata :name => "descMetadata", :type => ActiveFedora::QualifiedDublinCoreDatastream do |m|
-    m.field "created", :date, :xml_node => "created"
-    m.field "language", :string, :xml_node => "language"
-    m.field "creator", :string, :xml_node => "creator"
-    # Created remaining fields
-    m.field "geography", :string, :xml_node => "geography"
-    m.field "title", :string, :xml_node => "title"
-  end
-end
 
 describe "Datastreams synched together" do
   before do
@@ -58,6 +27,40 @@ end
 
 
 describe ActiveFedora::Base do
+  before :all do
+    ActiveSupport::Deprecation.stubs(:warn).with("Deprecation: Relationships will not be included by default in the next version.   To use has_relationship add 'include ActiveFedora::Relationships' to your model")
+    class MockAFBaseRelationship < ActiveFedora::Base
+      include ActiveFedora::FileManagement
+      has_relationship "testing", :has_part, :type=>MockAFBaseRelationship
+      has_relationship "testing2", :has_member, :type=>MockAFBaseRelationship
+      has_relationship "testing_inbound", :has_part, :type=>MockAFBaseRelationship, :inbound=>true
+      has_relationship "testing_inbound2", :has_member, :type=>MockAFBaseRelationship, :inbound=>true
+      has_bidirectional_relationship "testing_bidirectional", :has_collection_member, :is_member_of_collection
+      #next 2 used to test objects on opposite end of bidirectional relationship
+      has_relationship "testing_inbound3", :has_collection_member, :inbound=>true
+      has_relationship "testing3", :is_member_of_collection
+    end
+
+    class MockAFBaseFromSolr < ActiveFedora::Base
+      has_relationship "testing", :has_part, :type=>MockAFBaseFromSolr
+      has_relationship "testing2", :has_member, :type=>MockAFBaseFromSolr
+      has_relationship "testing_inbound", :has_part, :type=>MockAFBaseFromSolr, :inbound=>true
+      has_relationship "testing_inbound2", :has_member, :type=>MockAFBaseFromSolr, :inbound=>true
+      
+      has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|
+        m.field "holding_id", :string
+      end
+      
+      has_metadata :name => "descMetadata", :type => ActiveFedora::QualifiedDublinCoreDatastream do |m|
+        m.field "created", :date, :xml_node => "created"
+        m.field "language", :string, :xml_node => "language"
+        m.field "creator", :string, :xml_node => "creator"
+        # Created remaining fields
+        m.field "geography", :string, :xml_node => "geography"
+        m.field "title", :string, :xml_node => "title"
+      end
+    end
+  end
   
   before(:all) do
     ActiveFedora::SolrService.register(ActiveFedora.solr_config[:url])

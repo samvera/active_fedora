@@ -40,7 +40,7 @@ describe ActiveFedora::Base do
   after(:each) do
     begin
     ActiveFedora::SolrService.stubs(:instance)
-    @test_object.delete
+    #@test_object.delete
     rescue
     end
   end
@@ -830,17 +830,17 @@ describe ActiveFedora::Base do
     FooHistory.solr_search("pid: foobar", {:ding=>:dang}).should == {:baz=>:bif}
   end
 
-  it 'should provide #relationships_by_name' do
-    @test_object.should respond_to(:relationships_by_name)
-  end
-  
   describe '#relationships_by_name' do
     
-    class MockNamedRelationships < ActiveFedora::Base
-      include ActiveFedora::FileManagement
-      has_relationship "testing", :has_part, :type=>ActiveFedora::Base
-      has_relationship "testing2", :has_member, :type=>ActiveFedora::Base
-      has_relationship "testing_inbound", :has_part, :type=>ActiveFedora::Base, :inbound=>true
+    before do
+      ActiveSupport::Deprecation.stubs(:warn)
+
+      class MockNamedRelationships < ActiveFedora::Base
+        include ActiveFedora::FileManagement
+        has_relationship "testing", :has_part, :type=>ActiveFedora::Base
+        has_relationship "testing2", :has_member, :type=>ActiveFedora::Base
+        has_relationship "testing_inbound", :has_part, :type=>ActiveFedora::Base, :inbound=>true
+      end
     end
     
     it 'should return current relationships by name' do
@@ -866,9 +866,12 @@ describe ActiveFedora::Base do
 
   
   describe '#create_relationship_name_methods' do
-    class MockCreateNamedRelationshipMethodsBase < ActiveFedora::Base
-      register_relationship_desc :self, "testing", :is_part_of, :type=>ActiveFedora::Base
-      create_relationship_name_methods "testing"
+    before do
+      ActiveSupport::Deprecation.stubs(:warn)
+      class MockCreateNamedRelationshipMethodsBase < ActiveFedora::Base
+        register_relationship_desc :self, "testing", :is_part_of, :type=>ActiveFedora::Base
+        create_relationship_name_methods "testing"
+      end
     end
       
     it 'should append and remove using helper methods for each outbound relationship' do
