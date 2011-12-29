@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'rexml/document'
-require "active_fedora/samples"
 
 include ActiveFedora
 

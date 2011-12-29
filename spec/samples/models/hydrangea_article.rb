@@ -1,5 +1,4 @@
 require "active-fedora"
-require "active_fedora/samples"
 
 # This Model is used to load & index the hydrangea:fixture_mods_article1 fixture for use in tests.
 #

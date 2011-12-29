@@ -1,7 +1,7 @@
 require "active_fedora"
 class OralHistorySampleModel < ActiveFedora::Base
 
-    has_relationship "parts", :is_part_of, :inbound => true
+    #has_relationship "parts", :is_part_of, :inbound => true
     
     has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|
       m.field "narrator",  :string

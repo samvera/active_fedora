@@ -3,13 +3,6 @@ require 'spec_helper'
 require 'active_fedora'
 require "rexml/document"
 
-class MockAFRelsSolr < ActiveFedora::Base
-  include ActiveFedora::FileManagement
-  has_relationship "testing", :has_part, :type=>MockAFRelsSolr
-  has_relationship "testing2", :has_member, :type=>MockAFRelsSolr
-  has_relationship "testing_inbound", :has_part, :type=>MockAFRelsSolr, :inbound=>true
-  has_relationship "testing_inbound2", :has_member, :type=>MockAFRelsSolr, :inbound=>true
-end
 
 describe ActiveFedora::RelsExtDatastream do
   
@@ -86,7 +79,16 @@ describe ActiveFedora::RelsExtDatastream do
   end
 
   describe '#from_solr' do
-    
+    before do
+      ActiveSupport::Deprecation.stubs(:warn)
+      class MockAFRelsSolr < ActiveFedora::Base
+        include ActiveFedora::FileManagement
+        has_relationship "testing", :has_part, :type=>MockAFRelsSolr
+        has_relationship "testing2", :has_member, :type=>MockAFRelsSolr
+        has_relationship "testing_inbound", :has_part, :type=>MockAFRelsSolr, :inbound=>true
+        has_relationship "testing_inbound2", :has_member, :type=>MockAFRelsSolr, :inbound=>true
+      end
+    end
     it "should respond_to from_solr" do
       @test_datastream.respond_to?(:from_solr).should be_true
     end

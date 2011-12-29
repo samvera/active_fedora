@@ -1,5 +1,4 @@
 require 'spec_helper'
-require "active_fedora/samples"
 require "solrizer"
 
 describe ActiveFedora::NokogiriDatastream do
