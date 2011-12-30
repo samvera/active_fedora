@@ -19,9 +19,6 @@ describe ActiveFedora::Base do
       @base.expects(:parts).returns(["Foo"])
       @base.file_objects
     end
-    describe "_remove" do
-      it "should wrap collection_members_remove"
-    end
   end
   
   describe ".file_objects_append" do
@@ -52,7 +49,6 @@ describe ActiveFedora::Base do
     it "should return an array" do
       @base.collection_members.should be_kind_of(Array)
     end
-    it "should search for all of the :collection_members" 
     describe "_append" do
       it "should be a supported method" do
         @base.should respond_to(:collection_members_append)
@@ -61,13 +57,6 @@ describe ActiveFedora::Base do
         mocko = mock("object")
         @base.expects(:add_relationship).with(:has_collection_member, mocko)
         @base.collection_members_append(mocko)
-      end
-      it "should support << operator" do
-        pending
-        # I can't remember how to do this, and it's not a deal breaker... (MZ)
-        mocko = mock("object")
-        @base.expects(:add_relationship).with(:has_collection_member, mocko)
-        @base.collection_members << mocko
       end
     end
     describe "_remove" do

@@ -75,7 +75,7 @@ module ActiveFedora
       super
     end
     
-    self.ds_specs = {'RELS-EXT'=> {:type=> ActiveFedora::RelsExtDatastream, :label=>"", :block=>nil}}
+    self.ds_specs = {'RELS-EXT'=> {:type=> ActiveFedora::RelsExtDatastream, :label=>"", :label=>"Fedora Object-to-Object Relationship Metadata", :control_group=>'X', :block=>nil}}
 
     # Has this object been saved?
     def new_object?

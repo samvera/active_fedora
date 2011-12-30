@@ -2,6 +2,10 @@ require 'spec_helper'
 
 
 describe ActiveFedora::SolrService do
+  before do
+    Thread.current[:solr_service]=nil
+  end
+  
   after(:all) do
     ActiveFedora::SolrService.register(ActiveFedora.solr_config[:url])
   end
@@ -34,14 +38,13 @@ describe ActiveFedora::SolrService do
     Thread.current[:solr_service].should == ss
     ActiveFedora::SolrService.instance.should == ss
   end
-  it "should fail fast if solr service not initialized" do
+  it "should try to initialize if the service not initialized, and fail if it does not succeed" do
     Thread.current[:solr_service].should be_nil
+    ActiveFedora.expects(:load_configs)
+    ActiveFedora::SolrService.expects(:register)
     proc{ActiveFedora::SolrService.instance}.should raise_error(ActiveFedora::SolrNotInitialized)
   end
-  before do
-    Thread.current[:solr_service]=nil
-  end
-  
+
   describe "#reify_solr_results" do
     before(:each) do
       class AudioRecord

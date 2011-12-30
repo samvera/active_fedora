@@ -10,7 +10,7 @@ module ActiveFedora
     load_mappings
       
     attr_reader :conn
-        
+
     def self.register(host=nil, args={})
       Thread.current[:solr_service]=self.new(host, args)
 
@@ -22,6 +22,12 @@ module ActiveFedora
     end
     
     def self.instance
+    # Register Solr
+        
+      unless Thread.current[:solr_service]
+        ActiveFedora.load_configs
+        register(ActiveFedora.solr_config[:url])
+      end
       raise SolrNotInitialized unless Thread.current[:solr_service]
       Thread.current[:solr_service]
     end

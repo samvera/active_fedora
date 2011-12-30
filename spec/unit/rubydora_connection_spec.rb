@@ -16,6 +16,20 @@ describe ActiveFedora::RubydoraConnection do
     end
   end
 
+  # Put methods whose tests require registering Fedora & Solr here.
+  # to allow tests to run fast, keep these to a minimum.
+  describe "connection" do
+    describe "That is new" do
+      before do
+        ActiveFedora::RubydoraConnection.instance.instance_variable_set(:@connection, nil)
+      end
+      it "should regiser instances with the appropriate urls" do
+        ActiveFedora.expects(:load_configs)  
+        ActiveFedora::RubydoraConnection.instance.connection.should be_a Rubydora::Repository
+      end
+    end
+  end
+
   describe 'connect' do
     before do
       @instance = ActiveFedora::RubydoraConnection.instance
