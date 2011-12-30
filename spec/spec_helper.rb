@@ -16,6 +16,7 @@ ActiveFedora.init(:fedora_config_path=>File.join(File.dirname(__FILE__), "..", "
 
 RSpec.configure do |config|
   config.mock_with :mocha
+  config.color_enabled = true
 end
 
 def fixture(file)

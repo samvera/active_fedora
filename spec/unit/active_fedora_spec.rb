@@ -11,12 +11,6 @@ describe ActiveFedora do
     ActiveFedora.init(:environment=>"test", :fedora_config_path=>fedora_config_path)
   end
   
-  before(:each) do
-    # Stubbing register_fedora_and_solr in order to speed up tests.  
-    # If you have tests that need fedora & solr registered, 
-    # put them in the separate ActiveFedora describe block towards the end of this file.
-    ActiveFedora.stubs(:register_fedora_and_solr)
-  end
   
   describe "initialization methods" do
     
@@ -85,6 +79,7 @@ describe ActiveFedora do
         Dir.expects(:getwd).at_least_once.returns("/current/working/directory")
         File.expects(:file?).with("/current/working/directory/config/fedora.yml").returns(false)
         File.expects(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"),'config','fedora.yml'))).returns(true)
+        logger.expects(:warn).with("Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml to ActiveFedora - ie. ActiveFedora.init(:fedora_config_path => '/path/to/fedora.yml) - or set Rails.root and put fedora.yml into \#{Rails.root}/config.")
         ActiveFedora.get_config_path(:fedora).should eql(File.expand_path(File.join(File.dirname("__FILE__"),'config','fedora.yml')))
       end
     end
@@ -108,6 +103,7 @@ describe ActiveFedora do
         ActiveFedora.expects(:fedora_config_path).returns("/path/to/fedora/config/fedora.yml")
         File.expects(:file?).with("/path/to/fedora/config/solr.yml").returns(false)
         ActiveFedora.expects(:fedora_config).returns({"test"=>{"solr"=>{"url"=>"http://some_url"}}})
+        ActiveSupport::Deprecation.expects(:warn)
         lambda { ActiveFedora.get_config_path(:solr) }.should raise_exception
       end
 
@@ -139,6 +135,7 @@ describe ActiveFedora do
           Dir.expects(:getwd).at_least_once.returns("/current/working/directory")
           File.expects(:file?).with("/current/working/directory/config/solr.yml").returns(false)
           File.expects(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"),'config','solr.yml'))).returns(true)
+          logger.expects(:warn).with("Using the default solr.yml that comes with active-fedora.  If you want to override this, pass the path to solr.yml to ActiveFedora - ie. ActiveFedora.init(:solr_config_path => '/path/to/solr.yml) - or set Rails.root and put solr.yml into \#{Rails.root}/config.")
           ActiveFedora.get_config_path(:solr).should eql(File.expand_path(File.join(File.dirname("__FILE__"),'config','solr.yml')))
         end
       end
@@ -180,10 +177,28 @@ describe ActiveFedora do
     end
 
     describe "load_configs" do
-      it "should load the fedora and solr configs" do
-        ActiveFedora.expects(:load_config).with(:fedora)
-        ActiveFedora.expects(:load_config).with(:solr)
-        ActiveFedora.load_configs
+      describe "when config is not loaded" do
+        before do
+          ActiveFedora.instance_variable_set :@config_loaded, nil
+        end
+        it "should load the fedora and solr configs" do
+          ActiveFedora.expects(:load_config).with(:fedora)
+          ActiveFedora.expects(:load_config).with(:solr)
+          ActiveFedora.config_loaded?.should be_false
+          ActiveFedora.load_configs
+          ActiveFedora.config_loaded?.should be_true
+        end
+      end
+      describe "when config is loaded" do
+        before do
+          ActiveFedora.instance_variable_set :@config_loaded, true
+        end
+        it "should load the fedora and solr configs" do
+          ActiveFedora.expects(:load_config).never
+          ActiveFedora.config_loaded?.should be_true
+          ActiveFedora.load_configs
+          ActiveFedora.config_loaded?.should be_true
+        end
       end
     end
 
@@ -210,6 +225,7 @@ describe ActiveFedora do
     before(:all) do
       @fake_rails_root = File.expand_path(File.dirname(__FILE__) + '/../fixtures/rails_root')
     end
+
     
     after(:all) do
       config_file = File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml")
@@ -230,6 +246,7 @@ describe ActiveFedora do
     end
     it "loads the config that ships with this gem as a last choice" do
       Dir.stubs(:getwd).returns("/fake/path")
+      logger.expects(:warn).with("Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml to ActiveFedora - ie. ActiveFedora.init(:fedora_config_path => '/path/to/fedora.yml) - or set Rails.root and put fedora.yml into \#{Rails.root}/config.")
       ActiveFedora.init
       expected_config = File.expand_path(File.join(File.dirname(__FILE__), "..", "..", "config"))
       ActiveFedora.fedora_config_path.should eql(expected_config+'/fedora.yml')
@@ -268,15 +285,6 @@ describe ActiveFedora do
   
   ##########################
   
-  describe ".push_models_to_fedora" do
-    it "should push the model definition for each of the ActiveFedora models into Fedora CModel objects" do
-      pending
-      # find all of the models 
-      # create a cmodel for each model with the appropriate pid
-      # push the model definition into the cmodel's datastream (ie. dsname: oral_history.rb vs dsname: ruby)
-    end
-  end
-
   describe ".build_predicate_config_path" do
     it "should return the path to the default config/predicate_mappings.yml if no valid path is given" do
       ActiveFedora.send(:build_predicate_config_path, nil).should == default_predicate_mapping_file
@@ -296,18 +304,25 @@ describe ActiveFedora do
   end
 
   describe ".predicate_config" do
+    before do
+      ActiveFedora.instance_variable_set :@config_loaded, nil
+    end
     it "should return the default mapping if it has not been initialized" do
-      ActiveFedora.instance_variable_set("@predicate_config_path",nil)
       ActiveFedora.predicate_config().should == default_predicate_mapping_file
     end
-    it "should return the path that was set at initialization" do
-      pending()
-      File.expects(:exist?).with("/path/to/my/files/predicate_mappings.yml").returns(true)
-      mock_file = mock("fedora.yml")
-      File.expects(:open).returns(mock_file)
-      YAML.expects(:load).returns({"test"=>{"solr"=>{"url"=>"http://127.0.0.1:8983/solr/development"}, "fedora"=>{"url"=>"http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora"}}})
-      ActiveFedora.init(:fedora_config_path => "/path/to/my/files/fedora.yml")
-      ActiveFedora.predicate_config.should == "/path/to/my/files/predicate_mappings.yml"
+    describe "when the path has been set" do
+      before do
+        
+        ActiveFedora.instance_variable_set :@predicate_config_path, nil
+        ActiveFedora.instance_variable_set(:@fedora_config_path, "/path/to/my/files/fedora.yml")
+        # ActiveFedora.expects(:load_config).with(:fedora)
+        # ActiveFedora.expects(:load_config).with(:solr)
+      end
+      it "should return the path that was set at initialization" do
+        File.expects(:exist?).with("/path/to/my/files/predicate_mappings.yml").returns(true)
+        ActiveFedora.expects(:valid_predicate_mapping?).with("/path/to/my/files/predicate_mappings.yml").returns(true)
+        ActiveFedora.predicate_config.should == "/path/to/my/files/predicate_mappings.yml"
+      end
     end
   end
 
@@ -344,7 +359,7 @@ describe ActiveFedora do
     describe "outside of rails" do
       it "should load the default packaged config/fedora.yml file if no explicit config path is passed" do
         ActiveFedora.init()
-        ActiveFedora.fedora.options[:url].to_s.should == "http://127.0.0.1:8983/fedora-test"
+        ActiveFedora.fedora_config[:url].to_s.should == "http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora-test"
       end
       it "should load the passed config if explicit config passed in as a string" do
         ActiveFedora.init(:fedora_config_path=>'./spec/fixtures/rails_root/config/fedora.yml')
@@ -371,7 +386,6 @@ describe ActiveFedora do
             File.stubs(:open).with(fedora_config_path).returns(fedora_config)
             File.stubs(:open).with(solr_config_path).returns(solr_config)
 
-            ActiveFedora.expects(:build_predicate_config_path)
 
             ActiveFedora.init(:fedora_config_path=>fedora_config_path,:solr_config_path=>solr_config_path)
             ActiveFedora.solr.class.should == ActiveFedora::SolrService
@@ -397,24 +411,6 @@ describe ActiveFedora do
 end
 
 
-describe ActiveFedora do
-    after(:all) do
-      # Restore to default fedora configs
-      ActiveFedora.init(:environment => "test", :fedora_config_path => File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml"))
-    end
-
-  # Put methods whose tests require registering Fedora & Solr here.
-  # to allow tests to run fast, keep these to a minimum.
-  describe "register_solr_and_fedora" do
-    it "should regiser instances with the appropriate urls" do
-      ActiveFedora.expects(:solr_config).at_least_once.returns({:url=>"http://megasolr:8983"})
-      ActiveFedora.expects(:fedora_config).at_least_once.returns({:url=>"http://megafedora:8983"})
-      ActiveFedora.register_fedora_and_solr
-      ActiveFedora.solr.conn.url.to_s.should eql("http://megasolr:8983")
-      ActiveFedora.fedora.options[:url].to_s.should eql("http://megafedora:8983")
-    end
-  end
-end
 
 def mock_yaml(hash, path)
   mock_file = mock(path.split("/")[-1])

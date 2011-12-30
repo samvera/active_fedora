@@ -5,7 +5,6 @@ module ActiveFedora
   class RubydoraConnection
     include Singleton
     
-    attr_reader :connection
     attr_accessor :options
 
     def self.connect(params={})
@@ -23,6 +22,14 @@ module ActiveFedora
       instance.connect force
       instance
     end
+
+    def connection
+      return @connection if @connection
+      ActiveFedora.load_configs
+      ActiveFedora::RubydoraConnection.connect(ActiveFedora.fedora_config[:url])
+      @connection
+    end
+    
 
     def connect(force=false)
       return unless @connection.nil? or force

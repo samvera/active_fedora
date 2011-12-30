@@ -53,6 +53,7 @@ module ActiveFedora #:nodoc:
   # The configuration hash that gets used by RSolr.connect
   @solr_config ||= {}
   @fedora_config ||= {}
+  @config_options ||= {}
 
   # Initializes ActiveFedora's connection to Fedora and Solr based on the info in fedora.yml and solr.yml
   # NOTE: this deprecates the use of a solr url in the fedora.yml
@@ -89,28 +90,36 @@ module ActiveFedora #:nodoc:
     else
       @config_options = options
     end
+    config_reload!
+  end
 
-    @config_env = environment
-    @fedora_config_path = get_config_path(:fedora)
-    load_config(:fedora)
+  def self.config_reload!
+    reset!
+    load_configs
+  end
 
-    @solr_config_path = get_config_path(:solr)
-    load_config(:solr)
+  def self.reset!
+    @config_loaded = false  #Force reload of configs
+    @predicate_config_path = nil
+  end
 
-    register_fedora_and_solr
-
-    # Retrieve the valid path for the predicate mappings config file
-    @predicate_config_path = build_predicate_config_path(File.dirname(fedora_config_path))
-
+  def self.config_loaded?
+    @config_loaded || false
   end
 
   def self.load_configs
+    return if config_loaded?
+    @config_env = environment
     load_config(:fedora)
     load_config(:solr)
+    @config_loaded = true
+
   end
 
   def self.load_config(config_type)
+    config_path = get_config_path(config_type)
     config_type = config_type.to_s
+    self.instance_variable_set "@#{config_type}_config_path".to_sym, config_path
     config_path = self.send("#{config_type}_config_path".to_sym)
 
     logger.info("#{config_type.upcase}: loading ActiveFedora.#{config_type}_config from #{File.expand_path(config_path)}")
@@ -156,18 +165,6 @@ module ActiveFedora #:nodoc:
     end
   end
 
-  def self.register_fedora_and_solr
-    # Register Solr
-    logger.info("FEDORA: initializing ActiveFedora::SolrService with solr_config: #{ActiveFedora.solr_config.inspect}")
-    ActiveFedora::SolrService.register(ActiveFedora.solr_config[:url])
-    logger.info("FEDORA: initialized Solr with ActiveFedora.solr_config: #{ActiveFedora::SolrService.instance.inspect}")
-        
-    logger.info("FEDORA: initializing Fedora with fedora_config: #{ActiveFedora.fedora_config.inspect}")
-    ActiveFedora::RubydoraConnection.connect(ActiveFedora.fedora_config[:url])
-    logger.info("FEDORA: initialized Fedora as: #{ActiveFedora::RubydoraConnection.instance.inspect}")    
-    
-  end
-
   # Determine what environment we're running in. Order of preference is:
   # 1. config_options[:environment]
   # 2. Rails.env
@@ -204,7 +201,7 @@ module ActiveFedora #:nodoc:
   def self.get_config_path(config_type)
     config_type = config_type.to_s
     if (config_path = config_options.fetch("#{config_type}_config_path".to_sym,nil) )
-      raise ActiveFedoraConfigurationException unless File.file? config_path
+      raise ActiveFedoraConfigurationException, "file does not exist #{config_path}" unless File.file? config_path
       return config_path
     end
     
@@ -212,7 +209,7 @@ module ActiveFedora #:nodoc:
     if config_type == "solr" && (config_path = check_fedora_path_for_solr)
       return config_path
     elsif config_type == "solr" && fedora_config[environment].fetch("solr",nil)
-      logger.warn("DEPRECATION WARNING: You appear to be using a deprecated format for your fedora.yml file.  The solr url should be stored in a separate solr.yml file in the same directory as the fedora.yml")
+      ActiveSupport::Deprecation.warn("You appear to be using a deprecated format for your fedora.yml file.  The solr url should be stored in a separate solr.yml file in the same directory as the fedora.yml")
       raise ActiveFedoraConfigurationException
     end
 
@@ -251,7 +248,7 @@ module ActiveFedora #:nodoc:
   end
 
   def self.predicate_config
-    @predicate_config_path ||= build_predicate_config_path
+    @predicate_config_path ||= build_predicate_config_path(File.dirname(@fedora_config_path))
   end
 
   def self.version
@@ -264,7 +261,7 @@ module ActiveFedora #:nodoc:
     pred_config_paths = [File.expand_path(File.join(File.dirname(__FILE__),"..","config"))]
     pred_config_paths.unshift config_path if config_path
     pred_config_paths.each do |path|
-      testfile = File.join(path,"predicate_mappings.yml")
+      testfile = File.expand_path(File.join(path,"predicate_mappings.yml"))
       if File.exist?(testfile) && valid_predicate_mapping?(testfile)
         return testfile
       end

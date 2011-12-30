@@ -3,6 +3,7 @@ def mock_client
   @mock_client = mock("client")
   @getter = mock("getter")
   @getter.stubs(:get).returns('')
+  @mock_client.stubs(:[]).with("describe?xml=true").returns('')
   @mock_client 
 end
   
