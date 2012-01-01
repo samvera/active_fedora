@@ -406,12 +406,6 @@ module ActiveFedora
       @inner_object.new? ? Time.now : @inner_object.profile["objLastModDate"]
     end
 
-    #return the error list of the inner object (unless it's a new object)
-    def errors
-      #@inner_object.errors
-      []
-    end
-    
     #return the label of the inner object (unless it's a new object)
     def label
       @inner_object.label
@@ -673,6 +667,7 @@ module ActiveFedora
     include Solrizer::FieldNameMapper
     include Loggable
     include ActiveModel::Conversion
+    include Validations
     include Callbacks
     extend ActiveModel::Naming
     include Delegating

@@ -42,6 +42,7 @@ module ActiveFedora #:nodoc:
     autoload :DatastreamCollections
     autoload :NamedRelationships
     autoload :Predicates
+    autoload :Validations
 
   end
   
