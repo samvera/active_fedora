@@ -13,9 +13,11 @@ describe ActiveFedora::Relationships do
         include ActiveFedora::SemanticNode
         
         attr_accessor :pid
-        def initialize (params={}) 
-          self.pid = params[:pid]
+        def init_with(inner_obj)
+          self.pid = inner_obj.pid
+          self
         end
+
         def internal_uri
           'info:fedora/' + pid.to_s
         end

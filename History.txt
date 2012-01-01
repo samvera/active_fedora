@@ -1,5 +1,7 @@
 3.2.0
 
+Callbacks
+Added Base.create
 HYDRA-730 ActiveFedora isn't being initialized unless it is specified in the project Gemfile
 Don't create pids until save
 inspect and equality methods

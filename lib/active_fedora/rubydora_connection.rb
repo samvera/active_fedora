@@ -44,7 +44,7 @@ module ActiveFedora
     end
 
     def find_model(pid, klass)
-      klass.new(:pid=>pid)
+      klass.allocate.init_with(DigitalObject.find(klass, pid))
     end
 
   end

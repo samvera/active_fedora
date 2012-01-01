@@ -49,8 +49,9 @@ describe ActiveFedora::SolrService do
     before(:each) do
       class AudioRecord
         attr_accessor :pid
-        def initialize (params={}) 
-          self.pid = params[:pid]
+        def init_with(inner_obj)
+          self.pid = inner_obj.pid
+          self
         end
       end
       @sample_solr_hits = [{"id"=>"my:_PID1_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},

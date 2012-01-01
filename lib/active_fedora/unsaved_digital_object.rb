@@ -3,14 +3,15 @@ module ActiveFedora
   class UnsavedDigitalObject 
     attr_accessor :original_class, :datastreams, :label, :namespace
     
-    def initialize(original_class, namespace)
+    def initialize(original_class, namespace, pid=nil)
+      @pid = pid
       self.original_class = original_class
       self.namespace = namespace
       self.datastreams = {}
     end
 
     def pid
-      '__DO_NOT_USE__'
+      @pid || '__DO_NOT_USE__'
     end
 
     def new?
@@ -28,9 +29,11 @@ module ActiveFedora
     end
 
     def assign_pid
+        return @pid if @pid
         args = {}
         args[:namespace] = self.namespace if self.namespace
-        RubydoraConnection.instance.nextid args
+        @pid = RubydoraConnection.instance.nextid args
+        @pid
     end
 
 
