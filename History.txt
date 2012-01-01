@@ -1,6 +1,7 @@
 3.2.0
 
-Callbacks
+Added ActiveModel validations.
+Added callbacks on initialize, save, update, create, delete and find
 Added Base.create
 HYDRA-730 ActiveFedora isn't being initialized unless it is specified in the project Gemfile
 Don't create pids until save

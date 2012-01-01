@@ -1,5 +1,3 @@
-require 'active_fedora/fedora_object'
-
 SOLR_DOCUMENT_ID = "id" unless defined?(SOLR_DOCUMENT_ID)
 
 module ActiveFedora
@@ -7,7 +5,6 @@ module ActiveFedora
   # This module mixes various methods into the including class,
   # much in the way ActiveRecord does.  
   module Model 
-    extend ActiveFedora::FedoraObject
     DEFAULT_NS = 'afmodel'
 
     def self.included(klass) # :nodoc:

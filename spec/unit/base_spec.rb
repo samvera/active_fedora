@@ -1,30 +1,37 @@
 require 'spec_helper'
 
-require 'active_fedora'
-require 'active_fedora/base'
-require 'active_fedora/metadata_datastream'
-require 'time'
-require 'date'
-class FooHistory < ActiveFedora::Base
-  has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"someData" do |m|
-    m.field "fubar", :string
-    m.field "swank", :text
-  end
-  has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText" do |m|
-    m.field "fubar", :text
-  end
-  has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText2", :label=>"withLabel" do |m|
-    m.field "fubar", :text
-  end 
-  delegate :fubar, :to=>'withText'
-  delegate :swank, :to=>'someData'
-end
-class FooAdaptation < ActiveFedora::Base
-end
-
+# require 'active_fedora'
+# require 'active_fedora/base'
+# require 'active_fedora/metadata_datastream'
+# require 'time'
+# require 'date'
+# 
 @@last_pid = 0  
 
 describe ActiveFedora::Base do
+  before :all do
+    class FooHistory < ActiveFedora::Base
+      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"someData" do |m|
+        m.field "fubar", :string
+        m.field "swank", :text
+      end
+      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText" do |m|
+        m.field "fubar", :text
+      end
+      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText2", :label=>"withLabel" do |m|
+        m.field "fubar", :text
+      end 
+      delegate :fubar, :to=>'withText'
+      delegate :swank, :to=>'someData'
+    end
+    class FooAdaptation < ActiveFedora::Base
+    end
+  end
+
+  after :all do
+    Object.send(:remove_const, :FooHistory)
+    Object.send(:remove_const, :FooAdaptation)
+  end
   
   def increment_pid
     @@last_pid += 1    

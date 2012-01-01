@@ -4,7 +4,7 @@ module ActiveFedora
 
     #Saves a Base object, and any dirty datastreams, then updates 
     #the Solr index for this object.
-    def save
+    def save(*)
       # If it's a new object, set the conformsTo relationship for Fedora CMA
       if new_object? 
         result = create
@@ -16,7 +16,7 @@ module ActiveFedora
       return result
     end
 
-    def save!
+    def save!(*)
       save
     end
 

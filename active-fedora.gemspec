@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.name        = "active-fedora"
   s.version     = ActiveFedora::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Matt Zumwalt", "McClain Looney"]
+  s.authors     = ["Matt Zumwalt", "McClain Looney", "Justin Coyne"]
   s.email       = ["matt.zumwalt@yourmediashelf.com"]
   s.homepage    = %q{http://yourmediashelf.com/activefedora}
   s.summary     = %q{A convenience libary for manipulating MODS (Metadata Object Description Schema) documents.}
