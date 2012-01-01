@@ -84,12 +84,12 @@ describe ActiveFedora::Base do
 
       @test_object.expects(:datastreams).returns(mock_datastreams)
       @test_object.expects(:solrize_relationships)
-      @test_object.update_index
+      @test_object.send :update_index
     end
 
     it "should retrieve a solr Connection and call Connection.update" do
       ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock("SolrConnection", :update)))
-      @test_object.update_index
+      @test_object.send :update_index
     end
 
   end

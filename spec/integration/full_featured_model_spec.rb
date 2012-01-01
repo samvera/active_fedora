@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'rexml/document'
+require 'lib/active_fedora/samples/hydra-mods_article_datastream'
 
 include ActiveFedora
 

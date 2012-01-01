@@ -9,7 +9,7 @@ describe ActiveFedora do
     module SolrSpecModel
       class Basic
         include ActiveFedora::Model
-        def initialize(opts)
+        def init_with(inner_obj)
         end
       end
     end

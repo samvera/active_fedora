@@ -33,7 +33,7 @@ describe ActiveFedora::Base do
       delegate :duck, :to=>'xmlish', :unique=>true
     end
     before :each do
-      @n = BarHistory.new(:pid=>"monkey:99")
+      @n = BarHistory.new()
     end
     describe "attributes=" do
       it "should set attributes" do
@@ -47,7 +47,7 @@ describe ActiveFedora::Base do
     describe "update_attributes" do
       it "should set attributes and save " do
         @n.update_attributes(:fubar=>"baz", :duck=>"Quack")
-        @q = BarHistory.find('monkey:99')
+        @q = BarHistory.find(@n.pid)
         @q.fubar.should == "baz"
         @q.duck.should == "Quack"
       end

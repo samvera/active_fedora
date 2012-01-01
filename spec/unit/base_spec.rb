@@ -16,6 +16,8 @@ class FooHistory < ActiveFedora::Base
   has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText2", :label=>"withLabel" do |m|
     m.field "fubar", :text
   end 
+  delegate :fubar, :to=>'withText'
+  delegate :swank, :to=>'someData'
 end
 class FooAdaptation < ActiveFedora::Base
 end
@@ -46,21 +48,23 @@ describe ActiveFedora::Base do
   end
 
   describe '#new' do
-    it "should create a new inner object" do
-      Rubydora::DigitalObject.any_instance.expects(:save).never
-      stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
-
-      result = ActiveFedora::Base.new(:pid=>@this_pid)  
-      result.inner_object.should be_kind_of(Rubydora::DigitalObject)    
-    end
-
-    it "should allow initialization with nil" do  
+    it "should create an inner object" do  
       # for doing AFObject.new(params[:foo]) when nothing is in params[:foo]
       Rubydora::DigitalObject.any_instance.expects(:save).never
       result = ActiveFedora::Base.new(nil)  
       result.inner_object.should be_kind_of(ActiveFedora::UnsavedDigitalObject)    
     end
 
+    it "should not save or get an pid on init" do
+      Rubydora::DigitalObject.any_instance.expects(:save).never
+      ActiveFedora::RubydoraConnection.instance.expects(:nextid).never
+      f = FooHistory.new
+    end
+
+    it "should be able to create with a custom pid" do
+      f = FooHistory.new(:pid=>'numbnuts:1')
+      f.pid.should == 'numbnuts:1'
+    end
   end
 
   describe ".internal_uri" do
@@ -104,17 +108,10 @@ describe ActiveFedora::Base do
   describe "has_metadata" do
     describe "creates datastreams" do
       before :each do
-        @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams?format=xml").returns(@getter)
-        @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams/RELS-EXT/content").returns(@getter)
+        stub_ingest(@this_pid)
+        stub_add_ds(@this_pid, ['RELS-EXT', 'someData', 'withText', 'withText2'])
 
-        #Update record
-        @mock_client.stubs(:[]).with("objects/monkey%3A99").returns(stub('post', :post=>'monkey:99'))
-        #Update datastream
-        ['someData', 'withText', 'withText2', 'RELS-EXT'].each do |dsid|
-          @mock_client.stubs(:[]).with {|params| /objects\/monkey%3A99\/datastreams\/#{dsid}/.match(params)}.returns(stub('post', :post=>'monkey:99', :get=>''))
-        end
-
-        @n = FooHistory.new(:pid=>"monkey:99")
+        @n = FooHistory.new()
         @n.datastreams['RELS-EXT'].expects(:changed?).returns(true).at_least_once
         @n.expects(:update_index)
         @n.save
@@ -130,9 +127,10 @@ describe ActiveFedora::Base do
 
 
     it "should create specified datastreams with appropriate control group" do
-      stub_ingest('monkey:99')
-      stub_add_ds('monkey:99', ['RELS-EXT', 'DC', 'rightsMetadata', 'properties', 'descMetadata', 'UKETD_DC'])
-      stub_get('monkey:99', ['RELS-EXT', 'DC', 'rightsMetadata', 'properties', 'descMetadata', 'UKETD_DC'])
+      ActiveFedora::RubydoraConnection.instance.options.stubs(:[]).returns({:url=>'sub_url'})
+      stub_ingest(@this_pid)
+      stub_add_ds(@this_pid, ['RELS-EXT', 'DC', 'rightsMetadata', 'properties', 'descMetadata', 'UKETD_DC'])
+      stub_get(@this_pid, ['RELS-EXT', 'DC', 'rightsMetadata', 'properties', 'descMetadata', 'UKETD_DC'])
       class UketdObject < ActiveFedora::Base
         has_metadata :name => "rightsMetadata", :label=>"Rights metadata", :type => ActiveFedora::NokogiriDatastream 
         
@@ -151,7 +149,7 @@ describe ActiveFedora::Base do
         end
 
       end
-      @n = UketdObject.new(:pid=>"monkey:99")
+      @n = UketdObject.new()
       @n.save
       @n.datastreams["DC"].controlGroup.should eql("X")
       @n.datastreams["rightsMetadata"].controlGroup.should eql("X")
@@ -162,7 +160,7 @@ describe ActiveFedora::Base do
 
     context ":control_group => 'E'" do
       before do
-        stub_ingest(@this_pid)
+        stub_get(@this_pid)
         stub_add_ds(@this_pid, ['RELS-EXT', 'externalDisseminator', 'externalUrl'])
       end
 
@@ -181,6 +179,7 @@ describe ActiveFedora::Base do
         class MoreFooHistory < ActiveFedora::Base
           has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "E", :url => "http://exampl.com/mypic.jpg"
         end
+        stub_ingest(@this_pid)
         @n = MoreFooHistory.new
         @n.save
       end
@@ -199,7 +198,7 @@ describe ActiveFedora::Base do
 
     context ":control_group => 'R'" do
       before do
-        stub_ingest(@this_pid)
+        stub_get(@this_pid)
         stub_add_ds(@this_pid, ['RELS-EXT', 'externalDisseminator' ])
       end
       it "should raise an error without :url option" do
@@ -210,6 +209,7 @@ describe ActiveFedora::Base do
       end
       
       it "should work with a valid  :url option" do
+        stub_ingest(@this_pid)
         class MoreFooHistory < ActiveFedora::Base
           has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "R", :url => "http://exampl.com/mypic.jpg"
         end
@@ -356,14 +356,10 @@ describe ActiveFedora::Base do
   
   describe '#remove_relationship' do
     it 'should remove a relationship from the relationships hash' do
-      next_pid = increment_pid.to_s
-      ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(next_pid)
-      stub_get(next_pid)
-      @test_object3 = ActiveFedora::Base.new(:pid=>next_pid)
-      next_pid = increment_pid.to_s
-      ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(next_pid)
-      stub_get(next_pid)
-      @test_object4 = ActiveFedora::Base.new(:pid=>next_pid)
+      @test_object3 = ActiveFedora::Base.new()
+      @test_object3.stubs(:pid=>'7')
+      @test_object4 = ActiveFedora::Base.new()
+      @test_object4.stubs(:pid=>'8')
       @test_object.add_relationship(:has_part,@test_object3)
       @test_object.add_relationship(:has_part,@test_object4)
       #check both are there
@@ -390,7 +386,7 @@ describe ActiveFedora::Base do
 
   describe '.assert_content_model' do
     it "should default to the name of the class" do
-      stub_ingest(@this_pid)
+      stub_get(@this_pid)
       stub_add_ds(@this_pid, ['RELS-EXT'])
       @test_object.assert_content_model
       @test_object.relationships(:has_model).should == ["info:fedora/afmodel:ActiveFedora_Base"]
@@ -402,7 +398,7 @@ describe ActiveFedora::Base do
     
     
     it "should return true and set persisted if object and datastreams all save successfully" do
-      stub_ingest(@this_pid)
+      stub_get(@this_pid)
       stub_add_ds(@this_pid, ['RELS-EXT'])
       @test_object.persisted?.should be false
       @test_object.expects(:update_index)
@@ -511,6 +507,19 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe "#create" do
+    before do
+      stub_ingest(@this_pid)
+      stub_add_ds(@this_pid, ['someData', 'withText', 'withText2', 'RELS-EXT'])
+    end
+    it "should build a new record and save it" do
+      @hist = FooHistory.create(:fubar=>'ta', :swank=>'da')
+      @hist.fubar.should == ['ta']
+      @hist.swank.should == ['da']
+    end
+    
+  end
+
   describe "#create_datastream" do
     it 'should create a datastream object using the type of object supplied in the string (does reflection)' do
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
@@ -554,30 +563,16 @@ describe ActiveFedora::Base do
   end
 
   describe ".adapt_to" do
-    before(:each) do
-      @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams?format=xml").returns(@getter)
-      @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams/MY_DSID?format=xml").returns(@getter)
-      @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams/RELS-EXT/content").returns(@getter)
-      @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams/MY_DSID/content").returns("XXX")
-      #Update record
-      @mock_client.stubs(:[]).with("objects/monkey%3A99").returns(stub('post', :post=>'monkey:99'))
-      #Update datastream
-      ['someData', 'withText', 'withText2', 'RELS-EXT'].each do |dsid|
-        @mock_client.stubs(:[]).with {|params| /objects\/monkey%3A99\/datastreams\/#{dsid}/.match(params)}.returns(stub('post', :post=>'monkey:99', :get=>''))
-      end
-      @mock_file = mock('file')
-    end
     it "should return an adapted object of the requested type" do
-      @test_object = FooHistory.new(:pid=>"monkey:99")
+      @test_object = FooHistory.new()
       @test_object.adapt_to(FooAdaptation).class.should == FooAdaptation
     end
     it "should not make an additional call to fedora to create the adapted object" do
-      @mock_client.stubs(:[]).with("objects/monkey%3A99/datastreams?format=xml").returns(@getter).once
-      @test_object = FooHistory.new(:pid=>"monkey:99")
+      @test_object = FooHistory.new()
       adapted = @test_object.adapt_to(FooAdaptation)
     end
     it "should propagate new datastreams to the adapted object" do
-      @test_object = FooHistory.new(:pid=>"monkey:99")
+      @test_object = FooHistory.new()
       @test_object.add_file_datastream("XXX", :dsid=>'MY_DSID')
       adapted = @test_object.adapt_to(FooAdaptation)
       adapted.datastreams.keys.should include 'MY_DSID'
@@ -585,7 +580,7 @@ describe ActiveFedora::Base do
       adapted.datastreams['MY_DSID'].changed?.should be_true
     end
     it "should propagate modified datastreams to the adapted object" do
-      @test_object = FooHistory.new(:pid=>"monkey:99")
+      @test_object = FooHistory.new()
       @test_object.datastreams['someData'].content="YYY"
       adapted = @test_object.adapt_to(FooAdaptation)
       adapted.datastreams.keys.should include 'someData'
@@ -649,7 +644,7 @@ describe ActiveFedora::Base do
     it "should add self.class as the :active_fedora_model" do
       stub_get(@this_pid)
       stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
-      @test_history = FooHistory.new(:pid=>@this_pid)
+      @test_history = FooHistory.new()
       solr_doc = @test_history.to_solr
       solr_doc["active_fedora_model_s"].should eql("FooHistory")
     end
@@ -696,13 +691,6 @@ describe ActiveFedora::Base do
     end
     
   end
-  
-
-  describe ".update_index" do
-    it "should provide .update_index" do
-      @test_object.should respond_to(:update_index)
-    end
-  end
 
   describe ".label" do
     it "should return the label of the inner object" do 
@@ -719,21 +707,6 @@ describe ActiveFedora::Base do
     end
   end
   
-  it "should not save or get an pid on init" do
-    Rubydora::DigitalObject.any_instance.expects(:save).never
-    ActiveFedora::RubydoraConnection.instance.expects(:nextid).never
-    f = FooHistory.new
-  end
-  it "should not clobber a pid if i'm creating!" do
-    @mock_client.stubs(:[]).with("objects/numbnuts%3A1/datastreams?format=xml").returns(@getter)
-
-    ['someData', 'withText', 'withText2', 'RELS-EXT'].each do |dsid|
-      @mock_client.stubs(:[]).with {|params| /objects\/numbnuts%3A1\/datastreams\/#{dsid}/.match(params)}.returns(@getter)
-    end
-    f = FooHistory.new(:pid=>'numbnuts:1')
-    f.pid.should == 'numbnuts:1'
-
-  end
   
   describe "get_values_from_datastream" do
     it "should look up the named datastream and call get_values with the given pointer/field_name" do
@@ -797,7 +770,7 @@ describe ActiveFedora::Base do
       att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
       stub_get(@this_pid)
       stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
-      m = FooHistory.new(:pid=>@this_pid)
+      m = FooHistory.new()
       m.update_indexed_attributes(att, :datastreams=>"withText")
       m.should_not be_nil
       m.datastreams['someData'].fubar_values.should == []

@@ -17,6 +17,7 @@ module ActiveFedora #:nodoc:
     autoload :AttributeMethods
     autoload :Base
     autoload :ContentModel
+    autoload :Callbacks
     autoload :Reflection
     autoload :Relationships
     autoload :FileManagement
@@ -25,11 +26,13 @@ module ActiveFedora #:nodoc:
     autoload :Delegating
     autoload :DigitalObject
     autoload :UnsavedDigitalObject
+    autoload :SolrDigitalObject
     autoload :Model
     autoload :MetadataDatastream
     autoload :MetadataDatastreamHelper
     autoload :NokogiriDatastream
     autoload :Property
+    autoload :Persistence
     autoload :QualifiedDublinCoreDatastream
     autoload :RelsExtDatastream
     autoload :ServiceDefinitions

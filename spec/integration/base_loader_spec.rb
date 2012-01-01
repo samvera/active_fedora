@@ -26,8 +26,7 @@ describe ActiveFedora::Base do
   
   describe "load_instance" do
     it "should retain all datastream attributes pulled from fedora" do
-      # raw_object = Fedora::Repository.instance.find_objects("pid=#{@test_object.pid}").first
-      raw_object = ActiveFedora::Base.new(:pid=>@test_object.pid, :new_object=>false)
+      raw_object = ActiveFedora::Base.find(@test_object.pid)
       loaded = OralHistorySampleModel.load_instance(@test_object.pid)
       raw_datastreams = raw_object.datastreams
       loaded_datastreams = loaded.datastreams

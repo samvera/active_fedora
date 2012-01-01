@@ -48,7 +48,7 @@ describe ActiveFedora::Base do
       delegate :duck, :to=>'xmlish', :at=>[:waterfowl, :ducks]
     end
     before :each do
-      @n = BarHistory2.new(:pid=>"monkey:99")
+      @n = BarHistory2.new()
     end
     it "should save a delegated property uniquely" do
       @n.fubar="Quack"

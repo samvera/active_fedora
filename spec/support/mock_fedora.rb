@@ -17,9 +17,9 @@ def stub_get(pid, datastreams=nil, record_exists=false)
     mock_client.stubs(:[]).with("objects/#{pid}/datastreams/#{dsid}?format=xml").returns(@getter)
   end
 end
-def stub_ingest(pid)
-  n = pid.gsub(/:/, '%3A')
-  mock_client.stubs(:[]).with("objects/#{n || 'new'}").returns(stub("ingester", :post=>pid))
+def stub_ingest(pid=nil)
+  n = pid ? pid.gsub(/:/, '%3A') : nil
+  mock_client.expects(:[]).with("objects/#{n || 'new'}").returns(stub("ingester", :post=>pid))
 end
 
 def stub_add_ds(pid, dsids)

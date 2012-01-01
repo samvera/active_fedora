@@ -3,11 +3,12 @@ require 'spec_helper'
 describe ActiveFedora::RelationshipGraph do
   before do 
     @graph = ActiveFedora::RelationshipGraph.new
+    @n1 = ActiveFedora::Base.new()
+    @n1.stubs(:pid => 'foo:777')
   end
 
   
   it "should add relationships" do
-    @n1 = ActiveFedora::Base.new
     @n2 = ActiveFedora::Base.new
     @graph.add(:has_part, @n1)
     @graph.relationships[:has_part].should == [@n1]
@@ -23,7 +24,6 @@ describe ActiveFedora::RelationshipGraph do
     graph.should be_kind_of RDF::Graph
     graph.statements.to_a.should == []
 
-    @n1 = ActiveFedora::Base.new(:pid=>'foo:777')
     @graph.add(:has_part, @n1)
     graph = @graph.to_graph('info:fedora/foo:1')
     stmts = graph.statements.to_a
@@ -36,7 +36,6 @@ describe ActiveFedora::RelationshipGraph do
   end
 
   it "should have array accessor" do
-    @n1 = ActiveFedora::Base.new(:pid=>'foo:777')
     @graph.add(:has_part, @n1)
     @graph[:has_part].should == [@n1]
   end
@@ -44,7 +43,6 @@ describe ActiveFedora::RelationshipGraph do
 
   describe "delete" do
     it "should delete an object when an object is passed" do
-      @n1 = ActiveFedora::Base.new(:pid=>'foo:777')
       @graph.add(:has_part, @n1)
       @graph[:has_part].should == [@n1]
       @graph.delete(:has_part, @n1)
@@ -52,7 +50,6 @@ describe ActiveFedora::RelationshipGraph do
     end
     it "should delete an pid when an object is passed" do
       #a reloaded rels-ext is just a list of uris, not inflated.
-      @n1 = ActiveFedora::Base.new(:pid=>'foo:777')
       @graph.add(:has_part, 'info:fedora/foo:777')
       @graph[:has_part].should == ['info:fedora/foo:777']
       @graph.delete(:has_part, @n1)
@@ -60,7 +57,6 @@ describe ActiveFedora::RelationshipGraph do
     end
     it "should delete an pid when a string is passed" do
       #a reloaded rels-ext is just a list of uris, not inflated.
-      @n1 = ActiveFedora::Base.new(:pid=>'foo:777')
       @graph.add(:has_part, 'info:fedora/foo:777')
       @graph[:has_part].should == ['info:fedora/foo:777']
       @graph.delete(:has_part, 'info:fedora/foo:777')
@@ -68,7 +64,6 @@ describe ActiveFedora::RelationshipGraph do
     end
     it "should delete an object when a pid is passed" do
       #a reloaded rels-ext is just a list of uris, not inflated.
-      @n1 = ActiveFedora::Base.new(:pid=>'foo:777')
       @graph.add(:has_part, @n1)
       @graph[:has_part].should == [@n1]
       @graph.delete(:has_part, 'info:fedora/foo:777')
