@@ -131,6 +131,12 @@ module ActiveFedora
     #   post.properties.title # => 'hello world'
     def init_with(inner_obj)
       @inner_object = inner_obj
+      unless @inner_object.is_a? SolrDigitalObject
+        @inner_object.original_class = self.class
+        ds_specs.keys.each do |key|
+          @inner_object.datastreams.delete(key) unless @inner_object.datastreams[key].changed.include?(:content)
+        end
+      end
       load_datastreams
       run_callbacks :find
       run_callbacks :initialize
