@@ -1,11 +1,4 @@
 require 'spec_helper'
-
-# require 'active_fedora'
-# require 'active_fedora/base'
-# require 'active_fedora/metadata_datastream'
-# require 'time'
-# require 'date'
-# 
 @@last_pid = 0  
 
 describe ActiveFedora::Base do
@@ -25,6 +18,7 @@ describe ActiveFedora::Base do
       delegate :swank, :to=>'someData'
     end
     class FooAdaptation < ActiveFedora::Base
+      has_metadata :type=>ActiveFedora::NokogiriDatastream, :name=>'someData'
     end
   end
 
@@ -588,11 +582,19 @@ describe ActiveFedora::Base do
     end
     it "should propagate modified datastreams to the adapted object" do
       @test_object = FooHistory.new()
-      @test_object.datastreams['someData'].content="YYY"
+      orig_ds = @test_object.datastreams['someData']
+      orig_ds.content="YYY"
       adapted = @test_object.adapt_to(FooAdaptation)
       adapted.datastreams.keys.should include 'someData'
+      adapted.datastreams['someData'].should == orig_ds
       adapted.datastreams['someData'].content.should == "YYY"
       adapted.datastreams['someData'].changed?.should be_true
+    end
+    it "should use the datastream definitions from the adapted object" do
+      @test_object = FooHistory.new()
+      adapted = @test_object.adapt_to(FooAdaptation)
+      adapted.datastreams.keys.should include 'someData'
+      adapted.datastreams['someData'].class.should == ActiveFedora::NokogiriDatastream
     end
   end
 
