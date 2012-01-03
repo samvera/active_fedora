@@ -34,28 +34,29 @@ describe ActiveFedora::Base do
         @library.books.to_ary.should == []
         @library.book_ids.should ==[]
         @library.books << @book
-        @library.books.map(&:pid).should == [@book.pid]
+        @library.books.to_a.should == [@book]
         @library.book_ids.should ==[@book.pid]
+
       end
 
       it "should let you set an array of objects" do
         @library.books = [@book, @book2]
-        @library.books.map(&:pid).should == [@book.pid, @book2.pid]
+        @library.books.to_a.should == [@book, @book2]
         @library.save
 
         @library.books = [@book]
-        @library.books.map(&:pid).should == [@book.pid]
+        @library.books.to_a.should == [@book]
       
       end
       it "should let you set an array of object ids" do
         @library.book_ids = [@book.pid, @book2.pid]
-        @library.books.map(&:pid).should == [@book.pid, @book2.pid]
+        @library.books.to_a.should == [@book, @book2]
       end
 
       it "setter should wipe out previously saved relations" do
         @library.book_ids = [@book.pid, @book2.pid]
         @library.book_ids = [@book2.pid]
-        @library.books.map(&:pid).should == [@book2.pid]
+        @library.books.to_a.should == [@book2]
         
       end
 
@@ -97,7 +98,7 @@ describe ActiveFedora::Base do
         @book = Book.new
         @book.topics << @topic1
         @book.topics.map(&:pid).should == [@topic1.pid]
-        Topic.find(@topic1.pid).books.map(&:pid).should == [] #Can't have saved it because @book isn't saved yet.
+        Topic.find(@topic1.pid).books.to_a.should == [] #Can't have saved it because @book isn't saved yet.
       end
       after do
         @topic1.delete
@@ -124,11 +125,11 @@ describe ActiveFedora::Base do
 
         @book.library.pid.should == @library.pid
         @library.books.reload
-        @library.books.map(&:pid).should == [@book.pid]
-
+        @library.books.to_a.should == [@book]
 
         @library2 = Library.find(@library.pid)
-        @library2.books.map(&:pid).should == [@book.pid]
+        @library2.books.size.should == 1
+        @library2.books.to_a.should == [@book]
       end
 
       it "should respect the :class_name parameter" do
@@ -154,8 +155,8 @@ describe ActiveFedora::Base do
       end
       it "habtm should set relationships bidirectionally" do
         @book.topics << @topic1
-        @book.topics.map(&:pid).should == [@topic1.pid]
-        Topic.find(@topic1.pid).books.map(&:pid).should == [@book.pid] #Can't have saved it because @book isn't saved yet.
+        @book.topics.to_a.should == [@topic1]
+        Topic.find(@topic1.pid).books.to_a.should == [@book] #Can't have saved it because @book isn't saved yet.
       end
       it "should save new child objects" do
         @book.topics << Topic.new
