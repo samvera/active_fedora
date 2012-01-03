@@ -4,13 +4,16 @@ Added ActiveModel validations.
 Added callbacks on initialize, save, update, create, delete and find
 Added Base.create
 HYDRA-730 ActiveFedora isn't being initialized unless it is specified in the project Gemfile
-Don't create pids until save
-inspect and equality methods
-Deprecate datastream_collections
+Don't create pids until save so that we don't cycle through pids we don't intend to save
+inspect method gives less information (more readable)
+Added an equality method
+Deprecate the automatic inclusion of datastream_collections (you should include this optional module in your models if you intend to use it)
+Deprecate the automatic inclusion of relationships (you should include this optional module in your models if you intend to use it)
+Deprecate the automatic inclusion of file_management (you should include this optional module in your models if you intend to use it)
 Disseminators have been added
 HYDRA-729 don't update xml datastreams unless they've changed
-Adapt To
-ActiveFedora::Relationship is deprecated
+Added adapt_to method to reduce number of round trips to fedora.
+ActiveFedora::Relationship is deprecated (was not being used)
 Rails 3.1 compatibility
 Ruby 1.9 compatibility
 
