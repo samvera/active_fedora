@@ -85,10 +85,14 @@ module ActiveFedora
 
     # Deals with preparing new object to be saved to Fedora, then pushes it and its datastreams into Fedora. 
     def create
-      @inner_object = @inner_object.save #replace the unsaved digital object with a saved digital object
+      assign_pid
       assert_content_model
       @metadata_is_dirty = true
       persist
+    end
+
+    def assign_pid
+      @inner_object = @inner_object.save #replace the unsaved digital object with a saved digital object
     end
     
     # Pushes the object and all of its new or dirty datastreams into Fedora

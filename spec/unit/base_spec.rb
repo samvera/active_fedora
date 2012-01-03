@@ -157,6 +157,7 @@ describe ActiveFedora::Base do
       @n.datastreams["properties"].controlGroup.should eql("X")
       @n.datastreams["descMetadata"].controlGroup.should eql("M")
       @n.datastreams["UKETD_DC"].controlGroup.should eql("E")
+      @n.datastreams["UKETD_DC"].dsLocation.should == "urlsub_url/objects/#{@this_pid}/methods/hull-sDef:uketdObject/getUKETDMetadata"
     end
 
     context ":control_group => 'E'" do

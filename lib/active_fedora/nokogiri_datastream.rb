@@ -46,6 +46,7 @@ module ActiveFedora
     
     def ng_xml=(new_xml)
       self.xml_loaded=true
+      self.dirty = true
       case new_xml 
       when Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node
         @ng_xml = new_xml
@@ -58,7 +59,8 @@ module ActiveFedora
     
     def content=(content)
       super
-      self.ng_xml = Nokogiri::XML::Document.parse(content)
+      self.xml_loaded=true
+      @ng_xml = Nokogiri::XML::Document.parse(content)
     end
     
     

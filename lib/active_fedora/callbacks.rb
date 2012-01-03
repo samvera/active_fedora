@@ -19,7 +19,10 @@ module ActiveFedora
   # * (-) <tt>create</tt>
   # * (5) <tt>after_create</tt>
   # * (6) <tt>after_save</tt>
-  # * (7) <tt>after_commit</tt>
+  # * (-) <tt>assign_pid</tt>
+  # * (7) <tt>after_create</tt>
+  # * (8) <tt>after_save</tt>
+  # * (9) <tt>after_commit</tt>
   #
   # Lastly an <tt>after_find</tt> and <tt>after_initialize</tt> callback is triggered for each object that 
   # is found and instantiated by a finder, with <tt>after_initialize</tt> being triggered after new objects
@@ -226,7 +229,7 @@ module ActiveFedora
       include ActiveModel::Validations::Callbacks
 
       define_model_callbacks :initialize, :find, :only => :after
-      define_model_callbacks :save, :create, :update, :delete
+      define_model_callbacks :save, :create, :update, :delete, :assign_pid
     end
 
     def destroy #:nodoc:
@@ -239,6 +242,9 @@ module ActiveFedora
 
   private
 
+    def assign_pid #:nodoc:
+      run_callbacks(:assign_pid) { super }
+    end
 
     def create #:nodoc:
       run_callbacks(:create) { super }
