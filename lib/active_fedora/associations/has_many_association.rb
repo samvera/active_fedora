@@ -14,10 +14,11 @@ module ActiveFedora
       # If the collection is empty the target is set to an empty array and
       # the loaded flag is set to true as well.
       def count_records
-        count = if @target
+        count = if loaded? 
           @target.size
         else
-          0
+          load_target
+          @target.size
         end
 
         # If there's nothing in the database and @target has no new records
