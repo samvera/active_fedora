@@ -11,6 +11,8 @@ describe ActiveFedora::Base do
       delegate :swank, :to=>'someData'
 
       after_initialize :a_init
+      before_assign_pid :b_assign_pid
+      after_assign_pid :a_assign_pid
       before_save :b_save
       after_save :a_save
       before_create :b_create
@@ -29,6 +31,8 @@ describe ActiveFedora::Base do
     CallbackStub.any_instance.expects(:a_init).twice
     CallbackStub.any_instance.expects :b_create
     CallbackStub.any_instance.expects :a_create
+    CallbackStub.any_instance.expects(:a_assign_pid)
+    CallbackStub.any_instance.expects(:b_assign_pid)
     CallbackStub.any_instance.expects(:b_save).twice
     CallbackStub.any_instance.expects(:a_save).twice
     CallbackStub.any_instance.expects(:a_find)

@@ -14,12 +14,12 @@ describe ActiveFedora::NokogiriDatastream do
   end
   
   before(:each) do
-    mock_inner = mock('inner object')
+    @mock_inner = mock('inner object')
     @mock_repo = mock('repository')
     @mock_repo.stubs(:datastream_dissemination=>'My Content')
-    mock_inner.stubs(:repository).returns(@mock_repo)
-    mock_inner.stubs(:pid)
-    @test_ds = ActiveFedora::NokogiriDatastream.new(mock_inner, "descMetadata")
+    @mock_inner.stubs(:repository).returns(@mock_repo)
+    @mock_inner.stubs(:pid)
+    @test_ds = ActiveFedora::NokogiriDatastream.new(@mock_inner, "descMetadata")
     @test_ds.content="<test_xml/>"
   end
   
@@ -78,6 +78,7 @@ describe ActiveFedora::NokogiriDatastream do
     end
     it "should do nothing if field key is a string (must be an array or symbol).  Will not accept xpath queries!" do
       xml_before = @mods_ds.to_xml
+      logger.expects(:warn).with "WARNING: descMetadata ignoring {\"fubar\" => \"the role\"} because \"fubar\" is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it."
       @mods_ds.update_indexed_attributes( { "fubar"=>"the role" } ).should == {}
       @mods_ds.to_xml.should == xml_before
     end
@@ -192,16 +193,19 @@ describe ActiveFedora::NokogiriDatastream do
   end
   
   describe 'ng_xml=' do
+    before do
+      @test_ds2 = ActiveFedora::NokogiriDatastream.new(@mock_inner, "descMetadata")
+    end
     it "should parse raw xml for you" do
-      @test_ds.ng_xml.to_xml.should_not be_equivalent_to(@sample_raw_xml)
-      @test_ds.ng_xml = @sample_raw_xml
-      @test_ds.ng_xml.class.should == Nokogiri::XML::Document
-      @test_ds.ng_xml.to_xml.should be_equivalent_to(@sample_raw_xml)
+      @test_ds2.ng_xml = @sample_raw_xml
+      @test_ds2.ng_xml.class.should == Nokogiri::XML::Document
+      @test_ds2.ng_xml.to_xml.should be_equivalent_to(@sample_raw_xml)
     end
     it "should mark the datastream as dirty" do
-      @test_ds.dirty = false  # pretend it isn't dirty to show that content= does it
-      @test_ds.ng_xml = @sample_raw_xml
-      @test_ds.should be_dirty
+      @test_ds2.dirty.should be_false 
+      @test_ds2.ng_xml = @sample_raw_xml
+      @test_ds2.dirty.should be_true  #not the same as be_dirty
+      @test_ds2.should be_dirty
     end
   end
   

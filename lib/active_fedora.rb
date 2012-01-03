@@ -23,6 +23,7 @@ module ActiveFedora #:nodoc:
     autoload :FileManagement
     autoload :RelationshipGraph
     autoload :Datastream
+    autoload :Datastreams
     autoload :Delegating
     autoload :DigitalObject
     autoload :UnsavedDigitalObject

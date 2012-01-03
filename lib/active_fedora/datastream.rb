@@ -5,7 +5,7 @@ module ActiveFedora
     
     attr_writer :digital_object
     attr_accessor :dirty, :last_modified, :fields
-    before_create :add_mime_type
+    before_create :add_mime_type, :add_ds_location
   
     def initialize(digital_object, dsid)
       @fields={}
@@ -19,6 +19,11 @@ module ActiveFedora
 
     def add_mime_type
       self.mimeType = 'text/xml' unless self.mimeType
+    end
+
+    def add_ds_location
+      if self.controlGroup == 'E'
+      end
     end
 
     #compatibility method for rails' url generators. This method will 
