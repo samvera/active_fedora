@@ -100,10 +100,11 @@ module ActiveFedora
       persist
     end
 
-    def persist
-      datastreams.each {|k, ds| ds.serialize! }
-      @metadata_is_dirty = datastreams.any? {|k,ds| ds.changed? && (ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.instance_of?(ActiveFedora::RelsExtDatastream))}
+    def metadata_is_dirty=(bool)
+      @metadata_is_dirty = bool
+    end
 
+    def persist
       result = @inner_object.save
 
       ### Rubydora re-inits the datastreams after a save, so ensure our copy stays in synch

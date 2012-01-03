@@ -15,7 +15,14 @@ module ActiveFedora
         alias_method_chain :inherited, :datastreams
       end
 
-      after_assign_pid :add_disseminator_location_to_datastreams
+      before_save :add_disseminator_location_to_datastreams
+      before_save :serialize_datastreams
+    end
+
+    def serialize_datastreams
+      datastreams.each {|k, ds| ds.serialize! }
+      self.metadata_is_dirty = datastreams.any? {|k,ds| ds.changed? && (ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.instance_of?(ActiveFedora::RelsExtDatastream))}
+      true
     end
 
     # Adds the disseminator location to the datastream after the pid has been established
@@ -26,6 +33,7 @@ module ActiveFedora
           ds.dsLocation= "#{RubydoraConnection.instance.options[:url]}/objects/#{pid}/methods/#{ds_config[:disseminator]}"
         end
       end
+      true
     end
 
     ## Given a method name, return the best-guess dsid
