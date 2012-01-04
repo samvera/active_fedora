@@ -102,7 +102,6 @@ describe ActiveFedora::Model do
       mock_solr = mock("SolrConnection")
       mock_result = mock("MockResult")
       mock_result.expects(:hits).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
-      #mock_solr.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel\:\:Basic', :rows=>1001).returns(mock_result)
       mock_solr.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :rows=>1001).returns(mock_result)
       ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
       ActiveFedora::RubydoraConnection.instance.expects(:find_model).with("changeme:30", SpecModel::Basic).returns("Fake Object1")
@@ -149,6 +148,26 @@ describe ActiveFedora::Model do
       end
     end
     
+  end
+
+  describe '#count' do
+    
+    it "should return a count" do
+      mock_solr = mock("SolrConnection")
+      mock_result = mock("MockResult")
+      mock_result.expects(:total_hits).returns(7)
+      mock_solr.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :rows=>0).returns(mock_result)
+      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
+      SpecModel::Basic.count.should == 7
+    end
+    it "should allow conditions" do
+      mock_solr = mock("SolrConnection")
+      mock_result = mock("MockResult")
+      mock_result.expects(:total_hits).returns(7)
+      mock_solr.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:bar', :rows=>0).returns(mock_result)
+      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
+      SpecModel::Basic.count(:conditions=>'foo:bar').should == 7
+    end
   end
   
   

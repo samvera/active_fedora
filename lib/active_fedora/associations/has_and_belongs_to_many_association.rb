@@ -68,18 +68,11 @@ module ActiveFedora
           end
         end
 
-        # def construct_sql
-        #   if @reflection.options[:finder_sql]
-        #     @finder_sql = interpolate_and_sanitize_sql(@reflection.options[:finder_sql])
-        #   else
-        #     @finder_sql = "#{@owner.connection.quote_table_name @reflection.options[:join_table]}.#{@reflection.primary_key_name} = #{owner_quoted_id} "
-        #     @finder_sql << " AND (#{conditions})" if conditions
-        #   end
-
-        #   @join_sql = "INNER JOIN #{@owner.connection.quote_table_name @reflection.options[:join_table]} ON #{@reflection.quoted_table_name}.#{@reflection.klass.primary_key} = #{@owner.connection.quote_table_name @reflection.options[:join_table]}.#{@reflection.association_foreign_key}"
-
-        #   construct_counter_sql
-        # end
+        def construct_query
+          internal_uri = @owner.internal_uri
+          escaped_uri = internal_uri.gsub(/(:)/, '\\:')
+          @counter_query = @finder_query = "#{@reflection.options[:property]}_s:#{escaped_uri}" 
+        end
 
         def construct_scope
           { :find => {  :conditions => @finder_sql,

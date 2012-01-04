@@ -1,5 +1,7 @@
 3.2.0
 
+Added a count method
+HYDRA-731 running count on a has_many relationship returns zero unless the relationship has been loaded
 Added ActiveModel validations.
 Added callbacks on initialize, save, update, create, delete and find
 Added Base.create

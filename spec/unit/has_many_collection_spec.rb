@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ActiveFedora::Associations::HasManyAssociation do
   it "should be able to replace the collection" do
-    @owner = stub(:new_record? => false, :to_ary => nil)
+    @owner = stub(:new_record? => false, :to_ary => nil, :internal_uri => 'info:fedora/changeme:99')
     @reflection = stub(:klass => Mocha::Mock, :options=>{:property=>'predicate'})
     #ac = ActiveFedora::Associations::AssociationCollection.new(@owner, @reflection)
     ac = ActiveFedora::Associations::HasManyAssociation.new(@owner, @reflection)
@@ -17,11 +17,10 @@ describe ActiveFedora::Associations::HasManyAssociation do
   end
 
   it "should build" do
-    class Foo; end
-    @owner = stub(:new_record? => false)
+    @owner = stub(:new_record? => false, :internal_uri => 'info:fedora/changeme:99')
+    @reflection = stub(:klass => Mocha::Mock, :options=>{:property=>'predicate'})
     @assoc = ActiveFedora::Associations::HasManyAssociation.new(@owner, @reflection)
     @assoc.should respond_to :build
-    Object.send(:remove_const, :Foo)
       
   end
 

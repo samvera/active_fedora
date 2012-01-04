@@ -17,8 +17,9 @@ module ActiveFedora
         count = if loaded? 
           @target.size
         else
-          load_target
-          @target.size
+          @reflection.klass.count(:conditions => @counter_query)
+          # load_target
+          # @target.size
         end
 
         # If there's nothing in the database and @target has no new records
@@ -45,9 +46,11 @@ module ActiveFedora
         end
 
 
-
+        def construct_query
+          internal_uri = @owner.internal_uri
+          escaped_uri = internal_uri.gsub(/(:)/, '\\:')
+          @counter_query = @finder_query = "#{@reflection.options[:property]}_s:#{escaped_uri}" 
+        end
     end
-
   end
-
 end
