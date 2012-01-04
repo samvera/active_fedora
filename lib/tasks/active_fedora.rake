@@ -55,27 +55,14 @@ namespace :af do
     end
   end
   
-  desc "Export the object identified by pid into spec/fixtures. Example:rake fedora:harvest_fixture pid=druid:sb733gr4073 source=http://fedoraAdmin:fedoraAdmin@127.0.0.1:8080/fedora"
+  desc "Export the object identified by pid into spec/fixtures. Example:rake fedora:harvest_fixture pid=demo:12"
   task :harvest_fixture => :init do
-        
-    # If a source url has been provided, attampt to export from the fedora repository there.
-    if ENV["source"]
-      #FIXME
-      raise "Not Implemented"
-      #Fedora::Repository.register(ENV["source"])
-    end
-    
     if ENV["pid"].nil? 
       puts "You must specify a valid pid.  Example: rake fedora:harvest_fixture pid=demo:12"
     else
       pid = ENV["pid"]
-      puts "Exporting '#{pid}' from #{ActiveFedora::RubydoraConnection.instance.options[:url]}"
-      #FIXME
-      raise "Not Implemented"
-      foxml = Fedora::Repository.instance.export(pid)
-      filename = File.join("spec","fixtures","#{pid.gsub(":","_")}.foxml.xml")
-      file = File.new(filename,"w")
-      file.syswrite(foxml)
+      puts "Exporting '#{pid}'"# from #{ActiveFedora::RubydoraConnection.instance.options[:url]}"
+      filename = ActiveFedora::FixtureExporter.export_to_path(pid, File.join('spec', 'fixtures'))
       puts "The object has been saved as #{filename}"
     end
   end
