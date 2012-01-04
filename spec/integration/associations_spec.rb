@@ -128,8 +128,19 @@ describe ActiveFedora::Base do
         @library.books.to_a.should == [@book]
 
         @library2 = Library.find(@library.pid)
-        @library2.books.size.should == 1
         @library2.books.to_a.should == [@book]
+      end
+
+      it "should have a count once it has been saved" do
+        @library.books << @book << Book.create 
+        @library.save
+
+        # @book.library.pid.should == @library.pid
+        # @library.books.reload
+        # @library.books.to_a.should == [@book]
+
+        @library2 = Library.find(@library.pid)
+        @library2.books.size.should == 2
       end
 
       it "should respect the :class_name parameter" do

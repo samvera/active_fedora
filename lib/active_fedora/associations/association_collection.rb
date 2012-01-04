@@ -3,6 +3,7 @@ module ActiveFedora
     class AssociationCollection < AssociationProxy #:nodoc:
       def initialize(owner, reflection)
         super
+        construct_query
       end
 
       # Returns the size of the collection 
@@ -129,18 +130,12 @@ module ActiveFedora
       end
 
       def find_target
-        query = inbound_relationship_query(@reflection.options[:property])
-        return [] if query.empty?
-        solr_result = SolrService.instance.conn.query(query, :rows=>1000)
+        return [] if @finder_query.empty?
+        solr_result = SolrService.instance.conn.query(@finder_query, :rows=>1000)
 #TODO, don't reify, just store the solr results and lazily reify.
         return ActiveFedora::SolrService.reify_solr_results(solr_result)
       end
 
-      def inbound_relationship_query(predicate)
-        internal_uri = @owner.internal_uri
-        escaped_uri = internal_uri.gsub(/(:)/, '\\:')
-        "#{predicate}_s:#{escaped_uri}" 
-      end
 
       def add_record_to_target_with_callbacks(record)
       #  callback(:before_add, record)

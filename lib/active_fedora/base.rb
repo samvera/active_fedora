@@ -157,7 +157,7 @@ module ActiveFedora
       ds_specs[args[:name]]= {:type => args[:type], :label =>  args.fetch(:label,""), :control_group => args.fetch(:control_group,"X"), :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
     end
 
-    def self.create(args)
+    def self.create(args = {})
       obj = self.new(args)
       obj.save
       obj

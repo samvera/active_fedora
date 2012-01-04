@@ -119,6 +119,15 @@ module ActiveFedora
         end
       end
 
+      # Get a count of the number of objects from solr
+      # Takes :conditions as an argument
+      def count(args = {})
+          escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
+          q = "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
+          q << " AND #{args[:conditions]}" if args[:conditions]
+          SolrService.instance.conn.query(q, :rows=>0).total_hits
+      end
+
       #Sends a query directly to SolrService
       def solr_search(query, args={})
         SolrService.instance.conn.query(query, args)
