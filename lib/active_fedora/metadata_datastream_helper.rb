@@ -7,8 +7,6 @@ module ActiveFedora::MetadataDatastreamHelper
   
   module ClassMethods
     
-    attr_accessor :xml_model
-    
     #get the Class's field list
     def fields
       @@classFields
@@ -28,7 +26,9 @@ module ActiveFedora::MetadataDatastreamHelper
   end
   
   def serialize! # :nodoc:
-    self.content = self.to_xml  ##TODO only do this when the xml will have changed to avoid a load of the datastream content. 
+    if dirty?
+      self.content = self.to_xml 
+    end
   end
 
   def to_solr(solr_doc = Hash.new) # :nodoc:
@@ -70,27 +70,5 @@ module ActiveFedora::MetadataDatastreamHelper
     end
   end
   
-  def to_xml(xml = Nokogiri::XML::Document.parse("<fields />")) #:nodoc:
-    if xml.instance_of?(Nokogiri::XML::Builder)
-      xml_insertion_point = xml.doc.root 
-    elsif xml.instance_of?(Nokogiri::XML::Document) 
-      xml_insertion_point = xml.root
-    else
-      xml_insertion_point = xml
-    end
-    
-    builder = Nokogiri::XML::Builder.with(xml_insertion_point) do |xml|
-      fields.each_pair do |field,field_info|
-        element_attrs = field_info[:element_attrs].nil? ? {} : field_info[:element_attrs]
-        values = field_info[:values]
-        values = [values] unless values.respond_to? :each
-        values.each do |val|
-          builder_arg = "xml.#{field}(val, element_attrs)"
-          eval(builder_arg)
-        end
-      end
-    end
-    return builder.to_xml
-  end
 
 end

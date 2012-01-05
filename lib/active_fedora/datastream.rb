@@ -28,7 +28,6 @@ module ActiveFedora
     end
     
     # Test whether this datastream been modified since it was last saved?
-    # TODO deprecate this, just use changed?
     def dirty?
       @dirty || changed?
     end

@@ -1,3 +1,7 @@
+3.1.6
+
+HYDRA-733 When serializing, MetadataDatastream does not load the existing content, so it can overwrite with blank
+
 3.1.5
 HYDRA-722 updating AF::Base#label= and then saving doesn't persist the change
 JettyWrapper to 1.2.0

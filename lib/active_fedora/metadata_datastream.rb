@@ -8,10 +8,9 @@ module ActiveFedora
   #   </fields>
   class MetadataDatastream < Datastream
     
+    # .to_solr (among other things) is provided by ActiveFedora::MetadataDatastreamHelper
     include ActiveFedora::MetadataDatastreamHelper
 
-    # .to_solr and .to_xml (among other things) are provided by ActiveFedora::MetadataDatastreamHelper
-    self.xml_model = ActiveFedora::MetadataDatastream    
 
     def update_attributes(params={},opts={})
       result = params.dup
@@ -143,6 +142,29 @@ module ActiveFedora
       end
       tmpl.send(:dirty=, false)
       tmpl
+    end
+
+    def to_xml(xml = Nokogiri::XML::Document.parse("<fields />")) #:nodoc:
+      if xml.instance_of?(Nokogiri::XML::Builder)
+        xml_insertion_point = xml.doc.root 
+      elsif xml.instance_of?(Nokogiri::XML::Document) 
+        xml_insertion_point = xml.root
+      else
+        xml_insertion_point = xml
+      end
+      
+      builder = Nokogiri::XML::Builder.with(xml_insertion_point) do |xml|
+        fields.each_pair do |field,field_info|
+          element_attrs = field_info[:element_attrs].nil? ? {} : field_info[:element_attrs]
+          values = field_info[:values]
+          values = [values] unless values.respond_to? :each
+          values.each do |val|
+            builder_arg = "xml.#{field}(val, element_attrs)"
+            eval(builder_arg)
+          end
+        end
+      end
+      return builder.to_xml
     end
     
     # This method generates the various accessor and mutator methods on self for the datastream metadata attributes.

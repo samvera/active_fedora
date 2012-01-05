@@ -44,6 +44,7 @@ describe ActiveFedora::MetadataDatastream do
       @mock_repo.expects(:datastream).with(:pid => nil, :dsid => 'mdDs')
       @mock_repo.expects(:add_datastream).with(:pid => nil, :dsid => 'mdDs', :checksumType => 'DISABLED', :versionable => true, :content => 'fake xml', :controlGroup => 'M', :dsState => 'A', :mimeType=>'text/xml')
       @test_ds.expects(:to_xml).returns("fake xml")
+      @test_ds.expects(:dirty?).returns(true)
       @test_ds.serialize!
       @test_ds.save
       @test_ds.mimeType.should == 'text/xml'

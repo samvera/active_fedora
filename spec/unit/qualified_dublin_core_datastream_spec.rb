@@ -135,6 +135,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
     it "should call .content= with to_dc_xml" do
       result = @test_ds.to_dc_xml
       @test_ds.expects(:content=).with(result)
+      @test_ds.expects(:dirty?).returns(true)
       @test_ds.serialize!
     end
   end
