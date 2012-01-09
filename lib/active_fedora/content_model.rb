@@ -12,20 +12,10 @@ module ActiveFedora
       super
     end
     
-    ### TODO: Shouldn't this be the same as: klass.to_class_uri ?  - Justin
+    # @deprecated Please use {#to_class_uri} instead
     def self.pid_from_ruby_class(klass,attrs={})
-
-      unless klass.respond_to? :pid_suffix
-        pid_suffix = attrs.has_key?(:pid_suffix) ? attrs[:pid_suffix] : CMODEL_PID_SUFFIX
-      else
-        pid_suffix = klass.pid_suffix
-      end
-      unless klass.respond_to? :pid_namespace
-        namespace = attrs.has_key?(:namespace) ? attrs[:namespace] : CMODEL_NAMESPACE   
-      else
-        namespace = klass.pid_namespace
-      end
-      return "info:fedora/#{namespace}:#{sanitized_class_name(klass)}#{pid_suffix}" 
+      ActiveSupport::Deprecation.warn("pid_from_ruby_class is deprecated.  Use klass.to_class_uri instead")
+      klass.to_class_uri(attrs)
     end
     
     ###Override this, if you prefer your class names serialized some other way

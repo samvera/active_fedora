@@ -46,7 +46,7 @@ module ActiveFedora
         #check has model and class match
         mod = relationships.first(:predicate=>Predicates.find_graph_predicate(:has_model))
         if mod
-          expected = ActiveFedora::ContentModel.pid_from_ruby_class(self.class)
+          expected = self.class.to_class_uri
           if mod.object.to_s == expected
             return true
           else

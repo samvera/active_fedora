@@ -23,7 +23,7 @@ module ActiveFedora
     # This can be overriden to assert a different model
     # It's normally called once in the lifecycle, by #create#
     def assert_content_model
-      add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(self.class))
+      add_relationship(:has_model, self.class.to_class_uri)
     end
 
 
