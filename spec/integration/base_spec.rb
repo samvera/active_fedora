@@ -407,7 +407,7 @@ describe ActiveFedora::Base do
       @test_object5.testing_bidirectional_append(@test_object4)
       @test_object2.save
       @test_object5.save
-      model_rel = ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseRelationship)
+      model_rel = MockAFBaseRelationship.to_class_uri
       #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
       @test_object2.object_relations[:has_model].should include model_rel
       @test_object2.object_relations[:has_part].should include @test_object3
@@ -703,7 +703,7 @@ describe ActiveFedora::Base do
 #       @test_object5.testing2_append(@test_object3)
 #       @test_object2.save
 #       @test_object5.save
-#       model_rel = ActiveFedora::ContentModel.pid_from_ruby_class(MockAFBaseFromSolr)
+#       model_rel = MockAFBaseFromSolr.to_class_uri
 #       #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
 #       test_from_solr_object2 = MockAFBaseFromSolr.load_instance_from_solr(@test_object2.pid)
 #       test_from_solr_object3 = MockAFBaseFromSolr.load_instance_from_solr(@test_object3.pid)

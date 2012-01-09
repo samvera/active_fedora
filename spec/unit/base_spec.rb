@@ -831,8 +831,8 @@ describe ActiveFedora::Base do
       ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(next_pid)
       stub_get(next_pid)
       @test_object2 = MockNamedRelationships.new
-      @test_object2.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(MockNamedRelationships))
-      @test_object.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(ActiveFedora::Base))
+      @test_object2.add_relationship(:has_model, MockNamedRelationships.to_class_uri)
+      @test_object.add_relationship(:has_model, ActiveFedora::Base.to_class_uri)
       #should return expected named relationships
       @test_object2.relationships_by_name
       @test_object2.relationships_by_name[:self]["testing"].should == []
@@ -865,7 +865,7 @@ describe ActiveFedora::Base do
       @test_object2.should respond_to(:testing_append)
       @test_object2.should respond_to(:testing_remove)
       #test executing each one to make sure code added is correct
-      model_pid = ActiveFedora::ContentModel.pid_from_ruby_class(ActiveFedora::Base)
+      model_pid =ActiveFedora::Base.to_class_uri
       @test_object.add_relationship(:has_model,model_pid)
       @test_object2.add_relationship(:has_model,model_pid)
       @test_object2.testing_append(@test_object)

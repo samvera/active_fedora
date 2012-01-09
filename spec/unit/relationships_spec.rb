@@ -114,7 +114,7 @@ describe ActiveFedora::Relationships do
           @test_object2.pid = increment_pid
           @test_object2.stubs(:testing_inbound).returns({})
           @test_object2.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content =>'')).at_least_once
-          @test_object2.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(SpecNode))
+          @test_object2.add_relationship(:has_model, SpecNode.to_class_uri)
           @test_object2.should respond_to(:testing_append)
           @test_object2.should respond_to(:testing_remove)
           @test_object2.should respond_to(:testing2_append)
@@ -353,7 +353,7 @@ describe ActiveFedora::Relationships do
         @local_node.pid = "mypid1"
         @local_node2 = SpecNode.new
         @local_node2.pid = "mypid2"
-        model_def = ActiveFedora::ContentModel.pid_from_ruby_class(SpecNode)
+        model_def = SpecNode.to_class_uri
         @local_node.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).at_least_once
         @local_node.add_relationship(:has_model, model_def)
         @local_node2.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).at_least_once
@@ -428,7 +428,7 @@ describe ActiveFedora::Relationships do
       #add relationships that mirror 'testing' and 'testing2'
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(ActiveFedora::ContentModel.pid_from_ruby_class(MockRelationshipNames)))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(MockRelationshipNames.to_class_uri))
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_member),  RDF::URI.new(@test_object4.internal_uri))
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new(@test_object3.internal_uri))
       @test_object2.expects(:relationships).returns(graph).at_least_once
@@ -518,7 +518,7 @@ describe ActiveFedora::Relationships do
       #has_model relationship does not get created until save called
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(ActiveFedora::ContentModel.pid_from_ruby_class(SpecNode)))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(SpecNode.to_class_uri))
       @test_object.expects(:relationships).returns(graph).at_least_once
       @test_object.conforms_to?(SpecNode).should == true
     end
@@ -538,7 +538,7 @@ describe ActiveFedora::Relationships do
       #has_model relationship does not get created until save called so need to add the has model rel here, is fine since not testing save
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
-      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(ActiveFedora::ContentModel.pid_from_ruby_class(SpecNode)))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(SpecNode.to_class_uri))
       @test_object.expects(:relationships).returns(graph).at_least_once
       @test_object3.assert_conforms_to('object',@test_object,SpecNode)
     end
@@ -581,7 +581,7 @@ describe ActiveFedora::Relationships do
       @test_object2.pid = increment_pid
       @test_object3 = MockNamedRelationships3.new
       @test_object3.pid = increment_pid
-      model_pid = ActiveFedora::ContentModel.pid_from_ruby_class(MockNamedRelationships3)
+      model_pid = MockNamedRelationships3.to_class_uri
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(model_pid))

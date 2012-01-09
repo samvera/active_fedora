@@ -59,15 +59,15 @@ describe ActiveFedora::SemanticNode do
     class SpecialContainer; end;
     class SpecialPart; end;
     @special_container = ActiveFedora::Base.new()
-    @special_container.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(SpecialContainer))
+    @special_container.add_relationship(:has_model, SpecialContainer.to_class_uri)
     @special_container.save
 
     @special_container3 = ActiveFedora::Base.new()
-    @special_container3.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(SpecialContainer))
+    @special_container3.add_relationship(:has_model, SpecialContainer.to_class_uri)
     @special_container3.save
 
     @special_container4 = ActiveFedora::Base.new()
-    @special_container4.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(SpecialContainer))
+    @special_container4.add_relationship(:has_model, SpecialContainer.to_class_uri)
     @special_container4.save
 
     #even though adding container3 and 3 special containers, it should only include the special containers when returning via relationship name finder methods
@@ -80,7 +80,7 @@ describe ActiveFedora::SemanticNode do
     @test_object_query.save
 
     @special_container2 = ActiveFedora::Base.new()
-    @special_container2.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(SpecialContainer))
+    @special_container2.add_relationship(:has_model, SpecialContainer.to_class_uri)
     @special_container2.add_relationship(:has_member, 'info:fedora/'+@test_object_query.pid)
     @special_container2.save
 
@@ -89,7 +89,7 @@ describe ActiveFedora::SemanticNode do
     @part3.save
 
     @special_part = ActiveFedora::Base.new()
-    @special_part.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(SpecialPart))
+    @special_part.add_relationship(:has_model, SpecialPart.to_class_uri)
     @special_part.add_relationship(:is_part_of, @test_object_query)
     @special_part.save
    
@@ -442,7 +442,7 @@ describe ActiveFedora::SemanticNode do
 
     it 'should automatically update the relationships_by_name if relationships has changed (no refresh of relationships_by_name hash unless relationships hash has changed' do
       @test_object2 = MockSemNamedRelationships.new
-      @test_object2.add_relationship(:has_model, ActiveFedora::ContentModel.pid_from_ruby_class(MockSemNamedRelationships))
+      @test_object2.add_relationship(:has_model, MockSemNamedRelationships.to_class_uri)
       #should return expected named relationships
       @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[], "collection_members"=>[], "part_of"=>[], "parts_outbound"=>[]}}
       @test_object2.add_relationship(:has_part, @test_object.internal_uri)

@@ -51,14 +51,15 @@ describe ActiveFedora::ContentModel do
     @test_cmodel.should respond_to(:pid_suffix=)
   end
   
-  it 'should provide #pid_from_ruby_class' do
-    ActiveFedora::ContentModel.should respond_to(:pid_from_ruby_class)
-  end
   
   describe "#pid_from_ruby_class" do
+    before do
+      ActiveSupport::Deprecation.stubs(:warn)
+    end
+  
     it "should construct pids" do
-     ActiveFedora::ContentModel.pid_from_ruby_class(@test_cmodel.class).should == "info:fedora/afmodel:ActiveFedora_ContentModel"
-     ActiveFedora::ContentModel.pid_from_ruby_class(@test_cmodel.class, :namespace => "foo", :pid_suffix => "BarBar").should == "info:fedora/foo:ActiveFedora_ContentModelBarBar"
+      ActiveFedora::ContentModel.pid_from_ruby_class(@test_cmodel.class).should == "info:fedora/afmodel:ActiveFedora_ContentModel"
+      ActiveFedora::ContentModel.pid_from_ruby_class(@test_cmodel.class, :namespace => "foo", :pid_suffix => "BarBar").should == "info:fedora/foo:ActiveFedora_ContentModelBarBar"
     end
     it "should construct pids with the namespace declared in the model" do
       ActiveFedora::ContentModel.stubs(:pid_namespace).returns("test-cModel")

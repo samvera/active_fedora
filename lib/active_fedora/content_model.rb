@@ -12,7 +12,7 @@ module ActiveFedora
       super
     end
     
-    # @deprecated Please use {#to_class_uri} instead
+    # @deprecated Please use {.to_class_uri} instead
     def self.pid_from_ruby_class(klass,attrs={})
       ActiveSupport::Deprecation.warn("pid_from_ruby_class is deprecated.  Use klass.to_class_uri instead")
       klass.to_class_uri(attrs)

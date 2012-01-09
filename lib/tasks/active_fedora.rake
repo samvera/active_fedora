@@ -18,7 +18,6 @@ namespace :af do
       puts "You must specify a valid pid.  Example: rake fedora:delete pid=demo:12"
     else
       pid = ENV["pid"]
-      puts "Deleting '#{pid}' from #{ActiveFedora::RubydoraConnection.instance.options[:url]}"
       begin
         ActiveFedora::Base.load_instance(pid).delete
       rescue ActiveFedora::ObjectNotFoundError

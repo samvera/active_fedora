@@ -113,7 +113,7 @@ describe ActiveFedora::RelsExtDatastream do
       @test_object5.testing2_append(@test_object3)
       @test_object2.save
       @test_object5.save
-      model_rel = ActiveFedora::ContentModel.pid_from_ruby_class(MockAFRelsSolr)
+      model_rel = MockAFRelsSolr.to_class_uri
       #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
       #get solr doc for @test_object2
       solr_doc = MockAFRelsSolr.find_by_solr(@test_object2.pid).hits.first
