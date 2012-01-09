@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-# Some tentative extensions to ActiveFedora::Base
-
 describe ActiveFedora::Base do
   
   before(:each) do
@@ -11,9 +9,6 @@ describe ActiveFedora::Base do
   end
   
   describe ".file_objects" do
-    it "should be a supported method" do
-      @base.should respond_to("file_objects")
-    end
     it "should wrap .collection_members and .parts" do
       @base.expects(:collection_members).returns([])
       @base.expects(:parts).returns(["Foo"])

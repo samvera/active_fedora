@@ -9,15 +9,20 @@ include ActiveFedora::Model
 include Mocha::API
 
 describe 'bugs' do
-class FooHistory < ActiveFedora::Base
-  has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"someData" do |m|
-    m.field "fubar", :string
-    m.field "swank", :text
+  before :all do
+    class FooHistory < ActiveFedora::Base
+      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"someData" do |m|
+        m.field "fubar", :string
+        m.field "swank", :text
+      end
+      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText" do |m|
+        m.field "fubar", :text
+      end
+    end
   end
-  has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText" do |m|
-    m.field "fubar", :text
+  after :all do
+    Object.send(:remove_const, :FooHistory)
   end
-end
 
   before(:each) do
     @test_object = FooHistory.new
