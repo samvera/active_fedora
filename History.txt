@@ -1,3 +1,8 @@
+3.2.1
+Load rake tasks.
+Rubydora 0.4.0
+Added fixture exporter
+
 3.2.0
 
 Deprecate ContentModel.pid_from_ruby_class, use Model.to_class_uri instead
