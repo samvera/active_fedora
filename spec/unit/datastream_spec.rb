@@ -87,7 +87,7 @@ describe ActiveFedora::Datastream do
       EOS
       @test_datastream.expects(:repository).returns(@mock_repo)
       @mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).returns(ds_profile)
-      @test_datastream.size.should == "9999"
+      @test_datastream.size.should == 9999
     end
 
     it "should default to an empty string if ds has not been saved" do

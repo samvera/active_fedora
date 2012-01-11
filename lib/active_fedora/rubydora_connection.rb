@@ -35,6 +35,7 @@ module ActiveFedora
       return unless @connection.nil? or force
       allowable_options = [:url, :user, :password, :timeout, :open_timeout, :ssl_client_cert, :ssl_client_key]
       client_options = options.reject { |k,v| not allowable_options.include?(k) }
+      #puts "CLIENT OPTS #{client_options.inspect}"
       @connection = Rubydora.connect client_options
     end
 

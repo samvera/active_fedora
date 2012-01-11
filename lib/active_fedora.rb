@@ -1,5 +1,4 @@
 require "loggable"
-require 'active_fedora/railtie' if defined? Rails
 require 'active_support'
 require 'active_fedora/solr_service'
 require 'active_fedora/rubydora_connection'
