@@ -22,13 +22,11 @@ module ActiveFedora
   #     end
   #   end
   #
-  # The above example creates a FedoraObject with a metadata datastream named "properties", which is composed of a 
+  # The above example creates a Fedora object with a metadata datastream named "properties", which is composed of a 
   # narrator and bio field.
   #
   # Datastreams defined with +has_metadata+ are accessed via the +datastreams+ member hash.
   #
-  # =Implementation
-  # This class is really a facade for a basic Fedora::FedoraObject, which is stored internally.
   class Base
     include SemanticNode
 

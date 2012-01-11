@@ -75,34 +75,6 @@ module ActiveFedora
       tmpl
     end
     
-    # # Callback.  Override this to insert behaviors after the save method.  By default, sets self.dirty = false
-    # def after_save
-    #   self.dirty = false
-    # end
-    
-    # returns a datetime in the standard W3C DateTime Format.  
-    # ie 2008-10-17T00:17:18.194Z
-    # def last_modified_in_repository
-    #   # A hack to get around the fact that you can't call getDatastreamHistory 
-    #   # or API-M getDatasreams on Fedora 3.0 REST API  
-    #   # grabs the CREATED attribute off of the last foxml:datastreamVersion 
-    #   # within the appropriate datastream node in the objectXML
-    #   if self.pid != nil
-    #     object_xml = Fedora::FedoraObject.object_xml(self.pid).gsub("\n     ","")
-    #     datastream_xml = REXML::Document.new(object_xml).root.elements["foxml:datastream[@ID='#{self.dsid}']"]
-    #     
-    #     if datastream_xml.length > 3
-    #       datastream_xml.elements.each do |el|
-    #         logger.debug el.inspect
-    #       end
-    #     end
-    #     
-    #     datastream_xml.elements[datastream_xml.length - 2].attributes["CREATED"]
-    #   else
-    #     return nil
-    #   end
-    # end
-    
     def check_concurrency # :nodoc:
       return true
     end
