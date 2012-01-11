@@ -40,6 +40,7 @@ module ActiveFedora #:nodoc:
     autoload :SemanticNode
     autoload :NestedAttributes
     autoload :FixtureLoader
+    autoload :FixtureExporter
     autoload :DatastreamCollections
     autoload :NamedRelationships
     autoload :Predicates
