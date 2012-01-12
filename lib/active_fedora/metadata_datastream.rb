@@ -11,6 +11,11 @@ module ActiveFedora
     # .to_solr (among other things) is provided by ActiveFedora::MetadataDatastreamHelper
     include ActiveFedora::MetadataDatastreamHelper
 
+    def initialize(digital_object, dsid)
+      ActiveSupport::Deprecation.warn("MetadataDatastream is deprecated and will be removed in a future release. Create a NokogiriDatastream to structure your data")
+      super
+    end
+
 
     def update_attributes(params={},opts={})
       result = params.dup
