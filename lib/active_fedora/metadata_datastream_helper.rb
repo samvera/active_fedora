@@ -36,29 +36,4 @@ module ActiveFedora::MetadataDatastreamHelper
     end
   end
 
-  # ** EXPERIMENTAL **
-  #
-  # This is utilized by ActiveFedora::Base.load_instance_from_solr to set 
-  # metadata values in this object using the Solr document passed in.
-  # Any keys in the solr document that map to a metadata field key within a MetadataDatastream object
-  # are set to the corresponding value.  Any others are ignored. ActiveFedora::SolrService.solr_name
-  # is used to map solr key to field key name.
-  #
-  # ====Warning
-  #  Solr must be synchronized with data in Fedora.
-  def from_solr(solr_doc)
-    fields.each do |field_key, field_info|
-      field_symbol = ActiveFedora::SolrService.solr_name(field_key, field_info[:type])
-      value = (solr_doc[field_symbol].nil? ? solr_doc[field_symbol.to_s]: solr_doc[field_symbol]) 
-      unless value.nil?
-        if value.is_a? Array
-          update_attributes({field_key=>value})
-        else
-          update_indexed_attributes({field_key=>{0=>value}})
-        end
-      end
-    end
-  end
-  
-
 end
