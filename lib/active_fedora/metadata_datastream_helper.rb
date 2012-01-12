@@ -36,21 +36,6 @@ module ActiveFedora::MetadataDatastreamHelper
     end
   end
 
-  def to_solr(solr_doc = Hash.new) # :nodoc:
-    fields.each do |field_key, field_info|
-      if field_info.has_key?(:values) && !field_info[:values].nil?
-        field_symbol = ActiveFedora::SolrService.solr_name(field_key, field_info[:type])
-        values = field_info[:values]
-        values = [values] unless values.respond_to? :each
-        values.each do |val|    
-          ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val )         
-        end
-      end
-    end
-
-    return solr_doc
-  end
-  
   # ** EXPERIMENTAL **
   #
   # This is utilized by ActiveFedora::Base.load_instance_from_solr to set 

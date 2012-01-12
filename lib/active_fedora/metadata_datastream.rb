@@ -6,15 +6,30 @@ module ActiveFedora
   #     <title>Foo</title>
   #     <author>Bar</author>
   #   </fields>
-  class MetadataDatastream < Datastream
+  class MetadataDatastream < NokogiriDatastream 
     
     # .to_solr (among other things) is provided by ActiveFedora::MetadataDatastreamHelper
     include ActiveFedora::MetadataDatastreamHelper
 
-    def initialize(digital_object, dsid)
-      ActiveSupport::Deprecation.warn("MetadataDatastream is deprecated and will be removed in a future release. Create a NokogiriDatastream to structure your data")
-      super
+    # def initialize(digital_object, dsid)
+    #   ActiveSupport::Deprecation.warn("MetadataDatastream is deprecated and will be removed in a future release. Create a NokogiriDatastream to structure your data")
+    #   super
+    # end
+    def to_solr(solr_doc = Hash.new) # :nodoc:
+      fields.each do |field_key, field_info|
+        if field_info.has_key?(:values) && !field_info[:values].nil?
+          field_symbol = ActiveFedora::SolrService.solr_name(field_key, field_info[:type])
+          values = field_info[:values]
+          values = [values] unless values.respond_to? :each
+          values.each do |val|    
+            ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val )         
+          end
+        end
+      end
+
+      return solr_doc
     end
+  
 
 
     def update_attributes(params={},opts={})

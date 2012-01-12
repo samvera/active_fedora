@@ -21,6 +21,7 @@ describe ActiveFedora::MetadataDatastream do
     mock_inner = mock('inner object')
     @test_object = ActiveFedora::Base.new
     @mock_repo = mock('repository')
+    @mock_repo.stubs(:datastream)
     @mock_repo.stubs(:datastream_dissemination=>'My Content')
     mock_inner.stubs(:repository).returns(@mock_repo)
     mock_inner.stubs(:pid)
