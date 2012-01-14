@@ -1,5 +1,4 @@
 require "loggable"
-require 'active_fedora/railtie' if defined? Rails
 require 'active_support'
 require 'active_fedora/solr_service'
 require 'active_fedora/rubydora_connection'
@@ -294,4 +293,7 @@ module ActiveFedora
   class UnregisteredPredicateError < RuntimeError; end
 
 end
+
+Dir[File.expand_path(File.join(File.dirname(__FILE__),"tasks/*.rake"))].each { |ext| load ext } if defined?(Rake)
+
 
