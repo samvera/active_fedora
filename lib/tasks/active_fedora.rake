@@ -1,21 +1,15 @@
 require "active-fedora"
 require "solrizer-fedora"
 require "active_support" # This is just to load ActiveSupport::CoreExtensions::String::Inflections
-namespace :af do
+namespace :repo do
   
+  desc "Delete and re-import the object identified by pid" 
+  task :refresh => [:delete,:load]
   
-  desc "Delete and re-import the fixture identified by pid" 
-  task :refresh_fixture => [:delete,:import_fixture]
-  
-  desc "Delete the object identified by pid. Example: rake fedora:delete pid=demo:12"
+  desc "Delete the object identified by pid. Example: rake repo:delete pid=demo:12"
   task :delete => :init do
-    # If a destination url has been provided, attampt to export from the fedora repository there.
-    if ENV["destination"]
-      Fedora::Repository.register(ENV["destination"])
-    end
-    
     if ENV["pid"].nil? 
-      puts "You must specify a valid pid.  Example: rake fedora:delete pid=demo:12"
+      puts "You must specify a valid pid.  Example: rake repo:delete pid=demo:12"
     else
       pid = ENV["pid"]
       begin
@@ -25,22 +19,19 @@ namespace :af do
       rescue Errno::ECONNREFUSED => e
         puts "Can't connect to Fedora! Are you sure jetty is running?"
       end
-      logger.info "Deleted '#{pid}' from #{ActiveFedora::RubydoraConnection.instance.options[:url]}"
+      puts "Deleted '#{pid}' from #{ActiveFedora.fedora_config[:url]}"
     end
   end
   
-  desc "Delete a range of objects in a given namespace.  ie 'rake fedora:purge_range[demo, 22, 50]' will delete demo:22 through demo:50"
-  task :purge_range => :init do |t, args|
-    # If Fedora Repository connection is not already initialized, initialize it using ActiveFedora defaults
-    # ActiveFedora.init unless Thread.current[:repo]
-    
+  desc "Delete a range of objects in a given namespace.  ie 'rake repo:delete_range namespace=demo start=22 stop=50' will delete demo:22 through demo:50"
+  task :delete_range => :init do |t, args|
     namespace = ENV["namespace"]
     start_point = ENV["start"].to_i
     stop_point = ENV["stop"].to_i
-    unless start_point < stop_point 
+    unless start_point <= stop_point 
       raise StandardError "start point must be less that end point."
     end
-    puts "Deleting #{stop_point - start_point} objects from #{namespace}:#{start_point.to_s} to #{namespace}:#{stop_point.to_s}"
+    puts "Deleting #{stop_point - start_point + 1} objects from #{namespace}:#{start_point.to_s} to #{namespace}:#{stop_point.to_s}"
     i = start_point
     while i <= stop_point do
       pid = namespace + ":" + i.to_s
@@ -49,55 +40,47 @@ namespace :af do
       rescue ActiveFedora::ObjectNotFoundError
         # The object has already been deleted (or was never created).  Do nothing.
       end
-      puts "Deleted '#{pid}' from #{ActiveFedora::RubydoraConnection.instance.options[:url]}"
+      puts "Deleted '#{pid}' from #{ActiveFedora.fedora_config[:url]}"
       i += 1
     end
   end
-  
-  desc "Export the object identified by pid into spec/fixtures. Example:rake fedora:harvest_fixture pid=demo:12"
-  task :harvest_fixture => :init do
+
+  desc "Export the object identified by pid into spec/fixtures. Example:rake repo:export pid=demo:12"
+  task :export => :init do
     if ENV["pid"].nil? 
-      puts "You must specify a valid pid.  Example: rake fedora:harvest_fixture pid=demo:12"
+      puts "You must specify a valid pid.  Example: rake repo:export pid=demo:12"
     else
       pid = ENV["pid"]
-      puts "Exporting '#{pid}'"# from #{ActiveFedora::RubydoraConnection.instance.options[:url]}"
+      puts "Exporting '#{pid}' from #{ActiveFedora.fedora_config[:url]}"
       filename = ActiveFedora::FixtureExporter.export_to_path(pid, File.join('spec', 'fixtures'))
       puts "The object has been saved as #{filename}"
     end
   end
   
-  desc "Import the fixture located at the provided path. Example: rake fedora:import_fixture fixture=spec/fixtures/demo_12.foxml.xml"
-  task :import_fixture => [:init, :environment] do
-        
-    # If a destination url has been provided, attampt to export from the fedora repository there.
-    if ENV["destination"]
-      #FIXME
-      raise "Not Implemented"
-      Fedora::Repository.register(ENV["destination"])
-    end
-        
-    if !ENV["fixture"].nil? 
-      filename = ENV["fixture"]
+  desc "Load the object located at the provided path or identified by pid. Example: rake repo:load path=spec/fixtures/demo_12.foxml.xml"
+  task :load => :init do
+    if !ENV["path"].nil? 
+      filename = ENV["path"]
     elsif !ENV["pid"].nil?
       pid = ENV["pid"]
       filename = File.join("spec","fixtures","#{pid.gsub(":","_")}.foxml.xml")
     else
-      puts "You must specify a path to the fixture or provide its pid.  Example: rake fedora:import_fixture fixture=spec/fixtures/demo_12.foxml.xml"
+      puts "You must specify a path to the object or provide its pid.  Example: rake repo:load path=spec/fixtures/demo_12.foxml.xml"
     end
     
     if !filename.nil?
-      puts "Importing '#{filename}' to #{ActiveFedora::RubydoraConnection.instance.options[:url]}"
+      puts "Loading '#{filename}' in #{ActiveFedora.fedora_config[:url]}"
       file = File.new(filename, "r")
-      result = foxml = ActiveFedora::RubydoraConnection.instance.connection.ingest(:file=>file.read)
-#      result = foxml = Fedora::Repository.instance.ingest(file.read)
+      result = ActiveFedora::RubydoraConnection.instance.connection.ingest(:file=>file.read)
       if result
-        puts "The fixture has been ingested as #{result.body}"
-        if !pid.nil?
-          solrizer = Solrizer::Fedora::Solrizer.new 
-          solrizer.solrize(pid) 
-        end    
+        puts "The object has been loaded as #{result.body}"
+	if pid.nil?
+          pid = result.body
+        end
+        solrizer = Solrizer::Fedora::Solrizer.new 
+        solrizer.solrize(pid) 
       else
-        puts "Failed to ingest the fixture."
+        puts "Failed to load the object."
       end
     end    
     
