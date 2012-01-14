@@ -31,11 +31,11 @@ module ActiveFedora
         def create_delegate_accessor(field, args)
             define_method field do
               ds = self.send(args[:to])
-              val = if ds.kind_of? ActiveFedora::NokogiriDatastream 
+              val = if ds.kind_of? ActiveFedora::MetadataDatastream 
+                ds.send(:get_values, field)
+              else 
                 terminology = args[:at] || [field]
                 ds.send(:term_values, *terminology)
-              else 
-                ds.send(:get_values, field)
               end 
               args[:unique] ? val.first : val
                 
@@ -45,11 +45,11 @@ module ActiveFedora
         def create_delegate_setter(field, args)
             define_method "#{field}=".to_sym do |v|
               ds = self.send(args[:to])
-              if ds.kind_of? ActiveFedora::NokogiriDatastream 
+              if ds.kind_of? ActiveFedora::MetadataDatastream 
+                ds.send(:set_value, field, v)
+              else 
                 terminology = args[:at] || [field]
                 ds.send(:update_indexed_attributes, {terminology => v})
-              else 
-                ds.send(:set_value, field, v)
               end
             end
         end
