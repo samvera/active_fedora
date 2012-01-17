@@ -52,7 +52,12 @@ namespace :repo do
     else
       pid = ENV["pid"]
       puts "Exporting '#{pid}' from #{ActiveFedora.fedora_config[:url]}"
-      filename = ActiveFedora::FixtureExporter.export_to_path(pid, File.join('spec', 'fixtures'))
+      if !ENV["path"].nil?
+        path = ENV["path"]
+      else
+        path = File.join('spec', 'fixtures')
+      end
+      filename = ActiveFedora::FixtureExporter.export_to_path(pid, path)
       puts "The object has been saved as #{filename}"
     end
   end
