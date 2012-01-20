@@ -538,6 +538,11 @@ describe ActiveFedora::Base do
       ds.dsLabel.should == nil
       ds.mimeType.should == "application/octet-stream"
     end
+
+    it 'should not set dsLocation if dsLocation is nil' do
+      ActiveFedora::Datastream.any_instance.expects(:dsLocation=).never
+      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:dsLocation=>nil})
+    end
   end
 
   describe ".add_file_datastream" do

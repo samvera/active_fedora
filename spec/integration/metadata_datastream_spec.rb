@@ -2,8 +2,35 @@ require 'spec_helper'
 
 describe ActiveFedora::MetadataDatastream do
 
-  describe "when updating one datastream" do
-    before do
+  describe "changing the controlGroup of a datastream" do
+    before :all do
+      class Foo < ActiveFedora::Base
+        has_metadata :name => "stuff", :type => ActiveFedora::MetadataDatastream do |m|
+          m.field "alt_title", :string
+        end
+      end
+      obj = Foo.new()
+      obj.stuff.update_indexed_attributes({ [:alt_title] => {"0" => "Title"}} ) 
+      obj.save
+
+      #Update the object
+      obj2 = Foo.find(obj.pid)
+      obj2.stuff.controlGroup = 'M'
+      obj2.save
+
+      @obj = Foo.find(obj.pid)
+    end
+
+    after :all do
+      Object.send(:remove_const, :Foo)
+    end
+
+    it "should not change the datastream content" do
+      @obj.stuff.alt_title_values.should == ['Title']
+    end
+  end
+  describe "updating a datastream's content" do
+    before :all do
       class Foo < ActiveFedora::Base
         has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|
           m.field "field1",  :string
@@ -25,7 +52,7 @@ describe ActiveFedora::MetadataDatastream do
       @obj = Foo.find(obj.pid)
     end
 
-    after do
+    after :all do
       Object.send(:remove_const, :Foo)
     end
 

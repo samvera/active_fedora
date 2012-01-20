@@ -204,7 +204,7 @@ module ActiveFedora
       ds.mimeType = opts[:mimeType] 
       ds.controlGroup = opts[:controlGroup] 
       ds.dsLabel = opts[:dsLabel] 
-      ds.dsLocation = opts[:dsLocation] 
+      ds.dsLocation = opts[:dsLocation] if opts[:dsLocation]
       blob = opts[:blob] 
       if blob 
         if !ds.mimeType.present? 
@@ -213,36 +213,12 @@ module ActiveFedora
         end
         if !ds.dsLabel.present? && blob.respond_to?(:path)
           ds.dsLabel = File.basename(blob.path)
-#          ds.dsLabel = blob.original_filename
         end
       end
 
-#      blob = blob.read if blob.respond_to? :read
       ds.content = blob || "" 
       ds
     end
-
-    # def configure_defined_datastreams
-    #   if self.class.ds_specs
-    #     self.class.ds_specs.each do |name,ds_config|
-    #       if self.datastreams.has_key?(name)
-    #         #attributes = self.datastreams[name].attributes
-    #       else
-    #         ds = ds_config[:type].new(inner_object, name)
-    #         ds.model = self if ds_config[:type] == RelsExtDatastream
-    #         ds.dsLabel = ds_config[:label] if ds_config[:label].present?
-    #         ds.controlGroup = ds_config[:control_group]
-    #         # If you called has_metadata with a block, pass the block into the Datastream class
-    #         if ds_config[:block].class == Proc
-    #           ds_config[:block].call(ds)
-    #         end
-    #         additional_attributes_for_external_and_redirect_control_groups(ds, ds_config)
-    #         self.add_datastream(ds)
-    #       end
-    #     end
-    #   end
-    # end
-
 
     # This method provides validation of proper options for control_group 'E' and 'R' and builds an attribute hash to be merged back into ds.attributes prior to saving
     #
