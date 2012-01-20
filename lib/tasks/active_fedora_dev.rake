@@ -47,7 +47,7 @@ require 'rspec/core/rake_task'
     ActiveFedora.init unless Thread.current[:repo]
     
     ENV["pid"] = "hydrangea:fixture_mods_article1"
-    Rake::Task["af:refresh_fixture"].invoke
+    Rake::Task["repo:refresh"].invoke
     ENV["pid"] = nil
   end
 
