@@ -1,10 +1,5 @@
 require 'spec_helper'
 
-require 'active_fedora'
-require 'xmlsimple'
-require 'nokogiri'
-require 'equivalent-xml'
-
 describe ActiveFedora::QualifiedDublinCoreDatastream do
 
   before(:all) do
@@ -128,6 +123,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   describe 'serialize!' do
     it "should call .content= with to_dc_xml" do
       result = @test_ds.to_dc_xml
+      @test_ds.ensure_xml_loaded
       @test_ds.expects(:content=).with(result)
       @test_ds.expects(:dirty?).returns(true)
       @test_ds.serialize!

@@ -41,14 +41,17 @@ describe ActiveFedora::MetadataDatastream do
   
   describe '.save' do
     it "should persist the product of .to_xml in fedora" do
-      @test_ds.expects(:new?).returns(true).twice
+      @test_ds.field('coverage', :string)
+      @test_ds.expects(:new?).returns(true).times(3)
       @mock_repo.expects(:datastream).with(:pid => nil, :dsid => 'mdDs')
-      @mock_repo.expects(:add_datastream).with(:pid => nil, :dsid => 'mdDs', :checksumType => 'DISABLED', :versionable => true, :content => 'fake xml', :controlGroup => 'M', :dsState => 'A', :mimeType=>'text/xml')
-      @test_ds.expects(:to_xml).returns("fake xml")
+      @mock_repo.expects(:add_datastream)
+      #@test_ds.expects(:to_xml).returns("fake xml")
       @test_ds.expects(:dirty?).returns(true)
+      @test_ds.update_attributes(:coverage=>"Hat")
       @test_ds.serialize!
       @test_ds.save
       @test_ds.mimeType.should == 'text/xml'
+      @test_ds.content.should == "<?xml version=\"1.0\"?>\n<fields>\n  <coverage>Hat</coverage>\n</fields>\n"
     end
   end
   

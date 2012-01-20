@@ -15,7 +15,6 @@ describe ActiveFedora::DatastreamCollections do
   describe '#add_named_datastream' do
     it 'should add a datastream with the given name to the object in fedora' do
       @test_object2 = MockAFBaseDatastream.new
-#      @test_object2.new_object = true
       f = File.open(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"), 'rb')
       f2 = File.open(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ), 'rb')
       f2.stubs(:original_filename).returns("dino.jpg")

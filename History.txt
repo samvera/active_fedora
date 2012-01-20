@@ -1,3 +1,7 @@
+3.2.2
+Rubydora 0.4.1
+Fixed bugs where updating datastream properties would overwrite content.
+
 3.2.1
 Load rake tasks.
 Rubydora 0.4.0
