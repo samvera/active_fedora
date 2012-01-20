@@ -1,6 +1,7 @@
 3.2.2
 Rubydora 0.4.1
 Fixed bugs where updating datastream properties would overwrite content.
+HYDRA-661: Changed namespaces and names or rake tasks according to HYDRA-661 with the exception that harvest was renamed export
 
 3.2.1
 Load rake tasks.
