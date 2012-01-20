@@ -2,20 +2,6 @@ APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/../../")
 
 require 'jettywrapper'
 
-desc "Hudson build"
-task :hudson do
-  ENV['environment'] = "test"
-  Rake::Task["active_fedora:doc"].invoke
-  Rake::Task["active_fedora:configure_jetty"].invoke
-  jetty_params = Jettywrapper.load_config
-  jetty_params[:startup_wait]= 30
-  error = Jettywrapper.wrap(jetty_params) do
-    Rake::Task["active_fedora:load_fixtures"].invoke
-    Rake::Task["active_fedora:rspec"].invoke
-  end
-  raise "test failures: #{error}" if error
-end
-
 namespace :active_fedora do
   require 'active-fedora'
 
@@ -73,6 +59,20 @@ require 'rspec/core/rake_task'
       cp("#{f}", 'jetty/solr/test-core/conf/', :verbose => true)
     end
   end
+
+
+desc "Hudson build"
+task :hudson do
+  ENV['environment'] = "test"
+  Rake::Task["active_fedora:doc"].invoke
+  Rake::Task["active_fedora:configure_jetty"].invoke
+  jetty_params = Jettywrapper.load_config
+  jetty_params[:startup_wait]= 30
+  error = Jettywrapper.wrap(jetty_params) do
+    Rake::Task["active_fedora:load_fixtures"].invoke
+    Rake::Task["active_fedora:rspec"].invoke
+  end
+  raise "test failures: #{error}" if error
 end
 
 # Provides an :environment task for use while working within a working copy of active-fedora
@@ -83,3 +83,6 @@ task :environment do
   require "#{APP_ROOT}/spec/samples/models/hydrangea_article"
   require 'active_fedora/samples'
 end
+
+end
+
