@@ -51,12 +51,12 @@ module ActiveFedora
     # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
     def to_rels_ext()
       xml = ActiveFedora::RDFXMLWriter.buffer do |writer|
+        writer.prefixes.merge! ActiveFedora::Predicates.predicate_namespaces
         model.relationships.each_statement do |statement|
           writer << statement
         end
       end
       xml
-
     end
 
     def self.short_predicate(predicate)
