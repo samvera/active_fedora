@@ -9,8 +9,8 @@ module ActiveFedora
 
     def self.connect(params={})
       params = params.dup
-      if params.kind_of? String
-        u = URI.parse params
+      if params[:url] && !params[:user]
+        u = URI.parse params[:url]
         params = {}
         params[:user] = u.user
         params[:password] = u.password
@@ -26,7 +26,7 @@ module ActiveFedora
     def connection
       return @connection if @connection
       ActiveFedora.load_configs
-      ActiveFedora::RubydoraConnection.connect(ActiveFedora.fedora_config[:url])
+      ActiveFedora::RubydoraConnection.connect(ActiveFedora.config_for_environment)
       @connection
     end
     

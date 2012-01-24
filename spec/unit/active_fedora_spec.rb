@@ -165,14 +165,14 @@ describe ActiveFedora do
       it "should load the file specified in fedora_config_path" do
         ActiveFedora.expects(:fedora_config_path).returns("/path/to/fedora.yml")
         File.expects(:open).with("/path/to/fedora.yml").returns("test:\n  url: http://myfedora:8080")
-        ActiveFedora.load_config(:fedora).should eql({:url=>"http://myfedora:8080","test"=>{"url"=>"http://myfedora:8080"}})
-        ActiveFedora.fedora_config.should eql({:url=>"http://myfedora:8080","test"=>{"url"=>"http://myfedora:8080"}})
+        ActiveFedora.load_config(:fedora).should eql({'url'=>"http://myfedora:8080","test"=>{"url"=>"http://myfedora:8080"}})
+        ActiveFedora.fedora_config.should eql({'url'=>"http://myfedora:8080","test"=>{"url"=>"http://myfedora:8080"}})
       end
       it "should load the file specified in solr_config_path" do
         ActiveFedora.expects(:solr_config_path).returns("/path/to/solr.yml")
         File.expects(:open).with("/path/to/solr.yml").returns("development:\n  default:\n    url: http://devsolr:8983\ntest:\n  default:\n    url: http://mysolr:8080")
-        ActiveFedora.load_config(:solr).should eql({:url=>"http://mysolr:8080","development"=>{"default"=>{"url"=>"http://devsolr:8983"}}, "test"=>{"default"=>{"url"=>"http://mysolr:8080"}}})
-        ActiveFedora.solr_config.should eql({:url=>"http://mysolr:8080","development"=>{"default"=>{"url"=>"http://devsolr:8983"}}, "test"=>{"default"=>{"url"=>"http://mysolr:8080"}}})
+        ActiveFedora.load_config(:solr).should eql({'url'=>"http://mysolr:8080","development"=>{"default"=>{"url"=>"http://devsolr:8983"}}, "test"=>{"default"=>{"url"=>"http://mysolr:8080"}}})
+        ActiveFedora.solr_config.should eql({'url'=>"http://mysolr:8080","development"=>{"default"=>{"url"=>"http://devsolr:8983"}}, "test"=>{"default"=>{"url"=>"http://mysolr:8080"}}})
       end
     end
 

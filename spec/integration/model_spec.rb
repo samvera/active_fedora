@@ -23,7 +23,6 @@ describe ActiveFedora::Model do
       
     end
 
-    ActiveFedora::RubydoraConnection.connect(ActiveFedora.fedora_config[:url])
     @test_instance = ModelIntegrationSpec::Basic.new
     @test_instance.save
     

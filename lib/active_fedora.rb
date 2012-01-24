@@ -4,6 +4,7 @@ require 'active_fedora/solr_service'
 require 'active_fedora/rubydora_connection'
 require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/object'
+require 'active_support/core_ext/hash/indifferent_access'
 
 SOLR_DOCUMENT_ID = ActiveFedora::SolrService.id_field unless defined?(SOLR_DOCUMENT_ID)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
@@ -136,13 +137,17 @@ module ActiveFedora #:nodoc:
     config_path = self.send("#{config_type}_config_path".to_sym)
 
     logger.info("#{config_type.upcase}: loading ActiveFedora.#{config_type}_config from #{File.expand_path(config_path)}")
-    config = YAML::load(File.open(config_path))
+    config = YAML.load(File.open(config_path)).with_indifferent_access
     raise "The #{@config_env.to_s} environment settings were not found in the #{config_type}.yml config.  If you already have a #{config_type}.yml file defined, make sure it defines settings for the #{@config_env} environment" unless config[@config_env]
     
     config[:url] = determine_url(config_type,config)
 
     self.instance_variable_set("@#{config_type}_config", config)
     config
+  end
+
+  def self.config_for_environment
+    fedora_config[environment]
   end
 
   # Determines and sets the fedora_config[:url] or solr_config[:url]
@@ -153,6 +158,7 @@ module ActiveFedora #:nodoc:
     if config_type == "fedora"
       # support old-style config
       if config[environment].fetch("fedora",nil)
+        ActiveSupport::Deprecation.warn("Using \"fedora\" in the fedora.yml file is no longer supported") 
         return config[environment]["fedora"]["url"] if config[environment].fetch("fedora",nil)
       else
         return config[environment]["url"]

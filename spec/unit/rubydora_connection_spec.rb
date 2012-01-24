@@ -60,9 +60,6 @@ describe ActiveFedora::RubydoraConnection do
     end
   end
 
-  describe 'find_model' do
-    
-  end
 
   
 end
