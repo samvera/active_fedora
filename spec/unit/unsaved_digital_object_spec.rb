@@ -2,10 +2,14 @@ require 'spec_helper'
 
 describe ActiveFedora::UnsavedDigitalObject do
   
-  it "should have ownerId property" do
-    @obj = ActiveFedora::UnsavedDigitalObject.new(String, 'bar') 
-    @obj.ownerId = 'fooo'
-    @obj.ownerId.should == 'fooo'
+  describe "an unsaved instance" do
+    before do
+      @obj = ActiveFedora::UnsavedDigitalObject.new(String, 'bar') 
+    end
+    it "should have ownerId property" do
+      @obj.ownerId = 'fooo'
+      @obj.ownerId.should == 'fooo'
+    end
   end
 
   describe "#save" do
