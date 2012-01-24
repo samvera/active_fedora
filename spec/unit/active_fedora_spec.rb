@@ -145,18 +145,19 @@ describe ActiveFedora do
 
     describe "#determine url" do
       it "should support config['environment']['fedora']['url'] if config_type is fedora" do
-        config = {"test"=> {"fedora"=>{"url"=>"http://fedoraAdmin:fedorAdmin@oldstyle_url:8983/fedora"}}}
+        config = {:test=> {:fedora=>{"url"=>"http://fedoraAdmin:fedorAdmin@oldstyle_url:8983/fedora"}}}
+        ActiveSupport::Deprecation.expects(:warn).with("Using \"fedora\" in the fedora.yml file is no longer supported")
         ActiveFedora.determine_url("fedora",config).should eql("http://fedoraAdmin:fedorAdmin@oldstyle_url:8983/fedora")
       end
 
       it "should support config['environment']['url'] if config_type is fedora" do
-        config = {"test"=> {"url"=>"http://fedoraAdmin:fedorAdmin@oldstyle_url:8983/fedora"}}
+        config = {:test=> {:url=>"http://fedoraAdmin:fedorAdmin@oldstyle_url:8983/fedora"}}
         ActiveFedora.determine_url("fedora",config).should eql("http://fedoraAdmin:fedorAdmin@oldstyle_url:8983/fedora")
       end
 
       it "should call #get_solr_url to determine the solr url if config_type is solr" do
-        config = {"test"=>{"default" => "http://default.solr:8983"}}
-        ActiveFedora.expects(:get_solr_url).with(config["test"]).returns("http://default.solr:8983")
+        config = {:test=>{:default => "http://default.solr:8983"}}
+        ActiveFedora.expects(:get_solr_url).with(config[:test]).returns("http://default.solr:8983")
         ActiveFedora.determine_url("solr",config).should eql("http://default.solr:8983")
       end
     end
@@ -165,14 +166,14 @@ describe ActiveFedora do
       it "should load the file specified in fedora_config_path" do
         ActiveFedora.expects(:fedora_config_path).returns("/path/to/fedora.yml")
         File.expects(:open).with("/path/to/fedora.yml").returns("test:\n  url: http://myfedora:8080")
-        ActiveFedora.load_config(:fedora).should eql({'url'=>"http://myfedora:8080","test"=>{"url"=>"http://myfedora:8080"}})
-        ActiveFedora.fedora_config.should eql({'url'=>"http://myfedora:8080","test"=>{"url"=>"http://myfedora:8080"}})
+        ActiveFedora.load_config(:fedora).should eql({:url=>"http://myfedora:8080",:test=>{"url"=>"http://myfedora:8080"}})
+        ActiveFedora.fedora_config.should eql({:url=>"http://myfedora:8080",:test=>{"url"=>"http://myfedora:8080"}})
       end
       it "should load the file specified in solr_config_path" do
         ActiveFedora.expects(:solr_config_path).returns("/path/to/solr.yml")
         File.expects(:open).with("/path/to/solr.yml").returns("development:\n  default:\n    url: http://devsolr:8983\ntest:\n  default:\n    url: http://mysolr:8080")
-        ActiveFedora.load_config(:solr).should eql({'url'=>"http://mysolr:8080","development"=>{"default"=>{"url"=>"http://devsolr:8983"}}, "test"=>{"default"=>{"url"=>"http://mysolr:8080"}}})
-        ActiveFedora.solr_config.should eql({'url'=>"http://mysolr:8080","development"=>{"default"=>{"url"=>"http://devsolr:8983"}}, "test"=>{"default"=>{"url"=>"http://mysolr:8080"}}})
+        ActiveFedora.load_config(:solr).should eql({:url=>"http://mysolr:8080",:development=>{"default"=>{"url"=>"http://devsolr:8983"}}, :test=>{"default"=>{"url"=>"http://mysolr:8080"}}})
+        ActiveFedora.solr_config.should eql({:url=>"http://mysolr:8080",:development=>{"default"=>{"url"=>"http://devsolr:8983"}}, :test=>{"default"=>{"url"=>"http://mysolr:8080"}}})
       end
     end
 
@@ -387,6 +388,7 @@ describe ActiveFedora do
             File.stubs(:open).with(solr_config_path).returns(solr_config)
 
 
+            ActiveSupport::Deprecation.expects(:warn).with("Using \"fedora\" in the fedora.yml file is no longer supported")
             ActiveFedora.init(:fedora_config_path=>fedora_config_path,:solr_config_path=>solr_config_path)
             ActiveFedora.solr.class.should == ActiveFedora::SolrService
             ActiveFedora.fedora.class.should == ActiveFedora::RubydoraConnection

@@ -137,8 +137,8 @@ module ActiveFedora #:nodoc:
     config_path = self.send("#{config_type}_config_path".to_sym)
 
     logger.info("#{config_type.upcase}: loading ActiveFedora.#{config_type}_config from #{File.expand_path(config_path)}")
-    config = YAML.load(File.open(config_path)).with_indifferent_access
-    raise "The #{@config_env.to_s} environment settings were not found in the #{config_type}.yml config.  If you already have a #{config_type}.yml file defined, make sure it defines settings for the #{@config_env} environment" unless config[@config_env]
+    config = YAML.load(File.open(config_path)).symbolize_keys
+    raise "The #{@config_env.to_sym} environment settings were not found in the #{config_type}.yml config.  If you already have a #{config_type}.yml file defined, make sure it defines settings for the #{@config_env} environment" unless config[@config_env.to_sym]
     
     config[:url] = determine_url(config_type,config)
 
@@ -147,7 +147,7 @@ module ActiveFedora #:nodoc:
   end
 
   def self.config_for_environment
-    fedora_config[environment]
+    fedora_config[@config_env.to_sym].symbolize_keys
   end
 
   # Determines and sets the fedora_config[:url] or solr_config[:url]
@@ -155,26 +155,27 @@ module ActiveFedora #:nodoc:
   # @param [Hash] config The config hash 
   # @return [String] the solr or fedora url
   def self.determine_url(config_type,config)  
+    c = config[environment.to_sym].symbolize_keys
     if config_type == "fedora"
       # support old-style config
-      if config[environment].fetch("fedora",nil)
+      if c.fetch(:fedora,nil)
         ActiveSupport::Deprecation.warn("Using \"fedora\" in the fedora.yml file is no longer supported") 
-        return config[environment]["fedora"]["url"] if config[environment].fetch("fedora",nil)
+        return c[:fedora]["url"] if config[environment.to_sym].fetch(:fedora,nil)
       else
-        return config[environment]["url"]
+        return c[:url]
       end
     else
-      return get_solr_url(config[environment]) if config_type == "solr"
+      return get_solr_url(c) if config_type == "solr"
     end
   end
 
   # Given the solr_config that's been loaded for this environment, 
   # determine which solr url to use
   def self.get_solr_url(solr_config)
-    if @index_full_text == true && solr_config.has_key?('fulltext') && solr_config['fulltext'].has_key?('url')
-      return solr_config['fulltext']['url']
-    elsif solr_config.has_key?('default') && solr_config['default'].has_key?('url')
-      return solr_config['default']['url']
+    if @index_full_text == true && solr_config.has_key?(:fulltext) && solr_config[:fulltext].has_key?('url')
+      return solr_config[:fulltext]['url']
+    elsif solr_config.has_key?(:default) && solr_config[:default].has_key?('url')
+      return solr_config[:default]['url']
     elsif solr_config.has_key?('url')
       return solr_config['url']
     elsif solr_config.has_key?(:url)
