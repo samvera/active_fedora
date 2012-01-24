@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::UnsavedDigitalObject do
+  
   it "should have ownerId property" do
     @obj = ActiveFedora::UnsavedDigitalObject.new(String, 'bar') 
     @obj.ownerId = 'fooo'
@@ -8,12 +9,20 @@ describe ActiveFedora::UnsavedDigitalObject do
   end
 
   describe "#save" do
+    before :all do
+      obj = ActiveFedora::UnsavedDigitalObject.new(String, 'bar') 
+      obj.label = 'my label'
+      obj.ownerId = 'fooo'
+      @saved_obj = obj.save
+    end
+    it "should be a digital object" do
+      @saved_obj.should be_kind_of ActiveFedora::DigitalObject
+    end
     it "should set the ownerId property" do
-      @obj = ActiveFedora::UnsavedDigitalObject.new(String, 'bar') 
-      @obj.ownerId = 'fooo'
-      saved_obj = @obj.save
-      saved_obj.should be_kind_of ActiveFedora::DigitalObject
-      saved_obj.ownerId.should == 'fooo'
+      @saved_obj.ownerId.should == 'fooo'
+    end
+    it "should set the label property" do
+      @saved_obj.label.should == 'Label'
     end
   end
 

@@ -26,6 +26,7 @@ module ActiveFedora
         obj.datastreams[k] = v
       end
       obj.ownerId = ownerId if ownerId
+      obj.label = label if label
       obj
     end
 
