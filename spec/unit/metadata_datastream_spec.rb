@@ -22,7 +22,7 @@ describe ActiveFedora::MetadataDatastream do
     @test_object = ActiveFedora::Base.new
     @mock_repo = mock('repository')
     @mock_repo.stubs(:datastream)
-    @mock_repo.stubs(:datastream_dissemination=>'My Content')
+    @mock_repo.stubs(:datastream_dissemination=>'My Content', :config=>{})
     mock_inner.stubs(:repository).returns(@mock_repo)
     mock_inner.stubs(:pid)
     @test_ds = ActiveFedora::MetadataDatastream.new(mock_inner, 'mdDs')

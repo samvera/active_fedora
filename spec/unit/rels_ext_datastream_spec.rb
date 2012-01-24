@@ -16,7 +16,7 @@ describe ActiveFedora::RelsExtDatastream do
   before(:each) do
       mock_inner = mock('inner object')
       @mock_repo = mock('repository')
-      @mock_repo.stubs(:datastream_dissemination=>'My Content')
+      @mock_repo.stubs(:datastream_dissemination=>'My Content', :config=>{})
       mock_inner.stubs(:repository).returns(@mock_repo)
       mock_inner.stubs(:pid).returns(@pid)
       @test_ds = ActiveFedora::RelsExtDatastream.new(mock_inner, "RELS-EXT")
@@ -24,7 +24,7 @@ describe ActiveFedora::RelsExtDatastream do
 
   describe "#save" do
     before do
-      @mock_repo.expects(:add_datastream).with(:pid => 'test:sample_pid', :dsid => 'RELS-EXT', :checksumType => 'DISABLED', :versionable => true, :content => 'fake xml', :controlGroup => 'M', :dsState => 'A', :mimeType=>'application/rdf+xml')
+      @mock_repo.expects(:add_datastream).with(:pid => 'test:sample_pid', :dsid => 'RELS-EXT', :versionable => true, :content => 'fake xml', :controlGroup => 'M', :dsState => 'A', :mimeType=>'application/rdf+xml')
       @mock_repo.expects(:datastream).with(:pid => 'test:sample_pid', :dsid => 'RELS-EXT')
       @test_ds.content = 'fake xml'
     end

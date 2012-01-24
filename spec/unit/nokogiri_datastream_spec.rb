@@ -16,7 +16,7 @@ describe ActiveFedora::NokogiriDatastream do
   before(:each) do
     @mock_inner = mock('inner object')
     @mock_repo = mock('repository')
-    @mock_repo.stubs(:datastream_dissemination=>'My Content')
+    @mock_repo.stubs(:datastream_dissemination=>'My Content', :config=>{})
     @mock_inner.stubs(:repository).returns(@mock_repo)
     @mock_inner.stubs(:pid)
     @test_ds = ActiveFedora::NokogiriDatastream.new(@mock_inner, "descMetadata")
@@ -172,7 +172,7 @@ describe ActiveFedora::NokogiriDatastream do
     it "should persist the product of .to_xml in fedora" do
       @test_ds.expects(:new?).returns(true).twice
       @mock_repo.expects(:datastream).with(:pid => nil, :dsid => 'descMetadata')
-      @mock_repo.expects(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :checksumType => 'DISABLED', :versionable => true, :content => 'fake xml', :controlGroup => 'M', :dsState => 'A', :mimeType=>'text/xml')
+      @mock_repo.expects(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'M', :dsState => 'A', :mimeType=>'text/xml')
       @test_ds.expects(:to_xml).returns("fake xml")
       @test_ds.serialize!
       @test_ds.save

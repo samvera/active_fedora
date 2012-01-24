@@ -19,10 +19,10 @@ describe ActiveFedora::Datastream do
   
   describe '#save' do
     it "should set dirty? to false" do
-      @mock_repo = mock('repository')
-      @mock_repo.stubs(:add_datastream).with(:mimeType=>'text/xml', :versionable => true, :pid => @test_object.pid, :dsid => 'abcd', :controlGroup => 'M', :dsState => 'A', :content => 'hi there', :checksumType => 'DISABLED')
-      @mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid)
-      @test_object.inner_object.stubs(:repository).returns(@mock_repo)
+      mock_repo = mock('repository', :config=>{})
+      mock_repo.stubs(:add_datastream).with(:mimeType=>'text/xml', :versionable => true, :pid => @test_object.pid, :dsid => 'abcd', :controlGroup => 'M', :dsState => 'A', :content => 'hi there')
+      mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid)
+      @test_object.inner_object.stubs(:repository).returns(mock_repo)
       @test_datastream.dirty?.should be_true
       @test_datastream.save
       @test_datastream.dirty?.should be_false
@@ -85,8 +85,10 @@ describe ActiveFedora::Datastream do
          <dsChecksum>none</dsChecksum>
          </datastreamProfile>"
       EOS
-      @test_datastream.expects(:repository).returns(@mock_repo)
-      @mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).returns(ds_profile)
+
+      mock_repo = mock('repository', :config=>{})
+      @test_datastream.stubs(:repository).returns(mock_repo)
+      mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).returns(ds_profile)
       @test_datastream.size.should == 9999
     end
 
