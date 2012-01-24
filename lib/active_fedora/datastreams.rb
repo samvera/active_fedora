@@ -201,10 +201,9 @@ module ActiveFedora
       klass = type.kind_of?(Class) ? type : type.constantize
       raise ArgumentError, "Argument dsid must be of type string" unless dsid.kind_of?(String) || dsid.kind_of?(NilClass)
       ds = klass.new(inner_object, dsid)
-      ds.mimeType = opts[:mimeType] 
-      ds.controlGroup = opts[:controlGroup] 
-      ds.dsLabel = opts[:dsLabel] 
-      ds.dsLocation = opts[:dsLocation] if opts[:dsLocation]
+      [:mimeType, :controlGroup, :dsLabel, :dsLocation, :checksumType].each do |key|
+        ds.send("#{key}=".to_sym, opts[key]) if opts[key]
+      end
       blob = opts[:blob] 
       if blob 
         if !ds.mimeType.present? 

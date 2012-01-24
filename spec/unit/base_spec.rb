@@ -522,53 +522,6 @@ describe ActiveFedora::Base do
     
   end
 
-  describe "#create_datastream" do
-    it 'should create a datastream object using the type of object supplied in the string (does reflection)' do
-      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
-      f.stubs(:content_type).returns("image/jpeg")
-      f.stubs(:original_filename).returns("minivan.jpg")
-      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:blob=>f})
-      ds.class.should == ActiveFedora::Datastream
-      ds.dsLabel.should == "minivan.jpg"
-      ds.mimeType.should == "image/jpeg"
-    end
-    it 'should create a datastream object from a string' do
-      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:blob=>"My file data"})
-      ds.class.should == ActiveFedora::Datastream
-      ds.dsLabel.should == nil
-      ds.mimeType.should == "application/octet-stream"
-    end
-
-    it 'should not set dsLocation if dsLocation is nil' do
-      ActiveFedora::Datastream.any_instance.expects(:dsLocation=).never
-      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:dsLocation=>nil})
-    end
-  end
-
-  describe ".add_file_datastream" do
-    before do
-      @mock_file = mock('file')
-    end
-    it "should pass prefix" do
-      #@test_object.expects(:create_datastream).with(ActiveFedora::Datastream, nil, attrs)
-      stub_add_ds(@test_object.pid, ['content1'])
-      @test_object.add_file_datastream(@mock_file, :prefix=>'content' )
-      @test_object.datastreams.keys.should include 'content1'
-    end
-    it "should pass dsid" do
-      #@test_object.expects(:create_datastream).with(ActiveFedora::Datastream, "MY_DSID", attrs)
-      stub_add_ds(@test_object.pid, ['MY_DSID'])
-      @test_object.add_file_datastream(@mock_file, :dsid=>'MY_DSID')
-      @test_object.datastreams.keys.should include 'MY_DSID'
-    end
-    it "without dsid or prefix" do
-      #@test_object.expects(:create_datastream).with(ActiveFedora::Datastream, nil, attrs)
-      stub_add_ds(@test_object.pid, ['DS1'])
-      @test_object.add_file_datastream(@mock_file, {} )
-      @test_object.datastreams.keys.should include 'DS1'
-    end
-  end
-
   describe ".adapt_to" do
     it "should return an adapted object of the requested type" do
       @test_object = FooHistory.new()

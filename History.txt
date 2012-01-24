@@ -1,3 +1,7 @@
+3.2.3
+A label set on an unsaved datastream should be saved in the repository
+Should be able to add checksumType parameter when creating a datastream
+
 3.2.2
 Rubydora 0.4.1
 Fixed bugs where updating datastream properties would overwrite content.
