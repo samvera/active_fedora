@@ -53,8 +53,9 @@ describe ActiveFedora::RubydoraConnection do
     end
     
     it "should pass through valid options" do
-      ActiveFedora::RubydoraConnection.connect :timeout => 3600, :fake_option => :missing, :force => true
+      ActiveFedora::RubydoraConnection.connect :timeout => 3600, :fake_option => :missing, :force => true, :validateChecksum=>true
       @instance.connection.client.options[:timeout].should == 3600
+      @instance.connection.config[:validateChecksum].should == true
       @instance.connection.client.options.has_key?(:fake_option).should be_false
     end
   end

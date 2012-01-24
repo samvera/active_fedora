@@ -84,6 +84,14 @@ module ActiveFedora #:nodoc:
   # 1. look in config_options[:fedora_config_path].  If it finds a solr.yml there, it will use it.
   # 2. If it does not find a solr.yml and the fedora.yml contains a solr url, it will raise an configuration error 
   # 3. If it does not find a solr.yml and the fedora.yml does not contain a solr url, it will look in: +Rails.root+/config, +current working directory+/config, then the solr.yml shipped with gem
+
+  # Options allowed in fedora.yml
+  # first level is the environment (e.g. development, test, production and any custom environments you may have) 
+  # the second level has these keys:
+  # 1. url: url including protocol, user/pass, host, port and path (e.g. http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora)
+  # 2. validateChecksum:  indicates to the fedora server whether you want to validate checksums when the datastreams are queried.  
+
+
   def self.init( options={} )
     # Make config_options into a Hash if nil is passed in as the value
     options = {} if options.nil?
