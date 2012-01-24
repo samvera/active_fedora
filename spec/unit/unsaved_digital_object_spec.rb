@@ -22,7 +22,7 @@ describe ActiveFedora::UnsavedDigitalObject do
       @saved_obj.ownerId.should == 'fooo'
     end
     it "should set the label property" do
-      @saved_obj.label.should == 'Label'
+      @saved_obj.label.should == 'my label'
     end
   end
 
