@@ -56,6 +56,11 @@ describe ActiveFedora::Datastreams do
       @test_object.add_file_datastream(@mock_file, {} )
       @test_object.datastreams.keys.should include 'DS1'
     end
+    it "Should pass checksum Type" do
+      stub_add_ds(@test_object.pid, ['DS1'])
+      @test_object.add_file_datastream(@mock_file, {:checksumType=>'MD5'} )
+      @test_object.datastreams['DS1'].checksumType.should == 'MD5'
+    end
   end
 
 end
