@@ -236,5 +236,31 @@ module ActiveFedora
       end
     end
 
+
+    module ClassMethods
+      #This method is used to specify the details of a datastream. 
+      #args must include :name. Note that this method doesn't actually
+      #execute the block, but stores it at the class level, to be executed
+      #by any future instantiations.
+      def has_metadata(args, &block)
+        ds_specs[args[:name]]= {:type => args[:type], :label =>  args.fetch(:label,""), :control_group => args.fetch(:control_group,"X"), :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
+      end
+
+      # Specify the attributes of a file bearing datastream 
+      #
+      # === Options
+      # [:name]
+      #   The dsid of the datastream
+      # [:type]
+      #   The class the datastream should have
+      # [:label]
+      #   The default value to put in the dsLabel field
+      # [:control_group]
+      #   The type of controlGroup to store the datastream as. Defaults to M
+      def has_file_datastream(args)
+        ds_specs[args.fetch(:name, "content")]= {:type => args[:type], :label =>  args.fetch(:label,"File Datastream"), :control_group => args.fetch(:control_group,"M")}
+      end
+    end
+
   end
 end

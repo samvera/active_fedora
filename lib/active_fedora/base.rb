@@ -137,14 +137,6 @@ module ActiveFedora
       ds_specs[dsid] ? ds_specs[dsid][:type] : ActiveFedora::Datastream
     end
 
-    #This method is used to specify the details of a datastream. 
-    #args must include :name. Note that this method doesn't actually
-    #execute the block, but stores it at the class level, to be executed
-    #by any future instantiations.
-    def self.has_metadata(args, &block)
-      ds_specs[args[:name]]= {:type => args[:type], :label =>  args.fetch(:label,""), :control_group => args.fetch(:control_group,"X"), :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
-    end
-
     def self.create(args = {})
       obj = self.new(args)
       obj.save

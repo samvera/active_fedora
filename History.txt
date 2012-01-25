@@ -3,7 +3,7 @@ A label set on an unsaved datastream should be saved in the repository
 Should be able to add checksumType parameter when creating a datastream
 Upgrade rubydora to 0.5.0 so we can do checksum verification
 Pass checksumVerification parameter to rubydora
-Allow you to override the class of file datastream that gets created
+Allow you to override the class of file datastream that gets created by using ActiveFedora::Base.has_file_datastream
 
 3.2.2
 Rubydora 0.4.1
