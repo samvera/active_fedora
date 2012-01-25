@@ -68,6 +68,15 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe ".datastream_class_for_name" do
+    it "should return the specifed class" do
+      FooAdaptation.datastream_class_for_name('someData').should == ActiveFedora::NokogiriDatastream
+    end
+    it "should return the specifed class" do
+      FooAdaptation.datastream_class_for_name('content').should == ActiveFedora::Datastream
+    end
+  end
+
   describe ".internal_uri" do
     it "should return pid as fedors uri" do
       @test_object.internal_uri.should eql("info:fedora/#{@test_object.pid}")

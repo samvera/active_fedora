@@ -66,16 +66,6 @@ module ActiveFedora
     end
 
 
-    # class_attribute  :ds_specs
-    # 
-    # def self.inherited(p)
-    #   # each subclass should get a copy of the parent's datastream definitions, it should not add to the parent's definition table.
-    #   p.ds_specs = p.ds_specs.dup
-    #   super
-    # end
-    # 
-    # self.ds_specs = {'RELS-EXT'=> {:type=> ActiveFedora::RelsExtDatastream, :label=>"", :label=>"Fedora Object-to-Object Relationship Metadata", :control_group=>'X', :block=>nil}}
-
     # Has this object been saved?
     def new_object?
       inner_object.new?

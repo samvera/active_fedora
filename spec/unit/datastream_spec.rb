@@ -17,6 +17,10 @@ describe ActiveFedora::Datastream do
     @test_datastream.to_param.should == 'foo%2ebar'
   end
   
+  it "should be inspectable" do
+    @test_datastream.inspect.should match /#<ActiveFedora::Datastream:\d+ @pid=\"__DO_NOT_USE__\" @dsid=\"abcd\" @controlGroup=\"M\" @dirty=\"false\" @mimeType=\"\" >/
+  end
+
   describe '#save' do
     it "should set dirty? to false" do
       mock_repo = mock('repository', :config=>{})

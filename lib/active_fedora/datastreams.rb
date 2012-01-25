@@ -192,7 +192,7 @@ module ActiveFedora
         attrs.merge!({:mimeType=>opts[:content_type]})
       end
       attrs[:checksumType] = opts[:checksumType] if opts[:checksumType]
-      ds = create_datastream(ActiveFedora::Datastream, opts[:dsid], attrs)
+      ds = create_datastream(self.class.datastream_class_for_name(opts[:dsid]), opts[:dsid], attrs)
       add_datastream(ds)
     end
     
