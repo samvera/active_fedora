@@ -40,6 +40,13 @@ describe ActiveFedora::RelationshipGraph do
     @graph[:has_part].should == [@n1]
   end
 
+  describe "has_predicate?" do
+    it "should return true when it has it" do
+      @graph.has_predicate?(:has_part).should be_false
+      @graph.add(:has_part, @n1)
+      @graph.has_predicate?(:has_part).should be_true
+    end
+  end
 
   describe "delete" do
     it "should delete an object when an object is passed" do
@@ -68,6 +75,13 @@ describe ActiveFedora::RelationshipGraph do
       @graph[:has_part].should == [@n1]
       @graph.delete(:has_part, 'info:fedora/foo:777')
       @graph[:has_part].should == []
+    end
+
+    it "should delete all the predicates if only one arg is passed" do
+      @graph.add(:has_part, @n1)
+      @graph[:has_part].should == [@n1]
+      @graph.delete(:has_part)
+      @graph.has_predicate?(:has_part).should_not be_true
     end
   end
   describe "build_statement" do

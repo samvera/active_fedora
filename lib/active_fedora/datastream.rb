@@ -8,8 +8,8 @@ module ActiveFedora
     before_create :add_mime_type, :add_ds_location
   
     def initialize(digital_object, dsid)
-      @fields={}
-      @dirty = false
+      self.fields={}
+      self.dirty = false
       super
     end
     
@@ -39,7 +39,7 @@ module ActiveFedora
     
     # Test whether this datastream been modified since it was last saved
     def dirty?
-      @dirty || changed?
+      dirty || changed?
     end
 
     def new_object?
