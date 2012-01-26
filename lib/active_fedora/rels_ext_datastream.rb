@@ -46,9 +46,6 @@ module ActiveFedora
     end
 
     # Creates a RELS-EXT datastream for insertion into a Fedora Object
-    # @param [String] pid
-    # @param [Hash] relationships (optional) @default self.relationships
-    # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
     def to_rels_ext()
       xml = ActiveFedora::RDFXMLWriter.buffer do |writer|
         writer.prefixes.merge! ActiveFedora::Predicates.predicate_namespaces
