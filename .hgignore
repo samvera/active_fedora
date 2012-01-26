@@ -1,7 +1,0 @@
-syntax: glob
-*~
-*.orig
-*.swp
-*.bak
-pkg
-tasks/hoe.rake
