@@ -79,6 +79,33 @@ describe ActiveFedora::RelsExtDatastream do
       EquivalentXml.equivalent?(@test_ds.to_rels_ext(), @sample_rels_ext_xml).should be_true
     end
     
+    it 'should use mapped namespace prefixes when given' do
+      graph = RDF::Graph.new
+      subject = RDF::URI.new "info:fedora/test:sample_pid"
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:is_member_of),  RDF::URI.new('info:fedora/demo:10'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:is_part_of),  RDF::URI.new('info:fedora/demo:11'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new('info:fedora/demo:12'))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new("info:fedora/afmodel:OtherModel"))
+      graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new("info:fedora/afmodel:SampleModel"))
+
+      @test_ds.expects(:model).times(2).returns(stub("model", :relationships=>graph, :relationships_are_dirty= => true))
+      rels = @test_ds.to_rels_ext()
+      EquivalentXml.equivalent?(rels, @sample_rels_ext_xml).should be_true
+      rels.should_not =~ /fedora:isMemberOf/
+      rels.should_not =~ /fedora-model:hasModel/
+      rels.should =~ /ns\d:isMemberOf/
+      rels.should =~ /ns\d:hasModel/
+      
+      ActiveFedora::Predicates.predicate_config[:predicate_namespaces] = {:"fedora-model"=>"info:fedora/fedora-system:def/model#", :fedora=>"info:fedora/fedora-system:def/relations-external#"}
+      rels = @test_ds.to_rels_ext()
+      EquivalentXml.equivalent?(rels, @sample_rels_ext_xml).should be_true
+      rels.should =~ /fedora:isMemberOf/
+      rels.should =~ /fedora-model:hasModel/
+      rels.should_not =~ /ns\d:isMemberOf/
+      rels.should_not =~ /ns\d:hasModel/
+      ActiveFedora::Predicates.predicate_config[:predicate_namespaces] = nil
+    end
+    
   end
   
   describe "#from_xml" do

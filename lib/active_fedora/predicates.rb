@@ -54,6 +54,10 @@ module ActiveFedora
       @@predicate_config ||= YAML::load(File.open(ActiveFedora.predicate_config)) if File.exist?(ActiveFedora.predicate_config)
     end
 
+    def self.predicate_namespaces
+      predicate_config[:predicate_namespaces] || {}
+    end
+    
     def self.predicate_mappings
       predicate_config[:predicate_mapping]
     end
