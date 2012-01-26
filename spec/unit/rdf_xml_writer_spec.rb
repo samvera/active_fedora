@@ -30,7 +30,7 @@ describe ActiveFedora::RDFXMLWriter do
     subject = RDF::URI.new "info:fedora/test:sample_pid"
     graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:is_member_of),  RDF::URI.new('demo:10'))
     graph.insert RDF::Statement.new(subject, RDF::URI('http://www.w3.org/1999/02/22-rdf-syntax-ns#type'),  RDF::URI.new('http://purl.org/dc/dcmitype/Collection'))
-    content = RDF::RDFXML::Writer.buffer do |writer|
+    content = ActiveFedora::RDFXMLWriter.buffer do |writer|
       graph.each_statement do |statement|
         writer << statement
       end
