@@ -4,6 +4,7 @@ Should be able to add checksumType parameter when creating a datastream
 Upgrade rubydora to 0.5.0 so we can do checksum verification
 Pass checksumVerification parameter to rubydora
 Allow you to override the class of file datastream that gets created by using ActiveFedora::Base.has_file_datastream
+Allow `predicate_mappings.yml` to specify explicit namespace prefixes to use instead of ns0, ns1, ..., nsN when serializing a `RelsExtDatastream`.
 
 3.2.2
 Rubydora 0.4.1
