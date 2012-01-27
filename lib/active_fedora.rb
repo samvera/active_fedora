@@ -33,9 +33,11 @@ module ActiveFedora #:nodoc:
     autoload :MetadataDatastream
     autoload :MetadataDatastreamHelper
     autoload :NokogiriDatastream
+    autoload :NtriplesRDFDatastream
     autoload :Property
     autoload :Persistence
     autoload :QualifiedDublinCoreDatastream
+    autoload :RDFDatastream
     autoload :RelsExtDatastream
     autoload :ServiceDefinitions
     autoload :SemanticNode
