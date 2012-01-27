@@ -145,14 +145,14 @@ describe ActiveFedora do
 
     describe "#determine url" do
       it "should support config['environment']['fedora']['url'] if config_type is fedora" do
-        config = {:test=> {:fedora=>{"url"=>"http://fedoraAdmin:fedorAdmin@oldstyle_url:8983/fedora"}}}
+        config = {:test=> {:fedora=>{"url"=>"http://fedoraAdmin:fedorAdmin@localhost:8983/fedora"}}}
         ActiveSupport::Deprecation.expects(:warn).with("Using \"fedora\" in the fedora.yml file is no longer supported")
-        ActiveFedora.determine_url("fedora",config).should eql("http://fedoraAdmin:fedorAdmin@oldstyle_url:8983/fedora")
+        ActiveFedora.determine_url("fedora",config).should eql("http://localhost:8983/fedora")
       end
 
       it "should support config['environment']['url'] if config_type is fedora" do
-        config = {:test=> {:url=>"http://fedoraAdmin:fedorAdmin@oldstyle_url:8983/fedora"}}
-        ActiveFedora.determine_url("fedora",config).should eql("http://fedoraAdmin:fedorAdmin@oldstyle_url:8983/fedora")
+        config = {:test=> {:url=>"http://fedoraAdmin:fedorAdmin@localhost:8983/fedora"}}
+        ActiveFedora.determine_url("fedora",config).should eql("http://localhost:8983/fedora")
       end
 
       it "should call #get_solr_url to determine the solr url if config_type is solr" do
@@ -166,14 +166,14 @@ describe ActiveFedora do
       it "should load the file specified in fedora_config_path" do
         ActiveFedora.expects(:fedora_config_path).returns("/path/to/fedora.yml")
         File.expects(:open).with("/path/to/fedora.yml").returns("test:\n  url: http://myfedora:8080")
-        ActiveFedora.load_config(:fedora).should eql({:url=>"http://myfedora:8080",:test=>{"url"=>"http://myfedora:8080"}})
-        ActiveFedora.fedora_config.should eql({:url=>"http://myfedora:8080",:test=>{"url"=>"http://myfedora:8080"}})
+        ActiveFedora.load_config(:fedora).should eql({:url=>"http://myfedora:8080",:test=>{:url=>"http://myfedora:8080", :user=>nil, :password=>nil}})
+        ActiveFedora.fedora_config.should eql({:url=>"http://myfedora:8080",:test=>{:url=>"http://myfedora:8080", :user=>nil, :password=>nil}})
       end
       it "should load the file specified in solr_config_path" do
         ActiveFedora.expects(:solr_config_path).returns("/path/to/solr.yml")
         File.expects(:open).with("/path/to/solr.yml").returns("development:\n  default:\n    url: http://devsolr:8983\ntest:\n  default:\n    url: http://mysolr:8080")
-        ActiveFedora.load_config(:solr).should eql({:url=>"http://mysolr:8080",:development=>{"default"=>{"url"=>"http://devsolr:8983"}}, :test=>{"default"=>{"url"=>"http://mysolr:8080"}}})
-        ActiveFedora.solr_config.should eql({:url=>"http://mysolr:8080",:development=>{"default"=>{"url"=>"http://devsolr:8983"}}, :test=>{"default"=>{"url"=>"http://mysolr:8080"}}})
+        ActiveFedora.load_config(:solr).should eql({:url=>"http://mysolr:8080",:development=>{"default"=>{"url"=>"http://devsolr:8983"}}, :test=>{:default=>{"url"=>"http://mysolr:8080"}}})
+        ActiveFedora.solr_config.should eql({:url=>"http://mysolr:8080",:development=>{"default"=>{"url"=>"http://devsolr:8983"}}, :test=>{:default=>{"url"=>"http://mysolr:8080"}}})
       end
     end
 
@@ -360,11 +360,17 @@ describe ActiveFedora do
     describe "outside of rails" do
       it "should load the default packaged config/fedora.yml file if no explicit config path is passed" do
         ActiveFedora.init()
-        ActiveFedora.fedora_config[:url].to_s.should == "http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora-test"
+        ActiveFedora.fedora_config[:url].to_s.should == "http://127.0.0.1:8983/fedora-test"
+        ActiveFedora.fedora_config[:test][:url].to_s.should == "http://127.0.0.1:8983/fedora-test"
+        ActiveFedora.fedora_config[:test][:user].to_s.should == "fedoraAdmin"
+        ActiveFedora.fedora_config[:test][:password].to_s.should == "fedoraAdmin"
       end
       it "should load the passed config if explicit config passed in as a string" do
         ActiveFedora.init(:fedora_config_path=>'./spec/fixtures/rails_root/config/fedora.yml')
-        ActiveFedora.fedora_config[:url].should == "http://fedoraAdmin:fedoraAdmin@testhost.com:8983/fedora"
+        ActiveFedora.fedora_config[:url].should == "http://testhost.com:8983/fedora"
+        ActiveFedora.fedora_config[:test][:url].to_s.should == "http://testhost.com:8983/fedora"
+        ActiveFedora.fedora_config[:test][:user].to_s.should == "fedoraAdmin"
+        ActiveFedora.fedora_config[:test][:password].to_s.should == "fedoraAdmin"
       end
     end
 
@@ -399,12 +405,12 @@ describe ActiveFedora do
           it "should look for the file in the path defined at Rails.root" do
             stub_rails(:root=>File.join(File.dirname(__FILE__),"../fixtures/rails_root"))
             ActiveFedora.init()
-            ActiveFedora.fedora_config[:url].should == "http://fedoraAdmin:fedoraAdmin@testhost.com:8983/fedora"
+            ActiveFedora.fedora_config[:url].should == "http://testhost.com:8983/fedora"
           end
           it "should load the default file if no config is found at Rails.root" do
             stub_rails(:root=>File.join(File.dirname(__FILE__),"../fixtures/bad/path/to/rails_root"))
             ActiveFedora.init()
-            ActiveFedora.fedora_config[:url].should == "http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora-test"
+            ActiveFedora.fedora_config[:url].should == "http://127.0.0.1:8983/fedora-test"
           end
         end
       end

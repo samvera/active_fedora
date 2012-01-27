@@ -30,7 +30,7 @@ module ActiveFedora
       self.class.ds_specs.each do |name,ds_config|
         ds = datastreams[name]
         if ds && ds.controlGroup == 'E' && ds_config[:disseminator].present?
-          ds.dsLocation= "#{RubydoraConnection.instance.options[:url]}/objects/#{pid}/methods/#{ds_config[:disseminator]}"
+          ds.dsLocation= "#{ActiveFedora.config_for_environment[:url]}/objects/#{pid}/methods/#{ds_config[:disseminator]}"
         end
       end
       true

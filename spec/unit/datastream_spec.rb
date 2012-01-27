@@ -18,7 +18,7 @@ describe ActiveFedora::Datastream do
   end
   
   it "should be inspectable" do
-    @test_datastream.inspect.should match /#<ActiveFedora::Datastream:\d+ @pid=\"__DO_NOT_USE__\" @dsid=\"abcd\" @controlGroup=\"M\" @dirty=\"false\" @mimeType=\"\" >/
+    @test_datastream.inspect.should match /#<ActiveFedora::Datastream:-?\d+ @pid=\"__DO_NOT_USE__\" @dsid=\"abcd\" @controlGroup=\"M\" @dirty=\"false\" @mimeType=\"\" >/
   end
 
   describe '#save' do
