@@ -1,4 +1,3 @@
-require 'rdf'
 require 'rdf/ntriples'
 
 module ActiveFedora
