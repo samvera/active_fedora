@@ -7,7 +7,8 @@ module ActiveFedora
     attr_accessor :dirty, :last_modified, :fields
     before_create :add_mime_type, :add_ds_location
   
-    def initialize(digital_object, dsid)
+    def initialize(digital_object, dsid, options={})
+      ## When you use the versions feature of rubydora (0.5.x), you need to have a 3 argument constructor
       self.fields={}
       self.dirty = false
       super
