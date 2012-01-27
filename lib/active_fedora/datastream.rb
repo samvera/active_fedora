@@ -75,7 +75,7 @@ module ActiveFedora
     # @param [Nokogiri::XML::Node] node the "foxml:datastream" node from a FOXML file
     def self.from_xml(tmpl, node)
       tmpl.instance_variable_set(:@dirty, false)
-      tmpl.control_group= node['CONTROL_GROUP']
+      tmpl.controlGroup= node['CONTROL_GROUP']
       tmpl
     end
     
