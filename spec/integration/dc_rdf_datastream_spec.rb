@@ -20,6 +20,5 @@ describe ActiveFedora::DCRDFDatastream do
 
     loaded = RdfTest.find(@subject.pid)
     loaded.title.should == 'War and Peace'
-    
   end
 end
