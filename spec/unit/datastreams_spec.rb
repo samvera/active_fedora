@@ -61,7 +61,7 @@ describe ActiveFedora::Datastreams do
 
 
     it "should create specified datastreams with appropriate control group" do
-      ActiveFedora::RubydoraConnection.instance.options.stubs(:[]).returns({:url=>'sub_url'})
+      ActiveFedora.fedora_config.stubs(:[]).returns({:url=>'sub_url'})
       stub_ingest(@this_pid)
       stub_add_ds(@this_pid, ['RELS-EXT', 'DC', 'rightsMetadata', 'properties', 'descMetadata', 'UKETD_DC'])
       stub_get(@this_pid, ['RELS-EXT', 'DC', 'rightsMetadata', 'properties', 'descMetadata', 'UKETD_DC'])
@@ -90,7 +90,7 @@ describe ActiveFedora::Datastreams do
       @n.datastreams["properties"].controlGroup.should eql("X")
       @n.datastreams["descMetadata"].controlGroup.should eql("M")
       @n.datastreams["UKETD_DC"].controlGroup.should eql("E")
-      @n.datastreams["UKETD_DC"].dsLocation.should == "urlsub_url/objects/#{@this_pid}/methods/hull-sDef:uketdObject/getUKETDMetadata"
+      @n.datastreams["UKETD_DC"].dsLocation.should == "sub_url/objects/#{@this_pid}/methods/hull-sDef:uketdObject/getUKETDMetadata"
     end
 
     context ":control_group => 'E'" do

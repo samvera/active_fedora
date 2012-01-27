@@ -155,15 +155,24 @@ module ActiveFedora #:nodoc:
   # @param [Hash] config The config hash 
   # @return [String] the solr or fedora url
   def self.determine_url(config_type,config)  
-    c = config[environment.to_sym].symbolize_keys
+    c = config[environment.to_sym]
+    c.symbolize_keys!
     if config_type == "fedora"
       # support old-style config
-      if c.fetch(:fedora,nil)
+      url = if c.fetch(:fedora,nil)
         ActiveSupport::Deprecation.warn("Using \"fedora\" in the fedora.yml file is no longer supported") 
-        return c[:fedora]["url"] if config[environment.to_sym].fetch(:fedora,nil)
+        c[:fedora]["url"] if config[environment.to_sym].fetch(:fedora,nil)
       else
-        return c[:url]
+        c[:url]
       end
+      if url && !c[:user]
+        u = URI.parse url
+        c[:user] = u.user
+        c[:password] = u.password
+        c[:url] = "#{u.scheme}://#{u.host}:#{u.port}#{u.path}"
+        url = c[:url]
+      end
+      return url
     else
       return get_solr_url(c) if config_type == "solr"
     end

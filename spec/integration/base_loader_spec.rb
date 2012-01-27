@@ -2,7 +2,6 @@ require 'spec_helper'
 require 'active_fedora'
 require 'active_fedora/base'
 require 'active_fedora/metadata_datastream'
-require 'ruby-debug'
 require 'nokogiri'
 
 # Load Sample OralHistory Model

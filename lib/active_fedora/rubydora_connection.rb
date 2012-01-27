@@ -9,12 +9,6 @@ module ActiveFedora
 
     def self.connect(params={})
       params = params.dup
-      if params[:url] && !params[:user]
-        u = URI.parse params[:url]
-        params[:user] = u.user
-        params[:password] = u.password
-        params[:url] = "#{u.scheme}://#{u.host}:#{u.port}#{u.path}"
-      end
       instance = self.instance
       force = params.delete(:force)
       instance.options = params
