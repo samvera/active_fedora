@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.add_dependency('mime-types', '>= 1.16')
   s.add_dependency('multipart-post', "= 1.1.2")
   s.add_dependency('nokogiri')
-#  s.add_dependency('om', '>= 1.4.4')
+  s.add_dependency('om', '>= 1.5.1')
   s.add_dependency('solrizer', '~>1.2.0')
   s.add_dependency("activeresource", '>= 3.0.0')
   s.add_dependency("activesupport", '>= 3.0.0')

@@ -47,9 +47,9 @@ describe ActiveFedora::DatastreamCollections do
       end
     end
     
-    it 'should return an array of datastream names defined by has_datastream' do
+    it 'should return a set of datastream names defined by has_datastream' do
       @test_object2 = MockDatastreamNames.new
-      @test_object2.datastream_names.should == ["thumbnail","EAD"]
+      @test_object2.datastream_names.should include("thumbnail","EAD")
     end
   end
   
