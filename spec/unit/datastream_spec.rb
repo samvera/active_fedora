@@ -100,5 +100,29 @@ describe ActiveFedora::Datastream do
       @test_datastream.size.should be_nil
     end
   end
+  
+  describe ".from_xml" do
+    it "should load a FOXML datastream node" do
+      ds_xml = <<-EOS
+        <foxml:datastream ID="DC" STATE="A" CONTROL_GROUP="X" VERSIONABLE="true" xmlns:foxml="info:fedora/fedora-system:def/foxml#">
+          <foxml:xmlContent>
+            <datastream ID="DC" STATE="A" CONTROL_GROUP="X" VERSIONABLE="true">
+              <datastreamVersion ID="DC.1" LABEL="Dublin Core Record for this object" CREATED="2011-09-28T22:50:18.626Z" MIMETYPE="text/xml" FORMAT_URI="http://www.openarchives.org/OAI/2.0/oai_dc/" SIZE="526">
+                <xmlContent>
+                  <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+                    <dc:title>Title</dc:title>
+                    <dc:identifier>0123456789</dc:identifier>
+                  </oai_dc:dc>
+                </xmlContent>
+              </datastreamVersion>
+            </datastream>
+          </foxml:xmlContent>
+        </foxml:datastream>
+      EOS
+      ds_node = Nokogiri::XML(ds_xml).root
+      ds = ActiveFedora::Datastream.from_xml(@test_datastream, ds_node)
+      ds.should be_a(ActiveFedora::Datastream)
+    end
+  end
 
 end
