@@ -129,7 +129,8 @@ module ActiveFedora
               end
             end 
         
-            new_values.each do |y,z| 
+            new_values.keys.sort { |a,b| a.to_i <=> b.to_i }.each do |y| 
+              z = new_values[y]
               result[field_name].delete(y)
               current_values<<z #just append everything left
               new_array_index = current_values.length - 1
@@ -199,7 +200,7 @@ module ActiveFedora
       end
       
       builder = Nokogiri::XML::Builder.with(xml_insertion_point) do |xml|
-        fields.each_pair do |field,field_info|
+        fields.each do |field,field_info|
           element_attrs = field_info[:element_attrs].nil? ? {} : field_info[:element_attrs]
           values = field_info[:values]
           values = [values] unless values.respond_to? :each
