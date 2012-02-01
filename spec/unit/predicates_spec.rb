@@ -59,6 +59,31 @@ describe ActiveFedora::Predicates do
     lambda { ActiveFedora::Predicates.predicate_lookup(:has_foo) }.should raise_error ActiveFedora::UnregisteredPredicateError
   end
     
+  context 'initialization' do
+    before :each do
+      @old_predicate_config = ActiveFedora::Predicates.predicate_config
+    end
     
-
+    after :each do
+      ActiveFedora::Predicates.predicate_config = @old_predicate_config
+    end
+    
+    it 'should allow explicit initialization of predicates' do
+      ActiveFedora::Predicates.find_predicate(:is_part_of).should == ["isPartOf", "info:fedora/fedora-system:def/relations-external#"]
+      ActiveFedora::Predicates.predicate_config = {
+        :default_namespace => 'http://example.com/foo',
+        :predicate_mapping => {
+          'http://example.com/foo' => { :has_bar => 'hasBAR' }
+        }
+      }
+      ActiveFedora::Predicates.find_predicate(:has_bar).should == ["hasBAR", "http://example.com/foo"]
+      lambda { ActiveFedora::Predicates.find_predicate(:is_part_of) }.should raise_error ActiveFedora::UnregisteredPredicateError
+    end
+    
+    it 'should ensure that the configuration has the correct keys' do
+      lambda { ActiveFedora::Predicates.predicate_config = { :foo => 'invalid!' } }.should raise_error TypeError
+    end
+    
+  end
+  
 end
