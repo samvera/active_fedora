@@ -64,11 +64,15 @@ namespace :repo do
   
   desc "Load the object located at the provided path or identified by pid. Example: rake repo:load path=spec/fixtures/demo_12.foxml.xml"
   task :load => :init do
-    if !ENV["path"].nil? 
+    if !ENV["path"].nil? and File.file?(ENV["path"])
       filename = ENV["path"]
     elsif !ENV["pid"].nil?
       pid = ENV["pid"]
-      filename = File.join("spec","fixtures","#{pid.gsub(":","_")}.foxml.xml")
+      if !ENV["path"].nil? and File.directory?(ENV["path"])
+        filename = File.join(ENV["path"], "#{pid.gsub(":","_")}.foxml.xml")
+      else
+        filename = File.join("spec","fixtures","#{pid.gsub(":","_")}.foxml.xml")
+      end
     else
       puts "You must specify a path to the object or provide its pid.  Example: rake repo:load path=spec/fixtures/demo_12.foxml.xml"
     end
