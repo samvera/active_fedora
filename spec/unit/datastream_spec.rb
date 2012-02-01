@@ -21,6 +21,45 @@ describe ActiveFedora::Datastream do
     @test_datastream.inspect.should match /#<ActiveFedora::Datastream:-?\d+ @pid=\"__DO_NOT_USE__\" @dsid=\"abcd\" @controlGroup=\"M\" @dirty=\"false\" @mimeType=\"\" >/
   end
 
+  describe '#has_content?' do
+    before :each do
+      @test_datastream.content = nil
+      @test_datastream.dsLocation = nil
+    end
+
+    it "should expect content on an Inline (X) datastream" do
+      @test_datastream.controlGroup = 'X'
+      @test_datastream.dsLocation = "http://example.com/test/content/abcd"
+      @test_datastream.has_content?.should be_false
+      @test_datastream.content = "<foo><xmlelement/></foo>"
+      @test_datastream.has_content?.should be_true
+    end
+
+    it "should expect content on a Managed (M) datastream" do
+      @test_datastream.controlGroup = 'M'
+      @test_datastream.dsLocation = "http://example.com/test/content/abcd"
+      @test_datastream.has_content?.should be_false
+      @test_datastream.content = "<foo><xmlelement/></foo>"
+      @test_datastream.has_content?.should be_true
+    end
+
+    it "should expect a dsLocation on an External (E) datastream" do
+      @test_datastream.controlGroup = 'E'
+      @test_datastream.content = "<foo><xmlelement/></foo>"
+      @test_datastream.has_content?.should be_false
+      @test_datastream.dsLocation = "http://example.com/test/content/abcd"
+      @test_datastream.has_content?.should be_true
+    end
+
+    it "should expect a dsLocation on a Redirect (R) datastream" do
+      @test_datastream.controlGroup = 'R'
+      @test_datastream.content = "<foo><xmlelement/></foo>"
+      @test_datastream.has_content?.should be_false
+      @test_datastream.dsLocation = "http://example.com/test/content/abcd"
+      @test_datastream.has_content?.should be_true
+    end
+  end
+  
   describe '#save' do
     it "should set dirty? to false" do
       mock_repo = mock('repository', :config=>{})
