@@ -47,9 +47,20 @@ module ActiveFedora
       new?
     end
 
+    def has_content?
+      case controlGroup
+      when 'X','M'
+        return (not @content.nil?)
+      when 'E','R'
+        return (not (dsLocation.nil? or dsLocation.empty?))
+      else
+        raise "Invalid control group: #{controlGroup.inspect}"
+      end      
+    end
+    
     def save
       #raise "No content #{dsid}" if @content.nil?
-      return if @content.nil?
+      return false unless has_content?
       run_callbacks :save do
         return create if new?
         repository.modify_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
