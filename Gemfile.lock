@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active-fedora (3.3.0)
+    active-fedora (3.3.1)
       activeresource (>= 3.0.0)
       activesupport (>= 3.0.0)
       equivalent-xml
@@ -12,7 +12,7 @@ PATH
       om (>= 1.5.1)
       rdf
       rdf-rdfxml
-      rubydora (~> 0.5.1)
+      rubydora (~> 0.5.2)
       solr-ruby (>= 0.0.6)
       solrizer (~> 1.2.0)
       xml-simple (>= 1.0.12)
@@ -85,7 +85,7 @@ GEM
     rspec-expectations (2.8.0)
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.8.0)
-    rubydora (0.5.1)
+    rubydora (0.5.2)
       activemodel
       activesupport
       fastercsv

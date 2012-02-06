@@ -1,3 +1,10 @@
+3.3.1
+Allow explicit setting of predicate config.
+Check for appropriate content before saving a datastream
+rubydora to 0.5.2
+Support for changing base fixture directory path
+Removed unnecessary dependencies
+
 3.3.0
 A label set on an unsaved datastream should be saved in the repository
 Should be able to add checksumType parameter when creating a datastream
