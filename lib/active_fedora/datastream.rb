@@ -50,9 +50,9 @@ module ActiveFedora
     def has_content?
       case controlGroup
       when 'X','M'
-        return (not @content.nil?)
+        @content.present?
       when 'E','R'
-        return (not (dsLocation.nil? or dsLocation.empty?))
+        dsLocation.present?
       else
         raise "Invalid control group: #{controlGroup.inspect}"
       end      
