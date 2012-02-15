@@ -202,4 +202,27 @@ describe ActiveFedora::Model do
       SpecModel::Basic.load_instance("_PID_")
     end
   end
+  
+  describe "URI translation" do
+    before :all do
+      module SpecModel
+        class CamelCased
+          include ActiveFedora::Model
+        end
+      end
+    end
+    
+    after :all do
+      SpecModel.send(:remove_const, :CamelCased)
+    end
+    
+    it "should turn a Model class name into an afmodel URI" do
+      SpecModel::CamelCased.to_class_uri.should == 'info:fedora/afmodel:SpecModel_CamelCased'
+    end
+    
+    it "should turn an afmodel URI into a Model class name" do
+      ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:SpecModel_CamelCased').should == ['SpecModel::CamelCased', 'afmodel']
+    end
+  end
+  
 end
