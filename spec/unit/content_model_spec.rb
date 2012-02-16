@@ -7,7 +7,10 @@ require 'mocha'
 describe ActiveFedora::ContentModel do
   
   before(:all) do
-    class SampleModel < ActiveFedora::Base
+    class BaseModel < ActiveFedora::Base
+    end
+    
+    class SampleModel < BaseModel
     end
 
     class GenericContent < ActiveFedora::Base

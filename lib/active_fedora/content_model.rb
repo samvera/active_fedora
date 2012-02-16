@@ -53,7 +53,7 @@ module ActiveFedora
     # Returns false if no corresponding model can be found.
     def self.uri_to_model_class( uri )
       rc = Model.from_class_uri(uri)
-      if rc && rc.superclass == ActiveFedora::Base
+      if rc && (rc.superclass == ActiveFedora::Base || rc.ancestors.include?(ActiveFedora::Base))
         rc
       else
         false
