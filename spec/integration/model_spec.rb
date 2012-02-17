@@ -14,13 +14,14 @@ describe ActiveFedora::Model do
   before(:each) do 
     module ModelIntegrationSpec
       
-      class Basic < ActiveFedora::Base
+      class Base < ActiveFedora::Base
         include ActiveFedora::Model
         def self.pid_namespace
           "foo"
         end
       end
-      
+      class Basic < Base
+      end
     end
 
     @test_instance = ModelIntegrationSpec::Basic.new
