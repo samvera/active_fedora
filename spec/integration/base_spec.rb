@@ -384,7 +384,7 @@ describe ActiveFedora::Base do
       @test_object.remove_relationship(:has_part,@test_object2)
       @test_object.save
       @test_object = ActiveFedora::Base.load_instance(@pid)
-      @test_object.object_relations[:has_part].should be_nil
+      @test_object.object_relations[:has_part].should be_empty
     end
   end
 

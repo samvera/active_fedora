@@ -7,7 +7,18 @@ describe ActiveFedora::RelationshipGraph do
     @n1.stubs(:pid => 'foo:777')
   end
 
-  
+  describe "#relationships" do
+    it "should have hash accessors" do
+      @graph.should respond_to(:[])
+    end
+
+    it "should initialize new relation keys" do
+      @graph[:fictional_key].should be_empty
+      @graph[:fictional_key].should respond_to(:<<)
+    end
+
+  end
+
   it "should add relationships" do
     @n2 = ActiveFedora::Base.new
     @graph.add(:has_part, @n1)
