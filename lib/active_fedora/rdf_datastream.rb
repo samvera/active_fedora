@@ -2,6 +2,37 @@ require 'rdf'
 
 module ActiveFedora
   class RDFDatastream < Datastream
+    module ModelMethods
+      attr_accessor :vocabularies, :predicate_map
+      def self.included(base)
+        base.extend(ClassMethods)
+      end
+      module ClassMethods
+        attr_accessor :vocabularies, :predicate_map
+        def register_vocabularies(*vocabs)
+          @vocabularies ||= []
+          vocabs.each do |v|
+            if v.respond_to? :property and v.respond_to? :to_uri
+              @vocabularies << v 
+            else
+              raise "not an RDF vocabulary: #{v}"
+            end
+          end
+        end
+        def map_predicates(&block)
+          @predicate_map ||= {}
+          yield self
+        end
+        def method_missing(name, args)
+          raise "mapping must include :to and :in args" unless args.has_key? :to and args.has_key? :in
+          vocab, property = args[:in], args[:to]
+          raise "vocabulary not registered: #{vocab}" unless @vocabularies.include? vocab
+          raise "property #{property} not found in #{vocab}" unless vocab.respond_to? property
+          @predicate_map[name.to_sym] = vocab.send(property)
+        end
+      end
+    end
+    
     attr_accessor :loaded
 
     def ensure_loaded
@@ -48,8 +79,6 @@ module ActiveFedora
       graph.add(predicate, args, true)
     end
 
-
-
     def method_missing(name, *args)
       if pred = resolve_predicate(name) 
         get_values(pred)
@@ -63,7 +92,6 @@ module ActiveFedora
     def serialization_format
       raise "you must override the `serialization_format' method in a subclass"
     end
-
     
     # given a symbol or string, map it to a RDF::URI
     # if the provided parameter is not allowed in the vocabulary, return nil
