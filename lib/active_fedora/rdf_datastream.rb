@@ -3,8 +3,10 @@ require 'rdf'
 module ActiveFedora
   class RDFDatastream < Datastream
     module ModelMethods
-      extend ActiveSupport::Concern
-      #attr_accessor :vocabularies, :predicate_map
+      attr_accessor :vocabularies, :predicate_map
+      def self.included(base)
+        base.extend(ClassMethods)
+      end
       module ClassMethods
         def config
           ActiveFedora::Predicates.predicate_config
@@ -36,8 +38,7 @@ module ActiveFedora
         end
       end
     end
-
-    include ModelMethods
+    
     attr_accessor :loaded
 
     def ensure_loaded
@@ -129,10 +130,6 @@ module ActiveFedora
       raise "you must override the `serialization_format' method in a subclass"
     end
 
-    def serialization_format
-      raise "you must override the `serialization_format' method in a subclass"
-    end
-
     def method_missing(name, *args)
       if (md = /^([^=]+)=$/.match(name.to_s)) && pred = find_predicate(md[1])
         set_value(pred, *args)  
@@ -141,6 +138,10 @@ module ActiveFedora
       else 
         super
       end
+    end
+
+    def serialization_format
+      raise "you must override the `serialization_format' method in a subclass"
     end
     
     # Populate a RDFDatastream object based on the "datastream" content 
