@@ -48,17 +48,7 @@ describe ActiveFedora do
       @test_object.to_solr[SOLR_DOCUMENT_ID.to_sym].should_not be_nil
       @test_object.to_solr[:id].should be_nil
     end
-    it "should be used by ActiveFedora::Base#find" do
-      mock_solr = mock("SolrConnection")
-      mock_result = mock("MockResult")
-      mock_result.expects(:hits).returns([{SOLR_DOCUMENT_ID => "changeme:30"}])
-      mock_solr.expects(:query).with(SOLR_DOCUMENT_ID + ':changeme\:30').returns(mock_result)
-      #Fedora::Repository.instance.expects(:find_model).with("changeme:30", SolrSpecModel::Basic).returns("fake object")
 
-      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
-  
-      res = SolrSpecModel::Basic.find("changeme:30")
-    end
     it "should be used by ActiveFedora::Base#find_by_solr" do
       mock_solr = mock("SolrConnection")
       mock_response = mock("SolrResponse")

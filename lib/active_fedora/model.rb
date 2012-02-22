@@ -108,21 +108,12 @@ module ActiveFedora
           return_multiple = true
           escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
           q = "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
-        elsif args.class == String
-          escaped_id = args.gsub(/(:)/, '\\:')
-          q = "#{SOLR_DOCUMENT_ID}:#{escaped_id}"
-        end
-        if return_multiple == true
           hits = SolrService.instance.conn.query(q, :rows=>opts[:rows]).hits 
-        else
-          hits = SolrService.instance.conn.query(q).hits 
-        end
-        if return_multiple
           return hits.map do |hit|
              RubydoraConnection.instance.find_model(hit[SOLR_DOCUMENT_ID], self)
           end
-        else
-          return RubydoraConnection.instance.find_model(hits.first[SOLR_DOCUMENT_ID], self) if hits.first
+        elsif args.class == String
+          return RubydoraConnection.instance.find_model(args, self)
         end
       end
 

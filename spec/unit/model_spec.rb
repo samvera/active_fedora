@@ -110,26 +110,9 @@ describe ActiveFedora::Model do
     end
     
     it "(String) should query solr for an object with the given id and return that object" do
-      mock_solr = mock("SolrConnection")
-      mock_result = mock("MockResult")
-      mock_result.expects(:hits).returns([{"id" => "changeme:30"}])
-      mock_solr.expects(:query).with('id:changeme\:30').returns(mock_result)
-      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
       ActiveFedora::RubydoraConnection.instance.expects(:find_model).with("changeme:30", SpecModel::Basic).returns("Fake Object")
     
       SpecModel::Basic.find("changeme:30").should == "Fake Object"
-    end
-    
-    it 'should not call #new' do
-      mock_solr = mock("SolrConnection")
-      mock_result = mock("MockResult")
-      mock_result.expects(:hits).returns([{"id" => "changeme:30"}])
-      mock_solr.expects(:query).with('id:changeme\:30').returns(mock_result)
-      ActiveFedora::RubydoraConnection.instance.expects(:find_model).with("changeme:30", SpecModel::Basic).returns("fake object")
-
-      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
-    
-      res = SpecModel::Basic.find("changeme:30")
     end
     
     describe"(:pid => xxx)" do 
