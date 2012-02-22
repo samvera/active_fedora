@@ -6,7 +6,7 @@ module ActiveFedora
 
     def initialize
       self.dirty = false
-      self.relationships = {}
+      self.relationships = Hash.new { |h, k| h[k] = [] }
     end
 
     def has_predicate?(predicate)
