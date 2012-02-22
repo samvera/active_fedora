@@ -3,10 +3,7 @@ require 'rdf'
 module ActiveFedora
   class RDFDatastream < Datastream
     module ModelMethods
-      attr_accessor :vocabularies, :predicate_map
-      def self.included(base)
-        base.extend(ClassMethods)
-      end
+      extend ActiveSupport::Concern
       module ClassMethods
         def config
           ActiveFedora::Predicates.predicate_config
