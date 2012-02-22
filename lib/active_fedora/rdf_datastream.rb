@@ -3,10 +3,7 @@ require 'rdf'
 module ActiveFedora
   class RDFDatastream < Datastream
     module ModelMethods
-      attr_accessor :vocabularies, :predicate_map
-      def self.included(base)
-        base.extend(ClassMethods)
-      end
+      extend ActiveSupport::Concern
       module ClassMethods
         attr_accessor :vocabularies, :predicate_map
         def register_vocabularies(*vocabs)
@@ -28,7 +25,7 @@ module ActiveFedora
           vocab, property = args[:in], args[:to]
           raise "vocabulary not registered: #{vocab}" unless @vocabularies.include? vocab
           raise "property #{property} not found in #{vocab}" unless vocab.respond_to? property
-          @predicate_map[name.to_sym] = vocab.send(property)
+          @predicate_map[name] = vocab.send(property)
         end
       end
     end
