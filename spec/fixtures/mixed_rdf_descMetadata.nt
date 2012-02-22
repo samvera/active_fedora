@@ -1,0 +1,6 @@
+<http://id.psu.edu/object42> <http://purl.org/dc/terms/created> "2010-12-31"^^<http://www.w3.org/2001/XMLSchema#date> .
+<http://id.psu.edu/object42> <http://purl.org/dc/terms/title> "Title of work" .
+<http://id.psu.edu/object42> <http://purl.org/dc/terms/publisher> "Penn State" .
+<http://id.psu.edu/object42> <http://xmlns.com/foaf/0.1/based_near> "New York, NY, US" .
+<http://id.psu.edu/object42> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://google.com/> .
+
