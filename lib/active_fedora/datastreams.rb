@@ -226,7 +226,7 @@ module ActiveFedora
     # @param [Object] ds_config hash of options which may contain :disseminator and :url
     def additional_attributes_for_external_and_redirect_control_groups(ds,ds_config)
       if ds.controlGroup=='E'
-        if !ds_config[:disseminator] && ds_config[:url].present?
+        if !ds_config[:disseminator].present? && ds_config[:url].present?
           ds.dsLocation= ds_config[:url]
         end
       elsif ds.controlGroup=='R'
