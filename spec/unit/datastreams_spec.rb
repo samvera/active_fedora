@@ -98,18 +98,10 @@ describe ActiveFedora::Datastreams do
         stub_get(@this_pid)
         stub_add_ds(@this_pid, ['RELS-EXT', 'externalDisseminator', 'externalUrl'])
       end
-      before :all do
-        class MoreFooHistory < ActiveFedora::Base
-          has_metadata :type=>ActiveFedora::NokogiriDatastream, :name=>"externalDisseminator", :control_group => "E"
-        end
-      end
 
-      after(:all) do
+      after :each do
         # clean up test class
         Object.send(:remove_const, :MoreFooHistory)
-      end
-      it "should raise an error without :disseminator or :url option" do
-        lambda { @n = MoreFooHistory.new }.should raise_exception
       end
       
       it "should allow :control_group => 'E' with a :url option" do
@@ -129,7 +121,7 @@ describe ActiveFedora::Datastreams do
         end
         client.raises(RuntimeError, "Error adding datastream externalUrl for object changeme:4020. See logger for details")
         @n = MoreFooHistory.new
-        lambda {@n.save }.should raise_exception
+        lambda { @n.save }.should raise_exception(/See logger/)
       end
     end
 
@@ -138,11 +130,9 @@ describe ActiveFedora::Datastreams do
         stub_get(@this_pid)
         stub_add_ds(@this_pid, ['RELS-EXT', 'externalDisseminator' ])
       end
-      it "should raise an error without :url option" do
-        class MoreFooHistory < ActiveFedora::Base
-          has_metadata :type=>ActiveFedora::NokogiriDatastream, :name=>"externalDisseminator", :control_group => "R"
-        end
-        lambda { @n = MoreFooHistory.new }.should raise_exception
+      
+      after :each do
+        Object.send(:remove_const, :MoreFooHistory)
       end
       
       it "should work with a valid  :url option" do
@@ -153,12 +143,6 @@ describe ActiveFedora::Datastreams do
         @n = MoreFooHistory.new
         @n.save
       end
-      it "should not take a :disseminator option without a :url option" do
-        class MoreFooHistory < ActiveFedora::Base
-          has_metadata :type=>ActiveFedora::NokogiriDatastream, :name=>"externalDisseminator", :control_group => "R", :disseminator => "foo:s-def/hull-cModel:Foo"
-        end
-        lambda { @n = MoreFooHistory.new }.should raise_exception
-      end
       it "should raise an error if :url is malformed" do
         class MoreFooHistory < ActiveFedora::Base
           has_metadata :type => ActiveFedora::NokogiriDatastream, :name=>"externalUrl", :url=>"my_rul", :control_group => "R"
@@ -167,7 +151,7 @@ describe ActiveFedora::Datastreams do
           /objects\/#{@this_pid}\/datastreams\/externalUrl/.match(params)
         end
         client.raises(RuntimeError, "Error adding datastream externalUrl for object changeme:4020. See logger for details")
-        lambda {MoreFooHistory.new }.should raise_exception
+        lambda { MoreFooHistory.new }.should raise_exception(/See logger/)
       end
     end
   end
