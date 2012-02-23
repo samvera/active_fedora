@@ -111,6 +111,38 @@ describe ActiveFedora::Datastreams do
         stub_ingest(@this_pid)
         @n = MoreFooHistory.new
         @n.save
+        @n.datastreams['externalDisseminator'].dsLocation.should == "http://exampl.com/mypic.jpg"
+      end
+      
+      it "should allow :control_group => 'E' without a :url option" do
+        class MoreFooHistory < ActiveFedora::Base
+          has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "E"
+        end
+        stub_ingest(@this_pid)
+        @n = MoreFooHistory.new
+        @n.datastreams['externalDisseminator'].dsLocation.present?.should == false
+        @n.save
+      end
+      
+      it "should fail validation if a :url is not added before save" do
+        class MoreFooHistory < ActiveFedora::Base
+          has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "E"
+        end
+        stub_ingest(@this_pid)
+        @n = MoreFooHistory.new
+        @n.datastreams['externalDisseminator'].validate_content_present.should == false
+        @n.save
+      end
+      
+      it "should pass validation if a :url is added before save" do
+        class MoreFooHistory < ActiveFedora::Base
+          has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "E"
+        end
+        stub_ingest(@this_pid)
+        @n = MoreFooHistory.new
+        @n.datastreams['externalDisseminator'].dsLocation = "http://exampl.com/mypic.jpg"
+        @n.datastreams['externalDisseminator'].validate_content_present.should == true
+        @n.save
       end
     end
 
@@ -124,12 +156,43 @@ describe ActiveFedora::Datastreams do
         Object.send(:remove_const, :MoreFooHistory)
       end
       
-      it "should work with a valid  :url option" do
+      it "should allow :control_group => 'R' with a :url option" do
         stub_ingest(@this_pid)
         class MoreFooHistory < ActiveFedora::Base
           has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "R", :url => "http://exampl.com/mypic.jpg"
         end
         @n = MoreFooHistory.new
+        @n.save
+      end
+    
+      it "should allow :control_group => 'R' without a :url option" do
+        class MoreFooHistory < ActiveFedora::Base
+          has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "R"
+        end
+        stub_ingest(@this_pid)
+        @n = MoreFooHistory.new
+        @n.datastreams['externalDisseminator'].dsLocation.present?.should == false
+        @n.save
+      end
+    
+      it "should fail validation if a :url is not added before save" do
+        class MoreFooHistory < ActiveFedora::Base
+          has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "R"
+        end
+        stub_ingest(@this_pid)
+        @n = MoreFooHistory.new
+        @n.datastreams['externalDisseminator'].validate_content_present.should == false
+        @n.save
+      end
+    
+      it "should pass validation if a :url is added before save" do
+        class MoreFooHistory < ActiveFedora::Base
+          has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "R"
+        end
+        stub_ingest(@this_pid)
+        @n = MoreFooHistory.new
+        @n.datastreams['externalDisseminator'].dsLocation = "http://exampl.com/mypic.jpg"
+        @n.datastreams['externalDisseminator'].validate_content_present.should == true
         @n.save
       end
     end
