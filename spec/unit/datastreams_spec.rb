@@ -112,17 +112,6 @@ describe ActiveFedora::Datastreams do
         @n = MoreFooHistory.new
         @n.save
       end
-      it "should raise an error if :url is malformed" do
-        class MoreFooHistory < ActiveFedora::Base
-          has_metadata :type => ActiveFedora::NokogiriDatastream, :name=>"externalUrl", :url=>"my_rul", :control_group => "E"
-        end
-        client = mock_client.stubs(:[]).with do |params|
-          /objects\/#{@this_pid}\/datastreams\/externalUrl/.match(params)
-        end
-        client.raises(RuntimeError, "Error adding datastream externalUrl for object changeme:4020. See logger for details")
-        @n = MoreFooHistory.new
-        lambda { @n.save }.should raise_exception(/See logger/)
-      end
     end
 
     context ":control_group => 'R'" do
@@ -142,16 +131,6 @@ describe ActiveFedora::Datastreams do
         end
         @n = MoreFooHistory.new
         @n.save
-      end
-      it "should raise an error if :url is malformed" do
-        class MoreFooHistory < ActiveFedora::Base
-          has_metadata :type => ActiveFedora::NokogiriDatastream, :name=>"externalUrl", :url=>"my_rul", :control_group => "R"
-        end
-        client = mock_client.stubs(:[]).with do |params|
-          /objects\/#{@this_pid}\/datastreams\/externalUrl/.match(params)
-        end
-        client.raises(RuntimeError, "Error adding datastream externalUrl for object changeme:4020. See logger for details")
-        lambda { MoreFooHistory.new }.should raise_exception(/See logger/)
       end
     end
   end
