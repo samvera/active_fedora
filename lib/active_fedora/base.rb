@@ -318,17 +318,7 @@ module ActiveFedora
         raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
       end
      
-      create_date = solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date).to_s] : solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)]
-      modified_date = solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrService.solr_name(:system_modified, :date).to_s] : solr_doc[ActiveFedora::SolrService.solr_name(:system_modified, :date)]
-      object_profile = { 
-        :pid => solr_doc[SOLR_DOCUMENT_ID],
-        'objCreateDate' => create_date,
-        'objLastModDate' => modified_date,
-      }
-      ["objState", "objOwnerId", "objDissIndexViewURL", "objLabel", "objItemIndexViewURL"].each do |key|
-        object_profile[key] = solr_doc[ActiveFedora::SolrService.solr_name(key.underscore.to_sym, :string)]
-      end
-      obj = self.allocate.init_with(SolrDigitalObject.new(object_profile))
+      obj = self.allocate.init_with(SolrDigitalObject.new(solr_doc))
       #set by default to load any dependent relationship objects from solr as well
       #need to call rels_ext once so it exists when iterating over datastreams
       obj.rels_ext
