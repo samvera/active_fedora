@@ -253,13 +253,10 @@ module ActiveFedora
     def to_solr(solr_doc = Hash.new, opts={})
       unless opts[:model_only]
         solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid, ActiveFedora::SolrService.solr_name(:system_create, :date) => self.create_date, ActiveFedora::SolrService.solr_name(:system_modified, :date) => self.modified_date, ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol) => self.class.inspect)
-        if inner_object.respond_to? :profile
-          inner_object.profile.each_pair do |property,value|
-            solr_doc[ActiveFedora::SolrService.solr_name(property.underscore, property =~ /Date/ ? :date : :string)] = value
-          end
-        end
+        solrize_profile(solr_doc)
       end
       datastreams.each_value do |ds|
+        solr_doc = ds.solrize_profile(solr_doc)
         ds.ensure_xml_loaded if ds.respond_to? :ensure_xml_loaded  ### Can't put this in the model because it's often implemented in Solrizer::XML::TerminologyBasedSolrizer 
         solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) 
       end
@@ -272,6 +269,15 @@ module ActiveFedora
       return solr_doc
     end
 
+    def solrize_profile(solr_doc = Hash.new) # :nodoc:
+      if inner_object.respond_to? :profile
+        inner_object.profile.each_pair do |property,value|
+          solr_doc[ActiveFedora::SolrService.solr_name("objProfile_#{property}", property =~ /Date/ ? :date : :symbol)] = value
+        end
+      end
+      solr_doc
+    end
+    
     # Serialize the datastream's RDF relationships to solr
     # @param [Hash] solr_doc @deafult an empty Hash
     def solrize_relationships(solr_doc = Hash.new)

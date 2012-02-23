@@ -93,6 +93,24 @@ module ActiveFedora
       return true
     end
     
+    def solrize_profile(solr_doc = Hash.new) # :nodoc:
+      profile.each_pair do |property,value|
+        solr_doc[ActiveFedora::SolrService.solr_name("#{dsid}_dsProfile_#{property}", property =~ /Date/ ? :date : :symbol)] = value
+      end
+      solr_doc
+    end
+    
+    def from_solr(solr_doc)
+      profile_from_solr(solr_doc)
+    end
+    
+    def profile_from_solr(solr_doc)
+      profile_attrs = solr_doc.keys.select { |k| k =~ /^#{dsid}_dsProfile_/ }
+      profile_attrs.each do |key|
+        attr_name = key.split(/_/)[2..-2].join('_')
+        profile[attr_name] = solr_doc[key].to_s
+      end
+    end
   end
   
   class DatastreamConcurrencyException < Exception # :nodoc:
