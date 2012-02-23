@@ -253,6 +253,11 @@ module ActiveFedora
     def to_solr(solr_doc = Hash.new, opts={})
       unless opts[:model_only]
         solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid, ActiveFedora::SolrService.solr_name(:system_create, :date) => self.create_date, ActiveFedora::SolrService.solr_name(:system_modified, :date) => self.modified_date, ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol) => self.class.inspect)
+        if inner_object.respond_to? :profile
+          inner_object.profile.each_pair do |property,value|
+            solr_doc[ActiveFedora::SolrService.solr_name(property.underscore, property =~ /Date/ ? :date : :string)] = value
+          end
+        end
       end
       datastreams.each_value do |ds|
         ds.ensure_xml_loaded if ds.respond_to? :ensure_xml_loaded  ### Can't put this in the model because it's often implemented in Solrizer::XML::TerminologyBasedSolrizer 
@@ -315,7 +320,15 @@ module ActiveFedora
      
       create_date = solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date).to_s] : solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)]
       modified_date = solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrService.solr_name(:system_modified, :date).to_s] : solr_doc[ActiveFedora::SolrService.solr_name(:system_modified, :date)]
-      obj = self.allocate.init_with(SolrDigitalObject.new(:pid=>solr_doc[SOLR_DOCUMENT_ID],:create_date=>create_date,:modified_date=>modified_date))
+      object_profile = { 
+        :pid => solr_doc[SOLR_DOCUMENT_ID],
+        'objCreateDate' => create_date,
+        'objLastModDate' => modified_date,
+      }
+      ["objState", "objOwnerId", "objDissIndexViewURL", "objLabel", "objItemIndexViewURL"].each do |key|
+        object_profile[key] = solr_doc[ActiveFedora::SolrService.solr_name(key.underscore.to_sym, :string)]
+      end
+      obj = self.allocate.init_with(SolrDigitalObject.new(object_profile))
       #set by default to load any dependent relationship objects from solr as well
       #need to call rels_ext once so it exists when iterating over datastreams
       obj.rels_ext
