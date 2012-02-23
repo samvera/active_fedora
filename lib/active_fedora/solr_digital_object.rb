@@ -18,6 +18,12 @@ module ActiveFedora
       @pid = solr_doc[SOLR_DOCUMENT_ID]
     end
 
+    def freeze
+      @profile.freeze
+      @datastreams.freeze
+      self
+    end
+    
     def new?
       false
     end

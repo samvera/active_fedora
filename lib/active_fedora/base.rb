@@ -327,6 +327,7 @@ module ActiveFedora
           ds.from_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ( ds.kind_of?(ActiveFedora::RelsExtDatastream))
         end
       end
+      obj.inner_object.freeze
       obj
     end
 
