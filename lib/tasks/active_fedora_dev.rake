@@ -43,6 +43,7 @@ require 'rspec/core/rake_task'
     Dir.chdir("..")
   end
 
+  desc "Loads or refreshes the fixtures needed to run the tests"
   task :load_fixtures => :environment do
     ActiveFedora.init unless Thread.current[:repo]
     
