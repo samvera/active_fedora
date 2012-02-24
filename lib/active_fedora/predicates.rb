@@ -1,37 +1,42 @@
 module ActiveFedora
-
   module Predicates
     def self.find_graph_predicate(predicate)
-        #TODO, these could be cached
-        case predicate
-        when :has_model, "hasModel", :hasModel
-          xmlns="info:fedora/fedora-system:def/model#"
-          begin
-            rel_predicate = predicate_lookup(predicate,xmlns)
-          rescue UnregisteredPredicateError
-            xmlns = nil
-            rel_predicate = nil
-          end
-        else
-          xmlns="info:fedora/fedora-system:def/relations-external#"
-          begin
-            rel_predicate = predicate_lookup(predicate,xmlns)
-          rescue UnregisteredPredicateError
-            xmlns = nil
-            rel_predicate = nil
-          end
+      #TODO, these could be cached
+      case predicate
+      when :has_model, "hasModel", :hasModel
+        xmlns="info:fedora/fedora-system:def/model#"
+        begin
+          rel_predicate = predicate_lookup(predicate,xmlns)
+        rescue UnregisteredPredicateError
+          xmlns = nil
+          rel_predicate = nil
         end
+      else
+        xmlns="info:fedora/fedora-system:def/relations-external#"
+        begin
+          rel_predicate = predicate_lookup(predicate,xmlns)
+        rescue UnregisteredPredicateError
+          xmlns = nil
+          rel_predicate = nil
+        end
+      end
         
-        unless xmlns && rel_predicate
-          rel_predicate, xmlns = find_predicate(predicate)
-        end
-        vocabularies[xmlns][rel_predicate] 
+      unless xmlns && rel_predicate
+        rel_predicate, xmlns = find_predicate(predicate)
+      end
+      #puts "vs: #{vocabularies.inspect}"
+      #puts "xmlns: #{xmlns.inspect}"
+      #puts "rel_pred: #{rel_predicate}"
+      #puts "vs[xns]: #{vocabularies[xmlns].inspect}"
+      vocabularies[xmlns][rel_predicate] 
     end
 
     def self.vocabularies
-      return @vocabularies if @vocabularies
-      @vocabularies = {}
-      predicate_mappings.keys.each { |ns| @vocabularies[ns] = RDF::Vocabulary.new(ns)}
+      #return @vocabularies if @vocabularies
+      @vocabularies ||= {}
+      predicate_mappings.keys.each do |ns| 
+        @vocabularies[ns] = RDF::Vocabulary.new(ns) unless @vocabularies.has_key? ns
+      end
       @vocabularies
     end
 
@@ -74,8 +79,11 @@ module ActiveFedora
     end
 
     def self.find_predicate(predicate)
+      #puts "f_p: #{predicate.inspect}"
       predicate_mappings.each do |namespace,predicates|
-        if predicates.fetch(predicate,nil)
+        #puts "ns: #{namespace.inspect}"
+        #puts "preds: #{predicates.inspect}"
+        if predicates.fetch(predicate.to_sym,nil)
           return predicates[predicate], namespace
         end
       end
