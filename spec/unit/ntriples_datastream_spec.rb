@@ -3,8 +3,18 @@ require 'spec_helper'
 describe ActiveFedora::NtriplesRDFDatastream do
 
   describe "an instance with content" do
-    before do
-      @subject = ActiveFedora::NtriplesRDFDatastream.new(@inner_object, 'mixed_rdf')
+    before do 
+      class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+        #register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
+        map_predicates do |map|
+          map.created(:in => RDF::DC)
+          map.title(:in => RDF::DC)
+          map.publisher(:in => RDF::DC)
+          map.based_near(:in => RDF::FOAF)
+          map.related_url(:to => "seeAlso", :in => RDF::RDFS)
+        end
+      end
+      @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
       @subject.stubs(:pid => 'test:1')
       @subject.stubs(:new? => false)
@@ -19,18 +29,20 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.dsid.should == 'mixed_rdf'
     end
     it "should have fields" do
+      #puts "subj: #{@subject.content.inspect}"
       @subject.created.should == ["2010-12-31"]
       @subject.title.should == ["Title of work"]
       @subject.publisher.should == ["Penn State"]
       @subject.based_near.should == ["New York, NY, US"]
-      @subject.seeAlso.should == ["http://google.com/"]
+      @subject.related_url.should == ["http://google.com/"]
     end
     it "should have method missing" do
-      lambda{@subject.frank}.should raise_exception NoMethodError
+      lambda{@subject.frank}.should raise_exception ActiveFedora::UnregisteredPredicateError
     end
 
     it "should set fields" do
-      @subject.publisher= "St. Martin's Press"
+      puts "====================================================================="
+      @subject.publisher = "St. Martin's Press"
       @subject.publisher.should == ["St. Martin's Press"]
     end
     it "should append fields" do
@@ -41,11 +53,17 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
   describe "a new instance" do
     before do
-      @subject = ActiveFedora::NtriplesRDFDatastream.new(@inner_object, 'dc_rdf')
+      class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+        #register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
+        map_predicates do |map|
+          map.publisher(:in => RDF::DC)
+        end
+      end
+      @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
       @subject.stubs(:pid => 'test:1')
     end
     it "should save and reload" do
-      @subject.publisher= ["St. Martin's Press"]
+      @subject.publisher = ["St. Martin's Press"]
       @subject.save
     end
   end
