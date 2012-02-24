@@ -4,32 +4,63 @@ module ActiveFedora
   class RDFDatastream < Datastream
     module ModelMethods
       extend ActiveSupport::Concern
+      #attr_accessor :vocabularies, :predicate_map
       module ClassMethods
-        attr_accessor :vocabularies, :predicate_map
-        def register_vocabularies(*vocabs)
-          @vocabularies ||= []
-          vocabs.each do |v|
-            if v.respond_to? :property and v.respond_to? :to_uri
-              @vocabularies << v 
-            else
-              raise "not an RDF vocabulary: #{v}"
-            end
-          end
-        end
+        include ActiveFedora::Predicates
+        #attr_accessor :predicate_mappings, :predicate_config
+        #attr_accessor :vocabularies, :predicate_map
+        #def vocabularies
+        #  @@vocabularies ||= []
+        #end
+        #def register_vocabularies(*vocabs)
+        #  vocabularies
+        #  vocabs.each do |v|
+        #    if v.respond_to? :property and v.respond_to? :to_uri
+        #      vocabularies << v unless vocabularies.include? v
+        #    else
+        #      raise "not an RDF vocabulary: #{v}"
+        #    end
+        #  end
+        #end
+        #def predicate_map
+        #  @@predicate_map ||= {}
+        #end
+        #def resolve_predicate(vocab, predicate)
+        #  raise "property #{predicate} not found in #{vocab}" unless vocab.respond_to? predicate
+        #  vocab.send(predicate)
+        #end    
         def map_predicates(&block)
-          @predicate_map ||= {}
+          #predicate_map
           yield self
         end
-        def method_missing(name, args)
-          raise "mapping must include :to and :in args" unless args.has_key? :to and args.has_key? :in
-          vocab, property = args[:in], args[:to]
-          raise "vocabulary not registered: #{vocab}" unless @vocabularies.include? vocab
-          raise "property #{property} not found in #{vocab}" unless vocab.respond_to? property
-          @predicate_map[name] = vocab.send(property)
+        def method_missing(name, *args)
+          #puts "m_m(#{name.inspect}, #{args.inspect})"
+          args = args.first if args.respond_to? :first
+          raise "mapping must specify RDF vocabulary as :in argument" unless args.has_key? :in
+          vocab = args[:in].to_s
+          predicate = args.fetch(:to, name)
+          #raise "vocabulary not registered: #{vocab}" unless vocabularies.include? vocab
+          #predicate_map[name] = resolve_predicate(vocab, predicate)
+          if ActiveFedora::Predicates.predicate_config 
+            unless ActiveFedora::Predicates.predicate_config[:predicate_mapping].has_key? vocab
+              ActiveFedora::Predicates.predicate_config[:predicate_mapping][vocab] = { name => predicate }
+            else
+              ActiveFedora::Predicates.predicate_config[:predicate_mapping][vocab][name] = predicate
+            end
+          else
+            ActiveFedora::Predicates.predicate_config = {
+              :default_namespace => vocab,
+              :predicate_mapping => {
+                vocab => { name => predicate }
+              }
+            }
+          end
+          #puts "2 predmap: #{ActiveFedora::Predicates.predicate_config.inspect}" if name == :publisher
         end
       end
     end
-    
+
+    include ModelMethods
     attr_accessor :loaded
 
     def ensure_loaded
@@ -51,23 +82,69 @@ module ActiveFedora
       @graph ||= RelationshipGraph.new
     end
 
+    # Update field values within the current datastream using {#update_values}
+    # Ignores any fields from params that this datastream's predicate mappings don't recognize    
+    #
+    # @param [Hash] params The params specifying which fields to update and their new values.  The syntax of the params Hash is the same as that expected by 
+    #         term_pointers must be a valid OM Term pointers (ie. [:name]).  Strings will be ignored.
+    # @param [Hash] opts This is not currently used by the datastream-level update_indexed_attributes method
+    def update_indexed_attributes(params={}, opts={})    
+      if ActiveFedora::Predicates.predicate_mappings.empty?
+        raise "No predicates are set for this RDFDatastream class.  Cannot perform update_indexed_attributes"
+      end
+      ensure_loaded
+      # remove any fields from params that this datastream doesn't recognize    
+      # make sure to make a copy of params so not to modify hash that might be passed to other methods
+      current_params = params.clone
+      current_params.delete_if do |pred, new_values| 
+        !ActiveFedora::Predicates.predicate_mappings.fetch(pred.first.to_sym, false)
+      end
+      mapped_params = Hash[*current_params.collect do |k,v| 
+                             [ActiveFedora::Predicates.predicate_mappings[k.first.to_sym], v]
+                           end.flatten]
+      result = {}
+      unless mapped_params.empty?
+        result = update_values(mapped_params)
+      end      
+      result
+    end
+
     def get_values(predicate)
       ensure_loaded
-      predicate = resolve_predicate(predicate) unless predicate.kind_of? RDF::URI
-      results = graph[predicate]
+      pred = ActiveFedora::Predicates.find_predicate(predicate).reverse.to_s
+      #puts "pred: #{pred.inspect}" if predicate == :created
+      #puts "graph: #{graph.inspect}" if predicate == :created
+      results = graph[RDF::URI(pred)]
+      #puts "results: #{results.inspect}" if predicate == :created
+      return if results.nil?
       res = []
       results.each do |object|
         res << (object.kind_of?(RDF::Literal) ? object.value : object.to_str)
       end
       res
     end
+
+    def to_solr
+      # TODO
+    end
+
+    def update_values(params)
+      params.each_pair do |pred, value|
+        set_value(pred, value)
+      end
+      graph.dirty = true
+    end
   
     # if there are any existing statements with this predicate, replace them
     def set_value(predicate, args)
       ensure_loaded
-      predicate = resolve_predicate(predicate) unless predicate.kind_of? RDF::URI
+      predicate = RDF::URI(predicate.reverse.to_s) if predicate.is_a? Array
+      #puts "pred: #{predicate.inspect}"
+      #puts "graph: #{graph.inspect}"
+      #puts "args: #{args.inspect}"
       graph.delete(predicate)
       graph.add(predicate, args, true)
+      #puts "graph: #{graph.inspect}"
     end
 
     # append a value 
@@ -76,26 +153,22 @@ module ActiveFedora
       graph.add(predicate, args, true)
     end
 
+    def serialization_format
+      raise "you must override the `serialization_format' method in a subclass"
+    end
+
     def method_missing(name, *args)
-      if pred = resolve_predicate(name) 
-        get_values(pred)
-      elsif (md = /^([^=]+)=$/.match(name.to_s)) && pred = resolve_predicate(md[1])
+      if (md = /^([^=]+)=$/.match(name.to_s)) && pred = ActiveFedora::Predicates.find_predicate(md[1].to_sym)
+        #puts "tried to find #{md[1].inspect}"
+        #puts "passing #{pred.inspect}"
         set_value(pred, *args)  
+      elsif pred = ActiveFedora::Predicates.find_predicate(name)
+        get_values(name)
       else 
         super
       end
     end
-
-    def serialization_format
-      raise "you must override the `serialization_format' method in a subclass"
-    end
     
-    # given a symbol or string, map it to a RDF::URI
-    # if the provided parameter is not allowed in the vocabulary, return nil
-    def resolve_predicate(predicate)
-      raise "you must override the `resolve_predicate' method in a subclass"
-    end
-
     # Populate a RDFDatastream object based on the "datastream" content 
     # Assumes that the datastream contains RDF XML from a Fedora RELS-EXT datastream 
     # @param [ActiveFedora::MetadataDatastream] tmpl the Datastream object that you are populating
@@ -104,6 +177,7 @@ module ActiveFedora
       unless data.nil?
         RDF::Reader.for(serialization_format).new(data) do |reader|
           reader.each_statement do |statement|
+            next unless statement.subject == "info:fedora/#{self.pid}"
             literal = statement.object.kind_of?(RDF::Literal)
             object = literal ? statement.object.value : statement.object.to_str
             graph.add(statement.predicate, object, literal)
@@ -112,6 +186,7 @@ module ActiveFedora
       end
       graph
     end
+    #alias_method :content=, :deserialize
 
     # Creates a RDF datastream for insertion into a Fedora Object
     # @param [String] pid
@@ -125,9 +200,6 @@ module ActiveFedora
       end
       out
     end
-    
-    
   end
-
 end
 
