@@ -4,32 +4,63 @@ module ActiveFedora
   class RDFDatastream < Datastream
     module ModelMethods
       extend ActiveSupport::Concern
+      #attr_accessor :vocabularies, :predicate_map
       module ClassMethods
-        attr_accessor :vocabularies, :predicate_map
-        def register_vocabularies(*vocabs)
-          @vocabularies ||= []
-          vocabs.each do |v|
-            if v.respond_to? :property and v.respond_to? :to_uri
-              @vocabularies << v 
-            else
-              raise "not an RDF vocabulary: #{v}"
-            end
-          end
-        end
+        include ActiveFedora::Predicates
+        #attr_accessor :predicate_mappings, :predicate_config
+        #attr_accessor :vocabularies, :predicate_map
+        #def vocabularies
+        #  @@vocabularies ||= []
+        #end
+        #def register_vocabularies(*vocabs)
+        #  vocabularies
+        #  vocabs.each do |v|
+        #    if v.respond_to? :property and v.respond_to? :to_uri
+        #      vocabularies << v unless vocabularies.include? v
+        #    else
+        #      raise "not an RDF vocabulary: #{v}"
+        #    end
+        #  end
+        #end
+        #def predicate_map
+        #  @@predicate_map ||= {}
+        #end
+        #def resolve_predicate(vocab, predicate)
+        #  raise "property #{predicate} not found in #{vocab}" unless vocab.respond_to? predicate
+        #  vocab.send(predicate)
+        #end    
         def map_predicates(&block)
-          @predicate_map ||= {}
+          #predicate_map
           yield self
         end
-        def method_missing(name, args)
-          raise "mapping must include :to and :in args" unless args.has_key? :to and args.has_key? :in
-          vocab, property = args[:in], args[:to]
-          raise "vocabulary not registered: #{vocab}" unless @vocabularies.include? vocab
-          raise "property #{property} not found in #{vocab}" unless vocab.respond_to? property
-          @predicate_map[name] = vocab.send(property)
+        def method_missing(name, *args)
+          #puts "m_m(#{name.inspect}, #{args.inspect})"
+          args = args.first if args.respond_to? :first
+          raise "mapping must specify RDF vocabulary as :in argument" unless args.has_key? :in
+          vocab = args[:in].to_s
+          predicate = args.fetch(:to, name)
+          #raise "vocabulary not registered: #{vocab}" unless vocabularies.include? vocab
+          #predicate_map[name] = resolve_predicate(vocab, predicate)
+          if ActiveFedora::Predicates.predicate_config 
+            unless ActiveFedora::Predicates.predicate_config[:predicate_mapping].has_key? vocab
+              ActiveFedora::Predicates.predicate_config[:predicate_mapping][vocab] = { name => predicate }
+            else
+              ActiveFedora::Predicates.predicate_config[:predicate_mapping][vocab][name] = predicate
+            end
+          else
+            ActiveFedora::Predicates.predicate_config = {
+              :default_namespace => vocab,
+              :predicate_mapping => {
+                vocab => { name => predicate }
+              }
+            }
+          end
+          #puts "2 predmap: #{ActiveFedora::Predicates.predicate_config.inspect}" if name == :publisher
         end
       end
     end
-    
+
+    include ModelMethods
     attr_accessor :loaded
 
     def ensure_loaded
@@ -122,6 +153,10 @@ module ActiveFedora
       graph.add(predicate, args, true)
     end
 
+    def serialization_format
+      raise "you must override the `serialization_format' method in a subclass"
+    end
+
     def method_missing(name, *args)
       if (md = /^([^=]+)=$/.match(name.to_s)) && pred = ActiveFedora::Predicates.find_predicate(md[1].to_sym)
         #puts "tried to find #{md[1].inspect}"
@@ -132,10 +167,6 @@ module ActiveFedora
       else 
         super
       end
-    end
-
-    def serialization_format
-      raise "you must override the `serialization_format' method in a subclass"
     end
     
     # Populate a RDFDatastream object based on the "datastream" content 
