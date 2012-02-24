@@ -24,7 +24,6 @@ module ActiveFedora
       unless xmlns && rel_predicate
         rel_predicate, xmlns = find_predicate(predicate)
       end
-
       vocabularies[xmlns][rel_predicate] 
     end
 
@@ -74,6 +73,7 @@ module ActiveFedora
     end
 
     def self.find_predicate(predicate)
+      #puts "f_p: #{predicate.inspect}"
       predicate_mappings.each do |namespace,predicates|
         if predicates.fetch(predicate.to_sym,nil)
           return predicates[predicate], namespace

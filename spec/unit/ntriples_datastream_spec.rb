@@ -30,6 +30,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.dsid.should == 'mixed_rdf'
     end
     it "should have fields" do
+      #puts "subj: #{@subject.content.inspect}"
       @subject.created.should == ["2010-12-31"]
       @subject.title.should == ["Title of work"]
       @subject.publisher.should == ["Penn State"]
