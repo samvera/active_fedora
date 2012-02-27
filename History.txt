@@ -7,7 +7,6 @@ HYDRA-746 Speed up find() by not hitting solr first
 Added description for active_fedora:load_fixtures task
 HYDRA-748 Allow setting versionable via has_metadata
 
-
 3.3.1
 Allow explicit setting of predicate config.
 Check for appropriate content before saving a datastream
