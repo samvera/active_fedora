@@ -1,3 +1,12 @@
+3.3.2
+HYDRA-745 No need to require :url be present on external datastreams
+Initialize relationships graph to empty array
+HYDRA-668 ActiveFedora models do not need to be immediate descendants of ActiveFedora::Base
+Fix for camel cased classes in classname from uri
+HYDRA-746 Speed up find() by not hitting solr first
+Added description for active_fedora:load_fixtures task
+
+
 3.3.1
 Allow explicit setting of predicate config.
 Check for appropriate content before saving a datastream
