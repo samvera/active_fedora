@@ -78,6 +78,7 @@ module ActiveFedora
       ds = ds_spec[:type].new(inner_object, name)
       ds.dsLabel = ds_spec[:label] if ds_spec[:label].present?
       ds.controlGroup = ds_spec[:control_group]
+      ds.versionable = ds_spec[:versionable]
       additional_attributes_for_external_and_redirect_control_groups(ds, ds_spec)
       ds
     end
@@ -240,6 +241,16 @@ module ActiveFedora
       #args must include :name. Note that this method doesn't actually
       #execute the block, but stores it at the class level, to be executed
       #by any future instantiations.
+      #
+      # @param [Hash] args 
+      # @option args [Class] :type The class that will represent this datastream, should extend ``Datastream''
+      # @option args [String] :name the handle to refer to this datastream as
+      # @option args [String] :label sets the fedora label
+      # @option args [String] :control_group ('X') must be one of 'E', 'X', 'M', 'R'
+      # @option args [String] :disseminator Sets the disseminator location see {#add_disseminator_location_to_datastreams}
+      # @option args [String] :url 
+      # @option args [Boolean] :versionable (true) Should versioned datastreams be stored
+      # @yield block executed by some kinds of datastreams
       def has_metadata(args, &block)
         ds_specs[args[:name]]= {:type => args[:type], :label =>  args.fetch(:label,""), :control_group => args.fetch(:control_group,"X"), :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
       end
