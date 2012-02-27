@@ -5,6 +5,7 @@ HYDRA-668 ActiveFedora models do not need to be immediate descendants of ActiveF
 Fix for camel cased classes in classname from uri
 HYDRA-746 Speed up find() by not hitting solr first
 Added description for active_fedora:load_fixtures task
+HYDRA-748 Allow setting versionable via has_metadata
 
 
 3.3.1

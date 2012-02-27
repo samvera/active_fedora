@@ -9,6 +9,16 @@ describe ActiveFedora::Datastreams do
     ActiveFedora::Base.respond_to?(:has_metadata).should be_true
   end
 
+  describe "datastream_from_spec" do
+    it "should accept versionable" do
+      ds = @test_object.datastream_from_spec({:type=>ActiveFedora::Datastream, :versionable=>false}, 'test')
+      ds.versionable.should be_false
+      ds = @test_object.datastream_from_spec({:type=>ActiveFedora::Datastream, :versionable=>true}, 'test')
+      ds.versionable.should be_true
+    end
+
+  end
+
   describe "has_metadata" do
     @@last_pid = 0
     def increment_pid
