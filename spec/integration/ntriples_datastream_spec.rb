@@ -3,7 +3,6 @@ require 'spec_helper'
 describe ActiveFedora::NtriplesRDFDatastream do
   before do
     class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-      #register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
       map_predicates do |map|
         map.title(:in => RDF::DC)
         map.based_near(:in => RDF::FOAF)
