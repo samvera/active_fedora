@@ -5,7 +5,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "an instance with content" do
     before do 
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        #register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
         map_predicates do |map|
           map.created(:in => RDF::DC)
           map.title(:in => RDF::DC)
@@ -29,7 +28,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.dsid.should == 'mixed_rdf'
     end
     it "should have fields" do
-      #puts "subj: #{@subject.content.inspect}"
       @subject.created.should == ["2010-12-31"]
       @subject.title.should == ["Title of work"]
       @subject.publisher.should == ["Penn State"]
@@ -41,7 +39,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
 
     it "should set fields" do
-      puts "====================================================================="
       @subject.publisher = "St. Martin's Press"
       @subject.publisher.should == ["St. Martin's Press"]
     end
@@ -54,7 +51,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "a new instance" do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        #register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
         map_predicates do |map|
           map.publisher(:in => RDF::DC)
         end

@@ -24,22 +24,17 @@ module ActiveFedora
       unless xmlns && rel_predicate
         rel_predicate, xmlns = find_predicate(predicate)
       end
-      #puts "vs: #{vocabularies.inspect}"
-      #puts "xmlns: #{xmlns.inspect}"
-      #puts "rel_pred: #{rel_predicate}"
-      #puts "vs[xns]: #{vocabularies[xmlns].inspect}"
+
       vocabularies[xmlns][rel_predicate] 
     end
 
     def self.vocabularies
-      #return @vocabularies if @vocabularies
       @vocabularies ||= {}
       predicate_mappings.keys.each do |ns| 
         @vocabularies[ns] = RDF::Vocabulary.new(ns) unless @vocabularies.has_key? ns
       end
       @vocabularies
     end
-
 
     # If predicate is a symbol, looks up the predicate in the predicate_mappings
     # If predicate is not a Symbol, returns the predicate untouched
@@ -79,10 +74,7 @@ module ActiveFedora
     end
 
     def self.find_predicate(predicate)
-      #puts "f_p: #{predicate.inspect}"
       predicate_mappings.each do |namespace,predicates|
-        #puts "ns: #{namespace.inspect}"
-        #puts "preds: #{predicates.inspect}"
         if predicates.fetch(predicate.to_sym,nil)
           return predicates[predicate], namespace
         end

@@ -19,12 +19,6 @@ RSpec.configure do |config|
   config.color_enabled = true
 end
 
-#Spec::Runner.configure do |config|
-#  config.before(:each) do |t|
-#    puts "#{t.class.description}"
-#  end
-#end
-
 def fixture(file)
   File.open(File.join(File.dirname(__FILE__), 'fixtures', file), 'rb')
 end

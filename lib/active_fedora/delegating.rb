@@ -32,13 +32,11 @@ module ActiveFedora
         define_method field do
           ds = self.send(args[:to])
           val = if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::RDFDatastream)
-                  #puts "sending #{field.inspect} to g_v"
                   ds.send(:get_values, field)
                 else 
                   terminology = args[:at] || [field]
                   ds.send(:term_values, *terminology)
                 end
-          #puts "val: #{val.inspect}"
           args[:unique] ? val.first : val
         end
       end
