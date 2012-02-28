@@ -88,26 +88,26 @@ module ActiveFedora
     # @param [Hash] params The params specifying which fields to update and their new values.  The syntax of the params Hash is the same as that expected by 
     #         term_pointers must be a valid OM Term pointers (ie. [:name]).  Strings will be ignored.
     # @param [Hash] opts This is not currently used by the datastream-level update_indexed_attributes method
-    def update_indexed_attributes(params={}, opts={})    
-      if ActiveFedora::Predicates.predicate_mappings.empty?
-        raise "No predicates are set for this RDFDatastream class.  Cannot perform update_indexed_attributes"
-      end
-      ensure_loaded
+    #def update_indexed_attributes(params={}, opts={})    
+    #  if ActiveFedora::Predicates.predicate_mappings.empty?
+    #    raise "No predicates are set for this RDFDatastream class.  Cannot perform update_indexed_attributes"
+    #  end
+    #  ensure_loaded
       # remove any fields from params that this datastream doesn't recognize    
       # make sure to make a copy of params so not to modify hash that might be passed to other methods
-      current_params = params.clone
-      current_params.delete_if do |pred, new_values| 
-        !ActiveFedora::Predicates.predicate_mappings.fetch(pred.first.to_sym, false)
-      end
-      mapped_params = Hash[*current_params.collect do |k,v| 
-                             [ActiveFedora::Predicates.predicate_mappings[k.first.to_sym], v]
-                           end.flatten]
-      result = {}
-      unless mapped_params.empty?
-        result = update_values(mapped_params)
-      end      
-      result
-    end
+    #  current_params = params.clone
+    #  current_params.delete_if do |pred, new_values| 
+    #    !ActiveFedora::Predicates.predicate_mappings.fetch(pred.first.to_sym, false)
+    #  end
+    #  mapped_params = Hash[*current_params.collect do |k,v| 
+    #                         [ActiveFedora::Predicates.predicate_mappings[k.first.to_sym], v]
+    #                       end.flatten]
+    #  result = {}
+    #  unless mapped_params.empty?
+    #    result = update_values(mapped_params)
+    #  end      
+    #  result
+    #end
 
     def get_values(predicate)
       ensure_loaded
@@ -128,12 +128,12 @@ module ActiveFedora
       # TODO
     end
 
-    def update_values(params)
-      params.each_pair do |pred, value|
-        set_value(pred, value)
-      end
-      graph.dirty = true
-    end
+    #def update_values(params)
+    #  params.each_pair do |pred, value|
+    #    set_value(pred, value)
+    #  end
+    #  graph.dirty = true
+    #end
   
     # if there are any existing statements with this predicate, replace them
     def set_value(predicate, args)
@@ -145,6 +145,8 @@ module ActiveFedora
       graph.delete(predicate)
       graph.add(predicate, args, true)
       #puts "graph: #{graph.inspect}"
+      graph.dirty = true
+      return {predicate => args}
     end
 
     # append a value 
