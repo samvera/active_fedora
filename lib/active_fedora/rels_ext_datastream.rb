@@ -57,7 +57,8 @@ module ActiveFedora
     end
 
     def self.short_predicate(predicate)
-      if match = /^(#{Predicates.predicate_mappings.keys.join('|')})(.+)$/.match(predicate.to_str)
+      # for this regex to short-circuit correctly, namespaces must be sorted into descending order by length
+      if match = /^(#{Predicates.predicate_mappings.keys.sort.reverse.join('|')})(.+)$/.match(predicate.to_str)
         namespace = match[1]
         predicate = match[2]
         pred = Predicates.predicate_mappings[namespace].invert[predicate]
