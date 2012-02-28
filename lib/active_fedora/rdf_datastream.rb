@@ -132,7 +132,6 @@ module ActiveFedora
       end
       graph
     end
-    #alias_method :content=, :deserialize
 
     # Creates a RDF datastream for insertion into a Fedora Object
     # @param [String] pid
