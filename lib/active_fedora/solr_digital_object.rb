@@ -18,6 +18,7 @@ module ActiveFedora
       @label = @profile['objLabel']
       @state = @profile['objState']
       @ownerId = @profile['objOwnerId']
+      @repository = ActiveFedora.fedora.connection      
     end
 
     def freeze
