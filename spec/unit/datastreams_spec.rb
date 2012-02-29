@@ -71,7 +71,7 @@ describe ActiveFedora::Datastreams do
 
 
     it "should create specified datastreams with appropriate control group" do
-      ActiveFedora.fedora_config.stubs(:[]).returns({:url=>'sub_url'})
+      ActiveFedora.stubs(:config_for_environment).returns(:url=>'sub_url')
       stub_ingest(@this_pid)
       stub_add_ds(@this_pid, ['RELS-EXT', 'DC', 'rightsMetadata', 'properties', 'descMetadata', 'UKETD_DC'])
       stub_get(@this_pid, ['RELS-EXT', 'DC', 'rightsMetadata', 'properties', 'descMetadata', 'UKETD_DC'])

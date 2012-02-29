@@ -19,7 +19,7 @@ module ActiveFedora
     def connection
       return @connection if @connection
       ActiveFedora.load_configs
-      ActiveFedora::RubydoraConnection.connect(ActiveFedora.config_for_environment)
+      ActiveFedora::RubydoraConnection.connect(ActiveFedora.config)
       @connection
     end
     
