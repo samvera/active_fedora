@@ -48,6 +48,10 @@ describe ActiveFedora::Base do
     end
   end
 
+  it "should have a shard_index" do
+    @test_object.shard_index.should == 0
+  end
+
   describe '#new' do
     it "should create an inner object" do  
       # for doing AFObject.new(params[:foo]) when nothing is in params[:foo]

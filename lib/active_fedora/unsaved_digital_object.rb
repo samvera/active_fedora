@@ -32,10 +32,7 @@ module ActiveFedora
 
     def assign_pid
         return @pid if @pid
-        args = {}
-        args[:namespace] = self.namespace if self.namespace
-        @pid = RubydoraConnection.instance.nextid args
-        @pid
+        self.original_class.assign_pid(self)
     end
 
 

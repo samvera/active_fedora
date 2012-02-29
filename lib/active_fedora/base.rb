@@ -143,6 +143,15 @@ module ActiveFedora
       obj
     end
 
+    ### if you are doing sharding, override this method to do something other than use a sequence
+    # @returns [String] the unique pid for a new object
+    def self.assign_pid(obj)
+        args = {}
+        args[:namespace] = obj.namespace if obj.namespace
+        @pid = RubydoraConnection.instance.nextid args
+        @pid
+    end
+
     def inner_object # :nodoc
       @inner_object
     end
@@ -170,7 +179,7 @@ module ActiveFedora
 
     #If you want to use sharding override this method with your strategy
     #@returns [Integer] the index of the shard this object is stored in
-    def sharding_index
+    def shard_index
       0
     end
     
