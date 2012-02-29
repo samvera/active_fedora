@@ -125,7 +125,7 @@ module ActiveFedora #:nodoc:
   end
 
   def self.config
-    @fedora_config.values
+    @fedora_config
   end
 
   def self.reset!

@@ -167,6 +167,12 @@ module ActiveFedora
     def internal_uri
       "info:fedora/#{pid}"
     end
+
+    #If you want to use sharding override this method with your strategy
+    #@returns [Integer] the index of the shard this object is stored in
+    def sharding_index
+      0
+    end
     
     #return the state of the inner object
     def state 
