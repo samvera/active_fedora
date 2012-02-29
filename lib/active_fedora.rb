@@ -12,12 +12,21 @@ ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 module ActiveFedora #:nodoc:
   extend ActiveSupport::Autoload
 
+  class ObjectNotFoundError < RuntimeError; end # :nodoc:
+  class PredicateMappingsNotFoundError < RuntimeError; end # :nodoc:
+  class UnknownAttributeError < NoMethodError; end; # :nodoc:
+  class ConfigurationError < RuntimeError; end # :nodoc:
+  class AssociationTypeMismatch < RuntimeError; end # :nodoc:
+  class UnregisteredPredicateError < RuntimeError; end
+
+
   eager_autoload do
     autoload :Associations
     autoload :AttributeMethods
     autoload :Base
     autoload :ContentModel
     autoload :Callbacks
+    autoload :Config
     autoload :Reflection
     autoload :Relationships
     autoload :FileManagement
@@ -55,7 +64,7 @@ module ActiveFedora #:nodoc:
   include Loggable
   
   class << self
-    attr_accessor :solr_config, :fedora_config, :config_env, :fedora_config_path, :solr_config_path
+    attr_accessor :solr_config, :fedora_config, :config_env, :solr_config_path
     attr_reader :config_options
   end
   
@@ -115,6 +124,10 @@ module ActiveFedora #:nodoc:
     load_configs
   end
 
+  def self.config
+    @fedora_config.values
+  end
+
   def self.reset!
     @config_loaded = false  #Force reload of configs
     @predicate_config_path = nil
@@ -127,7 +140,7 @@ module ActiveFedora #:nodoc:
   def self.load_configs
     return if config_loaded?
     @config_env = environment
-    load_config(:fedora)
+    @fedora_config = Config.new(get_config_path(:fedora), @config_env)
     load_config(:solr)
     @config_loaded = true
 
@@ -150,7 +163,8 @@ module ActiveFedora #:nodoc:
   end
 
   def self.config_for_environment
-    fedora_config[@config_env.to_sym].symbolize_keys
+    ActiveSupport::Deprecation.warn("config_for_environment has been deprecated use `config' instead")
+    config
   end
 
   # Determines and sets the fedora_config[:url] or solr_config[:url]
@@ -233,16 +247,13 @@ module ActiveFedora #:nodoc:
   def self.get_config_path(config_type)
     config_type = config_type.to_s
     if (config_path = config_options.fetch("#{config_type}_config_path".to_sym,nil) )
-      raise ActiveFedoraConfigurationException, "file does not exist #{config_path}" unless File.file? config_path
-      return config_path
+      raise ConfigurationError, "file does not exist #{config_path}" unless File.file? config_path
+      return File.expand_path(config_path)
     end
     
     # if solr, attempt to use path where fedora.yml is first
     if config_type == "solr" && (config_path = check_fedora_path_for_solr)
       return config_path
-    elsif config_type == "solr" && fedora_config[environment].fetch("solr",nil)
-      ActiveSupport::Deprecation.warn("You appear to be using a deprecated format for your fedora.yml file.  The solr url should be stored in a separate solr.yml file in the same directory as the fedora.yml")
-      raise ActiveFedoraConfigurationException
     end
 
     if defined?(Rails.root)
@@ -258,12 +269,12 @@ module ActiveFedora #:nodoc:
     config_path = File.expand_path(File.join(File.dirname(__FILE__), "..", "config", "#{config_type}.yml"))
     logger.warn "Using the default #{config_type}.yml that comes with active-fedora.  If you want to override this, pass the path to #{config_type}.yml to ActiveFedora - ie. ActiveFedora.init(:#{config_type}_config_path => '/path/to/#{config_type}.yml) - or set Rails.root and put #{config_type}.yml into \#{Rails.root}/config."
     return config_path if File.file? config_path
-    raise ActiveFedoraConfigurationException "Couldn't load #{config_type} config file!"
+    raise ConfigurationError "Couldn't load #{config_type} config file!"
   end
   
-  # Checks the existing fedora_config_path to see if there is a solr.yml there
+  # Checks the existing fedora_config.path to see if there is a solr.yml there
   def self.check_fedora_path_for_solr
-    path = fedora_config_path.split('/')[0..-2].join('/') + "/solr.yml"
+    path = @fedora_config.path.split('/')[0..-2].join('/') + "/solr.yml"
     if File.file? path
       return path
     else
@@ -280,7 +291,7 @@ module ActiveFedora #:nodoc:
   end
 
   def self.predicate_config
-    @predicate_config_path ||= build_predicate_config_path(File.dirname(@fedora_config_path))
+    @predicate_config_path ||= build_predicate_config_path(File.dirname(@fedora_config.path))
   end
 
   def self.version
@@ -311,15 +322,6 @@ module ActiveFedora #:nodoc:
 
 end
 
-module ActiveFedora
-  class ObjectNotFoundError < RuntimeError; end # :nodoc:
-  class PredicateMappingsNotFoundError < RuntimeError; end # :nodoc:
-  class UnknownAttributeError < NoMethodError; end; # :nodoc:
-  class ActiveFedoraConfigurationException < Exception; end # :nodoc:
-  class AssociationTypeMismatch < RuntimeError; end # :nodoc:
-  class UnregisteredPredicateError < RuntimeError; end
-
-end
 
 load File.join(File.dirname(__FILE__),"tasks/active_fedora.rake") if defined?(Rake)
 
