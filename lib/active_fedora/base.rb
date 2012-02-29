@@ -300,6 +300,27 @@ module ActiveFedora
       end
       klass.allocate.init_with(inner_object)
     end
+    
+    # ** EXPERIMENTAL **
+    # This method returns a new object of the same class, with the internal SolrDigitalObject
+    # replaced with an actual DigitalObject.
+    def reify
+      if self.inner_object.is_a? DigitalObject
+        raise "#{self.inspect} is already a full digital object"
+      end
+      self.class.load_instance self.pid
+    end
+    
+    # ** EXPERIMENTAL **
+    # This method reinitializes a lightweight, loaded-from-solr object with an actual
+    # DigitalObject inside.
+    def reify!
+      if self.inner_object.is_a? DigitalObject
+        raise "#{self.inspect} is already a full digital object"
+      end
+      self.init_with DigitalObject.find(self.class,self.pid)
+    end
+    
     # ** EXPERIMENTAL **
     #
     # This method can be used instead of ActiveFedora::Model::ClassMethods.load_instance.  

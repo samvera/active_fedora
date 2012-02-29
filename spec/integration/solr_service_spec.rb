@@ -73,6 +73,40 @@ describe ActiveFedora::SolrService do
       end
     end
     
+    it 'should #reify a lightweight object as a new instance' do
+      query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
+      solr_result = ActiveFedora::SolrService.instance.conn.query(query)
+      result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
+      solr_foo = result.first
+      real_foo = solr_foo.reify
+      solr_foo.inner_object.should be_a(ActiveFedora::SolrDigitalObject)
+      real_foo.inner_object.should be_a(ActiveFedora::DigitalObject)
+      solr_foo.label.should == 'foo_object'
+      real_foo.label.should == 'foo_object'
+    end
+    
+    it 'should #reify! a lightweight object within the same instance' do
+      query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
+      solr_result = ActiveFedora::SolrService.instance.conn.query(query)
+      result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
+      solr_foo = result.first
+      solr_foo.inner_object.should be_a(ActiveFedora::SolrDigitalObject)
+      solr_foo.reify!
+      solr_foo.inner_object.should be_a(ActiveFedora::DigitalObject)
+      solr_foo.label.should == 'foo_object'
+    end
+    
+    it 'should raise an exception when attempting to reify a first-class object' do
+      query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
+      solr_result = ActiveFedora::SolrService.instance.conn.query(query)
+      result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
+      solr_foo = result.first
+      lambda {solr_foo.reify}.should_not raise_exception
+      lambda {solr_foo.reify!}.should_not raise_exception
+      lambda {solr_foo.reify!}.should raise_exception(/already a full/)
+      lambda {solr_foo.reify}.should raise_exception(/already a full/)
+    end
+  
     it 'should call load_instance_from_solr if :load_from_solr option passed in' do
       query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@test_object.pid)} OR id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
       solr_result = ActiveFedora::SolrService.instance.conn.query(query)
