@@ -77,12 +77,16 @@ describe ActiveFedora::Base do
       
       mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
       mock_datastreams.values.each {|ds| ds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)}
+      mock1.expects(:solrize_profile)
+      mock2.expects(:solrize_profile)
+      mock3.expects(:solrize_profile)
       mock1.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
       mock2.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
       mock3.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(false)
       #mock3.expects(:kind_of?).with(ActiveFedora::RelsExtDatastream).returns(true)
 
       @test_object.expects(:datastreams).returns(mock_datastreams)
+      @test_object.expects(:solrize_profile)
       @test_object.expects(:solrize_relationships)
       @test_object.send :update_index
     end
