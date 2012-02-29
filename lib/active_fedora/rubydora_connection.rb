@@ -19,7 +19,7 @@ module ActiveFedora
     def connection
       return @connection if @connection
       ActiveFedora.load_configs
-      ActiveFedora::RubydoraConnection.connect(ActiveFedora.config)
+      ActiveFedora::RubydoraConnection.connect(ActiveFedora.config.credentials)
       @connection
     end
     
@@ -33,6 +33,7 @@ module ActiveFedora
     end
 
     def nextid(attrs={})
+      raise RuntimeError "When using shards, you cannot use nextid to create a pid" if ActiveFedora.config.sharded?
       d = REXML::Document.new(connection.next_pid(:namespace=>attrs[:namespace]))
       d.elements['//pid'].text
     end
