@@ -133,10 +133,28 @@ module ActiveFedora
       self
     end
 
+    # Uses {shard_index} to find or create the rubydora connection for this pid
+    # @param [String] pid the identifier of the object to get the connection for
+    # @returns [Rubydora::Repository] The repository that the identifier exists in.
     def self.connection_for_pid(pid)
-      @fedora_connection ||= RubydoraConnection.new(ActiveFedora.config.credentials)
-      @fedora_connection.connection
+      @fedora_connection ||= {}
+      idx = shard_index(pid)
+      unless @fedora_connection.has_key? idx
+        if ActiveFedora.config.sharded?
+          @fedora_connection[idx] = RubydoraConnection.new(ActiveFedora.config.credentials[idx])
+        else
+          @fedora_connection[idx] = RubydoraConnection.new(ActiveFedora.config.credentials)
+        end
+      end
+      @fedora_connection[idx].connection
     end
+
+    #If you want to use sharding override this method with your strategy
+    #@returns [Integer] the index of the shard this object is stored in
+    def self.shard_index(pid)
+      0
+    end
+    
 
     def self.datastream_class_for_name(dsid)
       ds_specs[dsid] ? ds_specs[dsid][:type] : ActiveFedora::Datastream
@@ -184,12 +202,6 @@ module ActiveFedora
       "info:fedora/#{pid}"
     end
 
-    #If you want to use sharding override this method with your strategy
-    #@returns [Integer] the index of the shard this object is stored in
-    def shard_index
-      0
-    end
-    
     #return the state of the inner object
     def state 
       @inner_object.state
