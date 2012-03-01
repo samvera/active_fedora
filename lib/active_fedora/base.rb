@@ -30,6 +30,9 @@ module ActiveFedora
   class Base
     include SemanticNode
 
+    class_attribute :fedora_connection 
+
+    self.fedora_connection = {}
 
     def self.method_missing (name, *args)
       if [:has_relationship, :has_bidirectional_relationship, :register_relationship_desc].include? name 
@@ -137,16 +140,15 @@ module ActiveFedora
     # @param [String] pid the identifier of the object to get the connection for
     # @returns [Rubydora::Repository] The repository that the identifier exists in.
     def self.connection_for_pid(pid)
-      @fedora_connection ||= {}
       idx = shard_index(pid)
-      unless @fedora_connection.has_key? idx
+      unless fedora_connection.has_key? idx
         if ActiveFedora.config.sharded?
-          @fedora_connection[idx] = RubydoraConnection.new(ActiveFedora.config.credentials[idx])
+          fedora_connection[idx] = RubydoraConnection.new(ActiveFedora.config.credentials[idx])
         else
-          @fedora_connection[idx] = RubydoraConnection.new(ActiveFedora.config.credentials)
+          fedora_connection[idx] = RubydoraConnection.new(ActiveFedora.config.credentials)
         end
       end
-      @fedora_connection[idx].connection
+      fedora_connection[idx].connection
     end
 
     #If you want to use sharding override this method with your strategy
