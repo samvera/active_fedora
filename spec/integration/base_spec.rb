@@ -99,10 +99,19 @@ describe ActiveFedora::Base do
       @test_object.should have(0).errors
       @test_object.pid.should_not be_nil
     end
+  end
 
+  describe '.assign_pid' do
+    it "should get nextid" do
+      one = ActiveFedora::Base.assign_pid(ActiveFedora::UnsavedDigitalObject.new(ActiveFedora::Base, 'changeme'))
+      two = ActiveFedora::Base.assign_pid(ActiveFedora::UnsavedDigitalObject.new(ActiveFedora::Base, 'changeme'))
+      one = one.gsub('changeme:', '').to_i
+      two = two.gsub('changeme:', '').to_i
+      two.should == one + 1
+    end
   end
   
-  describe ".save" do
+  describe "#save" do
     before(:each) do
       @test_object2 = ActiveFedora::Base.new
     end

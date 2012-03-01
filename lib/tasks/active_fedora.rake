@@ -80,10 +80,10 @@ namespace :repo do
     if !filename.nil?
       puts "Loading '#{filename}' in #{ActiveFedora.fedora_config[:url]}"
       file = File.new(filename, "r")
-      result = ActiveFedora::RubydoraConnection.instance.connection.ingest(:file=>file.read)
+      result = ActiveFedora::Base.connection_for_pid(pid).ingest(:file=>file.read)
       if result
         puts "The object has been loaded as #{result.body}"
-	if pid.nil?
+      	if pid.nil?
           pid = result.body
         end
         solrizer = Solrizer::Fedora::Solrizer.new 

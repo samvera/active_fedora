@@ -12,7 +12,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   before(:each) do
     stub_get("_nextid_", ['RELS-EXT', 'sensitive_passages', 'significant_passages', 'dublin_core', 'properties'])
     Rubydora::Repository.any_instance.stubs(:client).returns(@mock_client)
-    ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns("_nextid_")
+    ActiveFedora::Base.stubs(:assign_pid).returns("_nextid_")
     @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new(nil, nil)
     @test_ds.stubs(:content).returns('')
 

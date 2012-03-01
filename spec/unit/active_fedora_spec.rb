@@ -379,7 +379,6 @@ describe ActiveFedora do
             ActiveSupport::Deprecation.expects(:warn).with("Using \":url\" in the fedora.yml file without :user and :password is no longer supported")
             ActiveFedora.init(:fedora_config_path=>fedora_config_path,:solr_config_path=>solr_config_path)
             ActiveFedora.solr.class.should == ActiveFedora::SolrService
-            ActiveFedora.fedora.class.should == ActiveFedora::RubydoraConnection
           end
         end
 
