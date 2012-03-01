@@ -134,7 +134,8 @@ module ActiveFedora
     end
 
     def self.connection_for_pid(pid)
-      @fedora_connection ||= RubydoraConnection.connect(ActiveFedora.config.credentials)
+      @fedora_connection ||= RubydoraConnection.new(ActiveFedora.config.credentials)
+      @fedora_connection.connection
     end
 
     def self.datastream_class_for_name(dsid)

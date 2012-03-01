@@ -3,22 +3,13 @@ require 'rubydora'
 module ActiveFedora
   class RubydoraConnection
     
-    attr_accessor :options
+    attr_accessor :options, :connection
 
-    def self.connect(params={})
+    def initialize(params={})
       params = params.dup
-      instance = self.new
-      instance.options = params
-      instance.connect
+      self.options = params
+      connect
     end
-
-    # def connection
-    #   return @connection if @connection
-    #   ActiveFedora.load_configs
-    #   ActiveFedora::RubydoraConnection.connect(ActiveFedora.config.credentials)
-    #   @connection
-    # end
-    
 
     def connect(force=false)
       return unless @connection.nil? or force
@@ -27,7 +18,5 @@ module ActiveFedora
       #puts "CLIENT OPTS #{client_options.inspect}"
       @connection = Rubydora.connect client_options
     end
-
-
   end
 end
