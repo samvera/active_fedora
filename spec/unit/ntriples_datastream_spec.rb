@@ -43,7 +43,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.publisher.should == ["St. Martin's Press"]
     end
     it "should append fields" do
-      @subject.append(RDF::DC.publisher, "St. Martin's Press")
+      # TODO: not the cleanest API for appending but it works for now
+      @subject.publisher = @subject.publisher.push("St. Martin's Press")
       @subject.publisher.should == ["Penn State", "St. Martin's Press"]
     end
   end

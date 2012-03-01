@@ -5,23 +5,27 @@ module ActiveFedora
     module ModelMethods
       extend ActiveSupport::Concern
       module ClassMethods
-        include ActiveFedora::Predicates
+        def config
+          ActiveFedora::Predicates.predicate_config
+        end
         def map_predicates(&block)
           yield self
         end
         def method_missing(name, *args)
           args = args.first if args.respond_to? :first
           raise "mapping must specify RDF vocabulary as :in argument" unless args.has_key? :in
-          vocab = args[:in].to_s
+          vocab = args[:in]
           predicate = args.fetch(:to, name)
-          if ActiveFedora::Predicates.predicate_config 
-            unless ActiveFedora::Predicates.predicate_config[:predicate_mapping].has_key? vocab
-              ActiveFedora::Predicates.predicate_config[:predicate_mapping][vocab] = { name => predicate }
+          raise "Vocabulary '#{vocab.inspect}' does not define property '#{predicate.inspect}'" unless vocab.respond_to? predicate
+          vocab = vocab.to_s
+          if config 
+            if config[:predicate_mapping].has_key? vocab
+              config[:predicate_mapping][vocab][name] = predicate
             else
-              ActiveFedora::Predicates.predicate_config[:predicate_mapping][vocab][name] = predicate
-            end
+              config[:predicate_mapping][vocab] = { name => predicate }
+           end
           else
-            ActiveFedora::Predicates.predicate_config = {
+            config = {
               :default_namespace => vocab,
               :predicate_mapping => {
                 vocab => { name => predicate }
@@ -50,14 +54,18 @@ module ActiveFedora
       end
     end
 
+    def find_predicate(predicate)
+      result = ActiveFedora::Predicates.find_predicate(predicate.to_sym)
+      return RDF::URI(result.reverse.to_s)
+    end
+
     def graph
       @graph ||= RelationshipGraph.new
     end
 
     def get_values(predicate)
       ensure_loaded
-      pred = ActiveFedora::Predicates.find_predicate(predicate).reverse.to_s
-      results = graph[RDF::URI(pred)]
+      results = graph[find_predicate(predicate)]
       return if results.nil?
       res = []
       results.each do |object|
@@ -73,9 +81,10 @@ module ActiveFedora
     # if there are any existing statements with this predicate, replace them
     def set_value(predicate, args)
       ensure_loaded
-      predicate = RDF::URI(predicate.reverse.to_s) if predicate.is_a? Array
       graph.delete(predicate)
-      graph.add(predicate, args, true)
+      args.each do |arg|
+        graph.add(predicate, arg, true)
+      end
       graph.dirty = true
       return {predicate => args}
     end
@@ -84,6 +93,8 @@ module ActiveFedora
     def append(predicate, args)
       ensure_loaded
       graph.add(predicate, args, true)
+      graph.dirty = true
+      return {predicate => args}
     end
 
     def serialization_format
@@ -91,9 +102,9 @@ module ActiveFedora
     end
 
     def method_missing(name, *args)
-      if (md = /^([^=]+)=$/.match(name.to_s)) && pred = ActiveFedora::Predicates.find_predicate(md[1].to_sym)
+      if (md = /^([^=]+)=$/.match(name.to_s)) && pred = find_predicate(md[1])
         set_value(pred, *args)  
-      elsif pred = ActiveFedora::Predicates.find_predicate(name)
+       elsif pred = find_predicate(name)
         get_values(name)
       else 
         super
@@ -108,7 +119,7 @@ module ActiveFedora
       unless data.nil?
         RDF::Reader.for(serialization_format).new(data) do |reader|
           reader.each_statement do |statement|
-            next unless statement.subject == "info:fedora/#{self.pid}"
+            next unless statement.subject == "info:fedora/#{pid}"
             literal = statement.object.kind_of?(RDF::Literal)
             object = literal ? statement.object.value : statement.object.to_str
             graph.add(statement.predicate, object, literal)
