@@ -125,6 +125,7 @@ module ActiveFedora #:nodoc:
   end
 
   def self.config
+    load_configs
     @fedora_config
   end
 
@@ -286,8 +287,11 @@ module ActiveFedora #:nodoc:
     ActiveFedora::SolrService.instance
   end
   
+  
   def self.fedora
-    ActiveFedora::RubydoraConnection.instance
+    ActiveSupport::Deprecation.warn("ActiveFedora.fedora() is deprecated and will be removed in the next release use ActiveFedora::Base.connection_for_pid(pid) instead")
+    
+    ActiveFedora::Base.connection_for_pid('0')
   end
 
   def self.predicate_config

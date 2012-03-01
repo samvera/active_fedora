@@ -133,6 +133,10 @@ module ActiveFedora
       self
     end
 
+    def self.connection_for_pid(pid)
+      @fedora_connection ||= RubydoraConnection.connect(ActiveFedora.config.credentials)
+    end
+
     def self.datastream_class_for_name(dsid)
       ds_specs[dsid] ? ds_specs[dsid][:type] : ActiveFedora::Datastream
     end
@@ -143,13 +147,15 @@ module ActiveFedora
       obj
     end
 
+
     ### if you are doing sharding, override this method to do something other than use a sequence
     # @returns [String] the unique pid for a new object
     def self.assign_pid(obj)
         args = {}
         args[:namespace] = obj.namespace if obj.namespace
-        @pid = RubydoraConnection.instance.nextid args
-        @pid
+        raise RuntimeError "When using shards, you cannot use nextid to create a pid" if ActiveFedora.config.sharded?
+        d = REXML::Document.new(connection_for_pid('0').next_pid(args))
+        d.elements['//pid'].text
     end
 
     def inner_object # :nodoc

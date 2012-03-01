@@ -35,7 +35,7 @@ describe ActiveFedora::Base do
     @this_pid = increment_pid.to_s
     stub_get(@this_pid)
     Rubydora::Repository.any_instance.stubs(:client).returns(@mock_client)
-    ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(@this_pid)
+    ActiveFedora::Base.stubs(:assign_pid).returns(@this_pid)
 
     @test_object = ActiveFedora::Base.new
   end
@@ -52,6 +52,11 @@ describe ActiveFedora::Base do
     @test_object.shard_index.should == 0
   end
 
+  describe "should have a connection_for_pid" do
+    subject {ActiveFedora::Base.connection_for_pid('foo:bar')}
+    it { should be_kind_of Rubydora::Repository}
+  end
+
   describe '#new' do
     it "should create an inner object" do  
       # for doing AFObject.new(params[:foo]) when nothing is in params[:foo]
@@ -62,7 +67,7 @@ describe ActiveFedora::Base do
 
     it "should not save or get an pid on init" do
       Rubydora::DigitalObject.any_instance.expects(:save).never
-      ActiveFedora::RubydoraConnection.instance.expects(:nextid).never
+      ActiveFedora::Base.expects(:assign_pid).never
       f = FooHistory.new
     end
 
@@ -211,7 +216,7 @@ describe ActiveFedora::Base do
     
     it 'should add a relationship to an object only if it does not exist already' do
       next_pid = increment_pid.to_s
-      ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(next_pid)
+      ActiveFedora::Base.stubs(:assign_pid).returns(next_pid)
       stub_get(next_pid)
 
       @test_object3 = ActiveFedora::Base.new
@@ -304,6 +309,7 @@ describe ActiveFedora::Base do
       to.datastreams["someData"].stubs(:new_object?).returns(true)
       to.datastreams["someData"].expects(:save)
       to.expects(:refresh)
+      FooHistory.expects(:assign_pid).with(to.inner_object).returns(@this_pid)
       to.save
     end
     it "should call .save on any datastreams that are new" do
@@ -331,6 +337,7 @@ describe ActiveFedora::Base do
       @test_object.datastreams['withText2'].expects(:save)
       @test_object.datastreams['withText'].expects(:save)
       @test_object.datastreams['RELS-EXT'].expects(:save)
+      FooHistory.expects(:assign_pid).with(@test_object.inner_object).returns(@this_pid)
       @test_object.save
     end
     it "should update solr index with all metadata if any MetadataDatastreams have changed" do
@@ -391,6 +398,7 @@ describe ActiveFedora::Base do
       stub_add_ds(@this_pid, ['someData', 'withText', 'withText2', 'RELS-EXT'])
     end
     it "should build a new record and save it" do
+      FooHistory.expects(:assign_pid).returns(@this_pid)
       @hist = FooHistory.create(:fubar=>'ta', :swank=>'da')
       @hist.fubar.should == ['ta']
       @hist.swank.should == ['da']
@@ -666,7 +674,7 @@ describe ActiveFedora::Base do
     
     it 'should return current relationships by name' do
       next_pid = increment_pid.to_s
-      ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(next_pid)
+      ActiveFedora::Base.stubs(:assign_pid).returns(next_pid)
       stub_get(next_pid)
       @test_object2 = MockNamedRelationships.new
       @test_object2.add_relationship(:has_model, MockNamedRelationships.to_class_uri)
@@ -697,7 +705,7 @@ describe ActiveFedora::Base do
       
     it 'should append and remove using helper methods for each outbound relationship' do
       next_pid = increment_pid.to_s
-      ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(next_pid)
+      ActiveFedora::Base.stubs(:assign_pid).returns(next_pid)
       stub_get(next_pid)
       @test_object2 = MockCreateNamedRelationshipMethodsBase.new 
       @test_object2.should respond_to(:testing_append)

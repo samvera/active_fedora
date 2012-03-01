@@ -17,6 +17,8 @@ describe ActiveFedora::Relationships do
           self.pid = inner_obj.pid
           self
         end
+        def self.connection_for_pid(pid)
+        end
 
         def internal_uri
           'info:fedora/' + pid.to_s

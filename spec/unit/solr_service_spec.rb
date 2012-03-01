@@ -53,6 +53,8 @@ describe ActiveFedora::SolrService do
           self.pid = inner_obj.pid
           self
         end
+        def self.connection_for_pid(pid)
+        end
       end
       @sample_solr_hits = [{"id"=>"my:_PID1_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
                             {"id"=>"my:_PID2_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
