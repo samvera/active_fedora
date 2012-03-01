@@ -5,6 +5,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     class MyDatastream < ActiveFedora::NtriplesRDFDatastream
       map_predicates do |map|
         map.title(:in => RDF::DC)
+        map.part(:to => "hasPart", :in => RDF::DC)
         map.based_near(:in => RDF::FOAF)
         map.related_url(:to => "seeAlso", :in => RDF::RDFS)
       end
@@ -13,6 +14,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       has_metadata :name=>'rdf', :type=>MyDatastream
       delegate :based_near, :to=>'rdf'
       delegate :related_url, :to=>'rdf'
+      delegate :part, :to=>'rdf'
       delegate :title, :to=>'rdf', :unique=>true
     end
     @subject = RdfTest.new
@@ -26,12 +28,26 @@ describe ActiveFedora::NtriplesRDFDatastream do
   it "should set and recall values" do
     @subject.title = 'War and Peace'
     @subject.based_near = "Moscow, Russia"
-    @subject.related_url = RDF::URI("http://en.wikipedia.org/wiki/War_and_Peace")
+    @subject.related_url = "http://en.wikipedia.org/wiki/War_and_Peace"
+    @subject.part = "this is a part"
     @subject.save
 
     loaded = RdfTest.find(@subject.pid)
     loaded.title.should == 'War and Peace'
     loaded.based_near.should == ['Moscow, Russia']
     loaded.related_url.should == ['http://en.wikipedia.org/wiki/War_and_Peace']
+    loaded.part.should == ['this is a part']
   end
+  it "should append values" do
+    @subject.part = "thing 1"
+    @subject.save
+    mf = RdfTest.find(@subject.pid)
+    mf.part = @subject.part.push("thing 2")
+    mf.save
+
+    loaded = RdfTest.find(@subject.pid)
+    loaded.part.should include("thing 1")
+    loaded.part.should include("thing 2")
+  end
+
 end
