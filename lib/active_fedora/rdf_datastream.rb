@@ -101,10 +101,6 @@ module ActiveFedora
       raise "you must override the `serialization_format' method in a subclass"
     end
 
-    def serialization_format
-      raise "you must override the `serialization_format' method in a subclass"
-    end
-
     def method_missing(name, *args)
       if (md = /^([^=]+)=$/.match(name.to_s)) && pred = find_predicate(md[1])
         set_value(pred, *args)  
