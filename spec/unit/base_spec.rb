@@ -8,6 +8,9 @@ describe ActiveFedora::Base do
     end
 
     describe "should have a connection_for_pid" do
+      before do
+        ActiveFedora::Base.fedora_connection = {}
+      end
       context "When the server is not sharded" do
         subject {ActiveFedora::Base.connection_for_pid('foo:bar')}
         it { should be_kind_of Rubydora::Repository}
