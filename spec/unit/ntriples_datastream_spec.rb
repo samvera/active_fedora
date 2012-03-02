@@ -14,8 +14,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
       end
       @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
-    before do
-      @subject = ActiveFedora::NtriplesRDFDatastream.new(@inner_object, 'mixed_rdf')
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
       @subject.stubs(:pid => 'test:1')
       @subject.stubs(:new? => false)
