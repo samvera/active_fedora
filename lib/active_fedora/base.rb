@@ -138,7 +138,7 @@ module ActiveFedora
 
     # Uses {shard_index} to find or create the rubydora connection for this pid
     # @param [String] pid the identifier of the object to get the connection for
-    # @returns [Rubydora::Repository] The repository that the identifier exists in.
+    # @return [Rubydora::Repository] The repository that the identifier exists in.
     def self.connection_for_pid(pid)
       idx = shard_index(pid)
       unless fedora_connection.has_key? idx
@@ -152,7 +152,7 @@ module ActiveFedora
     end
 
     #If you want to use sharding override this method with your strategy
-    #@returns [Integer] the index of the shard this object is stored in
+    #@return [Integer] the index of the shard this object is stored in
     def self.shard_index(pid)
       0
     end
@@ -170,7 +170,7 @@ module ActiveFedora
 
 
     ### if you are doing sharding, override this method to do something other than use a sequence
-    # @returns [String] the unique pid for a new object
+    # @return [String] the unique pid for a new object
     def self.assign_pid(obj)
         args = {}
         args[:namespace] = obj.namespace if obj.namespace
