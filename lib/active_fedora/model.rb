@@ -21,7 +21,7 @@ module ActiveFedora
     # Takes a Fedora URI for a cModel, and returns a 
     # corresponding Model if available
     # This method should reverse ClassMethods#to_class_uri
-    # @returns [Class, False] the class of the model or false, if it does not exist
+    # @return [Class, False] the class of the model or false, if it does not exist
     def self.from_class_uri(uri)
       model_value, pid_ns = classname_from_uri(uri)
       raise "model URI incorrectly formatted: #{uri}" unless model_value
@@ -80,7 +80,7 @@ module ActiveFedora
       # @example this will return an instance of Book, even if the object hydra:dataset1 asserts that it is a Dataset
       #   Book.load_instance("hydra:dataset1") 
       def load_instance(pid)
-        find_model(pid)
+        self.allocate.init_with(DigitalObject.find(self, pid))
       end
       
       # Returns a suitable uri object for :has_model
@@ -112,15 +112,16 @@ module ActiveFedora
           hits = SolrService.instance.conn.query(q, :rows=>opts[:rows]).hits 
           return hits.map do |hit|
              pid = hit[SOLR_DOCUMENT_ID]
-             find_model(pid)
+             load_instance(pid)
           end
         elsif args.class == String
-          return find_model(args)
+          return load_instance(args)
         end
       end
 
       def find_model(pid)
-        self.allocate.init_with(DigitalObject.find(self, pid))
+        ActiveSupport::Deprection.warn("find_model is deprecated.  Use load_instance instead")
+        load_instance(pid)
       end
 
 

@@ -80,13 +80,13 @@ describe ActiveFedora::Model do
       mock_result.expects(:hits).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
       mock_solr.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :rows=>1001).returns(mock_result)
       ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
-      SpecModel::Basic.expects(:find_model).with("changeme:30").returns("Fake Object1")
-      SpecModel::Basic.expects(:find_model).with("changeme:22").returns("Fake Object2")
+      SpecModel::Basic.expects(:load_instance).with("changeme:30").returns("Fake Object1")
+      SpecModel::Basic.expects(:load_instance).with("changeme:22").returns("Fake Object2")
       SpecModel::Basic.find(:all, :rows=>1001).should == ["Fake Object1", "Fake Object2"]
     end
     
     it "(String) should query solr for an object with the given id and return that object" do
-      SpecModel::Basic.expects(:find_model).with("changeme:30").returns("Fake Object")
+      SpecModel::Basic.expects(:load_instance).with("changeme:30").returns("Fake Object")
       SpecModel::Basic.find("changeme:30").should == "Fake Object"
     end
   end
