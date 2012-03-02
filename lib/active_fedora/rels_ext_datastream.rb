@@ -79,18 +79,21 @@ module ActiveFedora
     # ====Warning
     #  Solr must be synchronized with RELS-EXT data in Fedora.
     def from_solr(solr_doc)
+      profile_from_solr(solr_doc)
       #cycle through all possible predicates
       model.relationships_loaded = true
-      Predicates.predicate_mappings[Predicates.default_predicate_namespace].keys.each do |predicate|
-        predicate_symbol = ActiveFedora::SolrService.solr_name(predicate, :symbol)
-        value = (solr_doc[predicate_symbol].nil? ? solr_doc[predicate_symbol.to_s]: solr_doc[predicate_symbol]) 
-        unless value.nil? 
-          if value.is_a? Array
-            value.each do |obj|
-              model.add_relationship(predicate, obj)
+      Predicates.predicate_mappings.each_pair do |namespace,predicates|
+        predicates.keys.each do |predicate|
+          predicate_symbol = ActiveFedora::SolrService.solr_name(predicate, :symbol)
+          value = (solr_doc[predicate_symbol].nil? ? solr_doc[predicate_symbol.to_s]: solr_doc[predicate_symbol]) 
+          unless value.nil? 
+            if value.is_a? Array
+              value.each do |obj|
+                model.add_relationship(predicate, obj)
+              end
+            else
+              model.add_relationship(predicate, value)
             end
-          else
-            model.add_relationship(predicate, value)
           end
         end
       end

@@ -515,10 +515,14 @@ describe ActiveFedora::Base do
       mock1 = mock("ds1", :to_solr)
       mock2 = mock("ds2", :to_solr)
       ngds = mock("ngds")
+      ngds.expects(:solrize_profile)
+      mock1.expects(:solrize_profile)
+      mock2.expects(:solrize_profile)
       mock1.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
       mock2.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
       
       @test_object.expects(:datastreams).returns({:ds1 => mock1, :ds2 => mock2, :ngds => ngds})
+      @test_object.expects(:solrize_profile)
       @test_object.expects(:solrize_relationships)
       @test_object.to_solr
     end

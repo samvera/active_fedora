@@ -40,7 +40,12 @@ module ActiveFedora
     #
     # ====Warning
     #  Solr must be synchronized with data in Fedora.
+    #  @content is initialized to the empty document template to satisfy #ensure_xml_loaded
+    #    (called from #update_attributes and #update_indexed_attributes)
     def from_solr(solr_doc)
+      @content = self.to_xml
+      self.xml_loaded = true
+      profile_from_solr(solr_doc)
       fields.each do |field_key, field_info|
         field_symbol = ActiveFedora::SolrService.solr_name(field_key, field_info[:type])
         value = (solr_doc[field_symbol].nil? ? solr_doc[field_symbol.to_s]: solr_doc[field_symbol]) 

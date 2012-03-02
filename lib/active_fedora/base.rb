@@ -253,8 +253,10 @@ module ActiveFedora
     def to_solr(solr_doc = Hash.new, opts={})
       unless opts[:model_only]
         solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid, ActiveFedora::SolrService.solr_name(:system_create, :date) => self.create_date, ActiveFedora::SolrService.solr_name(:system_modified, :date) => self.modified_date, ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol) => self.class.inspect)
+        solrize_profile(solr_doc)
       end
       datastreams.each_value do |ds|
+        solr_doc = ds.solrize_profile(solr_doc)
         ds.ensure_xml_loaded if ds.respond_to? :ensure_xml_loaded  ### Can't put this in the model because it's often implemented in Solrizer::XML::TerminologyBasedSolrizer 
         solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) 
       end
@@ -267,6 +269,15 @@ module ActiveFedora
       return solr_doc
     end
 
+    def solrize_profile(solr_doc = Hash.new) # :nodoc:
+      if inner_object.respond_to? :profile
+        inner_object.profile.each_pair do |property,value|
+          solr_doc[ActiveFedora::SolrService.solr_name("objProfile_#{property}", property =~ /Date/ ? :date : :symbol)] = value
+        end
+      end
+      solr_doc
+    end
+    
     # Serialize the datastream's RDF relationships to solr
     # @param [Hash] solr_doc @deafult an empty Hash
     def solrize_relationships(solr_doc = Hash.new)
@@ -289,6 +300,27 @@ module ActiveFedora
       end
       klass.allocate.init_with(inner_object)
     end
+    
+    # ** EXPERIMENTAL **
+    # This method returns a new object of the same class, with the internal SolrDigitalObject
+    # replaced with an actual DigitalObject.
+    def reify
+      if self.inner_object.is_a? DigitalObject
+        raise "#{self.inspect} is already a full digital object"
+      end
+      self.class.load_instance self.pid
+    end
+    
+    # ** EXPERIMENTAL **
+    # This method reinitializes a lightweight, loaded-from-solr object with an actual
+    # DigitalObject inside.
+    def reify!
+      if self.inner_object.is_a? DigitalObject
+        raise "#{self.inspect} is already a full digital object"
+      end
+      self.init_with DigitalObject.find(self.class,self.pid)
+    end
+    
     # ** EXPERIMENTAL **
     #
     # This method can be used instead of ActiveFedora::Model::ClassMethods.load_instance.  
@@ -313,9 +345,7 @@ module ActiveFedora
         raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
       end
      
-      create_date = solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date).to_s] : solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)]
-      modified_date = solr_doc[ActiveFedora::SolrService.solr_name(:system_create, :date)].nil? ? solr_doc[ActiveFedora::SolrService.solr_name(:system_modified, :date).to_s] : solr_doc[ActiveFedora::SolrService.solr_name(:system_modified, :date)]
-      obj = self.allocate.init_with(SolrDigitalObject.new(:pid=>solr_doc[SOLR_DOCUMENT_ID],:create_date=>create_date,:modified_date=>modified_date))
+      obj = self.allocate.init_with(SolrDigitalObject.new(solr_doc))
       #set by default to load any dependent relationship objects from solr as well
       #need to call rels_ext once so it exists when iterating over datastreams
       obj.rels_ext
@@ -324,6 +354,7 @@ module ActiveFedora
           ds.from_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ( ds.kind_of?(ActiveFedora::RelsExtDatastream))
         end
       end
+      obj.inner_object.freeze
       obj
     end
 
