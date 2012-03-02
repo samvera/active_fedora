@@ -36,6 +36,35 @@ module ActiveFedora
       end
     end
 
+    class TermProxy
+      # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
+      # @param [ActiveFedora::RelationshipGraph] graph  the graph
+      include Enumerable
+      attr_accessor :values
+      def initialize(graph, predicate, values=[])
+        @graph = graph
+        @predicate = predicate
+        @values = values
+      end
+      def each(&block)
+        @values.each { |value| block.call(value)}
+      end
+      def <<(*values)
+        @values.concat(values)
+        values.each { |value| @graph.add(@predicate, value, true) }
+        @graph.dirty = true
+        @values
+      end
+      def method_missing(method, *args)
+        puts "m_m(#{method.inspect}, #{args.inspect})"
+        if block_given?
+          @values.send(method, *args) { |*block_args|  yield(*block_args) }
+        else
+          @values.send(method, *args)
+        end
+      end
+    end
+
     include ModelMethods
     attr_accessor :loaded
 
@@ -54,8 +83,10 @@ module ActiveFedora
       end
     end
 
+    # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def find_predicate(predicate)
-      result = ActiveFedora::Predicates.find_predicate(predicate.to_sym)
+      predicate = predicate.to_sym unless predicate.kind_of? RDF::URI
+      result = ActiveFedora::Predicates.find_predicate(predicate)
       return RDF::URI(result.reverse.to_s)
     end
 
@@ -63,15 +94,17 @@ module ActiveFedora
       @graph ||= RelationshipGraph.new
     end
 
+    # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def get_values(predicate)
       ensure_loaded
-      results = graph[find_predicate(predicate)]
+      predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
+      results = graph[predicate]
       return if results.nil?
-      res = []
+      values = []
       results.each do |object|
-        res << (object.kind_of?(RDF::Literal) ? object.value : object.to_str)
+        values << (object.kind_of?(RDF::Literal) ? object.value : object.to_str)
       end
-      res
+      TermProxy.new(graph, predicate, values)
     end
 
     def to_solr
@@ -79,22 +112,26 @@ module ActiveFedora
     end
 
     # if there are any existing statements with this predicate, replace them
+    # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def set_value(predicate, args)
       ensure_loaded
+      predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       graph.delete(predicate)
       args.each do |arg|
         graph.add(predicate, arg, true)
       end
       graph.dirty = true
-      return {predicate => args}
+      return TermProxy.new(graph, predicate, args)
     end
 
     # append a value 
+    # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def append(predicate, args)
       ensure_loaded
+      predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       graph.add(predicate, args, true)
       graph.dirty = true
-      return {predicate => args}
+      return TermProxy.new(graph, predicate, args)
     end
 
     def serialization_format
@@ -113,8 +150,7 @@ module ActiveFedora
     
     # Populate a RDFDatastream object based on the "datastream" content 
     # Assumes that the datastream contains RDF XML from a Fedora RELS-EXT datastream 
-    # @param [ActiveFedora::MetadataDatastream] tmpl the Datastream object that you are populating
-    # @param [String] the "rdf" node 
+    # @param [String] data the "rdf" node 
     def deserialize(data) 
       unless data.nil?
         RDF::Reader.for(serialization_format).new(data) do |reader|
@@ -130,10 +166,8 @@ module ActiveFedora
     end
 
     # Creates a RDF datastream for insertion into a Fedora Object
-    # @param [String] pid
-    # @param [Hash] relationships (optional) @default self.relationships
     # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
-    def serialize()
+    def serialize
       out = RDF::Writer.for(serialization_format).buffer do |writer|
         graph.to_graph("info:fedora/#{pid}").each_statement do |statement|
           writer << statement
