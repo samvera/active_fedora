@@ -34,7 +34,7 @@ h3. Testing with Hudson Rake Task
 The hudson rake task will spin up jetty, import the fixtures, and run the tests for you.
 
 <pre>
-  rake hudson
+  rake active_fedora:hudson
 </pre>
 
 h3. Testing Manually
