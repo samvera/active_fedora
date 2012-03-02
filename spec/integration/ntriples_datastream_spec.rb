@@ -39,11 +39,14 @@ describe ActiveFedora::NtriplesRDFDatastream do
     loaded.part.should == ['this is a part']
   end
   it "should append values" do
-    @subject.part = "thing 1"
+    # this is how I'd like it to work (but it doesn't):
+    @subject.part << "thing 1"
+    @subject.part << "thing 2"
     @subject.save
-    mf = RdfTest.find(@subject.pid)
-    mf.part = @subject.part.push("thing 2")
-    mf.save
+    # this is how I work around it:
+    #mf = RdfTest.find(@subject.pid)
+    #mf.part = @subject.part.push("thing 2")
+    #mf.save
 
     loaded = RdfTest.find(@subject.pid)
     loaded.part.should include("thing 1")
