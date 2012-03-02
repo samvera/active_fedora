@@ -55,13 +55,11 @@ module ActiveFedora
         @graph.dirty = true
         @values
       end
-      def method_missing(method, *args)
-        puts "m_m(#{method.inspect}, #{args.inspect})"
-        if block_given?
-          @values.send(method, *args) { |*block_args|  yield(*block_args) }
-        else
-          @values.send(method, *args)
-        end
+      def ==(other)
+        other.inspect == self.inspect
+      end
+      def inspect
+        @values.inspect
       end
     end
 
