@@ -28,21 +28,31 @@ describe ActiveFedora::Base do
         end
         before :each do
           ActiveFedora.config.expects(:sharded?).returns(true)
-          ActiveFedora.config.expects(:credentials).returns([{:url=>'shard1'}, {:url=>'shard2'} ])
         end
         after :all do
           Object.send(:remove_const, :FooHistory)
         end
-        describe "the repository for foo:bar" do
-          subject {FooHistory.connection_for_pid('foo:bar')}
-          it "should be shard1" do
-            subject.client.url.should == 'shard1'
+        describe "assign_pid" do
+          subject {FooHistory}
+          it "should raise an exception when assign_pid is not overridden" do
+            lambda {subject.assign_pid(stub(:namespace=>'changeme'))}.should raise_error(RuntimeError, "When using shards, you must override FooHistory.assign_pid()")
           end
         end
-        describe "the repository for foo:baz" do
-          subject {FooHistory.connection_for_pid('foo:baz')}
-          it "should be shard1" do
-            subject.client.url.should == 'shard2'
+        describe "the repository" do
+          before do
+            ActiveFedora.config.expects(:credentials).returns([{:url=>'shard1'}, {:url=>'shard2'} ])
+          end
+          describe "for foo:bar" do
+            subject {FooHistory.connection_for_pid('foo:bar')}
+            it "should be shard1" do
+              subject.client.url.should == 'shard1'
+            end
+          end
+          describe "for foo:baz" do
+            subject {FooHistory.connection_for_pid('foo:baz')}
+            it "should be shard1" do
+              subject.client.url.should == 'shard2'
+            end
           end
         end
       end
