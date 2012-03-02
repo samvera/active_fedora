@@ -272,6 +272,10 @@ module ActiveFedora
     def solrize_profile(solr_doc = Hash.new) # :nodoc:
       if inner_object.respond_to? :profile
         inner_object.profile.each_pair do |property,value|
+          if property =~ /Date/
+            value = Time.parse(value) unless value.is_a?(Time)
+            value = value.xmlschema
+          end
           solr_doc[ActiveFedora::SolrService.solr_name("objProfile_#{property}", property =~ /Date/ ? :date : :symbol)] = value
         end
       end
