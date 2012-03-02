@@ -56,12 +56,9 @@ module ActiveFedora
         @values
       end
       def ==(other)
-        other.inspect == self.inspect
+        other.inspect == @values.inspect
       end
-      def inspect
-        @values.inspect
-      end
-    end
+     end
 
     include ModelMethods
     attr_accessor :loaded
