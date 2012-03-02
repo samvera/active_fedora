@@ -174,7 +174,7 @@ module ActiveFedora
     def self.assign_pid(obj)
         args = {}
         args[:namespace] = obj.namespace if obj.namespace
-        raise RuntimeError, "When using shards, you cannot use nextid to create a pid" if ActiveFedora.config.sharded?
+        raise RuntimeError, "When using shards, you must override #{self}.assign_pid()" if ActiveFedora.config.sharded?
         d = REXML::Document.new(connection_for_pid('0').next_pid(args))
         d.elements['//pid'].text
     end
