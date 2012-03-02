@@ -31,6 +31,17 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.related_url = "http://en.wikipedia.org/wiki/War_and_Peace"
     @subject.part = "this is a part"
     @subject.save
+    @subject.title.should == 'War and Peace'
+    @subject.based_near.should == ["Moscow, Russia"]
+    @subject.related_url.should == ["http://en.wikipedia.org/wiki/War_and_Peace"]
+    @subject.part.should == ["this is a part"]    
+  end
+  it "should set, persist, and recall values" do
+    @subject.title = 'War and Peace'
+    @subject.based_near = "Moscow, Russia"
+    @subject.related_url = "http://en.wikipedia.org/wiki/War_and_Peace"
+    @subject.part = "this is a part"
+    @subject.save
 
     loaded = RdfTest.find(@subject.pid)
     loaded.title.should == 'War and Peace'
@@ -38,19 +49,19 @@ describe ActiveFedora::NtriplesRDFDatastream do
     loaded.related_url.should == ['http://en.wikipedia.org/wiki/War_and_Peace']
     loaded.part.should == ['this is a part']
   end
-  it "should append values" do
-    # this is how I'd like it to work (but it doesn't):
-    @subject.part << "thing 1"
-    @subject.part << "thing 2"
+  it "should set multiple values" do
+    @subject.part = ["part 1", "part 2"]
     @subject.save
-    # this is how I work around it:
-    #mf = RdfTest.find(@subject.pid)
-    #mf.part = @subject.part.push("thing 2")
-    #mf.save
 
     loaded = RdfTest.find(@subject.pid)
-    loaded.part.should include("thing 1")
-    loaded.part.should include("thing 2")
+    loaded.part.should == ['part 1', 'part 2']
+  end
+  it "should append values" do
+    @subject.part = "thing 1"
+    @subject.save
+
+    @subject.part << "thing 2"
+    @subject.part.should == ["thing 1", "thing 2"]
   end
 
 end

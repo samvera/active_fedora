@@ -75,7 +75,7 @@ module ActiveFedora
 
     def self.find_predicate(predicate)
       predicate_mappings.each do |namespace,predicates|
-        if predicates.fetch(predicate.to_sym,nil)
+        if predicates.fetch(predicate,nil)
           return predicates[predicate], namespace
         end
       end
