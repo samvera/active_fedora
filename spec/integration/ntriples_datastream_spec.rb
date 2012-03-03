@@ -63,5 +63,18 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.part << "thing 2"
     @subject.part.should == ["thing 1", "thing 2"]
   end
-
+  it "should delete values" do
+    @subject.title = "Hamlet"
+    @subject.related_url = "http://psu.edu/"
+    @subject.related_url << "http://projecthydra.org/"
+    @subject.save
+    @subject.title.should == "Hamlet"
+    @subject.related_url.should include("http://psu.edu/")
+    @subject.related_url.should include("http://projecthydra.org/")
+    @subject.title = ""
+    @subject.related_url.delete("http://projecthydra.org/")
+    @subject.save
+    @subject.title.should be_nil
+    @subject.related_url.should == ["http://psu.edu/"]
+  end
 end

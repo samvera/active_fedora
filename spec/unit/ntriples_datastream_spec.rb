@@ -49,6 +49,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.publisher << "St. Martin's Press"
       @subject.publisher.should == ["Penn State", "St. Martin's Press"]
     end
+    it "should delete fields" do
+      @subject.related_url.delete("http://google.com/")
+      @subject.related_url.should == []
+    end
   end
 
   describe "a new instance" do

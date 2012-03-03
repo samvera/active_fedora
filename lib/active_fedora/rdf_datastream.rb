@@ -40,7 +40,6 @@ module ActiveFedora
       # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
       # @param [ActiveFedora::RelationshipGraph] graph  the graph
       include Enumerable
-      attr_accessor :values
       def initialize(graph, predicate, values=[])
         @graph = graph
         @predicate = predicate
@@ -58,8 +57,16 @@ module ActiveFedora
       def ==(other)
         other.inspect == @values.inspect
       end
-     end
-
+      def delete(*values)
+        values.each do |value| 
+          res = @values.delete(value)
+          @graph.delete(@predicate, value) unless res.nil?
+          @graph.dirty = true
+        end
+        @values
+      end
+    end
+    
     include ModelMethods
     attr_accessor :loaded
 
