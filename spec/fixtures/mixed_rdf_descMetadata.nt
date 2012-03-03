@@ -1,0 +1,6 @@
+<info:fedora/test:1> <http://purl.org/dc/terms/created> "2010-12-31"^^<http://www.w3.org/2001/XMLSchema#date> .
+<info:fedora/test:1> <http://purl.org/dc/terms/title> "Title of work" .
+<info:fedora/test:1> <http://purl.org/dc/terms/publisher> "Penn State" .
+<info:fedora/test:1> <http://xmlns.com/foaf/0.1/based_near> "New York, NY, US" .
+<info:fedora/test:1> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://google.com/> .
+
