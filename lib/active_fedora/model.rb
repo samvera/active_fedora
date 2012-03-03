@@ -104,9 +104,7 @@ module ActiveFedora
       # called on
       def find(args, opts={})
         opts = {:rows=>25}.merge(opts)
-        return_multiple = false
         if args == :all
-          return_multiple = true
           escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
           q = "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
           hits = SolrService.instance.conn.query(q, :rows=>opts[:rows]).hits 
