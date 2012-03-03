@@ -1,40 +1,40 @@
 module ActiveFedora
-
   module Predicates
     def self.find_graph_predicate(predicate)
-        #TODO, these could be cached
-        case predicate
-        when :has_model, "hasModel", :hasModel
-          xmlns="info:fedora/fedora-system:def/model#"
-          begin
-            rel_predicate = predicate_lookup(predicate,xmlns)
-          rescue UnregisteredPredicateError
-            xmlns = nil
-            rel_predicate = nil
-          end
-        else
-          xmlns="info:fedora/fedora-system:def/relations-external#"
-          begin
-            rel_predicate = predicate_lookup(predicate,xmlns)
-          rescue UnregisteredPredicateError
-            xmlns = nil
-            rel_predicate = nil
-          end
+      #TODO, these could be cached
+      case predicate
+      when :has_model, "hasModel", :hasModel
+        xmlns="info:fedora/fedora-system:def/model#"
+        begin
+          rel_predicate = predicate_lookup(predicate,xmlns)
+        rescue UnregisteredPredicateError
+          xmlns = nil
+          rel_predicate = nil
         end
+      else
+        xmlns="info:fedora/fedora-system:def/relations-external#"
+        begin
+          rel_predicate = predicate_lookup(predicate,xmlns)
+        rescue UnregisteredPredicateError
+          xmlns = nil
+          rel_predicate = nil
+        end
+      end
         
-        unless xmlns && rel_predicate
-          rel_predicate, xmlns = find_predicate(predicate)
-        end
-        vocabularies[xmlns][rel_predicate] 
+      unless xmlns && rel_predicate
+        rel_predicate, xmlns = find_predicate(predicate)
+      end
+
+      vocabularies[xmlns][rel_predicate] 
     end
 
     def self.vocabularies
-      return @vocabularies if @vocabularies
-      @vocabularies = {}
-      predicate_mappings.keys.each { |ns| @vocabularies[ns] = RDF::Vocabulary.new(ns)}
+      @vocabularies ||= {}
+      predicate_mappings.keys.each do |ns| 
+        @vocabularies[ns] = RDF::Vocabulary.new(ns) unless @vocabularies.has_key? ns
+      end
       @vocabularies
     end
-
 
     # If predicate is a symbol, looks up the predicate in the predicate_mappings
     # If predicate is not a Symbol, returns the predicate untouched
