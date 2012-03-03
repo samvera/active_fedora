@@ -2,8 +2,11 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
   
-  before(:each) do
-    @base = ActiveFedora::Base.new
+  before(:all) do
+    class FileMgmt < ActiveFedora::Base
+      include ActiveFedora::FileManagement
+    end
+    @base = FileMgmt.new
     @base.stubs(:create_date).returns("2008-07-02T05:09:42.015Z")
     @base.stubs(:modified_date).returns("2008-09-29T21:21:52.892Z")
   end

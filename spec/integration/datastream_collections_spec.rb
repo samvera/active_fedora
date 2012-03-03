@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe ActiveFedora::DatastreamCollections do
   before(:all) do
-    ActiveSupport::Deprecation.expects(:warn).with("Deprecation: DatastreamCollections will not be included by default in the next version.   To use has_datastream add 'include ActiveFedora::DatastreamCollections' to your model")
     class MockAFBaseDatastream < ActiveFedora::Base
+      include ActiveFedora::DatastreamCollections
       has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
       has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
     end

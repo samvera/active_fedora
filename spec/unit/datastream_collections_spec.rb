@@ -1,14 +1,11 @@
 require 'spec_helper'
 
-
-DEPRECATION_MSG = "Deprecation: DatastreamCollections will not be included by default in the next version.   To use has_datastream add 'include ActiveFedora::DatastreamCollections' to your model"
-
 describe ActiveFedora::DatastreamCollections do
   describe '.has_datastream' do
     before(:all) do
-      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
       
       class MockHasDatastream < ActiveFedora::Base
+        include ActiveFedora::DatastreamCollections
         has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
         has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
         has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E'
@@ -40,8 +37,8 @@ describe ActiveFedora::DatastreamCollections do
   end
   describe '#datastream_names' do
     before(:all) do
-      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
       class MockDatastreamNames < ActiveFedora::Base
+        include ActiveFedora::DatastreamCollections
         has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
         has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
       end
@@ -55,8 +52,8 @@ describe ActiveFedora::DatastreamCollections do
   
   describe '#add_named_datastream' do
     before(:all) do
-      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
       class MockAddNamedDatastream < ActiveFedora::Base
+        include ActiveFedora::DatastreamCollections
         has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
         has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
         has_datastream :name=>"anymime", :type=>ActiveFedora::Datastream, :controlGroup=>'M' 
@@ -146,8 +143,8 @@ describe ActiveFedora::DatastreamCollections do
   
   describe '#add_named_file_datastream' do
     before do
-      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
       class MockAddNamedFileDatastream < ActiveFedora::Base
+        include ActiveFedora::DatastreamCollections
         has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
         has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
         has_datastream :name=>"anymime", :type=>ActiveFedora::Datastream, :controlGroup=>'M' 
@@ -176,8 +173,8 @@ describe ActiveFedora::DatastreamCollections do
 
   describe '#update_named_datastream' do
     before do
-      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
       class MockUpdateNamedDatastream < ActiveFedora::Base
+        include ActiveFedora::DatastreamCollections
         has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
       end
     end
@@ -236,8 +233,8 @@ describe ActiveFedora::DatastreamCollections do
   describe '#named_datastreams_desc' do
       
     before do
-      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
       class MockNamedDatastreamsDesc < ActiveFedora::Base
+        include ActiveFedora::DatastreamCollections
         has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
       end
     end
@@ -252,8 +249,8 @@ describe ActiveFedora::DatastreamCollections do
 
   describe '#is_named_datastream?' do
     before do
-      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
       class MockIsNamedDatastream < ActiveFedora::Base
+        include ActiveFedora::DatastreamCollections
         has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
       end
     end
@@ -268,8 +265,8 @@ describe ActiveFedora::DatastreamCollections do
   
   describe '#named_datastreams' do
     before do
-      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
       class MockNamedDatastreams < ActiveFedora::Base
+        include ActiveFedora::DatastreamCollections
         has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
         has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
         has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
@@ -318,8 +315,8 @@ describe ActiveFedora::DatastreamCollections do
     
   describe '#named_datastreams_ids' do
     before do
-      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
       class MockNamedDatastreamsIds < ActiveFedora::Base
+        include ActiveFedora::DatastreamCollections
         has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
         has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
         has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
@@ -344,8 +341,8 @@ describe ActiveFedora::DatastreamCollections do
     
   describe '#create_named_datastream_finders' do
     before do
-      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
       class MockCreateNamedDatastreamFinder < ActiveFedora::Base
+        include ActiveFedora::DatastreamCollections
         has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
         has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
       end
@@ -384,8 +381,8 @@ describe ActiveFedora::DatastreamCollections do
     
   describe '#create_named_datastream_update_methods' do
     before do
-      ActiveSupport::Deprecation.expects(:warn).with(DEPRECATION_MSG)
       class MockCreateNamedDatastreamUpdateMethods < ActiveFedora::Base
+        include ActiveFedora::DatastreamCollections
         has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
         has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
         has_datastream :name=>"external", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 

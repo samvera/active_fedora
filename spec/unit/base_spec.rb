@@ -711,8 +711,6 @@ describe ActiveFedora::Base do
     describe '#relationships_by_name' do
       
       before do
-        ActiveSupport::Deprecation.stubs(:warn)
-
         class MockNamedRelationships < ActiveFedora::Base
           include ActiveFedora::FileManagement
           has_relationship "testing", :has_part, :type=>ActiveFedora::Base
@@ -745,8 +743,8 @@ describe ActiveFedora::Base do
     
     describe '#create_relationship_name_methods' do
       before do
-        ActiveSupport::Deprecation.stubs(:warn)
         class MockCreateNamedRelationshipMethodsBase < ActiveFedora::Base
+          include ActiveFedora::Relationships
           register_relationship_desc :self, "testing", :is_part_of, :type=>ActiveFedora::Base
           create_relationship_name_methods "testing"
         end

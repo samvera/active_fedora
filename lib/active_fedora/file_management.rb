@@ -3,6 +3,7 @@ module ActiveFedora
     extend ActiveSupport::Concern
 
     included do
+      include ActiveFedora::Relationships
       has_relationship "collection_members", :has_collection_member
       has_relationship "part_of", :is_part_of
       has_bidirectional_relationship "parts", :has_part, :is_part_of

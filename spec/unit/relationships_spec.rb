@@ -379,6 +379,7 @@ describe ActiveFedora::Relationships do
   describe '#inbound_relationship_names' do
     before do
       class MockRelationshipNames < SpecNode
+        include ActiveFedora::Relationships
         register_relationship_desc(:self, "testing", :has_part, :type=>SpecNode)
         create_relationship_name_methods("testing")
         register_relationship_desc(:self, "testing2", :has_member, :type=>SpecNode)

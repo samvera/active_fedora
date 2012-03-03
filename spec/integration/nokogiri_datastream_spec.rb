@@ -1,12 +1,13 @@
 require 'spec_helper'
 require "solrizer"
+require File.join(File.dirname(__FILE__), "../..", "lib/active_fedora/samples", 'hydra-mods_article_datastream')
 
 describe ActiveFedora::NokogiriDatastream do
   
   before(:all) do
     class HydrangeaArticle2 < ActiveFedora::Base
 
-      has_relationship "parts", :is_part_of, :inbound => true
+      #has_relationship "parts", :is_part_of, :inbound => true
 
       # Uses the Hydra Rights Metadata Schema for tracking access permissions & copyright
       # has_metadata :name => "rightsMetadata", :type => Hydra::RightsMetadata 

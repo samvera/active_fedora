@@ -8,7 +8,7 @@ describe ActiveFedora::Base do
 
   before(:all) do
     class OralHistory < ActiveFedora::Base
-        #include Model
+        include ActiveFedora::Relationships
 
         # Imitating DataMapper ...
 

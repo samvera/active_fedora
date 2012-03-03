@@ -28,7 +28,6 @@ end
 
 describe ActiveFedora::Base do
   before :all do
-    ActiveSupport::Deprecation.stubs(:warn).with("Deprecation: Relationships will not be included by default in the next version.   To use has_relationship add 'include ActiveFedora::Relationships' to your model")
     class MockAFBaseRelationship < ActiveFedora::Base
       include ActiveFedora::FileManagement
       has_relationship "testing", :has_part, :type=>MockAFBaseRelationship
@@ -42,6 +41,7 @@ describe ActiveFedora::Base do
     end
 
     class MockAFBaseFromSolr < ActiveFedora::Base
+      include ActiveFedora::Relationships
       has_relationship "testing", :has_part, :type=>MockAFBaseFromSolr
       has_relationship "testing2", :has_member, :type=>MockAFBaseFromSolr
       has_relationship "testing_inbound", :has_part, :type=>MockAFBaseFromSolr, :inbound=>true

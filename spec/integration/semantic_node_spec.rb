@@ -6,20 +6,17 @@ describe ActiveFedora::SemanticNode do
   
   before(:all) do 
     class SNSpecNode < ActiveFedora::Base
-      # has_relationship "collection_members", :has_collection_member
-      # attr_accessor :rels_ext
-      # def initialize
-      #   self.rels_ext = ActiveFedora::RelsExtDatastream.new(nil, nil)
-      #   rels_ext.model = self
-      # end
+      include ActiveFedora::FileManagement
     end
     @node = SNSpecNode.new
     class SNSpecModel < ActiveFedora::Base
+      include ActiveFedora::Relationships
       has_relationship("parts", :is_part_of, :inbound => true)
       has_relationship("containers", :is_member_of)
       has_bidirectional_relationship("bi_containers", :is_member_of, :has_member)
     end
     class SpecNodeSolrFilterQuery < ActiveFedora::Base
+      include ActiveFedora::Relationships
       has_relationship("parts", :is_part_of, :inbound => true)
       has_relationship("special_parts", :is_part_of, :inbound => true, :solr_fq=>"has_model_s:info\\:fedora/afmodel\\:SpecialPart")
       has_relationship("containers", :is_member_of)
@@ -56,8 +53,8 @@ describe ActiveFedora::SemanticNode do
     @container4.add_relationship(:has_member,@test_object)
     @container4.save
 
-    class SpecialContainer; end;
-    class SpecialPart; end;
+    class SpecialContainer < ActiveFedora::Base; end;
+    class SpecialPart < ActiveFedora::Base; end;
     @special_container = ActiveFedora::Base.new()
     @special_container.add_relationship(:has_model, SpecialContainer.to_class_uri)
     @special_container.save
@@ -161,19 +158,27 @@ describe ActiveFedora::SemanticNode do
   describe "inbound relationship finders" do
     describe "when inheriting from parents" do
       before do
-        @part4 = ActiveFedora::Base.new()
-        @part4.parts  ## Includes the FileManagement onto AF::Base. This happens in another test (and caries into this one) if you run the whole suite, but it doesn't get set up if you just run this test.
+        class Test1 < ActiveFedora::Base
+          include ActiveFedora::FileManagement
+        end
+        @part4 = Test1.new()
+        @part4.parts 
+
         class Test2 < ActiveFedora::Base
+          include ActiveFedora::FileManagement
         end
         class Test3 < Test2
+          include ActiveFedora::Relationships
           has_relationship "testing", :has_member
         end
 
         class Test4 < Test3
+          include ActiveFedora::Relationships
           has_relationship "testing_inbound", :is_member_of, :inbound=>true
         end
 
         class Test5 < Test4
+          include ActiveFedora::Relationships
           has_relationship "testing_inbound", :is_part_of, :inbound=>true
         end 
  
@@ -181,21 +186,9 @@ describe ActiveFedora::SemanticNode do
         @test_object2.save
       end
       it "should have relationships defined" do
-        # puts "Test2 relationships_desc:"
-        # puts Test2.relationships_desc.inspect
-        # puts "ActiveFedora::Base relationships_desc:"
-        # puts ActiveFedora::Base.relationships_desc.inspect
-        ActiveFedora::Base.relationships_desc.should have_key(:inbound)
+        Test1.relationships_desc.should have_key(:inbound)
         Test2.relationships_desc.should have_key(:inbound)
-        ActiveFedora::Base.relationships_desc[:inbound].each_pair do |key, value|
-          Test2.relationships_desc[:inbound].should have_key(key)
-          Test2.relationships_desc[:inbound][key].should == value
-          Test2.inbound_relationship_query("foo:1",key.to_s).should_not be_empty
-        end
-        ActiveFedora::Base.relationships_desc[:self].each_pair do |key, value|
-          Test2.relationships_desc[:self].should have_key(key)
-          Test2.relationships_desc[:self][key].should == value
-        end
+        Test2.relationships_desc[:inbound]["parts_inbound"].should == {:inbound=>true, :predicate=>:is_part_of, :singular=>nil}
       end
 
       it "should have relationships defined from more than one ancestor class" do
@@ -213,7 +206,7 @@ describe ActiveFedora::SemanticNode do
 
       it "should not have relationships bleeding over from other sibling classes" do
         SpecNodeSolrFilterQuery.relationships_desc[:inbound].should have_key("bi_special_containers_inbound")
-        ActiveFedora::Base.relationships_desc[:inbound].should_not have_key("bi_special_containers_inbound")
+        Test1.relationships_desc[:inbound].should_not have_key("bi_special_containers_inbound")
         Test2.relationships_desc[:inbound].should_not have_key("bi_special_containers_inbound")
       end
       it "should return an empty set" do
@@ -431,7 +424,6 @@ describe ActiveFedora::SemanticNode do
   #putting this test here instead of relationships_helper because testing that relationships_by_name hash gets refreshed if the relationships hash is changed
   describe "relationships_by_name" do
     before do
-      ActiveSupport::Deprecation.stubs(:warn)
       class MockSemNamedRelationships  < ActiveFedora::Base
         include ActiveFedora::FileManagement
         has_relationship "testing", :has_part

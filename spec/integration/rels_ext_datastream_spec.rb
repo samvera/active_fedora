@@ -80,7 +80,6 @@ describe ActiveFedora::RelsExtDatastream do
 
   describe '#from_solr' do
     before do
-      ActiveSupport::Deprecation.stubs(:warn)
       class MockAFRelsSolr < ActiveFedora::Base
         include ActiveFedora::FileManagement
         has_relationship "testing", :has_part, :type=>MockAFRelsSolr

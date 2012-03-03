@@ -1,9 +1,5 @@
 require 'spec_helper'
 
-require 'active_fedora'
-require 'mocha'
-
-
 describe ActiveFedora::ContentModel do
   
   before(:all) do
@@ -56,9 +52,6 @@ describe ActiveFedora::ContentModel do
   
   
   describe "#pid_from_ruby_class" do
-    before do
-      ActiveSupport::Deprecation.stubs(:warn)
-    end
   
     it "should construct pids" do
       ActiveFedora::ContentModel.pid_from_ruby_class(@test_cmodel.class).should == "info:fedora/afmodel:ActiveFedora_ContentModel"
