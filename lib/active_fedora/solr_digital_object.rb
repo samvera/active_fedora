@@ -1,7 +1,6 @@
 module ActiveFedora
   class SolrDigitalObject
     attr_reader :pid, :label, :state, :ownerId, :profile, :datastreams
-    attr_accessor :repository
     
     def initialize(solr_doc)
       @pid = solr_doc[SOLR_DOCUMENT_ID]
@@ -18,7 +17,6 @@ module ActiveFedora
       @label = @profile['objLabel']
       @state = @profile['objState']
       @ownerId = @profile['objOwnerId']
-      @repository = ActiveFedora.fedora.connection      
     end
 
     def freeze

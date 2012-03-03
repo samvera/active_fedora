@@ -24,29 +24,29 @@ describe ActiveFedora::Base do
     @test_object = ActiveFedora::Base.new
     #get objects into fedora and solr
     @test_object2 = MockAFBaseQuerySolr.new
-    attributes = {"holding_id"=>{0=>"Holding 1"},
-                  "language"=>{0=>"Italian"},
-                  "creator"=>{0=>"Linguist, A."},
-                  "geography"=>{0=>"Italy"},
-                  "title"=>{0=>"Italian and Spanish: A Comparison of Common Phrases"}}
+    attributes = {[:holding_id]=>{0=>"Holding 1"},
+                  [:language]=>{0=>"Italian"},
+                  [:creator]=>{0=>"Linguist, A."},
+                  [:geography]=>{0=>"Italy"},
+                  [:title]=>{0=>"Italian and Spanish: A Comparison of Common Phrases"}}
     @test_object2.update_indexed_attributes(attributes)
     @test_object2.save
     
     @test_object3 = MockAFBaseQuerySolr.new
-    attributes = {"holding_id"=>{0=>"Holding 2"},
-                  "language"=>{0=>"Spanish;Latin"},
-                  "creator"=>{0=>"Linguist, A."},
-                  "geography"=>{0=>"Spain"},
-                  "title"=>{0=>"A study of the evolution of Spanish from Latin"}}
+    attributes = {[:holding_id]=>{0=>"Holding 2"},
+                  [:language]=>{0=>"Spanish;Latin"},
+                  [:creator]=>{0=>"Linguist, A."},
+                  [:geography]=>{0=>"Spain"},
+                  [:title]=>{0=>"A study of the evolution of Spanish from Latin"}}
     @test_object3.update_indexed_attributes(attributes)
     @test_object3.save      
 
     @test_object4 = MockAFBaseQuerySolr.new
-    attributes = {"holding_id"=>{0=>"Holding 3"},
-                  "language"=>{0=>"Spanish;Latin"},
-                  "creator"=>{0=>"Linguist, A."},
-                  "geography"=>{0=>"Spain"},
-                  "title"=>{0=>"An obscure look into early nomadic tribes of Spain"}}
+    attributes = {[:holding_id]=>{0=>"Holding 3"},
+                  [:language]=>{0=>"Spanish;Latin"},
+                  [:creator]=>{0=>"Linguist, A."},
+                  [:geography]=>{0=>"Spain"},
+                  [:title]=>{0=>"An obscure look into early nomadic tribes of Spain"}}
     @test_object4.update_indexed_attributes(attributes)
     @test_object4.save
       

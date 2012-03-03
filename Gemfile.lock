@@ -12,7 +12,7 @@ PATH
       om (>= 1.5.1)
       rdf
       rdf-rdfxml
-      rubydora (~> 0.5.3)
+      rubydora (~> 0.5.4)
       solr-ruby (>= 0.0.6)
       solrizer (~> 1.2.0)
       xml-simple (>= 1.0.12)
@@ -85,7 +85,7 @@ GEM
     rspec-expectations (2.8.0)
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.8.0)
-    rubydora (0.5.3)
+    rubydora (0.5.4)
       activemodel
       activesupport
       fastercsv

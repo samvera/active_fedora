@@ -297,12 +297,7 @@ module ActiveFedora
         solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) 
       end
       solr_doc = solrize_relationships(solr_doc) unless opts[:model_only]
-      begin
-        #logger.info("PID: '#{pid}' solr_doc put into solr: #{solr_doc.inspect}")
-      rescue
-        logger.info("Error encountered trying to output solr_doc details for pid: #{pid}")
-      end
-      return solr_doc
+      solr_doc
     end
 
     def solrize_profile(solr_doc = Hash.new) # :nodoc:

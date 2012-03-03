@@ -246,6 +246,7 @@ module ActiveFedora
     #you will end up replicating the values in the underlying datastream, resulting in mysterious dubling, quadrupling, etc. 
     #whenever you edit the field's values.
     def field(name, tupe, opts={})
+      #TODO add term to terminology
       @fields[name.to_s.to_sym]={:type=>tupe, :values=>[]}.merge(opts)
       eval <<-EOS
         def #{name}_values=(arg)

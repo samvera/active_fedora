@@ -53,6 +53,12 @@ describe ActiveFedora::NokogiriDatastream do
       ActiveFedora::NokogiriDatastream.xml_template.to_xml.should == "<?xml version=\"1.0\"?>\n<xml/>\n"
     end
   end
+
+  describe "an instance" do
+    subject { ActiveFedora::NokogiriDatastream.new(nil, nil) }
+    it{ should.respond_to? :to_solr }
+    its(:to_solr) {should == { }}
+  end
   
   describe ".update_indexed_attributes" do
     

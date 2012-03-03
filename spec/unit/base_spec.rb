@@ -575,8 +575,11 @@ describe ActiveFedora::Base do
       
       it "should call .to_solr on all MetadataDatastreams and NokogiriDatastreams, passing the resulting document to solr" do
         mock1 = mock("ds1", :to_solr)
+        mock1.expects(:solrize_profile)
         mock2 = mock("ds2", :to_solr)
+        mock2.expects(:solrize_profile)
         ngds = mock("ngds")
+        ngds.expects(:solrize_profile)
         mock1.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
         mock2.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
         
