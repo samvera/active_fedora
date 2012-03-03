@@ -91,8 +91,9 @@ module ActiveFedora
       persist
     end
 
+    # replace the unsaved digital object with a saved digital object
     def assign_pid
-      @inner_object = @inner_object.save #replace the unsaved digital object with a saved digital object
+      @inner_object = @inner_object.save 
     end
     
     # Pushes the object and all of its new or dirty datastreams into Fedora

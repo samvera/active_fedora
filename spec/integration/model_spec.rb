@@ -1,10 +1,5 @@
 require 'spec_helper'
 
-require 'active_fedora'
-require 'active_fedora/model'
-require "rexml/document"
-require 'mocha'
-
 include ActiveFedora::Model
 include Mocha::API
 
@@ -46,11 +41,9 @@ describe ActiveFedora::Model do
     end
   end
   
-  describe '#find_model' do
-    
+  describe '#load_instance' do
     it "should return an object of the given Model whose inner object is nil" do
-      #result = ModelIntegrationSpec::Basic.find_model(@test_instance.pid, ModelIntegrationSpec::Basic)
-      result = ActiveFedora::RubydoraConnection.instance.find_model(@test_instance.pid, ModelIntegrationSpec::Basic)
+      result = ModelIntegrationSpec::Basic.load_instance(@test_instance.pid)
       result.class.should == ModelIntegrationSpec::Basic
       result.inner_object.new?.should be_false
     end

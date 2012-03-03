@@ -109,12 +109,11 @@ GEM
       om (>= 1.5.0)
       stomp
       xml-simple
-    solrizer-fedora (1.2.3)
-      active-fedora (>= 3.1.0)
-      activesupport
+    solrizer-fedora (1.2.5)
+      active-fedora (>= 3.2.0)
+      activesupport (>= 3.0.11)
       fastercsv
-      jettywrapper (>= 1.1.0)
-      rsolr
+      rsolr (= 1.0.6)
       solr-ruby (>= 0.0.6)
       solrizer (>= 1.0.0)
     stomp (1.2.0)
@@ -133,5 +132,5 @@ DEPENDENCIES
   mocha (>= 0.9.8)
   rake
   rspec (~> 2.0)
-  solrizer-fedora (~> 1.2.3)
+  solrizer-fedora (~> 1.2.5)
   yard

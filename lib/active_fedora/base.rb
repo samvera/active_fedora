@@ -30,6 +30,9 @@ module ActiveFedora
   class Base
     include SemanticNode
 
+    class_attribute :fedora_connection 
+
+    self.fedora_connection = {}
 
     def self.method_missing (name, *args)
       if [:has_relationship, :has_bidirectional_relationship, :register_relationship_desc].include? name 
@@ -133,6 +136,28 @@ module ActiveFedora
       self
     end
 
+    # Uses {shard_index} to find or create the rubydora connection for this pid
+    # @param [String] pid the identifier of the object to get the connection for
+    # @return [Rubydora::Repository] The repository that the identifier exists in.
+    def self.connection_for_pid(pid)
+      idx = shard_index(pid)
+      unless fedora_connection.has_key? idx
+        if ActiveFedora.config.sharded?
+          fedora_connection[idx] = RubydoraConnection.new(ActiveFedora.config.credentials[idx])
+        else
+          fedora_connection[idx] = RubydoraConnection.new(ActiveFedora.config.credentials)
+        end
+      end
+      fedora_connection[idx].connection
+    end
+
+    #If you want to use sharding override this method with your strategy
+    #@return [Integer] the index of the shard this object is stored in
+    def self.shard_index(pid)
+      0
+    end
+    
+
     def self.datastream_class_for_name(dsid)
       ds_specs[dsid] ? ds_specs[dsid][:type] : ActiveFedora::Datastream
     end
@@ -141,6 +166,17 @@ module ActiveFedora
       obj = self.new(args)
       obj.save
       obj
+    end
+
+
+    ### if you are doing sharding, override this method to do something other than use a sequence
+    # @return [String] the unique pid for a new object
+    def self.assign_pid(obj)
+        args = {}
+        args[:namespace] = obj.namespace if obj.namespace
+        raise RuntimeError, "When using shards, you must override #{self}.assign_pid()" if ActiveFedora.config.sharded?
+        d = REXML::Document.new(connection_for_pid('0').next_pid(args))
+        d.elements['//pid'].text
     end
 
     def inner_object # :nodoc
@@ -167,7 +203,7 @@ module ActiveFedora
     def internal_uri
       "info:fedora/#{pid}"
     end
-    
+
     #return the state of the inner object
     def state 
       @inner_object.state

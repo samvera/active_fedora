@@ -21,6 +21,7 @@ module ActiveFedora
     # Takes a Fedora URI for a cModel, and returns a 
     # corresponding Model if available
     # This method should reverse ClassMethods#to_class_uri
+    # @return [Class, False] the class of the model or false, if it does not exist
     def self.from_class_uri(uri)
       model_value, pid_ns = classname_from_uri(uri)
       raise "model URI incorrectly formatted: #{uri}" unless model_value
@@ -79,7 +80,7 @@ module ActiveFedora
       # @example this will return an instance of Book, even if the object hydra:dataset1 asserts that it is a Dataset
       #   Book.load_instance("hydra:dataset1") 
       def load_instance(pid)
-        RubydoraConnection.instance.find_model(pid, self)
+        self.allocate.init_with(DigitalObject.find(self, pid))
       end
       
       # Returns a suitable uri object for :has_model
@@ -103,19 +104,24 @@ module ActiveFedora
       # called on
       def find(args, opts={})
         opts = {:rows=>25}.merge(opts)
-        return_multiple = false
         if args == :all
-          return_multiple = true
           escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
           q = "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
           hits = SolrService.instance.conn.query(q, :rows=>opts[:rows]).hits 
           return hits.map do |hit|
-             RubydoraConnection.instance.find_model(hit[SOLR_DOCUMENT_ID], self)
+             pid = hit[SOLR_DOCUMENT_ID]
+             load_instance(pid)
           end
         elsif args.class == String
-          return RubydoraConnection.instance.find_model(args, self)
+          return load_instance(args)
         end
       end
+
+      def find_model(pid)
+        ActiveSupport::Deprection.warn("find_model is deprecated.  Use load_instance instead")
+        load_instance(pid)
+      end
+
 
       # Get a count of the number of objects from solr
       # Takes :conditions as an argument

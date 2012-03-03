@@ -4,7 +4,7 @@ describe ActiveFedora::UnsavedDigitalObject do
   
   describe "an unsaved instance" do
     before do
-      @obj = ActiveFedora::UnsavedDigitalObject.new(String, 'bar') 
+      @obj = ActiveFedora::UnsavedDigitalObject.new(ActiveFedora::Base, 'bar') 
     end
     it "should have ownerId property" do
       @obj.ownerId = 'fooo'
@@ -14,7 +14,7 @@ describe ActiveFedora::UnsavedDigitalObject do
 
   describe "#save" do
     before :all do
-      obj = ActiveFedora::UnsavedDigitalObject.new(String, 'bar') 
+      obj = ActiveFedora::UnsavedDigitalObject.new(ActiveFedora::Base, 'bar') 
       obj.label = 'my label'
       obj.ownerId = 'fooo'
       @saved_obj = obj.save

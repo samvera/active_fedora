@@ -53,6 +53,8 @@ describe ActiveFedora::SolrService do
           self.pid = inner_obj.pid
           self
         end
+        def self.connection_for_pid(pid)
+        end
       end
       @sample_solr_hits = [{"id"=>"my:_PID1_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
                             {"id"=>"my:_PID2_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
@@ -62,7 +64,7 @@ describe ActiveFedora::SolrService do
       mocko = mock("input", :is_a? => false)
       lambda {ActiveFedora::SolrService.reify_solr_results(mocko)}.should raise_error(ArgumentError)
     end
-    it "should use Repository.find_model to instantiate objects" do
+    it "should use Repository.load_instance to instantiate objects" do
       solr_result = mock("solr result", :is_a? => true)
       solr_result.expects(:hits).returns(@sample_solr_hits)
       ActiveFedora::SolrService.reify_solr_results(solr_result).map(&:pid).should == ["my:_PID1_", "my:_PID2_", "my:_PID3_"] 

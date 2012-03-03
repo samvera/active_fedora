@@ -19,7 +19,7 @@ namespace :repo do
       rescue Errno::ECONNREFUSED => e
         puts "Can't connect to Fedora! Are you sure jetty is running?"
       end
-      puts "Deleted '#{pid}' from #{ActiveFedora.fedora_config[:url]}"
+      puts "Deleted '#{pid}' from #{ActiveFedora::Base.connection_for_pid(pid).client.url}"
     end
   end
   
@@ -40,7 +40,7 @@ namespace :repo do
       rescue ActiveFedora::ObjectNotFoundError
         # The object has already been deleted (or was never created).  Do nothing.
       end
-      puts "Deleted '#{pid}' from #{ActiveFedora.fedora_config[:url]}"
+      puts "Deleted '#{pid}' from #{ActiveFedora::Base.connection_for_pid(pid).client.url}"
       i += 1
     end
   end
@@ -51,7 +51,7 @@ namespace :repo do
       puts "You must specify a valid pid.  Example: rake repo:export pid=demo:12"
     else
       pid = ENV["pid"]
-      puts "Exporting '#{pid}' from #{ActiveFedora.fedora_config[:url]}"
+      puts "Exporting '#{pid}' from #{ActiveFedora::Base.connection_for_pid(pid).client.url}"
       if !ENV["path"].nil?
         path = ENV["path"]
       else
@@ -78,12 +78,12 @@ namespace :repo do
     end
     
     if !filename.nil?
-      puts "Loading '#{filename}' in #{ActiveFedora.fedora_config[:url]}"
+      puts "Loading '#{filename}' in #{ActiveFedora::Base.connection_for_pid(pid).client.url}"
       file = File.new(filename, "r")
-      result = ActiveFedora::RubydoraConnection.instance.connection.ingest(:file=>file.read)
+      result = ActiveFedora::Base.connection_for_pid(pid).ingest(:file=>file.read)
       if result
         puts "The object has been loaded as #{result.body}"
-	if pid.nil?
+      	if pid.nil?
           pid = result.body
         end
         solrizer = Solrizer::Fedora::Solrizer.new 

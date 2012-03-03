@@ -17,6 +17,8 @@ describe ActiveFedora::Relationships do
           self.pid = inner_obj.pid
           self
         end
+        def self.connection_for_pid(pid)
+        end
 
         def internal_uri
           'info:fedora/' + pid.to_s
@@ -176,7 +178,7 @@ describe ActiveFedora::Relationships do
         SpecNode.create_inbound_relationship_finders("constituents", :is_constituent_of, :inbound => true)
         local_node = SpecNode.new
         mock_repo = mock("repo")
-        mock_repo.expects(:find_model).never
+        mock_repo.expects(:load_instance).never
         local_node.expects(:pid).returns("test:sample_pid")
         SpecNode.expects(:relationships_desc).returns({:inbound=>{"constituents"=>{:predicate=>:is_constituent_of}}}).at_least_once()
         ActiveFedora::SolrService.instance.conn.expects(:query).with("is_constituent_of_s:info\\:fedora/test\\:sample_pid", :rows=>101).returns(solr_result)
@@ -228,7 +230,7 @@ describe ActiveFedora::Relationships do
       end
       
       describe " resulting finder" do
-        it "should read from relationships array and use Repository.find_model to build an array of objects" do
+        it "should read from relationships array and use Repository.load_instance to build an array of objects" do
           SpecNode.create_outbound_relationship_finders("containers", :is_member_of)
           local_node = SpecNode.new
           local_node.expects(:ids_for_outbound).with(:is_member_of).returns(["my:_PID1_", "my:_PID2_", "my:_PID3_"])
@@ -248,7 +250,7 @@ describe ActiveFedora::Relationships do
           SpecNode.create_outbound_relationship_finders("constituents", :is_constituent_of)
           local_node = SpecNode.new
           mock_repo = mock("repo")
-          mock_repo.expects(:find_model).never
+          mock_repo.expects(:load_instance).never
           local_node.expects(:rels_ext).returns(stub('rels-ext', :content=>''))
           ActiveFedora::SolrService.instance.conn.expects(:query).returns(solr_result)
           local_node.constituents(:response_format => :solr).should equal(solr_result)

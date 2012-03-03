@@ -2,66 +2,12 @@ require 'spec_helper'
 require 'active_fedora/rubydora_connection'
 
 describe ActiveFedora::RubydoraConnection do
-
-  describe 'nextid' do
-    before do
-      @instance = ActiveFedora::RubydoraConnection.instance
-    end
-    it "should get nextid" do
-      one = @instance.nextid
-      two = @instance.nextid
-      one = one.gsub('changeme:', '').to_i
-      two = two.gsub('changeme:', '').to_i
-      two.should == one + 1
-    end
-  end
-
-  # Put methods whose tests require registering Fedora & Solr here.
-  # to allow tests to run fast, keep these to a minimum.
-  describe "connection" do
-    describe "That is new" do
-      before do
-        ActiveFedora::RubydoraConnection.instance.instance_variable_set(:@connection, nil)
-      end
-      it "should regiser instances with the appropriate urls" do
-        ActiveFedora.expects(:load_configs)  
-        ActiveFedora::RubydoraConnection.instance.connection.should be_a Rubydora::Repository
-      end
-    end
-  end
-
-  describe 'connect' do
-    before do
-      @instance = ActiveFedora::RubydoraConnection.instance
-      @reconfig = { :force => true, :url => @instance.connection.client.url }.merge(@instance.connection.client.options)
-    end
-    
-    after do
-      ActiveFedora::RubydoraConnection.connect @reconfig
-    end
-    
-    it "shouldn't reconnect by default" do
-      client_id = @instance.connection.client.object_id
-      ActiveFedora::RubydoraConnection.connect :timeout => 3600
-      @instance.connection.client.object_id.should == client_id
-    end
-    
-    it "should reconnect with force" do
-      client_id = @instance.connection.client.object_id
-      ActiveFedora::RubydoraConnection.connect :force => true
-      @instance.connection.client.object_id.should_not == client_id
-    end
-    
+  describe 'initialize' do
     it "should pass through valid options" do
-      ActiveFedora::RubydoraConnection.connect :timeout => 3600, :fake_option => :missing, :force => true, :validateChecksum=>true
+      @instance = ActiveFedora::RubydoraConnection.new :timeout => 3600, :fake_option => :missing, :force => true, :validateChecksum=>true
       @instance.connection.client.options[:timeout].should == 3600
       @instance.connection.config[:validateChecksum].should == true
       @instance.connection.client.options.has_key?(:fake_option).should be_false
     end
   end
-
-
-  
 end
-
-

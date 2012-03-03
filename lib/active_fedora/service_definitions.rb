@@ -59,7 +59,7 @@ module ServiceDefinitions
     # inject methods by symbol key
     def add_sdef_methods! sdef_pid
       unless sdef_pid == "fedora-system:3"
-        content = ActiveFedora::RubydoraConnection.instance.connection.datastream_dissemination(:pid=>sdef_pid, :dsid=>"METHODMAP")
+        content = ActiveFedora::Base.connection_for_pid(sdef_pid).datastream_dissemination(:pid=>sdef_pid, :dsid=>"METHODMAP")
         method_map = Nokogiri::XML.parse(content)
         methods = method_map.xpath('//fmm:Method').collect { |method|
           method["operationName"]
@@ -78,9 +78,8 @@ module ServiceDefinitions
         define_method(method_key) { |*args, &block|
             opts = args[0] || {}
             opts = opts.merge({:pid => pid, :sdef => sdef_pid, :method => method_name })
-            repo = ActiveFedora::RubydoraConnection.instance.connection
           # dispatch to the dissemination method on restAPI client
-            repo.dissemination opts, &block
+            ActiveFedora::Base.connection_for_pid(pid).dissemination opts, &block
         }
       end
     end

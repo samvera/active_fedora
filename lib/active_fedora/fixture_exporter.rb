@@ -24,7 +24,7 @@ module ActiveFedora
         end
       end
 
-      RubydoraConnection.instance.connection.export(:pid=>pid, :format=>format, :context=>extra_params[:context].to_s)
+      ActiveFedora::Base.connection_for_pid(pid).export(:pid=>pid, :format=>format, :context=>extra_params[:context].to_s)
     end
 
 

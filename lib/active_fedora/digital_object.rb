@@ -4,7 +4,8 @@ module ActiveFedora
     attr_accessor :original_class
     
     def self.find(original_class, pid)
-      obj = super(pid, RubydoraConnection.instance.connection)
+      conn = original_class.connection_for_pid(pid)
+      obj = super(pid, conn)
       obj.original_class = original_class
       obj
     end

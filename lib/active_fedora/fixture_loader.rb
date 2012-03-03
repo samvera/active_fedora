@@ -26,7 +26,7 @@ module ActiveFedora
     end
 
     def import_and_index(pid)
-      body = self.class.import_to_fedora(filename_for_pid(pid))
+      body = self.class.import_to_fedora(filename_for_pid(pid), pid)
       self.class.index(pid)
       body
     end
@@ -36,9 +36,9 @@ module ActiveFedora
         solrizer.solrize(pid) 
     end
 
-    def self.import_to_fedora(filename)
+    def self.import_to_fedora(filename, pid)
       file = File.new(filename, "r")
-      result = ActiveFedora::RubydoraConnection.instance.connection.ingest(:file=>file.read)
+      result = ActiveFedora::Base.connection_for_pid(pid).ingest(:file=>file.read)
       raise "Failed to ingest the fixture." unless result
       result.body
     end

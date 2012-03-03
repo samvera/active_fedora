@@ -1,2 +1,4 @@
 test:
-  url: http://fedoraAdmin:fedoraAdmin@testhost.com:8983/fedora
+  user: fedoraAdmin
+  password: fedoraAdmin
+  url: http://testhost.com:8983/fedora

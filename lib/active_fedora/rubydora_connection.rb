@@ -1,28 +1,15 @@
-require 'singleton'
 require 'rubydora'
 
 module ActiveFedora
   class RubydoraConnection
-    include Singleton
     
-    attr_accessor :options
+    attr_accessor :options, :connection
 
-    def self.connect(params={})
+    def initialize(params={})
       params = params.dup
-      instance = self.instance
-      force = params.delete(:force)
-      instance.options = params
-      instance.connect force
-      instance
+      self.options = params
+      connect
     end
-
-    def connection
-      return @connection if @connection
-      ActiveFedora.load_configs
-      ActiveFedora::RubydoraConnection.connect(ActiveFedora.config_for_environment)
-      @connection
-    end
-    
 
     def connect(force=false)
       return unless @connection.nil? or force
@@ -31,15 +18,5 @@ module ActiveFedora
       #puts "CLIENT OPTS #{client_options.inspect}"
       @connection = Rubydora.connect client_options
     end
-
-    def nextid(attrs={})
-      d = REXML::Document.new(connection.next_pid(:namespace=>attrs[:namespace]))
-      d.elements['//pid'].text
-    end
-
-    def find_model(pid, klass)
-      klass.allocate.init_with(DigitalObject.find(klass, pid))
-    end
-
   end
 end
