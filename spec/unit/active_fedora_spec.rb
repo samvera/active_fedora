@@ -141,12 +141,6 @@ describe ActiveFedora do
 
 
     describe "#determine url" do
-      it "should support config['environment']['fedora']['url'] if config_type is fedora" do
-        config = {:test=> {:fedora=>{"url"=>"http://fedoraAdmin:fedorAdmin@localhost:8983/fedora"}}}
-        ActiveSupport::Deprecation.expects(:warn).with("Using \"fedora\" in the fedora.yml file is no longer supported")
-        ActiveFedora.determine_url("fedora",config).should eql("http://localhost:8983/fedora")
-      end
-
       it "should support config['environment']['url'] if config_type is fedora" do
         config = {:test=> {:url=>"http://fedoraAdmin:fedorAdmin@localhost:8983/fedora"}}
         ActiveFedora.determine_url("fedora",config).should eql("http://localhost:8983/fedora")

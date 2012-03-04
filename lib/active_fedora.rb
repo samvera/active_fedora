@@ -100,9 +100,20 @@ module ActiveFedora #:nodoc:
   # Options allowed in fedora.yml
   # first level is the environment (e.g. development, test, production and any custom environments you may have) 
   # the second level has these keys:
-  # 1. url: url including protocol, user/pass, host, port and path (e.g. http://fedoraAdmin:fedoraAdmin@127.0.0.1:8983/fedora)
-  # 2. validateChecksum:  indicates to the fedora server whether you want to validate checksums when the datastreams are queried.  
-
+  # 1. url: url including protocol, host, port and path (e.g. http://127.0.0.1:8983/fedora)
+  # 2. user: username
+  # 3. password: password
+  # 4. validateChecksum:  indicates to the fedora server whether you want to validate checksums when the datastreams are queried.  
+  #
+  # @example If you want to shard the fedora instance, you can specify an array of credentials. 
+  #   production:
+  #   - user: user1
+  #     password: password1
+  #     url: http://127.0.0.1:8983/fedora1
+  #   - user: user2
+  #     password: password2
+  #     url: http://127.0.0.1:8983/fedora2
+  #
 
   def self.init( options={} )
     # Make config_options into a Hash if nil is passed in as the value
@@ -175,13 +186,7 @@ module ActiveFedora #:nodoc:
     c = config[environment.to_sym]
     c.symbolize_keys!
     if config_type == "fedora"
-      # support old-style config
-      url = if c.fetch(:fedora,nil)
-        ActiveSupport::Deprecation.warn("Using \"fedora\" in the fedora.yml file is no longer supported") 
-        c[:fedora]["url"] if config[environment.to_sym].fetch(:fedora,nil)
-      else
-        c[:url]
-      end
+      url =  c[:url]
       if url && !c[:user]
         u = URI.parse url
         c[:user] = u.user
