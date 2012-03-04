@@ -1,5 +1,4 @@
 require 'spec_helper'
-require "active_fedora/samples"
 describe ActiveFedora::NokogiriDatastream do
   
   before(:all) do

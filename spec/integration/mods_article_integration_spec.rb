@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'active_fedora/samples/hydra-mods_article_datastream'
 
 describe ActiveFedora::Base do
 

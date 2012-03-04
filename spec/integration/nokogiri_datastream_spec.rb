@@ -1,6 +1,5 @@
 require 'spec_helper'
 require "solrizer"
-require File.join(File.dirname(__FILE__), "../..", "lib/active_fedora/samples", 'hydra-mods_article_datastream')
 
 describe ActiveFedora::NokogiriDatastream do
   

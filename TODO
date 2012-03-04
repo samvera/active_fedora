@@ -1,4 +1,2 @@
-Move samples into test_suppport
 Get rid of relationships in tests
 A method to find the class and record.
-remove using :fedora in fedora.yml

@@ -1,5 +1,4 @@
 require 'spec_helper'
-require "active_fedora/samples"
 
 class MockAFBaseQuerySolr < ActiveFedora::Base
   has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|
