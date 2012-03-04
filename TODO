@@ -1,2 +1,1 @@
-Get rid of relationships in tests
-A method to find the class and record.
+Get rid of ActiveFedora::Relationships methods in specs (except in relationships_spec.rb of course)

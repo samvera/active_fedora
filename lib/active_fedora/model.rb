@@ -92,7 +92,6 @@ module ActiveFedora
       def find_document(pid)
         af_base = load_instance(pid)
         the_model = ActiveFedora::ContentModel.known_models_for( af_base ).first
-puts "Model: #{ActiveFedora::ContentModel.known_models_for( af_base ).inspect}"
         af_base.adapt_to(the_model)
       end
 

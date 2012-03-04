@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'spec/samples/models/hydrangea_article'
 
 include ActiveFedora::Model
 include Mocha::API
@@ -41,14 +42,9 @@ describe ActiveFedora::Model do
     end
   end
 
-  describe "#find_document" do
-    before do
-    end
+  describe "#find_document with a valid pid" do
     subject { ActiveFedora::Base.find_document('hydrangea:fixture_mods_article1') }
-    #it { should be_instance_of HydrangeaArticle}
-    it "should" do
-puts "Subj: #{subject.inspect}"
-    end
+    it { should be_instance_of HydrangeaArticle}
   end
   
   describe '#load_instance' do

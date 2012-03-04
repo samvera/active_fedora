@@ -150,15 +150,29 @@ describe ActiveFedora::Model do
           include ActiveFedora::Model
         end
       end
+
     end
     
     after :all do
       SpecModel.send(:remove_const, :CamelCased)
     end
+    subject {SpecModel::CamelCased}
     
-    it "should turn a Model class name into an afmodel URI" do
-      SpecModel::CamelCased.to_class_uri.should == 'info:fedora/afmodel:SpecModel_CamelCased'
+    its(:to_class_uri) {should == 'info:fedora/afmodel:SpecModel_CamelCased' }
+  
+    context "with the namespace declared in the model" do
+      before do
+        subject.stubs(:pid_namespace).returns("test-cModel")
+      end
+      its(:to_class_uri) {should == 'info:fedora/test-cModel:SpecModel_CamelCased' }
     end
+    context "with the suffix declared in the model" do
+      before do
+        subject.stubs(:pid_suffix).returns("-TEST-SUFFIX")
+      end
+      its(:to_class_uri) {should == 'info:fedora/afmodel:SpecModel_CamelCased-TEST-SUFFIX' }
+    end
+  
     
     it "should turn an afmodel URI into a Model class name" do
       ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:SpecModel_CamelCased').should == ['SpecModel::CamelCased', 'afmodel']
