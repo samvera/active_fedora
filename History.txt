@@ -1,3 +1,12 @@
+4.0.0.rc1
+Removed deprecations
+  * allowing :fedora level in fedora.yml
+  * automatic includes of Relationships and FileMethods is removed
+Added sharding TODO add documentation
+Added find_document which determines the correct model and then casts the object to that.
+Improved loading from solr
+RDF datastreams
+
 3.3.2
 HYDRA-745 No need to require :url be present on external datastreams
 Initialize relationships graph to empty array

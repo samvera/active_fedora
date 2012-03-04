@@ -97,14 +97,6 @@ describe ActiveFedora do
         ActiveFedora.get_config_path(:solr).should eql("/path/to/fedora/config/solr.yml")
       end
       
-      it "should raise an error if there is not a solr.yml in the same directory as the fedora.yml and the fedora.yml has a solr url defined" do
-        ActiveFedora.expects(:config_options).at_least_once.returns({})
-        ActiveFedora.expects(:fedora_config_path).returns("/path/to/fedora/config/fedora.yml")
-        File.expects(:file?).with("/path/to/fedora/config/solr.yml").returns(false)
-        ActiveFedora.expects(:fedora_config).returns({"test"=>{"solr"=>{"url"=>"http://some_url"}}})
-        lambda { ActiveFedora.get_config_path(:solr) }.should raise_exception
-      end
-
       context "no solr.yml in same directory as fedora.yml and fedora.yml does not contain solr url" do
 
         before :each do
@@ -168,7 +160,7 @@ describe ActiveFedora do
           ActiveFedora.instance_variable_set :@config_loaded, nil
         end
         it "should load the fedora and solr configs" do
-          ActiveFedora.expects(:load_config).with(:fedora)
+          #ActiveFedora.expects(:load_config).with(:fedora)
           ActiveFedora.expects(:load_config).with(:solr)
           ActiveFedora.config_loaded?.should be_false
           ActiveFedora.load_configs
