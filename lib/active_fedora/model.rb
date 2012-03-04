@@ -82,6 +82,20 @@ module ActiveFedora
       def load_instance(pid)
         self.allocate.init_with(DigitalObject.find(self, pid))
       end
+ 
+      # Retrieve the Fedora object with te given pid, explore the returned object, determine its model 
+      # using #{known_models_for} and cast to that class.
+      # @param [String] pid of the object to load
+      #
+      # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel info:fedora/afmodel:Dataset), return a Dataset object (not a Book).
+      #   Book.find_document("hydra:dataset1") 
+      def find_document(pid)
+        af_base = load_instance(pid)
+        the_model = ActiveFedora::ContentModel.known_models_for( af_base ).first
+puts "Model: #{ActiveFedora::ContentModel.known_models_for( af_base ).inspect}"
+        af_base.adapt_to(the_model)
+      end
+
       
       # Returns a suitable uri object for :has_model
       # Should reverse Model#from_class_uri

@@ -40,6 +40,16 @@ describe ActiveFedora::Model do
       end
     end
   end
+
+  describe "#find_document" do
+    before do
+    end
+    subject { ActiveFedora::Base.find_document('hydrangea:fixture_mods_article1') }
+    #it { should be_instance_of HydrangeaArticle}
+    it "should" do
+puts "Subj: #{subject.inspect}"
+    end
+  end
   
   describe '#load_instance' do
     it "should return an object of the given Model whose inner object is nil" do

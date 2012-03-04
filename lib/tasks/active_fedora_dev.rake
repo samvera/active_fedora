@@ -82,7 +82,6 @@ desc 'Set up ActiveFedora environment.  !! Only for use while working within a w
 task :environment do
   puts "Initializing ActiveFedora Rake environment.  This should only be called when working within a workign copy of the active-fedora code."
   require "#{APP_ROOT}/spec/samples/models/hydrangea_article"
-  require 'active_fedora/samples'
 end
 
 end
