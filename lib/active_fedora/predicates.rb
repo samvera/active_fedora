@@ -28,8 +28,8 @@ module ActiveFedora
       vocabularies[xmlns][rel_predicate] 
     end
 
-    def self.vocabularies
-      @vocabularies ||= {}
+    def self.vocabularies(vocabs = {})
+      @vocabularies ||= vocabs
       predicate_mappings.keys.each do |ns| 
         @vocabularies[ns] = RDF::Vocabulary.new(ns) unless @vocabularies.has_key? ns
       end
