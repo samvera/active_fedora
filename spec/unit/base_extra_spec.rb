@@ -76,13 +76,42 @@ describe ActiveFedora::Base do
       mock3 = mock("RELS-EXT")
       
       mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
-      mock_datastreams.values.each {|ds| ds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)}
+      mock_datastreams.values.each do |ds| 
+        ds.stubs(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
+        ds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
+      end
       mock1.expects(:solrize_profile)
       mock2.expects(:solrize_profile)
       mock3.expects(:solrize_profile)
       mock1.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
       mock2.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
       mock3.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(false)
+      #mock3.expects(:kind_of?).with(ActiveFedora::RelsExtDatastream).returns(true)
+
+      @test_object.expects(:datastreams).returns(mock_datastreams)
+      @test_object.expects(:solrize_profile)
+      @test_object.expects(:solrize_relationships)
+      @test_object.send :update_index
+    end
+
+    it "should call .to_solr on all RDFDatastreams and pass the resulting document to solr" do
+      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock("SolrConnection", :update)))
+      # Actually uses self.to_solr internally to gather solr info from all metadata datastreams
+      mock1 = mock("ds1", :to_solr)
+      mock2 = mock("ds2", :to_solr)
+      mock3 = mock("RELS-EXT")
+      
+      mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
+      mock_datastreams.values.each do |ds| 
+        ds.stubs(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(false)
+        ds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
+      end
+      mock1.expects(:solrize_profile)
+      mock2.expects(:solrize_profile)
+      mock3.expects(:solrize_profile)
+      mock1.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(true)
+      mock2.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(true)
+      mock3.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
       #mock3.expects(:kind_of?).with(ActiveFedora::RelsExtDatastream).returns(true)
 
       @test_object.expects(:datastreams).returns(mock_datastreams)

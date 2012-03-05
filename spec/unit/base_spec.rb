@@ -342,6 +342,19 @@ describe ActiveFedora::Base do
       
       @test_object.save
     end
+    it "should update solr index with all metadata if any RDFDatastreams have changed" do
+      stub_ingest(@this_pid)
+      stub_add_ds(@this_pid, ['ds1', 'RELS-EXT'])
+
+      dirty_ds = ActiveFedora::NtriplesRDFDatastream.new(@test_object.inner_object, 'ds1')
+      rels_ds = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
+      rels_ds.model = @test_object
+      @test_object.add_datastream(rels_ds)
+      @test_object.add_datastream(dirty_ds)
+      @test_object.expects(:update_index)
+      
+      @test_object.save
+    end
     it "should NOT update solr index if no MetadataDatastreams have changed" do
       pending ## Rels-ext is getting automatically added so we can't test this.
       ActiveFedora::DigitalObject.any_instance.stubs(:save)
@@ -514,18 +527,35 @@ describe ActiveFedora::Base do
     it "should call .to_solr on all MetadataDatastreams and NokogiriDatastreams, passing the resulting document to solr" do
       mock1 = mock("ds1", :to_solr)
       mock2 = mock("ds2", :to_solr)
-      ngds = mock("ngds")
+      ngds = mock("ngds", :to_solr)
       ngds.expects(:solrize_profile)
       mock1.expects(:solrize_profile)
       mock2.expects(:solrize_profile)
+      mock1.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
+      mock1.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
       mock1.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
+      mock2.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
+      mock2.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
       mock2.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
+      ngds.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
+      ngds.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
       
       @test_object.expects(:datastreams).returns({:ds1 => mock1, :ds2 => mock2, :ngds => ngds})
       @test_object.expects(:solrize_profile)
       @test_object.expects(:solrize_relationships)
       @test_object.to_solr
     end
+    it "should call .to_solr on all RDFDatastreams, passing the resulting document to solr" do
+      mock = mock("ds1", :to_solr)
+      mock.expects(:solrize_profile)
+      mock.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(true)
+      
+      @test_object.expects(:datastreams).returns({:ds1 => mock})
+      @test_object.expects(:solrize_profile)
+      @test_object.expects(:solrize_relationships)
+      @test_object.to_solr
+    end
+
     it "should call .to_solr on the relationships rels-ext is dirty" do
       @test_object.add_relationship(:has_collection_member, "info:fedora/foo:member")
       rels_ext = @test_object.rels_ext
