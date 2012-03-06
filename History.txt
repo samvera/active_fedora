@@ -1,4 +1,4 @@
-4.0.0.rc1
+4.0.0.rc2
 Removed deprecations
   * allowing :fedora level in fedora.yml
   * automatic includes of Relationships and FileMethods is removed
@@ -7,6 +7,8 @@ Added find_document which determines the correct model and then casts the object
 Improved loading from solr
 RDF datastreams
 Replaced solr-ruby with rsolr. Note: remove any calls to .hits
+load_instance is now deprecated, replaced with find
+Find alwasy casts to the appropriate object.
 
 3.3.2
 HYDRA-745 No need to require :url be present on external datastreams
