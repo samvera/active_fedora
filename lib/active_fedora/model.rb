@@ -74,7 +74,8 @@ module ActiveFedora
       # @example this will return an instance of Book, even if the object hydra:dataset1 asserts that it is a Dataset
       #   Book.load_instance("hydra:dataset1") 
       def load_instance(pid)
-        self.allocate.init_with(DigitalObject.find(self, pid))
+        ActiveSupport::Deprecation.warn("load_instance is deprecated.  Use find instead")
+        find(pid)
       end
  
 
@@ -115,8 +116,8 @@ module ActiveFedora
 
 
       def find_model(pid)
-        ActiveSupport::Deprection.warn("find_model is deprecated.  Use load_instance instead")
-        load_instance(pid)
+        ActiveSupport::Deprecation.warn("find_model is deprecated.  Use find instead")
+        find(pid)
       end
 
 
@@ -267,7 +268,7 @@ module ActiveFedora
       # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel info:fedora/afmodel:Dataset), return a Dataset object (not a Book).
       #   Book.find_document("hydra:dataset1") 
       def find_one(pid)
-        af_base = load_instance(pid)
+        af_base = self.allocate.init_with(DigitalObject.find(self, pid))
         the_model = ActiveFedora::ContentModel.known_models_for( af_base ).first
         if af_base.class != the_model
           return af_base.adapt_to(the_model)

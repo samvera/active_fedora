@@ -80,6 +80,12 @@ describe ActiveFedora::Model do
       SpecModel::Basic.expects(:find_one).with("changeme:22").returns("Fake Object2")
       SpecModel::Basic.find(:all, :rows=>1001).should == ["Fake Object1", "Fake Object2"]
     end
+    it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
+      ActiveFedora::ContentModel.expects(:known_models_for).returns([SpecModel::Basic])
+      SpecModel::Basic.any_instance.expects(:init_with).returns(mock("Model", :adapt_to=>SpecModel::Basic ))
+      SpecModel::Basic.expects(:connection_for_pid).with("_PID_")
+      SpecModel::Basic.find("_PID_")
+    end
   end
 
   describe '#count' do
@@ -118,8 +124,8 @@ describe ActiveFedora::Model do
   
   describe "load_instance" do
     it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
-      SpecModel::Basic.any_instance.expects(:init_with)
-      SpecModel::Basic.expects(:connection_for_pid).with("_PID_")
+      ActiveSupport::Deprecation.expects(:warn).with("load_instance is deprecated.  Use find instead")
+      SpecModel::Basic.expects(:find).with("_PID_")
       SpecModel::Basic.load_instance("_PID_")
     end
   end
