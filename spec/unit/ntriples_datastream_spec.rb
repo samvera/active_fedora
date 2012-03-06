@@ -1,10 +1,10 @@
 require 'spec_helper'
 
 describe ActiveFedora::NtriplesRDFDatastream do
-
   describe "an instance with content" do
     before do 
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+        register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
         map_predicates do |map|
           map.created(:in => RDF::DC)
           map.title(:in => RDF::DC)
@@ -58,6 +58,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "a new instance" do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+        register_vocabularies RDF::DC
         map_predicates do |map|
           map.publisher(:in => RDF::DC)
         end
@@ -68,6 +69,156 @@ describe ActiveFedora::NtriplesRDFDatastream do
     it "should save and reload" do
       @subject.publisher = ["St. Martin's Press"]
       @subject.save
+    end
+  end
+
+  describe "solr integration" do
+    before(:all) do
+      class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+        register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
+        map_predicates do |map|
+          map.created(:in => RDF::DC, :type => :date)
+          map.title(:in => RDF::DC, :type => :text)
+          map.publisher(:in => RDF::DC)
+          map.based_near(:in => RDF::FOAF, :type => :text)
+          map.related_url(:to => "seeAlso", :in => RDF::RDFS, :type => :string)
+        end
+      end
+      @subject = MyDatastream.new(@inner_object, 'solr_rdf')
+      @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
+      @subject.stubs(:pid => 'test:1')
+      @subject.stubs(:new? => false)
+      @sample_fields = {:publisher => {:values => ["publisher1"], :type => :string}, 
+        :based_near => {:values => ["coverage1", "coverage2"], :type => :text}, 
+        :created => {:values => "fake-date", :type => :date},
+        :title => {:values => "fake-title", :type => :text},
+        :related_url => {:values => "http://example.org/", :type => :string},
+        :empty_field => {:values => []}
+      } 
+      @sample_xml = XmlSimple.xml_in("<fields><based_near>coverage1</based_near><based_near>coverage2</based_near><created>fake-date</created><publisher>publisher1</publisher><related_url>http://example.org/</related_url><title>fake-title</title></fields>")
+    end
+    after(:all) do
+      # Revert to default mappings after running tests
+      ActiveFedora::SolrService.load_mappings
+    end
+    it "should provide .to_solr and return a SolrDocument" do
+      @subject.should respond_to(:to_solr)
+      @subject.to_solr.should be_kind_of(Hash)
+    end
+    it "should provide .fields and return a Hash" do
+      @subject.should respond_to(:fields)
+      @subject.fields.should be_kind_of(Hash)
+    end   
+    it "should optionally allow you to provide the Solr::Document to add fields to and return that document when done" do
+      doc = Hash.new
+      @subject.to_solr(doc).should == doc
+    end
+    it "should iterate through @fields hash" do
+      @subject.expects(:fields).returns(@sample_fields)
+      solr_doc = @subject.to_solr
+      solr_doc["publisher_t"].should == ["publisher1"]
+      solr_doc["based_near_t"].sort.should == ["coverage1", "coverage2"]
+      solr_doc["created_dt"].should == ["fake-date"]
+      solr_doc["title_t"].should == ["fake-title"]
+      solr_doc["related_url_t"].should == ["http://example.org/"]
+      solr_doc["empty_field_t"].should be_nil
+    end
+    it "should allow multiple values for a single field"
+    it 'should append create keys in format field_name + _ + field_type' do
+      @subject.stubs(:fields).returns(@sample_fields)
+      
+      #should have these            
+      @subject.to_solr["publisher_t"].should_not be_nil
+      @subject.to_solr["based_near_t"].should_not be_nil
+      @subject.to_solr["created_dt"].should_not be_nil
+      @subject.to_solr["title_t"].should_not be_nil
+      
+      #should NOT have these
+      @subject.to_solr["narrator"].should be_nil
+      @subject.to_solr["empty_field"].should be_nil
+      @subject.to_solr["creator"].should be_nil
+    end
+    it "should use Solr mappings to generate field names" do
+      ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
+      @subject.stubs(:fields).returns(@sample_fields)
+      solr_doc =  @subject.to_solr
+      
+      #should have these            
+      solr_doc["publisher_field"].should == ["publisher1"]
+      solr_doc["based_near_field"].sort.should == ["coverage1", "coverage2"]
+      solr_doc["created_date"].should == ["fake-date"]
+      solr_doc["title_field"].should == ["fake-title"]
+        
+      solr_doc["title_t"].should be_nil
+      solr_doc["publisher_t"].should be_nil
+      solr_doc["based_near_t"].should be_nil
+      solr_doc["created_dt"].should be_nil
+      
+      # Reload default mappings
+      ActiveFedora::SolrService.load_mappings
+    end
+    it 'should append _dt to dates' do
+      ActiveFedora::SolrService.load_mappings
+      @subject.expects(:fields).returns(@sample_fields).at_least_once
+      @subject.to_solr["created_dt"].should_not be_nil
+      
+      #should NOT have these      
+      @subject.to_solr["created"].should be_nil
+      @subject.to_solr["created_date"].should be_nil
+    end
+    describe "with an actual object" do
+      before(:all) do
+        @obj = MyDatastream.new(@inner_object, 'solr_rdf')
+        @obj.created = "2012-03-04"
+        @obj.title = "Of Mice and Men, The Sequel"
+        @obj.publisher = "Bob's Blogtastic Publishing"
+        @obj.based_near = ["Tacoma, WA", "Renton, WA"]
+        @obj.related_url = "http://example.org/blogtastic/"
+        @obj.save
+      end
+      describe ".fields()" do
+        it "should return the right # of fields" do
+          @obj.fields.keys.count.should == 5
+        end
+        it "should return the right fields" do
+          @obj.fields.keys.should include(:related_url)
+          @obj.fields.keys.should include(:publisher)
+          @obj.fields.keys.should include(:created)
+          @obj.fields.keys.should include(:title)
+          @obj.fields.keys.should include(:based_near)
+        end
+        it "should return the right values" do
+          @obj.fields[:related_url][:values].should == ["http://example.org/blogtastic/"]
+        end
+        it "should return the right type information" do
+          @obj.fields[:created][:type].should == :date
+        end
+        it "should return multi-value fields as expected" do
+          @obj.fields[:based_near][:values].count.should == 2
+          @obj.fields[:based_near][:values].should include("Tacoma, WA")
+          @obj.fields[:based_near][:values].should include("Renton, WA")
+        end
+      end
+      describe ".to_solr()" do
+        it "should return the right # of fields" do
+          @obj.to_solr.keys.count.should == 5
+        end
+        it "should return the right fields" do
+          @obj.to_solr.keys.should include("related_url_t")
+          @obj.to_solr.keys.should include("publisher_t")
+          @obj.to_solr.keys.should include("created_dt")
+          @obj.to_solr.keys.should include("title_t")
+          @obj.to_solr.keys.should include("based_near_t")
+        end
+        it "should return the right values" do
+          @obj.to_solr["related_url_t"].should == ["http://example.org/blogtastic/"]
+        end
+        it "should return multi-value fields as expected" do
+          @obj.to_solr["based_near_t"].count.should == 2
+          @obj.to_solr["based_near_t"].should include("Tacoma, WA")
+          @obj.to_solr["based_near_t"].should include("Renton, WA")
+        end
+      end
     end
   end
 end
