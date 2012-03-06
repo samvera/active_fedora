@@ -85,7 +85,7 @@ namespace :repo do
       	if pid.nil?
           pid = result.body
         end
-        ActiveFedora::Base.find_document(pid).update_index
+        ActiveFedora::Base.find(pid).update_index
       else
         puts "Failed to load the object."
       end

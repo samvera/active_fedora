@@ -31,21 +31,23 @@ describe ActiveFedora::Model do
   end
   
   describe '#find' do
-    it "should return an array of instances of the calling Class" do
-      result = ModelIntegrationSpec::Basic.find(:all)
-      result.should be_instance_of(Array)
-      # this test is meaningless if the array length is zero
-      result.length.should > 0
-      result.each do |obj|
-        obj.class.should == ModelIntegrationSpec::Basic
+    describe "with :all" do
+      it "should return an array of instances of the calling Class" do
+        result = ModelIntegrationSpec::Basic.find(:all)
+        result.should be_instance_of(Array)
+        # this test is meaningless if the array length is zero
+        result.length.should > 0
+        result.each do |obj|
+          obj.class.should == ModelIntegrationSpec::Basic
+        end
       end
+    end
+    describe "#find with a valid pid" do
+      subject { ActiveFedora::Base.find('hydrangea:fixture_mods_article1') }
+      it { should be_instance_of HydrangeaArticle}
     end
   end
 
-  describe "#find_document with a valid pid" do
-    subject { ActiveFedora::Base.find_document('hydrangea:fixture_mods_article1') }
-    it { should be_instance_of HydrangeaArticle}
-  end
   
   describe '#load_instance' do
     it "should return an object of the given Model whose inner object is nil" do

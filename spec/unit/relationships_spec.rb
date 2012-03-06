@@ -231,12 +231,12 @@ describe ActiveFedora::Relationships do
       end
       
       describe " resulting finder" do
-        it "should read from relationships array and use Repository.load_instance to build an array of objects" do
+        it "should read from relationships array and use Repository.find to build an array of objects" do
           SpecNode.create_outbound_relationship_finders("containers", :is_member_of)
           local_node = SpecNode.new
           local_node.expects(:ids_for_outbound).with(:is_member_of).returns(["my:_PID1_", "my:_PID2_", "my:_PID3_"])
-          mock_repo = mock("repo")
 
+          ActiveFedora::ContentModel.expects(:known_models_for).returns([SpecNode]).times(3)
           ActiveFedora::SolrService.expects(:query).with("id:my\\:_PID1_ OR id:my\\:_PID2_ OR id:my\\:_PID3_").returns([{"id"=> "my:_PID1_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]},
                          {"id"=> "my:_PID2_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]}, 
                          {"id"=> "my:_PID3_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]}])

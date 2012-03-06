@@ -44,12 +44,6 @@ module ActiveFedora
       result
     end
 
-    def add_metadata
-    end
-
-    def datastream
-    end
-
 
     #
     # =Class Methods
@@ -83,17 +77,6 @@ module ActiveFedora
         self.allocate.init_with(DigitalObject.find(self, pid))
       end
  
-      # Retrieve the Fedora object with te given pid, explore the returned object, determine its model 
-      # using #{known_models_for} and cast to that class.
-      # @param [String] pid of the object to load
-      #
-      # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel info:fedora/afmodel:Dataset), return a Dataset object (not a Book).
-      #   Book.find_document("hydra:dataset1") 
-      def find_document(pid)
-        af_base = load_instance(pid)
-        the_model = ActiveFedora::ContentModel.known_models_for( af_base ).first
-        af_base.adapt_to(the_model)
-      end
 
       
       # Returns a suitable uri object for :has_model
@@ -123,12 +106,13 @@ module ActiveFedora
           hits = SolrService.query(q, :rows=>opts[:rows]) 
           return hits.map do |hit|
              pid = hit[SOLR_DOCUMENT_ID]
-             load_instance(pid)
+             find_one(pid)
           end
         elsif args.class == String
-          return load_instance(args)
+          return find_one(args)
         end
       end
+
 
       def find_model(pid)
         ActiveSupport::Deprection.warn("find_model is deprecated.  Use load_instance instead")
@@ -275,6 +259,22 @@ module ActiveFedora
         instance_variable_get("@#{name}")
       end
 
+      private 
+      # Retrieve the Fedora object with te given pid, explore the returned object, determine its model 
+      # using #{known_models_for} and cast to that class.
+      # @param [String] pid of the object to load
+      #
+      # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel info:fedora/afmodel:Dataset), return a Dataset object (not a Book).
+      #   Book.find_document("hydra:dataset1") 
+      def find_one(pid)
+        af_base = load_instance(pid)
+        the_model = ActiveFedora::ContentModel.known_models_for( af_base ).first
+        if af_base.class != the_model
+          return af_base.adapt_to(the_model)
+        end
+        af_base
+      end
+
     end
     def create_property_getter(property) # :nodoc:
 
@@ -295,12 +295,12 @@ module ActiveFedora
 
     private 
     
-    def self.class_exists?(class_name)
-      klass = class_name.constantize
-      return klass.is_a?(Class)
-    rescue NameError
-      return false
-    end
+      def self.class_exists?(class_name)
+        klass = class_name.constantize
+        return klass.is_a?(Class)
+      rescue NameError
+        return false
+      end
     
   end
 end
