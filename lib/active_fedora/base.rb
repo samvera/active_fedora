@@ -281,7 +281,7 @@ module ActiveFedora
       datastreams.each_value do |ds|
         solr_doc = ds.solrize_profile(solr_doc)
         ds.ensure_xml_loaded if ds.respond_to? :ensure_xml_loaded  ### Can't put this in the model because it's often implemented in Solrizer::XML::TerminologyBasedSolrizer 
-        solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) 
+        solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::RDFDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ds.kind_of?(ActiveFedora::MetadataDatastream)
       end
       solr_doc = solrize_relationships(solr_doc) unless opts[:model_only]
       solr_doc

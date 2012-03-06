@@ -5,8 +5,21 @@ module ActiveFedora
     module ModelMethods
       extend ActiveSupport::Concern
       module ClassMethods
+        attr_accessor :vocabularies
         def config
           ActiveFedora::Predicates.predicate_config
+        end
+        def register_vocabularies(*vocabs)
+          @vocabularies = {}
+          vocabs.each do |v|
+            if v.respond_to? :property and v.respond_to? :to_uri
+              @vocabularies[v.to_uri] = v 
+            else
+              raise "not an RDF vocabulary: #{v}"
+            end
+          end
+          ActiveFedora::Predicates.vocabularies(vocabularies)
+          @vocabularies
         end
         def map_predicates(&block)
           yield self
@@ -16,19 +29,23 @@ module ActiveFedora
           raise "mapping must specify RDF vocabulary as :in argument" unless args.has_key? :in
           vocab = args[:in]
           predicate = args.fetch(:to, name)
+          data_type = args.fetch(:type, :string)
           raise "Vocabulary '#{vocab.inspect}' does not define property '#{predicate.inspect}'" unless vocab.respond_to? predicate
           vocab = vocab.to_s
+          # this is needed for AF::Predicates integration
+          # stuff data_type in there too for to_solr support
           if config 
             if config[:predicate_mapping].has_key? vocab
               config[:predicate_mapping][vocab][name] = predicate
+              config[:predicate_mapping][vocab]["#{name}type".to_sym] = data_type
             else
-              config[:predicate_mapping][vocab] = { name => predicate }
+              config[:predicate_mapping][vocab] = { name => predicate, "#{name}type".to_sym => data_type }
            end
           else
             config = {
               :default_namespace => vocab,
               :predicate_mapping => {
-                vocab => { name => predicate }
+                vocab => { name => predicate, "#{name}type".to_sym => data_type }
               }
             }
           end
@@ -85,11 +102,40 @@ module ActiveFedora
       end
     end
 
+    # returns a Hash, e.g.: {field => {:values => values, :type => type}, ...}
+    def fields
+      field_map = {}
+      graph.relationships.each do |predicate, values|
+        vocab_sym, name = predicate.qname
+        vocabs_list = self.class.vocabularies.select { |ns, v| v.__prefix__ == vocab_sym }
+        vocab = vocabs_list.first.first.to_s
+        mapped_names = self.class.config[:predicate_mapping][vocab].select {|k, v| v.to_s == name.to_s}
+        name = mapped_names.first.first.to_s
+        type = self.class.config[:predicate_mapping][vocab]["#{name}type".to_sym]
+        field_map[name.to_sym] = {:values => values.map {|v| v.to_s}, :type => type}
+      end
+      field_map
+    end
+
+    def to_solr(solr_doc = Hash.new) # :nodoc:
+      fields.each do |field_key, field_info|
+        if field_info.has_key?(:values) && !field_info[:values].nil?
+          field_symbol = ActiveFedora::SolrService.solr_name(field_key, field_info[:type])
+          values = field_info[:values]
+          values = [values] unless values.respond_to? :each
+          values.each do |val|    
+            ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val)         
+          end
+        end
+      end
+      solr_doc
+    end
+
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def find_predicate(predicate)
       predicate = predicate.to_sym unless predicate.kind_of? RDF::URI
       result = ActiveFedora::Predicates.find_predicate(predicate)
-      return RDF::URI(result.reverse.to_s)
+      RDF::URI(result.reverse.to_s)
     end
 
     def graph
@@ -107,10 +153,6 @@ module ActiveFedora
         values << (object.kind_of?(RDF::Literal) ? object.value : object.to_str)
       end
       TermProxy.new(graph, predicate, values)
-    end
-
-    def to_solr
-      # TODO
     end
 
     # if there are any existing statements with this predicate, replace them

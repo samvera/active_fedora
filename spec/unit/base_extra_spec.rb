@@ -68,20 +68,26 @@ describe ActiveFedora::Base do
   end
 
   describe ".update_index" do
-    it "should call .to_solr on all MetadataDatastreams AND RelsExtDatastreams and pass the resulting document to solr" do
+    before do
       mock_conn = mock("SolrConnection")
       mock_conn.expects(:add)
       mock_conn.expects(:commit)
       mock_ss = mock("SolrService")
       mock_ss.stubs(:conn).returns(mock_conn)
       ActiveFedora::SolrService.stubs(:instance).returns(mock_ss)
+    end
+    
+    it "should call .to_solr on all MetadataDatastreams AND RelsExtDatastreams and pass the resulting document to solr" do
       # Actually uses self.to_solr internally to gather solr info from all metadata datastreams
       mock1 = mock("ds1", :to_solr)
       mock2 = mock("ds2", :to_solr)
       mock3 = mock("RELS-EXT")
       
       mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
-      mock_datastreams.values.each {|ds| ds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)}
+      mock_datastreams.values.each do |ds| 
+        ds.stubs(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
+        ds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
+      end
       mock1.expects(:solrize_profile)
       mock2.expects(:solrize_profile)
       mock3.expects(:solrize_profile)
@@ -93,17 +99,36 @@ describe ActiveFedora::Base do
       @test_object.expects(:datastreams).returns(mock_datastreams)
       @test_object.expects(:solrize_profile)
       @test_object.expects(:solrize_relationships)
-      @test_object.send :update_index
+      @test_object.update_index
+    end
+
+    it "should call .to_solr on all RDFDatastreams and pass the resulting document to solr" do
+      # Actually uses self.to_solr internally to gather solr info from all metadata datastreams
+      mock1 = mock("ds1", :to_solr)
+      mock2 = mock("ds2", :to_solr)
+      mock3 = mock("RELS-EXT")
+      
+      mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
+      mock_datastreams.values.each do |ds| 
+        ds.stubs(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(false)
+        ds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
+      end
+      mock1.expects(:solrize_profile)
+      mock2.expects(:solrize_profile)
+      mock3.expects(:solrize_profile)
+      mock1.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(true)
+      mock2.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(true)
+      mock3.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
+      #mock3.expects(:kind_of?).with(ActiveFedora::RelsExtDatastream).returns(true)
+
+      @test_object.expects(:datastreams).returns(mock_datastreams)
+      @test_object.expects(:solrize_profile)
+      @test_object.expects(:solrize_relationships)
+      @test_object.update_index
     end
 
     it "should retrieve a solr Connection and call Connection.add" do
-      mock_conn = mock("SolrConnection")
-      mock_conn.expects(:add)
-      mock_conn.expects(:commit)
-      mock_ss = mock("SolrService")
-      mock_ss.stubs(:conn).returns(mock_conn)
-      ActiveFedora::SolrService.stubs(:instance).returns(mock_ss)
-      @test_object.send :update_index
+      @test_object.update_index
     end
 
   end
