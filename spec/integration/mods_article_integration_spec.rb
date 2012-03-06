@@ -21,7 +21,7 @@ describe ActiveFedora::Base do
   end
   
   before(:each) do
-    @test_article = HydrangeaArticle.load_instance("hydrangea:fixture_mods_article1")
+    @test_article = HydrangeaArticle.find("hydrangea:fixture_mods_article1")
   end
   
   describe ".update_indexed_attributes" do
@@ -37,7 +37,7 @@ describe ActiveFedora::Base do
       @test_article.update_indexed_attributes(test_args[:params], test_args[:opts])
       @test_article.get_values_from_datastream("descMetadata", [{:person=>0}, :first_name]).should == ["Replacement FirstName"]
       @test_article.save
-      retrieved_article = HydrangeaArticle.load_instance("hydrangea:fixture_mods_article1")
+      retrieved_article = HydrangeaArticle.find("hydrangea:fixture_mods_article1")
       retrieved_article.get_values_from_datastream("descMetadata", [{:person=>0}, :first_name]).should == ["Replacement FirstName"]
     end
   end

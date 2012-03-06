@@ -7,7 +7,7 @@ module ServiceDefinitions
       model_uri = mod.to_class_uri
     # load ContentModel, pull Sdef pointers
       begin
-        cmodel = ActiveFedora::ContentModel.load_instance(mod.to_class_uri)
+        cmodel = ActiveFedora::ContentModel.find(mod.to_class_uri)
         sdef_pids = cmodel.ids_for_outbound(:has_service).collect { |uri|
           uri.split('/')[-1]
         }

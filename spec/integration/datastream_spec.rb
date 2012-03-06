@@ -48,7 +48,7 @@ describe ActiveFedora::Datastream do
     ds.content = fixture('dino.jpg')
     @test_object.add_datastream(ds).should be_true
     @test_object.save
-    to = ActiveFedora::Base.load_instance(@test_object.pid) 
+    to = ActiveFedora::Base.find(@test_object.pid) 
     to.should_not be_nil 
     to.datastreams[dsid].should_not be_nil
     to.datastreams[dsid].content.should == fixture('dino.jpg').read

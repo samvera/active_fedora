@@ -161,7 +161,7 @@ describe ActiveFedora::Relationships do
         local_node.should respond_to(:containers_query)
       end
       
-      it "resulting finder should search against solr and use Model#load_instance to build an array of objects" do
+      it "resulting finder should search against solr and use Model#find to build an array of objects" do
         @sample_solr_hits = [{"id"=>"_PID1_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
                               {"id"=>"_PID2_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
                               {"id"=>"_PID3_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]}]
@@ -178,7 +178,7 @@ describe ActiveFedora::Relationships do
         SpecNode.create_inbound_relationship_finders("constituents", :is_constituent_of, :inbound => true)
         local_node = SpecNode.new
         mock_repo = mock("repo")
-        mock_repo.expects(:load_instance).never
+        mock_repo.expects(:find).never
         local_node.expects(:pid).returns("test:sample_pid")
         SpecNode.expects(:relationships_desc).returns({:inbound=>{"constituents"=>{:predicate=>:is_constituent_of}}}).at_least_once()
         instance = stub(:conn=>stub(:conn))
@@ -248,7 +248,7 @@ describe ActiveFedora::Relationships do
           SpecNode.create_outbound_relationship_finders("constituents", :is_constituent_of)
           local_node = SpecNode.new
           mock_repo = mock("repo")
-          mock_repo.expects(:load_instance).never
+          mock_repo.expects(:find).never
           local_node.expects(:rels_ext).returns(stub('rels-ext', :content=>''))
           ActiveFedora::SolrService.expects(:query).returns(solr_result)
           local_node.constituents(:response_format => :solr).should == solr_result

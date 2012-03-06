@@ -73,8 +73,7 @@ describe ActiveFedora::RelsExtDatastream do
     @test_object.save
     # make sure that _something_ was actually added to the object's relationships hash
     @test_object.ids_for_outbound(:is_member_of).size.should == 1
-    o = ActiveFedora::Base.load_instance(@test_object.pid)
-    new_rels = ActiveFedora::Base.load_instance(@test_object.pid).relationships
+    new_rels = ActiveFedora::Base.find(@test_object.pid).relationships
     new_rels.should == @test_object.relationships
   end
 

@@ -147,6 +147,7 @@ describe ActiveFedora::Base do
   
   describe "#load_instance" do
     it "should return an object loaded from fedora" do
+      ActiveSupport::Deprecation.expects(:warn).with("load_instance is deprecated.  Use find instead")
       result = ActiveFedora::Base.load_instance(@test_object.pid)
       result.should be_instance_of(ActiveFedora::Base)
     end
@@ -258,26 +259,26 @@ describe ActiveFedora::Base do
      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
      @test_object.add_file_datastream(f)
      @test_object.save
-     test_obj = ActiveFedora::Base.load_instance(@test_object.pid)
+     test_obj = ActiveFedora::Base.find(@test_object.pid)
      #check case where nothing passed in does not have correct mime type
      test_obj.datastreams["DS1"].mimeType.should == "application/octet-stream"
      @test_object2 = ActiveFedora::Base.new
      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
      @test_object2.add_file_datastream(f,{:mimeType=>"image/jpeg"})
      @test_object2.save
-     test_obj = ActiveFedora::Base.load_instance(@test_object2.pid)
+     test_obj = ActiveFedora::Base.find(@test_object2.pid)
      test_obj.datastreams["DS1"].mimeType.should == "image/jpeg"
      @test_object3 = ActiveFedora::Base.new
      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
      @test_object3.add_file_datastream(f,{:mime_type=>"image/jpeg"})
      @test_object3.save
-     test_obj = ActiveFedora::Base.load_instance(@test_object3.pid)
+     test_obj = ActiveFedora::Base.find(@test_object3.pid)
      test_obj.datastreams["DS1"].mimeType.should == "image/jpeg"
      @test_object4 = ActiveFedora::Base.new
      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
      @test_object4.add_file_datastream(f,{:content_type=>"image/jpeg"})
      @test_object4.save
-     test_obj = ActiveFedora::Base.load_instance(@test_object4.pid)
+     test_obj = ActiveFedora::Base.find(@test_object4.pid)
      test_obj.datastreams["DS1"].mimeType.should == "image/jpeg"
    end
   end
@@ -364,7 +365,7 @@ describe ActiveFedora::Base do
 
         @test_object2.delete
         #need to reload since removed from rels_ext in memory
-        @test_object5 = MockAFBaseRelationship.load_instance(@test_object5.pid)
+        @test_object5 = MockAFBaseRelationship.find(@test_object5.pid)
       
         #check any test_object2 inbound rels gone from source
         @test_object3.relationships_by_name(false)[:inbound]["testing_inbound"].should == []
@@ -384,7 +385,7 @@ describe ActiveFedora::Base do
       @test_object.save
       @pid = @test_object.pid
       begin
-        @test_object = ActiveFedora::Base.load_instance(@pid)
+        @test_object = ActiveFedora::Base.find(@pid)
       rescue => e
         puts "#{e.message}\n#{e.backtrace}"
         raise e
@@ -392,7 +393,7 @@ describe ActiveFedora::Base do
       @test_object.object_relations[:has_part].should include @test_object2.internal_uri
       @test_object.remove_relationship(:has_part,@test_object2)
       @test_object.save
-      @test_object = ActiveFedora::Base.load_instance(@pid)
+      @test_object = ActiveFedora::Base.find(@pid)
       @test_object.object_relations[:has_part].should be_empty
     end
   end

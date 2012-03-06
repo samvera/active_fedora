@@ -51,7 +51,7 @@ describe ActiveFedora::SolrService do
                             {"id"=>"my:_PID2_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
                             {"id"=>"my:_PID3_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]}]
     end
-    it "should use Repository.load_instance to instantiate objects" do
+    it "should use Repository.find to instantiate objects" do
       AudioRecord.expects(:find).with("my:_PID1_")
       AudioRecord.expects(:find).with("my:_PID2_")
       AudioRecord.expects(:find).with("my:_PID3_")

@@ -51,6 +51,7 @@ describe ActiveFedora::Model do
   
   describe '#load_instance' do
     it "should return an object of the given Model whose inner object is nil" do
+      ActiveSupport::Deprecation.expects(:warn).with("load_instance is deprecated.  Use find instead")
       result = ModelIntegrationSpec::Basic.load_instance(@test_instance.pid)
       result.class.should == ModelIntegrationSpec::Basic
       result.inner_object.new?.should be_false

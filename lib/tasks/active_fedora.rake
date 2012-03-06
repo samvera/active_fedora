@@ -12,7 +12,7 @@ namespace :repo do
     else
       pid = ENV["pid"]
       begin
-        ActiveFedora::Base.load_instance(pid).delete
+        ActiveFedora::Base.find(pid).delete
       rescue ActiveFedora::ObjectNotFoundError
         puts "The object #{pid} has already been deleted (or was never created)."
       rescue Errno::ECONNREFUSED => e
@@ -35,7 +35,7 @@ namespace :repo do
     while i <= stop_point do
       pid = namespace + ":" + i.to_s
       begin
-        ActiveFedora::Base.load_instance(pid).delete
+        ActiveFedora::Base.find(pid).delete
       rescue ActiveFedora::ObjectNotFoundError
         # The object has already been deleted (or was never created).  Do nothing.
       end

@@ -45,7 +45,7 @@ module ActiveFedora
       # collection_members_append(obj)
       unless obj.kind_of? ActiveFedora::Base
         begin
-          obj = ActiveFedora::Base.load_instance(obj)
+          obj = ActiveFedora::Base.find(obj)
         rescue ActiveFedora::ObjectNotFoundError
           "You must provide either an ActiveFedora object or a valid pid to add it as a file object.  You submitted #{obj.inspect}"
         end

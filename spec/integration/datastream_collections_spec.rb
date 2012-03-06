@@ -24,7 +24,7 @@ describe ActiveFedora::DatastreamCollections do
       ds = @test_object2.thumbnail.first
       ds2 = @test_object2.high.first
       @test_object2.save
-      @test_object2 = MockAFBaseDatastream.load_instance(@test_object2.pid)
+      @test_object2 = MockAFBaseDatastream.find(@test_object2.pid)
       @test_object2.named_datastreams.keys.size.should == 2
       @test_object2.named_datastreams.keys.include?("thumbnail").should == true
       @test_object2.named_datastreams.keys.include?("high").should == true
@@ -54,7 +54,7 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2.add_named_file_datastream("thumbnail",f)
       ds = @test_object2.thumbnail.first
       @test_object2.save
-      @test_object2 = MockAFBaseDatastream.load_instance(@test_object2.pid)
+      @test_object2 = MockAFBaseDatastream.find(@test_object2.pid)
       @test_object2.named_datastreams["thumbnail"].size.should == 1
       t2_thumb1 = @test_object2.named_datastreams["thumbnail"].first
       t2_thumb1.dsid.should == "THUMB1"
@@ -86,7 +86,7 @@ describe ActiveFedora::DatastreamCollections do
       #check raise exception if dsid not supplied
       @test_object2.add_named_datastream("thumbnail",{:file=>f})
       @test_object2.save
-      @test_object2 = MockAFBaseDatastream.load_instance(@test_object2.pid)
+      @test_object2 = MockAFBaseDatastream.find(@test_object2.pid)
       
       @test_object2.thumbnail.size.should == 1
       @test_object2.thumbnail_ids == ["THUMB1"]
@@ -100,7 +100,7 @@ describe ActiveFedora::DatastreamCollections do
       ds.content.should == minivan 
       @test_object2.update_named_datastream("thumbnail",{:file=>f2,:dsid=>"THUMB1"})
       @test_object2.save
-      @test_object2 = MockAFBaseDatastream.load_instance(@test_object2.pid)
+      @test_object2 = MockAFBaseDatastream.find(@test_object2.pid)
       @test_object2.thumbnail.size.should == 1
       @test_object2.thumbnail_ids == ["THUMB1"]
       ds2 = @test_object2.thumbnail.first
@@ -124,7 +124,7 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f, :label=>"testDS"})
       @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f2})
       @test_object2.save
-      @test_object2 = MockAFBaseDatastream.load_instance(@test_object2.pid)
+      @test_object2 = MockAFBaseDatastream.find(@test_object2.pid)
       @test_object2.named_datastreams_ids.should == {"high"=>[], "thumbnail"=>["THUMB1", "THUMB2"]}
     end
   end

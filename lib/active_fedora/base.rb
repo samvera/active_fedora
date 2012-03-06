@@ -330,7 +330,7 @@ module ActiveFedora
       if self.inner_object.is_a? DigitalObject
         raise "#{self.inspect} is already a full digital object"
       end
-      self.class.load_instance self.pid
+      self.class.find self.pid
     end
     
     # ** EXPERIMENTAL **
@@ -345,7 +345,7 @@ module ActiveFedora
     
     # ** EXPERIMENTAL **
     #
-    # This method can be used instead of ActiveFedora::Model::ClassMethods.load_instance.  
+    # This method can be used instead of ActiveFedora::Model::ClassMethods.find.  
     # It works similarly except it populates an object from Solr instead of Fedora.
     # It is most useful for objects used in read-only displays in order to speed up loading time.  If only
     # a pid is passed in it will query solr for a corresponding solr document and then use it
@@ -355,7 +355,7 @@ module ActiveFedora
     # one passed to populate the object.
     #
     # It will anything stored within solr such as metadata and relationships.  Non-metadata datastreams will not
-    # be loaded and if needed you should use load_instance instead.
+    # be loaded and if needed you should use find instead.
     def self.load_instance_from_solr(pid,solr_doc=nil)
       if solr_doc.nil?
         result = find_by_solr(pid)

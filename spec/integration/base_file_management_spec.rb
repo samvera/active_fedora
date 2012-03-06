@@ -17,7 +17,7 @@ describe ActiveFedora::Base do
   end
   
   it "should persist and re-load collection members" do
-    container_copy = FileMgmt.load_instance(@test_container.pid)
+    container_copy = FileMgmt.find(@test_container.pid)
     container_copy.collection_members(:response_format=>:id_array).should == ["foo:2"]
   end
     

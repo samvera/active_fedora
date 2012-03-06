@@ -30,7 +30,7 @@ describe ActiveFedora::Base do
       mock_child = mock("object")
       mock_child.expects(:add_relationship).with(:is_part_of, @base)
       mock_child.expects(:save)
-      ActiveFedora::Base.expects(:load_instance).with("_PID_").returns(mock_child)
+      ActiveFedora::Base.expects(:find).with("_PID_").returns(mock_child)
       @base.file_objects_append("_PID_")
     end
   end
