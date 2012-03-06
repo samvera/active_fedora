@@ -50,10 +50,8 @@ describe ActiveFedora do
     end
 
     it "should be used by ActiveFedora::Base#find_by_solr" do
-      mock_solr = mock("SolrConnection")
       mock_response = mock("SolrResponse")
-      mock_solr.expects(:query).with(SOLR_DOCUMENT_ID + ':changeme\:30', {}).returns(mock_response)
-      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
+      ActiveFedora::SolrService.expects(:query).with(SOLR_DOCUMENT_ID + ':changeme\:30', {}).returns(mock_response)
   
       SolrSpecModel::Basic.find_by_solr("changeme:30").should equal(mock_response)
     end

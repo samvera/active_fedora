@@ -271,7 +271,11 @@ module ActiveFedora
     # If opts[:model_only] == true, the base object metadata and the RELS-EXT datastream will be omitted.  This is mainly to support shelver, which calls .to_solr for each model an object subscribes to. 
     def to_solr(solr_doc = Hash.new, opts={})
       unless opts[:model_only]
-        solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid, ActiveFedora::SolrService.solr_name(:system_create, :date) => self.create_date, ActiveFedora::SolrService.solr_name(:system_modified, :date) => self.modified_date, ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol) => self.class.inspect)
+        c_time = create_date
+        c_time = Time.parse(c_time) unless c_time.is_a?(Time)
+        m_time = modified_date
+        m_time = Time.parse(m_time) unless m_time.is_a?(Time)
+        solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid, ActiveFedora::SolrService.solr_name(:system_create, :date) => c_time.utc.xmlschema, ActiveFedora::SolrService.solr_name(:system_modified, :date) => m_time.utc.xmlschema, ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol) => self.class.inspect)
         solrize_profile(solr_doc)
       end
       datastreams.each_value do |ds|
@@ -356,7 +360,7 @@ module ActiveFedora
       if solr_doc.nil?
         result = find_by_solr(pid)
         raise "Object #{pid} not found in solr" if result.nil?
-        solr_doc = result.hits.first
+        solr_doc = result.first
         #double check pid and id in record match
         raise "Object #{pid} not found in Solr" unless !result.nil? && !solr_doc.nil? && pid == solr_doc[SOLR_DOCUMENT_ID]
       else

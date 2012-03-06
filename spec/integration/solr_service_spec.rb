@@ -43,12 +43,12 @@ describe ActiveFedora::SolrService do
       @foo_content = @foo_object.datastreams['descMetadata'].content
     end
     after(:all) do
-      @test_object.delete
-      @foo_object.delete
+      # @test_object.delete
+      # @foo_object.delete
     end
     it "should return an array of objects that are of the class stored in active_fedora_model_s" do
       query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@test_object.pid)} OR id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
-      solr_result = ActiveFedora::SolrService.instance.conn.query(query)
+      solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result)
       result.length.should == 2
       result.each do |r|
@@ -58,7 +58,7 @@ describe ActiveFedora::SolrService do
     
     it 'should load objects from solr data if a :load_from_solr option is passed in' do
       query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@test_object.pid)} OR id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
-      solr_result = ActiveFedora::SolrService.instance.conn.query(query)
+      solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
       result.length.should == 2
       result.each do |r|
@@ -75,7 +75,7 @@ describe ActiveFedora::SolrService do
     
     it 'should #reify a lightweight object as a new instance' do
       query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
-      solr_result = ActiveFedora::SolrService.instance.conn.query(query)
+      solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
       solr_foo = result.first
       real_foo = solr_foo.reify
@@ -87,7 +87,7 @@ describe ActiveFedora::SolrService do
     
     it 'should #reify! a lightweight object within the same instance' do
       query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
-      solr_result = ActiveFedora::SolrService.instance.conn.query(query)
+      solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
       solr_foo = result.first
       solr_foo.inner_object.should be_a(ActiveFedora::SolrDigitalObject)
@@ -98,7 +98,7 @@ describe ActiveFedora::SolrService do
     
     it 'should raise an exception when attempting to reify a first-class object' do
       query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
-      solr_result = ActiveFedora::SolrService.instance.conn.query(query)
+      solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
       solr_foo = result.first
       lambda {solr_foo.reify}.should_not raise_exception
@@ -109,7 +109,7 @@ describe ActiveFedora::SolrService do
   
     it 'should call load_instance_from_solr if :load_from_solr option passed in' do
       query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@test_object.pid)} OR id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
-      solr_result = ActiveFedora::SolrService.instance.conn.query(query)
+      solr_result = ActiveFedora::SolrService.query(query)
       ActiveFedora::Base.expects(:load_instance_from_solr).times(1)
       FooObject.expects(:load_instance_from_solr).times(1)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})

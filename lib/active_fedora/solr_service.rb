@@ -1,5 +1,5 @@
-require 'solr'
 require "solrizer"
+require 'rsolr'
 
 module ActiveFedora
   class SolrService 
@@ -17,8 +17,10 @@ module ActiveFedora
     end
     def initialize(host, args)
       host = 'http://localhost:8080/solr' unless host
-      opts = {:autocommit=>:on}.merge(args)
-      @conn = Solr::Connection.new(host, opts)
+      args = args.dup
+      args.merge!(:url=>host)
+      @conn = RSolr.connect args
+ #     @conn = Solr::Connection.new(host, opts)
     end
     
     def self.instance
@@ -33,11 +35,8 @@ module ActiveFedora
     end
     
     def self.reify_solr_results(solr_result,opts={})
-      unless solr_result.is_a?(Solr::Response::Standard)
-        raise ArgumentError.new("Only solr responses (Solr::Response::Standard) are allowed. You provided a #{solr_result.class}")
-      end
       results = []
-      solr_result.hits.each do |hit|
+      solr_result.each do |hit|
         classname = class_from_solr_document(hit)
         if opts[:load_from_solr]
           results << classname.load_instance_from_solr(hit[SOLR_DOCUMENT_ID])
@@ -70,7 +69,15 @@ module ActiveFedora
     def self.escape_uri_for_query(uri)
       return uri.gsub(/(:)/, '\\:')
     end
-    
+
+    def self.query(query, args={})
+      raw = args.delete(:raw)
+      args = args.merge(:q=>query)
+      result = SolrService.instance.conn.get('select', :params=>args)
+      return result if raw
+      result['response']['docs']
+    end
+
   
 end #SolrService
 class SolrNotInitialized < StandardError;end

@@ -59,11 +59,9 @@ module ActiveFedora
         raise ObjectNotFoundError, "Unable to find #{pid} in the repository"
       end
       if ENABLE_SOLR_UPDATES
-        ActiveFedora::SolrService.instance.conn.delete(pid) 
-        # if defined?( Solrizer::Solrizer ) 
-        #   solrizer = Solrizer::Solrizer.new
-        #   solrizer.solrize_delete(pid)
-        # end
+        solr = ActiveFedora::SolrService.instance.conn
+        solr.delete_by_id(pid) 
+        solr.commit
       end
     end
 
@@ -78,8 +76,8 @@ module ActiveFedora
         solrizer = Solrizer::Fedora::Solrizer.new
         solrizer.solrize( self )
       else
-        #logger.info("Trying to update solr for pid: #{pid}")
-        SolrService.instance.conn.update(self.to_solr)
+        SolrService.instance.conn.add(self.to_solr)
+        SolrService.instance.conn.commit
       end
     end
 

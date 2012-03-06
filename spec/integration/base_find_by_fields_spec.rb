@@ -30,6 +30,7 @@ describe ActiveFedora::Base do
                   [:title]=>{0=>"Italian and Spanish: A Comparison of Common Phrases"}}
     @test_object2.update_indexed_attributes(attributes)
     @test_object2.save
+    sleep(1)
     
     @test_object3 = MockAFBaseQuerySolr.new
     attributes = {[:holding_id]=>{0=>"Holding 2"},
@@ -39,6 +40,7 @@ describe ActiveFedora::Base do
                   [:title]=>{0=>"A study of the evolution of Spanish from Latin"}}
     @test_object3.update_indexed_attributes(attributes)
     @test_object3.save      
+    sleep(1)
 
     @test_object4 = MockAFBaseQuerySolr.new
     attributes = {[:holding_id]=>{0=>"Holding 3"},
@@ -75,7 +77,7 @@ describe ActiveFedora::Base do
       #query based on just model
       results = MockAFBaseQuerySolr.find_by_fields_by_solr({})
       found_pids = []
-      results.hits.each do |hit|
+      results.each do |hit|
         found_pids.push(hit[SOLR_DOCUMENT_ID])
       end
       
@@ -86,7 +88,7 @@ describe ActiveFedora::Base do
       #query on certain fields
       results = MockAFBaseQuerySolr.find_by_fields_by_solr({"language"=>"Latin"})
       found_pids = []
-      results.hits.each do |hit|
+      results.each do |hit|
         found_pids.push(hit[SOLR_DOCUMENT_ID])
       end
       
@@ -94,7 +96,7 @@ describe ActiveFedora::Base do
       
       results = MockAFBaseQuerySolr.find_by_fields_by_solr({"language"=>"Italian"})
       found_pids = []
-      results.hits.each do |hit|
+      results.each do |hit|
         found_pids.push(hit[SOLR_DOCUMENT_ID])
       end
       
@@ -102,7 +104,7 @@ describe ActiveFedora::Base do
       
       results = MockAFBaseQuerySolr.find_by_fields_by_solr({"language"=>"Spanish"})
       found_pids = []
-      results.hits.each do |hit|
+      results.each do |hit|
         found_pids.push(hit[SOLR_DOCUMENT_ID])
       end
       
@@ -114,7 +116,7 @@ describe ActiveFedora::Base do
       
       results = MockAFBaseQuerySolr.find_by_fields_by_solr({"creator"=>"Linguist,A.","title"=>"latin"})
       found_pids = []
-      results.hits.each do |hit|
+      results.each do |hit|
         found_pids.push(hit[SOLR_DOCUMENT_ID])
       end
       
@@ -126,7 +128,7 @@ describe ActiveFedora::Base do
       #query with value with embedded ':' (pid)
       results = MockAFBaseQuerySolr.find_by_fields_by_solr({"id"=>@test_object3.pid})
       found_pids = []
-      results.hits.each do |hit|
+      results.each do |hit|
         found_pids.push(hit[SOLR_DOCUMENT_ID])
       end
       
@@ -137,7 +139,7 @@ describe ActiveFedora::Base do
     it "should sort by default by system_create_date" do
       results = MockAFBaseQuerySolr.find_by_fields_by_solr({"creator"=>"Linguist,A.","language"=>"Spanish"})
       found_pids = []
-      results.hits.each do |hit|
+      results.each do |hit|
         found_pids.push(hit[SOLR_DOCUMENT_ID])
       end
       
@@ -147,7 +149,7 @@ describe ActiveFedora::Base do
     it "should be able to change the sort direction" do 
       results = MockAFBaseQuerySolr.find_by_fields_by_solr({"creator"=>"Linguist,A."},{:sort=>[{"system_create"=>"desc"}]})
       found_pids = []
-      results.hits.each do |hit|
+      results.each do |hit|
         found_pids.push(hit[SOLR_DOCUMENT_ID])
       end
       
@@ -157,7 +159,7 @@ describe ActiveFedora::Base do
     it "should default the sort direction to ascending" do
       results = MockAFBaseQuerySolr.find_by_fields_by_solr({"creator"=>"Linguist,A."},{:sort=>["system_create"]})
       found_pids = []
-      results.hits.each do |hit|
+      results.each do |hit|
         found_pids.push(hit[SOLR_DOCUMENT_ID])
       end
       
@@ -168,7 +170,7 @@ describe ActiveFedora::Base do
     it "should sort by multiple fields" do
       results = MockAFBaseQuerySolr.find_by_fields_by_solr({"creator"=>"Linguist,A."},{:sort=>["geography",{"system_create"=>"desc"}]})
       found_pids = []
-      results.hits.each do |hit|
+      results.each do |hit|
         found_pids.push(hit[SOLR_DOCUMENT_ID])
       end
       
@@ -179,7 +181,7 @@ describe ActiveFedora::Base do
       #check appropriate logic for system_modified_date field name transformation
       results = MockAFBaseQuerySolr.find_by_fields_by_solr({"creator"=>"Linguist,A."},{:sort=>["geography",{"system_mod"=>"desc"}]})
       found_pids = []
-      results.hits.each do |hit|
+      results.each do |hit|
         found_pids.push(hit[SOLR_DOCUMENT_ID])
       end
       
@@ -190,7 +192,7 @@ describe ActiveFedora::Base do
       #check pass in rows values
       results = MockAFBaseQuerySolr.find_by_fields_by_solr({"creator"=>"Linguist,A."},{:rows=>2})
       found_pids = []
-      results.hits.each do |hit|
+      results.each do |hit|
         found_pids.push(hit[SOLR_DOCUMENT_ID])
       end
       
@@ -201,7 +203,7 @@ describe ActiveFedora::Base do
       #check query with field mapping to solr field and with solr field that is not a field in object
       #should be able to query by either active fedora model field name or solr key name
       results = MockAFBaseQuerySolr.find_by_fields_by_solr({"geography_t"=>"Italy"})
-      found_pids = results.hits.map{|h| h[SOLR_DOCUMENT_ID]}
+      found_pids = results.map{|h| h[SOLR_DOCUMENT_ID]}
       found_pids.should == [@test_object2.pid]
     end
 
@@ -212,7 +214,7 @@ describe ActiveFedora::Base do
       end
       it "should query Nokogiri based datastreams if you use the solr field names (doesn't do mapping)" do
         results = MockAFBaseQuerySolr.find_by_fields_by_solr({"journal_title_t" => "foo"})
-        found_pids = results.hits.map{|h| h[SOLR_DOCUMENT_ID]}
+        found_pids = results.map{|h| h[SOLR_DOCUMENT_ID]}
         found_pids.should == [@test_object2.pid]
       end
     end

@@ -27,7 +27,7 @@ module ActiveFedora
           pid = @owner.ids_for_outbound(@reflection.options[:property]).first
           return if pid.nil?
           query = ActiveFedora::SolrService.construct_query_for_pids([pid])
-          solr_result = SolrService.instance.conn.query(query)
+          solr_result = SolrService.query(query) 
           return ActiveFedora::SolrService.reify_solr_results(solr_result).first
         end
 

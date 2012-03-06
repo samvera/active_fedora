@@ -120,7 +120,7 @@ module ActiveFedora
         if args == :all
           escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
           q = "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
-          hits = SolrService.instance.conn.query(q, :rows=>opts[:rows]).hits 
+          hits = SolrService.query(q, :rows=>opts[:rows]) 
           return hits.map do |hit|
              pid = hit[SOLR_DOCUMENT_ID]
              load_instance(pid)
@@ -142,7 +142,7 @@ module ActiveFedora
           escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
           q = "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
           q << " AND #{args[:conditions]}" if args[:conditions]
-          SolrService.instance.conn.query(q, :rows=>0).total_hits
+          SolrService.query(q, :raw=>true, :rows=>0)['response']['numFound']
       end
 
       #Sends a query directly to SolrService
@@ -164,10 +164,10 @@ module ActiveFedora
       def find_by_solr(query, args={})
         if query == :all
           escaped_class_name = self.name.gsub(/(:)/, '\\:')
-          SolrService.instance.conn.query("#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}", args)
+          SolrService.query("#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}", args) 
         elsif query.class == String
           escaped_id = query.gsub(/(:)/, '\\:')          
-          SolrService.instance.conn.query("#{SOLR_DOCUMENT_ID}:#{escaped_id}", args)
+          SolrService.query("#{SOLR_DOCUMENT_ID}:#{escaped_id}", args) 
         end
       end
 
@@ -218,20 +218,20 @@ module ActiveFedora
       
         #set default sort to created date ascending
         unless query_opts.include?(:sort)
-          query_opts.merge!({:sort=>[ActiveFedora::SolrService.solr_name(:system_create,:date)=>:ascending]}) 
+          query_opts.merge!({:sort=>[ActiveFedora::SolrService.solr_name(:system_create,:date)+' asc']}) 
         else
           #need to convert to solr names for all fields
           sort_array =[]
         
           opts[:sort].collect do |sort|
-            sort_direction = :ascending
+            sort_direction = 'ascending'
             if sort.respond_to?(:keys)
               key = sort.keys[0]
               sort_direction = sort[key]
-              sort_direction =~ /^desc/ ? sort_direction = :descending : :ascending
             else
               key = sort.to_s
             end
+            sort_direction = sort_direction =~ /^desc/ ? 'desc' : 'asc'
             field_name = key
             
             if key.to_s =~ /^system_create/
@@ -246,14 +246,14 @@ module ActiveFedora
             if class_fields.include?(field_name.to_sym)
               solr_name = ActiveFedora::SolrService.solr_name(key,class_fields[field_name.to_sym][:type])
             end
-            sort_array.push({solr_name=>sort_direction})
+            sort_array.push("#{solr_name} #{sort_direction}")
           end
         
-          query_opts[:sort] = sort_array
+          query_opts[:sort] = sort_array.join(",")
         end
 
         logger.debug "Querying solr for #{self.name} objects with query: '#{query}'"
-    	  results = ActiveFedora::SolrService.instance.conn.query(query,query_opts)
+        SolrService.query(query, query_opts) 
       end
     
       def class_fields

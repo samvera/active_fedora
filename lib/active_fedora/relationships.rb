@@ -161,13 +161,14 @@ module ActiveFedora
       opts = {:rows=>25}.merge(opts)
       query = self.class.inbound_relationship_query(self.pid,"#{name}")
       return [] if query.empty?
-      solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
       if opts[:response_format] == :solr
+        solr_result = SolrService.query query, :raw=>true, :rows=>opts[:rows]
         return solr_result
       else
+        solr_result = SolrService.query(query, :rows=>opts[:rows]) 
         if opts[:response_format] == :id_array
           id_array = []
-          solr_result.hits.each do |hit|
+          solr_result.each do |hit|
             id_array << hit[SOLR_DOCUMENT_ID]
           end
           return id_array
@@ -187,7 +188,7 @@ module ActiveFedora
           predicate = outbound_relationship_predicates["#{name}_outbound"]
           outbound_id_array = ids_for_outbound(predicate)
           query = self.class.bidirectional_relationship_query(self.pid,"#{name}",outbound_id_array)
-          solr_result = SolrService.instance.conn.query(query, :rows=>opts[:rows])
+          solr_result = SolrService.query(query, :rows=>opts[:rows])
           
           if opts[:response_format] == :solr
             return solr_result
@@ -208,15 +209,11 @@ module ActiveFedora
         return id_array
       else
         query = self.class.outbound_relationship_query(name,id_array)
-        solr_result = SolrService.instance.conn.query(query)
+        solr_result = SolrService.query(query)
         if opts[:response_format] == :solr
           return solr_result
         elsif opts[:response_format] == :id_array
-          id_array = []
-          solr_result.hits.each do |hit|
-            id_array << hit[SOLR_DOCUMENT_ID]
-          end
-          return id_array
+          return solr_result.map {|hit| hit[SOLR_DOCUMENT_ID] }
         elsif opts[:response_format] == :load_from_solr || self.load_from_solr
           return ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
         else

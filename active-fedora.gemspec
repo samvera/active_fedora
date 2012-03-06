@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "rubyfedora"
   s.rubygems_version = %q{1.3.7}
 
-  s.add_dependency('solr-ruby', '>= 0.0.6')
+  s.add_dependency('rsolr')
   s.add_dependency('xml-simple', '>= 1.0.12')
   s.add_dependency('mime-types', '>= 1.16')
   s.add_dependency('multipart-post', "= 1.1.2")
@@ -33,7 +33,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("RedCloth") # for RDoc formatting
   s.add_development_dependency("rake")
 #  s.add_development_dependency("rcov") # not ruby 1.9 compatible
-  s.add_development_dependency("solrizer-fedora", "~>1.2.5") # used by the fixtures rake tasks
+#  s.add_development_dependency("solrizer-fedora", "~>1.2.5") # used by the fixtures rake tasks
   s.add_development_dependency("jettywrapper", ">=1.2.0")
   s.add_development_dependency("rspec", "~> 2.0")
   s.add_development_dependency("mocha", ">= 0.9.8")

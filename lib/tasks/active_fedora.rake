@@ -1,5 +1,9 @@
 require "active-fedora"
-require "solrizer-fedora"
+begin
+  require "solrizer-fedora"
+rescue LoadError => e
+  $stderr.puts "Solrizer-fedora not found.  Add `gem \"solrizer-fedora\"' to your Gemfile."
+end
 require "active_support" # This is just to load ActiveSupport::CoreExtensions::String::Inflections
 namespace :repo do
   
@@ -86,8 +90,12 @@ namespace :repo do
       	if pid.nil?
           pid = result.body
         end
-        solrizer = Solrizer::Fedora::Solrizer.new 
-        solrizer.solrize(pid) 
+        if defined? Solrizer::Fedora
+          solrizer = Solrizer::Fedora::Solrizer.new 
+          solrizer.solrize(pid) 
+        else
+          $stderr.puts "Object was not indexed because `solrizer-fedora' gem was not installed"
+        end
       else
         puts "Failed to load the object."
       end

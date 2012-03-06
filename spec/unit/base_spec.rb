@@ -328,8 +328,6 @@ describe ActiveFedora::Base do
     end
 
     describe '.save' do
-      
-      
       it "should return true and set persisted if object and datastreams all save successfully" do
         stub_get(@this_pid)
         stub_add_ds(@this_pid, ['RELS-EXT'])
@@ -497,11 +495,11 @@ describe ActiveFedora::Base do
       end
 
       it "should add pid, system_create_date and system_modified_date from object attributes" do
-        @test_object.expects(:create_date).returns("cDate")
-        @test_object.expects(:modified_date).returns("mDate")
+        @test_object.expects(:create_date).returns("2012-03-06T03:12:02Z")
+        @test_object.expects(:modified_date).returns("2012-03-07T03:12:02Z")
         solr_doc = @test_object.to_solr
-        solr_doc["system_create_dt"].should eql("cDate")
-        solr_doc["system_modified_dt"].should eql("mDate")
+        solr_doc["system_create_dt"].should eql("2012-03-06T03:12:02Z")
+        solr_doc["system_modified_dt"].should eql("2012-03-07T03:12:02Z")
         solr_doc[:id].should eql("#{@test_object.pid}")
       end
 
@@ -526,11 +524,11 @@ describe ActiveFedora::Base do
       end
 
       it "should add pid, system_create_date and system_modified_date from object attributes" do
-        @test_object.expects(:create_date).returns("cDate")
-        @test_object.expects(:modified_date).returns("mDate")
+        @test_object.expects(:create_date).returns("2012-03-04T03:12:02Z")
+        @test_object.expects(:modified_date).returns("2012-03-07T03:12:02Z")
         solr_doc = @test_object.to_solr
-        solr_doc["system_create_dt"].should eql("cDate")
-        solr_doc["system_modified_dt"].should eql("mDate")
+        solr_doc["system_create_dt"].should eql("2012-03-04T03:12:02Z")
+        solr_doc["system_modified_dt"].should eql("2012-03-07T03:12:02Z")
         solr_doc[:id].should eql("#{@test_object.pid}")
       end
 
@@ -552,8 +550,8 @@ describe ActiveFedora::Base do
       end
 
       it "should use mappings.yml to decide names of solr fields" do      
-        cdate = "2008-07-02T05:09:42.015Z"
-        mdate = "2009-07-07T23:37:18.991Z"
+        cdate = "2008-07-02T05:09:42Z"
+        mdate = "2009-07-07T23:37:18Z"
         @test_object.stubs(:create_date).returns(cdate)
         @test_object.stubs(:modified_date).returns(mdate)
         solr_doc = @test_object.to_solr

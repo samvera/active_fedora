@@ -131,7 +131,7 @@ module ActiveFedora
 
       def find_target
         return [] if @finder_query.empty?
-        solr_result = SolrService.instance.conn.query(@finder_query, :rows=>1000)
+        solr_result = SolrService.query(@finder_query, :rows=>1000)
 #TODO, don't reify, just store the solr results and lazily reify.
         return ActiveFedora::SolrService.reify_solr_results(solr_result)
       end

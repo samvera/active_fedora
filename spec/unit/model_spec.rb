@@ -75,11 +75,7 @@ describe ActiveFedora::Model do
   describe '#find' do
     
     it "(:all) should query solr for all objects with :active_fedora_model_s of self.class" do
-      mock_solr = mock("SolrConnection")
-      mock_result = mock("MockResult")
-      mock_result.expects(:hits).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
-      mock_solr.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :rows=>1001).returns(mock_result)
-      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
+      ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :rows=>1001).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
       SpecModel::Basic.expects(:load_instance).with("changeme:30").returns("Fake Object1")
       SpecModel::Basic.expects(:load_instance).with("changeme:22").returns("Fake Object2")
       SpecModel::Basic.find(:all, :rows=>1001).should == ["Fake Object1", "Fake Object2"]
@@ -94,19 +90,13 @@ describe ActiveFedora::Model do
   describe '#count' do
     
     it "should return a count" do
-      mock_solr = mock("SolrConnection")
-      mock_result = mock("MockResult")
-      mock_result.expects(:total_hits).returns(7)
-      mock_solr.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :rows=>0).returns(mock_result)
-      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
+      mock_result = {'response'=>{'numFound'=>7}}
+      ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :rows=>0, :raw=>true).returns(mock_result)
       SpecModel::Basic.count.should == 7
     end
     it "should allow conditions" do
-      mock_solr = mock("SolrConnection")
-      mock_result = mock("MockResult")
-      mock_result.expects(:total_hits).returns(7)
-      mock_solr.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:bar', :rows=>0).returns(mock_result)
-      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
+      mock_result = {'response'=>{'numFound'=>7}}
+      ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:bar', :rows=>0, :raw=>true).returns(mock_result)
       SpecModel::Basic.count(:conditions=>'foo:bar').should == 7
     end
   end
@@ -118,18 +108,14 @@ describe ActiveFedora::Model do
   
   describe '#find_by_solr' do
     it "(:all) should query solr for all objects with :active_fedora_model_s of self.class and return a Solr result" do
-      mock_solr = mock("SolrConnection")
       mock_response = mock("SolrResponse")
-      mock_solr.expects(:query).with('active_fedora_model_s:SpecModel\:\:Basic', {}).returns(mock_response)
-      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
+      ActiveFedora::SolrService.expects(:query).with('active_fedora_model_s:SpecModel\:\:Basic', {}).returns(mock_response)
     
       SpecModel::Basic.find_by_solr(:all).should equal(mock_response)
     end
     it "(String) should query solr for an object with the given id and return the Solr Result" do
-      mock_solr = mock("SolrConnection")
       mock_response = mock("SolrResponse")
-      mock_solr.expects(:query).with('id:changeme\:30', {}).returns(mock_response)
-      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock_solr))
+      ActiveFedora::SolrService.expects(:query).with('id:changeme\:30', {}).returns(mock_response)
     
       SpecModel::Basic.find_by_solr("changeme:30").should equal(mock_response)
     end

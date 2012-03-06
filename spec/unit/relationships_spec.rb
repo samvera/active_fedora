@@ -11,6 +11,7 @@ describe ActiveFedora::Relationships do
       class SpecNode
         include ActiveFedora::Relationships
         include ActiveFedora::SemanticNode
+        include ActiveFedora::Model
         
         attr_accessor :pid
         def init_with(inner_obj)
@@ -164,12 +165,11 @@ describe ActiveFedora::Relationships do
         @sample_solr_hits = [{"id"=>"_PID1_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
                               {"id"=>"_PID2_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
                               {"id"=>"_PID3_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]}]
-        solr_result = mock("solr result", :hits => @sample_solr_hits)
         SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
         local_node = SpecNode.new()
         local_node.expects(:pid).returns("test:sample_pid")
         SpecNode.expects(:relationships_desc).returns({:inbound=>{"parts"=>{:predicate=>:is_part_of}}}).at_least_once()
-        ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid", :rows=>25).returns(solr_result)
+        ActiveFedora::SolrService.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid", :rows=>25).returns(@sample_solr_hits)
         local_node.parts_ids.should == ["_PID1_", "_PID2_", "_PID3_"]
       end
       
@@ -181,8 +181,9 @@ describe ActiveFedora::Relationships do
         mock_repo.expects(:load_instance).never
         local_node.expects(:pid).returns("test:sample_pid")
         SpecNode.expects(:relationships_desc).returns({:inbound=>{"constituents"=>{:predicate=>:is_constituent_of}}}).at_least_once()
-        ActiveFedora::SolrService.instance.conn.expects(:query).with("is_constituent_of_s:info\\:fedora/test\\:sample_pid", :rows=>101).returns(solr_result)
-        local_node.constituents(:response_format => :solr, :rows=>101).should equal(solr_result)
+        instance = stub(:conn=>stub(:conn))
+        ActiveFedora::SolrService.expects(:query).with("is_constituent_of_s:info\\:fedora/test\\:sample_pid", :raw=>true, :rows=>101).returns(solr_result)
+        local_node.constituents(:response_format => :solr, :rows=>101).should == solr_result
       end
       
       
@@ -191,7 +192,7 @@ describe ActiveFedora::Relationships do
         local_node = SpecNode.new
         local_node.expects(:pid).returns("test:sample_pid")
         SpecNode.expects(:relationships_desc).returns({:inbound=>{"parts"=>{:predicate=>:is_part_of}}}).at_least_once() 
-        ActiveFedora::SolrService.instance.conn.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid", :rows=>25).returns(mock("solr result", :hits => [Hash["id"=>"pid1"], Hash["id"=>"pid2"]]))
+        ActiveFedora::SolrService.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid", :rows=>25).returns([Hash["id"=>"pid1"], Hash["id"=>"pid2"]])
         local_node.parts(:response_format => :id_array).should == ["pid1", "pid2"]
       end
       
@@ -235,13 +236,10 @@ describe ActiveFedora::Relationships do
           local_node = SpecNode.new
           local_node.expects(:ids_for_outbound).with(:is_member_of).returns(["my:_PID1_", "my:_PID2_", "my:_PID3_"])
           mock_repo = mock("repo")
-          solr_result = mock("solr result", :is_a? => true)
-          solr_result.expects(:hits).returns(
-                        [{"id"=> "my:_PID1_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]},
+
+          ActiveFedora::SolrService.expects(:query).with("id:my\\:_PID1_ OR id:my\\:_PID2_ OR id:my\\:_PID3_").returns([{"id"=> "my:_PID1_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]},
                          {"id"=> "my:_PID2_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]}, 
                          {"id"=> "my:_PID3_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]}])
-
-          ActiveFedora::SolrService.instance.conn.expects(:query).with("id:my\\:_PID1_ OR id:my\\:_PID2_ OR id:my\\:_PID3_").returns(solr_result)
           local_node.containers.map(&:pid).should == ["my:_PID1_", "my:_PID2_", "my:_PID3_"]
         end
       
@@ -252,8 +250,8 @@ describe ActiveFedora::Relationships do
           mock_repo = mock("repo")
           mock_repo.expects(:load_instance).never
           local_node.expects(:rels_ext).returns(stub('rels-ext', :content=>''))
-          ActiveFedora::SolrService.instance.conn.expects(:query).returns(solr_result)
-          local_node.constituents(:response_format => :solr).should equal(solr_result)
+          ActiveFedora::SolrService.expects(:query).returns(solr_result)
+          local_node.constituents(:response_format => :solr).should == solr_result
         end
         
         it "(:response_format => :id_array) should read from relationships array" do
@@ -319,7 +317,7 @@ describe ActiveFedora::Relationships do
         @local_node.expects(:ids_for_outbound).with(:has_part).returns(["mypid:1"])
         id_array_query = ActiveFedora::SolrService.construct_query_for_pids(["mypid:1"])
         solr_result = mock("solr result")
-        ActiveFedora::SolrService.instance.conn.expects(:query).with("#{id_array_query} OR (is_part_of_s:info\\:fedora/test\\:sample_pid)", :rows=>25).returns(solr_result)
+        ActiveFedora::SolrService.expects(:query).with("#{id_array_query} OR (is_part_of_s:info\\:fedora/test\\:sample_pid)", :rows=>25).returns(solr_result)
         @local_node.all_parts(:response_format=>:solr)
       end
 

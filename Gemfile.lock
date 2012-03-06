@@ -12,8 +12,8 @@ PATH
       om (>= 1.5.3)
       rdf
       rdf-rdfxml
+      rsolr
       rubydora (~> 0.5.4)
-      solr-ruby (>= 0.0.6)
       solrizer (~> 1.2.0)
       xml-simple (>= 1.0.12)
 
@@ -101,7 +101,6 @@ GEM
       nokogiri (>= 1.4.0)
       nori (~> 1.1)
       wasabi (~> 2.1)
-    solr-ruby (0.0.8)
     solrizer (1.2.0)
       daemons
       mediashelf-loggable (~> 0.4.7)
@@ -109,13 +108,6 @@ GEM
       om (>= 1.5.0)
       stomp
       xml-simple
-    solrizer-fedora (1.2.5)
-      active-fedora (>= 3.2.0)
-      activesupport (>= 3.0.11)
-      fastercsv
-      rsolr (= 1.0.6)
-      solr-ruby (>= 0.0.6)
-      solrizer (>= 1.0.0)
     stomp (1.2.0)
     wasabi (2.1.0)
       nokogiri (>= 1.4.0)
@@ -132,5 +124,4 @@ DEPENDENCIES
   mocha (>= 0.9.8)
   rake
   rspec (~> 2.0)
-  solrizer-fedora (~> 1.2.5)
   yard

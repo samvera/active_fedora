@@ -152,7 +152,6 @@ describe ActiveFedora::SemanticNode do
       collection_members.first.pid.should == @test_object.pid
       collection_members.first.class.should == @test_object.class
     end
-    it "should create useable inbound finders if :inbound is set to true"
   end
   
   describe "inbound relationship finders" do

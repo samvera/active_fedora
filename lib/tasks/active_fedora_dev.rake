@@ -65,7 +65,6 @@ require 'rspec/core/rake_task'
 desc "Hudson build"
 task :hudson do
   ENV['environment'] = "test"
-  Rake::Task["active_fedora:doc"].invoke
   Rake::Task["active_fedora:configure_jetty"].invoke
   jetty_params = Jettywrapper.load_config
   jetty_params[:startup_wait]= 30
@@ -74,6 +73,8 @@ task :hudson do
     Rake::Task["active_fedora:rspec"].invoke
   end
   raise "test failures: #{error}" if error
+  # Only create documentation if the tests have passed
+  Rake::Task["active_fedora:doc"].invoke
 end
 
 # Provides an :environment task for use while working within a working copy of active-fedora

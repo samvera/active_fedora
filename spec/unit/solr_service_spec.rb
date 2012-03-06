@@ -11,29 +11,20 @@ describe ActiveFedora::SolrService do
   end
   
   it "should take a narg constructor and configure for localhost" do
-    mconn = mock('conn')
-    Solr::Connection.expects(:new).with('http://localhost:8080/solr', {:autocommit=>:on}).returns(mconn)
-    ss = ActiveFedora::SolrService.register
+    RSolr.expects(:connect).with(:url => 'http://localhost:8080/solr')
+    ActiveFedora::SolrService.register
   end
   it "should accept host arg into constructor" do
-    mconn = mock('conn')
-    Solr::Connection.expects(:new).with('http://fubar', {:autocommit=>:on}).returns(mconn)
-    ss = ActiveFedora::SolrService.register('http://fubar')
-  end
-  it "should merge options" do
-    mconn = mock('conn')
-    Solr::Connection.expects(:new).with('http://localhost:8080/solr', {:autocommit=>:on, :foo=>'bar'}).returns(mconn)
-    ss = ActiveFedora::SolrService.register(nil, {:foo=>'bar'})
+    RSolr.expects(:connect).with(:url => 'http://fubar')
+    ActiveFedora::SolrService.register('http://fubar')
   end
   it "should clobber options" do
-    mconn = mock('conn')
-    Solr::Connection.expects(:new).with('http://localhost:8080/solr', {:autocommit=>:off, :foo=>:bar}).returns(mconn)
-    ss = ActiveFedora::SolrService.register(nil, {:autocommit=>:off, :foo=>:bar})
+    RSolr.expects(:connect).with(:url => 'http://localhost:8080/solr', :autocommit=>:off, :foo=>:bar)
+    ActiveFedora::SolrService.register(nil, {:autocommit=>:off, :foo=>:bar})
   end
 
   it "should set the threadlocal solr service" do
-    mconn = mock('conn')
-    Solr::Connection.expects(:new).with('http://localhost:8080/solr', {:autocommit=>:off, :foo=>:bar}).returns(mconn)
+    RSolr.expects(:connect).with(:url => 'http://localhost:8080/solr', :autocommit=>:off, :foo=>:bar)
     ss = ActiveFedora::SolrService.register(nil, {:autocommit=>:off, :foo=>:bar})
     Thread.current[:solr_service].should == ss
     ActiveFedora::SolrService.instance.should == ss
@@ -60,14 +51,11 @@ describe ActiveFedora::SolrService do
                             {"id"=>"my:_PID2_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
                             {"id"=>"my:_PID3_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]}]
     end
-    it "should only take Solr::Response::Standard objects as input" do
-      mocko = mock("input", :is_a? => false)
-      lambda {ActiveFedora::SolrService.reify_solr_results(mocko)}.should raise_error(ArgumentError)
-    end
     it "should use Repository.load_instance to instantiate objects" do
-      solr_result = mock("solr result", :is_a? => true)
-      solr_result.expects(:hits).returns(@sample_solr_hits)
-      ActiveFedora::SolrService.reify_solr_results(solr_result).map(&:pid).should == ["my:_PID1_", "my:_PID2_", "my:_PID3_"] 
+      AudioRecord.expects(:find).with("my:_PID1_")
+      AudioRecord.expects(:find).with("my:_PID2_")
+      AudioRecord.expects(:find).with("my:_PID3_")
+      ActiveFedora::SolrService.reify_solr_results(@sample_solr_hits)
     end
   end
   

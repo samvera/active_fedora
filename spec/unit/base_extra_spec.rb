@@ -69,7 +69,12 @@ describe ActiveFedora::Base do
 
   describe ".update_index" do
     it "should call .to_solr on all MetadataDatastreams AND RelsExtDatastreams and pass the resulting document to solr" do
-      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock("SolrConnection", :update)))
+      mock_conn = mock("SolrConnection")
+      mock_conn.expects(:add)
+      mock_conn.expects(:commit)
+      mock_ss = mock("SolrService")
+      mock_ss.stubs(:conn).returns(mock_conn)
+      ActiveFedora::SolrService.stubs(:instance).returns(mock_ss)
       # Actually uses self.to_solr internally to gather solr info from all metadata datastreams
       mock1 = mock("ds1", :to_solr)
       mock2 = mock("ds2", :to_solr)
@@ -91,8 +96,13 @@ describe ActiveFedora::Base do
       @test_object.send :update_index
     end
 
-    it "should retrieve a solr Connection and call Connection.update" do
-      ActiveFedora::SolrService.expects(:instance).returns(mock("SolrService", :conn => mock("SolrConnection", :update)))
+    it "should retrieve a solr Connection and call Connection.add" do
+      mock_conn = mock("SolrConnection")
+      mock_conn.expects(:add)
+      mock_conn.expects(:commit)
+      mock_ss = mock("SolrService")
+      mock_ss.stubs(:conn).returns(mock_conn)
+      ActiveFedora::SolrService.stubs(:instance).returns(mock_ss)
       @test_object.send :update_index
     end
 
@@ -104,8 +114,13 @@ describe ActiveFedora::Base do
     end
     
     it "should delete object from repository and index" do
-      ActiveFedora::SolrService.instance.conn.expects(:delete).with("__DO_NOT_USE__")      
       @test_object.inner_object.stubs(:delete)
+      mock_conn = mock("SolrConnection")
+      mock_conn.expects(:delete_by_id).with("__DO_NOT_USE__") 
+      mock_conn.expects(:commit)
+      mock_ss = mock("SolrService")
+      mock_ss.stubs(:conn).returns(mock_conn)
+      ActiveFedora::SolrService.stubs(:instance).returns(mock_ss)
       @test_object.expects(:inbound_relationships).returns({})
       @test_object.delete
     end
