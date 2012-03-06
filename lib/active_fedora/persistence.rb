@@ -65,10 +65,6 @@ module ActiveFedora
       end
     end
 
-
-
-  private
-    
     # Updates Solr index with self.
     def update_index
       if defined?( Solrizer::Fedora::Solrizer ) 
@@ -80,6 +76,10 @@ module ActiveFedora
         SolrService.instance.conn.commit
       end
     end
+
+
+  private
+    
 
     # Deals with preparing new object to be saved to Fedora, then pushes it and its datastreams into Fedora. 
     def create

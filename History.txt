@@ -6,6 +6,7 @@ Added sharding TODO add documentation
 Added find_document which determines the correct model and then casts the object to that.
 Improved loading from solr
 RDF datastreams
+Replaced solr-ruby with rsolr. Note: remove any calls to .hits
 
 3.3.2
 HYDRA-745 No need to require :url be present on external datastreams
