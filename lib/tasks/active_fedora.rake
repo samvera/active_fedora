@@ -86,12 +86,6 @@ namespace :repo do
           pid = result.body
         end
         ActiveFedora::Base.find_document(pid).update_index
-        # if defined? Solrizer::Fedora
-        #   solrizer = Solrizer::Fedora::Solrizer.new 
-        #   solrizer.solrize(pid) 
-        # else
-        #   $stderr.puts "Object was not indexed because `solrizer-fedora' gem was not installed"
-        # end
       else
         puts "Failed to load the object."
       end
