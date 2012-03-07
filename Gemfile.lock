@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active-fedora (4.0.0.rc5)
+    active-fedora (4.0.0.rc6)
       activeresource (>= 3.0.0)
       activesupport (>= 3.0.0)
       equivalent-xml
