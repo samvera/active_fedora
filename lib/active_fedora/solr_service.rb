@@ -72,7 +72,7 @@ module ActiveFedora
 
     def self.query(query, args={})
       raw = args.delete(:raw)
-      args = args.merge(:q=>query)
+      args = args.merge(:q=>query, :qt=>'standard')
       result = SolrService.instance.conn.get('select', :params=>args)
       return result if raw
       result['response']['docs']

@@ -74,5 +74,15 @@ describe ActiveFedora::SolrService do
       ActiveFedora::SolrService.escape_uri_for_query("my:pid").should == 'my\:pid'
     end
   end
+
+  describe ".query" do
+    it "should call rubydora" do 
+      mock_conn = mock("Connection")
+      stub_result = stub("Result")
+      mock_conn.expects(:get).with('select', :params=>{:q=>'querytext', :qt=>'standard'}).returns(stub_result)
+      ActiveFedora::SolrService.stubs(:instance =>stub("instance", :conn=>mock_conn))
+      ActiveFedora::SolrService.query('querytext', :raw=>true).should == stub_result
+    end
+  end
   
 end

@@ -262,7 +262,7 @@ module ActiveFedora
 
       private 
       # Retrieve the Fedora object with te given pid, explore the returned object, determine its model 
-      # using #{known_models_for} and cast to that class.
+      # using #{ActiveFedora::ContentModel.known_models_for} and cast to that class.
       # @param [String] pid of the object to load
       #
       # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel info:fedora/afmodel:Dataset), return a Dataset object (not a Book).
