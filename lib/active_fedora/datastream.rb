@@ -89,10 +89,6 @@ module ActiveFedora
       tmpl
     end
     
-    def check_concurrency # :nodoc:
-      return true
-    end
-    
     def solrize_profile(solr_doc = Hash.new) # :nodoc:
       profile.each_pair do |property,value|
         if property =~ /Date/
