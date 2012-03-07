@@ -62,8 +62,8 @@ module ActiveFedora
         @predicate = predicate
         @values = values
       end
-      def each(&block)
-        @values.each { |value| block.call(value)}
+      def each
+        @values.each { |value| yield value }
       end
       def <<(*values)
         @values.concat(values)
@@ -72,15 +72,22 @@ module ActiveFedora
         @values
       end
       def ==(other)
-        other.inspect == @values.inspect
+        other == @values
+      end
+      def inspect
+        @values.inspect
       end
       def delete(*values)
         values.each do |value| 
-          res = @values.delete(value)
-          @graph.delete(@predicate, value) unless res.nil?
-          @graph.dirty = true
+          unless @values.delete(value).nil?
+            @graph.delete(@predicate, value)
+            @graph.dirty = true
+          end
         end
         @values
+      end
+      def empty?
+        @values.empty?
       end
     end
     
