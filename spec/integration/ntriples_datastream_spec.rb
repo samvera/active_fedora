@@ -78,4 +78,56 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.title.should be_nil
     @subject.related_url.should == ["http://psu.edu/"]
   end
+  it "should delete multiple values at once" do
+    @subject.part = "MacBeth"
+    @subject.part << "Hamlet"
+    @subject.part << "Romeo & Juliet"
+    @subject.part.first.should == "MacBeth"
+    @subject.part.delete("MacBeth", "Romeo & Juliet")
+    @subject.part.should == ["Hamlet"]
+    @subject.part.first.should == "Hamlet"
+  end
+  it "should ignore values to be deleted that do not exist" do
+    @subject.part = ["title1", "title2", "title3"]
+    @subject.part.delete("title2", "title4", "title6")
+    @subject.part.should == ["title1", "title3"]
+  end
+  describe "term proxy methods" do
+    before(:each) do
+      class TitleDatastream < ActiveFedora::NtriplesRDFDatastream
+        register_vocabularies RDF::DC
+        map_predicates { |map| map.title(:in => RDF::DC) }
+      end
+      class Foobar < ActiveFedora::Base 
+        has_metadata :name=>'rdf', :type=>TitleDatastream
+        delegate :title, :to=>'rdf'
+      end
+      @subject = Foobar.new
+      @subject.title = ["title1", "title2", "title3"]
+    end
+
+    after(:each) do
+      Object.send(:remove_const, :Foobar)
+      Object.send(:remove_const, :TitleDatastream)
+    end
+
+    it "should support the count method to determine # of values" do
+      @subject.title.count.should == 3
+    end
+    it "should iterate over multiple values" do
+      @subject.title.should respond_to(:each)
+    end
+    it "should get the first value" do
+      @subject.title.first.should == "title1"
+    end
+    it "should evaluate equality predictably" do
+      @subject.title.should == ["title1", "title2", "title3"]
+    end
+    it "should support the empty? method" do
+      @subject.title.should respond_to(:empty?)
+      @subject.title.empty?.should be_false
+      @subject.title.delete("title1", "title2", "title3")
+      @subject.title.empty?.should be_true
+    end
+  end
 end
