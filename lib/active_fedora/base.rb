@@ -107,10 +107,13 @@ module ActiveFedora
     def init_with(inner_obj)
       @inner_object = inner_obj
       unless @inner_object.is_a? SolrDigitalObject
-        ## Replace existing unchanged datastreams with the definitions found in this class
         @inner_object.original_class = self.class
+        ## Replace existing unchanged datastreams with the definitions found in this class if they have a different type.
+        ## Any datastream that is deleted here will cause a reload from fedora, so avoid it whenever possible
         ds_specs.keys.each do |key|
-          @inner_object.datastreams.delete(key) unless @inner_object.datastreams[key].changed.include?(:content)
+          if !@inner_object.datastreams[key].changed.include?(:content) && @inner_object.datastreams[key].class != self.class.ds_specs[key][:type]
+            @inner_object.datastreams.delete(key)
+          end
         end
       end
       load_datastreams
