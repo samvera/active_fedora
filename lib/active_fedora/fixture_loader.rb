@@ -32,8 +32,7 @@ module ActiveFedora
     end
 
     def self.index(pid)
-        solrizer = Solrizer::Fedora::Solrizer.new 
-        solrizer.solrize(pid) 
+        ActiveFedora::Base.find(pid).update_index
     end
 
     def self.import_to_fedora(filename, pid)

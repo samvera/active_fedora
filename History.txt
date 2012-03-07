@@ -1,4 +1,4 @@
-4.0.0.rc6
+4.0.0.rc7
 Removed deprecations
   * allowing :fedora level in fedora.yml
   * automatic includes of Relationships and FileMethods is removed
@@ -11,6 +11,7 @@ load_instance is now deprecated, replaced with find
 Find alwasy casts to the appropriate object.
 Run a stub :environment task in the fixture loading rake tasks (which is overridden by rails)
 Find raises ObjectNotFoundError when the object isn't found
+Removed dependency on solrizer-fedora
 
 3.3.2
 HYDRA-745 No need to require :url be present on external datastreams
