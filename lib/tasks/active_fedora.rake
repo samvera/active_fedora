@@ -93,8 +93,10 @@ namespace :repo do
     
   end
 
-  task :environment do
-    # This task is overridden (chained) in hydra-head.
-  end
 
 end
+
+task :environment do
+  # This task is overridden (chained) in hydra-head.
+end
+

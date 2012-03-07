@@ -1,4 +1,4 @@
-4.0.0.rc3
+4.0.0.rc4
 Removed deprecations
   * allowing :fedora level in fedora.yml
   * automatic includes of Relationships and FileMethods is removed
@@ -9,7 +9,7 @@ RDF datastreams
 Replaced solr-ruby with rsolr. Note: remove any calls to .hits
 load_instance is now deprecated, replaced with find
 Find alwasy casts to the appropriate object.
-Run the :environment task in the fixture loading rake tasks
+Run a stub :environment task in the fixture loading rake tasks (which is overridden by rails)
 
 3.3.2
 HYDRA-745 No need to require :url be present on external datastreams
