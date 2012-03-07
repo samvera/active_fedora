@@ -263,12 +263,15 @@ module ActiveFedora
       private 
       # Retrieve the Fedora object with te given pid, explore the returned object, determine its model 
       # using #{ActiveFedora::ContentModel.known_models_for} and cast to that class.
+      # Raises a ObjectNotFoundError if the object is not found.
       # @param [String] pid of the object to load
       #
       # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel info:fedora/afmodel:Dataset), return a Dataset object (not a Book).
-      #   Book.find_document("hydra:dataset1") 
+      #   Book.find_one("hydra:dataset1") 
       def find_one(pid)
-        af_base = self.allocate.init_with(DigitalObject.find(self, pid))
+        inner = DigitalObject.find(self, pid)
+        raise ActiveFedora::ObjectNotFoundError if inner.new?
+        af_base = self.allocate.init_with(inner)
         the_model = ActiveFedora::ContentModel.known_models_for( af_base ).first
         if af_base.class != the_model
           return af_base.adapt_to(the_model)

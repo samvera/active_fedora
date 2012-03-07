@@ -240,6 +240,9 @@ describe ActiveFedora::Relationships do
           ActiveFedora::SolrService.expects(:query).with("id:my\\:_PID1_ OR id:my\\:_PID2_ OR id:my\\:_PID3_").returns([{"id"=> "my:_PID1_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]},
                          {"id"=> "my:_PID2_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]}, 
                          {"id"=> "my:_PID3_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]}])
+          ActiveFedora::DigitalObject.expects(:find).with(SpecNode, 'my:_PID1_').returns(stub("inner obj", :'new?'=>false, :pid=>'my:_PID1_'))
+          ActiveFedora::DigitalObject.expects(:find).with(SpecNode, 'my:_PID2_').returns(stub("inner obj", :'new?'=>false, :pid=>'my:_PID2_'))
+          ActiveFedora::DigitalObject.expects(:find).with(SpecNode, 'my:_PID3_').returns(stub("inner obj", :'new?'=>false, :pid=>'my:_PID3_'))
           local_node.containers.map(&:pid).should == ["my:_PID1_", "my:_PID2_", "my:_PID3_"]
         end
       

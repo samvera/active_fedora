@@ -122,7 +122,7 @@ module ActiveFedora
         # If the \target is already \loaded it is just returned. Thus, you can call
         # +load_target+ unconditionally to get the \target.
         #
-        # ActiveFedora::RecordNotFound is rescued within the method, and it is
+        # ActiveFedora::ObjectNotFoundError is rescued within the method, and it is
         # not reraised. The proxy is \reset and +nil+ is the return value.
         def load_target
           return nil unless defined?(@loaded)

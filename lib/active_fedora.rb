@@ -17,7 +17,7 @@ module ActiveFedora #:nodoc:
   class UnknownAttributeError < NoMethodError; end; # :nodoc:
   class ConfigurationError < RuntimeError; end # :nodoc:
   class AssociationTypeMismatch < RuntimeError; end # :nodoc:
-  class UnregisteredPredicateError < RuntimeError; end
+  class UnregisteredPredicateError < RuntimeError; end # :nodoc:
 
 
   eager_autoload do
