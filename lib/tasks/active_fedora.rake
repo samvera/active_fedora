@@ -6,7 +6,7 @@ namespace :repo do
   task :refresh => [:delete,:load]
   
   desc "Delete the object identified by pid. Example: rake repo:delete pid=demo:12"
-  task :delete => :init do
+  task :delete => :environment do
     if ENV["pid"].nil? 
       puts "You must specify a valid pid.  Example: rake repo:delete pid=demo:12"
     else
@@ -23,7 +23,7 @@ namespace :repo do
   end
   
   desc "Delete a range of objects in a given namespace.  ie 'rake repo:delete_range namespace=demo start=22 stop=50' will delete demo:22 through demo:50"
-  task :delete_range => :init do |t, args|
+  task :delete_range => :environment do |t, args|
     namespace = ENV["namespace"]
     start_point = ENV["start"].to_i
     stop_point = ENV["stop"].to_i
@@ -45,7 +45,7 @@ namespace :repo do
   end
 
   desc "Export the object identified by pid into spec/fixtures. Example:rake repo:export pid=demo:12"
-  task :export => :init do
+  task :export => :environment do
     if ENV["pid"].nil? 
       puts "You must specify a valid pid.  Example: rake repo:export pid=demo:12"
     else
@@ -62,7 +62,7 @@ namespace :repo do
   end
   
   desc "Load the object located at the provided path or identified by pid. Example: rake repo:load path=spec/fixtures/demo_12.foxml.xml"
-  task :load => :init do
+  task :load => :environment do
     if !ENV["path"].nil? and File.file?(ENV["path"])
       filename = ENV["path"]
     elsif !ENV["pid"].nil?
@@ -93,14 +93,8 @@ namespace :repo do
     
   end
 
-  
-  desc "Init ActiveFedora configuration" 
-  task :init do
-    if !ENV["environment"].nil? 
-      RAILS_ENV = ENV["environment"]
-    end
-    # If Fedora Repository connection is not already initialized, initialize it using ActiveFedora defaults
-    ActiveFedora.init unless Thread.current[:repo]  
+  task :environment do
+    # This task is overridden (chained) in hydra-head.
   end
 
 end
