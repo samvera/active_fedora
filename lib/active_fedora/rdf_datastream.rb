@@ -18,7 +18,7 @@ module ActiveFedora
               raise "not an RDF vocabulary: #{v}"
             end
           end
-          ActiveFedora::Predicates.vocabularies(vocabularies)
+          ActiveFedora::Predicates.vocabularies(@vocabularies)
           @vocabularies
         end
         def map_predicates(&block)
@@ -56,6 +56,7 @@ module ActiveFedora
     class TermProxy
       # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
       # @param [ActiveFedora::RelationshipGraph] graph  the graph
+      # @param [Array] values  an array of object values
       include Enumerable
       def initialize(graph, predicate, values=[])
         @graph = graph
@@ -63,7 +64,7 @@ module ActiveFedora
         @values = values
       end
       def each(&block)
-        @values.each { |value| block.call(value)}
+        @values.each { |value| block.call(value) }
       end
       def <<(*values)
         @values.concat(values)
@@ -72,15 +73,19 @@ module ActiveFedora
         @values
       end
       def ==(other)
-        other.inspect == @values.inspect
+        other == @values
       end
       def delete(*values)
         values.each do |value| 
-          res = @values.delete(value)
-          @graph.delete(@predicate, value) unless res.nil?
-          @graph.dirty = true
+          unless @values.delete(value).nil?
+            @graph.delete(@predicate, value)
+            @graph.dirty = true
+          end
         end
         @values
+      end
+      def empty?
+        @values.empty?
       end
     end
     
