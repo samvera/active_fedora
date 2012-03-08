@@ -51,14 +51,14 @@ module ActiveFedora
     end
 
     def self.predicate_config= value
-      unless value.is_a?(Hash) and [:predicate_mapping,:default_namespace].all? { |key| value.has_key? key }
+      unless value.nil? or (value.is_a?(Hash) and [:predicate_mapping,:default_namespace].all? { |key| value.has_key? key })
         raise TypeError, "predicate_config must specify :predicate_mapping and :default_namespace" 
       end
       @@predicate_config = value 
     end
     
     def self.predicate_config
-      @@predicate_config ||= YAML::load(File.open(ActiveFedora.predicate_config)) if File.exist?(ActiveFedora.predicate_config)
+      @@predicate_config ||= ActiveFedora.predicate_config
     end
 
     def self.predicate_namespaces
