@@ -13,7 +13,10 @@ $VERBOSE=nil
 
 # This loads the Fedora and Solr config info from /config/fedora.yml
 # You can load it from a different location by passing a file path as an argument.
-ActiveFedora.init(:fedora_config_path=>File.join(File.dirname(__FILE__), "..", "config", "fedora.yml"))
+def restore_spec_configuration
+  ActiveFedora.init(:fedora_config_path=>File.join(File.dirname(__FILE__), "..", "config", "fedora.yml"))
+end
+restore_spec_configuration
 
 RSpec.configure do |config|
   config.mock_with :mocha

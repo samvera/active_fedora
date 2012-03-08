@@ -31,7 +31,6 @@ describe ActiveFedora::SolrService do
   end
   it "should try to initialize if the service not initialized, and fail if it does not succeed" do
     Thread.current[:solr_service].should be_nil
-    ActiveFedora.expects(:load_configs)
     ActiveFedora::SolrService.expects(:register)
     proc{ActiveFedora::SolrService.instance}.should raise_error(ActiveFedora::SolrNotInitialized)
   end
