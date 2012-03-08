@@ -16,6 +16,10 @@ describe ActiveFedora::Datastreams do
       ds = @test_object.datastream_from_spec({:type=>ActiveFedora::Datastream, :versionable=>true}, 'test')
       ds.versionable.should be_true
     end
+    it "should default versionable to true" do
+      ds = @test_object.datastream_from_spec({:type=>ActiveFedora::Datastream}, 'test') 
+      ds.versionable.should be_true
+    end
 
   end
 

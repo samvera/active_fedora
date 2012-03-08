@@ -78,7 +78,7 @@ module ActiveFedora
       ds = ds_spec[:type].new(inner_object, name)
       ds.dsLabel = ds_spec[:label] if ds_spec[:label].present?
       ds.controlGroup = ds_spec[:control_group]
-      ds.versionable = ds_spec[:versionable]
+      ds.versionable = ds_spec[:versionable] unless ds_spec[:versionable].nil?
       additional_attributes_for_external_and_redirect_control_groups(ds, ds_spec)
       ds
     end
