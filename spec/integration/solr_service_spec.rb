@@ -73,6 +73,11 @@ describe ActiveFedora::SolrService do
       end
     end
     
+    it 'should instantiate all datastreams in the solr doc, even ones undeclared by the class' do
+      obj = ActiveFedora::Base.load_instance_from_solr "hydrangea:fixture_mods_article1"
+      obj.datastreams.keys.should include('descMetadata')
+    end
+    
     it 'should #reify a lightweight object as a new instance' do
       query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
       solr_result = ActiveFedora::SolrService.query(query)

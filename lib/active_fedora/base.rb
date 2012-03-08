@@ -370,7 +370,7 @@ module ActiveFedora
         raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
       end
      
-      obj = self.allocate.init_with(SolrDigitalObject.new(solr_doc))
+      obj = self.allocate.init_with(SolrDigitalObject.new(solr_doc, self))
       #set by default to load any dependent relationship objects from solr as well
       #need to call rels_ext once so it exists when iterating over datastreams
       obj.rels_ext
