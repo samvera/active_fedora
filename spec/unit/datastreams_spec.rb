@@ -37,6 +37,39 @@ describe ActiveFedora::Datastreams do
       #ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(@this_pid)
     end
 
+    describe "updates the spec" do
+      before do
+        class FooHistory < ActiveFedora::Base
+        end
+      end
+      after do
+        Object.send(:remove_const, :FooHistory)
+      end
+      subject { FooHistory}
+      it "should update the ds_spec" do
+        FooHistory.ds_specs.keys.should == ['RELS-EXT']
+        FooHistory.has_metadata :type=>ActiveFedora::Datastream, :name=>'new_ds'
+        FooHistory.ds_specs.keys.should include 'new_ds'
+      end
+      it "should be able to set a type" do
+        FooHistory.has_metadata :type=>ActiveFedora::Datastream, :name=>'new_ds', :control_group=>'R'
+        FooHistory.ds_specs['new_ds'][:control_group].should == 'R'
+      end
+      it "should be able to set versionable to false" do
+        FooHistory.has_metadata :type=>ActiveFedora::Datastream, :name=>'new_ds', :versionable=>false
+        FooHistory.ds_specs['new_ds'][:versionable].should be_false
+      end
+      it "should be able to set versionable to true" do
+        FooHistory.has_metadata :type=>ActiveFedora::Datastream, :name=>'new_ds', :versionable=>true
+        FooHistory.ds_specs['new_ds'][:versionable].should be_true
+      end
+      it "should not set versionable if it's not supplied" do
+        FooHistory.has_metadata :type=>ActiveFedora::Datastream, :name=>'new_ds'
+        FooHistory.ds_specs['new_ds'].keys.should_not include :versionable
+      end
+      
+    end
+
     describe "creates datastreams" do
       before do
         class FooHistory < ActiveFedora::Base
@@ -44,14 +77,9 @@ describe ActiveFedora::Datastreams do
             m.field "fubar", :string
             m.field "swank", :text
           end
-          has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText" do |m|
-            m.field "fubar", :text
-          end
           has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText2", :label=>"withLabel" do |m|
             m.field "fubar", :text
           end 
-          delegate :fubar, :to=>'withText'
-          delegate :swank, :to=>'someData'
         end
         stub_ingest(@this_pid)
         stub_add_ds(@this_pid, ['RELS-EXT', 'someData', 'withText', 'withText2'])
@@ -109,6 +137,7 @@ describe ActiveFedora::Datastreams do
       @n.datastreams["UKETD_DC"].controlGroup.should eql("E")
       @n.datastreams["UKETD_DC"].dsLocation.should == "sub_url/objects/#{@this_pid}/methods/hull-sDef:uketdObject/getUKETDMetadata"
     end
+
 
     context ":control_group => 'E'" do
       before do

@@ -14,6 +14,8 @@ Find raises ObjectNotFoundError when the object isn't found
 Removed dependency on solrizer-fedora
 Avoid unnecessary reload of RELS-EXT when typecasting
 HYDRA-754 Delegate discovery of config parameters to a separate module to allow for non-file-based configuration
+HYDRA-753 has_metadata should accept :versionable as part of the spec.
+HYDRA-755 Instantiate un-spec'ed datastreams in SolrDigitalObject
 
 3.3.2
 HYDRA-745 No need to require :url be present on external datastreams

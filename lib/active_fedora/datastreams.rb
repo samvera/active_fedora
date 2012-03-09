@@ -252,7 +252,9 @@ module ActiveFedora
       # @option args [Boolean] :versionable (true) Should versioned datastreams be stored
       # @yield block executed by some kinds of datastreams
       def has_metadata(args, &block)
-        ds_specs[args[:name]]= {:type => args[:type], :label =>  args.fetch(:label,""), :control_group => args.fetch(:control_group,"X"), :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
+        spec = {:type => args[:type], :label =>  args.fetch(:label,""), :control_group => args.fetch(:control_group,"X"), :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
+        spec[:versionable] = args[:versionable] if args.has_key? :versionable
+        ds_specs[args[:name]]= spec
       end
 
       # Specify the attributes of a file bearing datastream 
