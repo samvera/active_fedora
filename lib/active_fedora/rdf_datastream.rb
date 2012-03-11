@@ -2,6 +2,24 @@ require 'rdf'
 
 module ActiveFedora
   class RDFDatastream < Datastream
+    # this enables a cleaner API for solr integration
+    class IndexObject
+      attr_accessor :data_type, :behaviors
+      def initialize
+        @behaviors = [:searchable]
+        @data_type = :string
+      end
+      def as(*args)
+        @behaviors = args
+      end
+      def type(sym)
+        @data_type = sym
+      end
+      def defaults
+        :noop
+      end
+    end
+
     module ModelMethods
       extend ActiveSupport::Concern
       module ClassMethods
@@ -24,21 +42,24 @@ module ActiveFedora
         def map_predicates(&block)
           yield self
         end
-        def method_missing(name, *args)
+        def method_missing(name, *args, &block)
           args = args.first if args.respond_to? :first
           raise "mapping must specify RDF vocabulary as :in argument" unless args.has_key? :in
           vocab = args[:in]
           predicate = args.fetch(:to, name)
           raise "Vocabulary '#{vocab.inspect}' does not define property '#{predicate.inspect}'" unless vocab.respond_to? predicate
-          vocab = vocab.to_s
-          # needed for solrizer integration
-          indexing = args.fetch(:index_as, false)
-          # set data_type default to :string like other impls
-          data_type = indexing.fetch(:type, :string) if indexing
-          # set behaviors default to :searchable like other impls
-          behaviors = indexing.fetch(:behaviors, [:searchable]) if indexing
+          indexing = false
+          if block_given?
+            # needed for solrizer integration
+            indexing = true
+            iobj = IndexObject.new
+            yield iobj
+            data_type = iobj.data_type
+            behaviors = iobj.behaviors
+          end
           # needed for AF::Predicates integration & drives all other
           # functionality below
+          vocab = vocab.to_s
           if config
             if config[:predicate_mapping].has_key? vocab
               config[:predicate_mapping][vocab][name] = predicate
@@ -62,7 +83,6 @@ module ActiveFedora
         end
       end
     end
-
     class TermProxy
       # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
       # @param [ActiveFedora::RelationshipGraph] graph  the graph

@@ -87,16 +87,24 @@ describe ActiveFedora::NtriplesRDFDatastream do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
         map_predicates do |map|
-          map.created(:in => RDF::DC, :index_as => {:type => :date,
-                        :behaviors => [:sortable, :displayable]})
-          map.title(:in => RDF::DC, :index_as => {:type => :text, 
-                      :behaviors => [:searchable, :displayable, :sortable]})
-          map.publisher(:in => RDF::DC, :index_as => {
-                          :behaviors => [:facetable, :sortable, :searchable, :displayable]})
-          map.based_near(:in => RDF::FOAF, :index_as => {:type => :text,
-                           :behaviors => [:displayable, :facetable, :searchable]})
-          map.related_url(:to => "seeAlso", :in => RDF::RDFS,
-                          :index_as => {:type => :string})
+          map.created(:in => RDF::DC) do |index| 
+            index.as :sortable, :displayable
+            index.type :date
+          end
+          map.title(:in => RDF::DC) do |index|
+            index.as :searchable, :displayable, :sortable
+            index.type :text 
+          end
+          map.publisher(:in => RDF::DC) do |index| 
+            index.as :facetable, :sortable, :searchable, :displayable
+          end
+          map.based_near(:in => RDF::FOAF) do |index|
+            index.as :displayable, :facetable, :searchable 
+            index.type :text
+          end
+          map.related_url(:to => "seeAlso", :in => RDF::RDFS) do |index|
+            index.defaults
+          end
           map.rights(:in => RDF::DC)
         end
       end
