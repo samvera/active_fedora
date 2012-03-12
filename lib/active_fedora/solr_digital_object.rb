@@ -9,7 +9,7 @@ module ActiveFedora
       @profile = {}
       profile_attrs.each do |key|
         attr_name = key.split(/_/)[1..-2].join('_')
-        @profile[attr_name] = solr_doc[key].to_s
+        @profile[attr_name] = Array(solr_doc[key]).first.to_s
       end
       @profile['objCreateDate'] ||= Time.now.xmlschema
       @profile['objLastModDate'] ||= @profile['objCreateDate']
