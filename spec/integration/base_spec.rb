@@ -217,10 +217,8 @@ describe ActiveFedora::Base do
     it "should expose the DC datastream" do
       dc = @test_object.dc
       dc.should be_a_kind_of(ActiveFedora::Datastream)
-      #dc["identifier"].should_not be_nil
       rexml = REXML::Document.new(dc.content)
       rexml.root.elements["dc:identifier"].get_text.should_not be_nil
-      #dc.elements["dc:identifier"].should_not be_nil
     end
   end
 
@@ -669,6 +667,15 @@ describe ActiveFedora::Base do
       @test_object5.find_relationship_by_name("testing_inbound").should == []
       @test_object5.find_relationship_by_name("testing_inbound2").should == []
       
+    end
+  end
+
+  describe "#exists?" do
+    it "should return true for objects that exist" do
+      ActiveFedora::Base.exists?('hydrangea:fixture_mods_article1').should be_true
+    end
+    it "should return false for objects that dont exist" do
+      ActiveFedora::Base.exists?('nil:object').should be_false
     end
   end
 end

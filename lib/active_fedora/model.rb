@@ -114,6 +114,13 @@ module ActiveFedora
         end
       end
 
+      # Returns true if the pid exists in the repository 
+      # @param[String] pid 
+      # @return[boolean] 
+      def exists?(pid)
+        inner = DigitalObject.find(self, pid)
+        !inner.new?
+      end
 
       def find_model(pid)
         ActiveSupport::Deprecation.warn("find_model is deprecated.  Use find instead")
