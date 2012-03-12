@@ -24,7 +24,6 @@ module ActiveFedora
       args = args.dup
       args.merge!(:url=>host)
       @conn = RSolr.connect args
- #     @conn = Solr::Connection.new(host, opts)
     end
     
     def self.instance
