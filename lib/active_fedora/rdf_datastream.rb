@@ -2,6 +2,24 @@ require 'rdf'
 
 module ActiveFedora
   class RDFDatastream < Datastream
+    # this enables a cleaner API for solr integration
+    class IndexObject
+      attr_accessor :data_type, :behaviors
+      def initialize
+        @behaviors = [:searchable]
+        @data_type = :string
+      end
+      def as(*args)
+        @behaviors = args
+      end
+      def type(sym)
+        @data_type = sym
+      end
+      def defaults
+        :noop
+      end
+    end
+
     module ModelMethods
       extend ActiveSupport::Concern
       module ClassMethods
@@ -24,35 +42,47 @@ module ActiveFedora
         def map_predicates(&block)
           yield self
         end
-        def method_missing(name, *args)
+        def method_missing(name, *args, &block)
           args = args.first if args.respond_to? :first
           raise "mapping must specify RDF vocabulary as :in argument" unless args.has_key? :in
           vocab = args[:in]
           predicate = args.fetch(:to, name)
-          data_type = args.fetch(:type, :string)
           raise "Vocabulary '#{vocab.inspect}' does not define property '#{predicate.inspect}'" unless vocab.respond_to? predicate
+          indexing = false
+          if block_given?
+            # needed for solrizer integration
+            indexing = true
+            iobj = IndexObject.new
+            yield iobj
+            data_type = iobj.data_type
+            behaviors = iobj.behaviors
+          end
+          # needed for AF::Predicates integration & drives all other
+          # functionality below
           vocab = vocab.to_s
-          # this is needed for AF::Predicates integration
-          # stuff data_type in there too for to_solr support
-          if config 
+          if config
             if config[:predicate_mapping].has_key? vocab
               config[:predicate_mapping][vocab][name] = predicate
-              config[:predicate_mapping][vocab]["#{name}type".to_sym] = data_type
             else
-              config[:predicate_mapping][vocab] = { name => predicate, "#{name}type".to_sym => data_type }
-           end
+              config[:predicate_mapping][vocab] = { name => predicate } 
+            end
+            # stuff data_type and behaviors in there for to_solr support
+            config[:predicate_mapping][vocab]["#{name}type".to_sym] = data_type if indexing
+            config[:predicate_mapping][vocab]["#{name}behaviors".to_sym] = behaviors if indexing
           else
             config = {
               :default_namespace => vocab,
               :predicate_mapping => {
-                vocab => { name => predicate, "#{name}type".to_sym => data_type }
+                vocab => { name => predicate }
               }
             }
+            # stuff data_type and behaviors in there for to_solr support
+            config[:predicate_mapping][vocab]["#{name}type".to_sym] = data_type if indexing
+            config[:predicate_mapping][vocab]["#{name}behaviors".to_sym] = behaviors if indexing
           end
         end
       end
     end
-
     class TermProxy
       # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
       # @param [ActiveFedora::RelationshipGraph] graph  the graph
@@ -87,6 +117,9 @@ module ActiveFedora
       def empty?
         @values.empty?
       end
+      def to_s
+        @values.to_s
+      end
     end
     
     include ModelMethods
@@ -107,29 +140,34 @@ module ActiveFedora
       end
     end
 
-    # returns a Hash, e.g.: {field => {:values => values, :type => type}, ...}
+    # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
     def fields
       field_map = {}
       graph.relationships.each do |predicate, values|
         vocab_sym, name = predicate.qname
         vocabs_list = self.class.vocabularies.select { |ns, v| v.__prefix__ == vocab_sym }
         vocab = vocabs_list.first.first.to_s
-        mapped_names = self.class.config[:predicate_mapping][vocab].select {|k, v| v.to_s == name.to_s}
+        vocab_hash = self.class.config[:predicate_mapping][vocab]
+        mapped_names = vocab_hash.select {|k, v| v.to_s == name.to_s}
         name = mapped_names.first.first.to_s
-        type = self.class.config[:predicate_mapping][vocab]["#{name}type".to_sym]
-        field_map[name.to_sym] = {:values => values.map {|v| v.to_s}, :type => type}
+        next unless vocab_hash.has_key?("#{name}type".to_sym) and vocab_hash.has_key?("#{name}behaviors".to_sym)
+        type = vocab_hash["#{name}type".to_sym]
+        behaviors = vocab_hash["#{name}behaviors".to_sym]
+        field_map[name.to_sym] = {:values => values.map {|v| v.to_s}, :type => type, :behaviors => behaviors}
       end
       field_map
     end
 
     def to_solr(solr_doc = Hash.new) # :nodoc:
       fields.each do |field_key, field_info|
-        if field_info.has_key?(:values) && !field_info[:values].nil?
-          field_symbol = ActiveFedora::SolrService.solr_name(field_key, field_info[:type])
-          values = field_info[:values]
-          values = [values] unless values.respond_to? :each
-          values.each do |val|    
-            ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val)         
+        values = field_info.fetch(:values, false)
+        if values
+          field_info[:behaviors].each do |index_type|
+            field_symbol = ActiveFedora::SolrService.solr_name(field_key, field_info[:type], index_type)
+            values = [values] unless values.respond_to? :each
+            values.each do |val|    
+              ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val)         
+            end
           end
         end
       end

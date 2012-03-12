@@ -56,7 +56,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
   end
 
   describe "a new instance" do
-    before do
+    before(:each) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         register_vocabularies RDF::DC
         map_predicates do |map|
@@ -66,36 +66,59 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
       @subject.stubs(:pid => 'test:1')
     end
+    after(:each) do
+      Object.send(:remove_const, :MyDatastream)
+    end
     it "should save and reload" do
       @subject.publisher = ["St. Martin's Press"]
       @subject.save
     end
-  end
+    it "should support to_s method" do
+      @subject.publisher.to_s.should == ""
+      @subject.publisher = "Bob"
+      @subject.publisher.to_s.should == "Bob"
+      @subject.publisher << "Jim"
+      @subject.publisher.to_s.should == "BobJim"
+    end
+ end
 
   describe "solr integration" do
     before(:all) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
         map_predicates do |map|
-          map.created(:in => RDF::DC, :type => :date)
-          map.title(:in => RDF::DC, :type => :text)
-          map.publisher(:in => RDF::DC)
-          map.based_near(:in => RDF::FOAF, :type => :text)
-          map.related_url(:to => "seeAlso", :in => RDF::RDFS, :type => :string)
+          map.created(:in => RDF::DC) do |index| 
+            index.as :sortable, :displayable
+            index.type :date
+          end
+          map.title(:in => RDF::DC) do |index|
+            index.as :searchable, :displayable, :sortable
+            index.type :text 
+          end
+          map.publisher(:in => RDF::DC) do |index| 
+            index.as :facetable, :sortable, :searchable, :displayable
+          end
+          map.based_near(:in => RDF::FOAF) do |index|
+            index.as :displayable, :facetable, :searchable 
+            index.type :text
+          end
+          map.related_url(:to => "seeAlso", :in => RDF::RDFS) do |index|
+            index.defaults
+          end
+          map.rights(:in => RDF::DC)
         end
       end
       @subject = MyDatastream.new(@inner_object, 'solr_rdf')
       @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
       @subject.stubs(:pid => 'test:1')
       @subject.stubs(:new? => false)
-      @sample_fields = {:publisher => {:values => ["publisher1"], :type => :string}, 
-        :based_near => {:values => ["coverage1", "coverage2"], :type => :text}, 
-        :created => {:values => "fake-date", :type => :date},
-        :title => {:values => "fake-title", :type => :text},
-        :related_url => {:values => "http://example.org/", :type => :string},
-        :empty_field => {:values => []}
+      @sample_fields = {:publisher => {:values => ["publisher1"], :type => :string, :behaviors => [:facetable, :sortable, :searchable, :displayable]}, 
+        :based_near => {:values => ["coverage1", "coverage2"], :type => :text, :behaviors => [:displayable, :facetable, :searchable]}, 
+        :created => {:values => "fake-date", :type => :date, :behaviors => [:sortable, :displayable]},
+        :title => {:values => "fake-title", :type => :text, :behaviors => [:searchable, :displayable, :sortable]},
+        :related_url => {:values => "http://example.org/", :type =>:string, :behaviors => [:searchable]},
+        :empty_field => {:values => [], :type => :string, :behaviors => [:searchable]}
       } 
-      @sample_xml = XmlSimple.xml_in("<fields><based_near>coverage1</based_near><based_near>coverage2</based_near><created>fake-date</created><publisher>publisher1</publisher><related_url>http://example.org/</related_url><title>fake-title</title></fields>")
     end
     after(:all) do
       # Revert to default mappings after running tests
@@ -117,9 +140,17 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.expects(:fields).returns(@sample_fields)
       solr_doc = @subject.to_solr
       solr_doc["publisher_t"].should == ["publisher1"]
+      solr_doc["publisher_sort"].should == ["publisher1"]
+      solr_doc["publisher_display"].should == ["publisher1"]
+      solr_doc["publisher_facet"].should == ["publisher1"]
       solr_doc["based_near_t"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["created_dt"].should == ["fake-date"]
+      solr_doc["based_near_display"].sort.should == ["coverage1", "coverage2"]
+      solr_doc["based_near_facet"].sort.should == ["coverage1", "coverage2"]
+      solr_doc["created_sort"].should == ["fake-date"]
+      solr_doc["created_display"].should == ["fake-date"]
       solr_doc["title_t"].should == ["fake-title"]
+      solr_doc["title_sort"].should == ["fake-title"]
+      solr_doc["title_display"].should == ["fake-title"]
       solr_doc["related_url_t"].should == ["http://example.org/"]
       solr_doc["empty_field_t"].should be_nil
     end
@@ -130,9 +161,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
       #should have these            
       @subject.to_solr["publisher_t"].should_not be_nil
       @subject.to_solr["based_near_t"].should_not be_nil
-      @subject.to_solr["created_dt"].should_not be_nil
       @subject.to_solr["title_t"].should_not be_nil
-      
+      @subject.to_solr["related_url_t"].should_not be_nil
+
       #should NOT have these
       @subject.to_solr["narrator"].should be_nil
       @subject.to_solr["empty_field"].should be_nil
@@ -142,11 +173,11 @@ describe ActiveFedora::NtriplesRDFDatastream do
       ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
       @subject.stubs(:fields).returns(@sample_fields)
       solr_doc =  @subject.to_solr
-      
+
       #should have these            
       solr_doc["publisher_field"].should == ["publisher1"]
       solr_doc["based_near_field"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["created_date"].should == ["fake-date"]
+      solr_doc["created_display"].should == ["fake-date"]
       solr_doc["title_field"].should == ["fake-title"]
         
       solr_doc["title_t"].should be_nil
@@ -157,15 +188,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
       # Reload default mappings
       ActiveFedora::SolrService.load_mappings
     end
-    it 'should append _dt to dates' do
-      ActiveFedora::SolrService.load_mappings
-      @subject.expects(:fields).returns(@sample_fields).at_least_once
-      @subject.to_solr["created_dt"].should_not be_nil
-      
-      #should NOT have these      
-      @subject.to_solr["created"].should be_nil
-      @subject.to_solr["created_date"].should be_nil
-    end
     describe "with an actual object" do
       before(:all) do
         @obj = MyDatastream.new(@inner_object, 'solr_rdf')
@@ -174,6 +196,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
         @obj.publisher = "Bob's Blogtastic Publishing"
         @obj.based_near = ["Tacoma, WA", "Renton, WA"]
         @obj.related_url = "http://example.org/blogtastic/"
+        @obj.rights = "Totally open, y'all"
         @obj.save
       end
       describe ".fields()" do
@@ -201,14 +224,22 @@ describe ActiveFedora::NtriplesRDFDatastream do
       end
       describe ".to_solr()" do
         it "should return the right # of fields" do
-          @obj.to_solr.keys.count.should == 5
+          @obj.to_solr.keys.count.should == 13
         end
         it "should return the right fields" do
           @obj.to_solr.keys.should include("related_url_t")
           @obj.to_solr.keys.should include("publisher_t")
-          @obj.to_solr.keys.should include("created_dt")
+          @obj.to_solr.keys.should include("publisher_sort")
+          @obj.to_solr.keys.should include("publisher_display")
+          @obj.to_solr.keys.should include("publisher_facet")
+          @obj.to_solr.keys.should include("created_sort")
+          @obj.to_solr.keys.should include("created_display")
           @obj.to_solr.keys.should include("title_t")
+          @obj.to_solr.keys.should include("title_sort")
+          @obj.to_solr.keys.should include("title_display")
           @obj.to_solr.keys.should include("based_near_t")
+          @obj.to_solr.keys.should include("based_near_facet")
+          @obj.to_solr.keys.should include("based_near_display")
         end
         it "should return the right values" do
           @obj.to_solr["related_url_t"].should == ["http://example.org/blogtastic/"]
