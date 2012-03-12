@@ -204,6 +204,8 @@ module ActiveFedora
       ensure_loaded
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       graph.delete(predicate)
+
+      args = [args] unless args.respond_to? :each
       args.each do |arg|
         graph.add(predicate, arg, true)
       end
