@@ -87,23 +87,18 @@ module ActiveFedora
       # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
       # @param [ActiveFedora::RelationshipGraph] graph  the graph
       # @param [Array] values  an array of object values
-      include Enumerable
+      instance_methods.each { |m| undef_method m unless m.to_s =~ /^(?:nil\?|send|object_id|to_a)$|^__|^respond_to|proxy_/ }
+      
       def initialize(graph, predicate, values=[])
         @graph = graph
         @predicate = predicate
         @values = values
-      end
-      def each(&block)
-        @values.each { |value| block.call(value) }
       end
       def <<(*values)
         @values.concat(values)
         values.each { |value| @graph.add(@predicate, value, true) }
         @graph.dirty = true
         @values
-      end
-      def ==(other)
-        other == @values
       end
       def delete(*values)
         values.each do |value| 
@@ -114,12 +109,25 @@ module ActiveFedora
         end
         @values
       end
-      def empty?
-        @values.empty?
+      def method_missing(method, *args)
+        unless @values.respond_to?(method)
+          message = "undefined method `#{method.to_s}' for \"#{@values}\":#{@values.class.to_s}"
+          raise NoMethodError, message
+        end
+
+        if block_given?
+          @values.send(method, *args)  { |*block_args| yield(*block_args) }
+        else
+          @values.send(method, *args)
+        end
+  
       end
-      def to_s
-        @values.to_s
-      end
+      # def empty?
+      #   @values.empty?
+      # end
+      # def to_s
+      #   @values.to_s
+      # end
     end
     
     include ModelMethods

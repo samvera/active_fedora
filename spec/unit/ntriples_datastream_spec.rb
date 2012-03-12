@@ -34,8 +34,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.based_near.should == ["New York, NY, US"]
       @subject.related_url.should == ["http://google.com/"]
     end
-    it "should return fields that are TermProxies" do
-      @subject.created.should be_kind_of ActiveFedora::RDFDatastream::TermProxy
+    it "should return fields that are not TermProxies" do
+      @subject.created.should be_kind_of Array
     end
     it "should have method missing" do
       lambda{@subject.frank}.should raise_exception ActiveFedora::UnregisteredPredicateError
@@ -74,11 +74,11 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.save
     end
     it "should support to_s method" do
-      @subject.publisher.to_s.should == ""
+      @subject.publisher.to_s.should == [].to_s
       @subject.publisher = "Bob"
-      @subject.publisher.to_s.should == "Bob"
+      @subject.publisher.to_s.should == ["Bob"].to_s
       @subject.publisher << "Jim"
-      @subject.publisher.to_s.should == "BobJim"
+      @subject.publisher.to_s.should == ["Bob", "Jim"].to_s
     end
  end
 
