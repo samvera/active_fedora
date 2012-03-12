@@ -215,7 +215,7 @@ module ActiveFedora
 
       args = [args] unless args.respond_to? :each
       args.each do |arg|
-        graph.add(predicate, arg, true)
+        graph.add(predicate, arg, true) unless arg.empty?
       end
       graph.dirty = true
       return TermProxy.new(graph, predicate, args)
