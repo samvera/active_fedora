@@ -48,7 +48,14 @@ describe ActiveFedora::ServiceDefinitions do
       obj.document_style_1({:format=>'xml'})
     end
     it "should call the appropriate rubydora rest api method with a block" do
-      pending "how to mock the passed block to rubydora"
+      Rubydora::Repository.any_instance.stubs(:dissemination).with({:pid=>'monkey:99',:sdef=>'test:12', :method=>'getDocumentStyle1'}).yields "ping!","pang!"
+      obj = Test.new()
+      obj.stubs(:pid).returns('monkey:99')
+      block_response = ""
+      obj.document_style_1 {|res,req|
+        block_response += 'pong!' if res == "ping!" and req == "pang!"
+      }
+      block_response.should == "pong!"
     end
   end
 end
