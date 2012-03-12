@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'spec/samples/models/hydrangea_article'
+#require 'spec/samples/models/hydrangea_article'
 
 include ActiveFedora::Model
 include Mocha::API
