@@ -178,7 +178,7 @@ module ActiveFedora
     def find_predicate(predicate)
       predicate = predicate.to_sym unless predicate.kind_of? RDF::URI
       result = ActiveFedora::Predicates.find_predicate(predicate)
-      RDF::URI(result.reverse.to_s)
+      RDF::URI(result.reverse.join)
     end
 
     def graph
