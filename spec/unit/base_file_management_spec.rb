@@ -61,7 +61,6 @@ describe ActiveFedora::Base do
       it "should be a supported method" do
         @base.should respond_to(:collection_members_remove)
       end
-      it "should remove hasCollectionMember for the given object/pid"
     end
   end
   

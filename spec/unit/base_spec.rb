@@ -415,7 +415,10 @@ describe ActiveFedora::Base do
         @test_object.save
       end
       it "should NOT update solr index if no MetadataDatastreams have changed" do
-        pending "Rels-ext is getting automatically added so we can't test this."
+        stub_ingest(@this_pid)
+        stub_add_ds(@this_pid, ['ds1', 'RELS-EXT'])
+        @test_object.save
+        @test_object.expects(:new_object?).returns(false).twice
         ActiveFedora::DigitalObject.any_instance.stubs(:save)
         mock1 = mock("ds1")
         mock1.expects( :changed?).returns(false).at_least_once

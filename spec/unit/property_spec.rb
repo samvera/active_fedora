@@ -15,25 +15,10 @@ describe ActiveFedora::Property do
     ActiveFedora::Property.should respond_to(:new)
   end
 
-  describe '.new' do
-    
-    it 'should use assertions to check types of incoming args'
-    
-    # This could rely on property_set and in turn serialize to a 'properties' metadata datastream...
-    it 'should add corresponding field to the properties datastream'
-      
-    it 'should add field to repository indexer (ie. solr)'
-  end
-  
   it 'should provide .name' do
     ActiveFedora::Property.should respond_to(:name)
   end
 
-  describe '.name' do
-    it 'should return the value of the name attribute' do
-      
-    end
-  end
   
   it 'should provide .instance_variable_name' do
     #ActiveFedora::Property.should respond_to(:instance_variable_name)

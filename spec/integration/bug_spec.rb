@@ -51,10 +51,4 @@ describe 'bugs' do
     x.datastreams['someData'].fubar_values.should == ["meh"]
     x.save
   end
-  it "should update the index, even if there is no metadata" do
-    pending
-    oh = FooHistory.new
-    oh.save
-  end
-
 end

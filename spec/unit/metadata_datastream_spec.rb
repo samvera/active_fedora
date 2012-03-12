@@ -82,14 +82,6 @@ describe ActiveFedora::MetadataDatastream do
       @test_ds.should be_dirty
     end
     
-    it "should support single-value arguments (as opposed to a hash of values with array indexes as keys)" do
-      # In other words, { "fubar"=>"dork" } should have the same effect as { "fubar"=>{"0"=>"dork"} }
-      pending "this should be working, but for some reason, the updates don't stick"
-      result = @test_ds.update_indexed_attributes( { "fubar"=>"dork" } )
-      result.should == {"fubar"=>{"0"=>"dork"}}
-      @test_ds.fubar_values.should == ["dork"]
-    end
-    
     it "should work for text fields" do 
       att= {"swank"=>{"-1"=>"mork", "1"=>"york"}}
       result = @test_ds.update_indexed_attributes(att)
@@ -111,12 +103,6 @@ describe ActiveFedora::MetadataDatastream do
       @test_ds.swank_values = ["my_val1","my_val2"]
       result = @test_ds.update_indexed_attributes "swank"=>{"-1"=>"mork"}
       result.should == {"swank"=>{"2"=>"mork"}}
-    end
-    
-    it "should return accurate response when multiple values have been added in a single run" do
-      pending
-      att= {"swank"=>{"-1"=>"mork", "0"=>"york"}}
-      @test_ds.update_indexed_attributes(att).should == {"swank"=>{"0"=>"york", "1"=>"mork"}}
     end
     
     it "should deal gracefully with adding new values at explicitly declared indexes" do
@@ -345,8 +331,6 @@ describe ActiveFedora::MetadataDatastream do
       
       solr_doc["empty_field_t"].should be_nil
     end
-    
-    it "should allow multiple values for a single field"
     
     it 'should append create keys in format field_name + _ + field_type' do
       @test_ds.stubs(:fields).returns(@sample_fields)
