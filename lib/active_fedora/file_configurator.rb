@@ -44,23 +44,31 @@ module ActiveFedora
     #     url: http://127.0.0.1:8983/fedora2
     #
 
-    attr_accessor :solr_config, :fedora_config, :config_env
+    attr_accessor :solr_config, :config_env
     attr_reader :config_options, :fedora_config_path, :solr_config_path
 
     # The configuration hash that gets used by RSolr.connect
-    @solr_config ||= {}
-    @fedora_config ||= {}
-    @config_options ||= {}
+    # @solr_config ||= {}
+    def initialize
+      reset!
+    end
 
     def init options = {}
       if options.is_a?(String) 
         raise ArgumentError, "Calling ActiveFedora.init with a path as an argument has been removed.  Use ActiveFedora.init(:fedora_config_path=>#{options})"
       end
+      reset!
       @config_options = options
-      config_reload!
+      load_configs
+    end
+
+    def fedora_config
+      load_configs
+      @fedora_config
     end
 
     def config_reload!
+      ActiveSupport::Deprecation.warn("config_reload! is not supported")
       reset!
       load_configs
     end
@@ -71,6 +79,8 @@ module ActiveFedora
     
     def reset!
       @config_loaded = false  #Force reload of configs
+      @fedora_config = {}
+      @config_options = {}
       @predicate_config_path = nil
     end
 

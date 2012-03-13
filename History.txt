@@ -1,4 +1,4 @@
-4.0.0.rc10
+4.0.0.rc11
 Removed deprecations
   * allowing :fedora level in fedora.yml
   * automatic includes of Relationships and FileMethods is removed

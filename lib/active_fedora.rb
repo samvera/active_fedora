@@ -111,11 +111,9 @@ module ActiveFedora #:nodoc:
     elsif defined?(ENV['environment']) and !(ENV['environment'].nil?)
       return ENV['environment']
     elsif defined?(ENV['RAILS_ENV']) and !(ENV['RAILS_ENV'].nil?)
-      logger.warn("You're depending on RAILS_ENV for setting your environment. This is deprecated in Rails3. Please use ENV['environment'] for non-rails environment setting: 'rake foo:bar environment=test'")
-      ENV['environment'] = ENV['RAILS_ENV']
-      return ENV['environment']
+      raise RuntimeError, "You're depending on RAILS_ENV for setting your environment. Please use ENV['environment'] for non-rails environment setting: 'rake foo:bar environment=test'"
     else
-      ENV['environment'] = 'development' #raise "Can't determine what environment to run in!"
+      ENV['environment'] = 'development' 
     end
   end
   
