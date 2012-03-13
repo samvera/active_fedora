@@ -49,8 +49,6 @@ module ActiveFedora
 
     # The configuration hash that gets used by RSolr.connect
     # @solr_config ||= {}
-    # @fedora_config ||= {}
-    # @config_options ||= {}
     def initialize
       reset!
     end

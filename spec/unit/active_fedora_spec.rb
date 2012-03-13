@@ -35,9 +35,7 @@ describe ActiveFedora do
       it "should use ENV['RAILS_ENV'] and log a warning if none of the above are set" do
         ENV['environment']=nil
         ENV['RAILS_ENV'] = "rails_env"
-        logger.expects(:warn)
-        ActiveFedora.expects(:config_options).at_least_once.returns({})
-        ActiveFedora.environment.should eql("rails_env")
+        lambda {ActiveFedora.environment}.should raise_error(RuntimeError, "You're depending on RAILS_ENV for setting your environment. Please use ENV['environment'] for non-rails environment setting: 'rake foo:bar environment=test'")
         ENV['environment']='test'
       end
 

@@ -45,7 +45,7 @@ require 'rspec/core/rake_task'
 
   desc "Loads or refreshes the fixtures needed to run the tests"
   task :load_fixtures => :environment do
-    ActiveFedora.init unless Thread.current[:repo]
+   # ActiveFedora.init unless Thread.current[:repo]
     
     ENV["pid"] = "hydrangea:fixture_mods_article1"
     Rake::Task["repo:refresh"].invoke
