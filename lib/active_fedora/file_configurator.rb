@@ -44,7 +44,7 @@ module ActiveFedora
     #     url: http://127.0.0.1:8983/fedora2
     #
 
-    attr_accessor :solr_config, :fedora_config, :config_env
+    attr_accessor :solr_config, :config_env
     attr_reader :config_options, :fedora_config_path, :solr_config_path
 
     # The configuration hash that gets used by RSolr.connect
@@ -60,6 +60,11 @@ module ActiveFedora
       config_reload!
     end
 
+    def fedora_config
+      load_configs
+      @fedora_config
+    end
+
     def config_reload!
       reset!
       load_configs
@@ -71,6 +76,7 @@ module ActiveFedora
     
     def reset!
       @config_loaded = false  #Force reload of configs
+      @fedora_config = nil
       @predicate_config_path = nil
     end
 
