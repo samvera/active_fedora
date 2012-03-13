@@ -154,7 +154,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
       solr_doc["related_url_t"].should == ["http://example.org/"]
       solr_doc["empty_field_t"].should be_nil
     end
-    it "should allow multiple values for a single field"
     it 'should append create keys in format field_name + _ + field_type' do
       @subject.stubs(:fields).returns(@sample_fields)
       
