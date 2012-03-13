@@ -11,6 +11,22 @@ describe ActiveFedora::FileConfigurator do
     restore_spec_configuration
   end
 
+  describe "#initialize" do
+    it "should trigger configuration reset (to empty defaults)" do
+      ActiveFedora::FileConfigurator.any_instance.expects(:reset!)
+      ActiveFedora::FileConfigurator.new
+    end 
+  end
+
+  describe "#config_options" do
+    before do
+      subject.reset!
+    end
+    it "should be an empty hash" do
+      subject.config_options.should == {}
+    end
+  end
+
   describe "#fedora_config" do
     before do
       subject.reset!
@@ -21,9 +37,12 @@ describe ActiveFedora::FileConfigurator do
   end
 
   describe "#reset!" do
+    before { subject.reset! }
     it "should clear @fedora_config" do
-      subject.reset!
-      subject.instance_variable_get(:@fedora_config).should be_nil
+      subject.instance_variable_get(:@fedora_config).should == {} 
+    end
+    it "should clear @config_options" do
+      subject.instance_variable_get(:@config_options).should == {}
     end
   end
 
