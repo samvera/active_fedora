@@ -20,6 +20,7 @@ module ActiveFedora
     end
 
     def serialize_datastreams
+#puts "SERIALIZING"
       datastreams.each {|k, ds| ds.serialize! }
       self.metadata_is_dirty = datastreams.any? {|k,ds| ds.changed? && (ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.instance_of?(ActiveFedora::RelsExtDatastream))}
       true

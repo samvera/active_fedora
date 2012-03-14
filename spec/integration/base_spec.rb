@@ -25,6 +25,24 @@ describe "Datastreams synched together" do
 
 end
 
+describe "has_metadata" do
+  before :all do
+    class MockAFBaseRelationship < ActiveFedora::Base
+      has_metadata :name=>'foo', :type=>Hydra::ModsArticleDatastream 
+    end
+  end
+  after :all do
+    Object.send(:remove_const, :MockAFBaseRelationship)
+  end
+  it "should save the datastream." do
+    obj = MockAFBaseRelationship.new
+    obj.foo.person = "bob"
+    obj.save
+    ActiveFedora::Base.find(obj.pid).foo.person.should == ['bob']
+  end
+
+end
+
 
 describe ActiveFedora::Base do
   before :all do
@@ -64,6 +82,10 @@ describe ActiveFedora::Base do
   
   before(:all) do
     ActiveFedora::SolrService.register(ActiveFedora.solr_config[:url])
+  end
+
+  after :all do
+    Object.send(:remove_const, :MockAFBaseRelationship)
   end
   
   before(:each) do

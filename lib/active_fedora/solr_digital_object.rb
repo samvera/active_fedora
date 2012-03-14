@@ -34,6 +34,12 @@ module ActiveFedora
       @finished = true
       @profile.freeze
       @datastreams.freeze
+      class << self
+        #Once this instance is frozen create a repository method just for this one instance.
+        define_method :repository do
+          ActiveFedora::Base.connection_for_pid(self.pid)
+        end
+      end
       self
     end
     
@@ -41,8 +47,5 @@ module ActiveFedora
       false
     end
 
-    def repository
-      @finished ? ActiveFedora::Base.connection_for_pid(self.pid) : nil
-    end
   end
 end

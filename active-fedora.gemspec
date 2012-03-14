@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   s.add_dependency("activesupport", '>= 3.0.0')
   s.add_dependency("mediashelf-loggable")
   s.add_dependency("equivalent-xml")
-  s.add_dependency("rubydora", '0.5.4')
+  s.add_dependency("rubydora", '~>0.5.7')
   s.add_dependency("rdf")
   s.add_dependency("rdf-rdfxml", '0.3.5') # 0.3.6 is broken
   s.add_development_dependency("yard")
