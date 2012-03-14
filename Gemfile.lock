@@ -11,7 +11,7 @@ PATH
       nokogiri
       om (>= 1.5.3)
       rdf
-      rdf-rdfxml
+      rdf-rdfxml (= 0.3.5)
       rsolr
       rubydora (~> 0.5.4)
       solrizer (~> 1.2.0)
