@@ -5,13 +5,15 @@ module ActiveFedora
     #Saves a Base object, and any dirty datastreams, then updates 
     #the Solr index for this object.
     def save(*)
+#puts "PERSISTENT SAVE"
       # If it's a new object, set the conformsTo relationship for Fedora CMA
       if new_object? 
         result = create
+        update_index if ENABLE_SOLR_UPDATES
       else
         result = update
+        update_index if @metadata_is_dirty == true && ENABLE_SOLR_UPDATES
       end
-      update_index if @metadata_is_dirty == true && ENABLE_SOLR_UPDATES
       @metadata_is_dirty = false
       return result
     end
@@ -91,6 +93,7 @@ module ActiveFedora
 
     # replace the unsaved digital object with a saved digital object
     def assign_pid
+      ## this causes datastream changes to be written, so @metadata_is_dirty will not be marked.
       @inner_object = @inner_object.save 
     end
     

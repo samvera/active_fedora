@@ -176,7 +176,7 @@ describe ActiveFedora::NokogiriDatastream do
     end
     it "should persist the product of .to_xml in fedora" do
       @test_ds.expects(:new?).returns(true).twice
-      @mock_repo.expects(:datastream).with(:pid => nil, :dsid => 'descMetadata')
+      @mock_repo.expects(:datastream).with(:pid => nil, :dsid => 'descMetadata').returns('')
       @mock_repo.expects(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'M', :dsState => 'A', :mimeType=>'text/xml')
       @test_ds.expects(:to_xml).returns("fake xml")
       @test_ds.serialize!

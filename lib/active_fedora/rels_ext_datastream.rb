@@ -21,6 +21,7 @@ module ActiveFedora
     
 
     def to_xml(fields_xml) 
+      ActiveSupport::Deprecation.warn("to_xml is deprecated, use to_rels_ext")
       to_rels_ext() 
     end
       

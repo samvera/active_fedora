@@ -11,9 +11,9 @@ PATH
       nokogiri
       om (>= 1.5.3)
       rdf
-      rdf-rdfxml
+      rdf-rdfxml (= 0.3.5)
       rsolr
-      rubydora (~> 0.5.4)
+      rubydora (~> 0.5.7)
       solrizer (~> 1.2.0)
       xml-simple (>= 1.0.12)
 
@@ -61,7 +61,7 @@ GEM
       metaclass (~> 0.0.1)
     multi_json (1.1.0)
     multipart-post (1.1.2)
-    nokogiri (1.5.0)
+    nokogiri (1.5.2)
     nori (1.1.0)
     om (1.5.3)
       mediashelf-loggable
@@ -75,7 +75,7 @@ GEM
       rdf (>= 0.3.4)
     rest-client (1.6.7)
       mime-types (>= 1.16)
-    rsolr (1.0.6)
+    rsolr (1.0.7)
       builder (>= 2.1.2)
     rspec (2.8.0)
       rspec-core (~> 2.8.0)
@@ -85,7 +85,7 @@ GEM
     rspec-expectations (2.8.0)
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.8.0)
-    rubydora (0.5.4)
+    rubydora (0.5.7)
       activemodel
       activesupport
       fastercsv
@@ -108,7 +108,7 @@ GEM
       om (>= 1.5.0)
       stomp
       xml-simple
-    stomp (1.2.0)
+    stomp (1.2.1)
     wasabi (2.1.0)
       nokogiri (>= 1.4.0)
     xml-simple (1.1.1)

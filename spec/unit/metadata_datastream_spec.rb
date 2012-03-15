@@ -21,7 +21,7 @@ describe ActiveFedora::MetadataDatastream do
     mock_inner = mock('inner object')
     @test_object = ActiveFedora::Base.new
     @mock_repo = mock('repository')
-    @mock_repo.stubs(:datastream)
+    @mock_repo.stubs(:datastream).returns('')
     @mock_repo.stubs(:datastream_dissemination=>'My Content', :config=>{})
     mock_inner.stubs(:repository).returns(@mock_repo)
     mock_inner.stubs(:pid)
@@ -43,7 +43,7 @@ describe ActiveFedora::MetadataDatastream do
     it "should persist the product of .to_xml in fedora" do
       @test_ds.field('coverage', :string)
       @test_ds.expects(:new?).returns(true).times(3)
-      @mock_repo.expects(:datastream).with(:pid => nil, :dsid => 'mdDs')
+      @mock_repo.expects(:datastream).with(:pid => nil, :dsid => 'mdDs').returns("")
       @mock_repo.expects(:add_datastream)
       #@test_ds.expects(:to_xml).returns("fake xml")
       @test_ds.expects(:dirty?).returns(true)

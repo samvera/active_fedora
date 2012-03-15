@@ -114,7 +114,7 @@ To see a more complete implementation of importing and deleting Fedora objects, 
 
 h2. Define a Model for Your (Active)Fedora Objects
 
-Look at the SpecialThing model defined in lib/active_fedora/samples/special_thing.rb to see how you declare an ActiveFedora model.
+Look at the SpecialThing model defined in spec/samples/special_thing.rb to see how you declare an ActiveFedora model.
 
 Create an instance of the SpecialThing class:
 

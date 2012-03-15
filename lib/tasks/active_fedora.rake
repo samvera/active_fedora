@@ -11,14 +11,8 @@ namespace :repo do
       puts "You must specify a valid pid.  Example: rake repo:delete pid=demo:12"
     else
       pid = ENV["pid"]
-      begin
-        ActiveFedora::Base.find(pid).delete
-      rescue ActiveFedora::ObjectNotFoundError
-        puts "The object #{pid} has already been deleted (or was never created)."
-      rescue Errno::ECONNREFUSED => e
-        puts "Can't connect to Fedora! Are you sure jetty is running?"
-      end
-      puts "Deleted '#{pid}' from #{ActiveFedora::Base.connection_for_pid(pid).client.url}"
+      result = ActiveFedora::FixtureLoader.delete(pid)
+      puts "Deleted '#{pid}' from #{ActiveFedora::Base.connection_for_pid(pid).client.url}" if result == 1
     end
   end
   
@@ -34,12 +28,8 @@ namespace :repo do
     i = start_point
     while i <= stop_point do
       pid = namespace + ":" + i.to_s
-      begin
-        ActiveFedora::Base.find(pid).delete
-      rescue ActiveFedora::ObjectNotFoundError
-        # The object has already been deleted (or was never created).  Do nothing.
-      end
-      puts "Deleted '#{pid}' from #{ActiveFedora::Base.connection_for_pid(pid).client.url}"
+      result = ActiveFedora::FixtureLoader.delete(pid)
+      puts "Deleted '#{pid}' from #{ActiveFedora::Base.connection_for_pid(pid).client.url}" if result == 1
       i += 1
     end
   end
@@ -51,46 +41,33 @@ namespace :repo do
     else
       pid = ENV["pid"]
       puts "Exporting '#{pid}' from #{ActiveFedora::Base.connection_for_pid(pid).client.url}"
-      if !ENV["path"].nil?
-        path = ENV["path"]
+      if !ENV["dir"].nil?
+        dir = ENV["dir"]
       else
-        path = File.join('spec', 'fixtures')
+        dir = File.join('spec', 'fixtures')
       end
-      filename = ActiveFedora::FixtureExporter.export_to_path(pid, path)
+      filename = ActiveFedora::FixtureExporter.export_to_path(pid, dir)
       puts "The object has been saved as #{filename}"
     end
   end
   
-  desc "Load the object located at the provided path or identified by pid. Example: rake repo:load path=spec/fixtures/demo_12.foxml.xml"
+  desc "Load the object located at the provided path or identified by pid. Example: rake repo:load foxml=spec/fixtures/demo_12.foxml.xml"
   task :load => :environment do
-    if !ENV["path"].nil? and File.file?(ENV["path"])
-      filename = ENV["path"]
+    if !ENV["foxml"].nil? and File.file?(ENV["foxml"])
+      filename = ENV["foxml"]
+      pid = ActiveFedora::FixtureLoader.import_to_fedora(filename)
+      ActiveFedora::FixtureLoader.index(pid)
     elsif !ENV["pid"].nil?
       pid = ENV["pid"]
-      if !ENV["path"].nil? and File.directory?(ENV["path"])
-        filename = File.join(ENV["path"], "#{pid.gsub(":","_")}.foxml.xml")
+      if !ENV["dir"].nil? and File.directory?(ENV["dir"])
+       loader = ActiveFedora::FixtureLoader.new(ENV["dir"])
       else
-        filename = File.join("spec","fixtures","#{pid.gsub(":","_")}.foxml.xml")
+       loader = ActiveFedora::FixtureLoader.new(File.join("spec", "fixtures"))
       end
+      loader.import_and_index(pid)
     else
-      puts "You must specify a path to the object or provide its pid.  Example: rake repo:load path=spec/fixtures/demo_12.foxml.xml"
+      puts "You must specify the foxml path or provide its pid.  Example: rake repo:load foxml=spec/fixtures/demo_12.foxml.xml"
     end
-    
-    if !filename.nil?
-      puts "Loading '#{filename}' in #{ActiveFedora::Base.connection_for_pid(pid).client.url}"
-      file = File.new(filename, "r")
-      result = ActiveFedora::Base.connection_for_pid(pid).ingest(:file=>file.read)
-      if result
-        puts "The object has been loaded as #{result.body}"
-      	if pid.nil?
-          pid = result.body
-        end
-        ActiveFedora::Base.find(pid).update_index
-      else
-        puts "Failed to load the object."
-      end
-    end    
-    
   end
 
 
