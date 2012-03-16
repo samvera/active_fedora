@@ -44,7 +44,7 @@ module ActiveFedora
     #     url: http://127.0.0.1:8983/fedora2
     #
 
-    attr_accessor :solr_config, :config_env
+    attr_accessor :config_env
     attr_reader :config_options, :fedora_config_path, :solr_config_path
 
     # The configuration hash that gets used by RSolr.connect
@@ -66,6 +66,10 @@ module ActiveFedora
       load_configs
       @fedora_config
     end
+    def solr_config
+      load_configs
+      @solr_config
+    end
 
     def config_reload!
       ActiveSupport::Deprecation.warn("config_reload! is not supported")
@@ -80,6 +84,7 @@ module ActiveFedora
     def reset!
       @config_loaded = false  #Force reload of configs
       @fedora_config = {}
+      @solr_config = {}
       @config_options = {}
       @predicate_config_path = nil
     end
@@ -92,48 +97,25 @@ module ActiveFedora
       return if config_loaded?
       @config_env = ActiveFedora.environment
       
-      config_path = get_config_path(:fedora)
-      @fedora_config = YAML.load(File.open(config_path))[@config_env] || {}
-      load_config(:solr)
+      load_fedora_config
+      load_solr_config
       @config_loaded = true
     end
 
-    def load_config(config_type)
-      config_path = get_config_path(config_type)
-      config_type = config_type.to_s
-      self.instance_variable_set "@#{config_type}_config_path".to_sym, config_path
-      config_path = self.send("#{config_type}_config_path".to_sym)
-
-      logger.info("#{config_type.upcase}: loading ActiveFedora.#{config_type}_config from #{File.expand_path(config_path)}")
-      config = YAML.load(File.open(config_path)).symbolize_keys
-      raise "The #{@config_env.to_sym} environment settings were not found in the #{config_type}.yml config.  If you already have a #{config_type}.yml file defined, make sure it defines settings for the #{@config_env} environment" unless config[@config_env.to_sym]
-    
-      config[:url] = determine_url(config_type,config)
-
-      self.instance_variable_set("@#{config_type}_config", config)
-      config
+    def load_fedora_config
+      return @fedora_config unless @fedora_config.empty?
+      config_path = get_config_path(:fedora)
+      @fedora_config = YAML.load(File.open(config_path))[@config_env] || {}
     end
 
-    # Determines and sets the fedora_config[:url] or solr_config[:url]
-    # @param [String] config_type Either 'fedora' or 'solr'
-    # @param [Hash] config The config hash 
-    # @return [String] the solr or fedora url
-    def determine_url(config_type,config)  
-      c = config[ActiveFedora.environment.to_sym]
-      c.symbolize_keys!
-      if config_type == "fedora"
-        url =  c[:url]
-        if url && !c[:user]
-          u = URI.parse url
-          c[:user] = u.user
-          c[:password] = u.password
-          c[:url] = "#{u.scheme}://#{u.host}:#{u.port}#{u.path}"
-          url = c[:url]
-        end
-        return url
-      else
-        return get_solr_url(c) if config_type == "solr"
-      end
+    def load_solr_config
+      return @solr_config unless @solr_config.empty?
+      @solr_config_path = get_config_path(:solr)
+
+      logger.info("ActiveFedora: loading solr config from #{File.expand_path(@solr_config_path)}")
+      config = YAML.load(File.open(@solr_config_path)).symbolize_keys
+      raise "The #{@config_env.to_sym} environment settings were not found in the solr.yml config.  If you already have a solr.yml file defined, make sure it defines settings for the #{@config_env} environment" unless config[@config_env.to_sym]
+      @solr_config = {:url=> get_solr_url(config[ActiveFedora.environment.to_sym].symbolize_keys)}
     end
 
     # Given the solr_config that's been loaded for this environment, 

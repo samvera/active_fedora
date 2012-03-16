@@ -20,6 +20,7 @@ HYDRA-758 Added ActiveFedora::Base.exists?
 Fixes for Ruby 1.9 compatibility
 HYDRA-741 Use fixture loader in repo:* rake tasks. Parameters changed to foxml and dir.
 rubydora to 0.5.7
+Lazily load solr config
 
 3.3.2
 HYDRA-745 No need to require :url be present on external datastreams
