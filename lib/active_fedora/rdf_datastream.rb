@@ -27,6 +27,11 @@ module ActiveFedora
         def config
           ActiveFedora::Predicates.predicate_config
         end
+        def prefix(name)
+          name = name.to_s unless name.is_a? String
+          pre = self.to_s.sub(/RDFDatastream$/, '').underscore
+          return "#{pre}__#{name}".to_sym
+        end
         def register_vocabularies(*vocabs)
           @vocabularies = {}
           vocabs.each do |v|
@@ -60,6 +65,7 @@ module ActiveFedora
           # needed for AF::Predicates integration & drives all other
           # functionality below
           vocab = vocab.to_s
+          name = self.prefix(name)
           if config
             if config[:predicate_mapping].has_key? vocab
               config[:predicate_mapping][vocab][name] = predicate
@@ -122,12 +128,6 @@ module ActiveFedora
         end
   
       end
-      # def empty?
-      #   @values.empty?
-      # end
-      # def to_s
-      #   @values.to_s
-      # end
     end
     
     include ModelMethods
@@ -156,7 +156,7 @@ module ActiveFedora
         vocabs_list = self.class.vocabularies.select { |ns, v| v.__prefix__ == vocab_sym }
         vocab = vocabs_list.first.first.to_s
         vocab_hash = self.class.config[:predicate_mapping][vocab]
-        mapped_names = vocab_hash.select {|k, v| v.to_s == name.to_s}
+        mapped_names = vocab_hash.select { |k, v| name.to_s == v.to_s && k.to_s.split("__")[0] == self.class.prefix(name).to_s.split("__")[0]}
         name = mapped_names.first.first.to_s
         next unless vocab_hash.has_key?("#{name}type".to_sym) and vocab_hash.has_key?("#{name}behaviors".to_sym)
         type = vocab_hash["#{name}type".to_sym]
@@ -184,7 +184,7 @@ module ActiveFedora
 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def find_predicate(predicate)
-      predicate = predicate.to_sym unless predicate.kind_of? RDF::URI
+      predicate = self.class.prefix(predicate) unless predicate.kind_of? RDF::URI
       result = ActiveFedora::Predicates.find_predicate(predicate)
       RDF::URI(result.reverse.join)
     end
@@ -212,7 +212,6 @@ module ActiveFedora
       ensure_loaded
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       graph.delete(predicate)
-
       args = [args] unless args.respond_to? :each
       args.each do |arg|
         graph.add(predicate, arg, true) unless arg.empty?
