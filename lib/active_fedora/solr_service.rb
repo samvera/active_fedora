@@ -81,6 +81,14 @@ module ActiveFedora
       result['response']['docs']
     end
 
+    def self.add(doc)
+      SolrService.instance.conn.add(doc)
+    end
+
+    def self.commit
+      SolrService.instance.conn.commit
+    end
+
   
 end #SolrService
 class SolrNotInitialized < StandardError;end
