@@ -75,12 +75,30 @@ describe ActiveFedora::SolrService do
   end
 
   describe ".query" do
-    it "should call rubydora" do 
+    it "should call solr" do 
       mock_conn = mock("Connection")
       stub_result = stub("Result")
       mock_conn.expects(:get).with('select', :params=>{:q=>'querytext', :qt=>'standard'}).returns(stub_result)
       ActiveFedora::SolrService.stubs(:instance =>stub("instance", :conn=>mock_conn))
       ActiveFedora::SolrService.query('querytext', :raw=>true).should == stub_result
+    end
+  end
+  describe ".add" do
+    it "should call solr" do 
+      mock_conn = mock("Connection")
+      doc = {'id' => '1234'}
+      mock_conn.expects(:add).with(doc)
+      ActiveFedora::SolrService.stubs(:instance =>stub("instance", :conn=>mock_conn))
+      ActiveFedora::SolrService.add(doc)
+    end
+  end
+  describe ".commit" do
+    it "should call solr" do 
+      mock_conn = mock("Connection")
+      doc = {'id' => '1234'}
+      mock_conn.expects(:commit)
+      ActiveFedora::SolrService.stubs(:instance =>stub("instance", :conn=>mock_conn))
+      ActiveFedora::SolrService.commit()
     end
   end
   

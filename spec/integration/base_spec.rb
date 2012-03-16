@@ -34,11 +34,31 @@ describe "has_metadata" do
   after :all do
     Object.send(:remove_const, :MockAFBaseRelationship)
   end
-  it "should save the datastream." do
-    obj = MockAFBaseRelationship.new
-    obj.foo.person = "bob"
-    obj.save
-    ActiveFedora::Base.find(obj.pid).foo.person.should == ['bob']
+  describe "a new document" do
+    before do
+      @obj = MockAFBaseRelationship.new
+      @obj.foo.person = "bob"
+      @obj.save
+    end
+    it "should save the datastream." do
+      ActiveFedora::Base.find(@obj.pid).foo.person.should == ['bob']
+      ActiveFedora::SolrService.query("id:#{@obj.pid.gsub(":", "\\:")}", :fl=>'id person_t').first.should == {"id"=>@obj.pid, 'person_t'=>['bob']}
+    end
+  end
+
+
+  describe "a changed document" do
+    before do
+      @obj = MockAFBaseRelationship.new
+      @obj.foo.person = "bob"
+      @obj.save
+      @obj.foo.person = "frank"
+      @obj.save
+    end
+    it "should save the datastream." do
+      ActiveFedora::Base.find(@obj.pid).foo.person.should == ['frank']
+      ActiveFedora::SolrService.query("id:#{@obj.pid.gsub(":", "\\:")}", :fl=>'id person_t').first.should == {"id"=>@obj.pid, 'person_t'=>['frank']}
+    end
   end
 
 end

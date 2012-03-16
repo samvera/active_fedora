@@ -35,11 +35,22 @@ describe ActiveFedora::FileConfigurator do
       subject.fedora_config.should == {"url"=>"http://127.0.0.1:8983/fedora-test", "password"=>"fedoraAdmin", "user"=>"fedoraAdmin"}
     end 
   end
+  describe "#solr_config" do
+    before do
+      subject.reset!
+    end
+    it "should trigger configuration to load" do
+      subject.solr_config.should == {:url=>"http://localhost:8983/solr/test"}
+    end 
+  end
 
   describe "#reset!" do
     before { subject.reset! }
     it "should clear @fedora_config" do
       subject.instance_variable_get(:@fedora_config).should == {} 
+    end
+    it "should clear @solr_config" do
+      subject.instance_variable_get(:@solr_config).should == {} 
     end
     it "should clear @config_options" do
       subject.instance_variable_get(:@config_options).should == {}
@@ -127,25 +138,13 @@ describe ActiveFedora::FileConfigurator do
 
     end
 
-    describe "#determine url" do
-      it "should support config['environment']['url'] if config_type is fedora" do
-        config = {:test=> {:url=>"http://fedoraAdmin:fedorAdmin@localhost:8983/fedora"}}
-        subject.determine_url("fedora",config).should eql("http://localhost:8983/fedora")
-      end
-
-      it "should call #get_solr_url to determine the solr url if config_type is solr" do
-        config = {:test=>{:default => "http://default.solr:8983"}}
-        subject.expects(:get_solr_url).with(config[:test]).returns("http://default.solr:8983")
-        subject.determine_url("solr",config).should eql("http://default.solr:8983")
-      end
-    end
-
-    describe "load_config" do
+    describe "load_solr_config" do
       it "should load the file specified in solr_config_path" do
-        subject.expects(:solr_config_path).returns("/path/to/solr.yml")
+        subject.expects(:get_config_path).with(:solr).returns("/path/to/solr.yml")
+        subject.expects(:load_fedora_config)
         File.expects(:open).with("/path/to/solr.yml").returns("development:\n  default:\n    url: http://devsolr:8983\ntest:\n  default:\n    url: http://mysolr:8080")
-        subject.load_config(:solr).should eql({:url=>"http://mysolr:8080",:development=>{"default"=>{"url"=>"http://devsolr:8983"}}, :test=>{:default=>{"url"=>"http://mysolr:8080"}}})
-        subject.solr_config.should eql({:url=>"http://mysolr:8080",:development=>{"default"=>{"url"=>"http://devsolr:8983"}}, :test=>{:default=>{"url"=>"http://mysolr:8080"}}})
+        subject.load_solr_config.should == {:url=>"http://mysolr:8080"}
+        subject.solr_config.should == {:url=>"http://mysolr:8080"}
       end
     end
 
@@ -155,8 +154,6 @@ describe ActiveFedora::FileConfigurator do
           subject.instance_variable_set :@config_loaded, nil
         end
         it "should load the fedora and solr configs" do
-          #ActiveFedora.expects(:load_config).with(:fedora)
-          subject.expects(:load_config).with(:solr)
           subject.config_loaded?.should be_false
           subject.load_configs
           subject.config_loaded?.should be_true
