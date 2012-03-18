@@ -17,8 +17,9 @@ module ActiveFedora
       @datastreams = {}
       
       dsids = @solr_doc.keys.collect { |k| k.scan(/^(.+)_dsProfile_/).flatten.first }.compact.uniq
-      missing = dsids-klass.ds_specs.keys
+      missing = dsids - klass.ds_specs.keys
       missing.each do |dsid|
+        #Initialize the datastreams that are in the solr document, but not found in the classes spec.
         mime_key = ActiveFedora::SolrService.solr_name("#{dsid}_dsProfile_dsMIME",:symbol)
         mime_type = Array(@solr_doc[mime_key]).first
         ds_class = mime_type =~ /[\/\+]xml$/ ? NokogiriDatastream : Datastream

@@ -372,7 +372,7 @@ module ActiveFedora
         ActiveFedora::Base
       end
      
-      obj = klass.allocate.init_with(SolrDigitalObject.new(solr_doc, self))
+      obj = klass.allocate.init_with(SolrDigitalObject.new(solr_doc, klass))
       #set by default to load any dependent relationship objects from solr as well
       #need to call rels_ext once so it exists when iterating over datastreams
       obj.rels_ext

@@ -48,7 +48,6 @@ module ActiveFedora
     attr_reader :config_options, :fedora_config_path, :solr_config_path
 
     # The configuration hash that gets used by RSolr.connect
-    # @solr_config ||= {}
     def initialize
       reset!
     end
