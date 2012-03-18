@@ -8,7 +8,7 @@ Improved loading from solr
 RDF datastreams
 Replaced solr-ruby with rsolr. Note: remove any calls to .hits
 load_instance is now deprecated, replaced with find
-Find always casts to the appropriate object.
+Find and load_instance_from_solr always instantiate the model defined in the object. 
 Run a stub :environment task in the fixture loading rake tasks (which is overridden by rails)
 Find raises ObjectNotFoundError when the object isn't found
 Removed dependency on solrizer-fedora

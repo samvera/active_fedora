@@ -176,10 +176,9 @@ module ActiveFedora
       values = []
       solr_doc = @internal_solr_doc
       return values if solr_doc.nil?
-      begin
-       term = self.class.terminology.retrieve_term(*OM.pointers_to_flat_array(term_pointer, false))
-       #check if hierarchical term pointer
-       if is_hierarchical_term_pointer?(*term_pointer)
+      term = self.class.terminology.retrieve_term(*OM.pointers_to_flat_array(term_pointer, false))
+      #check if hierarchical term pointer
+      if is_hierarchical_term_pointer?(*term_pointer)
          # if we are hierarchical need to detect all possible node values that exist
          # we do this by building up the possible solr names parent by parent and/or child by child
          # if an index is supplied for any node in the pointer it will be used
@@ -227,7 +226,7 @@ module ActiveFedora
              value.is_a?(Array) ? values.concat(value) : values << value
            end
          end
-       else
+      else
          #this is not hierarchical and we can simply look for the solr name created using the terms without any indexes
          generic_field_name_base = OM::XML::Terminology.term_generic_name(*term_pointer)
          generic_field_name = generate_solr_symbol(generic_field_name_base, term.data_type)
@@ -235,10 +234,6 @@ module ActiveFedora
          unless value.nil?
            value.is_a?(Array) ? values.concat(value) : values << value
          end
-       end
-      rescue Exception => e
-        #just do nothing since term does not exist and return emtpy values
-        raise e
       end
       values
     end

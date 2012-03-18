@@ -101,11 +101,6 @@ describe ActiveFedora::Model do
     end
   end
   
-  
-  it 'should provide #find_by_solr' do
-    SpecModel::Basic.should respond_to(:find)
-  end
-  
   describe '#find_by_solr' do
     it "(:all) should query solr for all objects with :active_fedora_model_s of self.class and return a Solr result" do
       mock_response = mock("SolrResponse")

@@ -58,4 +58,10 @@ describe ActiveFedora::Model do
     end
   end
   
+  describe "#load_instance_from_solr" do
+    describe "with a valid pid" do
+      subject { ActiveFedora::Base.load_instance_from_solr('hydrangea:fixture_mods_article1') }
+      it { should be_instance_of HydrangeaArticle}
+    end
+  end
 end

@@ -1,31 +1,9 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-
-  before(:all) do
-    class HydrangeaArticle < ActiveFedora::Base
-      include ActiveFedora::Relationships
-      has_relationship "parts", :is_part_of, :inbound => true
-
-      # Uses the Hydra Rights Metadata Schema for tracking access permissions & copyright
-      # has_metadata :name => "rightsMetadata", :type => Hydra::RightsMetadata 
-
-      # Uses the Hydra MODS Article profile for tracking most of the descriptive metadata
-      has_metadata :name => "descMetadata", :type => Hydra::ModsArticleDatastream 
-
-      # A place to put extra metadata values
-      has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|
-        m.field 'collection', :string
-      end
-    end
-  end
-  
-  before(:each) do
-    @test_article = HydrangeaArticle.find("hydrangea:fixture_mods_article1")
-  end
-  
   describe ".update_indexed_attributes" do
     before(:each) do
+      @test_article = HydrangeaArticle.find("hydrangea:fixture_mods_article1")
       @test_article.update_indexed_attributes({[{:person=>0}, :first_name] => "GIVEN NAMES"}, :datastreams=>"descMetadata")
     end
     after(:each) do

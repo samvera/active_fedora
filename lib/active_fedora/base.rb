@@ -316,7 +316,6 @@ module ActiveFedora
     end
 
     
-    # ** EXPERIMENTAL **
     # This method adapts the inner_object to a new ActiveFedora::Base implementation
     # This is intended to minimize redundant interactions with Fedora
     def adapt_to(klass)
@@ -346,8 +345,6 @@ module ActiveFedora
       self.init_with DigitalObject.find(self.class,self.pid)
     end
     
-    # ** EXPERIMENTAL **
-    #
     # This method can be used instead of ActiveFedora::Model::ClassMethods.find.  
     # It works similarly except it populates an object from Solr instead of Fedora.
     # It is most useful for objects used in read-only displays in order to speed up loading time.  If only
@@ -369,8 +366,13 @@ module ActiveFedora
       else
         raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
       end
+      klass = if class_str = solr_doc['active_fedora_model_s']
+        class_str.first.constantize
+      else
+        ActiveFedora::Base
+      end
      
-      obj = self.allocate.init_with(SolrDigitalObject.new(solr_doc, self))
+      obj = klass.allocate.init_with(SolrDigitalObject.new(solr_doc, self))
       #set by default to load any dependent relationship objects from solr as well
       #need to call rels_ext once so it exists when iterating over datastreams
       obj.rels_ext
@@ -475,7 +477,7 @@ module ActiveFedora
     include Associations
     include NestedAttributes
     include Reflection
-    include NamedRelationships
+    include NamedRelationships ##TODO don't include by default
   end
 
 end

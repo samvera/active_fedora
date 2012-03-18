@@ -248,22 +248,23 @@ module ActiveFedora
     def field(name, tupe, opts={})
       #TODO add term to terminology
       @fields[name.to_s.to_sym]={:type=>tupe, :values=>[]}.merge(opts)
-      eval <<-EOS
-        def #{name}_values=(arg)
+      #eval <<-EOS
+      (class << self; self; end).class_eval do
+        define_method "#{name}_values=".to_sym do |arg|
           ensure_xml_loaded  
           @fields["#{name.to_s}".to_sym][:values]=[arg].flatten
           self.dirty=true
         end
-        def #{name}_values
+        define_method "#{name}_values".to_sym do 
           ensure_xml_loaded  
           @fields["#{name}".to_sym][:values]
         end
-        def #{name}_append(arg)
+        define_method "#{name}_append".to_sym do |arg|
           ensure_xml_loaded  
           @fields["#{name}".to_sym][:values] << arg
           self.dirty =true
         end
-      EOS
+      end
     end
 
   end
