@@ -359,10 +359,10 @@ module ActiveFedora
     def self.load_instance_from_solr(pid,solr_doc=nil)
       if solr_doc.nil?
         result = find_by_solr(pid)
-        raise "Object #{pid} not found in solr" if result.nil?
+        raise ActiveFedora::ObjectNotFoundError, "Object #{pid} not found in solr" if result.nil?
         solr_doc = result.first
         #double check pid and id in record match
-        raise "Object #{pid} not found in Solr" unless !result.nil? && !solr_doc.nil? && pid == solr_doc[SOLR_DOCUMENT_ID]
+        raise ActiveFedora::ObjectNotFoundError, "Object #{pid} not found in Solr" unless !result.nil? && !solr_doc.nil? && pid == solr_doc[SOLR_DOCUMENT_ID]
       else
         raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
       end

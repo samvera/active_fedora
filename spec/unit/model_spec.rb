@@ -154,9 +154,16 @@ describe ActiveFedora::Model do
       its(:to_class_uri) {should == 'info:fedora/afmodel:SpecModel_CamelCased-TEST-SUFFIX' }
     end
   
-    
-    it "should turn an afmodel URI into a Model class name" do
-      ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:SpecModel_CamelCased').should == ['SpecModel::CamelCased', 'afmodel']
+    describe ".classname_from_uri" do 
+      it "should turn an afmodel URI into a Model class name" do
+        ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:SpecModel_CamelCased').should == ['SpecModel::CamelCased', 'afmodel']
+      end
+      it "should not change plurality" do
+        ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:MyMetadata').should == ['MyMetadata', 'afmodel']
+      end
+      it "should capitalize the first letter" do
+        ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:image').should == ['Image', 'afmodel']
+      end
     end
   end
   
