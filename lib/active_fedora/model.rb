@@ -5,8 +5,6 @@ module ActiveFedora
   # This module mixes various methods into the including class,
   # much in the way ActiveRecord does.  
   module Model 
-    DEFAULT_NS = 'afmodel'
-
     def self.included(klass) # :nodoc:
       klass.extend(ClassMethods)
     end
@@ -36,7 +34,7 @@ module ActiveFedora
         result = Kernel.const_get(model_value)
       end
       unless result.nil?
-        model_ns = (result.respond_to? :pid_namespace) ? result.pid_namespace : DEFAULT_NS
+        model_ns = (result.respond_to? :pid_namespace) ? result.pid_namespace : ContentModel::CMODEL_NAMESPACE
         if model_ns != pid_ns
           logger.warn "Model class namespace '#{model_ns}' does not match uri: '#{uri}'"
         end
