@@ -40,7 +40,9 @@
     :is_subset_of: isSubsetOf
     :is_topic_of: isTopicOf
   info:fedora/fedora-system:def/model#:
-    :has_model: hasModel
+    :is_contractor_of: isContractorOf
+    :is_deployment_of: isDeploymentOf
     :has_service: hasService
+    :has_model: hasModel
   http://www.openarchives.org/OAI/2.0/: 
     :oai_item_id: itemID
