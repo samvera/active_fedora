@@ -260,7 +260,7 @@ module ActiveFedora
     ##
     # Get the subject for this rdf/xml datastream
     def subject
-      self.class.subject.call(self)
+      @subject ||= self.class.subject.call(self)
     end
     
     # Populate a RDFDatastream object based on the "datastream" content 
