@@ -47,6 +47,7 @@ module ActiveFedora #:nodoc:
     autoload :Persistence
     autoload :QualifiedDublinCoreDatastream
     autoload :RDFDatastream
+    autoload :RdfxmlRDFDatastream
     autoload :RelsExtDatastream
     autoload :ServiceDefinitions
     autoload :SemanticNode
