@@ -4,7 +4,7 @@ module ActiveFedora
     attr_accessor :relationships, :dirty
 
 
-    def initialize
+    def initialize 
       self.dirty = false
       self.relationships = Hash.new { |h, k| h[k] = [] }
     end
