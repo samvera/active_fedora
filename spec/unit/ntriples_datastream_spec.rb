@@ -18,6 +18,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.stubs(:pid => 'test:1')
       @subject.stubs(:new? => false)
     end
+
+    it "should have a subject" do
+      @subject.subject.should == "info:fedora/test:1"
+    end
     it "should have controlGroup" do
       @subject.controlGroup.should == 'M'
     end
@@ -52,6 +56,30 @@ describe ActiveFedora::NtriplesRDFDatastream do
     it "should delete fields" do
       @subject.related_url.delete("http://google.com/")
       @subject.related_url.should == []
+    end
+  end
+
+  describe "an instance with a custom subject" do
+    before do 
+      class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+        register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
+        subject { |ds| "info:fedora/#{ds.pid}/content" }
+        map_predicates do |map|
+          map.created(:in => RDF::DC)
+          map.title(:in => RDF::DC)
+          map.publisher(:in => RDF::DC)
+          map.based_near(:in => RDF::FOAF)
+          map.related_url(:to => "seeAlso", :in => RDF::RDFS)
+        end
+      end
+      @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
+      @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
+      @subject.stubs(:pid => 'test:1')
+      @subject.stubs(:new? => false)
+    end
+
+    it "should have fields" do
+      @subject.title.should == ["Title of datastream"]
     end
   end
 
