@@ -20,7 +20,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
 
     it "should have a subject" do
-      @subject.subject.should == "info:fedora/test:1"
+      @subject.rdf_subject.should == "info:fedora/test:1"
     end
     it "should have controlGroup" do
       @subject.controlGroup.should == 'M'
@@ -63,7 +63,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     before do 
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
-        subject { |ds| "info:fedora/#{ds.pid}/content" }
+        rdf_subject { |ds| "info:fedora/#{ds.pid}/content" }
         map_predicates do |map|
           map.created(:in => RDF::DC)
           map.title(:in => RDF::DC)
@@ -80,6 +80,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
     it "should have fields" do
       @subject.title.should == ["Title of datastream"]
+    end
+
+    it "should have a custom subject" do
+      @subject.rdf_subject.should == 'info:fedora/test:1/content'
     end
   end
 

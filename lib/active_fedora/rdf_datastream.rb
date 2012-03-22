@@ -37,7 +37,7 @@ module ActiveFedora
         # Register a ruby block that evaluates to the subject of the graph
         # By default, the block returns the current object's pid
         # @yield [ds] 'ds' is the datastream instance
-        def subject &block
+        def rdf_subject &block
           if block_given?
              return @subject_block = block
           end
@@ -260,8 +260,8 @@ module ActiveFedora
 
     ##
     # Get the subject for this rdf/xml datastream
-    def subject
-      @subject ||= self.class.subject.call(self)
+    def rdf_subject
+      @subject ||= self.class.rdf_subject.call(self)
     end
     
     # Populate a RDFDatastream object based on the "datastream" content 
@@ -271,7 +271,7 @@ module ActiveFedora
       unless data.nil?
         RDF::Reader.for(serialization_format).new(data) do |reader|
           reader.each_statement do |statement|
-            next unless statement.subject == subject
+            next unless statement.subject == rdf_subject
             literal = statement.object.kind_of?(RDF::Literal)
             object = literal ? statement.object.value : statement.object.to_str
             graph.add(statement.predicate, object, literal)
@@ -285,7 +285,7 @@ module ActiveFedora
     # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
     def serialize
       out = RDF::Writer.for(serialization_format).buffer do |writer|
-        graph.to_graph(subject).each_statement do |statement|
+        graph.to_graph(rdf_subject).each_statement do |statement|
           writer << statement
         end
       end
