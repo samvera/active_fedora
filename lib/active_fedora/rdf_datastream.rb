@@ -48,7 +48,7 @@ module ActiveFedora
         def register_vocabularies(*vocabs)
           @vocabularies = {}
           vocabs.each do |v|
-            if v.respond_to? :property and v.respond_to? :to_uri
+            if v.is_a?(RDF::Vocabulary) or (v.respond_to? :property and v.respond_to? :to_uri)
               @vocabularies[v.to_uri] = v 
             else
               raise "not an RDF vocabulary: #{v}"
@@ -260,7 +260,7 @@ module ActiveFedora
     ##
     # Get the subject for this rdf/xml datastream
     def subject
-      self.class.subject.call(self)
+      @subject ||= self.class.subject.call(self)
     end
     
     # Populate a RDFDatastream object based on the "datastream" content 
