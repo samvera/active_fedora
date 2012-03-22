@@ -166,14 +166,15 @@ module ActiveFedora
       field_map = {}
       graph.relationships.each do |predicate, values|
         vocab_sym, name = predicate.qname
-        vocabs_list = self.class.vocabularies.select { |ns, v| v.__prefix__ == vocab_sym }
-        vocab = vocabs_list.first.first.to_s
-        vocab_hash = self.class.config[:predicate_mapping][vocab]
-        mapped_names = vocab_hash.select { |k, v| name.to_s == v.to_s && k.to_s.split("__")[0] == self.class.prefix(name).to_s.split("__")[0]}
-        name = mapped_names.first.first.to_s
-        next unless vocab_hash.has_key?("#{name}type".to_sym) and vocab_hash.has_key?("#{name}behaviors".to_sym)
-        type = vocab_hash["#{name}type".to_sym]
-        behaviors = vocab_hash["#{name}behaviors".to_sym]
+        uri, vocab = self.class.vocabularies.select { |ns, v| v.__prefix__ == vocab_sym }.first
+        next unless vocab
+
+        config = self.class.config[:predicate_mapping][vocab.to_s]
+
+        name, indexed_as = config.select { |k, v| name.to_s == v.to_s && k.to_s.split("__")[0] == self.class.prefix(name).to_s.split("__")[0]}.first
+        next unless name and config.has_key?("#{name}type".to_sym) and config.has_key?("#{name}behaviors".to_sym)
+        type = config["#{name}type".to_sym]
+        behaviors = config["#{name}behaviors".to_sym]
         field_map[name.to_sym] = {:values => values.map {|v| v.to_s}, :type => type, :behaviors => behaviors}
       end
       field_map
