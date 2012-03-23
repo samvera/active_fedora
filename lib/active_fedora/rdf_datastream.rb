@@ -217,7 +217,7 @@ module ActiveFedora
       return if results.nil?
       values = []
       results.each do |object|
-        values << (object.kind_of?(RDF::Literal) ? object.value : object.to_str)
+        values << (object.kind_of?(RDF::Literal) ? object.value : object.to_s)
       end
       TermProxy.new(graph, predicate, values)
     end
@@ -275,7 +275,7 @@ module ActiveFedora
           reader.each_statement do |statement|
             next unless statement.subject == rdf_subject
             literal = statement.object.kind_of?(RDF::Literal)
-            object = literal ? statement.object.value : statement.object.to_str
+            object = literal ? statement.object.value : statement.object.to_s
             graph.add(statement.predicate, object, literal)
           end
         end
