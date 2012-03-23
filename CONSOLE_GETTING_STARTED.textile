@@ -88,9 +88,7 @@ h2. Load a Fixture Object To Play With
 The ActiveFedora code includes sample Fedora objects (as foxml files) that you can load into a Fedora repository and play around with.  Here we will load the one called hydrangea_fixture_mods_article1.foxml.xml:
 
 <pre>
-filename = File.join(File.dirname(__FILE__),"spec","fixtures", "hydrangea_fixture_mods_article1.foxml.xml")
-file = File.new(filename, "r")
-result = foxml = Fedora::Repository.instance.ingest(file.read)
+ActiveFedora::FixtureLoader.new(File.join(File.dirname(__FILE__),"spec","fixtures")).import_and_index('hydrangea:fixture_mods_article1')
 </pre>
 
 If you get an error that starts with the lines below, this means that you already have a copy of that object in fedora.
@@ -102,7 +100,7 @@ If you get an error that starts with the lines below, this means that you alread
 The easiest way to delete an object from Fedora is to use the following line.  Note that this will raise an error if the object didn't exist in the first place.
 
 <pre>
-  ActiveFedora::Base.load_instance("hydrangea:fixture_mods_article1").delete
+  ActiveFedora::Base.find("hydrangea:fixture_mods_article1").delete
 </pre>
 
 
