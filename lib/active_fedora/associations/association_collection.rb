@@ -120,7 +120,7 @@ module ActiveFedora
                 @target = find_target
               end
             end
-          rescue ObjectNotFoundError # TODO this isn't ever thrown. Maybe check for nil instead
+          rescue ObjectNotFoundError
             reset
           end
         end

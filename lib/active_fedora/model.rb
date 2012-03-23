@@ -275,7 +275,7 @@ module ActiveFedora
       #   Book.find_one("hydra:dataset1") 
       def find_one(pid)
         inner = DigitalObject.find(self, pid)
-        raise ActiveFedora::ObjectNotFoundError if inner.new?
+        raise ActiveFedora::ObjectNotFoundError, "Unable to find '#{pid}' in fedora" if inner.new?
         af_base = self.allocate.init_with(inner)
         the_model = ActiveFedora::ContentModel.known_models_for( af_base ).first
         if af_base.class != the_model
