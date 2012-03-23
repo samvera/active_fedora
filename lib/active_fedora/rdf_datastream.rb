@@ -163,6 +163,7 @@ module ActiveFedora
 
     # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
     def fields
+    ensure_loaded
       field_map = {}
       graph.relationships.each do |predicate, values|
         vocab_sym, name = predicate.qname
@@ -181,6 +182,7 @@ module ActiveFedora
     end
 
     def to_solr(solr_doc = Hash.new) # :nodoc:
+    ensure_loaded
       fields.each do |field_key, field_info|
         values = field_info.fetch(:values, false)
         if values
