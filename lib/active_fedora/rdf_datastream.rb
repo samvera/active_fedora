@@ -163,6 +163,7 @@ module ActiveFedora
 
     # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
     def fields
+    ensure_loaded
       field_map = {}
       graph.relationships.each do |predicate, values|
         vocab_sym, name = predicate.qname
@@ -181,6 +182,7 @@ module ActiveFedora
     end
 
     def to_solr(solr_doc = Hash.new) # :nodoc:
+    ensure_loaded
       fields.each do |field_key, field_info|
         values = field_info.fetch(:values, false)
         if values
@@ -215,7 +217,7 @@ module ActiveFedora
       return if results.nil?
       values = []
       results.each do |object|
-        values << (object.kind_of?(RDF::Literal) ? object.value : object.to_str)
+        values << (object.kind_of?(RDF::Literal) ? object.value : object.to_s)
       end
       TermProxy.new(graph, predicate, values)
     end
@@ -273,7 +275,7 @@ module ActiveFedora
           reader.each_statement do |statement|
             next unless statement.subject == rdf_subject
             literal = statement.object.kind_of?(RDF::Literal)
-            object = literal ? statement.object.value : statement.object.to_str
+            object = literal ? statement.object.value : statement.object.to_s
             graph.add(statement.predicate, object, literal)
           end
         end
