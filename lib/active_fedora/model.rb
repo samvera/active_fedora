@@ -94,9 +94,13 @@ module ActiveFedora
         "info:fedora/#{namespace}:#{ContentModel.sanitized_class_name(self)}#{pid_suffix}" 
       end
       
-      # Takes :all or a pid as arguments
       # Returns an Array of objects of the Class that +find+ is being 
       # called on
+      #
+      # @param[String,Symbol] either a pid or :all  
+      # @param [Hash] opts the options to create a message with.
+      # @option opts [Integer] :rows when :all is passed, the maximum number of rows to load from solr
+      # @option opts [Boolean] :cast when true, examine the model and cast it to the first known cModel
       def find(args, opts={})
         opts = {:rows=>25}.merge(opts)
         if args == :all
@@ -105,10 +109,10 @@ module ActiveFedora
           hits = SolrService.query(q, :rows=>opts[:rows]) 
           return hits.map do |hit|
              pid = hit[SOLR_DOCUMENT_ID]
-             find_one(pid)
+             find_one(pid, opts[:cast])
           end
         elsif args.class == String
-          return find_one(args)
+          return find_one(args, opts[:cast])
         end
       end
 
@@ -270,18 +274,15 @@ module ActiveFedora
       # using #{ActiveFedora::ContentModel.known_models_for} and cast to that class.
       # Raises a ObjectNotFoundError if the object is not found.
       # @param [String] pid of the object to load
+      # @param [Boolean] cast when true, cast the found object to the class of the first known model defined in it's RELS-EXT
       #
       # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel info:fedora/afmodel:Dataset), return a Dataset object (not a Book).
       #   Book.find_one("hydra:dataset1") 
-      def find_one(pid)
+      def find_one(pid, cast=false)
         inner = DigitalObject.find(self, pid)
         raise ActiveFedora::ObjectNotFoundError, "Unable to find '#{pid}' in fedora" if inner.new?
         af_base = self.allocate.init_with(inner)
-        the_model = ActiveFedora::ContentModel.known_models_for( af_base ).first
-        if af_base.class != the_model
-          return af_base.adapt_to(the_model)
-        end
-        af_base
+        cast ? af_base.adapt_to_cmodel : af_base
       end
 
     end

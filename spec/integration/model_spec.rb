@@ -42,9 +42,13 @@ describe ActiveFedora::Model do
         end
       end
     end
-    describe "#find with a valid pid" do
-      subject { ActiveFedora::Base.find('hydrangea:fixture_mods_article1') }
+    describe "#find with a valid pid with cast" do
+      subject { ActiveFedora::Base.find('hydrangea:fixture_mods_article1', :cast=>true) }
       it { should be_instance_of HydrangeaArticle}
+    end
+    describe "#find with a valid pid without cast" do
+      subject { ActiveFedora::Base.find('hydrangea:fixture_mods_article1') }
+      it { should be_instance_of ActiveFedora::Base}
     end
   end
 

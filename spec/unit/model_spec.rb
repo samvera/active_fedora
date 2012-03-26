@@ -69,21 +69,29 @@ describe ActiveFedora::Model do
   end
   
   describe '#find' do
-    it "(:all) should query solr for all objects with :active_fedora_model_s of self.class" do
-      ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :rows=>1001).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
-      SpecModel::Basic.expects(:find_one).with("changeme:30").returns("Fake Object1")
-      SpecModel::Basic.expects(:find_one).with("changeme:22").returns("Fake Object2")
-      SpecModel::Basic.find(:all, :rows=>1001).should == ["Fake Object1", "Fake Object2"]
+    describe "without :cast" do
+      it "(:all) should query solr for all objects with :active_fedora_model_s of self.class" do
+        ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :rows=>1001).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
+        SpecModel::Basic.expects(:find_one).with("changeme:30", nil).returns("Fake Object1")
+        SpecModel::Basic.expects(:find_one).with("changeme:22", nil).returns("Fake Object2")
+        SpecModel::Basic.find(:all, :rows=>1001).should == ["Fake Object1", "Fake Object2"]
+      end
+      it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
+        SpecModel::Basic.any_instance.expects(:init_with).returns(SpecModel::Basic.new)
+        ActiveFedora::DigitalObject.expects(:find).returns(stub("inner obj", :'new?'=>false))
+        SpecModel::Basic.find("_PID_").should be_a SpecModel::Basic
+      end
+      it "should raise an exception if it is not found" do
+        SpecModel::Basic.expects(:connection_for_pid).with("_PID_")
+        lambda {SpecModel::Basic.find("_PID_")}.should raise_error ActiveFedora::ObjectNotFoundError
+      end
     end
-    it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
-      ActiveFedora::ContentModel.expects(:known_models_for).returns([SpecModel::Basic])
-      SpecModel::Basic.any_instance.expects(:init_with).returns(mock("Model", :adapt_to=>SpecModel::Basic ))
-      ActiveFedora::DigitalObject.expects(:find).returns(stub("inner obj", :'new?'=>false))
-      SpecModel::Basic.find("_PID_")
-    end
-    it "should raise an exception if it is not found" do
-      SpecModel::Basic.expects(:connection_for_pid).with("_PID_")
-      lambda {SpecModel::Basic.find("_PID_")}.should raise_error ActiveFedora::ObjectNotFoundError
+    describe "with :cast" do
+      it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
+        SpecModel::Basic.any_instance.expects(:init_with).returns(mock("Model", :adapt_to_cmodel=>SpecModel::Basic.new ))
+        ActiveFedora::DigitalObject.expects(:find).returns(stub("inner obj", :'new?'=>false))
+        SpecModel::Basic.find("_PID_", :cast=>true)
+      end
     end
   end
 

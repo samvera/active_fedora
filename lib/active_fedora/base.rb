@@ -252,7 +252,8 @@ module ActiveFedora
       # end
       
       datastreams.each_value do |ds|  
-        ds.to_xml(fields_xml) if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.kind_of?(ActiveFedora::RelsExtDatastream)
+        ds.to_xml(fields_xml) if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper)
+        ds.to_rels_ext if ds.kind_of?(ActiveFedora::RelsExtDatastream)
       end
       return xml.to_s
     end
@@ -323,6 +324,12 @@ module ActiveFedora
         raise "Cannot adapt #{self.class.name} to #{klass.name}: Not a ActiveFedora::Base subclass"
       end
       klass.allocate.init_with(inner_object)
+    end
+
+    # Examine the :has_model assertions in the RELS-EXT.  Adapt this class to the first first known model
+    def adapt_to_cmodel
+      the_model = ActiveFedora::ContentModel.known_models_for( self ).first
+      self.class != the_model ? self.adapt_to(the_model) : self
     end
     
     # ** EXPERIMENTAL **

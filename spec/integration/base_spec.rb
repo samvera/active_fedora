@@ -41,7 +41,7 @@ describe "has_metadata" do
       @obj.save
     end
     it "should save the datastream." do
-      ActiveFedora::Base.find(@obj.pid).foo.person.should == ['bob']
+      ActiveFedora::Base.find(@obj.pid, :cast=>true).foo.person.should == ['bob']
       ActiveFedora::SolrService.query("id:#{@obj.pid.gsub(":", "\\:")}", :fl=>'id person_t').first.should == {"id"=>@obj.pid, 'person_t'=>['bob']}
     end
   end
@@ -56,7 +56,7 @@ describe "has_metadata" do
       @obj.save
     end
     it "should save the datastream." do
-      ActiveFedora::Base.find(@obj.pid).foo.person.should == ['frank']
+      ActiveFedora::Base.find(@obj.pid, :cast=>true).foo.person.should == ['frank']
       ActiveFedora::SolrService.query("id:#{@obj.pid.gsub(":", "\\:")}", :fl=>'id person_t').first.should == {"id"=>@obj.pid, 'person_t'=>['frank']}
     end
   end

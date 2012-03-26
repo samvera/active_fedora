@@ -505,6 +505,18 @@ describe ActiveFedora::Base do
       end
     end
 
+    describe ".adapt_to_cmodel" do
+      subject { FooHistory.new } 
+      it "should cast when a cmodel is found" do
+        ActiveFedora::ContentModel.expects(:known_models_for).with( subject).returns([FooAdaptation])
+        subject.adapt_to_cmodel.should be_kind_of FooAdaptation
+      end
+      it "should not cast when a cmodel is same as the class" do
+        ActiveFedora::ContentModel.expects(:known_models_for).with( subject).returns([FooHistory])
+        subject.adapt_to_cmodel.should === subject
+      end
+    end
+
     describe ".to_xml" do
       it "should provide .to_xml" do
         @test_object.should respond_to(:to_xml)
