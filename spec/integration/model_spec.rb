@@ -1,11 +1,6 @@
 require 'spec_helper'
-#require 'spec/samples/models/hydrangea_article'
-
-include ActiveFedora::Model
-include Mocha::API
 
 describe ActiveFedora::Model do
-  
   
   before(:each) do 
     module ModelIntegrationSpec

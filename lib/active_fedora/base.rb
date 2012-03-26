@@ -1,9 +1,3 @@
-require "solrizer"
-require 'nokogiri'
-require "loggable"
-require 'active_fedora/datastream_hash'
-
-
 SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 
