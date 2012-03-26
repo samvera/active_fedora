@@ -9,7 +9,7 @@ PATH
       mime-types (>= 1.16)
       multipart-post (= 1.1.2)
       nokogiri
-      om (>= 1.5.3)
+      om (~> 1.6.0.rc1)
       rdf
       rdf-rdfxml (= 0.3.5)
       rsolr
@@ -63,7 +63,7 @@ GEM
     multipart-post (1.1.2)
     nokogiri (1.5.2)
     nori (1.1.0)
-    om (1.5.3)
+    om (1.6.0.rc1)
       mediashelf-loggable
       nokogiri (>= 1.4.2)
     rack (1.4.1)
