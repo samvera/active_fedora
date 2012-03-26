@@ -1,4 +1,4 @@
-require "spec/samples/marpa-dc_datastream.rb"
+require "samples/marpa-dc_datastream.rb"
 
 # This is an example of an ActiveFedora Model
 #

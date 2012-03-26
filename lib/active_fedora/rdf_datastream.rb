@@ -46,7 +46,7 @@ module ActiveFedora
         end
 
         def register_vocabularies(*vocabs)
-          @vocabularies = {}
+          @vocabularies ||= {}
           vocabs.each do |v|
             if v.is_a?(RDF::Vocabulary) or (v.respond_to? :property and v.respond_to? :to_uri)
               @vocabularies[v.to_uri] = v 
@@ -57,6 +57,7 @@ module ActiveFedora
           ActiveFedora::Predicates.vocabularies(@vocabularies)
           @vocabularies
         end
+
         def map_predicates(&block)
           yield self
         end
