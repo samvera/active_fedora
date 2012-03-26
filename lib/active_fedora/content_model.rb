@@ -16,10 +16,15 @@ module ActiveFedora
       klass.name.gsub(/(::)/, '_')
     end
     
+    # list all of the models asserted by the provided object
     def self.models_asserted_by(obj)
       obj.relationships(:has_model)
     end
     
+    # returns an array of the model classes that are defined in the current 
+    # application that the given object asserts (ie. if the object asserts 
+    # a StreamingVideo model but the application doesn't define a 
+    # StreamingVideo model, it will be excluded from this list.
     def self.known_models_for(obj)
       models_array = []
       models_asserted_by( obj ).each do |model_uri|
