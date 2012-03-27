@@ -40,8 +40,17 @@ module ActiveFedora
     end
 
     def ng_xml 
-      ensure_xml_loaded
-      return @ng_xml
+      @ng_xml ||= begin
+      self.dirty = false
+      self.xml_loaded = true
+
+      if new?
+        ## Load up the template
+        self.class.xml_template
+      else
+        Nokogiri::XML::Document.parse(content)
+      end
+      end
     end
     
     def ng_xml=(new_xml)
@@ -65,7 +74,6 @@ module ActiveFedora
     
     
     def to_xml(xml = nil)
-      ensure_xml_loaded
       xml = self.ng_xml if xml.nil?
       ng_xml = self.ng_xml
       if ng_xml.respond_to?(:root) && ng_xml.root.nil? && self.class.respond_to?(:root_property_ref) && !self.class.root_property_ref.nil?
@@ -295,7 +303,6 @@ module ActiveFedora
       if self.class.terminology.nil?
         raise "No terminology is set for this NokogiriDatastream class.  Cannot perform update_indexed_attributes"
       end
-      ensure_xml_loaded
       # remove any fields from params that this datastream doesn't recognize    
       # make sure to make a copy of params so not to modify hash that might be passed to other methods
       current_params = params.clone
@@ -317,13 +324,11 @@ module ActiveFedora
     end
     
     def get_values(field_key,default=[])
-      ensure_xml_loaded
       term_values(*field_key)
     end
 
 
     def find_by_terms(*termpointer)
-      ensure_xml_loaded
       super
     end
 
@@ -349,7 +354,6 @@ module ActiveFedora
         #lazy load values from solr on demand
         get_values_from_solr(*term_pointer)
       else
-        ensure_xml_loaded
         om_term_values(*term_pointer)
       end
     end
