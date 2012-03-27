@@ -27,7 +27,6 @@ module ActiveFedora #:nodoc:
 
   eager_autoload do
     autoload :Associations
-    autoload :AttributeMethods
     autoload :Base
     autoload :ContentModel
     autoload :Callbacks
