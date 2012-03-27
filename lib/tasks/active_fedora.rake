@@ -47,7 +47,7 @@ namespace :repo do
         dir = File.join('spec', 'fixtures')
       end
       filename = ActiveFedora::FixtureExporter.export_to_path(pid, dir)
-      puts "The object has been saved as #{filename}"
+      puts "The object has been saved as #{filename}" if filename
     end
   end
   
@@ -68,6 +68,7 @@ namespace :repo do
     else
       puts "You must specify the foxml path or provide its pid.  Example: rake repo:load foxml=spec/fixtures/demo_12.foxml.xml"
     end
+    puts "Loaded '#{pid}' into #{ActiveFedora::Base.connection_for_pid(pid).client.url}" if pid
   end
 
 
