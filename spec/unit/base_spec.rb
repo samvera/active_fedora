@@ -615,8 +615,7 @@ describe ActiveFedora::Base do
         ngds.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
         ngds.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
         
-        @test_object.expects(:datastreams).returns({:ds1 => mock1, :ds2 => mock2, :ngds => ngds})
-        @test_object.expects(:solrize_profile)
+        @test_object.expects(:datastreams).twice.returns({:ds1 => mock1, :ds2 => mock2, :ngds => ngds})
         @test_object.expects(:solrize_relationships)
         @test_object.to_solr
       end
@@ -625,8 +624,7 @@ describe ActiveFedora::Base do
         mock.expects(:solrize_profile)
         mock.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(true)
         
-        @test_object.expects(:datastreams).returns({:ds1 => mock})
-        @test_object.expects(:solrize_profile)
+        @test_object.expects(:datastreams).twice.returns({:ds1 => mock})
         @test_object.expects(:solrize_relationships)
         @test_object.to_solr
       end
