@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ActiveFedora::SolrDigitalObject do
   describe "repository" do
-    subject { ActiveFedora::SolrDigitalObject.new({}) }
+    subject { ActiveFedora::SolrDigitalObject.new({},{'datastreams'=>{}}) }
     describe "when not finished" do
       it "should not respond_to? :repository" do
         subject.should_not respond_to :repository
@@ -28,7 +28,7 @@ describe ActiveFedora::SolrDigitalObject do
       after do
         Object.send(:remove_const, :WithoutMetadataDs)
       end
-      subject { ActiveFedora::SolrDigitalObject.new({'properties_dsProfile_dsMIME_s' =>'text/xml'}, WithoutMetadataDs) }
+      subject { ActiveFedora::SolrDigitalObject.new({}, {'datastreams'=>{'properties'=>{'dsMIME'=>'text/xml'}}},WithoutMetadataDs) }
       it "should create an xml datastream" do
         subject.datastreams['properties'].should be_kind_of ActiveFedora::NokogiriDatastream
       end
