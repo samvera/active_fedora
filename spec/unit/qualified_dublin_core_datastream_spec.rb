@@ -45,7 +45,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   end
 
   it "should create the right number of fields" do
-    ActiveFedora::QualifiedDublinCoreDatastream::DCTERMS.size.should == 65
+    ActiveFedora::QualifiedDublinCoreDatastream::DCTERMS.size.should == 62
   end
 
   it "should have unmodifiable constants" do
@@ -91,11 +91,9 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
         end
       end
     end
-    
   end
   
   describe '.to_xml' do
-    
     it 'should output the fields hash as Qualified Dublin Core XML' do
       #@test_ds.expects(:new?).returns(true).twice
       sample_xml = "<dc xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'><dcterms:title>title1</dcterms:title><dcterms:publisher>publisher1</dcterms:publisher><dcterms:creator>creator1</dcterms:creator><dcterms:creator>creator2</dcterms:creator></dc>"
@@ -117,7 +115,15 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
                  <dcterms:title>title1</dcterms:title>
               </dc>')
     end
+  end
 
+  describe "#to_solr" do
+    it "should have title" do
+      @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new(nil, 'qdc' )
+      @test_ds.title = "War and Peace"
+      solr = @test_ds.to_solr
+      solr["title_t"].should == ["War and Peace"]
+    end
 
   end
 

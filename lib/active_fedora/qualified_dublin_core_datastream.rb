@@ -12,27 +12,9 @@ module ActiveFedora
     attr_accessor :fields # TODO this can be removed when Model.find_by_fields_by_solr has been removed.
     
     
-    set_terminology do |t|
-      t.root(:path=>"dc", :xmlns=>"http://purl.org/dc/terms/")
-        t.contributor(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.coverage(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.creator(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.date(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.description(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.format(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.identifier(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.language(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.publisher(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.relation(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.rights(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.source(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.spatial(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.type_(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.medium(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.rights(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.subject(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-        t.title(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
-    end
+     set_terminology do |t|
+       t.root(:path=>"dc", :xmlns=>"http://purl.org/dc/terms/")
+     end
 
     define_template :creator do |xml,name|
       xml.creator() do
@@ -42,15 +24,23 @@ module ActiveFedora
     
     #A frozen array of Dublincore Terms.
     DCTERMS = [
-      :contributor, :coverage, :creator,  :description, :format, :identifier, :language, :publisher, :relation,  :source, :title, :abstract, :accessRights, :accrualMethod, :accrualPeriodicity, :accrualPolicy, :alternative, :audience, :available, :bibliographicCitation, :conformsTo, :contributor, :coverage, :created, :creator, :date, :dateAccepted, :dateCopyrighted, :dateSubmitted, :description, :educationLevel, :extent, :format, :hasFormat, :hasPart, :hasVersion, :identifier, :instructionalMethod, :isFormatOf, :isPartOf, :isReferencedBy, :isReplacedBy, :isRequiredBy, :issued, :isVersionOf, :language, :license, :mediator, :medium, :modified, :provenance, :publisher, :references, :relation, :replaces, :requires, :rights, :rightsHolder, :source, :spatial, :subject, :tableOfContents, :temporal, :type, :valid
-    ]
+      :contributor, :coverage, :creator,  :description, :identifier, :language, :publisher, :relation,  :source, :title, :abstract, :accessRights, :accrualMethod, :accrualPeriodicity, :accrualPolicy, :alternative, :audience, :available, :bibliographicCitation, :conformsTo, :contributor, :coverage, :created, :creator, :date, :dateAccepted, :dateCopyrighted, :dateSubmitted, :description, :educationLevel, :extent, :hasFormat, :hasPart, :hasVersion, :identifier, :instructionalMethod, :isFormatOf, :isPartOf, :isReferencedBy, :isReplacedBy, :isRequiredBy, :issued, :isVersionOf, :language, :license, :mediator, :medium, :modified, :provenance, :publisher, :references, :relation, :replaces, :requires, :rights, :rightsHolder, :source, :spatial, :subject, :tableOfContents, :temporal,  :valid
+    ] # removed :type, :format
     DCTERMS.freeze
 
+    #Constructor. this class will call self.field for each DCTERM. In short, all DCTERMS fields will already exist
+    #when this method returns. Each term is marked as a multivalue string.
+    def initialize(digital_object, dsid )
+      super(digital_object, dsid)
+      DCTERMS.each do |el|
+        field el, :string, :multiple=>true
+      end
+    end
+
     # This method generates the various accessor and mutator methods on self for the datastream metadata attributes.
-    # each field will have the 3 magic methods:
-    #   name_values=(arg) 
-    #   name_values 
-    #   name_append(arg)
+    # each field will have the 2 magic methods:
+    #   name=(arg) 
+    #   name 
     #
     #
     # Calling any of the generated methods marks self as dirty.

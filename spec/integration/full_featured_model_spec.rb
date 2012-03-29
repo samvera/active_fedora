@@ -141,6 +141,7 @@ describe ActiveFedora::Base do
     end
     
     @dublin_core_sample_values.each_pair do |field, value|
+      next if [:format, :type].include?(field)  #format and type are methods declared on Object
       dublin_core_ds.send("#{field.to_s}=", [value])
     end
     
