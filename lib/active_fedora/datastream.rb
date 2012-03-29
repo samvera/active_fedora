@@ -89,26 +89,21 @@ module ActiveFedora
       tmpl
     end
     
-    def solrize_profile(solr_doc = Hash.new) # :nodoc:
+    def solrize_profile # :nodoc:
+      profile_hash = {}
       profile.each_pair do |property,value|
         if property =~ /Date/
           value = Time.parse(value) unless value.is_a?(Time)
           value = value.xmlschema
         end
-        solr_doc[ActiveFedora::SolrService.solr_name("#{dsid}_dsProfile_#{property}", property =~ /Date/ ? :date : :symbol)] = value
+        profile_hash[property] = value
       end
-      solr_doc
+      profile_hash
     end
     
-    def from_solr(solr_doc)
-      profile_from_solr(solr_doc)
-    end
-    
-    def profile_from_solr(solr_doc)
-      profile_attrs = solr_doc.keys.select { |k| k =~ /^#{dsid}_dsProfile_/ }
-      profile_attrs.each do |key|
-        attr_name = key.split(/_/)[2..-2].join('_')
-        profile[attr_name] = solr_doc[key].to_s
+    def profile_from_hash(profile_hash)
+      profile_hash.each_pair do |key,value|
+        profile[key] = value.to_s
       end
     end
   end
