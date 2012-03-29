@@ -13,14 +13,7 @@ describe ActiveFedora::SolrService do
           m.field "holding_id", :string
         end
   
-        has_metadata :name => "descMetadata", :type => ActiveFedora::QualifiedDublinCoreDatastream do |m|
-          m.field "created", :date, :xml_node => "created"
-          m.field "language", :string, :xml_node => "language"
-          m.field "creator", :string, :xml_node => "creator"
-          # Created remaining fields
-          m.field "geography", :string, :xml_node => "geography"
-          m.field "title", :string, :xml_node => "title"
-        end
+        has_metadata :name => "descMetadata", :type => ActiveFedora::QualifiedDublinCoreDatastream
       end
       @test_object = ActiveFedora::Base.new
       @test_object.label = 'test_object'

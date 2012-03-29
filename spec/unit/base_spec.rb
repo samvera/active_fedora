@@ -211,10 +211,8 @@ describe ActiveFedora::Base do
       end
       
       it "should call .fields on all MetadataDatastreams and return the resulting document" do
-        mock1 = mock("ds1", :fields => {})
-        mock2 = mock("ds2", :fields => {})
-        mock1.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
-        mock2.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
+        mock1 = mock("ds1", :fields => {}, :class=>ActiveFedora::MetadataDatastream)
+        mock2 = mock("ds2", :fields => {}, :class=>ActiveFedora::MetadataDatastream)
 
         @test_object.expects(:datastreams).returns({:ds1 => mock1, :ds2 => mock2})
         @test_object.fields

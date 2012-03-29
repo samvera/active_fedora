@@ -16,6 +16,7 @@ class MockMetaHelperSolr < ActiveFedora::Base
     m.field "geography", :string, :xml_node => "geography"
     m.field "title", :string, :xml_node => "title"
   end
+
 end
 
 describe ActiveFedora::MetadataDatastreamHelper do
@@ -44,7 +45,7 @@ describe ActiveFedora::MetadataDatastreamHelper do
     it 'should return an object with the appropriate metadata fields filled in' do
       @test_object = MockMetaHelperSolr.new
       attributes = {"holding_id"=>{0=>"Holding 1"},
-                    "language"=>{0=>"Italian"},
+                    "language" =>{0=>"Italian"},
                     "creator"=>{0=>"Linguist, A."},
                     "geography"=>{0=>"Italy"},
                     "title"=>{0=>"Italian and Spanish: A Comparison of Common Phrases"}}
@@ -74,23 +75,23 @@ describe ActiveFedora::MetadataDatastreamHelper do
       test_from_solr_object2 = MockMetaHelperSolr.load_instance_from_solr(@test_object2.pid)
       test_from_solr_object3 = MockMetaHelperSolr.load_instance_from_solr(@test_object3.pid)
       
-      test_from_solr_object.fields[:language][:values].should == ["Italian"]
-      test_from_solr_object.fields[:creator][:values].should == ["Linguist, A."]
-      #test_from_solr_object.fields[:geography][:values].should == ["Italy"]
-      test_from_solr_object.fields[:title][:values].should == ["Italian and Spanish: A Comparison of Common Phrases"]
+      test_from_solr_object.descMetadata.language.should == ["Italian"]
+      test_from_solr_object.descMetadata.creator.should == ["Linguist, A."]
+      test_from_solr_object.descMetadata.geography.should == ["Italy"]
+      test_from_solr_object.descMetadata.title.should == ["Italian and Spanish: A Comparison of Common Phrases"]
       #test_from_solr_object.fields[:holding_id][:values].should == ["Holding 1"]
       
-      test_from_solr_object2.fields[:language][:values].should == ["Spanish;Latin"]
-      test_from_solr_object2.fields[:creator][:values].should == ["Linguist, A."]
-      #test_from_solr_object2.fields[:geography][:values].should == ["Spain"]
-      test_from_solr_object2.fields[:title][:values].should == ["A study of the evolution of Spanish from Latin"]
+      test_from_solr_object2.descMetadata.language.should == ["Spanish;Latin"]
+      test_from_solr_object2.descMetadata.creator.should == ["Linguist, A."]
+      test_from_solr_object2.descMetadata.geography.should == ["Spain"]
+      test_from_solr_object2.descMetadata.title.should == ["A study of the evolution of Spanish from Latin"]
       #test_from_solr_object2.fields[:holding_id][:values].should == ["Holding 2"]
       
-      test_from_solr_object3.fields[:language][:values].should == ["Spanish;Latin"]
-      test_from_solr_object3.fields[:creator][:values].should == ["Linguist, A."]
-      #test_from_solr_object3.fields[:geography][:values].should == ["Spain"]
-      test_from_solr_object3.fields[:title][:values].should == ["An obscure look into early nomadic tribes of Spain"]
-      #test_from_solr_object3.fields[:holding_id][:values].should == ["Holding 3"]
+      test_from_solr_object3.descMetadata.language.should == ["Spanish;Latin"]
+      test_from_solr_object3.descMetadata.creator.should == ["Linguist, A."]
+      test_from_solr_object3.descMetadata.geography.should == ["Spain"]
+      test_from_solr_object3.descMetadata.title.should == ["An obscure look into early nomadic tribes of Spain"]
+      #test_from_solr_object3.properties.holding_id.should == ["Holding 3"]
       
       
     end

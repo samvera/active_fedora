@@ -5,87 +5,118 @@ module ActiveFedora
   #Fedora Dublin Core XML datastreams structure.
   #
   #Fields can still be overridden if more specificity is desired (see ActiveFedora::Datastream#fields method).
-  class QualifiedDublinCoreDatastream < MetadataDatastream
+  class QualifiedDublinCoreDatastream < NokogiriDatastream
+
+    class_attribute :class_fields
+    self.class_fields = []
+    attr_accessor :fields # TODO this can be removed when Model.find_by_fields_by_solr has been removed.
+    
+    
+    set_terminology do |t|
+      t.root(:path=>"dc", :xmlns=>"http://purl.org/dc/terms/")
+        t.contributor(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.coverage(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.creator(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.date(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.description(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.format(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.identifier(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.language(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.publisher(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.relation(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.rights(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.source(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.spatial(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.type_(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.medium(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.rights(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.subject(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+        t.title(:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms")
+    end
+
+    define_template :creator do |xml,name|
+      xml.creator() do
+        xml.text(name)
+      end
+    end
     
     #A frozen array of Dublincore Terms.
     DCTERMS = [
       :contributor, :coverage, :creator,  :description, :format, :identifier, :language, :publisher, :relation,  :source, :title, :abstract, :accessRights, :accrualMethod, :accrualPeriodicity, :accrualPolicy, :alternative, :audience, :available, :bibliographicCitation, :conformsTo, :contributor, :coverage, :created, :creator, :date, :dateAccepted, :dateCopyrighted, :dateSubmitted, :description, :educationLevel, :extent, :format, :hasFormat, :hasPart, :hasVersion, :identifier, :instructionalMethod, :isFormatOf, :isPartOf, :isReferencedBy, :isReplacedBy, :isRequiredBy, :issued, :isVersionOf, :language, :license, :mediator, :medium, :modified, :provenance, :publisher, :references, :relation, :replaces, :requires, :rights, :rightsHolder, :source, :spatial, :subject, :tableOfContents, :temporal, :type, :valid
     ]
     DCTERMS.freeze
-    
-    #Constructor. this class will call self.field for each DCTERM. In short, all DCTERMS fields will already exist
-    #when this method returns. Each term is marked as a multivalue string.
-    def initialize(digital_object, dsid )
-      super(digital_object, dsid)
-      DCTERMS.each do |el|
-        field el, :string, :multiple=>true
+
+    # This method generates the various accessor and mutator methods on self for the datastream metadata attributes.
+    # each field will have the 3 magic methods:
+    #   name_values=(arg) 
+    #   name_values 
+    #   name_append(arg)
+    #
+    #
+    # Calling any of the generated methods marks self as dirty.
+    #
+    # 'tupe' is a datatype, currently :string, :text and :date are supported.
+    #
+    # opts is an options hash, which  will affect the generation of the xml representation of this datastream.
+    #
+    # Currently supported modifiers: 
+    # For +QualifiedDublinCorDatastreams+:
+    #   :element_attrs =>{:foo=>:bar} -  hash of xml element attributes
+    #   :xml_node => :nodename  - The xml node to be used to represent this object (in dcterms namespace)
+    #   :encoding=>foo, or encodings_scheme  - causes an xsi:type attribute to be set to 'foo'
+    #   :multiple=>true -  mark this field as a multivalue field (on by default)
+    #
+    #At some point, these modifiers will be ported up to work for any +ActiveFedora::MetadataDatastream+.
+    #
+    #There is quite a good example of this class in use in spec/examples/oral_history.rb
+    #
+    #!! Careful: If you declare two fields that correspond to the same xml node without any qualifiers to differentiate them, 
+    #you will end up replicating the values in the underlying datastream, resulting in mysterious dubling, quadrupling, etc. 
+    #whenever you edit the field's values.
+    def field(name, tupe=nil, opts={})
+      fields ||= {}
+      @fields[name.to_s.to_sym]={:type=>tupe, :values=>[]}.merge(opts)
+      # add term to template
+      self.class.class_fields << name.to_s
+      # add term to terminology
+      unless self.class.terminology.has_term?(name.to_sym)
+        term = OM::XML::Term.new(name.to_sym, {:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms"}, self.class.terminology)
+        self.class.terminology.add_term(term)
+        term.generate_xpath_queries!
       end
-      self.class.from_xml(nil, self)
+      
     end
     
-    # Populate a QualifiedDublinCoreDatastream object based on the "datastream" node from a FOXML file
-    # @param [String] node the xml from the content.  Assumes that the content of this datastream is that of an ActiveFedora QualifiedDublinCoreDatastream 
-    # @param [ActiveFedora::Datastream] tmpl the Datastream object that you are building
-    def self.from_xml(xml, tmpl) # :nodoc:
-      return if !xml.present?
-      node = Nokogiri::XML::Document.parse(xml)
-      tmpl.fields.each do |z|
-        fname = z.first
-        fspec = z.last
-        node_name = "dcterms:#{fspec[:xml_node] ? fspec[:xml_node] : fname}"
-        attr_modifier= "[@xsi:type='#{fspec[:encoding]}']" if fspec[:encoding]
-        query = "/dc/#{node_name}#{attr_modifier}"
-
-        node.xpath(query).each do |f|
-           tmpl.send("#{fname}_append", f.text)
+    def update_indexed_attributes(params={}, opts={})
+      # if the params are just keys, not an array, make then into an array.
+      new_params = {}
+      params.each do |key, val|
+        if key.is_a? Array
+          new_params[key] = val
+        else
+          new_params[[key.to_sym]] = val
         end
-
       end
-      tmpl.instance_variable_set(:@dirty, false)
-      tmpl
+      super(new_params, opts)
     end
-
-    def to_xml() 
-      to_dc_xml() 
-    end
+    
 
     def self.xml_template
        Nokogiri::XML::Document.parse("<dc xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'/>")
     end
 
-   #Render self as a Fedora DC xml document.
-   def to_dc_xml
-     #TODO: pull the modifiers up into MDDS
-     xml = REXML::Document.new("<dc xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'/>")
-     fields.each do |field_name,field_info|
-       el = REXML::Element.new("dcterms:#{field_name.to_s}")
-       if field_info.class == Hash
-         field_info.each do |k, v|
-           case k
-           when :element_attrs
-            v.each{|k,v| el.add_attribute(k.to_s, v.to_s)}
-           when :values, :type
-             # do nothing to the :values array
-           when :xml_node
-             el.name = "dcterms:#{v}"
-           when :encoding, :encoding_scheme
-             el.add_attribute("xsi:type", v)
-           when :multiple
-             next
-           else
-             el.add_attribute(k.to_s, v)
-           end
-         end
-         field_info = field_info[:values]
-       end
-       field_info.each do |val|
-         el = el.clone
-         el.text = val.to_s
-         xml.root.elements.add(el)
-       end
-     end
-     return xml.to_s
-   end
+    def to_solr(solr_doc = Hash.new) # :nodoc:
+      @fields.each do |field_key, field_info|
+        things = send(field_key)
+        if things 
+          field_symbol = ActiveFedora::SolrService.solr_name(field_key, field_info[:type])
+          things.val.each do |val|    
+            ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val )         
+          end
+        end
+      end
+      return solr_doc
+    end
 
   end
 end

@@ -1,10 +1,5 @@
 require 'spec_helper'
 
-require 'active_fedora'
-require 'active_fedora/base'
-require 'active_fedora/metadata_datastream'
-require 'active_fedora/qualified_dublin_core_datastream'
-
 describe ActiveFedora::Base do
   before(:each) do
     #Fedora::Repository.instance.stubs(:nextid).returns("_nextid_")
@@ -12,9 +7,10 @@ describe ActiveFedora::Base do
       has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"foostream" do|m|
         m.field "foostream", :string
       end
-      has_metadata :type=>ActiveFedora::QualifiedDublinCoreDatastream, :name=>"dcstream" do|m|
-        m.field "fz", :string
-      end
+      has_metadata :type=>ActiveFedora::QualifiedDublinCoreDatastream, :name=>"dcstream" 
+      # do|m|
+      #   m.field "fz", :string
+      # end
     end
     class Bar  < ActiveFedora::Base
       has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"barstream" do |m|

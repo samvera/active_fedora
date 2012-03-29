@@ -28,7 +28,7 @@ module ActiveFedora
     end
 
     def inspect
-      "#<#{self.class}:#{self.hash} @pid=\"#{pid}\" @dsid=\"#{dsid}\" @controlGroup=\"#{controlGroup}\" @dirty=\"#{dirty}\" @mimeType=\"#{mimeType}\" >"
+      "#<#{self.class}:#{self.hash} @pid=\"#{digital_object ? pid : nil}\" @dsid=\"#{dsid}\" @controlGroup=\"#{controlGroup}\" @dirty=\"#{dirty}\" @mimeType=\"#{mimeType}\" >"
     end
 
     #compatibility method for rails' url generators. This method will 

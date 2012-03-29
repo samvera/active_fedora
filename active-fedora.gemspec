@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.add_dependency('mime-types', '>= 1.16')
   s.add_dependency('multipart-post', "= 1.1.2")
   s.add_dependency('nokogiri')
-  s.add_dependency('om', '~> 1.6.0.rc1')
+  s.add_dependency('om', '~> 1.6.0.rc3')
   s.add_dependency('solrizer', '~>1.2.0')
   s.add_dependency("activeresource", '>= 3.0.0')
   s.add_dependency("activesupport", '>= 3.0.0')
@@ -34,7 +34,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("rake")
 #  s.add_development_dependency("rcov") # not ruby 1.9 compatible
   s.add_development_dependency("jettywrapper", ">=1.2.0")
-  s.add_development_dependency("rspec", "~> 2.0")
+  s.add_development_dependency("rspec", ">= 2.9.0")
   s.add_development_dependency("mocha", ">= 0.9.8")
   
   s.files         = `git ls-files`.split("\n")

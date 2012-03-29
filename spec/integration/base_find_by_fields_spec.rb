@@ -30,6 +30,9 @@ describe ActiveFedora::Base do
                   [:title]=>{0=>"Italian and Spanish: A Comparison of Common Phrases"}}
     @test_object2.update_indexed_attributes(attributes)
     @test_object2.save
+    slr = @test_object2.to_solr
+    # puts "PID: #{@test_object2.pid}"
+    # puts "ID: #{slr[:id]} #{slr["active_fedora_model_s"]}"
     sleep(1)
     
     @test_object3 = MockAFBaseQuerySolr.new

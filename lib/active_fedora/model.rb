@@ -181,6 +181,7 @@ module ActiveFedora
       #   :field_list       => array, defaults to ["*", "score"]
       #
       def find_by_fields_by_solr(query_fields,opts={})
+        ActiveSupport::Deprecation.warn("find_by_fields_by_solr is deprecated and will be removed in the next release")
         #create solr_args from fields passed in, needs to be comma separated list of form field1=value1,field2=value2,...
         escaped_class_name = self.name.gsub(/(:)/, '\\:')
         query = "#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}" 

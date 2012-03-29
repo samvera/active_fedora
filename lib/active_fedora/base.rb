@@ -222,9 +222,10 @@ module ActiveFedora
     #system_create_date, system_modified_date, active_fedora_model_field, 
     #and the object id.
     def fields
+    # TODO this can likely be removed once find_by_fields_by_solr is removed
       fields = {:id => {:values => [pid]}, :system_create_date => {:values => [self.create_date], :type=>:date}, :system_modified_date => {:values => [self.modified_date], :type=>:date}, :active_fedora_model => {:values => [self.class.inspect], :type=>:symbol}}
       datastreams.values.each do |ds|        
-        fields.merge!(ds.fields) if ds.kind_of?(ActiveFedora::MetadataDatastream)
+        fields.merge!(ds.fields) if [ActiveFedora::MetadataDatastream, ActiveFedora::QualifiedDublinCoreDatastream].include?(ds.class)
       end
       return fields
     end
@@ -279,6 +280,7 @@ module ActiveFedora
       datastreams.each_value do |ds|
         solr_doc = ds.solrize_profile(solr_doc)
         ds.ensure_xml_loaded if ds.respond_to? :ensure_xml_loaded  ### Can't put this in the model because it's often implemented in Solrizer::XML::TerminologyBasedSolrizer 
+        #puts "\n\nQDC #{ds.to_solr(solr_doc).inspect}" if ds.kind_of?(ActiveFedora::QualifiedDublinCoreDatastream)
         solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::RDFDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ds.kind_of?(ActiveFedora::MetadataDatastream)
       end
       solr_doc = solrize_relationships(solr_doc) unless opts[:model_only]

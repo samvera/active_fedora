@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-
 describe ActiveFedora::SolrService do
   before do
     Thread.current[:solr_service]=nil

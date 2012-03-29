@@ -17,17 +17,8 @@ class OralHistorySampleModel < ActiveFedora::Base
       m.field "location", :string
     end
     
-    has_metadata :name => "dublin_core", :type => ActiveFedora::QualifiedDublinCoreDatastream do |m|
-      m.field "creation_date", :date, :xml_node => "date"
-      m.field "abstract", :text, :xml_node => "abstract"
-      m.field "rights", :text, :xml_node => "rights"
-      m.field "subject_heading", :string, :xml_node => "subject", :encoding => "LCSH" 
-      m.field "spatial_coverage", :string, :xml_node => "spatial", :encoding => "TGN"
-      m.field "temporal_coverage", :string, :xml_node => "temporal", :encoding => "Period"
-      m.field "type", :string, :xml_node => "type", :encoding => "DCMITYPE"
-      m.field "alt_title", :string, :xml_node => "alternative"
-    end
-    
+    has_metadata :name => "dublin_core", :type => ActiveFedora::QualifiedDublinCoreDatastream
+
     has_metadata :name => "significant_passages", :type => ActiveFedora::MetadataDatastream do |m|
       m.field "significant_passage", :text
     end

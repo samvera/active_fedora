@@ -45,16 +45,16 @@ describe ActiveFedora::Base do
           # my_oral_history.subjects  OR   my_oral_history.titles  OR EVEN my_oral_history.title whenever possible
           
           # Setting new Types for dates and text content
-          m.field "creation_date", :date, :xml_node => "date"
-          m.field "abstract", :text, :xml_node => "abstract"
-          m.field "rights", :text, :xml_node => "rights"
+          #m.field "creation_date", :date, :xml_node => "date"
+          #m.field "abstract", :text, :xml_node => "abstract"
+          #m.field "rights", :text, :xml_node => "rights"
           
           # Setting up special named fields
-          m.field "subject_heading", :string, :xml_node => "subject", :encoding => "LCSH" 
-          m.field "spatial_coverage", :string, :xml_node => "spatial", :encoding => "TGN"
-          m.field "temporal_coverage", :string, :xml_node => "temporal", :encoding => "Period"
-          m.field "type", :string, :xml_node => "type", :encoding => "DCMITYPE"
-          m.field "alt_title", :string, :xml_node => "alternative"
+          #m.field "subject_heading", :string, :xml_node => "subject", :encoding => "LCSH" 
+          #m.field "spatial_coverage", :string, :xml_node => "spatial", :encoding => "TGN"
+          #m.field "temporal_coverage", :string, :xml_node => "temporal", :encoding => "Period"
+          #m.field "type", :string, :xml_node => "type", :encoding => "DCMITYPE"
+          #m.field "alt_title", :string, :xml_node => "alternative"
         end
         
         has_metadata :name => "significant_passages", :type => ActiveFedora::MetadataDatastream do |m|
@@ -87,10 +87,17 @@ describe ActiveFedora::Base do
                                     :notes => sample_notes, :hard_copy_availability => sample_hard_copy_availability, :hard_copy_location => "Archives", :other_contributor => sample_other_contributor, 
                                     :restrictions => "None", :series => "My Series", :location => sample_location]
 
-    @dublin_core_sample_values = Hash[:creator => 'Matt && McClain', :publisher => 'Jewish Women\\\'s Archive', :description => "description", :identifier => "jwa:sample_pid", 
-                                    :title => "title", :alt_title => "alt_title", :subject => "subject", :subject_heading => "subject heading", 
-                                    :creation_date => "2008-07-02T05:09:42.015Z", :language => "language", :spatial_coverage => "spatial coverage", 
-                                    :temporal_coverage => "temporal coverage", :abstract => "abstract", :rights => "rights", :type => "type", :extent => "extent", 
+    @dublin_core_sample_values = Hash[:creator => 'Matt && McClain', :publisher => "Jewish Womens's Archive", :description => "description", :identifier => "jwa:sample_pid", 
+                                    :title => "title", 
+                                    #:alt_title => "alt_title", :subject => "subject", 
+                                    #:subject_heading => "subject heading", 
+                                    #:creation_date => "2008-07-02T05:09:42.015Z", 
+                                    :language => "language", 
+                                    #:spatial_coverage => "spatial coverage", 
+                                    #:temporal_coverage => "temporal coverage", 
+                                    #:abstract => "abstract",
+                                    :rights => "rights", :type => "type",
+                                    #:extent => "extent", 
                                     :format => "format", :medium => "medium"]
     @signigicant_passages_sample_values = {}
     @sensitive_passages_sample_values = {}     
@@ -134,7 +141,7 @@ describe ActiveFedora::Base do
     end
     
     @dublin_core_sample_values.each_pair do |field, value|
-      dublin_core_ds.send("#{field.to_s}_values=", [value])
+      dublin_core_ds.send("#{field.to_s}=", [value])
     end
     
     @test_history.save
@@ -145,20 +152,19 @@ describe ActiveFedora::Base do
     end
     
     @dublin_core_sample_values.each_pair do |field, value|
-      dublin_core_ds.send("#{field.to_s}_values").should == [value]
+      next if [:format, :type].include?(field)  #format and type are methods declared on Object
+      dublin_core_ds.send("#{field.to_s}").should == [value]
     end    
   end
   
   it "should have Qualified Dublin core, with custom accessors" do
     
-    #xml = REXML::Document.new(@test_history.to_xml.to_s)
     dublin_core_ds = @test_history.datastreams["dublin_core"]
     
-    dublin_core_ds.subject_heading_values = "My Subject Heading"
-    dc_xml = REXML::Document.new(dublin_core_ds.to_dc_xml)
+    dublin_core_ds.subject = "My Subject Heading"
+    dc_xml = REXML::Document.new(dublin_core_ds.to_xml)
     
     dc_xml.root.elements["dcterms:subject"].text.should == "My Subject Heading"
-    dc_xml.root.elements["dcterms:subject"].attributes["xsi:type"].should == "LCSH"
     
   end
   
