@@ -45,7 +45,6 @@ module ActiveFedora
     def from_solr(solr_doc)
       @content = self.to_xml
       self.xml_loaded = true
-      profile_from_solr(solr_doc)
       fields.each do |field_key, field_info|
         field_symbol = ActiveFedora::SolrService.solr_name(field_key, field_info[:type])
         value = (solr_doc[field_symbol].nil? ? solr_doc[field_symbol.to_s]: solr_doc[field_symbol]) 

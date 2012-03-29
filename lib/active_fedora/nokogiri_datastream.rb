@@ -108,7 +108,6 @@ module ActiveFedora
     # 
     # See ActiveFedora::Base.load_instance_from_solr and +get_values_from_solr+ for more information.
     def from_solr(solr_doc)
-      profile_from_solr(solr_doc)
       #just initialize internal_solr_doc since any value retrieval will be done via lazy loading on this doc on-demand
       @internal_solr_doc = solr_doc
     end

@@ -88,16 +88,13 @@ describe ActiveFedora::Base do
         ds.stubs(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
         ds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
       end
-      mock1.expects(:solrize_profile)
-      mock2.expects(:solrize_profile)
-      mock3.expects(:solrize_profile)
+      mock1.expects(:solrize_profile).returns({})
+      mock2.expects(:solrize_profile).returns({})
+      mock3.expects(:solrize_profile).returns({})
       mock1.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
       mock2.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
       mock3.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(false)
-      #mock3.expects(:kind_of?).with(ActiveFedora::RelsExtDatastream).returns(true)
-
-      @test_object.expects(:datastreams).returns(mock_datastreams)
-      @test_object.expects(:solrize_profile)
+      @test_object.expects(:datastreams).twice.returns(mock_datastreams)
       @test_object.expects(:solrize_relationships)
       @test_object.update_index
     end
@@ -113,16 +110,13 @@ describe ActiveFedora::Base do
         ds.stubs(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(false)
         ds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
       end
-      mock1.expects(:solrize_profile)
-      mock2.expects(:solrize_profile)
-      mock3.expects(:solrize_profile)
+      mock1.expects(:solrize_profile).returns({})
+      mock2.expects(:solrize_profile).returns({})
+      mock3.expects(:solrize_profile).returns({})
       mock1.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(true)
       mock2.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(true)
       mock3.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-      #mock3.expects(:kind_of?).with(ActiveFedora::RelsExtDatastream).returns(true)
-
-      @test_object.expects(:datastreams).returns(mock_datastreams)
-      @test_object.expects(:solrize_profile)
+      @test_object.expects(:datastreams).twice.returns(mock_datastreams)
       @test_object.expects(:solrize_relationships)
       @test_object.update_index
     end

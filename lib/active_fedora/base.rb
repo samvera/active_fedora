@@ -24,8 +24,9 @@ module ActiveFedora
   class Base
     include SemanticNode
 
-    class_attribute :fedora_connection 
+    class_attribute :fedora_connection, :profile_solr_name
     self.fedora_connection = {}
+    self.profile_solr_name = ActiveFedora::SolrService.solr_name("object_profile", :string, :displayable)
 
     def method_missing(name, *args)
       # if [:collection_members, :part_of, :parts, :part_of_append, :file_objects].include? name 
@@ -277,7 +278,6 @@ module ActiveFedora
         solrize_profile(solr_doc)
       end
       datastreams.each_value do |ds|
-        solr_doc = ds.solrize_profile(solr_doc)
         ds.ensure_xml_loaded if ds.respond_to? :ensure_xml_loaded  ### Can't put this in the model because it's often implemented in Solrizer::XML::TerminologyBasedSolrizer 
         solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::RDFDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ds.kind_of?(ActiveFedora::MetadataDatastream)
       end
@@ -286,16 +286,18 @@ module ActiveFedora
     end
 
     def solrize_profile(solr_doc = Hash.new) # :nodoc:
+      profile_hash = { 'datastreams' => {} }
       if inner_object.respond_to? :profile
         inner_object.profile.each_pair do |property,value|
           if property =~ /Date/
             value = Time.parse(value) unless value.is_a?(Time)
             value = value.xmlschema
           end
-          solr_doc[ActiveFedora::SolrService.solr_name("objProfile_#{property}", property =~ /Date/ ? :date : :symbol)] = value
+          profile_hash[property] = value
         end
       end
-      solr_doc
+      self.datastreams.each_pair { |dsid,ds| profile_hash['datastreams'][dsid] = ds.solrize_profile }
+      solr_doc[self.class.profile_solr_name] = profile_hash.to_json
     end
     
     # Serialize the datastream's RDF relationships to solr
@@ -372,12 +374,20 @@ module ActiveFedora
       else
         ActiveFedora::Base
       end
-     
-      obj = klass.allocate.init_with(SolrDigitalObject.new(solr_doc, klass))
+
+      profile_json = Array(solr_doc[ActiveFedora::Base.profile_solr_name]).first
+      unless profile_json.present?
+        raise ActiveFedora::ObjectNotFoundError, "Object #{pid} does not contain a solrized profile"
+      end
+      profile_hash = ActiveSupport::JSON.decode(profile_json)
+      obj = klass.allocate.init_with(SolrDigitalObject.new(solr_doc, profile_hash, klass))
       #set by default to load any dependent relationship objects from solr as well
       #need to call rels_ext once so it exists when iterating over datastreams
       obj.rels_ext
       obj.datastreams.each_value do |ds|
+        if ds.respond_to?(:profile_from_hash)
+          ds.profile_from_hash(profile_hash['datastreams'][ds.dsid])
+        end
         if ds.respond_to?(:from_solr)
           ds.from_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ( ds.kind_of?(ActiveFedora::RelsExtDatastream))
         end

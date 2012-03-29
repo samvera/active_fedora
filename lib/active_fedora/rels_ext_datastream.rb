@@ -80,7 +80,6 @@ module ActiveFedora
     # ====Warning
     #  Solr must be synchronized with RELS-EXT data in Fedora.
     def from_solr(solr_doc)
-      profile_from_solr(solr_doc)
       #cycle through all possible predicates
       model.relationships_loaded = true
       Predicates.predicate_mappings.each_pair do |namespace,predicates|
