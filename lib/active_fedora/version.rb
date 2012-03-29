@@ -1,3 +1,3 @@
 module ActiveFedora
-    VERSION = "4.0.0.rc17"
+    VERSION = "4.0.0.rc18"
 end
