@@ -60,6 +60,32 @@ describe ActiveFedora::Base do
         
       end
 
+      it "saving the parent should save the relationships on the children" do
+        @library.save
+        @library.books = [@book, @book2]
+        @library.save
+        @library = Library.find(@library.pid)
+        @library.books.to_a.should == [@book, @book2]
+      end
+
+
+      it "should let you lookup an array of objects with solr" do
+        @library.save
+        @book.library = @library
+        @book2.library = @library
+        @book.save
+        @book2.save
+
+        @library = Library.find(@library.pid)
+        @library.books.to_a.should == [@book, @book2]
+      
+        solr_resp =  @library.books(:response_format=>:solr)
+        solr_resp.size.should == 2
+        solr_resp[0]['id'].should == @book.pid 
+        solr_resp[1]['id'].should == @book2.pid 
+      
+      end
+
 
 
       after do

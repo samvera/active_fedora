@@ -136,6 +136,11 @@ module ActiveFedora
         return ActiveFedora::SolrService.reify_solr_results(solr_result)
       end
 
+      def load_from_solr
+        return [] if @finder_query.empty?
+        SolrService.query(@finder_query, :rows=>1000)
+      end
+
 
       def add_record_to_target_with_callbacks(record)
       #  callback(:before_add, record)

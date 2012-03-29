@@ -219,7 +219,12 @@ module ActiveFedora
         def collection_reader_method(reflection, association_proxy_class)
           redefine_method(reflection.name) do |*params|
             
-            force_reload = params.first unless params.empty?
+            if (params.first.is_a?(Hash) && params.first[:response_format] == :solr)
+              load_from_solr = true
+              force_reload = false 
+            else 
+              force_reload = params.first unless params.empty?
+            end
             association = association_instance_get(reflection.name)
             unless association
               association = association_proxy_class.new(self, reflection)
@@ -227,6 +232,7 @@ module ActiveFedora
             end
 
             association.reload if force_reload
+            return association.load_from_solr if load_from_solr
 
             association
           end
