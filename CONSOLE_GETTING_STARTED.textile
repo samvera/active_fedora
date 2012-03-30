@@ -1,1 +1,1 @@
-Moved to "https://github.com/mediashelf/active_fedora/wiki/Getting-Started:---Console-Tour":https://github.com/mediashelf/active_fedora/wiki/Getting-Started:---Console-Tour
+Moved to "https://github.com/projecthydra/active_fedora/wiki/Getting-Started:-Console-Tour":https://github.com/projecthydra/active_fedora/wiki/Getting-Started:-Console-Tour
