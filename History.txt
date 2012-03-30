@@ -1,4 +1,4 @@
-4.0.0.rc18
+4.0.0.rc19
 Removed deprecations
   * allowing :fedora level in fedora.yml
   * automatic includes of Relationships and FileMethods is removed
@@ -25,6 +25,7 @@ HYDRA-766 Model#classname_from_uri singularizes terms, but it shouldn't change t
 HYDRA-767 Remove Model::DEFAULT_NS
 Upgrade Om to 1.6.0
 QualifiedDublinCore now extends immediately from NokogiriDatastream
+Deprecated MetadataDatastream
 
 3.3.2
 HYDRA-745 No need to require :url be present on external datastreams
