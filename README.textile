@@ -15,14 +15,14 @@ The gem is hosted on gemcutter.
 
 h2. Getting Started
 
-The "ActiveFedora Console Tour":http://hudson.projecthydra.org/job/active_fedora/Documentation/file.CONSOLE_GETTING_STARTED.html  gives you a brief tour through ActiveFedora's features on the command line.
+The "ActiveFedora Console Tour":https://github.com/projecthydra/active_fedora/wiki/Getting-Started:-Console-Tour  gives you a brief tour through ActiveFedora's features on the command line.
 
 h2. Testing (this Gem)
 
 In order to run the RSpec tests, you need to have a copy of the ActiveFedora source code, and then run bundle install in the source directory.
 
 <pre>
-git clone https://github.com/mediashelf/active_fedora.git
+git clone https://github.com/projecthydra/active_fedora.git
 cd /wherever/active_fedora/is
 bundle install
 git submodule init
@@ -84,11 +84,11 @@ h2. Acknowledgements
 Creator: Matt Zumwalt ("MediaShelf":http://yourmediashelf.com)
 
 Developers: 
-McClain Looney & Eddie Shin ("MediaShelf":http://yourmediashelf.com), Rick Johnson (Notre Dame)
+Justin Coyne, McClain Looney & Eddie Shin ("MediaShelf":http://yourmediashelf.com), Rick Johnson (Notre Dame)
 
 h2. LICENSE:
 
-Copyright (c) 2009-2010 Matt Zumwalt & MediaShelf, LLC
+Copyright (c) 2009-2012 Matt Zumwalt & MediaShelf, LLC
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License (LGPL) as 
