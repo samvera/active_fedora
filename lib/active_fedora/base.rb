@@ -387,8 +387,8 @@ module ActiveFedora
       #need to call rels_ext once so it exists when iterating over datastreams
       obj.rels_ext
       obj.datastreams.each_value do |ds|
-        if ds.respond_to?(:profile_from_hash)
-          ds.profile_from_hash(profile_hash['datastreams'][ds.dsid])
+        if ds.respond_to?(:profile_from_hash) and (ds_prof = profile_hash['datastreams'][ds.dsid])
+          ds.profile_from_hash(ds_prof)
         end
         if ds.respond_to?(:from_solr)
           ds.from_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ( ds.kind_of?(ActiveFedora::RelsExtDatastream))
