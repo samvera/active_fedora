@@ -54,7 +54,6 @@ module ActiveFedora
         @loaded = false
       end
 
-
       def build(attributes = {}, &block)
         if attributes.is_a?(Array)
           attributes.collect { |attr| build(attr, &block) }

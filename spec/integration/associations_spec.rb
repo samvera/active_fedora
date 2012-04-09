@@ -28,6 +28,12 @@ describe ActiveFedora::Base do
         @book2.save
       end
 
+      it "should build" do
+        new_book = @library.books.build({})
+        new_book.should be_new_record
+        new_book.should be_kind_of Book
+      end
+
       it "should let you shift onto the association" do
         @library.new_record?.should be_true
         @library.books.size == 0
@@ -103,6 +109,7 @@ describe ActiveFedora::Base do
       end
       it "should be settable from the book side" do
         @book.library_id = @library.pid
+        @book.library.should == @library
         @book.library.pid.should == @library.pid
         @book.attributes= {:library_id => ""}
         @book.library_id.should be_nil

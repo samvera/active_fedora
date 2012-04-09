@@ -1,6 +1,7 @@
 module ActiveFedora
   module Associations
     class BelongsToAssociation < AssociationProxy #:nodoc:
+
       def replace(record)
         if record.nil?
           ### TODO a more efficient way of doing this would be to write a clear_relationship method

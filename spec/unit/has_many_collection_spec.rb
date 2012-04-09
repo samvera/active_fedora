@@ -16,12 +16,5 @@ describe ActiveFedora::Associations::HasManyAssociation do
 
   end
 
-  it "should build" do
-    @owner = stub(:new_record? => false, :internal_uri => 'info:fedora/changeme:99')
-    @reflection = stub(:klass => Mocha::Mock, :options=>{:property=>'predicate'})
-    @assoc = ActiveFedora::Associations::HasManyAssociation.new(@owner, @reflection)
-    @assoc.should respond_to :build
-      
-  end
 
 end

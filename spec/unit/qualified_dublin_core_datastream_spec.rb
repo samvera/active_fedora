@@ -126,6 +126,13 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
     end
 
   end
-
+  describe 'custom fields' do
+    it 'should grab the term' do
+      sample_xml = "<dc xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'><dcterms:cust>custom</dcterms:cust></dc>"
+      test_ds = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(sample_xml )
+      test_ds.field :cust
+      test_ds.cust.should == ['custom']
+    end
+  end
 
 end
