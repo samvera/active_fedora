@@ -29,7 +29,7 @@ module ActiveFedora
         end
         def prefix(name)
           name = name.to_s unless name.is_a? String
-          pre = self.to_s.sub(/RDFDatastream$/, '').underscore
+          pre = self.to_s.sub(/RDFDatastream$/i, '').underscore
           return "#{pre}__#{name}".to_sym
         end
 
