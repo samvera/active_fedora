@@ -59,6 +59,21 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
   end
 
+  describe "some dummy instances" do
+    before do
+      class MyFoobarRDFDatastream < ActiveFedora::NtriplesRDFDatastream
+      end
+      class MyFoobarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
+      end
+    end
+    it "should generate predictable prexies" do
+      MyFoobarRDFDatastream.prefix("baz").should == :my_foobar__baz
+    end
+    it "should generate prefixes case-insensitively" do
+      MyFoobarRDFDatastream.prefix("quux").should == MyFoobarRdfDatastream.prefix("quux")
+    end
+  end
+
   describe "an instance with a custom subject" do
     before do 
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
