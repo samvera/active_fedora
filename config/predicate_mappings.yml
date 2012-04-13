@@ -28,6 +28,7 @@
     :has_model: hasModel
     :has_part: hasPart
     :has_subset: hasSubset
+    :has_topic: hasTopic
     :is_annotation_of: isAnnotationOf
     :is_constituent_of: isConstituentOf
     :is_dependent_of: isDependentOf

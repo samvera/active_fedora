@@ -138,10 +138,13 @@ module ActiveFedora
       #   Project class, but if the real class name is SuperProject, you'll have to specify it with this option.
       # [:property]
       #   <b>REQUIRED</b> Specify the predicate to use when storing the relationship.
+      # [:inverse_of]
+      #   Specify the predicate to use when storing the relationship on the foreign object. If it is not provided, the relationship will not set the foriegn association.
       #
       # Option examples:
       #   has_and_belongs_to_many :projects, :property=>:works_on
       #   has_and_belongs_to_many :nations, :class_name => "Country", :property=>:is_citizen_of
+      #   has_and_belongs_to_many :topics, :property=>:has_topic, :inverse_of=>:is_topic_of
       def has_and_belongs_to_many(association_id, options = {}, &extension)
         reflection = create_has_and_belongs_to_many_reflection(association_id, options, &extension)
         collection_accessor_methods(reflection, HasAndBelongsToManyAssociation)

@@ -7,10 +7,14 @@ end
 class Book < ActiveFedora::Base 
   belongs_to :library, :property=>:has_constituent
   belongs_to :author, :property=>:has_member, :class_name=>'Person'
-  has_and_belongs_to_many :topics, :property=>:is_topic_of
+  has_and_belongs_to_many :topics, :property=>:has_topic, :inverse_of=>:is_topic_of
+  has_and_belongs_to_many :collections, :property=>:is_member_of_collection
 end
 
 class Person < ActiveFedora::Base
+end
+
+class Collection < ActiveFedora::Base
 end
 
 class Topic < ActiveFedora::Base 
@@ -190,31 +194,54 @@ describe ActiveFedora::Base do
     end
     describe "of has_many_and_belongs_to" do
       before do
-        @topic1 = Topic.new
-        @topic1.save
-        @topic2 = Topic.new
-        @topic2.save
-        @book = Book.new
-        @book.save
-      end
-      it "habtm should set relationships bidirectionally" do
-        @book.topics << @topic1
-        @book.topics.to_a.should == [@topic1]
-        Topic.find(@topic1.pid).books.to_a.should == [@book] #Can't have saved it because @book isn't saved yet.
-      end
-      it "should save new child objects" do
-        @book.topics << Topic.new
-        @book.topics.first.pid.should_not be_nil
-      end
-      it "should clear out the old associtions" do
-        @book.topics = [@topic1]
-        @book.topics = [@topic2]
-        @book.topic_ids.should == [@topic2.pid]
+        @book = Book.create
       end
       after do
         @book.delete
-        @topic1.delete
-        @topic2.delete
+      end
+      describe "when invese is specified" do
+        before do
+          @topic1 = Topic.create
+          @topic2 = Topic.create
+        end
+        it "should set relationships bidirectionally" do
+          @book.topics << @topic1
+          @book.topics.to_a.should == [@topic1]
+          @book.relationships(:has_topic).should == [@topic1.internal_uri]
+          @topic1.relationships(:has_topic).should == []
+          @topic1.relationships(:is_topic_of).should == [@book.internal_uri]
+          Topic.find(@topic1.pid).books.to_a.should == [@book] #Can't have saved it because @book isn't saved yet.
+        end
+        it "should save new child objects" do
+          @book.topics << Topic.new
+          @book.topics.first.pid.should_not be_nil
+        end
+        it "should clear out the old associtions" do
+          @book.topics = [@topic1]
+          @book.topics = [@topic2]
+          @book.topic_ids.should == [@topic2.pid]
+        end
+        after do
+          @topic1.delete
+          @topic2.delete
+        end
+      end
+      describe "when invese is not specified" do
+        before do
+          @c = Collection.create
+          @book.collections << @c
+          @book.save
+        end
+        after do
+          @c.delete
+        end
+        it "should have a collection" do
+          @book.relationships(:is_member_of_collection).should == [@c.internal_uri]
+          @book.collections.should == [@c]
+        end
+        it "habtm should not set foreign relationships if :inverse_of is not specified" do
+           @c.relationships(:is_member_of_collection).should == []
+        end
       end
     end
   end
