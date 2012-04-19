@@ -13,7 +13,7 @@ PATH
       rdf
       rdf-rdfxml (= 0.3.5)
       rsolr
-      rubydora (~> 0.5.7)
+      rubydora (~> 0.5.8)
       solrizer (~> 1.2.0)
       xml-simple (>= 1.0.12)
 
@@ -63,12 +63,12 @@ GEM
     multipart-post (1.1.2)
     nokogiri (1.5.2)
     nori (1.1.0)
-    om (1.6.0.rc3)
+    om (1.6.0)
       mediashelf-loggable
       nokogiri (>= 1.4.2)
     rack (1.4.1)
     rake (0.9.2.2)
-    rdf (0.3.5.1)
+    rdf (0.3.5.2)
       addressable (>= 2.2.6)
     rdf-rdfxml (0.3.5)
       nokogiri (>= 1.4.4)
@@ -85,7 +85,7 @@ GEM
     rspec-expectations (2.9.0)
       diff-lcs (~> 1.1.3)
     rspec-mocks (2.9.0)
-    rubydora (0.5.7)
+    rubydora (0.5.8)
       activemodel
       activesupport
       fastercsv
