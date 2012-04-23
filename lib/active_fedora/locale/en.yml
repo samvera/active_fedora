@@ -1,0 +1,5 @@
+en:
+  activefedora:
+    errors:
+      messages:
+        record_invalid: "Validation failed: %{errors}"

@@ -5,11 +5,6 @@ require 'active_fedora/rubydora_connection'
 require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/object'
 require 'active_support/core_ext/hash/indifferent_access'
-# require "solrizer"
-# require 'nokogiri'
-# require "loggable"
-
-
 
 SOLR_DOCUMENT_ID = ActiveFedora::SolrService.id_field unless defined?(SOLR_DOCUMENT_ID)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
@@ -154,5 +149,5 @@ end
 
 
 load File.join(File.dirname(__FILE__),"tasks/active_fedora.rake") if defined?(Rake)
-
+I18n.load_path << File.dirname(__FILE__) + '/active_fedora/locale/en.yml'
 
