@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active-fedora (4.0.0.rc20)
+    active-fedora (4.0.0)
       activeresource (>= 3.0.0)
       activesupport (>= 3.0.0)
       equivalent-xml
@@ -9,7 +9,7 @@ PATH
       mime-types (>= 1.16)
       multipart-post (= 1.1.2)
       nokogiri
-      om (~> 1.6.0.rc3)
+      om (~> 1.6.0)
       rdf
       rdf-rdfxml (= 0.3.5)
       rsolr

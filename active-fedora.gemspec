@@ -8,8 +8,8 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Matt Zumwalt", "McClain Looney", "Justin Coyne"]
   s.email       = ["matt.zumwalt@yourmediashelf.com"]
-  s.homepage    = %q{http://yourmediashelf.com/activefedora}
-  s.summary     = %q{A convenience libary for manipulating MODS (Metadata Object Description Schema) documents.}
+  s.homepage    = %q{https://github.com/projecthydra/active_fedora}
+  s.summary     = %q{A convenience libary for manipulating documents in the Fedora Repository.}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
 
   s.rubyforge_project = "rubyfedora"
