@@ -236,6 +236,15 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
     describe "with an actual object" do
       before(:all) do
+        class Foo < ActiveFedora::Base
+          has_metadata :name => "descMetadata", :type => MyDatastream
+          delegate :created, :to => :descMetadata
+          delegate :title, :to => :descMetadata
+          delegate :publisher, :to => :descMetadata
+          delegate :based_near, :to => :descMetadata
+          delegate :related_url, :to => :descMetadata
+          delegate :rights, :to => :descMetadata
+        end
         @obj = MyDatastream.new(@inner_object, 'solr_rdf')
         @obj.created = "2012-03-04"
         @obj.title = "Of Mice and Men, The Sequel"
@@ -266,6 +275,17 @@ describe ActiveFedora::NtriplesRDFDatastream do
           @obj.fields[:my_datastream__based_near][:values].count.should == 2
           @obj.fields[:my_datastream__based_near][:values].should include("Tacoma, WA")
           @obj.fields[:my_datastream__based_near][:values].should include("Renton, WA")
+        end
+        it "should solrize even when the object is not new" do
+          foo = Foo.new
+          foo.expects(:update_index).once
+          foo.title = "title1"
+          foo.save
+          foo = Foo.find(foo.pid)
+          foo.expects(:update_index).once
+          foo.publisher = "Allah2"
+          foo.title = "The Work2"
+          foo.save  
         end
       end
       describe ".to_solr()" do
