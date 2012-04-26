@@ -87,8 +87,8 @@ module ActiveFedora
               config[:predicate_mapping][vocab] = { name => predicate } 
             end
             # stuff data_type and behaviors in there for to_solr support
-            config[:predicate_mapping][vocab]["#{name}type".to_sym] = data_type if indexing
-            config[:predicate_mapping][vocab]["#{name}behaviors".to_sym] = behaviors if indexing
+            config[:predicate_mapping][vocab]["#{name}__type".to_sym] = data_type if indexing
+            config[:predicate_mapping][vocab]["#{name}__behaviors".to_sym] = behaviors if indexing
           else
             config = {
               :default_namespace => vocab,
@@ -97,8 +97,8 @@ module ActiveFedora
               }
             }
             # stuff data_type and behaviors in there for to_solr support
-            config[:predicate_mapping][vocab]["#{name}type".to_sym] = data_type if indexing
-            config[:predicate_mapping][vocab]["#{name}behaviors".to_sym] = behaviors if indexing
+            config[:predicate_mapping][vocab]["#{name}__type".to_sym] = data_type if indexing
+            config[:predicate_mapping][vocab]["#{name}__behaviors".to_sym] = behaviors if indexing
           end
         end
       end
@@ -168,9 +168,9 @@ module ActiveFedora
         config = self.class.config[:predicate_mapping][vocab.to_s]
 
         name, indexed_as = config.select { |k, v| name.to_s == v.to_s && k.to_s.split("__")[0] == self.class.prefix(name).to_s.split("__")[0]}.first
-        next unless name and config.has_key?("#{name}type".to_sym) and config.has_key?("#{name}behaviors".to_sym)
-        type = config["#{name}type".to_sym]
-        behaviors = config["#{name}behaviors".to_sym]
+        next unless name and config.has_key?("#{name}__type".to_sym) and config.has_key?("#{name}__behaviors".to_sym)
+        type = config["#{name}__type".to_sym]
+        behaviors = config["#{name}__behaviors".to_sym]
         field_map[name.to_sym] = {:values => values.map {|v| v.to_s}, :type => type, :behaviors => behaviors}
       end
       field_map
