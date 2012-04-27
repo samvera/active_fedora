@@ -258,14 +258,23 @@ module ActiveFedora
       # @param[Hash] conditions 
       def find_with_conditions(conditions, opts={})
         escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
-        query = "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
+        clauses = ["#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"]
         conditions.each_pair do |key,value|
           unless value.nil?
-            escaped_value = value.gsub(/(:)/, '\\:')
-            key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
-            query = key.to_s.eql?(SOLR_DOCUMENT_ID) ? "#{query} AND #{key}:#{escaped_value}" : "#{query} AND #{key}:#{escaped_value}"  
+            if value.is_a? Array
+              value.each do |val|
+                escaped_value = '"' + val.gsub(/(:)/, '\\:') + '"'
+                clauses << "#{key}:#{escaped_value}"  
+              end
+            else
+              key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
+              escaped_value = '"' + value.gsub(/(:)/, '\\:') + '"'
+              clauses << (key.to_s.eql?(SOLR_DOCUMENT_ID) ? "#{key}:#{escaped_value}" : "#{key}:#{escaped_value}")
+            end
           end
         end
+
+        query = clauses.join(" AND ")
 
         #set default sort to created date ascending
         unless opts.include?(:sort)
