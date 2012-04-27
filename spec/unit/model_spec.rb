@@ -123,6 +123,15 @@ describe ActiveFedora::Model do
       SpecModel::Basic.find_by_solr("changeme:30").should equal(mock_response)
     end
   end
+
+  describe '#find_with_conditions' do
+    it "should make a query to solr and return the results" do
+      mock_result = stub('Result')
+      ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:bar AND baz:quix', {:sort => ['system_create_dt asc']}).returns(mock_result)
+      SpecModel::Basic.find_with_conditions(:foo=>'bar', :baz=>'quix').should == mock_result
+      
+    end
+  end
   
   describe "load_instance" do
     it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
