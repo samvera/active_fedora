@@ -145,17 +145,18 @@ module ActiveFedora
     end
     
     include ModelMethods
-      
+    attr_accessor :g
+
     def serialize! # :nodoc:
       if graph.dirty
         self.content = serialize
       end
     end
 
-    def content= *args
-      @graph = nil
-      super
-    end
+    #def content= *args
+    #  @g = nil
+    #  super
+    #end
 
     # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
     def fields
@@ -200,19 +201,19 @@ module ActiveFedora
     end
 
     def graph
-      @graph ||= begin
-        graph = RelationshipGraph.new
+      @g ||= begin
+        g = RelationshipGraph.new
         unless new?
           RDF::Reader.for(serialization_format).new(content) do |reader|
             reader.each_statement do |statement|
               next unless statement.subject == rdf_subject
               literal = statement.object.kind_of?(RDF::Literal)
               object = literal ? statement.object.value : statement.object.to_s
-              graph.add(statement.predicate, object, literal)
+              g.add(statement.predicate, object, literal)
             end
           end
         end
-        graph
+        g
       end
     end
 
@@ -268,9 +269,7 @@ module ActiveFedora
     # Get the subject for this rdf/xml datastream
     def rdf_subject
       @subject ||= self.class.rdf_subject.call(self)
-    end
-    
-   
+    end   
 
     # Creates a RDF datastream for insertion into a Fedora Object
     # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
