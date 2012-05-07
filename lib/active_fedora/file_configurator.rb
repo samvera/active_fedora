@@ -1,3 +1,5 @@
+require 'erb'
+
 module ActiveFedora
   class FileConfigurator
 
@@ -103,8 +105,24 @@ module ActiveFedora
 
     def load_fedora_config
       return @fedora_config unless @fedora_config.empty?
-      config_path = get_config_path(:fedora)
-      @fedora_config = YAML.load(File.open(config_path))[@config_env] || {}
+      @fedora_config_path = get_config_path(:fedora)
+      logger.info("ActiveFedora: loading fedora config from #{File.expand_path(@fedora_config_path)}")
+
+      begin
+        config_erb = ERB.new(IO.read(@fedora_config_path)).result(binding)
+      rescue Exception => e
+        raise("fedora.yml was found, but could not be parsed with ERB. \n#{$!.inspect}")
+      end
+
+      begin
+        fedora_yml = YAML::load(config_erb)
+      rescue StandardError => e
+        raise("fedora.yml was found, but could not be parsed.\n")
+      end
+
+      config = fedora_yml.symbolize_keys
+
+      @fedora_config = config[ActiveFedora.environment.to_sym].symbolize_keys || {}
     end
 
     def load_solr_config
@@ -112,8 +130,20 @@ module ActiveFedora
       @solr_config_path = get_config_path(:solr)
 
       logger.info("ActiveFedora: loading solr config from #{File.expand_path(@solr_config_path)}")
-      config = YAML.load(File.open(@solr_config_path)).symbolize_keys
-      raise "The #{@config_env.to_sym} environment settings were not found in the solr.yml config.  If you already have a solr.yml file defined, make sure it defines settings for the #{@config_env} environment" unless config[@config_env.to_sym]
+      begin
+        config_erb = ERB.new(IO.read(@solr_config_path)).result(binding)
+      rescue Exception => e
+        raise("solr.yml was found, but could not be parsed with ERB. \n#{$!.inspect}")
+      end
+
+      begin
+        solr_yml = YAML::load(config_erb)
+      rescue StandardError => e
+        raise("solr.yml was found, but could not be parsed.\n")
+      end
+
+      config = solr_yml.symbolize_keys
+      raise "The #{ActiveFedora.environment.to_sym} environment settings were not found in the solr.yml config.  If you already have a solr.yml file defined, make sure it defines settings for the #{ActiveFedora.environment.to_sym} environment" unless config[ActiveFedora.environment.to_sym]
       @solr_config = {:url=> get_solr_url(config[ActiveFedora.environment.to_sym].symbolize_keys)}
     end
 
