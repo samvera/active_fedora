@@ -93,6 +93,16 @@ describe ActiveFedora::Model do
         SpecModel::Basic.find("_PID_", :cast=>true)
       end
     end
+
+    describe "with conditions hash" do
+      it "should filter by the provided fields" do
+        SpecModel::Basic.expects(:find_one).with("changeme:30", nil).returns("Fake Object1")
+        SpecModel::Basic.expects(:find_one).with("changeme:22", nil).returns("Fake Object2")
+
+        ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:"bar" AND baz:"quix" AND baz:"quack"', {:sort => ['system_create_dt asc'], :rows=>1002}).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
+        SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}, {:rows=>1002}).should == ["Fake Object1", "Fake Object2"]
+      end
+    end
   end
 
   describe '#count' do

@@ -111,9 +111,12 @@ module ActiveFedora
              pid = hit[SOLR_DOCUMENT_ID]
              find_one(pid, opts[:cast])
           end
-        # TODO add this
-        # elsif args.class == Hash 
-        #   return find_with_conditions(args, opts)
+        elsif args.class == Hash 
+          hits = find_with_conditions(args, opts)
+          return hits.map do |hit|
+             pid = hit[SOLR_DOCUMENT_ID]
+             find_one(pid, opts[:cast])
+          end
         elsif args.class == String
           return find_one(args, opts[:cast])
         end
@@ -255,6 +258,7 @@ module ActiveFedora
         SolrService.query(query, query_opts) 
       end
 
+      ## TODO this method will be on ActiveFedora::Base in 4.1.0
       # @param[Hash] conditions 
       def find_with_conditions(conditions, opts={})
         escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
