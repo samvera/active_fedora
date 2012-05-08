@@ -97,7 +97,7 @@ module ActiveFedora
       # Returns an Array of objects of the Class that +find+ is being 
       # called on
       #
-      # @param[String,Symbol] either a pid or :all  
+      # @param[String,Symbol, Hash] either a pid or :all or a hash of conditions
       # @param [Hash] opts the options to create a message with.
       # @option opts [Integer] :rows when :all is passed, the maximum number of rows to load from solr
       # @option opts [Boolean] :cast when true, examine the model and cast it to the first known cModel
@@ -111,10 +111,17 @@ module ActiveFedora
              pid = hit[SOLR_DOCUMENT_ID]
              find_one(pid, opts[:cast])
           end
+        elsif args.class == Hash 
+          hits = find_with_conditions(args, opts)
+          return hits.map do |hit|
+             pid = hit[SOLR_DOCUMENT_ID]
+             find_one(pid, opts[:cast])
+          end
         elsif args.class == String
           return find_one(args, opts[:cast])
         end
       end
+
 
       # Returns true if the pid exists in the repository 
       # @param[String] pid 
@@ -250,6 +257,36 @@ module ActiveFedora
         logger.debug "Querying solr for #{self.name} objects with query: '#{query}'"
         SolrService.query(query, query_opts) 
       end
+
+      ## TODO this method will be on ActiveFedora::Base in 4.1.0
+      # @param[Hash] conditions 
+      def find_with_conditions(conditions, opts={})
+        escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
+        clauses = ["#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"]
+        conditions.each_pair do |key,value|
+          unless value.nil?
+            if value.is_a? Array
+              value.each do |val|
+                escaped_value = '"' + val.gsub(/(:)/, '\\:') + '"'
+                clauses << "#{key}:#{escaped_value}"  
+              end
+            else
+              key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
+              escaped_value = '"' + value.gsub(/(:)/, '\\:') + '"'
+              clauses << (key.to_s.eql?(SOLR_DOCUMENT_ID) ? "#{key}:#{escaped_value}" : "#{key}:#{escaped_value}")
+            end
+          end
+        end
+
+        query = clauses.join(" AND ")
+
+        #set default sort to created date ascending
+        unless opts.include?(:sort)
+          opts[:sort]=[ActiveFedora::SolrService.solr_name(:system_create,:date)+' asc'] 
+        end
+        SolrService.query(query, opts) 
+      end
+
     
       def class_fields
         #create dummy object that is empty by passing in fake pid

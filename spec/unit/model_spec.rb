@@ -93,6 +93,16 @@ describe ActiveFedora::Model do
         SpecModel::Basic.find("_PID_", :cast=>true)
       end
     end
+
+    describe "with conditions hash" do
+      it "should filter by the provided fields" do
+        SpecModel::Basic.expects(:find_one).with("changeme:30", nil).returns("Fake Object1")
+        SpecModel::Basic.expects(:find_one).with("changeme:22", nil).returns("Fake Object2")
+
+        ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:"bar" AND baz:"quix" AND baz:"quack"', {:sort => ['system_create_dt asc'], :rows=>1002}).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
+        SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}, {:rows=>1002}).should == ["Fake Object1", "Fake Object2"]
+      end
+    end
   end
 
   describe '#count' do
@@ -121,6 +131,15 @@ describe ActiveFedora::Model do
       ActiveFedora::SolrService.expects(:query).with('id:changeme\:30', {}).returns(mock_response)
     
       SpecModel::Basic.find_by_solr("changeme:30").should equal(mock_response)
+    end
+  end
+
+  describe '#find_with_conditions' do
+    it "should make a query to solr and return the results" do
+      mock_result = stub('Result')
+      ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:"bar" AND baz:"quix" AND baz:"quack"', {:sort => ['system_create_dt asc']}).returns(mock_result)
+      SpecModel::Basic.find_with_conditions(:foo=>'bar', :baz=>['quix','quack']).should == mock_result
+      
     end
   end
   

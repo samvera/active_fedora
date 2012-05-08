@@ -32,7 +32,8 @@ describe ActiveFedora::FileConfigurator do
       subject.reset!
     end
     it "should trigger configuration to load" do
-      subject.fedora_config.should == {"url"=>"http://127.0.0.1:8983/fedora-test", "password"=>"fedoraAdmin", "user"=>"fedoraAdmin"}
+      subject.expects(:load_fedora_config).at_least_once
+      subject.fedora_config
     end 
   end
   describe "#solr_config" do
@@ -40,7 +41,8 @@ describe ActiveFedora::FileConfigurator do
       subject.reset!
     end
     it "should trigger configuration to load" do
-      subject.solr_config.should == {:url=>"http://localhost:8983/solr/test"}
+      subject.expects(:load_solr_config).at_least_once
+      subject.solr_config
     end 
   end
 
@@ -138,13 +140,45 @@ describe ActiveFedora::FileConfigurator do
 
     end
 
+    describe "load_fedora_config" do
+      before(:each) do
+        subject.reset!
+      end
+      it "should load the file specified in fedora_config_path" do
+        subject.expects(:get_config_path).with(:fedora).returns("/path/to/fedora.yml")
+        subject.expects(:load_solr_config)
+        IO.expects(:read).with("/path/to/fedora.yml").returns("development:\n url: http://devfedora:8983\ntest:\n  url: http://myfedora:8080")
+        subject.load_fedora_config.should == {:url=>"http://myfedora:8080"}
+        subject.fedora_config.should == {:url=>"http://myfedora:8080"}
+      end
+
+      it "should parse the file using ERb" do
+        subject.expects(:get_config_path).with(:fedora).returns("/path/to/fedora.yml")
+        subject.expects(:load_solr_config)
+        IO.expects(:read).with("/path/to/fedora.yml").returns("development:\n  url: http://devfedora:<%= 8983 %>\ntest:\n  url: http://myfedora:<%= 8081 %>")
+        subject.load_fedora_config.should == {:url=>"http://myfedora:8081"}
+        subject.fedora_config.should == {:url=>"http://myfedora:8081"}
+      end
+    end
+
     describe "load_solr_config" do
+      before(:each) do
+        subject.reset!
+      end
       it "should load the file specified in solr_config_path" do
         subject.expects(:get_config_path).with(:solr).returns("/path/to/solr.yml")
         subject.expects(:load_fedora_config)
-        File.expects(:open).with("/path/to/solr.yml").returns("development:\n  default:\n    url: http://devsolr:8983\ntest:\n  default:\n    url: http://mysolr:8080")
+        IO.expects(:read).with("/path/to/solr.yml").returns("development:\n  default:\n    url: http://devsolr:8983\ntest:\n  default:\n    url: http://mysolr:8080")
         subject.load_solr_config.should == {:url=>"http://mysolr:8080"}
         subject.solr_config.should == {:url=>"http://mysolr:8080"}
+      end
+
+      it "should parse the file using ERb" do
+        subject.expects(:get_config_path).with(:solr).returns("/path/to/solr.yml")
+        subject.expects(:load_fedora_config)
+        IO.expects(:read).with("/path/to/solr.yml").returns("development:\n  default:\n    url: http://devsolr:<%= 8983 %>\ntest:\n  default:\n    url: http://mysolr:<%= 8081 %>")
+        subject.load_solr_config.should == {:url=>"http://mysolr:8081"}
+        subject.solr_config.should == {:url=>"http://mysolr:8081"}
       end
     end
 
