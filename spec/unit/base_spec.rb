@@ -13,9 +13,13 @@ describe ActiveFedora::Base do
       end
       context "When the server is not sharded" do
         subject {ActiveFedora::Base.connection_for_pid('foo:bar')}
+        before(:each) do
+          ActiveFedora.config.expects(:sharded?).returns(false)
+          ActiveFedora.config.expects(:credentials).returns(:url=>'myfedora')
+        end
         it { should be_kind_of Rubydora::Repository}
         it "should be the standard connection" do
-          subject.client.url.should == 'http://127.0.0.1:8983/fedora-test'
+          subject.client.url.should == 'myfedora'
         end
       end
       context "When the repository is sharded" do
