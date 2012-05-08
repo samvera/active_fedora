@@ -209,7 +209,7 @@ module ActiveFedora
           end
 
           redefine_method("#{reflection.name}_id=") do |new_value|
-            obj =  new_value.empty? ? nil : reflection.klass.find(new_value)
+            obj =  new_value.blank? ? nil : reflection.klass.find(new_value)
             send("#{reflection.name}=", obj)
           end
           redefine_method("#{reflection.name}_id") do 

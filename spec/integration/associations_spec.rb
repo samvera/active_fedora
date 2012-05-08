@@ -111,6 +111,9 @@ describe ActiveFedora::Base do
         @book = Book.new
         @book.save
       end
+      it "shouldn't do anything if you set a nil id" do
+        @book.library_id = nil
+      end
       it "should be settable from the book side" do
         @book.library_id = @library.pid
         @book.library.should == @library
