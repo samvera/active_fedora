@@ -13,12 +13,22 @@ describe ActiveFedora::NtriplesRDFDatastream do
           map.related_url(:to => "seeAlso", :in => RDF::RDFS)
         end
       end
-      @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
+      class Foo < ActiveFedora::Base
+        has_metadata :name => "descMetadata", :type => MyDatastream
+        delegate :created, :to => :descMetadata
+        delegate :title, :to => :descMetadata
+        delegate :publisher, :to => :descMetadata
+        delegate :based_near, :to => :descMetadata
+        delegate :related_url, :to => :descMetadata
+      end
+      @object = Foo.new(:pid => 'test:1')
+      @subject = @object.descMetadata
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
-      @subject.stubs(:pid => 'test:1')
-      @subject.stubs(:new? => false)
+      @object.save
     end
-
+    after do
+      @object.delete
+    end
     it "should have a subject" do
       @subject.rdf_subject.should == "info:fedora/test:1"
     end
@@ -29,7 +39,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.mimeType.should == 'text/plain'
     end
     it "should have dsid" do
-      @subject.dsid.should == 'mixed_rdf'
+      @subject.dsid.should == 'descMetadata'
     end
     it "should have fields" do
       @subject.created.should == ["2010-12-31"]
@@ -88,9 +98,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
       end
       @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
-      @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
       @subject.stubs(:pid => 'test:1')
       @subject.stubs(:new? => false)
+      @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
 
     it "should have fields" do
@@ -156,9 +166,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
       end
       @subject = MyDatastream.new(@inner_object, 'solr_rdf')
-      @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
       @subject.stubs(:pid => 'test:1')
       @subject.stubs(:new? => false)
+      @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
       @sample_fields = {:my_datastream__publisher => {:values => ["publisher1"], :type => :string, :behaviors => [:facetable, :sortable, :searchable, :displayable]}, 
         :my_datastream__based_near => {:values => ["coverage1", "coverage2"], :type => :text, :behaviors => [:displayable, :facetable, :searchable]}, 
         :my_datastream__created => {:values => "fake-date", :type => :date, :behaviors => [:sortable, :displayable]},
@@ -276,9 +286,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
           mock_repo = mock('repository')
           mock_repo.expects(:datastream_dissemination).with(:pid => 'test:123', 
                                                             :dsid => 'solr_rdf')
+          sample_rdf = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
           @obj.stubs(:pid).returns('test:123')
           @obj.stubs(:repository).returns(mock_repo)
-          sample_rdf = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
           @obj.should_not be_changed
           @obj.content.should_not be_equivalent_to(sample_rdf)
           @obj.content = sample_rdf
@@ -287,14 +297,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
       end
       it "should save content properly upon save" do
-        foo = Foo.new
-        foo.title = "Hamlet"
-        debugger
+        foo = Foo.new(:pid => 'test:1')
+        foo.title = 'Hamlet'
         foo.save
-        foo.title.should == ["Hamlet"]
+        foo.title.should == ['Hamlet']
         foo.descMetadata.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
         foo.save
-        foo.title.should == "blah"
+        foo.title.should == ['Title of work']
       end
       describe ".fields()" do
         it "should return the right # of fields" do
