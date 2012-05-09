@@ -235,7 +235,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       ActiveFedora::SolrService.load_mappings
     end
     describe "with an actual object" do
-      before(:all) do
+      before(:each) do
         class Foo < ActiveFedora::Base
           has_metadata :name => "descMetadata", :type => MyDatastream
           delegate :created, :to => :descMetadata
@@ -253,6 +253,48 @@ describe ActiveFedora::NtriplesRDFDatastream do
         @obj.related_url = "http://example.org/blogtastic/"
         @obj.rights = "Totally open, y'all"
         @obj.save
+      end
+      describe '#save' do
+        it "should set dirty? to false" do
+          @obj.dirty?.should be_false
+          @obj.title = "something"
+          @obj.dirty?.should be_true
+          @obj.save
+          @obj.dirty?.should be_false
+        end
+      end
+      describe ".dirty?" do
+        it "should return the value of the @dirty attribute or changed?" do
+          @obj.expects(:changed?).returns(false)
+          @obj.dirty?.should be_false  
+          @obj.title = "boo"
+          @obj.dirty?.should be_true   
+        end
+      end 
+      describe '.content=' do
+        it "should update the content and graph, marking the datastream as changed" do
+          mock_repo = mock('repository')
+          mock_repo.expects(:datastream_dissemination).with(:pid => 'test:123', 
+                                                            :dsid => 'solr_rdf')
+          @obj.stubs(:pid).returns('test:123')
+          @obj.stubs(:repository).returns(mock_repo)
+          sample_rdf = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
+          @obj.should_not be_changed
+          @obj.content.should_not be_equivalent_to(sample_rdf)
+          @obj.content = sample_rdf
+          @obj.should be_changed
+          @obj.content.should be_equivalent_to(sample_rdf)
+        end
+      end
+      it "should save content properly upon save" do
+        foo = Foo.new
+        foo.title = "Hamlet"
+        debugger
+        foo.save
+        foo.title.should == ["Hamlet"]
+        foo.descMetadata.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
+        foo.save
+        foo.title.should == "blah"
       end
       describe ".fields()" do
         it "should return the right # of fields" do

@@ -5,7 +5,7 @@ source "http://rubygems.org"
 gemspec
 
 # gem 'ruby-debug', :platform => :ruby_18
-# gem 'debugger' # for ruby 1.9.3
+gem 'debugger' # for ruby 1.9.3
 
 
 gem 'rcov', :platform => :mri_18
