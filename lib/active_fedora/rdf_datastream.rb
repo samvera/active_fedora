@@ -145,26 +145,39 @@ module ActiveFedora
     end
     
     include ModelMethods
-    attr_accessor :g
+    #attr_accessor :g
 
     def dirty?
       graph.dirty || changed?
     end
 
     def serialize! # :nodoc:
-      if graph.dirty
-        self.content = serialize
-      end
+      puts "in serialize!"
+      puts "graph is dirty? #{dirty?}"
+      return unless dirty?
+      puts "setting content = serialize"
+      self.content = serialize
+      #puts "marking graph as clean"
+      #graph.dirty = false
     end
 
-    def save
-      graph.dirty = false
-      super
-    end
+    #def save
+    #  puts "in save method, checking if graph is dirty"
+    #  return unless graph.dirty
+    #  puts "in save method, deserializing"
+    #  deserialize
+    #  super
+    #  graph.dirty = false
+    #end
 
-    def content= *args
-      @g = nil
+    def content=(triples)
+      puts "called content= with #{triples}"
       super
+      puts "initializing the graph"
+      graph(:initialize => true)
+      puts "adding #{triples} to graph"
+      deserialize(triples)
+      #graph(:rdf => triples)
     end
 
     # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
@@ -209,21 +222,41 @@ module ActiveFedora
       RDF::URI(result.reverse.join)
     end
 
-    def graph
-      @g ||= begin
-        g = RelationshipGraph.new
-        unless new?
-          RDF::Reader.for(serialization_format).new(content) do |reader|
-            reader.each_statement do |statement|
-              next unless statement.subject == rdf_subject
-              literal = statement.object.kind_of?(RDF::Literal)
-              object = literal ? statement.object.value : statement.object.to_s
-              g.add(statement.predicate, object, literal)
-            end
+    def deserialize(triples=content)
+      puts "deserializing"
+      puts "content is #{content}"
+      return @g unless content
+      puts "populating graph with #{content}"
+      RDF::Reader.for(serialization_format).new(content) do |reader|
+        reader.each_statement do |statement|
+          # filter out assertions which don't match the subject
+          begin
+            next unless statement.subject == rdf_subject
+          rescue
+            # do nothing -- the object does not yet have a pid which
+            # causes rdf_subject to raise an error
           end
+          literal = statement.object.kind_of?(RDF::Literal)
+          object = literal ? statement.object.value : statement.object.to_s
+          puts "adding to graph: #{statement}"
+          @g.add(statement.predicate, object, literal)
         end
-        g
       end
+      @g
+    end
+
+    def graph(params={})
+      # force reset the graph if requested
+      if params[:initialize] || @g.nil?
+        @g = RelationshipGraph.new
+      end
+      puts "before, value of memoized graph is #{@g.inspect}"
+      unless new?
+        puts "in graph, not new"
+        deserialize
+      end
+      puts "after, value of memoized graph is #{@g.inspect}"
+      @g
     end
 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
@@ -283,8 +316,10 @@ module ActiveFedora
     # Creates a RDF datastream for insertion into a Fedora Object
     # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
     def serialize
+      puts "in serialize"
       out = RDF::Writer.for(serialization_format).buffer do |writer|
         graph.to_graph(rdf_subject).each_statement do |statement|
+          puts "serialize, writing #{statement}"
           writer << statement
         end
       end
