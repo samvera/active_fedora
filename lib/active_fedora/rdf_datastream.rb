@@ -147,16 +147,25 @@ module ActiveFedora
     include ModelMethods
     attr_accessor :g
 
+    def dirty?
+      graph.dirty || changed?
+    end
+
     def serialize! # :nodoc:
       if graph.dirty
         self.content = serialize
       end
     end
 
-    #def content= *args
-    #  @g = nil
-    #  super
-    #end
+    def save
+      graph.dirty = false
+      super
+    end
+
+    def content= *args
+      @g = nil
+      super
+    end
 
     # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
     def fields
