@@ -152,6 +152,14 @@ describe ActiveFedora::FileConfigurator do
         subject.fedora_config.should == {:url=>"http://myfedora:8080"}
       end
 
+      it "should allow sharding" do
+        subject.expects(:get_config_path).with(:fedora).returns("/path/to/fedora.yml")
+        subject.expects(:load_solr_config)
+        IO.expects(:read).with("/path/to/fedora.yml").returns("development:\n  url: http://devfedora:8983\ntest:\n- url: http://myfedora:8080\n- url: http://myfedora:8081")
+        subject.load_fedora_config.should == [{:url=>"http://myfedora:8080"}, {:url=>"http://myfedora:8081"}]
+        subject.fedora_config.should == [{:url=>"http://myfedora:8080"}, {:url=>"http://myfedora:8081"}]
+      end
+
       it "should parse the file using ERb" do
         subject.expects(:get_config_path).with(:fedora).returns("/path/to/fedora.yml")
         subject.expects(:load_solr_config)

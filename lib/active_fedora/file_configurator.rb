@@ -122,7 +122,8 @@ module ActiveFedora
 
       config = fedora_yml.symbolize_keys
 
-      @fedora_config = config[ActiveFedora.environment.to_sym].symbolize_keys || {}
+      cfg = config[ActiveFedora.environment.to_sym] || {}
+      @fedora_config = cfg.kind_of?(Array) ? cfg.map(&:symbolize_keys) : cfg.symbolize_keys
     end
 
     def load_solr_config
