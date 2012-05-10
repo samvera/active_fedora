@@ -258,7 +258,6 @@ module ActiveFedora
         SolrService.query(query, query_opts) 
       end
 
-      ## TODO this method will be on ActiveFedora::Base in 4.1.0
       # @param[Hash] conditions 
       def find_with_conditions(conditions, opts={})
         escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
@@ -267,12 +266,11 @@ module ActiveFedora
           unless value.nil?
             if value.is_a? Array
               value.each do |val|
-                escaped_value = '"' + val.gsub(/(:)/, '\\:') + '"'
-                clauses << "#{key}:#{escaped_value}"  
+                clauses << "#{key}:#{quote_for_solr(val)}"  
               end
             else
               key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
-              escaped_value = '"' + value.gsub(/(:)/, '\\:') + '"'
+              escaped_value = quote_for_solr(value)
               clauses << (key.to_s.eql?(SOLR_DOCUMENT_ID) ? "#{key}:#{escaped_value}" : "#{key}:#{escaped_value}")
             end
           end
@@ -285,6 +283,10 @@ module ActiveFedora
           opts[:sort]=[ActiveFedora::SolrService.solr_name(:system_create,:date)+' asc'] 
         end
         SolrService.query(query, opts) 
+      end
+
+      def quote_for_solr(value)
+        '"' + value.gsub(/(:)/, '\\:').gsub(/"/, '\\"') + '"'
       end
 
     

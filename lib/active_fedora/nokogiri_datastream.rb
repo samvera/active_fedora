@@ -57,8 +57,10 @@ module ActiveFedora
       self.xml_loaded=true
       self.dirty = true
       case new_xml 
-      when Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node
+      when Nokogiri::XML::Document
         @ng_xml = new_xml
+      when  Nokogiri::XML::Node 
+        @ng_xml = Nokogiri::XML(new_xml.to_s) ## Cast a fragment to a document
       when String 
         @ng_xml = Nokogiri::XML::Document.parse(new_xml)
       else

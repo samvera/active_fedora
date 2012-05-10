@@ -141,6 +141,12 @@ describe ActiveFedora::Model do
       SpecModel::Basic.find_with_conditions(:foo=>'bar', :baz=>['quix','quack']).should == mock_result
       
     end
+    it "should escape quotes" do
+      mock_result = stub('Result')
+      ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:"9\\" Nails" AND baz:"7\\" version" AND baz:"quack"', {:sort => ['system_create_dt asc']}).returns(mock_result)
+      SpecModel::Basic.find_with_conditions(:foo=>'9" Nails', :baz=>['7" version','quack']).should == mock_result
+      
+    end
   end
   
   describe "load_instance" do

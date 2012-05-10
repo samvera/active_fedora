@@ -206,6 +206,12 @@ describe ActiveFedora::NokogiriDatastream do
       @test_ds2.ng_xml.class.should == Nokogiri::XML::Document
       @test_ds2.ng_xml.to_xml.should be_equivalent_to(@sample_raw_xml)
     end
+
+    it "Should always set a document when an Element is passed" do
+      @test_ds2.ng_xml = Nokogiri::XML(@sample_raw_xml).xpath('//xmlelement').first
+      @test_ds2.ng_xml.should be_kind_of Nokogiri::XML::Document
+      @test_ds2.ng_xml.to_xml.should be_equivalent_to("<xmlelement/>")
+    end
     it "should mark the datastream as dirty" do
       @test_ds2.dirty.should be_false 
       @test_ds2.ng_xml = @sample_raw_xml
