@@ -42,13 +42,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.based_near = "Moscow, Russia"
     @subject.related_url = "http://en.wikipedia.org/wiki/War_and_Peace"
     @subject.part = "this is a part"
-    puts "before save, graph is #{@subject.rdf.graph.inspect}"
     @subject.save
-    puts "called save on instance, graph is #{@subject.rdf.graph.inspect}"
-    
-    puts "loading instance"
     loaded = RdfTest.find(@subject.pid)
-    puts "loaded instance, graph is #{loaded.rdf.graph.inspect}"
     loaded.title.should == 'War and Peace'
     loaded.based_near.should == ['Moscow, Russia']
     loaded.related_url.should == ['http://en.wikipedia.org/wiki/War_and_Peace']
@@ -68,6 +63,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.part << "thing 2"
     @subject.part.should == ["thing 1", "thing 2"]
   end
+  it "should delete a value" do
+    @subject.title = "Hamlet"
+    @subject.save
+    @subject.title = ""
+    @subject.save
+    @subject.title.should be_nil
+  end
   it "should delete values" do
     @subject.title = "Hamlet"
     @subject.related_url = "http://psu.edu/"
@@ -76,7 +78,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.title.should == "Hamlet"
     @subject.related_url.should include("http://psu.edu/")
     @subject.related_url.should include("http://projecthydra.org/")
-    puts "+++++++++++++++++++++++++++ SETTING TITLE TO EMPTY STRING ++++++++++++++++++++++++++++++"
     @subject.title = ""
     @subject.related_url.delete("http://projecthydra.org/")
     @subject.save
