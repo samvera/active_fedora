@@ -87,8 +87,8 @@ module ActiveFedora
               config[:predicate_mapping][vocab] = { name => predicate } 
             end
             # stuff data_type and behaviors in there for to_solr support
-            config[:predicate_mapping][vocab]["#{name}type".to_sym] = data_type if indexing
-            config[:predicate_mapping][vocab]["#{name}behaviors".to_sym] = behaviors if indexing
+            config[:predicate_mapping][vocab]["#{name}__solrtype".to_sym] = data_type if indexing
+            config[:predicate_mapping][vocab]["#{name}__solrbehaviors".to_sym] = behaviors if indexing
           else
             config = {
               :default_namespace => vocab,
@@ -97,8 +97,8 @@ module ActiveFedora
               }
             }
             # stuff data_type and behaviors in there for to_solr support
-            config[:predicate_mapping][vocab]["#{name}type".to_sym] = data_type if indexing
-            config[:predicate_mapping][vocab]["#{name}behaviors".to_sym] = behaviors if indexing
+            config[:predicate_mapping][vocab]["#{name}__solrtype".to_sym] = data_type if indexing
+            config[:predicate_mapping][vocab]["#{name}__solrbehaviors".to_sym] = behaviors if indexing
           end
         end
       end
@@ -145,20 +145,40 @@ module ActiveFedora
     end
     
     include ModelMethods
-      
-    def serialize! # :nodoc:
-      if graph.dirty
-        self.content = serialize
+    attr_accessor :loaded
+
+    def ensure_loaded
+      return if loaded 
+      self.loaded = true
+      unless new?
+        deserialize content
       end
     end
 
-    def content= *args
-      @graph = nil
+    def dirty?
+      graph.dirty
+    end
+
+    def save
       super
+      graph.dirty = false
+    end
+
+    def serialize! # :nodoc:
+      return unless dirty?
+      return unless loaded
+      self.content = serialize
+    end
+
+    def content=(content)
+      super
+      @graph = RelationshipGraph.new
+      deserialize(content)
     end
 
     # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
     def fields
+      ensure_loaded
       field_map = {}
       graph.relationships.each do |predicate, values|
         vocab_sym, name = predicate.qname
@@ -168,15 +188,16 @@ module ActiveFedora
         config = self.class.config[:predicate_mapping][vocab.to_s]
 
         name, indexed_as = config.select { |k, v| name.to_s == v.to_s && k.to_s.split("__")[0] == self.class.prefix(name).to_s.split("__")[0]}.first
-        next unless name and config.has_key?("#{name}type".to_sym) and config.has_key?("#{name}behaviors".to_sym)
-        type = config["#{name}type".to_sym]
-        behaviors = config["#{name}behaviors".to_sym]
+        next unless name and config.has_key?("#{name}__solrtype".to_sym) and config.has_key?("#{name}__solrbehaviors".to_sym)
+        type = config["#{name}__solrtype".to_sym]
+        behaviors = config["#{name}__solrbehaviors".to_sym]
         field_map[name.to_sym] = {:values => values.map {|v| v.to_s}, :type => type, :behaviors => behaviors}
       end
       field_map
     end
 
     def to_solr(solr_doc = Hash.new) # :nodoc:
+      ensure_loaded
       fields.each do |field_key, field_info|
         values = field_info.fetch(:values, false)
         if values
@@ -199,25 +220,33 @@ module ActiveFedora
       RDF::URI(result.reverse.join)
     end
 
-    def graph
-      @graph ||= begin
-        graph = RelationshipGraph.new
-        unless new?
-          RDF::Reader.for(serialization_format).new(content) do |reader|
-            reader.each_statement do |statement|
+    # Populate a RDFDatastream object based on the "datastream" content 
+    # Assumes that the datastream contains RDF content
+    # @param [String] data the "rdf" node 
+    def deserialize(data)
+      unless data.nil?
+        RDF::Reader.for(serialization_format).new(data) do |reader|
+          reader.each_statement do |statement|
+            begin
               next unless statement.subject == rdf_subject
-              literal = statement.object.kind_of?(RDF::Literal)
-              object = literal ? statement.object.value : statement.object.to_s
-              graph.add(statement.predicate, object, literal)
+            rescue
             end
+            literal = statement.object.kind_of?(RDF::Literal)
+            object = literal ? statement.object.value : statement.object.to_s
+            graph.add(statement.predicate, object, literal)
           end
         end
-        graph
       end
+      graph
+    end
+
+    def graph
+      @graph ||= RelationshipGraph.new
     end
 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def get_values(predicate)
+      ensure_loaded
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       results = graph[predicate]
       return if results.nil?
@@ -231,6 +260,7 @@ module ActiveFedora
     # if there are any existing statements with this predicate, replace them
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def set_value(predicate, args)
+      ensure_loaded
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       graph.delete(predicate)
       args = [args] unless args.respond_to? :each
@@ -244,6 +274,7 @@ module ActiveFedora
     # append a value 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def append(predicate, args)
+      ensure_loaded
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       graph.add(predicate, args, true)
       graph.dirty = true
@@ -268,9 +299,7 @@ module ActiveFedora
     # Get the subject for this rdf/xml datastream
     def rdf_subject
       @subject ||= self.class.rdf_subject.call(self)
-    end
-    
-   
+    end   
 
     # Creates a RDF datastream for insertion into a Fedora Object
     # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
@@ -280,6 +309,7 @@ module ActiveFedora
           writer << statement
         end
       end
+      graph.dirty = false
       out
     end
   end

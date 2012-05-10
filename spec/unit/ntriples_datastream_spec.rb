@@ -13,12 +13,22 @@ describe ActiveFedora::NtriplesRDFDatastream do
           map.related_url(:to => "seeAlso", :in => RDF::RDFS)
         end
       end
-      @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
+      class Foo < ActiveFedora::Base
+        has_metadata :name => "descMetadata", :type => MyDatastream
+        delegate :created, :to => :descMetadata
+        delegate :title, :to => :descMetadata
+        delegate :publisher, :to => :descMetadata
+        delegate :based_near, :to => :descMetadata
+        delegate :related_url, :to => :descMetadata
+      end
+      @object = Foo.new(:pid => 'test:1')
+      @subject = @object.descMetadata
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
-      @subject.stubs(:pid => 'test:1')
-      @subject.stubs(:new? => false)
+      @object.save
     end
-
+    after do
+      @object.delete
+    end
     it "should have a subject" do
       @subject.rdf_subject.should == "info:fedora/test:1"
     end
@@ -29,7 +39,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.mimeType.should == 'text/plain'
     end
     it "should have dsid" do
-      @subject.dsid.should == 'mixed_rdf'
+      @subject.dsid.should == 'descMetadata'
     end
     it "should have fields" do
       @subject.created.should == ["2010-12-31"]
@@ -59,6 +69,21 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
   end
 
+  describe "some dummy instances" do
+    before do
+      class MyFoobarRDFDatastream < ActiveFedora::NtriplesRDFDatastream
+      end
+      class MyFoobarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
+      end
+    end
+    it "should generate predictable prexies" do
+      MyFoobarRDFDatastream.prefix("baz").should == :my_foobar__baz
+    end
+    it "should generate prefixes case-insensitively" do
+      MyFoobarRDFDatastream.prefix("quux").should == MyFoobarRdfDatastream.prefix("quux")
+    end
+  end
+
   describe "an instance with a custom subject" do
     before do 
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
@@ -73,9 +98,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
       end
       @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
-      @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
       @subject.stubs(:pid => 'test:1')
       @subject.stubs(:new? => false)
+      @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
 
     it "should have fields" do
@@ -220,7 +245,16 @@ describe ActiveFedora::NtriplesRDFDatastream do
       ActiveFedora::SolrService.load_mappings
     end
     describe "with an actual object" do
-      before(:all) do
+      before(:each) do
+        class Foo < ActiveFedora::Base
+          has_metadata :name => "descMetadata", :type => MyDatastream
+          delegate :created, :to => :descMetadata
+          delegate :title, :to => :descMetadata
+          delegate :publisher, :to => :descMetadata
+          delegate :based_near, :to => :descMetadata
+          delegate :related_url, :to => :descMetadata
+          delegate :rights, :to => :descMetadata
+        end
         @obj = MyDatastream.new(@inner_object, 'solr_rdf')
         @obj.created = "2012-03-04"
         @obj.title = "Of Mice and Men, The Sequel"
@@ -229,6 +263,39 @@ describe ActiveFedora::NtriplesRDFDatastream do
         @obj.related_url = "http://example.org/blogtastic/"
         @obj.rights = "Totally open, y'all"
         @obj.save
+      end
+      describe '#save' do
+        it "should set dirty? to false" do
+          @obj.dirty?.should be_false
+          @obj.title = "something"
+          @obj.dirty?.should be_true
+          @obj.save
+          @obj.dirty?.should be_false
+        end
+      end
+      describe '.content=' do
+        it "should update the content and graph, marking the datastream as changed" do
+          mock_repo = mock('repository')
+          mock_repo.expects(:datastream_dissemination).with(:pid => 'test:123', 
+                                                            :dsid => 'solr_rdf')
+          sample_rdf = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
+          @obj.stubs(:pid).returns('test:123')
+          @obj.stubs(:repository).returns(mock_repo)
+          @obj.should_not be_changed
+          @obj.content.should_not be_equivalent_to(sample_rdf)
+          @obj.content = sample_rdf
+          @obj.should be_changed
+          @obj.content.should be_equivalent_to(sample_rdf)
+        end
+      end
+      it "should save content properly upon save" do
+        foo = Foo.new(:pid => 'test:1')
+        foo.title = 'Hamlet'
+        foo.save
+        foo.title.should == ['Hamlet']
+        foo.descMetadata.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
+        foo.save
+        foo.title.should == ['Title of work']
       end
       describe ".fields()" do
         it "should return the right # of fields" do
@@ -251,6 +318,17 @@ describe ActiveFedora::NtriplesRDFDatastream do
           @obj.fields[:my_datastream__based_near][:values].count.should == 2
           @obj.fields[:my_datastream__based_near][:values].should include("Tacoma, WA")
           @obj.fields[:my_datastream__based_near][:values].should include("Renton, WA")
+        end
+        it "should solrize even when the object is not new" do
+          foo = Foo.new
+          foo.expects(:update_index).once
+          foo.title = "title1"
+          foo.save
+          foo = Foo.find(foo.pid)
+          foo.expects(:update_index).once
+          foo.publisher = "Allah2"
+          foo.title = "The Work2"
+          foo.save  
         end
       end
       describe ".to_solr()" do
