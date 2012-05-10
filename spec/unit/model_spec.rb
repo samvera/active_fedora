@@ -6,6 +6,8 @@ describe ActiveFedora::Model do
     module SpecModel
       class Basic
         include ActiveFedora::Model
+        def initialize (args = {})
+        end
       end
     end
     @test_property = ActiveFedora::Property.new("foo_model","test_property", :text)
@@ -71,7 +73,7 @@ describe ActiveFedora::Model do
   describe '#find' do
     describe "without :cast" do
       it "(:all) should query solr for all objects with :active_fedora_model_s of self.class" do
-        ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :rows=>1001).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
+        ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :fl => 'id', :sort => ['system_create_dt asc'], :rows=>1001).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
         SpecModel::Basic.expects(:find_one).with("changeme:30", nil).returns("Fake Object1")
         SpecModel::Basic.expects(:find_one).with("changeme:22", nil).returns("Fake Object2")
         SpecModel::Basic.find(:all, :rows=>1001).should == ["Fake Object1", "Fake Object2"]
@@ -99,8 +101,31 @@ describe ActiveFedora::Model do
         SpecModel::Basic.expects(:find_one).with("changeme:30", nil).returns("Fake Object1")
         SpecModel::Basic.expects(:find_one).with("changeme:22", nil).returns("Fake Object2")
 
-        ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:"bar" AND baz:"quix" AND baz:"quack"', {:sort => ['system_create_dt asc'], :rows=>1002}).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
+        ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:"bar" AND baz:"quix" AND baz:"quack"', {:sort => ['system_create_dt asc'], :fl=> 'id', :rows=>1002}).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
         SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}, {:rows=>1002}).should == ["Fake Object1", "Fake Object2"]
+      end
+    end
+  end
+
+  describe '#find_each' do
+    it "should query solr for all objects with :active_fedora_model_s of self.class" do
+      ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :rows=>1001, :fl=>'id',:sort => ['system_create_dt asc']).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
+      
+      SpecModel::Basic.expects(:find_one).with("changeme:30", nil).returns(SpecModel::Basic.new(:pid=>'changeme:30'))
+      SpecModel::Basic.expects(:find_one).with("changeme:22", nil).returns(SpecModel::Basic.new(:pid=>'changeme:22'))
+      yielded = mock("yielded method")
+      yielded.expects(:run).with { |obj| obj.class == SpecModel::Basic}.twice
+      SpecModel::Basic.find_each(:rows=>1001){|obj| yielded.run(obj) }.should == [{"id"=>"changeme:30"}, {"id"=>"changeme:22"}]
+    end
+    describe "with conditions hash" do
+      it "should filter by the provided fields" do
+        SpecModel::Basic.expects(:find_one).with("changeme:30", nil).returns(SpecModel::Basic.new(:pid=>'changeme:30'))
+        SpecModel::Basic.expects(:find_one).with("changeme:22", nil).returns(SpecModel::Basic.new(:pid=>'changeme:22'))
+
+        ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:"bar" AND baz:"quix" AND baz:"quack"', {:sort => ['system_create_dt asc'], :fl=> 'id', :rows=>1002}).returns([{"id" => "changeme:30"}, {"id" => "changeme:22"}])
+        yielded = mock("yielded method")
+        yielded.expects(:run).with { |obj| obj.class == SpecModel::Basic}.twice
+        SpecModel::Basic.find_each(:conditions=>{:foo=>'bar', :baz=>['quix','quack']}, :rows=>1002){|obj| yielded.run(obj) }.should == [{"id"=>"changeme:30"}, {"id"=>"changeme:22"}]
       end
     end
   end

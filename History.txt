@@ -1,12 +1,14 @@
+4.2.0
+Added Base.find_each which allows yielding of each result
+
 4.1.0
 ActiveFedora::Base.find() now supports filtering by solr fields (boolean OR).
 * example:  ModsAsset.find('title_t' => 'Song of Fire and Ice','author_t'=>['Agatha Christie', 'Dr. Seuss']
-ActiveFedora::Base.find_with_conditions added to conform more closely to Rails convention
-ActiveFedora::Base.find_by_fields_by_solr is deprecated in favor of find_by_conditions.
+ActiveFedora::Base.find_with_conditions which is the replacement for ActiveFedora::Base.find_by_fields_by_solr (previously deprecated)
 YAML configurations are loaded through ERB, allowing reference to evaluated Ruby or environment variables
 When setting ng_xml= with a Nokogiri node, cast it to a new Nokogiri document
 
-4.0.0.rc20
+4.0.0
 Removed deprecations
   * allowing :fedora level in fedora.yml
   * automatic includes of Relationships and FileMethods is removed
