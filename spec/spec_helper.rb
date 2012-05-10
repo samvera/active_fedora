@@ -1,5 +1,14 @@
 ENV["environment"] ||= 'test'
 require "bundler/setup"
+
+if ENV['COVERAGE'] and RUBY_VERSION =~ /^1.9/
+  require 'simplecov'
+  require 'simplecov-rcov'
+
+  SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter
+  SimpleCov.start
+end
+
 require 'active-fedora'
 require 'rspec'
 require 'equivalent-xml/rspec_matchers'
