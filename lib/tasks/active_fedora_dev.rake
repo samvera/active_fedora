@@ -77,6 +77,28 @@ task :hudson do
   Rake::Task["active_fedora:doc"].invoke
 end
 
+desc "Execute specs with coverage"
+task :coverage do 
+  # Put spec opts in a file named .rspec in root
+  ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
+  ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
+
+  Rake::Task["active_fedora:load_fixtures"].invoke
+  Rake::Task["active_fedora:rspec"].invoke
+end
+
+namespace :coverage do
+desc "Execute ci build with coverage"
+task :ci do 
+  # Put spec opts in a file named .rspec in root
+  ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
+  ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
+
+
+  Rake::Task['active_fedora:hudson'].invoke
+end
+end
+
 # Provides an :environment task for use while working within a working copy of active-fedora
 # You should never load this rake file into any other application
 desc 'Set up ActiveFedora environment.  !! Only for use while working within a working copy of active-fedora'
