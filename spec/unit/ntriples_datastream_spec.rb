@@ -166,9 +166,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
       end
       @subject = MyDatastream.new(@inner_object, 'solr_rdf')
+      @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
       @subject.stubs(:pid => 'test:1')
       @subject.stubs(:new? => false)
-      @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
       @sample_fields = {:my_datastream__publisher => {:values => ["publisher1"], :type => :string, :behaviors => [:facetable, :sortable, :searchable, :displayable]}, 
         :my_datastream__based_near => {:values => ["coverage1", "coverage2"], :type => :text, :behaviors => [:displayable, :facetable, :searchable]}, 
         :my_datastream__created => {:values => "fake-date", :type => :date, :behaviors => [:sortable, :displayable]},
@@ -273,14 +273,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
           @obj.dirty?.should be_false
         end
       end
-      describe ".dirty?" do
-        it "should return the value of the @dirty attribute or changed?" do
-          @obj.expects(:changed?).returns(false)
-          @obj.dirty?.should be_false  
-          @obj.title = "boo"
-          @obj.dirty?.should be_true   
-        end
-      end 
       describe '.content=' do
         it "should update the content and graph, marking the datastream as changed" do
           mock_repo = mock('repository')

@@ -51,14 +51,14 @@ Then open a new terminal, go to your ActiveFedora source directory, and import f
 
 <pre>
   export FEDORA_HOME=/path/to/hydra/jetty/fedora/default
-  rake active_fedora:load_fixtures RAILS_ENV=test
+  rake active_fedora:load_fixtures environment=test
 </pre>
 
 This does the equivalent of:
 
 <pre>
   $FEDORA_HOME/client/bin/fedora-ingest-demos.sh localhost 8983 fedoraAdmin fedoraAdmin http
-  rake af:import_fixture pid=hydrangea:fixture_mods_article1 RAILS_ENV=test
+  rake af:import_fixture pid=hydrangea:fixture_mods_article1 environment=test
 </pre>
 
 Now you're ready to run the tests.  In the directory where active_fedora is installed, run
