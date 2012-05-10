@@ -145,57 +145,40 @@ module ActiveFedora
     end
     
     include ModelMethods
+    attr_accessor :loaded
 
-    def initialize(digital_object, dsid, options={})
-      ## When you use the versions feature of rubydora (0.5.x), you
-      ## need to have a 3 argument constructor
-      puts dirty?
-      if self.respond_to? :pid
-        puts 'responds to pid'
-        puts self.inspect
-        #puts "initialize :: content = #{content}"
-        #graph = deserialize(content) 
-        #puts "initialize :: graph = #{graph.inspect}"
-        #graph.dirty = false
-      else
-        puts "initialize :: new, not deserializing"
+    def ensure_loaded
+      return if loaded 
+      self.loaded = true
+      unless new?
+        deserialize content
       end
-      super
     end
 
-
     def dirty?
-      #graph.dirty || changed?
       graph.dirty
+    end
+
+    def save
+      super
+      graph.dirty = false
     end
 
     def serialize! # :nodoc:
       return unless dirty?
+      return unless loaded
       self.content = serialize
-      #puts "marking graph as clean"
-      graph.dirty = false
     end
 
-    #def save
-    #  puts "in save method, checking if graph is dirty"
-    #  return unless graph.dirty
-    #  puts "in save method, deserializing"
-    #  deserialize
-    #  super
-    #  graph.dirty = false
-    #end
-
-    def content=(triples)
+    def content=(content)
       super
-      #graph(:initialize => true)
-      graph = deserialize(triples)
-      triples
-      #graph(:rdf => triples)
-      #puts "graph is #{graph.inspect}"
+      @graph = RelationshipGraph.new
+      deserialize(content)
     end
 
     # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
     def fields
+      ensure_loaded
       field_map = {}
       graph.relationships.each do |predicate, values|
         vocab_sym, name = predicate.qname
@@ -214,6 +197,7 @@ module ActiveFedora
     end
 
     def to_solr(solr_doc = Hash.new) # :nodoc:
+      ensure_loaded
       fields.each do |field_key, field_info|
         values = field_info.fetch(:values, false)
         if values
@@ -236,38 +220,33 @@ module ActiveFedora
       RDF::URI(result.reverse.join)
     end
 
-    def deserialize(triples)
-      g = RelationshipGraph.new
-      RDF::Reader.for(serialization_format).new(triples) do |reader|
-        reader.each_statement do |statement|
-          # filter out assertions which don't match the subject
-          begin
-            next unless statement.subject == rdf_subject
-          rescue
-            # do nothing -- the object does not yet have a pid which
-            # causes rdf_subject to raise an error
+    # Populate a RDFDatastream object based on the "datastream" content 
+    # Assumes that the datastream contains RDF content
+    # @param [String] data the "rdf" node 
+    def deserialize(data)
+      unless data.nil?
+        RDF::Reader.for(serialization_format).new(data) do |reader|
+          reader.each_statement do |statement|
+            begin
+              next unless statement.subject == rdf_subject
+            rescue
+            end
+            literal = statement.object.kind_of?(RDF::Literal)
+            object = literal ? statement.object.value : statement.object.to_s
+            graph.add(statement.predicate, object, literal)
           end
-          literal = statement.object.kind_of?(RDF::Literal)
-          object = literal ? statement.object.value : statement.object.to_s
-          g.add(statement.predicate, object, literal)
         end
       end
-      g
+      graph
     end
 
     def graph
       @graph ||= RelationshipGraph.new
-      #if params[:initialize] || @g.nil?
-      #  @g = RelationshipGraph.new
-      #end
-      #unless new?
-      #  deserialize
-      #end
-      # @g
     end
 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def get_values(predicate)
+      ensure_loaded
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       results = graph[predicate]
       return if results.nil?
@@ -281,6 +260,7 @@ module ActiveFedora
     # if there are any existing statements with this predicate, replace them
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def set_value(predicate, args)
+      ensure_loaded
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       graph.delete(predicate)
       args = [args] unless args.respond_to? :each
@@ -294,6 +274,7 @@ module ActiveFedora
     # append a value 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def append(predicate, args)
+      ensure_loaded
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       graph.add(predicate, args, true)
       graph.dirty = true
