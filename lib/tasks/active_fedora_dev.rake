@@ -69,8 +69,7 @@ task :hudson do
   jetty_params = Jettywrapper.load_config
   jetty_params[:startup_wait]= 30
   error = Jettywrapper.wrap(jetty_params) do
-    Rake::Task["active_fedora:load_fixtures"].invoke
-    Rake::Task["active_fedora:rspec"].invoke
+    Rake::Task['active_fedora:coverage'].invoke
   end
   raise "test failures: #{error}" if error
   # Only create documentation if the tests have passed
@@ -85,18 +84,6 @@ task :coverage do
 
   Rake::Task["active_fedora:load_fixtures"].invoke
   Rake::Task["active_fedora:rspec"].invoke
-end
-
-namespace :coverage do
-desc "Execute ci build with coverage"
-task :ci do 
-  # Put spec opts in a file named .rspec in root
-  ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
-  ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
-
-
-  Rake::Task['active_fedora:hudson'].invoke
-end
 end
 
 # Provides an :environment task for use while working within a working copy of active-fedora
