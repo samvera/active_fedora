@@ -102,32 +102,58 @@ module ActiveFedora
       # @option opts [Integer] :rows when :all is passed, the maximum number of rows to load from solr
       # @option opts [Boolean] :cast when true, examine the model and cast it to the first known cModel
       def find(args, opts={})
-        opts = {:rows=>25}.merge(opts)
         return find_one(args, opts[:cast]) if args.class == String
         args = {} if args == :all
-        hits = find_with_conditions(args, opts.merge({:fl=>SOLR_DOCUMENT_ID}))
-        hits.map do |hit|
-           pid = hit[SOLR_DOCUMENT_ID]
-           find_one(pid, opts[:cast])
+        results = []
+        find_each(args, opts) do |obj|
+           results << obj
         end
+        results
       end
 
-      # Yields the found object to the passed block
-      #
-      # @param[ Hash] options 
-      # @option opts [Integer] :conditions a list of conditions for the search to match
-      # @option opts [Integer] :rows when :all is passed, the maximum number of rows to load from solr
-      # @option opts [Boolean] :cast when true, examine the model and cast it to the first known cModel
-      def find_each(opts={})
-        opts = {:rows=>25}.merge(opts)
-        conditions = opts.delete(:conditions) || {}
-        hits = find_with_conditions(conditions, opts.merge({:fl=>SOLR_DOCUMENT_ID}))
 
-        hits.each do |hit|
-          pid = hit[SOLR_DOCUMENT_ID]
-          if pid.present?
-            obj=find_one(pid, opts[:cast])
-            yield(obj)
+      # Yields each batch of solr records that was found by the find +options+ as
+      # an array. The size of each batch is set by the <tt>:batch_size</tt>
+      # option; the default is 1000.
+      #
+      # Returns a solr result matching the supplied conditions
+      # @param[Hash] conditions solr conditions to match
+      # @param[Hash] options 
+      # @option opts [Array] :sort a list of fields to sort by 
+      # @option opts [Array] :rows number of rows to return
+      #
+      # @example
+      #  Person.find_in_batches('age_t'=>'21', {:batch_size=>50}) do |group|
+      #  group.each { |person| puts person['name_t'] }
+      #  end
+      
+      def find_in_batches conditions, opts={}
+        opts[:q] = create_query(conditions)
+        #set default sort to created date ascending
+        unless opts.include?(:sort)
+          opts[:sort]=[ActiveFedora::SolrService.solr_name(:system_create,:date)+' asc'] 
+        end
+
+        batch_size = opts.delete(:batch_size) || 1000
+
+        counter = 0
+        begin
+          counter += 1
+          response = ActiveFedora::SolrService.instance.conn.paginate counter, batch_size, "select", :params => opts
+          docs = response["response"]["docs"]
+          yield docs
+        end while docs.has_next? 
+      end
+
+      # Yields the found ActiveFedora::Base object to the passed block
+      #
+      # @param [Hash] conditions the conditions for the solr search to match
+      # @param [Hash] opts 
+      # @option opts [Boolean] :cast when true, examine the model and cast it to the first known cModel
+      def find_each( conditions={}, opts={})
+        find_in_batches(conditions, opts.merge({:fl=>SOLR_DOCUMENT_ID})) do |group|
+          group.each do |hit|
+            yield(find_one(hit[SOLR_DOCUMENT_ID], opts[:cast]))
           end
         end
       end
@@ -141,6 +167,7 @@ module ActiveFedora
         !inner.new?
       end
 
+      #@deprecated
       def find_model(pid)
         ActiveSupport::Deprecation.warn("find_model is deprecated.  Use find instead")
         find(pid)
@@ -156,8 +183,10 @@ module ActiveFedora
           SolrService.query(q, :raw=>true, :rows=>0)['response']['numFound']
       end
 
+      #@deprecated
       #Sends a query directly to SolrService
       def solr_search(query, args={})
+        ActiveSupport::Deprecation.warn("solr_search is deprecated and will be removed in the next release. Use SolrService.query instead")
         SolrService.instance.conn.query(query, args)
       end
 
@@ -182,6 +211,7 @@ module ActiveFedora
         end
       end
 
+      # @deprecated
       # Find all ActiveFedora objects for this model that match arguments
       # passed in by querying Solr.  Like find_by_solr this returns a solr result.
       #
@@ -268,8 +298,24 @@ module ActiveFedora
         SolrService.query(query, query_opts) 
       end
 
-      # @param[Hash] conditions 
+      # Returns a solr result matching the supplied conditions
+      # @param[Hash] conditions solr conditions to match
+      # @param[Hash] options 
+      # @option opts [Array] :sort a list of fields to sort by 
+      # @option opts [Array] :rows number of rows to return
       def find_with_conditions(conditions, opts={})
+        query = create_query(conditions)
+        #set default sort to created date ascending
+        unless opts.include?(:sort)
+          opts[:sort]=[ActiveFedora::SolrService.solr_name(:system_create,:date)+' asc'] 
+        end
+        SolrService.query(query, opts) 
+      end
+
+      
+      # Returns a solr query for the supplied conditions
+      # @param[Hash] conditions solr conditions to match
+      def create_query(conditions)
         escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
         clauses = ["#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"]
         conditions.each_pair do |key,value|
@@ -286,13 +332,7 @@ module ActiveFedora
           end
         end
 
-        query = clauses.join(" AND ")
-
-        #set default sort to created date ascending
-        unless opts.include?(:sort)
-          opts[:sort]=[ActiveFedora::SolrService.solr_name(:system_create,:date)+' asc'] 
-        end
-        SolrService.query(query, opts) 
+        clauses.join(" AND ")
       end
 
       def quote_for_solr(value)
@@ -309,18 +349,20 @@ module ActiveFedora
         return fields
       end
 
+    #TODO remove
       #wrapper around instance_variable_set, sets @name to value
       def attribute_set(name, value)
         instance_variable_set("@#{name}", value)
       end
 
+    #TODO remove
       #wrapper around instance_variable_get, returns current value of @name
       def attribute_get(name)
         instance_variable_get("@#{name}")
       end
 
       private 
-      # Retrieve the Fedora object with te given pid, explore the returned object, determine its model 
+      # Retrieve the Fedora object with the given pid, explore the returned object, determine its model 
       # using #{ActiveFedora::ContentModel.known_models_for} and cast to that class.
       # Raises a ObjectNotFoundError if the object is not found.
       # @param [String] pid of the object to load
@@ -336,6 +378,7 @@ module ActiveFedora
       end
 
     end
+    #TODO remove
     def create_property_getter(property) # :nodoc:
 
       class_eval <<-END, __FILE__, __LINE__
@@ -345,6 +388,7 @@ module ActiveFedora
           END
     end
 
+    #TODO remove
     def create_property_setter(property)# :nodoc:
       class_eval <<-END, __FILE__, __LINE__  
           def #{property.name}=(value)

@@ -1,5 +1,6 @@
 4.2.0
 Added Base.find_each which allows yielding of each result
+Added Base.find_in_batches which allows yielding of a chunk of solr results
 
 4.1.0
 ActiveFedora::Base.find() now supports filtering by solr fields (boolean AND).
