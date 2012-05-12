@@ -349,18 +349,6 @@ module ActiveFedora
         return fields
       end
 
-    #TODO remove
-      #wrapper around instance_variable_set, sets @name to value
-      def attribute_set(name, value)
-        instance_variable_set("@#{name}", value)
-      end
-
-    #TODO remove
-      #wrapper around instance_variable_get, returns current value of @name
-      def attribute_get(name)
-        instance_variable_get("@#{name}")
-      end
-
       private 
       # Retrieve the Fedora object with the given pid, explore the returned object, determine its model 
       # using #{ActiveFedora::ContentModel.known_models_for} and cast to that class.
@@ -377,24 +365,6 @@ module ActiveFedora
         cast ? af_base.adapt_to_cmodel : af_base
       end
 
-    end
-    #TODO remove
-    def create_property_getter(property) # :nodoc:
-
-      class_eval <<-END, __FILE__, __LINE__
-          def #{property.name}
-            attribute_get("#{property.name}")
-          end
-          END
-    end
-
-    #TODO remove
-    def create_property_setter(property)# :nodoc:
-      class_eval <<-END, __FILE__, __LINE__  
-          def #{property.name}=(value)
-            attribute_set("#{property.name}", value)
-          end
-          END
     end
 
     private 

@@ -10,65 +10,12 @@ describe ActiveFedora::Model do
         end
       end
     end
-    @test_property = ActiveFedora::Property.new("foo_model","test_property", :text)
-  end
-  
-  before(:each) do 
-    ActiveFedora::Base.stubs(:assign_pid).returns('_nextid_')
-    @test_instance = SpecModel::Basic.new
-    @property = stub("myproperty", :name => "mock_prop", :instance_variable_name => "@mock_prop")
-    SpecModel::Basic.extend(ActiveFedora::Model)
-    SpecModel::Basic.create_property_getter(@property)
-    @obj = SpecModel::Basic.new
   end
   
   after(:all) do
     Object.send(:remove_const, :SpecModel)
   end
   
-  it 'should provide #attribute_set and #attribute_get' do
-    SpecModel::Basic.should respond_to(:attribute_set)
-    SpecModel::Basic.should respond_to(:attribute_get) 
-  end
-  
-  it 'should provide #create_property_getter' do
-    SpecModel::Basic.should respond_to(:create_property_getter)
-  end
-  
-  describe '#create_property_getter' do
-    it 'should add getter to the model' do
-      @obj.should respond_to(@property.name)
-    end
-    
-    it 'should use attribute_get in custom getter method' do
-      @obj.expects(:attribute_get).with(@property.name)
-      @obj.send @property.name
-    end
-    
-  end
-  
-  it 'should provide #create_property_setter' do
-    SpecModel::Basic.should respond_to(:create_property_setter)
-  end
-  
-  describe '#create_property_setter' do
-    
-    before(:each) do
-      @property = stub("myproperty", :name => "mock_prop", :instance_variable_name => "@mock_prop")
-      SpecModel::Basic.create_property_setter(@property)
-      @obj = SpecModel::Basic.new
-    end
-    
-    it 'should add setter to the model' do
-      @obj.should respond_to("#{@property.name}=")
-    end
-    
-    it 'should use attribute_set in custom setter method' do
-      @obj.expects(:attribute_set).with(@property.name, "sample value")
-      @obj.send "#{@property.name}=", "sample value" 
-    end
-      
-  end
   
   describe '#find' do
     describe "without :cast" do
