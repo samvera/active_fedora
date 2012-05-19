@@ -168,7 +168,8 @@ describe ActiveFedora::Model do
     it "should make a query to solr and return the results" do
       mock_result = stub('Result')
            ActiveFedora::SolrService.expects(:query).with() { |args|
-            q = args.first
+            q = args.first if args.is_a? Array
+            q ||= args
             q.split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
             q.split(" AND ").includes("foo:\"bar\"") &&
             q.split(" AND ").includes("baz:\"quix\"") &&
@@ -180,7 +181,8 @@ describe ActiveFedora::Model do
     it "should escape quotes" do
       mock_result = stub('Result')
            ActiveFedora::SolrService.expects(:query).with() { |args|
-            q = args.first
+            q = args.first if args.is_a? Array
+            q ||= args
             q.split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
             q.split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
             q.split(" AND ").includes('foo:"9\\" Nails"') &&
