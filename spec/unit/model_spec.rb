@@ -54,7 +54,18 @@ describe ActiveFedora::Model do
         mock_docs = mock('docs')
         mock_docs.expects(:each).multiple_yields([{"id" => "changeme:30"}],[{"id" => "changeme:22"}])
         mock_docs.expects(:has_next?).returns(false)
-        ActiveFedora::SolrService.instance.conn.expects(:paginate).with(1, 1000, 'select', :params=>{:q=>'has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:"bar" AND baz:"quix" AND baz:"quack"', :sort => ['system_create_dt asc'], :fl=> 'id', }).returns('response'=>{'docs'=>mock_docs})
+        ActiveFedora::SolrService.instance.conn.expects(:paginate).with() { |page, rows, method, hash|
+            page == 1 &&
+            rows == 1000 &&
+            method == 'select' &&
+            hash[:params] &&
+            hash[:params].has_entries('sort' => ['system_create_dt_asc'],
+                             'fl' => 'id') && 
+            hash[:params][:q].split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
+            hash[:params][:q].split(" AND ").includes("foo:\"bar\"") &&
+            hash[:params][:q].split(" AND ").includes("baz:\"quix\"") &&
+            hash[:params][:q].split(" AND ").includes("baz:\"quack\"")
+        }.returns('response'=>{'docs'=>mock_docs})
         SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}).should == ["Fake Object1", "Fake Object2"]
       end
     end
@@ -81,7 +92,18 @@ describe ActiveFedora::Model do
         mock_docs = mock('docs')
         mock_docs.expects(:each).multiple_yields([{"id" => "changeme:30"}],[{"id" => "changeme:22"}])
         mock_docs.expects(:has_next?).returns(false)
-        ActiveFedora::SolrService.instance.conn.expects(:paginate).with(1, 1000, 'select', :params=>{:q=>'has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:"bar" AND baz:"quix" AND baz:"quack"', :sort => ['system_create_dt asc'], :fl=> 'id', }).returns('response'=>{'docs'=>mock_docs})
+        ActiveFedora::SolrService.instance.conn.expects(:paginate).with() { |page, rows, method, hash|
+            page == 1 &&
+            rows == 1000 &&
+            method == 'select' &&
+            hash[:params] &&
+            hash[:params].has_entries('sort' => ['system_create_dt_asc'],
+                             'fl' => 'id') && 
+            hash[:params][:q].split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
+            hash[:params][:q].split(" AND ").includes("foo:\"bar\"") &&
+            hash[:params][:q].split(" AND ").includes("baz:\"quix\"") &&
+            hash[:params][:q].split(" AND ").includes("baz:\"quack\"")
+        }.returns('response'=>{'docs'=>mock_docs})
         yielded = mock("yielded method")
         yielded.expects(:run).with { |obj| obj.class == SpecModel::Basic}.twice
         SpecModel::Basic.find_each({:foo=>'bar', :baz=>['quix','quack']}){|obj| yielded.run(obj) }
@@ -94,7 +116,18 @@ describe ActiveFedora::Model do
       it "should filter by the provided fields" do
         mock_docs = mock('docs')
         mock_docs.expects(:has_next?).returns(false)
-        ActiveFedora::SolrService.instance.conn.expects(:paginate).with(1, 1002, 'select', :params=>{:q=>'has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:"bar" AND baz:"quix" AND baz:"quack"', :sort => ['system_create_dt asc'], :fl=> 'id', }).returns('response'=>{'docs'=>mock_docs})
+        ActiveFedora::SolrService.instance.conn.expects(:paginate).with() { |page, rows, method, hash|
+            page == 1 &&
+            rows == 1002 &&
+            method == 'select' &&
+            hash[:params] &&
+            hash[:params].has_entries('sort' => ['system_create_dt_asc'],
+                             'fl' => 'id') && 
+            hash[:params][:q].split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
+            hash[:params][:q].split(" AND ").includes("foo:\"bar\"") &&
+            hash[:params][:q].split(" AND ").includes("baz:\"quix\"") &&
+            hash[:params][:q].split(" AND ").includes("baz:\"quack\"")
+        }.returns('response'=>{'docs'=>mock_docs})
         yielded = mock("yielded method")
         yielded.expects(:run).with(mock_docs)
         SpecModel::Basic.find_in_batches({:foo=>'bar', :baz=>['quix','quack']}, {:batch_size=>1002, :fl=>'id'}){|group| yielded.run group }.should
@@ -134,13 +167,23 @@ describe ActiveFedora::Model do
   describe '#find_with_conditions' do
     it "should make a query to solr and return the results" do
       mock_result = stub('Result')
-      ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:"bar" AND baz:"quix" AND baz:"quack"', {:sort => ['system_create_dt asc']}).returns(mock_result)
+           ActiveFedora::SolrService.expects(:query).with() { |q|
+            q.split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
+            q.split(" AND ").includes("foo:\"bar\"") &&
+            q.split(" AND ").includes("baz:\"quix\"") &&
+            q.split(" AND ").includes("baz:\"quack\"")
+        }.returns(mock_result)
       SpecModel::Basic.find_with_conditions(:foo=>'bar', :baz=>['quix','quack']).should == mock_result
       
     end
     it "should escape quotes" do
       mock_result = stub('Result')
-      ActiveFedora::SolrService.expects(:query).with('has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic AND foo:"9\\" Nails" AND baz:"7\\" version" AND baz:"quack"', {:sort => ['system_create_dt asc']}).returns(mock_result)
+           ActiveFedora::SolrService.expects(:query).with() { |q|
+            q.split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
+            q.split(" AND ").includes('foo:"9\\" Nails"') &&
+            q.split(" AND ").includes('baz:"7\\" version"') &&
+            q.split(" AND ").includes('baz:"quack"')
+        }.returns(mock_result)
       SpecModel::Basic.find_with_conditions(:foo=>'9" Nails', :baz=>['7" version','quack']).should == mock_result
       
     end
