@@ -167,7 +167,8 @@ describe ActiveFedora::Model do
   describe '#find_with_conditions' do
     it "should make a query to solr and return the results" do
       mock_result = stub('Result')
-           ActiveFedora::SolrService.expects(:query).with() { |q|
+           ActiveFedora::SolrService.expects(:query).with() { |args|
+            q = args.first
             q.split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
             q.split(" AND ").includes("foo:\"bar\"") &&
             q.split(" AND ").includes("baz:\"quix\"") &&
@@ -178,7 +179,9 @@ describe ActiveFedora::Model do
     end
     it "should escape quotes" do
       mock_result = stub('Result')
-           ActiveFedora::SolrService.expects(:query).with() { |q|
+           ActiveFedora::SolrService.expects(:query).with() { |args|
+            q = args.first
+            q.split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
             q.split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
             q.split(" AND ").includes('foo:"9\\" Nails"') &&
             q.split(" AND ").includes('baz:"7\\" version"') &&
