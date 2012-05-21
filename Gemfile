@@ -6,7 +6,7 @@ gemspec
 
 group :development, :test do
   gem 'ruby-debug', :platform => :ruby_18
-  gem 'debugger', :platform => :ruby_19
+#  gem 'debugger', :platform => :ruby_19
 
 
   gem 'rcov', :platform => :mri_18
