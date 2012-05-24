@@ -28,13 +28,13 @@ Gem::Specification.new do |s|
   s.add_dependency("equivalent-xml")
   s.add_dependency("rubydora", '~>0.5.8')
   s.add_dependency("rdf")
-  s.add_dependency("rdf-rdfxml", '0.3.5') # 0.3.6 is broken
+  s.add_dependency("rdf-rdfxml", '~>0.3.8')
   s.add_development_dependency("yard")
   s.add_development_dependency("RedCloth") # for RDoc formatting
   s.add_development_dependency("rake")
   s.add_development_dependency("jettywrapper", ">=1.2.0")
   s.add_development_dependency("rspec", ">= 2.9.0")
-  s.add_development_dependency("mocha", ">= 0.9.8")
+  s.add_development_dependency("mocha", "0.10.5")
   
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

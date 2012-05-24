@@ -3,7 +3,7 @@
 # This is an RVM Project .rvmrc file, used to automatically load the ruby
 # development environment upon cd'ing into the directory
 
-ruby_string="1.9.3-p125"
+ruby_string="1.9.3-p194"
 gemset_name="active_fedora_4.0"
 
 # Install rubies when used instead of only displaying a warning and exiting
