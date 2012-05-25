@@ -190,6 +190,23 @@ describe ActiveFedora::Base do
         Book.find(@book.id).author.send(:find_target).should be_kind_of Person
       end
 
+      describe "when changing the belonger" do
+        before do
+          @book.library = @library
+          @book.save
+          @library2 = Library.create
+        end
+        it "should replace an existing instance" do
+          @book.library_id.should == @library.id
+          @book.library = @library2
+          @book.save
+          Book.find(@book.id).library_id.should == @library2.id
+        end
+        after do
+          @library2.delete
+        end
+      end
+
       after do
         @library.delete
         @book.delete
