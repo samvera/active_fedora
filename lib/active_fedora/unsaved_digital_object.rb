@@ -14,6 +14,12 @@ module ActiveFedora
       @pid || '__DO_NOT_USE__'
     end
 
+
+    # Set the pid.  This method is only avaialable before the object has been persisted in fedora.
+    def pid=pid
+      @pid = pid
+    end
+
     def new?
       true
     end
