@@ -60,12 +60,12 @@ describe ActiveFedora::Model do
             rows == 1000 &&
             method == 'select' &&
             hash[:params] &&
-            hash[:params].has_entries('sort' => ['system_create_dt_asc'],
-                             'fl' => 'id') && 
-            hash[:params][:q].split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
-            hash[:params][:q].split(" AND ").includes("foo:\"bar\"") &&
-            hash[:params][:q].split(" AND ").includes("baz:\"quix\"") &&
-            hash[:params][:q].split(" AND ").includes("baz:\"quack\"")
+            hash[:params][:sort] == ['system_create_dt asc'] &&
+            hash[:params][:fl] == 'id' && 
+            hash[:params][:q].split(" AND ").include?("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
+            hash[:params][:q].split(" AND ").include?("foo:\"bar\"") &&
+            hash[:params][:q].split(" AND ").include?("baz:\"quix\"") &&
+            hash[:params][:q].split(" AND ").include?("baz:\"quack\"")
         }.returns('response'=>{'docs'=>mock_docs})
         SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}).should == ["Fake Object1", "Fake Object2"]
       end
@@ -98,12 +98,12 @@ describe ActiveFedora::Model do
             rows == 1000 &&
             method == 'select' &&
             hash[:params] &&
-            hash[:params].has_entries('sort' => ['system_create_dt_asc'],
-                             'fl' => 'id') && 
-            hash[:params][:q].split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
-            hash[:params][:q].split(" AND ").includes("foo:\"bar\"") &&
-            hash[:params][:q].split(" AND ").includes("baz:\"quix\"") &&
-            hash[:params][:q].split(" AND ").includes("baz:\"quack\"")
+            hash[:params][:sort] == ['system_create_dt asc'] && 
+            hash[:params][:fl] == 'id' && 
+            hash[:params][:q].split(" AND ").include?("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
+            hash[:params][:q].split(" AND ").include?("foo:\"bar\"") &&
+            hash[:params][:q].split(" AND ").include?("baz:\"quix\"") &&
+            hash[:params][:q].split(" AND ").include?("baz:\"quack\"")
         }.returns('response'=>{'docs'=>mock_docs})
         yielded = mock("yielded method")
         yielded.expects(:run).with { |obj| obj.class == SpecModel::Basic}.twice
@@ -122,12 +122,12 @@ describe ActiveFedora::Model do
             rows == 1002 &&
             method == 'select' &&
             hash[:params] &&
-            hash[:params].has_entries('sort' => ['system_create_dt_asc'],
-                             'fl' => 'id') && 
-            hash[:params][:q].split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
-            hash[:params][:q].split(" AND ").includes("foo:\"bar\"") &&
-            hash[:params][:q].split(" AND ").includes("baz:\"quix\"") &&
-            hash[:params][:q].split(" AND ").includes("baz:\"quack\"")
+            hash[:params][:sort] == ['system_create_dt asc'] && 
+            hash[:params][:fl] == 'id' && 
+            hash[:params][:q].split(" AND ").include?("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
+            hash[:params][:q].split(" AND ").include?("foo:\"bar\"") &&
+            hash[:params][:q].split(" AND ").include?("baz:\"quix\"") &&
+            hash[:params][:q].split(" AND ").include?("baz:\"quack\"")
         }.returns('response'=>{'docs'=>mock_docs})
         yielded = mock("yielded method")
         yielded.expects(:run).with(mock_docs)
@@ -171,10 +171,10 @@ describe ActiveFedora::Model do
            ActiveFedora::SolrService.expects(:query).with() { |args|
             q = args.first if args.is_a? Array
             q ||= args
-            q.split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
-            q.split(" AND ").includes("foo:\"bar\"") &&
-            q.split(" AND ").includes("baz:\"quix\"") &&
-            q.split(" AND ").includes("baz:\"quack\"")
+            q.split(" AND ").include?("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
+            q.split(" AND ").include?("foo:\"bar\"") &&
+            q.split(" AND ").include?("baz:\"quix\"") &&
+            q.split(" AND ").include?("baz:\"quack\"")
         }.returns(mock_result)
       SpecModel::Basic.find_with_conditions(:foo=>'bar', :baz=>['quix','quack']).should == mock_result
       
@@ -184,11 +184,11 @@ describe ActiveFedora::Model do
            ActiveFedora::SolrService.expects(:query).with() { |args|
             q = args.first if args.is_a? Array
             q ||= args
-            q.split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
-            q.split(" AND ").includes("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
-            q.split(" AND ").includes('foo:"9\\" Nails"') &&
-            q.split(" AND ").includes('baz:"7\\" version"') &&
-            q.split(" AND ").includes('baz:"quack"')
+            q.split(" AND ").include?("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
+            q.split(" AND ").include?("has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic") &&
+            q.split(" AND ").include?('foo:"9\\" Nails"') &&
+            q.split(" AND ").include?('baz:"7\\" version"') &&
+            q.split(" AND ").include?('baz:"quack"')
         }.returns(mock_result)
       SpecModel::Basic.find_with_conditions(:foo=>'9" Nails', :baz=>['7" version','quack']).should == mock_result
       
