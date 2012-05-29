@@ -13,7 +13,7 @@ PATH
       rdf
       rdf-rdfxml (~> 0.3.8)
       rsolr
-      rubydora (~> 0.5.8)
+      rubydora (~> 0.5.9)
       solrizer (~> 1.2.0)
       xml-simple (>= 1.0.12)
 
@@ -44,7 +44,7 @@ GEM
       nokogiri (>= 1.4.3)
     fastercsv (1.5.5)
     ffi (1.0.11)
-    gyoku (0.4.4)
+    gyoku (0.4.5)
       builder (>= 2.1.2)
     httpi (0.9.7)
       rack
@@ -100,7 +100,7 @@ GEM
       ruby-debug-base (~> 0.10.4.0)
     ruby-debug-base (0.10.4)
       linecache (>= 0.3)
-    rubydora (0.5.8)
+    rubydora (0.5.9)
       activemodel
       activesupport
       fastercsv
