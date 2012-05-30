@@ -25,7 +25,7 @@ describe ActiveFedora::Model do
         mock_docs = mock('docs')
         mock_docs.expects(:each).multiple_yields([{"id" => "changeme:30"}],[{"id" => "changeme:22"}])
         mock_docs.expects(:has_next?).returns(false)
-        ActiveFedora::SolrService.instance.conn.expects(:paginate).with(1, 1000, 'select', :params=>{:q=>'has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :sort => ['system_create_dt asc'], :fl=> 'id', }).returns('response'=>{'docs'=>mock_docs})
+        ActiveFedora::SolrService.instance.conn.expects(:paginate).with(1, 1000, 'select', :params=>{:q=>'has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :qt => 'standard', :sort => ['system_create_dt asc'], :fl=> 'id', }).returns('response'=>{'docs'=>mock_docs})
         SpecModel::Basic.find(:all).should == ["Fake Object1", "Fake Object2"]
       end
       it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
@@ -77,7 +77,7 @@ describe ActiveFedora::Model do
       mock_docs = mock('docs')
       mock_docs.expects(:each).multiple_yields([{"id" => "changeme:30"}],[{"id" => "changeme:22"}])
       mock_docs.expects(:has_next?).returns(false)
-      ActiveFedora::SolrService.instance.conn.expects(:paginate).with(1, 1000, 'select', :params=>{:q=>'has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :sort => ['system_create_dt asc'], :fl=> 'id', }).returns('response'=>{'docs'=>mock_docs})
+      ActiveFedora::SolrService.instance.conn.expects(:paginate).with(1, 1000, 'select', :params=>{:q=>'has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :qt => 'standard', :sort => ['system_create_dt asc'], :fl=> 'id', }).returns('response'=>{'docs'=>mock_docs})
       
       SpecModel::Basic.expects(:find_one).with("changeme:30", nil).returns(SpecModel::Basic.new(:pid=>'changeme:30'))
       SpecModel::Basic.expects(:find_one).with("changeme:22", nil).returns(SpecModel::Basic.new(:pid=>'changeme:22'))

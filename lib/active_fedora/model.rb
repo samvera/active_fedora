@@ -129,6 +129,7 @@ module ActiveFedora
       
       def find_in_batches conditions, opts={}
         opts[:q] = create_query(conditions)
+        opts[:qt] = 'standard'
         #set default sort to created date ascending
         unless opts.include?(:sort)
           opts[:sort]=[ActiveFedora::SolrService.solr_name(:system_create,:date)+' asc'] 
