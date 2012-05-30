@@ -33,6 +33,15 @@ module ActiveFedora
       rels_ext.dirty = true
     end
 
+    # Clears all relationships with the specified predicate
+    # @param predicate
+    def clear_relationship(predicate)
+      relationships(predicate).each do |target|
+        object_relations.delete(predicate, target) 
+      end
+      rels_ext.dirty = true
+    end
+
     # Checks that this object is matches the model class passed in.
     # It requires two steps to pass to return true
     #   1. It has a hasModel relationship of the same model

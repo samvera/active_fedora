@@ -4,15 +4,11 @@ module ActiveFedora
 
       def replace(record)
         if record.nil?
-          ### TODO a more efficient way of doing this would be to write a clear_relationship method
-          old_record = find_target
-          @owner.remove_relationship(@reflection.options[:property], old_record) unless old_record.nil?
+          @owner.clear_relationship(@reflection.options[:property])
         else
           raise_on_type_mismatch(record)
 
-          ### TODO a more efficient way of doing this would be to write a clear_relationship method
-          old_record = find_target
-          @owner.remove_relationship(@reflection.options[:property], old_record) unless old_record.nil?
+          @owner.clear_relationship(@reflection.options[:property])
 
           @target = (AssociationProxy === record ? record.target : record)
           @owner.add_relationship(@reflection.options[:property], record) unless record.new_record?

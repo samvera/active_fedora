@@ -99,7 +99,7 @@ describe ActiveFedora::SemanticNode do
 
       it "should add a literal relationship to the relationships graph" do
         @node.add_relationship("isMemberOf", 'demo:9', true)
-        @node.ids_for_outbound("isMemberOf").should == ['demo:9']
+        @node.relationships("isMemberOf").should == ['demo:9']
       end
       
       it "adding relationship to an instance should not affect class-level relationships hash" do 
@@ -109,8 +109,22 @@ describe ActiveFedora::SemanticNode do
         local_test_node1.add_relationship(:is_member_of, 'demo:10')
         local_test_node2.expects(:rels_ext).returns(stub('rels-ext', :content=>''))
         
-        local_test_node1.ids_for_outbound(:is_member_of).should == ["demo:10"]
-        local_test_node2.ids_for_outbound(:is_member_of).should == []
+        local_test_node1.relationships(:is_member_of).should == ["demo:10"]
+        local_test_node2.relationships(:is_member_of).should == []
+      end
+      
+    end
+
+    describe ".clear_relationship" do
+      before do
+        @node.add_relationship(:is_member_of, 'demo:9')
+        @node.add_relationship(:is_member_of, 'demo:7')
+        @node.add_relationship(:is_brother_of, 'demo:9')
+      end
+      it "should clear the specified relationship" do
+        @node.clear_relationship(:is_member_of)
+        @node.relationships(:is_member_of).should == []
+        @node.relationships(:is_brother_of).should == ['demo:9']
       end
       
     end
