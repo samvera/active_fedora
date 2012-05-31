@@ -261,17 +261,17 @@ module ActiveFedora
 
       # Specify the attributes of a file bearing datastream 
       #
-      # === Options
-      # [:name]
-      #   The dsid of the datastream
-      # [:type]
-      #   The class the datastream should have
-      # [:label]
-      #   The default value to put in the dsLabel field
-      # [:control_group]
-      #   The type of controlGroup to store the datastream as. Defaults to M
-      def has_file_datastream(args)
-        ds_specs[args.fetch(:name, "content")]= {:type => args[:type], :label =>  args.fetch(:label,"File Datastream"), :control_group => args.fetch(:control_group,"M")}
+      # @param [Hash] args 
+      # @option args :name ("content") The dsid of the datastream
+      # @option args :type (ActiveFedora::Datastream) The class the datastream should have
+      # @option args :label ("File Datastream") The default value to put in the dsLabel field
+      # @option args :control_group ("M") The type of controlGroup to store the datastream as. Defaults to M
+      def has_file_datastream(args = {})
+        ds_specs[args.fetch(:name, "content")]= {
+            :type => args.fetch(:type,ActiveFedora::Datastream),
+            :label =>  args.fetch(:label,"File Datastream"),
+            :control_group => args.fetch(:control_group,"M")
+        }
       end
     end
 

@@ -272,7 +272,8 @@ describe ActiveFedora::Datastreams do
     before do
       class FileDS < ActiveFedora::Datastream; end
       class FooHistory < ActiveFedora::Base
-        has_file_datastream :type=>FileDS
+        has_file_datastream
+        has_file_datastream :name=>"second", :label=>"Second file", :type=>FileDS, :control_group=>'X'
       end
     end
     after do
@@ -280,9 +281,12 @@ describe ActiveFedora::Datastreams do
       Object.send(:remove_const, :FileDS)
     end
     it "Should add a line in ds_spec" do
-      FooHistory.ds_specs['content'][:type].should == FileDS
+      FooHistory.ds_specs['content'][:type].should == ActiveFedora::Datastream
       FooHistory.ds_specs['content'][:label].should == "File Datastream"
       FooHistory.ds_specs['content'][:control_group].should == "M"
+      FooHistory.ds_specs['second'][:type].should == FileDS
+      FooHistory.ds_specs['second'][:label].should == "Second file"
+      FooHistory.ds_specs['second'][:control_group].should == "X"
     end
   end
 
