@@ -149,6 +149,25 @@ module ActiveFedora
       obj
     end
 
+    def clone
+      new_object = self.class.create
+      clone_into(new_object)
+    end
+
+    # Clone the datastreams from this object into the provided object, while preserving the pid of the provided object
+    # @param [Base] new_object clone into this object
+    def clone_into(new_object)
+      rels = Nokogiri::XML( rels_ext.content)
+      rels.xpath("//rdf:Description/@rdf:about").first.value = new_object.internal_uri
+      new_object.rels_ext.content = rels.to_xml
+      new_object.rels_ext.dirty = false
+
+      datastreams.each do |k, v|
+        next if k == 'RELS-EXT'
+        new_object.datastreams[k].content = v.content
+      end
+      new_object if new_object.save
+    end
 
     ### if you are doing sharding, override this method to do something other than use a sequence
     # @return [String] the unique pid for a new object

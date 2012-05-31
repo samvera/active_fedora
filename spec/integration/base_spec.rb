@@ -1,5 +1,92 @@
 require 'spec_helper'
 
+describe "A base object with metadata" do
+  before :all do
+    class MockAFBaseRelationship < ActiveFedora::Base
+      has_metadata :name=>'foo', :type=>Hydra::ModsArticleDatastream 
+    end
+  end
+  after :all do
+    Object.send(:remove_const, :MockAFBaseRelationship)
+  end
+  describe "a new document" do
+    before do
+      @obj = MockAFBaseRelationship.new
+      @obj.foo.person = "bob"
+      @obj.save
+    end
+    it "should save the datastream." do
+      ActiveFedora::Base.find(@obj.pid, :cast=>true).foo.person.should == ['bob']
+      ActiveFedora::SolrService.query("id:#{@obj.pid.gsub(":", "\\:")}", :fl=>'id person_t').first.should == {"id"=>@obj.pid, 'person_t'=>['bob']}
+    end
+  end
+
+  describe "that already exists in the repo" do
+    before do
+      @release = MockAFBaseRelationship.create()
+      @release.add_relationship(:is_governed_by, 'info:fedora/narmdemo:catalog-fixture')
+      @release.add_relationship(:is_part_of, 'info:fedora/narmdemo:777')
+      @release.foo.person = "test foo content"
+      @release.save
+    end
+    describe "and has been changed" do
+      before do
+        @release.foo.person = 'frank'
+        @release.save
+      end
+      it "should save the datastream." do
+        MockAFBaseRelationship.find(@release.pid).foo.person.should == ['frank']
+        ActiveFedora::SolrService.query("id:#{@release.pid.gsub(":", "\\:")}", :fl=>'id person_t').first.should == {"id"=>@release.pid, 'person_t'=>['frank']}
+      end
+    end
+    describe "clone_into a new object" do
+      before do
+        begin
+          new_object = MockAFBaseRelationship.find('narm:999')
+          new_object.delete
+        rescue ActiveFedora::ObjectNotFoundError
+        end
+        
+        new_object = MockAFBaseRelationship.create(:pid => 'narm:999')
+        @release.clone_into(new_object)
+        @new_object = MockAFBaseRelationship.find('narm:999')
+      end
+      it "should have all the assertions" do
+        @new_object.rels_ext.content.should be_equivalent_to '<rdf:RDF xmlns:ns1="info:fedora/fedora-system:def/model#" xmlns:ns2="info:fedora/fedora-system:def/relations-external#" xmlns:ns0="http://projecthydra.org/ns/relations#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+         <rdf:Description rdf:about="info:fedora/narm:999">
+           <ns0:isGovernedBy rdf:resource="info:fedora/narmdemo:catalog-fixture"/>
+           <ns1:hasModel rdf:resource="info:fedora/afmodel:MockAFBaseRelationship"/>
+           <ns2:isPartOf rdf:resource="info:fedora/narmdemo:777"/>
+
+         </rdf:Description>
+       </rdf:RDF>'
+      end
+      it "should have the other datastreams too" do
+        @new_object.datastreams.keys.should include "foo"
+        @new_object.foo.content.should be_equivalent_to @release.foo.content
+      end
+    end
+    describe "clone" do
+      before do
+        @new_object = @release.clone
+      end
+      it "should have all the assertions" do
+        @new_object.rels_ext.content.should be_equivalent_to '<rdf:RDF xmlns:ns1="info:fedora/fedora-system:def/model#" xmlns:ns2="info:fedora/fedora-system:def/relations-external#" xmlns:ns0="http://projecthydra.org/ns/relations#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+         <rdf:Description rdf:about="info:fedora/'+ @new_object.pid+'">
+           <ns0:isGovernedBy rdf:resource="info:fedora/narmdemo:catalog-fixture"/>
+           <ns1:hasModel rdf:resource="info:fedora/afmodel:MockAFBaseRelationship"/>
+           <ns2:isPartOf rdf:resource="info:fedora/narmdemo:777"/>
+
+         </rdf:Description>
+       </rdf:RDF>'
+      end
+      it "should have the other datastreams too" do
+        @new_object.datastreams.keys.should include "foo"
+        @new_object.foo.content.should be_equivalent_to @release.foo.content
+      end
+    end
+  end
+end
 
 describe "Datastreams synched together" do
   before do
@@ -25,43 +112,7 @@ describe "Datastreams synched together" do
 
 end
 
-describe "has_metadata" do
-  before :all do
-    class MockAFBaseRelationship < ActiveFedora::Base
-      has_metadata :name=>'foo', :type=>Hydra::ModsArticleDatastream 
-    end
-  end
-  after :all do
-    Object.send(:remove_const, :MockAFBaseRelationship)
-  end
-  describe "a new document" do
-    before do
-      @obj = MockAFBaseRelationship.new
-      @obj.foo.person = "bob"
-      @obj.save
-    end
-    it "should save the datastream." do
-      ActiveFedora::Base.find(@obj.pid, :cast=>true).foo.person.should == ['bob']
-      ActiveFedora::SolrService.query("id:#{@obj.pid.gsub(":", "\\:")}", :fl=>'id person_t').first.should == {"id"=>@obj.pid, 'person_t'=>['bob']}
-    end
-  end
 
-
-  describe "a changed document" do
-    before do
-      @obj = MockAFBaseRelationship.new
-      @obj.foo.person = "bob"
-      @obj.save
-      @obj.foo.person = "frank"
-      @obj.save
-    end
-    it "should save the datastream." do
-      ActiveFedora::Base.find(@obj.pid, :cast=>true).foo.person.should == ['frank']
-      ActiveFedora::SolrService.query("id:#{@obj.pid.gsub(":", "\\:")}", :fl=>'id person_t').first.should == {"id"=>@obj.pid, 'person_t'=>['frank']}
-    end
-  end
-
-end
 
 
 describe ActiveFedora::Base do
