@@ -11,6 +11,7 @@ describe ActiveFedora::Base do
       subject {ActiveFedora::Base.connection_for_pid('foo:bar')}
       before(:each) do
         ActiveFedora.config.stubs(:sharded?).returns(false)
+        ActiveFedora::Base.fedora_connection = {}
         ActiveFedora.config.stubs(:credentials).returns(:url=>'myfedora')
       end
       it { should be_kind_of Rubydora::Repository}
