@@ -7,60 +7,60 @@ describe ActiveFedora::Base do
       ActiveFedora::Base.shard_index(@this_pid).should == 0
     end
 
-    describe "should have a connection_for_pid" do
-      before do
+    context "When the repository is NOT sharded" do
+      subject {ActiveFedora::Base.connection_for_pid('foo:bar')}
+      before(:each) do
+        ActiveFedora.config.stubs(:sharded?).returns(false)
+        ActiveFedora.config.stubs(:credentials).returns(:url=>'myfedora')
+      end
+      it { should be_kind_of Rubydora::Repository}
+      it "should be the standard connection" do
+        subject.client.url.should == 'myfedora'
+      end
+      describe "shard_index" do
+        it "should always return zero (the first and only connection)" do
+          ActiveFedora::Base.shard_index('foo:bar').should == 0
+        end
+      end
+    end
+    context "When the repository is sharded" do
+      before :each do
+        ActiveFedora.config.stubs(:sharded?).returns(true)
         ActiveFedora::Base.fedora_connection = {}
+        ActiveFedora.config.stubs(:credentials).returns([{:url=>'shard1'}, {:url=>'shard2'} ])
       end
-      context "When the server is not sharded" do
-        subject {ActiveFedora::Base.connection_for_pid('foo:bar')}
-        before(:each) do
-          ActiveFedora.config.expects(:sharded?).returns(false)
-          ActiveFedora.config.expects(:credentials).returns(:url=>'myfedora')
-        end
-        it { should be_kind_of Rubydora::Repository}
-        it "should be the standard connection" do
-          subject.client.url.should == 'myfedora'
+      describe "assign_pid" do
+        it "should always use the first shard to generate pids" do
+          stubshard1 = mock("Shard")
+          stubshard2 = mock("Shard")
+          stubshard1.expects(:connection).returns(mock("Connection", :next_pid =>"<pid>sample:newpid</pid>"))
+          stubshard2.expects(:connection).never
+          ActiveFedora::Base.fedora_connection = {0 => stubshard1, 1 => stubshard2}
+          ActiveFedora::Base.assign_pid(ActiveFedora::Base.new.inner_object)
         end
       end
-      context "When the repository is sharded" do
-        before :all do
-          class FooHistory < ActiveFedora::Base
-            def self.shard_index(pid)
-              pid == 'foo:bar' ? 0 : 1
-            end
+      describe "shard_index" do
+        it "should use modulo of md5 of the pid to distribute objects across shards" do
+          ActiveFedora::Base.shard_index('foo:bar').should == 0
+          ActiveFedora::Base.shard_index('foo:nanana').should == 1
+        end
+      end
+      describe "the repository" do
+        describe "for foo:bar" do
+          subject {ActiveFedora::Base.connection_for_pid('foo:bar')}
+          it "should be shard1" do
+            subject.client.url.should == 'shard1'
           end
         end
-        before :each do
-          ActiveFedora.config.expects(:sharded?).returns(true)
-        end
-        after :all do
-          Object.send(:remove_const, :FooHistory)
-        end
-        describe "assign_pid" do
-          subject {FooHistory}
-          it "should raise an exception when assign_pid is not overridden" do
-            lambda {subject.assign_pid(stub(:namespace=>'changeme'))}.should raise_error(RuntimeError, "When using shards, you must override FooHistory.assign_pid()")
-          end
-        end
-        describe "the repository" do
-          before do
-            ActiveFedora.config.expects(:credentials).returns([{:url=>'shard1'}, {:url=>'shard2'} ])
-          end
-          describe "for foo:bar" do
-            subject {FooHistory.connection_for_pid('foo:bar')}
-            it "should be shard1" do
-              subject.client.url.should == 'shard1'
-            end
-          end
-          describe "for foo:baz" do
-            subject {FooHistory.connection_for_pid('foo:baz')}
-            it "should be shard1" do
-              subject.client.url.should == 'shard2'
-            end
+        describe "for foo:baz" do
+          subject {ActiveFedora::Base.connection_for_pid('foo:nanana')}
+          it "should be shard1" do
+            subject.client.url.should == 'shard2'
           end
         end
       end
     end
+
   end
 
   describe "With a test class" do

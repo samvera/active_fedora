@@ -1,5 +1,6 @@
 SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
+require "digest"
 
 module ActiveFedora
   
@@ -132,10 +133,19 @@ module ActiveFedora
       fedora_connection[idx].connection
     end
 
-    #If you want to use sharding override this method with your strategy
+    # This is where your sharding strategy is implemented -- it's how we figure out which shard an object will be (or was) written to.
+    # Given a pid, it decides which shard that pid will be written to (and thus retrieved from).
+    # For a given pid, as long as your shard configuration remains the same it will always return the same value.
+    # If you're not using sharding, this will always return 0, meaning use the first/only Fedora Repository in your configuration.
+    # Default strategy runs a modulo of the md5 of the pid against the number of shards.
+    # If you want to use a different sharding strategy, override this method.  Make sure that it will always return the same value for a given pid and shard configuration.
     #@return [Integer] the index of the shard this object is stored in
     def self.shard_index(pid)
-      0
+      if ActiveFedora.config.sharded?
+        Digest::MD5.hexdigest(pid).hex % ActiveFedora.config.credentials.length
+      else
+        0
+      end
     end
     
 
@@ -172,11 +182,12 @@ module ActiveFedora
     ### if you are doing sharding, override this method to do something other than use a sequence
     # @return [String] the unique pid for a new object
     def self.assign_pid(obj)
-        args = {}
-        args[:namespace] = obj.namespace if obj.namespace
-        raise RuntimeError, "When using shards, you must override #{self}.assign_pid()" if ActiveFedora.config.sharded?
-        d = REXML::Document.new(connection_for_pid('0').next_pid(args))
-        d.elements['//pid'].text
+      args = {}
+      args[:namespace] = obj.namespace if obj.namespace
+      fedora_connection[0] ||= ActiveFedora::RubydoraConnection.new(ActiveFedora.config.credentials[0])
+      d = REXML::Document.new( fedora_connection[0].connection.next_pid(args))
+      pid =d.elements['//pid'].text
+      pid
     end
 
     def inner_object # :nodoc
