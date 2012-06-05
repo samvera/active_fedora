@@ -184,7 +184,14 @@ module ActiveFedora
     def self.assign_pid(obj)
       args = {}
       args[:namespace] = obj.namespace if obj.namespace
-      fedora_connection[0] ||= ActiveFedora::RubydoraConnection.new(ActiveFedora.config.credentials[0])
+      # TODO: This juggling of Fedora credentials & establishing connections should be handled by 
+      # an establish_fedora_connection method,possibly wrap it all into a fedora_connection method - MZ 06-05-2012
+      if ActiveFedora.config.sharded?
+        credentials = ActiveFedora.config.credentials[0]
+      else
+        credentials = ActiveFedora.config.credentials
+      end
+      fedora_connection[0] ||= ActiveFedora::RubydoraConnection.new(credentials)
       d = REXML::Document.new( fedora_connection[0].connection.next_pid(args))
       pid =d.elements['//pid'].text
       pid

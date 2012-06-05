@@ -18,6 +18,20 @@ describe ActiveFedora::Base do
       it "should be the standard connection" do
         subject.client.url.should == 'myfedora'
       end
+      describe "assign_pid" do
+        after do
+          ActiveFedora::RubydoraConnection.unstub(:new)
+        end
+        it "should use fedora to generate pids" do
+          # TODO: This juggling of Fedora credentials & establishing connections should be handled by an establish_fedora_connection method, 
+          # possibly wrap it all into a fedora_connection method - MZ 06-05-2012
+          stubfedora = mock("Fedora")
+          stubfedora.expects(:connection).returns(mock("Connection", :next_pid =>"<pid>sample:newpid</pid>"))
+          # Should use ActiveFedora.config.credentials as a single hash rather than an array of shards
+          ActiveFedora::RubydoraConnection.expects(:new).with(ActiveFedora.config.credentials).returns(stubfedora)
+          ActiveFedora::Base.assign_pid(ActiveFedora::Base.new.inner_object)
+        end
+      end
       describe "shard_index" do
         it "should always return zero (the first and only connection)" do
           ActiveFedora::Base.shard_index('foo:bar').should == 0
