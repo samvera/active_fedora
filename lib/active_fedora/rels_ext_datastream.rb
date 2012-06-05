@@ -13,6 +13,10 @@ module ActiveFedora
     def add_mime_type
       self.mimeType= 'application/rdf+xml'
     end
+    
+    def changed?
+      model.relationships_are_dirty or super
+    end
 
     def serialize!
       self.content = to_rels_ext() if model.relationships_are_dirty

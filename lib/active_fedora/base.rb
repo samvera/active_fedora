@@ -165,7 +165,6 @@ module ActiveFedora
       rels = Nokogiri::XML( rels_ext.content)
       rels.xpath("//rdf:Description/@rdf:about").first.value = new_object.internal_uri
       new_object.rels_ext.content = rels.to_xml
-      new_object.rels_ext.dirty = false
 
       datastreams.each do |k, v|
         next if k == 'RELS-EXT'

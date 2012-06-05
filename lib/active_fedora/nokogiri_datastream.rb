@@ -41,7 +41,6 @@ module ActiveFedora
 
     def ng_xml 
       @ng_xml ||= begin
-      self.dirty = false
       self.xml_loaded = true
 
       if new?
@@ -54,8 +53,8 @@ module ActiveFedora
     end
     
     def ng_xml=(new_xml)
+      ng_xml_will_change!
       self.xml_loaded=true
-      self.dirty = true
       case new_xml 
       when Nokogiri::XML::Document
         @ng_xml = new_xml
@@ -66,6 +65,16 @@ module ActiveFedora
       else
         raise TypeError, "You passed a #{new_xml.class} into the ng_xml of the #{self.dsid} datastream. NokogiriDatastream.ng_xml= only accepts Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node, or raw XML (String) as inputs."
       end
+    end
+    
+    # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods 
+    def ng_xml_will_change!
+      changed_attributes[:ng_xml] = nil
+    end
+    
+    # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods 
+    def ng_xml_changed?
+      changed_attributes.has_key? :ng_xml
     end
     
     def content=(content)
@@ -343,8 +352,8 @@ module ActiveFedora
       if @internal_solr_doc
         raise "No update performed, this object was initialized via Solr instead of Fedora and is therefore read-only.  Please utilize ActiveFedora::Base.find to first load object via Fedora instead."
       else
+        ng_xml_will_change!
         result = om_update_values(params)
-        self.dirty= true
         return result
       end
     end

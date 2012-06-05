@@ -215,7 +215,7 @@ describe ActiveFedora::NokogiriDatastream do
     it "should mark the datastream as dirty" do
       @test_ds2.dirty.should be_false 
       @test_ds2.ng_xml = @sample_raw_xml
-      @test_ds2.dirty.should be_true  #not the same as be_dirty
+      @test_ds2.ng_xml_changed?.should be_true
       @test_ds2.should be_dirty
     end
   end

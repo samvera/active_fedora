@@ -4,13 +4,12 @@ module ActiveFedora
   class Datastream < Rubydora::Datastream
     
     attr_writer :digital_object
-    attr_accessor :dirty, :last_modified, :fields
+    attr_accessor :last_modified, :fields
     before_create :add_mime_type, :add_ds_location, :validate_content_present
   
     def initialize(digital_object, dsid, options={})
       ## When you use the versions feature of rubydora (0.5.x), you need to have a 3 argument constructor
       self.fields={}
-      self.dirty = false
       super
     end
     
@@ -40,7 +39,19 @@ module ActiveFedora
     
     # Test whether this datastream been modified since it was last saved
     def dirty?
-      dirty || changed?
+      changed?
+    end
+    
+    def dirty
+      changed?
+    end
+    
+    def dirty=(value)
+      if value
+        content_will_change! # an innocent hack to pretend something has changed
+      else
+        changed_attributes.clear
+      end
     end
 
     def new_object?
@@ -84,7 +95,6 @@ module ActiveFedora
     # @param [ActiveFedora::Datastream] tmpl the Datastream object that you are building
     # @param [Nokogiri::XML::Node] node the "foxml:datastream" node from a FOXML file
     def self.from_xml(tmpl, node)
-      tmpl.instance_variable_set(:@dirty, false)
       tmpl.controlGroup= node['CONTROL_GROUP']
       tmpl
     end

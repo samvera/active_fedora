@@ -18,7 +18,7 @@ describe ActiveFedora::Datastream do
   end
   
   it "should be inspectable" do
-    @test_datastream.inspect.should match /#<ActiveFedora::Datastream:-?\d+ @pid=\"__DO_NOT_USE__\" @dsid=\"abcd\" @controlGroup=\"M\" @dirty=\"false\" @mimeType=\"\" >/
+    @test_datastream.inspect.should match /#<ActiveFedora::Datastream:-?\d+ @pid=\"__DO_NOT_USE__\" @dsid=\"abcd\" @controlGroup=\"M\" @dirty=\"true\" @mimeType=\"\" >/
   end
 
   describe '#validate_content_present' do
@@ -86,7 +86,7 @@ describe ActiveFedora::Datastream do
   
   describe ".dirty?" do
     it "should return the value of the @dirty attribute or changed?" do
-      @test_datastream.expects(:changed?).returns(false)
+      @test_datastream.instance_variable_get(:@changed_attributes).clear
       @test_datastream.dirty?.should be_false  
       @test_datastream.dirty = "boo"
       @test_datastream.dirty?.should be_true   
