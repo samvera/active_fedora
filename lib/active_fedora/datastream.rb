@@ -48,7 +48,7 @@ module ActiveFedora
     
     def dirty=(value)
       if value
-        content_will_change! # an innocent hack to pretend something has changed
+        lastModifiedDate_will_change! # an innocent hack to pretend something has changed
       else
         changed_attributes.clear
       end
