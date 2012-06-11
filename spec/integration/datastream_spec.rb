@@ -55,4 +55,28 @@ describe ActiveFedora::Datastream do
     
   end
   
+  it "should be able to set the versionable attribute" do
+    dsid = "ds#{Time.now.to_i}"
+    v1 = "<version1>data</version1>"
+    v2 = "<version2>data</version2>"
+    ds = ActiveFedora::Datastream.new(@test_object.inner_object, dsid)
+    ds.content = v1
+    ds.versionable = false
+    @test_object.add_datastream(ds).should be_true
+    @test_object.save
+    to = ActiveFedora::Base.find(@test_object.pid)
+    ds = to.datastreams[dsid]
+    ds.versionable.should be_false
+    ds.versionable = true
+    to.save
+    timestamp = Time.now.utc
+    ms = timestamp.usec / 1000
+    timestamp = timestamp.strftime("%Y-%m-%dT%H:%M:%S") + ".#{ms.to_s}Z"
+    ds.content = v2
+    to.save
+    versions = ds.versions
+    versions.length.should == 2   
+    ds.content.should == v2
+    ds.asOfDateTime(timestamp).content.should == v1
+  end
 end
