@@ -1,6 +1,14 @@
 4.2.0
 Added Base.find_each which allows yielding of each result
 Added Base.find_in_batches which allows yielding of a chunk of solr results
+Rubydora to 0.5.9
+HYDRA-811 allow setting a pid after object is initialized, but before it is saved
+find(:all) must use solr paramater qt=standard
+HYDRA-812 belongs_to should replace assertions, even if the asserted object is not found.
+HYDRA-814 add clone()
+HYDRA-815 give :type a default value (ActiveFedora::Datastream) for has_file_datastream
+HYDRA-816 Sharding works automatically if multiple connections are specified in fedora.yml
+HYDRA-818 Assign_pid should work correctly when the config is not sharded.
 
 4.1.0
 ActiveFedora::Base.find() now supports filtering by solr fields (boolean AND).
