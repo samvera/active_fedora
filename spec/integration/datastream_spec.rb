@@ -69,14 +69,19 @@ describe ActiveFedora::Datastream do
     ds.versionable.should be_false
     ds.versionable = true
     to.save
-    timestamp = Time.now.utc
-    ms = timestamp.usec / 1000
-    timestamp = timestamp.strftime("%Y-%m-%dT%H:%M:%S") + ".#{ms.to_s}Z"
     ds.content = v2
     to.save
     versions = ds.versions
-    versions.length.should == 2   
+    versions.length.should == 2
+    # order of versions not guaranteed
+    if versions[0].content == v2
+      versions[1].content.should == v1
+      versions[0].asOfDateTime.should be >= versions[1].asOfDateTime
+    else
+      versions[0].content.should == v1
+      versions[1].content.should == v2   
+      versions[1].asOfDateTime.should be >= versions[0].asOfDateTime
+    end
     ds.content.should == v2
-    ds.asOfDateTime(timestamp).content.should == v1
   end
 end
