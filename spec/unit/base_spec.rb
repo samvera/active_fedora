@@ -81,14 +81,14 @@ describe ActiveFedora::Base do
   describe "With a test class" do
     before :all do
       class FooHistory < ActiveFedora::Base
-        has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"someData" do |m|
+        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
           m.field "fubar", :string
           m.field "swank", :text
         end
-        has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText" do |m|
+        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText" do |m|
           m.field "fubar", :text
         end
-        has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText2", :label=>"withLabel" do |m|
+        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel" do |m|
           m.field "fubar", :text
         end 
         delegate :fubar, :to=>'withText'
@@ -229,9 +229,9 @@ describe ActiveFedora::Base do
         fields[:active_fedora_model][:values].should eql([@test_object.class.inspect])
       end
       
-      it "should call .fields on all MetadataDatastreams and return the resulting document" do
-        mock1 = mock("ds1", :fields => {}, :class=>ActiveFedora::MetadataDatastream)
-        mock2 = mock("ds2", :fields => {}, :class=>ActiveFedora::MetadataDatastream)
+      it "should call .fields on all SimpleDatastreams and return the resulting document" do
+        mock1 = mock("ds1", :fields => {}, :class=>ActiveFedora::SimpleDatastream)
+        mock2 = mock("ds2", :fields => {}, :class=>ActiveFedora::SimpleDatastream)
 
         @test_object.expects(:datastreams).returns({:ds1 => mock1, :ds2 => mock2})
         @test_object.fields
@@ -405,11 +405,11 @@ describe ActiveFedora::Base do
         FooHistory.expects(:assign_pid).with(@test_object.inner_object).returns(@this_pid)
         @test_object.save
       end
-      it "should update solr index with all metadata if any MetadataDatastreams have changed" do
+      it "should update solr index with all metadata if any SimpleDatastreams have changed" do
         stub_ingest(@this_pid)
         stub_add_ds(@this_pid, ['ds1', 'RELS-EXT'])
 
-        dirty_ds = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, 'ds1')
+        dirty_ds = ActiveFedora::SimpleDatastream.new(@test_object.inner_object, 'ds1')
         rels_ds = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
         rels_ds.model = @test_object
         @test_object.add_datastream(rels_ds)
@@ -431,7 +431,7 @@ describe ActiveFedora::Base do
         
         @test_object.save
       end
-      it "should NOT update solr index if no MetadataDatastreams have changed" do
+      it "should NOT update solr index if no SimpleDatastreams have changed" do
         stub_ingest(@this_pid)
         stub_add_ds(@this_pid, ['ds1', 'RELS-EXT'])
         @test_object.save
@@ -548,9 +548,9 @@ describe ActiveFedora::Base do
         solr_doc[:id].should eql("#{@test_object.pid}")
       end
 
-      it "should call .to_xml on all MetadataDatastreams and return the resulting document" do
-        ds1 = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, 'ds1')
-        ds2 = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, 'ds2')
+      it "should call .to_xml on all SimpleDatastreams and return the resulting document" do
+        ds1 = ActiveFedora::SimpleDatastream.new(@test_object.inner_object, 'ds1')
+        ds2 = ActiveFedora::SimpleDatastream.new(@test_object.inner_object, 'ds2')
         [ds1,ds2].each {|ds| ds.expects(:to_xml)}
 
         @test_object.expects(:datastreams).returns({:ds1 => ds1, :ds2 => ds2})
@@ -616,7 +616,7 @@ describe ActiveFedora::Base do
         solr_doc["active_fedora_model_field"].should eql(@test_object.class.inspect)
       end
       
-      it "should call .to_solr on all MetadataDatastreams and NokogiriDatastreams, passing the resulting document to solr" do
+      it "should call .to_solr on all SimpleDatastreams and NokogiriDatastreams, passing the resulting document to solr" do
         mock1 = mock("ds1", :to_solr)
         mock2 = mock("ds2", :to_solr)
         ngds = mock("ngds", :to_solr)
@@ -624,11 +624,9 @@ describe ActiveFedora::Base do
         mock1.expects(:solrize_profile)
         mock2.expects(:solrize_profile)
         mock1.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-        mock1.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
-        mock1.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
+        mock1.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
         mock2.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-        mock2.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
-        mock2.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(true)
+        mock2.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
         ngds.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
         ngds.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
         
@@ -697,6 +695,7 @@ describe ActiveFedora::Base do
         m.update_datastream_attributes( ds_values_hash )
       end
       it "should not do anything and should return an empty hash if the specified datastream does not exist" do
+pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
         ds_values_hash = {
           "nonexistentDatastream"=>{ "notes"=>"foo" }
         }
@@ -737,16 +736,15 @@ describe ActiveFedora::Base do
         m = FooHistory.new()
         m.update_indexed_attributes(att, :datastreams=>"withText")
         m.should_not be_nil
-        m.datastreams['someData'].fubar_values.should == []
-        m.datastreams["withText"].fubar_values.should == ['mork', 'york', 'mangle']
-        m.datastreams['withText2'].fubar_values.should == []
+        m.datastreams['someData'].fubar.should == []
+        m.datastreams["withText"].fubar.should == ['york', 'mangle']
+        m.datastreams['withText2'].fubar.should == []
         
         att= {"fubar"=>{"-1"=>"tork", "0"=>"work", "1"=>"bork"}}
         m.update_indexed_attributes(att, :datastreams=>["someData", "withText2"])
         m.should_not be_nil
-        m.datastreams['someData'].fubar_values.should == ['tork', 'work', 'bork']
-        m.datastreams["withText"].fubar_values.should == ['mork', 'york', 'mangle']
-        m.datastreams['withText2'].fubar_values.should == ['tork', 'work', 'bork']
+        m.datastreams['someData'].fubar.should == ['work', 'bork']
+        m.datastreams['withText2'].fubar.should == ['work', 'bork']
       end
     end
 

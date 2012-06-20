@@ -136,7 +136,7 @@ describe ActiveFedora::Base do
       has_relationship "testing_inbound", :has_part, :type=>MockAFBaseFromSolr, :inbound=>true
       has_relationship "testing_inbound2", :has_member, :type=>MockAFBaseFromSolr, :inbound=>true
       
-      has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|
+      has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream do |m|
         m.field "holding_id", :string
       end
       
@@ -266,8 +266,8 @@ describe ActiveFedora::Base do
   end
   
   describe ".metadata_streams" do
-    it "should return all of the datastreams from the object that are kinds of MetadataDatastreams " do
-      mds1 = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, "md1")
+    it "should return all of the datastreams from the object that are kinds of NokogiriDatastream " do
+      mds1 = ActiveFedora::SimpleDatastream.new(@test_object.inner_object, "md1")
       mds2 = ActiveFedora::QualifiedDublinCoreDatastream.new(@test_object.inner_object, "qdc")
       fds = ActiveFedora::Datastream.new(@test_object.inner_object, "fds")
       @test_object.add_datastream(mds1)
@@ -282,10 +282,10 @@ describe ActiveFedora::Base do
   end
   
   describe ".file_streams" do
-    it "should return all of the datastreams from the object that are kinds of MetadataDatastreams" do
+    it "should return all of the datastreams from the object that are kinds of NokogiriDatastream" do
       fds1 = ActiveFedora::Datastream.new(@test_object.inner_object, "fds1")
       fds2 = ActiveFedora::Datastream.new(@test_object.inner_object, "fds2")
-      mds = ActiveFedora::MetadataDatastream.new(@test_object.inner_object, "mds")
+      mds = ActiveFedora::SimpleDatastream.new(@test_object.inner_object, "mds")
       @test_object.add_datastream(fds1)  
       @test_object.add_datastream(fds2)
       @test_object.add_datastream(mds)    

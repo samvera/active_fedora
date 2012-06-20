@@ -30,21 +30,16 @@ module ActiveFedora
     self.profile_solr_name = ActiveFedora::SolrService.solr_name("object_profile", :string, :displayable)
 
     def method_missing(name, *args)
-      # if [:collection_members, :part_of, :parts, :part_of_append, :file_objects].include? name 
-      #   ActiveSupport::Deprecation.warn("Deprecation: FileManagement will not be included by default in the next version.   To use #{name} add 'include ActiveFedora::FileManagement' to your model")
-      #   self.class.send :include, FileManagement
-      #   send name, *args
-      # else 
-        dsid = corresponding_datastream_name(name)
-        if dsid
-          ### Create and invoke a proxy method 
-          self.class.send :define_method, name do
-              datastreams[dsid]
-          end
-          self.send(name)
-        else 
-          super
+      dsid = corresponding_datastream_name(name)
+      if dsid
+        ### Create and invoke a proxy method 
+        self.class.send :define_method, name do
+            datastreams[dsid]
         end
+        self.send(name)
+      else 
+        super
+      end
     end
 
 
@@ -54,7 +49,7 @@ module ActiveFedora
     end
     
     def new_object=(bool)
-      ActiveSupport::Deprecation.warn("ActiveFedora::Base.new_object= has been deprecated and nolonger has any effect")
+      ActiveSupport::Deprecation.warn("ActiveFedora::Base.new_object= has been deprecated and nolonger has any effect. Will be removed in 5.0")
     end
 
     ## Required by associations
@@ -263,13 +258,14 @@ module ActiveFedora
     # TODO this can likely be removed once find_by_fields_by_solr is removed
       fields = {:id => {:values => [pid]}, :system_create_date => {:values => [self.create_date], :type=>:date}, :system_modified_date => {:values => [self.modified_date], :type=>:date}, :active_fedora_model => {:values => [self.class.inspect], :type=>:symbol}}
       datastreams.values.each do |ds|        
-        fields.merge!(ds.fields) if [ActiveFedora::MetadataDatastream, ActiveFedora::QualifiedDublinCoreDatastream].include?(ds.class)
+        fields.merge!(ds.fields) if [ActiveFedora::MetadataDatastream, ActiveFedora::SimpleDatastream, ActiveFedora::QualifiedDublinCoreDatastream].include?(ds.class)
       end
       return fields
     end
     
     #Returns the xml version of this object as a string.
     def to_xml(xml=Nokogiri::XML::Document.parse("<xml><fields/><content/></xml>"))
+      ActiveSupport::Deprecation.warn("ActiveFedora::Base#to_xml has been deprecated and will be removed in version 5.0")
       fields_xml = xml.xpath('//fields').first
       builder = Nokogiri::XML::Builder.with(fields_xml) do |fields_xml|
         fields_xml.id_ pid
@@ -277,12 +273,6 @@ module ActiveFedora
         fields_xml.system_modified_date self.modified_date
         fields_xml.active_fedora_model self.class.inspect
       end
-      
-      # {:id => pid, :system_create_date => self.create_date, :system_modified_date => self.modified_date, :active_fedora_model => self.class.inspect}.each_pair do |attribute_name, value|
-      #   el = REXML::Element.new(attribute_name.to_s)
-      #   el.text = value
-      #   fields_xml << el
-      # end
       
       datastreams.each_value do |ds|  
         ds.to_xml(fields_xml) if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper)
@@ -317,7 +307,6 @@ module ActiveFedora
       end
       datastreams.each_value do |ds|
         ds.ensure_xml_loaded if ds.respond_to? :ensure_xml_loaded  ### Can't put this in the model because it's often implemented in Solrizer::XML::TerminologyBasedSolrizer 
-        #puts "\n\nQDC #{ds.to_solr(solr_doc).inspect}" if ds.kind_of?(ActiveFedora::QualifiedDublinCoreDatastream)
         solr_doc = ds.to_solr(solr_doc) if ds.kind_of?(ActiveFedora::RDFDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ds.kind_of?(ActiveFedora::MetadataDatastream)
       end
       solr_doc = solrize_relationships(solr_doc) unless opts[:model_only]

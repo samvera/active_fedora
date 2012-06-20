@@ -2,18 +2,14 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
   before(:each) do
-    #Fedora::Repository.instance.stubs(:nextid).returns("_nextid_")
     class Foo < ActiveFedora::Base
-      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"foostream" do|m|
+      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"foostream" do|m|
         m.field "foostream", :string
       end
       has_metadata :type=>ActiveFedora::QualifiedDublinCoreDatastream, :name=>"dcstream" 
-      # do|m|
-      #   m.field "fz", :string
-      # end
     end
     class Bar  < ActiveFedora::Base
-      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"barstream" do |m|
+      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"barstream" do |m|
         m.field "barfield", :string
       end
     end
@@ -23,9 +19,9 @@ describe ActiveFedora::Base do
     f = Foo.new
     f.datastreams.size.should == 3
     streams = f.datastreams.values.map{|x| x.class.to_s}.sort
+    streams.pop.should == "ActiveFedora::SimpleDatastream"
     streams.pop.should == "ActiveFedora::RelsExtDatastream"
     streams.pop.should == "ActiveFedora::QualifiedDublinCoreDatastream"
-    streams.pop.should == "ActiveFedora::MetadataDatastream"
   end
 
   it "should work for multiple types" do

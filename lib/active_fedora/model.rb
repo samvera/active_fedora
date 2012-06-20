@@ -97,7 +97,7 @@ module ActiveFedora
       # Returns an Array of objects of the Class that +find+ is being 
       # called on
       #
-      # @param[String,Symbol, Hash] either a pid or :all or a hash of conditions
+      # @param[String,Symbol,Hash] args either a pid or :all or a hash of conditions
       # @param [Hash] opts the options to create a message with.
       # @option opts [Integer] :rows when :all is passed, the maximum number of rows to load from solr
       # @option opts [Boolean] :cast when true, examine the model and cast it to the first known cModel

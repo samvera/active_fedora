@@ -11,11 +11,11 @@ include Mocha::API
 describe 'bugs' do
   before :all do
     class FooHistory < ActiveFedora::Base
-      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"someData" do |m|
+      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
         m.field "fubar", :string
         m.field "swank", :text
       end
-      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText" do |m|
+      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText" do |m|
         m.field "fubar", :text
       end
     end
@@ -33,22 +33,22 @@ describe 'bugs' do
   end
   it "should not clobber everything when setting a value" do
     ds = @test_object.datastreams["someData"]
-    ds.fubar_values.should == []
+    ds.fubar.should == []
     ds.should_not be_nil
-    ds.fubar_values=['bar']
-    ds.fubar_values.should == ['bar']
+    ds.fubar=['bar']
+    ds.fubar.should == ['bar']
     @test_object.save
 
     @test_object.pid.should_not be_nil
 
     x = FooHistory.find(@test_object.pid)
     ds2 = x.datastreams["someData"]
-    ds2.fubar_values.should == ['bar']
-    ds2.fubar_values = ["meh"]
-    ds2.fubar_values.should == ["meh"]
+    ds2.fubar.should == ['bar']
+    ds2.fubar = ["meh"]
+    ds2.fubar.should == ["meh"]
     x.save
     x = FooHistory.find(@test_object.pid)
-    x.datastreams['someData'].fubar_values.should == ["meh"]
+    x.datastreams['someData'].fubar.should == ["meh"]
     x.save
   end
 end

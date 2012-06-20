@@ -28,7 +28,5 @@ class SeminarAudioFile
     datastream "compressed", ["audio/mpeg"], :multiple => true
     datastream "uncompressed", ["audio/wav", "audio/aiff"], :multiple => true
     
-    #has_metadata "dublin_core", :type => ActiveFedora::MetadataDatastream::QualifiedDublinCore
-
   
 end

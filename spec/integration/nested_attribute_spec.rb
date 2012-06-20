@@ -4,7 +4,7 @@ describe "NestedAttribute behavior" do
   before do
     class Bar < ActiveFedora::Base
       belongs_to :car, :property=>:has_member
-      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"someData" do |m|
+      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
         m.field "uno", :string
         m.field "dos", :string
       end

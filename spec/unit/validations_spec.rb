@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   before :all do
     class ValidationStub < ActiveFedora::Base
-      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"someData" do |m|
+      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
         m.field "fubar", :string
         m.field "swank", :text
       end

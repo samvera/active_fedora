@@ -29,15 +29,15 @@ describe ActiveFedora::Base do
     end
 
     class BarHistory2 < ActiveFedora::Base
-      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"someData" do |m|
+      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
         m.field "fubar", :string
         m.field "bandana", :string
         m.field "swank", :text
       end
-      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText" do |m|
+      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText" do |m|
         m.field "fubar", :text
       end
-      has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText2", :label=>"withLabel" do |m|
+      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel" do |m|
         m.field "fubar", :text
       end 
 

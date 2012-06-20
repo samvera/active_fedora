@@ -76,6 +76,7 @@ module ActiveFedora
 
     def to_solr(solr_doc = Hash.new) # :nodoc:
       @fields.each do |field_key, field_info|
+        next if field_key == :location ## FIXME HYDRA-825
         things = send(field_key)
         if things 
           field_symbol = ActiveFedora::SolrService.solr_name(field_key, field_info[:type])

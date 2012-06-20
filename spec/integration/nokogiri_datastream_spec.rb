@@ -9,7 +9,7 @@ describe ActiveFedora::NokogiriDatastream do
       has_metadata :name => "descMetadata", :type => Hydra::ModsArticleDatastream
 
       # A place to put extra metadata values
-      has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|
+      has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream do |m|
         m.field 'collection', :string
       end
     end

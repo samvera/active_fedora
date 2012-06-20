@@ -1,3 +1,8 @@
+4.3.0 - NOT RELEASED YET
+Deprecated AF::Base#file_streams
+Deprecated AF::Base#to_xml
+HYDRA-826 Added SimpleDatastream as a replacement for MetadataDatastream
+
 4.2.0
 Added Base.find_each which allows yielding of each result
 Added Base.find_in_batches which allows yielding of a chunk of solr results

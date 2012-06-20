@@ -73,11 +73,11 @@ describe ActiveFedora::Datastreams do
     describe "creates datastreams" do
       before do
         class FooHistory < ActiveFedora::Base
-          has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"someData" do |m|
+          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
             m.field "fubar", :string
             m.field "swank", :text
           end
-          has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"withText2", :label=>"withLabel" do |m|
+          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel" do |m|
             m.field "fubar", :text
           end 
         end
@@ -97,8 +97,8 @@ describe ActiveFedora::Datastreams do
 
       it "should create specified datastreams with specified fields" do
         @n.datastreams["someData"].should_not be_nil
-        @n.datastreams["someData"].fubar_values='bar'
-        @n.datastreams["someData"].fubar_values.should == ['bar']
+        @n.datastreams["someData"].fubar='bar'
+        @n.datastreams["someData"].fubar.should == ['bar']
         @n.datastreams["withText2"].dsLabel.should == "withLabel"
       end
     end
@@ -121,7 +121,7 @@ describe ActiveFedora::Datastreams do
         has_metadata :name => "DC", :type => ActiveFedora::NokogiriDatastream, :label=>"DC admin metadata"
 
         # A place to put extra metadata values
-        has_metadata :name => "properties", :label=>"Workflow properties", :type => ActiveFedora::MetadataDatastream do |m|
+        has_metadata :name => "properties", :label=>"Workflow properties", :type => ActiveFedora::SimpleDatastream do |m|
           m.field 'collection', :string
           m.field 'depositor', :string
         end
@@ -152,7 +152,7 @@ describe ActiveFedora::Datastreams do
       
       it "should allow :control_group => 'E' with a :url option" do
         class MoreFooHistory < ActiveFedora::Base
-          has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "E", :url => "http://exampl.com/mypic.jpg"
+          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"externalDisseminator",:control_group => "E", :url => "http://exampl.com/mypic.jpg"
         end
         stub_ingest(@this_pid)
         @n = MoreFooHistory.new
@@ -164,7 +164,7 @@ describe ActiveFedora::Datastreams do
       describe "control_group E without a url" do
         before do
           class MoreFooHistory < ActiveFedora::Base
-            has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "E"
+            has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"externalDisseminator",:control_group => "E"
           end
           stub_ingest(@this_pid)
           @n = MoreFooHistory.new
@@ -201,7 +201,7 @@ describe ActiveFedora::Datastreams do
       it "should allow :control_group => 'R' with a :url option" do
         stub_ingest(@this_pid)
         class MoreFooHistory < ActiveFedora::Base
-          has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "R", :url => "http://exampl.com/mypic.jpg"
+          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"externalDisseminator",:control_group => "R", :url => "http://exampl.com/mypic.jpg"
         end
         @n = MoreFooHistory.new
         MoreFooHistory.stubs(:assign_pid).returns(@this_pid)
@@ -211,7 +211,7 @@ describe ActiveFedora::Datastreams do
       describe "control_group R without url" do
         before do
           class MoreFooHistory < ActiveFedora::Base
-            has_metadata :type=>ActiveFedora::MetadataDatastream, :name=>"externalDisseminator",:control_group => "R"
+            has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"externalDisseminator",:control_group => "R"
           end
           MoreFooHistory.stubs(:assign_pid).returns(@this_pid)
           stub_ingest(@this_pid)

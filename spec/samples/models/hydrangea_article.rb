@@ -9,6 +9,6 @@ class HydrangeaArticle < ActiveFedora::Base
   
   has_metadata :name => "descMetadata", :type=> Hydra::ModsArticleDatastream  
   has_metadata :name => "rightsMetadata", :type => Hydra::RightsMetadataDatastream
-  has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream
+  has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream
 
 end
