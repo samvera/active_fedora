@@ -51,6 +51,7 @@ module ActiveFedora #:nodoc:
     autoload :RelsExtDatastream
     autoload :ServiceDefinitions
     autoload :SemanticNode
+    autoload :SimpleDatastream
     autoload :NestedAttributes
     autoload :FixtureLoader
     autoload :FixtureExporter
