@@ -1,4 +1,5 @@
-4.3.0 - NOT RELEASED YET
+4.3.0
+Added the #delegate_to method for easier delegation of multiple terms to the same datastream.
 Deprecated AF::Base#file_streams
 Deprecated AF::Base#to_xml
 HYDRA-826 Added SimpleDatastream as a replacement for MetadataDatastream

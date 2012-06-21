@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active-fedora (4.2.0)
+    active-fedora (4.3.0)
       activeresource (>= 3.0.0)
       activesupport (>= 3.0.0)
       equivalent-xml
@@ -34,7 +34,7 @@ GEM
     akami (1.1.0)
       gyoku (>= 0.4.0)
       nokogiri (>= 1.5.2)
-    backports (2.5.3)
+    backports (2.6.1)
     builder (3.0.0)
     childprocess (0.3.2)
       ffi (~> 1.0.6)
