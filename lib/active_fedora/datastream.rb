@@ -38,14 +38,17 @@ module ActiveFedora
     end
     
     # Test whether this datastream been modified since it was last saved
+    # Deprecated
     def dirty?
       changed?
     end
     
+    # Deprecated
     def dirty
       changed?
     end
     
+    # Deprecated
     def dirty=(value)
       if value
         lastModifiedDate_will_change! # an innocent hack to pretend something has changed

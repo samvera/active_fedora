@@ -52,4 +52,18 @@ describe ActiveFedora::NokogiriDatastream do
     end
   end
   
+  describe '.update_values' do
+    before do
+      @pid = "hydrangea:fixture_mods_article1"
+      @test_object = HydrangeaArticle2.find(@pid)
+    end
+
+    it "should not be dirty after .update_values is saved" do
+      @test_object.datastreams["descMetadata"].update_values([{:name=>0},{:role=>0},:text] =>"Funder")
+      @test_object.datastreams["descMetadata"].dirty?.should be_true
+      @test_object.save
+      @test_object.datastreams["descMetadata"].dirty?.should be_false
+      @test_object.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text).should == ["Funder"]
+    end    
+  end
 end

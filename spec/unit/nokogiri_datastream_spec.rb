@@ -217,6 +217,7 @@ describe ActiveFedora::NokogiriDatastream do
       @test_ds2.ng_xml = @sample_raw_xml
       @test_ds2.ng_xml_changed?.should be_true
       @test_ds2.should be_dirty
+      @test_ds2.instance_variable_get(:@content).should be_nil
     end
   end
   

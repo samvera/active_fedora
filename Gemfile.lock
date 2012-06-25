@@ -13,7 +13,7 @@ PATH
       rdf
       rdf-rdfxml (~> 0.3.8)
       rsolr
-      rubydora (~> 0.5.9)
+      rubydora (~> 0.5.10)
       solrizer (~> 1.2.0)
       xml-simple (>= 1.0.12)
 
@@ -21,13 +21,13 @@ GEM
   remote: http://rubygems.org/
   specs:
     RedCloth (4.2.9)
-    activemodel (3.2.3)
-      activesupport (= 3.2.3)
+    activemodel (3.2.6)
+      activesupport (= 3.2.6)
       builder (~> 3.0.0)
-    activeresource (3.2.3)
-      activemodel (= 3.2.3)
-      activesupport (= 3.2.3)
-    activesupport (3.2.3)
+    activeresource (3.2.6)
+      activemodel (= 3.2.6)
+      activesupport (= 3.2.6)
+    activesupport (3.2.6)
       i18n (~> 0.6)
       multi_json (~> 1.0)
     addressable (2.2.8)
@@ -50,7 +50,7 @@ GEM
     httpi (1.0.0)
       rack
     i18n (0.6.0)
-    jettywrapper (1.2.1)
+    jettywrapper (1.3.0)
       activesupport (>= 3.0.0)
       childprocess
       i18n
@@ -61,21 +61,21 @@ GEM
     logger (1.2.8)
     mediashelf-loggable (0.4.9)
     metaclass (0.0.1)
-    mime-types (1.18)
+    mime-types (1.19)
     mocha (0.10.5)
       metaclass (~> 0.0.1)
-    multi_json (1.3.5)
+    multi_json (1.3.6)
     multipart-post (1.1.2)
     nokogiri (1.5.3)
     nori (1.1.0)
-    om (1.6.0)
+    om (1.6.1)
       mediashelf-loggable
       nokogiri (>= 1.4.2)
     rack (1.4.1)
     rake (0.9.2.2)
     rbx-require-relative (0.0.9)
     rcov (1.0.0)
-    rdf (0.3.5.2)
+    rdf (0.3.7)
       addressable (>= 2.2.6)
     rdf-rdfxml (0.3.8)
       rdf (>= 0.3.4)
@@ -101,7 +101,7 @@ GEM
       ruby-debug-base (~> 0.10.4.0)
     ruby-debug-base (0.10.4)
       linecache (>= 0.3)
-    rubydora (0.5.9)
+    rubydora (0.5.10)
       activemodel
       activesupport
       fastercsv
@@ -134,7 +134,7 @@ GEM
     wasabi (2.3.0)
       nokogiri (>= 1.4.0)
     xml-simple (1.1.1)
-    yard (0.8.1)
+    yard (0.8.2.1)
 
 PLATFORMS
   ruby
