@@ -19,7 +19,7 @@ describe ActiveFedora::NokogiriDatastream do
   describe '.term_values' do
     before do
       @pid = "hydrangea:fixture_mods_article1"
-      @test_solr_object = HydrangeaArticle2.load_instance_from_solr(@pid)
+      @test_solr_object = ActiveFedora::Base.load_instance_from_solr(@pid)
       @test_object = HydrangeaArticle2.find(@pid)
     end
 

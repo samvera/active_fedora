@@ -191,7 +191,7 @@ module ActiveFedora
         SolrService.instance.conn.query(query, args)
       end
 
-
+      #  @deprecated
       #  If query is :all, this method will query Solr for all instances
       #  of self.type (based on active_fedora_model_s as indexed
       #  by Solr). If the query is any other string, this method simply does
@@ -203,6 +203,7 @@ module ActiveFedora
       #  Args is an options hash, which is passed into the SolrService 
       #  connection instance.
       def find_by_solr(query, args={})
+        ActiveSupport::Deprecation.warn("find_by_fields_by_solr is deprecated and will be removed in 5.0. Use find_with_conditions instead.")
         if query == :all
           escaped_class_name = self.name.gsub(/(:)/, '\\:')
           SolrService.query("#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}", args) 
@@ -229,7 +230,7 @@ module ActiveFedora
       #   :field_list       => array, defaults to ["*", "score"]
       #
       def find_by_fields_by_solr(query_fields,opts={})
-        ActiveSupport::Deprecation.warn("find_by_fields_by_solr is deprecated and will be removed in the next release")
+        ActiveSupport::Deprecation.warn("find_by_fields_by_solr is deprecated and will be removed in 5.0")
         #create solr_args from fields passed in, needs to be comma separated list of form field1=value1,field2=value2,...
         escaped_class_name = self.name.gsub(/(:)/, '\\:')
         query = "#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}" 
@@ -318,7 +319,10 @@ module ActiveFedora
       # @param[Hash] conditions solr conditions to match
       def create_query(conditions)
         escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
-        clauses = ["#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"]
+        clauses = []
+        unless self == ActiveFedora::Base
+          clauses << "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
+        end
         conditions.each_pair do |key,value|
           unless value.nil?
             if value.is_a? Array

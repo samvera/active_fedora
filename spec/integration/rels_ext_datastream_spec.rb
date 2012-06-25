@@ -114,16 +114,16 @@ describe ActiveFedora::RelsExtDatastream do
       model_rel = MockAFRelsSolr.to_class_uri
       #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
       #get solr doc for @test_object2
-      solr_doc = MockAFRelsSolr.find_by_solr(@test_object2.pid).first
+      solr_doc = MockAFRelsSolr.find_with_conditions(:id=>@test_object2.pid).first
       test_from_solr_object2 = MockAFRelsSolr.new
       test_from_solr_object2.rels_ext.from_solr(solr_doc)
-      solr_doc = MockAFRelsSolr.find_by_solr(@test_object3.pid).first
+      solr_doc = MockAFRelsSolr.find_with_conditions(:id=>@test_object3.pid).first
       test_from_solr_object3 = MockAFRelsSolr.new
       test_from_solr_object3.rels_ext.from_solr(solr_doc)
-      solr_doc = MockAFRelsSolr.find_by_solr(@test_object4.pid).first
+      solr_doc = MockAFRelsSolr.find_with_conditions(:id=>@test_object4.pid).first
       test_from_solr_object4 = MockAFRelsSolr.new
       test_from_solr_object4.rels_ext.from_solr(solr_doc)
-      solr_doc = MockAFRelsSolr.find_by_solr(@test_object5.pid).first
+      solr_doc = MockAFRelsSolr.find_with_conditions(:id=>@test_object5.pid).first
       test_from_solr_object5 = MockAFRelsSolr.new
       test_from_solr_object5.rels_ext.from_solr(solr_doc)
       

@@ -177,8 +177,8 @@ describe ActiveFedora::Model do
             q.split(" AND ").include?("baz:\"quack\"")
         }.returns(mock_result)
       SpecModel::Basic.find_with_conditions(:foo=>'bar', :baz=>['quix','quack']).should == mock_result
-      
     end
+
     it "should escape quotes" do
       mock_result = stub('Result')
            ActiveFedora::SolrService.expects(:query).with() { |args|
@@ -191,6 +191,12 @@ describe ActiveFedora::Model do
             q.split(" AND ").include?('baz:"quack"')
         }.returns(mock_result)
       SpecModel::Basic.find_with_conditions(:foo=>'9" Nails', :baz=>['7" version','quack']).should == mock_result
+    end
+
+    it "shouldn't use the class if it's called on AF:Base " do
+      mock_result = stub('Result')
+      ActiveFedora::SolrService.expects(:query).with('baz:"quack"', {:sort => ['system_create_dt asc']}).returns(mock_result)
+      ActiveFedora::Base.find_with_conditions(:baz=>'quack').should == mock_result
       
     end
   end
