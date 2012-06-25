@@ -148,7 +148,7 @@ describe ActiveFedora::Base do
     
     @test_history.save
     
-    @solr_result = OralHistory.find_by_solr(@test_history.pid)[0]
+    @solr_result = OralHistory.find_with_conditions(:id=>@test_history.pid)[0]
     @properties_sample_values.each_pair do |field, value|
       next if field == :hard_copy_availability #FIXME HYDRA-824
       next if field == :location #FIXME HYDRA-825 
@@ -172,8 +172,8 @@ describe ActiveFedora::Base do
     
   end
   
-  it "should support #find_by_solr" do
-    solr_result = OralHistory.find(:all)
+  it "should support #find_with_conditions" do
+    solr_result = OralHistory.find_with_conditions({})
     solr_result.should_not be_nil
   end
   

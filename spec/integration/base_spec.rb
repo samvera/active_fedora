@@ -420,10 +420,10 @@ describe ActiveFedora::Base do
     
     it "should delete the object from Fedora and Solr" do
       @test_object.save
-      ActiveFedora::Base.find_by_solr(@test_object.pid).first["id"].should == @test_object.pid
+      ActiveFedora::Base.find_with_conditions(:id=>@test_object.pid).first["id"].should == @test_object.pid
       pid = @test_object.pid # store so we can access it after deletion
       @test_object.delete
-      ActiveFedora::Base.find_by_solr(pid).should be_empty
+      ActiveFedora::Base.find_with_conditions(:id=>pid).should be_empty
     end
 
     describe '#delete' do

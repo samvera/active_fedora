@@ -19,12 +19,12 @@ describe ActiveFedora do
     @test_object = ActiveFedora::Base.new
   end
   
-  after(:all) do
-    # Revert to default mappings after running tests
-    ActiveFedora::SolrService.load_mappings
-  end
   
   describe "field name mappings" do
+    after(:all) do
+      # Revert to default mappings after running tests
+      ActiveFedora::SolrService.load_mappings
+    end
     it "should default to using the mappings for the current schema" do
       from_default_yml = YAML::load(File.open(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings.yml")))
       ActiveFedora::SolrService.mappings[:searchable].data_types[:date].opts[:suffix].should == from_default_yml["searchable"]["date"]    
@@ -49,11 +49,11 @@ describe ActiveFedora do
       @test_object.to_solr[:id].should be_nil
     end
 
-    it "should be used by ActiveFedora::Base#find_by_solr" do
+    it "should be used by ActiveFedora::Base#find_with_conditions" do
       mock_response = mock("SolrResponse")
-      ActiveFedora::SolrService.expects(:query).with(SOLR_DOCUMENT_ID + ':changeme\:30', {}).returns(mock_response)
+      ActiveFedora::SolrService.expects(:query).with("has_model_s:info\\:fedora/afmodel\\:SolrSpecModel_Basic AND " + SOLR_DOCUMENT_ID + ':"changeme\\:30"', {:sort => ['system_create_dt asc']}).returns(mock_response)
   
-      SolrSpecModel::Basic.find_by_solr("changeme:30").should equal(mock_response)
+      SolrSpecModel::Basic.find_with_conditions(:id=>"changeme:30").should equal(mock_response)
     end
   end
   

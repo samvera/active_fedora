@@ -389,8 +389,8 @@ module ActiveFedora
     # be loaded and if needed you should use find instead.
     def self.load_instance_from_solr(pid,solr_doc=nil)
       if solr_doc.nil?
-        result = find_by_solr(pid)
-        raise ActiveFedora::ObjectNotFoundError, "Object #{pid} not found in solr" if result.nil?
+        result = find_with_conditions(:id=>pid)
+        raise ActiveFedora::ObjectNotFoundError, "Object #{pid} not found in solr" if result.empty?
         solr_doc = result.first
         #double check pid and id in record match
         raise ActiveFedora::ObjectNotFoundError, "Object #{pid} not found in Solr" unless !result.nil? && !solr_doc.nil? && pid == solr_doc[SOLR_DOCUMENT_ID]
