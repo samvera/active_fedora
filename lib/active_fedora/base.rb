@@ -102,7 +102,7 @@ module ActiveFedora
         ## Replace existing unchanged datastreams with the definitions found in this class if they have a different type.
         ## Any datastream that is deleted here will cause a reload from fedora, so avoid it whenever possible
         ds_specs.keys.each do |key|
-          if !@inner_object.datastreams[key].changed.include?(:content) && @inner_object.datastreams[key].class != self.class.ds_specs[key][:type]
+          if !@inner_object.datastreams[key].changed.include?('content') && @inner_object.datastreams[key].class != self.class.ds_specs[key][:type]
             @inner_object.datastreams.delete(key)
           end
         end
