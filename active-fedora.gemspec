@@ -16,10 +16,6 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.7}
 
   s.add_dependency('rsolr')
-  s.add_dependency('xml-simple', '>= 1.0.12')
-  s.add_dependency('mime-types', '>= 1.16')
-  s.add_dependency('multipart-post')
-  s.add_dependency('nokogiri')
   s.add_dependency('om', '~> 1.6.0')
   s.add_dependency('solrizer', '~>1.2.0')
   s.add_dependency("activeresource", '>= 3.0.0')
