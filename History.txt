@@ -1,3 +1,11 @@
+4.4.0
+Updated gem dependencies
+Deprecated #find_by_solr()
+Added compatibility with Rubydora 0.5.10
+HYDRA-833 find_by_conditions should accept conditions as a string or a hash
+HYDRA-696 ActiveModel::Dirty to track @ng_xml
+HYDRA-830: Parsing has_model_s for model name
+
 4.3.0
 Added the #delegate_to method for easier delegation of multiple terms to the same datastream.
 Deprecated AF::Base#file_streams
