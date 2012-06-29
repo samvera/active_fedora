@@ -308,12 +308,11 @@ module ActiveFedora
       # @option opts [Array] :sort a list of fields to sort by 
       # @option opts [Array] :rows number of rows to return
       def find_with_conditions(conditions, opts={})
-        query = conditions.kind_of?(Hash) ? create_query(conditions) : conditions
         #set default sort to created date ascending
         unless opts.include?(:sort)
           opts[:sort]=[ActiveFedora::SolrService.solr_name(:system_create,:date)+' asc'] 
         end
-        SolrService.query(query, opts) 
+        SolrService.query(create_query(conditions), opts) 
       end
 
       def quote_for_solr(value)
