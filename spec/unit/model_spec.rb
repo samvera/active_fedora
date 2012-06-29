@@ -197,7 +197,11 @@ describe ActiveFedora::Model do
       mock_result = stub('Result')
       ActiveFedora::SolrService.expects(:query).with('baz:"quack"', {:sort => ['system_create_dt asc']}).returns(mock_result)
       ActiveFedora::Base.find_with_conditions(:baz=>'quack').should == mock_result
-      
+    end
+    it "should use the query string if it's provided" do
+      mock_result = stub('Result')
+      ActiveFedora::SolrService.expects(:query).with('chunky:monkey', {:sort => ['system_create_dt asc']}).returns(mock_result)
+      ActiveFedora::Base.find_with_conditions('chunky:monkey').should == mock_result
     end
   end
   

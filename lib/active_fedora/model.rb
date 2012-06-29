@@ -178,10 +178,9 @@ module ActiveFedora
       # Get a count of the number of objects from solr
       # Takes :conditions as an argument
       def count(args = {})
-          escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
-          q = "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
-          q << " AND #{args[:conditions]}" if args[:conditions]
-          SolrService.query(q, :raw=>true, :rows=>0)['response']['numFound']
+        q = search_model_clause
+        q << " AND #{args[:conditions]}"  if args[:conditions]
+        SolrService.query(q, :raw=>true, :rows=>0)['response']['numFound']
       end
 
       #@deprecated
@@ -301,12 +300,15 @@ module ActiveFedora
       end
 
       # Returns a solr result matching the supplied conditions
-      # @param[Hash] conditions solr conditions to match
+      # @param[Hash,String] conditions can either be specified as a string, or 
+      # hash representing the query part of an solr statement. If a hash is 
+      # provided, this method will generate conditions based simple equality
+      # combined using the boolean AND operator.
       # @param[Hash] options 
       # @option opts [Array] :sort a list of fields to sort by 
       # @option opts [Array] :rows number of rows to return
       def find_with_conditions(conditions, opts={})
-        query = create_query(conditions)
+        query = conditions.kind_of?(Hash) ? create_query(conditions) : conditions
         #set default sort to created date ascending
         unless opts.include?(:sort)
           opts[:sort]=[ActiveFedora::SolrService.solr_name(:system_create,:date)+' asc'] 
@@ -318,11 +320,8 @@ module ActiveFedora
       # Returns a solr query for the supplied conditions
       # @param[Hash] conditions solr conditions to match
       def create_query(conditions)
-        escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
-        clauses = []
-        unless self == ActiveFedora::Base
-          clauses << "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
-        end
+        return '' unless conditions
+        clauses = [search_model_clause]
         conditions.each_pair do |key,value|
           unless value.nil?
             if value.is_a? Array
@@ -337,7 +336,15 @@ module ActiveFedora
           end
         end
 
-        clauses.join(" AND ")
+        clauses.compact.join(" AND ")
+      end
+
+      # Return the solr clause that queries for this type of class
+      def search_model_clause
+        unless self == ActiveFedora::Base
+          escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
+          return "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
+        end
       end
 
       def quote_for_solr(value)
