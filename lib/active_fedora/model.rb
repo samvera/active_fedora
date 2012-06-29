@@ -316,11 +316,30 @@ module ActiveFedora
         SolrService.query(query, opts) 
       end
 
-      
+      def quote_for_solr(value)
+        '"' + value.gsub(/(:)/, '\\:').gsub(/"/, '\\"') + '"'
+      end
+    
+      # @deprecated
+      def class_fields
+        #create dummy object that is empty by passing in fake pid
+        object = self.new()#{:pid=>'FAKE'})
+        fields = object.fields
+        #reset id to nothing
+        fields[:id][:values] = []
+        return fields
+      end
+
+      private 
+
       # Returns a solr query for the supplied conditions
       # @param[Hash] conditions solr conditions to match
       def create_query(conditions)
         return '' unless conditions
+        conditions.kind_of?(Hash) ? create_query_from_hash(conditions) : create_query_from_string(conditions)
+      end
+
+      def create_query_from_hash(conditions)
         clauses = [search_model_clause]
         conditions.each_pair do |key,value|
           unless value.nil?
@@ -339,6 +358,11 @@ module ActiveFedora
         clauses.compact.join(" AND ")
       end
 
+      def create_query_from_string(conditions)
+        model_clause = search_model_clause
+        model_clause ? "#{model_clause} AND (#{conditions})" : conditions
+      end
+
       # Return the solr clause that queries for this type of class
       def search_model_clause
         unless self == ActiveFedora::Base
@@ -347,21 +371,6 @@ module ActiveFedora
         end
       end
 
-      def quote_for_solr(value)
-        '"' + value.gsub(/(:)/, '\\:').gsub(/"/, '\\"') + '"'
-      end
-
-    
-      def class_fields
-        #create dummy object that is empty by passing in fake pid
-        object = self.new()#{:pid=>'FAKE'})
-        fields = object.fields
-        #reset id to nothing
-        fields[:id][:values] = []
-        return fields
-      end
-
-      private 
       # Retrieve the Fedora object with the given pid, explore the returned object, determine its model 
       # using #{ActiveFedora::ContentModel.known_models_for} and cast to that class.
       # Raises a ObjectNotFoundError if the object is not found.
