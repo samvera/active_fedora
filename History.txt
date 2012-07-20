@@ -1,3 +1,7 @@
+4.4.1
+HYDRA-834 find(:all) should work on ActiveFedora::Base
+update AF to hide the deprecation warnings introduced in rubydora 0.5.11
+
 4.4.0
 Updated gem dependencies
 Deprecated #find_by_solr()
