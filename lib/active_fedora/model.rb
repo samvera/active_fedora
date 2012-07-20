@@ -5,9 +5,7 @@ module ActiveFedora
   # This module mixes various methods into the including class,
   # much in the way ActiveRecord does.  
   module Model 
-    def self.included(klass) # :nodoc:
-      klass.extend(ClassMethods)
-    end
+    extend ActiveSupport::Concern
     
     # Takes a Fedora URI for a cModel and returns classname, namespace
     def self.classname_from_uri(uri)
@@ -164,7 +162,7 @@ module ActiveFedora
       # @param[String] pid 
       # @return[boolean] 
       def exists?(pid)
-        inner = DigitalObject.find(self, pid)
+        inner = DigitalObject.find_or_initialize(self, pid)
         !inner.new?
       end
 
@@ -379,11 +377,9 @@ module ActiveFedora
       #   Book.find_one("hydra:dataset1") 
       def find_one(pid, cast=false)
         inner = DigitalObject.find(self, pid)
-        raise ActiveFedora::ObjectNotFoundError, "Unable to find '#{pid}' in fedora" if inner.new?
         af_base = self.allocate.init_with(inner)
         cast ? af_base.adapt_to_cmodel : af_base
       end
-
     end
 
     private 

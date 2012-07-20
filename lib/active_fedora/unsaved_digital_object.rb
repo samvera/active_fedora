@@ -26,7 +26,7 @@ module ActiveFedora
 
     ### Change this into a real digital object
     def save
-      obj = DigitalObject.find(self.original_class, assign_pid)
+      obj = DigitalObject.find_or_initialize(self.original_class, assign_pid)
       self.datastreams.each do |k, v|
         v.digital_object = obj
         obj.datastreams[k] = v

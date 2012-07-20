@@ -5,6 +5,16 @@ module ActiveFedora
     
     def self.find(original_class, pid)
       conn = original_class.connection_for_pid(pid)
+      obj = Deprecation.silence(Rubydora::DigitalObject) do
+        super(pid, conn)
+      end
+      obj.original_class = original_class
+      raise ActiveFedora::ObjectNotFoundError, "Unable to find '#{pid}' in fedora" if obj.new?
+      obj
+    end
+
+    def self.find_or_initialize(original_class, pid)
+      conn = original_class.connection_for_pid(pid)
       obj = super(pid, conn)
       obj.original_class = original_class
       obj
