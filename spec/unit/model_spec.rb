@@ -19,24 +19,41 @@ describe ActiveFedora::Model do
   
   describe '#find' do
     describe "without :cast" do
-      it "(:all) should query solr for all objects with :active_fedora_model_s of self.class" do
-        SpecModel::Basic.expects(:find_one).with("changeme:30", nil).returns("Fake Object1")
-        SpecModel::Basic.expects(:find_one).with("changeme:22", nil).returns("Fake Object2")
-        mock_docs = mock('docs')
-        mock_docs.expects(:each).multiple_yields([{"id" => "changeme:30"}],[{"id" => "changeme:22"}])
-        mock_docs.expects(:has_next?).returns(false)
-        ActiveFedora::SolrService.instance.conn.expects(:paginate).with(1, 1000, 'select', :params=>{:q=>'has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :qt => 'standard', :sort => ['system_create_dt asc'], :fl=> 'id', }).returns('response'=>{'docs'=>mock_docs})
-        SpecModel::Basic.find(:all).should == ["Fake Object1", "Fake Object2"]
+      describe ":all" do
+        describe "called on a concrete class" do
+          it "should query solr for all objects with :has_model_s of self.class" do
+            SpecModel::Basic.expects(:find_one).with("changeme:30", nil).returns("Fake Object1")
+            SpecModel::Basic.expects(:find_one).with("changeme:22", nil).returns("Fake Object2")
+            mock_docs = mock('docs')
+            mock_docs.expects(:each).multiple_yields([{"id" => "changeme:30"}],[{"id" => "changeme:22"}])
+            mock_docs.expects(:has_next?).returns(false)
+            ActiveFedora::SolrService.instance.conn.expects(:paginate).with(1, 1000, 'select', :params=>{:q=>'has_model_s:info\\:fedora/afmodel\\:SpecModel_Basic', :qt => 'standard', :sort => ['system_create_dt asc'], :fl=> 'id', }).returns('response'=>{'docs'=>mock_docs})
+            SpecModel::Basic.find(:all).should == ["Fake Object1", "Fake Object2"]
+          end
+        end
+        describe "called without a specific class" do
+          it "should specify a q parameter" do
+            ActiveFedora::Base.expects(:find_one).with("changeme:30", nil).returns("Fake Object1")
+            ActiveFedora::Base.expects(:find_one).with("changeme:22", nil).returns("Fake Object2")
+            mock_docs = mock('docs')
+            mock_docs.expects(:each).multiple_yields([{"id" => "changeme:30"}],[{"id" => "changeme:22"}])
+            mock_docs.expects(:has_next?).returns(false)
+            ActiveFedora::SolrService.instance.conn.expects(:paginate).with(1, 1000, 'select', :params=>{:q=>'*:*', :qt => 'standard', :sort => ['system_create_dt asc'], :fl=> 'id', }).returns('response'=>{'docs'=>mock_docs})
+            ActiveFedora::Base.find(:all).should == ["Fake Object1", "Fake Object2"]
+          end
+        end
       end
-      it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
-        SpecModel::Basic.any_instance.expects(:init_with).returns(SpecModel::Basic.new)
-        ActiveFedora::DigitalObject.expects(:find).returns(stub("inner obj", :'new?'=>false))
-        SpecModel::Basic.find("_PID_").should be_a SpecModel::Basic
-      end
-      it "should raise an exception if it is not found" do
-        Rubydora::Repository.any_instance.expects(:object).raises(RestClient::ResourceNotFound)
-        SpecModel::Basic.expects(:connection_for_pid).with("_PID_")
-        lambda {SpecModel::Basic.find("_PID_")}.should raise_error ActiveFedora::ObjectNotFoundError
+      describe "and a pid is specified" do
+        it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
+          SpecModel::Basic.any_instance.expects(:init_with).returns(SpecModel::Basic.new)
+          ActiveFedora::DigitalObject.expects(:find).returns(stub("inner obj", :'new?'=>false))
+          SpecModel::Basic.find("_PID_").should be_a SpecModel::Basic
+        end
+        it "should raise an exception if it is not found" do
+          Rubydora::Repository.any_instance.expects(:object).raises(RestClient::ResourceNotFound)
+          SpecModel::Basic.expects(:connection_for_pid).with("_PID_")
+          lambda {SpecModel::Basic.find("_PID_")}.should raise_error ActiveFedora::ObjectNotFoundError
+        end
       end
     end
     describe "with :cast" do

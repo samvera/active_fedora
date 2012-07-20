@@ -334,12 +334,11 @@ module ActiveFedora
       # Returns a solr query for the supplied conditions
       # @param[Hash] conditions solr conditions to match
       def create_query(conditions)
-        return '' unless conditions
         conditions.kind_of?(Hash) ? create_query_from_hash(conditions) : create_query_from_string(conditions)
       end
 
       def create_query_from_hash(conditions)
-        clauses = [search_model_clause]
+        clauses = search_model_clause ?  [search_model_clause] : []
         conditions.each_pair do |key,value|
           unless value.nil?
             if value.is_a? Array
@@ -353,7 +352,7 @@ module ActiveFedora
             end
           end
         end
-
+        return "*:*" if clauses.empty?
         clauses.compact.join(" AND ")
       end
 
