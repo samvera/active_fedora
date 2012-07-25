@@ -11,7 +11,7 @@ PATH
       rdf
       rdf-rdfxml (~> 0.3.8)
       rsolr
-      rubydora (~> 0.5.11)
+      rubydora (~> 0.5.13)
       solrizer (~> 1.2.0)
 
 GEM
@@ -27,7 +27,7 @@ GEM
     activesupport (3.2.6)
       i18n (~> 0.6)
       multi_json (~> 1.0)
-    addressable (2.2.8)
+    addressable (2.3.1)
     akami (1.2.0)
       gyoku (>= 0.4.0)
       nokogiri (>= 1.4.0)
@@ -100,7 +100,7 @@ GEM
       ruby-debug-base (~> 0.10.4.0)
     ruby-debug-base (0.10.4)
       linecache (>= 0.3)
-    rubydora (0.5.11)
+    rubydora (0.5.13)
       activemodel
       activesupport
       deprecation
@@ -124,7 +124,7 @@ GEM
     simplecov-html (0.5.3)
     simplecov-rcov (0.2.3)
       simplecov (>= 0.4.1)
-    solrizer (1.2.1)
+    solrizer (1.2.2)
       daemons
       mediashelf-loggable (~> 0.4.7)
       nokogiri

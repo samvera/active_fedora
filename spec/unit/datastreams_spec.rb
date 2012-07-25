@@ -71,7 +71,7 @@ describe ActiveFedora::Datastreams do
     end
 
     describe "creates datastreams" do
-      before do
+      before(:each) do
         class FooHistory < ActiveFedora::Base
           has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
             m.field "fubar", :string
@@ -80,22 +80,36 @@ describe ActiveFedora::Datastreams do
           has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel" do |m|
             m.field "fubar", :text
           end 
+          
+          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"no_autocreate", :autocreate => false, :label=>"withLabel" do |m|
+            m.field "fubar", :text
+          end 
         end
         stub_ingest(@this_pid)
-        stub_add_ds(@this_pid, ['RELS-EXT', 'someData', 'withText', 'withText2'])
+        stub_add_ds(@this_pid, ['RELS-EXT', 'someData', 'withText', 'withText2','no_autocreate'])
 
         @n = FooHistory.new()
         FooHistory.stubs(:assign_pid).returns(@this_pid)
         @n.datastreams['RELS-EXT'].expects(:changed?).returns(true).at_least_once
         @n.expects(:update_index)
-        @n.save
       end
 
       after do
         Object.send(:remove_const, :FooHistory)
       end
 
+      it "should respect autocreate => false" do
+        @n.datastreams['no_autocreate'].expects(:save).never
+        @n.save
+      end
+
+      it "should default to autocreating datastreams" do
+        @n.datastreams['someData'].expects(:save).once
+        @n.save
+      end
+
       it "should create specified datastreams with specified fields" do
+        @n.save
         @n.datastreams["someData"].should_not be_nil
         @n.datastreams["someData"].fubar='bar'
         @n.datastreams["someData"].fubar.should == ['bar']

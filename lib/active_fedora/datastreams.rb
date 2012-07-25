@@ -78,10 +78,20 @@ module ActiveFedora
 
     def datastream_from_spec(ds_spec, name)
       ds = ds_spec[:type].new(inner_object, name)
-      ds.dsLabel = ds_spec[:label] if ds_spec[:label].present?
-      ds.controlGroup = ds_spec[:control_group]
-      ds.versionable = ds_spec[:versionable] unless ds_spec[:versionable].nil?
-      additional_attributes_for_external_and_redirect_control_groups(ds, ds_spec)
+      attributes = {}
+
+      attributes[:dsLabel] = ds_spec[:label] if ds_spec[:label].present?
+      attributes[:controlGroup] = ds_spec[:control_group] if ds_spec[:control_group].present?
+      attributes[:versionable] = ds_spec[:versionable] unless ds_spec[:versionable].nil?
+      if attributes[:controlGroup]=='E'
+        if !ds_spec[:disseminator].present? && ds_spec[:url].present?
+          attributes[:dsLocation]= ds_spec[:url]
+        end
+      elsif attributes[:controlGroup]=='R'
+        attributes[:dsLocation]= ds_spec[:url]
+      end
+      ds.default_attributes = attributes
+      ds.datastream_will_change! if ds_spec[:autocreate]
       ds
     end
 
@@ -253,10 +263,11 @@ module ActiveFedora
       # @option args [String] :control_group ('X') must be one of 'E', 'X', 'M', 'R'
       # @option args [String] :disseminator Sets the disseminator location see {#add_disseminator_location_to_datastreams}
       # @option args [String] :url 
+      # @option args [Boolean] :autocreate Always create this datastream on new objects
       # @option args [Boolean] :versionable (true) Should versioned datastreams be stored
       # @yield block executed by some kinds of datastreams
       def has_metadata(args, &block)
-        spec = {:type => args[:type], :label =>  args.fetch(:label,""), :control_group => args.fetch(:control_group,"X"), :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
+        spec = {:autocreate => args.fetch(:autocreate, true), :type => args[:type], :label =>  args.fetch(:label,""), :control_group => args[:control_group], :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
         spec[:versionable] = args[:versionable] if args.has_key? :versionable
         ds_specs[args[:name]]= spec
       end
@@ -268,8 +279,10 @@ module ActiveFedora
       # @option args :type (ActiveFedora::Datastream) The class the datastream should have
       # @option args :label ("File Datastream") The default value to put in the dsLabel field
       # @option args :control_group ("M") The type of controlGroup to store the datastream as. Defaults to M
+      # @option args [Boolean] :autocreate Always create this datastream on new objects
       def has_file_datastream(args = {})
         ds_specs[args.fetch(:name, "content")]= {
+            :autocreate => args.fetch(:autocreate, true),
             :type => args.fetch(:type,ActiveFedora::Datastream),
             :label =>  args.fetch(:label,"File Datastream"),
             :control_group => args.fetch(:control_group,"M")

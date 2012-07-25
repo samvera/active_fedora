@@ -17,6 +17,10 @@ module ActiveFedora
     
     attr_accessor :internal_solr_doc
 
+    def self.default_attributes
+      super.merge(:controlGroup => 'X', :mimeType => 'text/xml')
+    end
+
     # Create an instance of this class based on xml content
     # @param [String, File, Nokogiri::XML::Node] xml the xml content to build from
     # @param [ActiveFedora::MetadataDatastream] tmpl the Datastream object that you are building @default a new instance of this class

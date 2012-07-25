@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency("activesupport", '>= 3.0.0')
   s.add_dependency("mediashelf-loggable")
   s.add_dependency("equivalent-xml")
-  s.add_dependency("rubydora", '~>0.5.12')
+  s.add_dependency("rubydora", '~>0.5.13')
   s.add_dependency("rdf")
   s.add_dependency("rdf-rdfxml", '~>0.3.8')
   s.add_dependency("deprecation")
