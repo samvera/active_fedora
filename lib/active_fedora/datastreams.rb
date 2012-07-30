@@ -285,6 +285,7 @@ module ActiveFedora
             :autocreate => args.fetch(:autocreate, true),
             :type => args.fetch(:type,ActiveFedora::Datastream),
             :label =>  args.fetch(:label,"File Datastream"),
+            :versionable =>  args.fetch(:versionable, true),
             :control_group => args.fetch(:control_group,"M")
         }
       end
