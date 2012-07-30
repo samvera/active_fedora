@@ -1,3 +1,10 @@
+4.5.0
+HYDRA-837: ActiveFedora::Datastreams#has_file_datastream should support :versionable argument
+implement per-class and per-instance defaults from rubydora 0.5.13
+bump to Rubydora 0.5.13
+add has_metadata :autocreate boolean that allows datastream to /not/ be created when a new object is saved
+add an after_rollback handler to update the SolrService when an object is rolled back
+
 4.4.1
 HYDRA-834 find(:all) should work on ActiveFedora::Base
 update AF to hide the deprecation warnings introduced in rubydora 0.5.11
