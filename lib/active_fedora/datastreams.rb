@@ -207,6 +207,7 @@ module ActiveFedora
         attrs.merge!({:mimeType=>opts[:content_type]})
       end
       attrs[:checksumType] = opts[:checksumType] if opts[:checksumType]
+      attrs[:versionable] = opts[:versionable] unless opts[:versionable].nil?
       ds = create_datastream(self.class.datastream_class_for_name(opts[:dsid]), opts[:dsid], attrs)
       add_datastream(ds)
     end
@@ -217,8 +218,8 @@ module ActiveFedora
       klass = type.kind_of?(Class) ? type : type.constantize
       raise ArgumentError, "Argument dsid must be of type string" unless dsid.kind_of?(String) || dsid.kind_of?(NilClass)
       ds = klass.new(inner_object, dsid)
-      [:mimeType, :controlGroup, :dsLabel, :dsLocation, :checksumType].each do |key|
-        ds.send("#{key}=".to_sym, opts[key]) if opts[key]
+      [:mimeType, :controlGroup, :dsLabel, :dsLocation, :checksumType, :versionable].each do |key|
+        ds.send("#{key}=".to_sym, opts[key]) unless opts[key].nil?
       end
       blob = opts[:blob] 
       if blob 
@@ -260,11 +261,11 @@ module ActiveFedora
       # @option args [Class] :type The class that will represent this datastream, should extend ``Datastream''
       # @option args [String] :name the handle to refer to this datastream as
       # @option args [String] :label sets the fedora label
-      # @option args [String] :control_group ('X') must be one of 'E', 'X', 'M', 'R'
+      # @option args [String] :control_group must be one of 'E', 'X', 'M', 'R'
       # @option args [String] :disseminator Sets the disseminator location see {#add_disseminator_location_to_datastreams}
       # @option args [String] :url 
       # @option args [Boolean] :autocreate Always create this datastream on new objects
-      # @option args [Boolean] :versionable (true) Should versioned datastreams be stored
+      # @option args [Boolean] :versionable Should versioned datastreams be stored
       # @yield block executed by some kinds of datastreams
       def has_metadata(args, &block)
         spec = {:autocreate => args.fetch(:autocreate, true), :type => args[:type], :label =>  args.fetch(:label,""), :control_group => args[:control_group], :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
@@ -280,13 +281,12 @@ module ActiveFedora
       # @option args :label ("File Datastream") The default value to put in the dsLabel field
       # @option args :control_group ("M") The type of controlGroup to store the datastream as. Defaults to M
       # @option args [Boolean] :autocreate Always create this datastream on new objects
+      # @option args [Boolean] :versionable Should versioned datastreams be stored
       def has_file_datastream(args = {})
-        ds_specs[args.fetch(:name, "content")]= {
-            :autocreate => args.fetch(:autocreate, true),
-            :type => args.fetch(:type,ActiveFedora::Datastream),
-            :label =>  args.fetch(:label,"File Datastream"),
-            :control_group => args.fetch(:control_group,"M")
-        }
+        spec = {:autocreate => args.fetch(:autocreate, true), :type => args.fetch(:type,ActiveFedora::Datastream),
+                :label =>  args.fetch(:label,"File Datastream"), :control_group => args.fetch(:control_group,"M")}
+        spec[:versionable] = args[:versionable] if args.has_key? :versionable
+        ds_specs[args.fetch(:name, "content")]= spec
       end
     end
 

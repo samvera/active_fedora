@@ -76,9 +76,10 @@ describe ActiveFedora::Base do
       mock_file = stub("File", :path=>'foo')
       mock_ds = stub_everything("Datastream")
       mock_ds.expects(:dsLabel=).with('My Label')
+      mock_ds.expects(:versionable=).with(false)
       ActiveFedora::Datastream.expects(:new).with(@base.inner_object, '__DSID__').returns(mock_ds)
       @base.expects(:add_datastream).with(mock_ds)
-      @base.add_file_datastream(mock_file, :label => "My Label", :dsid => "__DSID__")
+      @base.add_file_datastream(mock_file, :label => "My Label", :dsid => "__DSID__", :versionable => false)
     end
     
   end

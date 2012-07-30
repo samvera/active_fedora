@@ -57,7 +57,9 @@ describe ActiveFedora::Datastreams do
       end
       it "should be able to set versionable to false" do
         FooHistory.has_metadata :type=>ActiveFedora::Datastream, :name=>'new_ds', :versionable=>false
+        FooHistory.has_file_datastream :type=>ActiveFedora::Datastream, :name=>'newer_ds', :versionable=>false
         FooHistory.ds_specs['new_ds'][:versionable].should be_false
+        FooHistory.ds_specs['newer_ds'][:versionable].should be_false
       end
       it "should be able to set versionable to true" do
         FooHistory.has_metadata :type=>ActiveFedora::Datastream, :name=>'new_ds', :versionable=>true
