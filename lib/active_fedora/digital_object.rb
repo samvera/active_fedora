@@ -3,6 +3,29 @@ module ActiveFedora
   class DigitalObject < Rubydora::DigitalObject
     attr_accessor :original_class
     
+    module DatastreamBootstrap
+      def datastream_object_for dsid, ds_spec=nil
+        ds_spec ||= original_class.ds_specs[dsid] || {}
+        ds = ds_spec.fetch(:type, ActiveFedora::Datastream).new(self, dsid)
+        attributes = {}
+        attributes[:asOfDateTime] ||= asOfDateTime if self.respond_to? :asOfDateTime
+        attributes[:dsLabel] = ds_spec[:label] if ds_spec[:label].present?
+        attributes[:controlGroup] = ds_spec[:control_group] if ds_spec[:control_group].present?
+        attributes[:versionable] = ds_spec[:versionable] unless ds_spec[:versionable].nil?
+        if attributes[:controlGroup]=='E'
+          if !ds_spec[:disseminator].present? && ds_spec[:url].present?
+            attributes[:dsLocation]= ds_spec[:url]
+          end
+        elsif attributes[:controlGroup]=='R'
+          attributes[:dsLocation]= ds_spec[:url]
+        end
+        ds.default_attributes = attributes
+        ds.datastream_will_change! if ds_spec[:autocreate]
+        ds
+      end
+    end    
+    include DatastreamBootstrap
+
     def self.find(original_class, pid)
       conn = original_class.connection_for_pid(pid)
       obj = Deprecation.silence(Rubydora::DigitalObject) do
@@ -19,11 +42,5 @@ module ActiveFedora
       obj.original_class = original_class
       obj
     end
-
-    def datastream_object_for dsid
-      klass = original_class.datastream_class_for_name(dsid)
-      klass.new self, dsid
-    end
-    
   end
 end

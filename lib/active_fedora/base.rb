@@ -145,7 +145,7 @@ module ActiveFedora
     
 
     def self.datastream_class_for_name(dsid)
-      ds_specs[dsid] ? ds_specs[dsid][:type] : ActiveFedora::Datastream
+      ds_specs[dsid] ? ds_specs[dsid].fetch(:type, ActiveFedora::Datastream) : ActiveFedora::Datastream
     end
 
     def self.create(args = {})

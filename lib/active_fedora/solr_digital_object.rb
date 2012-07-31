@@ -1,7 +1,8 @@
 module ActiveFedora
   class SolrDigitalObject
+    include DigitalObject::DatastreamBootstrap
     attr_reader :pid, :label, :state, :ownerId, :profile, :datastreams, :solr_doc
-    
+    attr_accessor :original_class
     def initialize(solr_doc, profile_hash, klass=ActiveFedora::Base)
       @solr_doc = solr_doc
       @pid = solr_doc[SOLR_DOCUMENT_ID]
@@ -13,6 +14,7 @@ module ActiveFedora
       @datastreams = {}
       
       dsids = profile_hash['datastreams'].keys
+      original_class = klass
       missing = dsids - klass.ds_specs.keys
       missing.each do |dsid|
         #Initialize the datastreams that are in the solr document, but not found in the classes spec.

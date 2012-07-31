@@ -77,22 +77,7 @@ module ActiveFedora
     end
 
     def datastream_from_spec(ds_spec, name)
-      ds = ds_spec[:type].new(inner_object, name)
-      attributes = {}
-
-      attributes[:dsLabel] = ds_spec[:label] if ds_spec[:label].present?
-      attributes[:controlGroup] = ds_spec[:control_group] if ds_spec[:control_group].present?
-      attributes[:versionable] = ds_spec[:versionable] unless ds_spec[:versionable].nil?
-      if attributes[:controlGroup]=='E'
-        if !ds_spec[:disseminator].present? && ds_spec[:url].present?
-          attributes[:dsLocation]= ds_spec[:url]
-        end
-      elsif attributes[:controlGroup]=='R'
-        attributes[:dsLocation]= ds_spec[:url]
-      end
-      ds.default_attributes = attributes
-      ds.datastream_will_change! if ds_spec[:autocreate]
-      ds
+      inner_object.datastream_object_for name, ds_spec
     end
 
     def load_datastreams
