@@ -1,3 +1,6 @@
+4.5.1
+HYDRA-838: Solr connection timeout is now 120 seconds
+
 4.5.0
 HYDRA-837: ActiveFedora::Datastreams#has_file_datastream should support :versionable argument
 implement per-class and per-instance defaults from rubydora 0.5.13

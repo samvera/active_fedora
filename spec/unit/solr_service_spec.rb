@@ -10,20 +10,20 @@ describe ActiveFedora::SolrService do
   end
   
   it "should take a narg constructor and configure for localhost" do
-    RSolr.expects(:connect).with(:url => 'http://localhost:8080/solr')
+    RSolr.expects(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://localhost:8080/solr')
     ActiveFedora::SolrService.register
   end
   it "should accept host arg into constructor" do
-    RSolr.expects(:connect).with(:url => 'http://fubar')
+    RSolr.expects(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://fubar')
     ActiveFedora::SolrService.register('http://fubar')
   end
   it "should clobber options" do
-    RSolr.expects(:connect).with(:url => 'http://localhost:8080/solr', :autocommit=>:off, :foo=>:bar)
+    RSolr.expects(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://localhost:8080/solr', :autocommit=>:off, :foo=>:bar)
     ActiveFedora::SolrService.register(nil, {:autocommit=>:off, :foo=>:bar})
   end
 
   it "should set the threadlocal solr service" do
-    RSolr.expects(:connect).with(:url => 'http://localhost:8080/solr', :autocommit=>:off, :foo=>:bar)
+    RSolr.expects(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://localhost:8080/solr', :autocommit=>:off, :foo=>:bar)
     ss = ActiveFedora::SolrService.register(nil, {:autocommit=>:off, :foo=>:bar})
     Thread.current[:solr_service].should == ss
     ActiveFedora::SolrService.instance.should == ss
