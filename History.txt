@@ -1,4 +1,6 @@
 4.5.1
+Removes .rvmrc and Gemfile.lock from version control (devs should deal with these themselves)
+HYDRA-837: ActiveFedora::Datastreams#has_file_datastream should support :versionable argument (re-opened)
 HYDRA-838: Solr connection timeout is now 120 seconds
 
 4.5.0

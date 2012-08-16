@@ -23,10 +23,11 @@ coverage
 rdoc
 pkg
 /.bundle
-#/.rvmrc
+.rvmrc
 .yardoc
 doc
 tmp
+Gemfile.lock
 
 ## PROJECT::SPECIFIC
 hydra-jetty
