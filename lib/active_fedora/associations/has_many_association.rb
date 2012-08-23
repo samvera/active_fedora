@@ -44,13 +44,6 @@ module ActiveFedora
             r.remove_relationship(@reflection.options[:property], @owner)
           end
         end
-
-
-        def construct_query
-          internal_uri = @owner.internal_uri
-          escaped_uri = internal_uri.gsub(/(:)/, '\\:')
-          @counter_query = @finder_query = "#{@reflection.options[:property]}_s:#{escaped_uri}" 
-        end
     end
   end
 end
