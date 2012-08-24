@@ -119,6 +119,10 @@ module ActiveFedora
         profile[key] = value.to_s
       end
     end
+    
+    def to_solr(solr_doc = Hash.new)
+      solr_doc
+    end
   end
   
   class DatastreamConcurrencyException < Exception # :nodoc:
