@@ -314,7 +314,7 @@ module ActiveFedora
       end
 
       def quote_for_solr(value)
-        '"' + value.gsub(/(:)/, '\\:').gsub(/"/, '\\"') + '"'
+        '"' + value.gsub(/(:)/, '\\:').gsub(/(\/)/, '\\/').gsub(/"/, '\\"') + '"'
       end
     
       # @deprecated
@@ -362,8 +362,7 @@ module ActiveFedora
       # Return the solr clause that queries for this type of class
       def search_model_clause
         unless self == ActiveFedora::Base
-          escaped_class_uri = SolrService.escape_uri_for_query(self.to_class_uri)
-          return "#{ActiveFedora::SolrService.solr_name(:has_model, :symbol)}:#{escaped_class_uri}"
+          return ActiveFedora::SolrService.construct_query_for_rel(:has_model, self.to_class_uri)
         end
       end
 

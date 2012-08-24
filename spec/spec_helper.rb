@@ -35,3 +35,7 @@ end
 def fixture(file)
   File.open(File.join(File.dirname(__FILE__), 'fixtures', file), 'rb')
 end
+
+def solr_uri(uri)
+  uri.gsub(/(:)/, "\\:").gsub(/(\/)/,"\\/")
+end

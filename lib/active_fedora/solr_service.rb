@@ -70,7 +70,11 @@ module ActiveFedora
     end
     
     def self.escape_uri_for_query(uri)
-      return uri.gsub(/(:)/, '\\:')
+      return uri.gsub(/(:)/, '\\:').gsub(/(\/)/, '\\/')
+    end
+    
+    def self.construct_query_for_rel(predicate, target_uri)
+      "#{solr_name(predicate, :symbol)}:#{escape_uri_for_query(target_uri)}"
     end
 
     def self.query(query, args={})
