@@ -6,6 +6,12 @@ describe ActiveFedora::Relationships do
     def increment_pid
       @@last_pid += 1    
     end
+    
+    before(:all) do
+      @part_of_sample = "is_part_of_s:#{solr_uri("info:fedora/test:sample_pid")}"
+      @constituent_of_sample = "is_constituent_of_s:#{solr_uri("info:fedora/test:sample_pid")}"
+      @is_part_query = "has_model_s:#{solr_uri("info:fedora/SpecialPart")}"
+    end
 
     before(:each) do
       class SpecNode
@@ -169,7 +175,7 @@ describe ActiveFedora::Relationships do
         local_node = SpecNode.new()
         local_node.expects(:pid).returns("test:sample_pid")
         SpecNode.expects(:relationships_desc).returns({:inbound=>{"parts"=>{:predicate=>:is_part_of}}}).at_least_once()
-        ActiveFedora::SolrService.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid", :rows=>25).returns(@sample_solr_hits)
+        ActiveFedora::SolrService.expects(:query).with(@part_of_sample, :rows=>25).returns(@sample_solr_hits)
         local_node.parts_ids.should == ["_PID1_", "_PID2_", "_PID3_"]
       end
       
@@ -182,7 +188,7 @@ describe ActiveFedora::Relationships do
         local_node.expects(:pid).returns("test:sample_pid")
         SpecNode.expects(:relationships_desc).returns({:inbound=>{"constituents"=>{:predicate=>:is_constituent_of}}}).at_least_once()
         instance = stub(:conn=>stub(:conn))
-        ActiveFedora::SolrService.expects(:query).with("is_constituent_of_s:info\\:fedora/test\\:sample_pid", :raw=>true, :rows=>101).returns(solr_result)
+        ActiveFedora::SolrService.expects(:query).with(@constituent_of_sample, :raw=>true, :rows=>101).returns(solr_result)
         local_node.constituents(:response_format => :solr, :rows=>101).should == solr_result
       end
       
@@ -192,7 +198,7 @@ describe ActiveFedora::Relationships do
         local_node = SpecNode.new
         local_node.expects(:pid).returns("test:sample_pid")
         SpecNode.expects(:relationships_desc).returns({:inbound=>{"parts"=>{:predicate=>:is_part_of}}}).at_least_once() 
-        ActiveFedora::SolrService.expects(:query).with("is_part_of_s:info\\:fedora/test\\:sample_pid", :rows=>25).returns([Hash["id"=>"pid1"], Hash["id"=>"pid2"]])
+        ActiveFedora::SolrService.expects(:query).with(@part_of_sample, :rows=>25).returns([Hash["id"=>"pid1"], Hash["id"=>"pid2"]])
         local_node.parts(:response_format => :id_array).should == ["pid1", "pid2"]
       end
       
@@ -320,7 +326,7 @@ describe ActiveFedora::Relationships do
         @local_node.expects(:ids_for_outbound).with(:has_part).returns(["mypid:1"])
         id_array_query = ActiveFedora::SolrService.construct_query_for_pids(["mypid:1"])
         solr_result = mock("solr result")
-        ActiveFedora::SolrService.expects(:query).with("#{id_array_query} OR (is_part_of_s:info\\:fedora/test\\:sample_pid)", :rows=>25).returns(solr_result)
+        ActiveFedora::SolrService.expects(:query).with("#{id_array_query} OR (#{@part_of_sample})", :rows=>25).returns(solr_result)
         @local_node.all_parts(:response_format=>:solr)
       end
 
@@ -747,8 +753,8 @@ describe ActiveFedora::Relationships do
     describe "bidirectional_relationship_query" do
       before do
         class MockBiNamedRelationshipQuery < SpecNode
-          register_relationship_desc(:self, "testing_query_outbound", :has_part, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
-          register_relationship_desc(:inbound, "testing_query_inbound", :is_part_of, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+          register_relationship_desc(:self, "testing_query_outbound", :has_part, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora\\/SpecialPart")
+          register_relationship_desc(:inbound, "testing_query_inbound", :is_part_of, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora\\/SpecialPart")
           create_bidirectional_relationship_name_methods("testing","testing_outbound")
           register_relationship_desc(:self, "testing_no_solr_fq_outbound", :has_part, :type=>SpecNode)
           register_relationship_desc(:inbound, "testing_no_solr_fq_inbound", :is_part_of, :type=>SpecNode)
@@ -774,10 +780,10 @@ describe ActiveFedora::Relationships do
         ids = ["changeme:1","changeme:2","changeme:3","changeme:4","changeme:5"]
         ids.each_with_index do |id,index|
           expected_string << " OR " if index > 0
-          expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialPart)"
+          expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND #{@is_part_query})"
         end
         expected_string << " OR "
-        expected_string << "(is_part_of_s:info\\:fedora/changeme\\:6 AND has_model_s:info\\:fedora/SpecialPart)"
+        expected_string << "(is_part_of_s:info\\:fedora\\/changeme\\:6 AND #{@is_part_query})"
         MockBiNamedRelationshipQuery.bidirectional_relationship_query("changeme:6","testing_query",ids).should == expected_string
       end
 
@@ -789,7 +795,7 @@ describe ActiveFedora::Relationships do
           expected_string << "id:" + id.gsub(/(:)/, '\\:')
         end
         expected_string << " OR "
-        expected_string << "(is_part_of_s:info\\:fedora/changeme\\:6)"
+        expected_string << "(is_part_of_s:info\\:fedora\\/changeme\\:6)"
         MockBiNamedRelationshipQuery.bidirectional_relationship_query("changeme:6","testing_no_solr_fq",ids).should == expected_string
       end
     end
@@ -797,7 +803,7 @@ describe ActiveFedora::Relationships do
     describe "inbound_relationship_query" do
       before do
         class MockInboundNamedRelationshipQuery < SpecNode
-          register_relationship_desc(:inbound, "testing_inbound_query", :is_part_of, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+          register_relationship_desc(:inbound, "testing_inbound_query", :is_part_of, :type=>SpecNode, :solr_fq=>"has_model_s:#{solr_uri("info:fedora/SpecialPart")}")
           register_relationship_desc(:inbound, "testing_inbound_no_solr_fq", :is_part_of, :type=>SpecNode)
         end
       end
@@ -806,11 +812,11 @@ describe ActiveFedora::Relationships do
       end
 
       it "should return a properly formatted query for a relationship that has a solr filter query defined" do
-        MockInboundNamedRelationshipQuery.inbound_relationship_query("changeme:1","testing_inbound_query").should == "is_part_of_s:info\\:fedora/changeme\\:1 AND has_model_s:info\\:fedora/SpecialPart"
+        MockInboundNamedRelationshipQuery.inbound_relationship_query("changeme:1","testing_inbound_query").should == "is_part_of_s:info\\:fedora\\/changeme\\:1 AND #{@is_part_query}"
       end
       
       it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
-        MockInboundNamedRelationshipQuery.inbound_relationship_query("changeme:1","testing_inbound_no_solr_fq").should == "is_part_of_s:info\\:fedora/changeme\\:1"
+        MockInboundNamedRelationshipQuery.inbound_relationship_query("changeme:1","testing_inbound_no_solr_fq").should == "is_part_of_s:info\\:fedora\\/changeme\\:1"
       end
     end
 
@@ -820,7 +826,7 @@ describe ActiveFedora::Relationships do
     describe "outbound_relationship_query" do
       before do
         class MockOutboundNamedRelationshipQuery < SpecNode
-          register_relationship_desc(:self, "testing_query", :is_part_of, :type=>SpecNode, :solr_fq=>"has_model_s:info\\:fedora/SpecialPart")
+          register_relationship_desc(:self, "testing_query", :is_part_of, :type=>SpecNode, :solr_fq=>"has_model_s:#{solr_uri("info:fedora/SpecialPart")}")
           register_relationship_desc(:self,"testing_no_solr_fq", :is_part_of, :type=>SpecNode)
         end
       end
@@ -833,7 +839,7 @@ describe ActiveFedora::Relationships do
         expected_string = ""
         ids.each_with_index do |id,index|
           expected_string << " OR " if index > 0
-          expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:info\\:fedora/SpecialPart)"
+          expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND has_model_s:#{solr_uri("info:fedora/SpecialPart")})"
         end
         MockOutboundNamedRelationshipQuery.outbound_relationship_query("testing_query",ids).should == expected_string
       end

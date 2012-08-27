@@ -623,12 +623,6 @@ describe ActiveFedora::Base do
         ngds.expects(:solrize_profile)
         mock1.expects(:solrize_profile)
         mock2.expects(:solrize_profile)
-        mock1.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-        mock1.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
-        mock2.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-        mock2.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
-        ngds.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-        ngds.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
         
         @test_object.expects(:datastreams).twice.returns({:ds1 => mock1, :ds2 => mock2, :ngds => ngds})
         @test_object.expects(:solrize_relationships)
@@ -637,7 +631,6 @@ describe ActiveFedora::Base do
       it "should call .to_solr on all RDFDatastreams, passing the resulting document to solr" do
         mock = mock("ds1", :to_solr)
         mock.expects(:solrize_profile)
-        mock.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(true)
         
         @test_object.expects(:datastreams).twice.returns({:ds1 => mock})
         @test_object.expects(:solrize_relationships)

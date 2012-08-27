@@ -160,6 +160,10 @@ module ActiveFedora
           @target = Array.new
         end
 
+        def construct_query
+          @counter_query = @finder_query = ActiveFedora::SolrService.construct_query_for_rel(@reflection.options[:property], @owner.internal_uri)
+        end
+
 
       private 
 

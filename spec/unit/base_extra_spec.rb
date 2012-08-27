@@ -87,19 +87,12 @@ describe ActiveFedora::Base do
       # Actually uses self.to_solr internally to gather solr info from all metadata datastreams
       mock1 = mock("ds1", :to_solr)
       mock2 = mock("ds2", :to_solr)
-      mock3 = mock("RELS-EXT")
+      mock3 = mock("RELS-EXT", :to_solr)
       
       mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
-      mock_datastreams.values.each do |ds| 
-        ds.stubs(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-        ds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
-      end
       mock1.expects(:solrize_profile).returns({})
       mock2.expects(:solrize_profile).returns({})
       mock3.expects(:solrize_profile).returns({})
-      mock1.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
-      mock2.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
-      mock3.expects(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(false)
       @test_object.expects(:datastreams).twice.returns(mock_datastreams)
       @test_object.expects(:solrize_relationships)
       @test_object.update_index
@@ -109,19 +102,12 @@ describe ActiveFedora::Base do
       # Actually uses self.to_solr internally to gather solr info from all metadata datastreams
       mock1 = mock("ds1", :to_solr)
       mock2 = mock("ds2", :to_solr)
-      mock3 = mock("RELS-EXT")
+      mock3 = mock("RELS-EXT", :to_solr)
       
       mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
-      mock_datastreams.values.each do |ds| 
-        ds.stubs(:kind_of?).with(ActiveFedora::MetadataDatastream).returns(false)
-        ds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
-      end
       mock1.expects(:solrize_profile).returns({})
       mock2.expects(:solrize_profile).returns({})
       mock3.expects(:solrize_profile).returns({})
-      mock1.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(true)
-      mock2.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(true)
-      mock3.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
       @test_object.expects(:datastreams).twice.returns(mock_datastreams)
       @test_object.expects(:solrize_relationships)
       @test_object.update_index
