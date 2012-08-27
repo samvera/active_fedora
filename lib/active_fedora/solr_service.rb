@@ -51,8 +51,10 @@ module ActiveFedora
     end
   
     def self.class_from_solr_document(hit)
-        model_value = hit[solr_name("has_model", :symbol)].first
-        Model.from_class_uri(model_value)
+        model_value = nil
+        hit[solr_name("has_model", :symbol)].each {|value| model_value ||= Model.from_class_uri(value)}
+        logger.warn "Could not find a model for #{hit["id"]}, defaulting to ActiveFedora::Base" unless model_value
+        model_value || ActiveFedora::Base
     end
     
     # Construct a solr query for a list of pids
