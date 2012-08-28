@@ -99,14 +99,18 @@ module ActiveFedora
       # @param [Hash] opts the options to create a message with.
       # @option opts [Integer] :rows when :all is passed, the maximum number of rows to load from solr
       # @option opts [Boolean] :cast when true, examine the model and cast it to the first known cModel
-      def find(args, opts={})
+      def find(args, opts={}, &block)
         return find_one(args, opts[:cast]) if args.class == String
+        return to_enum(:find, args, opts).to_a unless block_given?
+
         args = {} if args == :all
-        results = []
         find_each(args, opts) do |obj|
-           results << obj
+          yield obj
         end
-        results
+      end
+
+      def all(opts = {}, &block)
+        find(:all, opts, &block)
       end
 
 

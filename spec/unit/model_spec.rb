@@ -90,6 +90,13 @@ describe ActiveFedora::Model do
     end
   end
 
+  describe '#all' do
+    it "should pass everything through to .find" do
+      SpecModel::Basic.expects(:find).with(:all, {})
+      SpecModel::Basic.all
+    end
+  end
+
   describe '#find_each' do
     it "should query solr for all objects with :active_fedora_model_s of self.class" do
       mock_docs = mock('docs')
