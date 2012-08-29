@@ -416,9 +416,7 @@ module ActiveFedora
         if ds.respond_to?(:profile_from_hash) and (ds_prof = profile_hash['datastreams'][ds.dsid])
           ds.profile_from_hash(ds_prof)
         end
-        if ds.respond_to?(:from_solr)
-          ds.from_solr(solr_doc) if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream) || ( ds.kind_of?(ActiveFedora::RelsExtDatastream))
-        end
+        ds.from_solr(solr_doc) if ds.respond_to?(:from_solr)
       end
       obj.inner_object.freeze
       obj
