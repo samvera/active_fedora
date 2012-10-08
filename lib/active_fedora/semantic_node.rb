@@ -30,7 +30,7 @@ module ActiveFedora
     # @param object Either a string URI or an object that is a kind of ActiveFedora::Base 
     def add_relationship(predicate, target, literal=false)
       object_relations.add(predicate, target, literal)
-      rels_ext.dirty = true
+      rels_ext.dirty = true if object_relations.dirty
     end
 
     # Clears all relationships with the specified predicate
@@ -39,7 +39,7 @@ module ActiveFedora
       relationships(predicate).each do |target|
         object_relations.delete(predicate, target) 
       end
-      rels_ext.dirty = true
+      rels_ext.dirty = true if object_relations.dirty
     end
 
     # Checks that this object is matches the model class passed in.

@@ -52,6 +52,7 @@ describe ActiveFedora::Datastreams do
     before :all do
       class HasFile < ActiveFedora::Base
         has_file_datastream :name => "file_ds", :versionable => false
+        has_file_datastream :name => "file_ds2", :versionable => false, :autocreate => false
       end
     end
     after :all do
@@ -77,13 +78,23 @@ describe ActiveFedora::Datastreams do
     it "should create datastreams from the spec on new objects" do
       @has_file.file_ds.versionable.should be_false
       @has_file.file_ds.content = "blah blah blah"
+      @has_file.file_ds.changed?.should be_true
+      @has_file.file_ds2.changed?.should be_false # no autocreate
+      @has_file.file_ds2.new?.should be_true
       @has_file.save
       @has_file.file_ds.versionable.should be_false
-      HasFile.find(@has_file.pid).file_ds.versionable.should be_false
+      test_obj = HasFile.find(@has_file.pid)
+      test_obj.file_ds.versionable.should be_false
+      test_obj.dc.changed?.should be_false
+      test_obj.rels_ext.changed?.should be_false
+      test_obj.file_ds.changed?.should be_false
+      test_obj.file_ds2.changed?.should be_false
+      test_obj.file_ds2.new?.should be_true
     end
     
     it "should use ds_specs on migrated objects" do
       test_obj = HasFile.find(@base.pid)
+      test_obj.dc.changed?.should be_false
       test_obj.file_ds.versionable.should be_false
       test_obj.file_ds.new?.should be_true
       test_obj.file_ds.content = "blah blah blah"

@@ -46,6 +46,7 @@ module ActiveFedora
           end
         end
         tmpl.model.relationships_are_dirty = false
+        tmpl.changed_attributes.clear
         tmpl
       end
     end

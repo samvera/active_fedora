@@ -5,7 +5,8 @@ module ActiveFedora
     
     module DatastreamBootstrap
       def datastream_object_for dsid, ds_spec=nil
-        ds_spec ||= original_class.ds_specs[dsid] || {}
+        # ds_spec is nil when called from Rubydora for existing datastreams, so it should not be autocreated
+        ds_spec ||= (original_class.ds_specs[dsid] || {}).merge(:autocreate=>false)
         ds = ds_spec.fetch(:type, ActiveFedora::Datastream).new(self, dsid)
         attributes = {}
         attributes[:asOfDateTime] ||= asOfDateTime if self.respond_to? :asOfDateTime
@@ -20,7 +21,10 @@ module ActiveFedora
           attributes[:dsLocation]= ds_spec[:url]
         end
         ds.default_attributes = attributes
-        ds.datastream_will_change! if ds_spec[:autocreate]
+        # would rather not load profile here in the call to .new?, so trusting :autocreate attribute
+        if ds_spec[:autocreate] # and ds.new?
+          ds.datastream_will_change!
+        end
         ds
       end
     end    
