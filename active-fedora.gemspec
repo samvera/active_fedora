@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
   s.add_dependency('solrizer', '~>1.2.0')
   s.add_dependency("activeresource", '>= 3.0.0')
   s.add_dependency("activesupport", '>= 3.0.0')
+  s.add_dependency("builder", '~> 3.0.0')
   s.add_dependency("mediashelf-loggable")
   s.add_dependency("equivalent-xml")
   s.add_dependency("rubydora", '~>0.5.13')
