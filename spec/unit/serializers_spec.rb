@@ -18,12 +18,16 @@ describe ActiveFedora::Attributes::Serializers do
 
   describe "serialize to date" do
     it "should cast to date" do
-      subject.coerce_to_date("30/10/2010").should == Date.parse('2010-10-30') # ruby interprets this as DD/MM/YYYY
+      unless RUBY_VERSION < "1.9"
+        subject.coerce_to_date("30/10/2010").should == Date.parse('2010-10-30') # ruby interprets this as DD/MM/YYYY
+      end
       subject.coerce_to_date("2010-01-31").should == Date.parse('2010-01-31')
     end
     it "should handle invalid dates" do
       subject.coerce_to_date("0").should == nil #
-      subject.coerce_to_date("01/15/2010").should == nil # ruby interprets this as DD/MM/YYYY
+      unless RUBY_VERSION < "1.9"
+        subject.coerce_to_date("01/15/2010").should == nil # ruby interprets this as DD/MM/YYYY
+      end
       subject.coerce_to_date("2010-31-01").should == nil
     end
     it "should work with a blank string" do
