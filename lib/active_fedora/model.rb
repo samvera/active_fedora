@@ -218,8 +218,8 @@ module ActiveFedora
       # Find all ActiveFedora objects for this model that match arguments
       # passed in by querying Solr.  Like find_by_solr this returns a solr result.
       #
-      # query_fields   a hash of object field names and values to filter on (query_fields must be the solr_field_name for non-MetadataDatastream derived datastreams)
-      # opts           specifies options for the solr query
+      # @param query_fields [Hash] field names and values to filter on (query_fields must be the solr_field_name for non-MetadataDatastream derived datastreams)
+      # @param opts [Hash] specifies options for the solr query
       #
       #   options may include:
       # 

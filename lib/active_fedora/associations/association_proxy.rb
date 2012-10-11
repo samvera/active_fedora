@@ -35,7 +35,7 @@ module ActiveFedora
     # ActiveFedora::Associations::HasManyAssociation.
 
     class AssociationProxy
-      delegate :to_param, :to=>:target
+      #delegate :to_param, :to=>:target
       instance_methods.each { |m| undef_method m unless m.to_s =~ /^(?:nil\?|send|object_id|to_a)$|^__|^respond_to|proxy_/ }
 
       def initialize(owner, reflection)
