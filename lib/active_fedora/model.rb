@@ -6,6 +6,11 @@ module ActiveFedora
   # much in the way ActiveRecord does.  
   module Model 
     extend ActiveSupport::Concern
+
+    included do
+      class_attribute  :solr_query_handler
+      self.solr_query_handler = 'standard'
+    end
     
     # Takes a Fedora URI for a cModel and returns classname, namespace
     def self.classname_from_uri(uri)
@@ -131,7 +136,7 @@ module ActiveFedora
       
       def find_in_batches conditions, opts={}
         opts[:q] = create_query(conditions)
-        opts[:qt] = 'standard'
+        opts[:qt] = solr_query_handler
         #set default sort to created date ascending
         unless opts.include?(:sort)
           opts[:sort]=[ActiveFedora::SolrService.solr_name(:system_create,:date)+' asc'] 
