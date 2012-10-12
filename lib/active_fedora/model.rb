@@ -185,9 +185,9 @@ module ActiveFedora
       # Get a count of the number of objects from solr
       # Takes :conditions as an argument
       def count(args = {})
-        q = search_model_clause
-        q << " AND #{args[:conditions]}"  if args[:conditions]
-        SolrService.query(q, :raw=>true, :rows=>0)['response']['numFound']
+        q = search_model_clause ? [search_model_clause] : []
+        q << "#{args[:conditions]}"  if args[:conditions]
+        SolrService.query(q.join(' AND '), :raw=>true, :rows=>0)['response']['numFound']
       end
 
       #@deprecated

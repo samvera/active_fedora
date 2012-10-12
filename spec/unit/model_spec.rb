@@ -186,6 +186,12 @@ describe ActiveFedora::Model do
       ActiveFedora::SolrService.expects(:query).with("#{@model_query} AND foo:bar", :rows=>0, :raw=>true).returns(mock_result)
       SpecModel::Basic.count(:conditions=>'foo:bar').should == 7
     end
+
+    it "should count without a class specified" do
+      mock_result = {'response'=>{'numFound'=>7}}
+      ActiveFedora::SolrService.expects(:query).with("foo:bar", :rows=>0, :raw=>true).returns(mock_result)
+      ActiveFedora::Base.count(:conditions=>'foo:bar').should == 7
+    end
   end
   
   describe '#find_by_solr' do
