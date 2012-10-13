@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::SimpleDatastream do
 
   before do
-    @sample_xml =  "<fields><coverage>coverage1</coverage><coverage>coverage2</coverage><creation_date>fake-date</creation_date><mydate>fake-date</mydate><publisher>publisher1</publisher></fields>"
+    @sample_xml =  "<fields><coverage>coverage1</coverage><coverage>coverage2</coverage><creation_date>2012-01-15</creation_date><mydate>fake-date</mydate><publisher>publisher1</publisher></fields>"
     @test_ds = ActiveFedora::SimpleDatastream.from_xml(@sample_xml )
     @test_ds.field :coverage
     @test_ds.field :creation_date, :date
@@ -19,12 +19,18 @@ describe ActiveFedora::SimpleDatastream do
   describe '#new' do
     describe "model methods" do 
 
-      [:coverage, :creation_date, :mydate, :publisher].each do |el|
-        it "should respond to getters and setters for #{el} element" do
+      [:coverage, :mydate, :publisher].each do |el|
+        it "should respond to getters and setters for the string typed #{el} element" do
           value = "Hey #{el}"
           @test_ds.send("#{el.to_s}=", value) 
           @test_ds.send(el).first.should == value  #Looking at first because creator has 2 nodes
         end
+      end
+
+      it "should set date elements" do
+        d = Date.parse('1939-05-23')
+        @test_ds.creation_date = d
+        @test_ds.creation_date.first.should == d
       end
     end
   end
@@ -38,7 +44,7 @@ describe ActiveFedora::SimpleDatastream do
         <fields>
           <coverage>80%</coverage>
           <coverage>20%</coverage>
-          <creation_date>fake-date</creation_date>
+          <creation_date>2012-01-15</creation_date>
           <mydate>fake-date</mydate>
           <publisher>charlie</publisher>
         </fields>')
@@ -49,7 +55,7 @@ describe ActiveFedora::SimpleDatastream do
     it "should have title" do
       solr = @test_ds.to_solr
       solr["publisher_t"].should == ["publisher1"]
-      solr["creation_date_dt"].should == ["fake-date"]
+      solr["creation_date_dt"].should == ["2012-01-15"]
     end
   end
 

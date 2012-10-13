@@ -24,7 +24,7 @@ module ActiveFedora
     #   name 
     #
     #
-    # 'datatype' is a datatype, currently :string, :text and :date are supported.
+    # 'datatype' is a datatype, currently :string, :integer and :date are supported.
     #
     # opts is an options hash, which  will affect the generation of the xml representation of this datastream.
     #
@@ -49,7 +49,7 @@ module ActiveFedora
       self.class.class_fields << name.to_s
       # add term to terminology
       unless self.class.terminology.has_term?(name.to_sym)
-        term = OM::XML::Term.new(name.to_sym, {}, self.class.terminology)
+        term = OM::XML::Term.new(name.to_sym, {:type=>datatype}, self.class.terminology)
         self.class.terminology.add_term(term)
         term.generate_xpath_queries!
       end
@@ -81,7 +81,7 @@ module ActiveFedora
         if things 
           field_symbol = ActiveFedora::SolrService.solr_name(field_key, field_info[:type])
           things.val.each do |val|    
-            ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val )         
+            ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val.to_s )         
           end
         end
       end
