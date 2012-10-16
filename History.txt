@@ -1,3 +1,7 @@
+4.6.0
+Depend on solrizer 2.0.0 (for HYDRA-827 DO NOT index terms by default)
+
+
 4.5.1
 Removes .rvmrc and Gemfile.lock from version control (devs should deal with these themselves)
 HYDRA-837: ActiveFedora::Datastreams#has_file_datastream should support :versionable argument (re-opened)
