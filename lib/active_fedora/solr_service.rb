@@ -7,11 +7,10 @@ module ActiveFedora
     include Solrizer::FieldNameMapper
     include Loggable
     
-    load_mappings
-      
     attr_reader :conn
 
     def self.register(host=nil, args={})
+      load_mappings
       Thread.current[:solr_service]=self.new(host, args)
     end
 

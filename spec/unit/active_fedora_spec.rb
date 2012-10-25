@@ -81,6 +81,7 @@ describe ActiveFedora do
             
             File.stubs(:open).with(fedora_config_path).returns(fedora_config)
             File.stubs(:open).with(solr_config_path).returns(solr_config)
+            ActiveFedora::SolrService.stubs(:load_mappings) #For the solrizer solr_mappings.yml
 
 
 #            ActiveSupport::Deprecation.expects(:warn).with("Configuring fedora with \":url\" without :user and :password is no longer supported.")
