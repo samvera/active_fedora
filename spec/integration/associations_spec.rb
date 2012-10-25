@@ -262,6 +262,10 @@ describe ActiveFedora::Base do
         it "habtm should not set foreign relationships if :inverse_of is not specified" do
            @c.relationships(:is_member_of_collection).should == []
         end
+        it "should load the collections" do
+          reloaded = Book.find(@book.pid)
+          reloaded.collections.should == [@c]
+        end
       end
     end
   end
