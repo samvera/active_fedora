@@ -62,7 +62,7 @@ module ActiveFedora
     end
 
     def self.predicate_namespaces
-      predicate_config[:predicate_namespaces] || {}
+      predicate_config[:predicate_namespaces] ||= {}
     end
     
     def self.predicate_mappings

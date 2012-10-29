@@ -37,6 +37,7 @@ module ActiveFedora
       if (xml.nil?)
         ### maybe put the template here?
       else
+        ensure_predicates_exist!(xml)
         RDF::RDFXML::Reader.new(xml) do |reader|
           reader.each_statement do |statement|
             literal = statement.object.kind_of?(RDF::Literal)
@@ -60,6 +61,23 @@ module ActiveFedora
         end
       end
       xml
+    end
+
+    def self.ensure_predicates_exist!(xml)
+      statements = Nokogiri::XML(xml).xpath('//rdf:Description/*', 'rdf' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#')
+      predicates = statements.collect { |e| { :prefix => e.namespace.prefix, :uri => e.namespace.href, :predicate => e.name } }.uniq
+      predicates.each do |pred|
+        unless Predicates.predicate_mappings[pred[:uri]]
+          Predicates.predicate_mappings[pred[:uri]] = {}
+          if pred[:prefix] and not Predicates.predicate_namespaces.has_value?(pred[:uri])
+            Predicates.predicate_namespaces[pred[:prefix].to_sym] = pred[:uri]
+          end
+        end
+        ns = Predicates.predicate_mappings[pred[:uri]]
+        unless ns.invert[pred[:predicate]]
+          ns["#{pred[:prefix]}_#{pred[:predicate].underscore}".to_sym] = pred[:predicate]
+        end
+      end
     end
 
     def self.short_predicate(predicate)
