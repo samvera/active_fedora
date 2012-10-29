@@ -38,7 +38,7 @@ module Hydra
       t.topic_tag(:proxy=>[:subject, :topic])    
       # t.topic_tag(:index_as=>[:facetable],:path=>"subject", :default_content_path=>"topic")
       # This is a mods:name.  The underscore is purely to avoid namespace conflicts.
-      t.name_ {
+      t.name_(:index_as=>[:searchable]) {
         # this is a namepart
         t.namePart(:type=>:string, :label=>"generic name")
         # affiliations are great
@@ -58,8 +58,8 @@ module Hydra
       t.department(:proxy=>[:person,:description],:index_as=>[:facetable])
       t.organization(:ref=>:name, :attributes=>{:type=>"corporate"}, :index_as=>[:facetable])
       t.conference(:ref=>:name, :attributes=>{:type=>"conference"}, :index_as=>[:facetable])
-      t.role {
-        t.text(:path=>"roleTerm",:attributes=>{:type=>"text"})
+      t.role(:index_as=>[:searchable]) {
+        t.text(:path=>"roleTerm",:attributes=>{:type=>"text"}, :index_as=>[:searchable])
         t.code(:path=>"roleTerm",:attributes=>{:type=>"code"})
       }
       t.journal(:path=>'relatedItem', :attributes=>{:type=>"host"}) {
