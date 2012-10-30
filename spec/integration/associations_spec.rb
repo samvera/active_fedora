@@ -320,7 +320,54 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe "single direction habtm" do
+    before :all do
+      class LibraryBook < ActiveFedora::Base
+        has_and_belongs_to_many :pages, :property=>:is_part_of
+      end
+      class Page < ActiveFedora::Base
+        has_many :library_books, :property=>:is_part_of
+      end
+        
+    end
+    after :all do
+      Object.send(:remove_const, :LibraryBook)
+      Object.send(:remove_const, :Page)
+    end
 
+    describe "with a parent that has two children" do
+      before do
+        @book = LibraryBook.create
+        @p1 = Page.create()
+        @p2 = Page.create()
+        @book.pages = [@p1, @p2]
+        @book.save
+      end
 
+      it "should load the association stored in the parent" do
+        @reloaded_book = LibraryBook.find(@book.pid)
+        @reloaded_book.pages.should == [@p1, @p2]
+      end
 
+      it "should allow a parent to be deleted from the has_many association" do
+        @reloaded_book = LibraryBook.find(@book.pid)
+        @p1.library_books.delete(@reloaded_book)
+        @reloaded_book.save
+
+        @reloaded_book = LibraryBook.find(@book.pid)
+        @reloaded_book.pages.should == [@p2]
+      end
+
+      it "should allow a child to be deleted from the has_and_belongs_to_many association" do
+        pending "This isn't working and we ought to fix it"
+        @reloaded_book = LibraryBook.find(@book.pid)
+        @reloaded_book.pages.delete(@p1)
+        @reloaded_book.save
+        @p1.save
+
+        @reloaded_book = LibraryBook.find(@book.pid)
+        @reloaded_book.pages.should == [@p2]
+      end
+    end
+  end
 end
