@@ -80,7 +80,7 @@ module Hydra
           }
           t.start_page(:proxy=>[:pages, :start])
           t.end_page(:proxy=>[:pages, :end])
-          t.publication_date(:path=>"date")
+          t.publication_date(:path=>"date", :type=>:date, :index_as=>[:searchable])
         }
       }
       t.note

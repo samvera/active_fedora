@@ -16,6 +16,10 @@ describe ActiveFedora::NokogiriDatastream do
 
   end
 
+  after(:all) do
+    Object.send(:remove_const, :HydrangeaArticle2)
+  end
+
   describe '.term_values' do
     before do
       @pid = "hydrangea:fixture_mods_article1"
@@ -65,5 +69,19 @@ describe ActiveFedora::NokogiriDatastream do
       @test_object.datastreams["descMetadata"].dirty?.should be_false
       @test_object.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text).should == ["Funder"]
     end    
+  end
+
+
+  describe ".to_solr" do
+    before do
+      object = HydrangeaArticle2.new
+      object.descMetadata.journal.issue.publication_date = Date.parse('2012-11-02')
+      object.save!
+      @test_object = HydrangeaArticle2.find(object.pid)
+
+    end
+    it "should solrize terms with :type=>'date' to *_dt solr terms" do
+      @test_object.to_solr['mods_journal_issue_publication_date_dt'].should == ['2012-11-02']
+    end
   end
 end
