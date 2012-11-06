@@ -125,6 +125,25 @@ describe ActiveFedora::RelsExtDatastream do
       @test_obj.relationships.size.should == 5 
       @test_obj.ids_for_outbound("foo").should == ["foo:bar"]
     end
+    it "should automatically map un-mapped predicates" do
+      xml = <<-EOS
+        <rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+          <rdf:Description rdf:about='info:fedora/test:sample_pid'>
+            <isMemberOf rdf:resource='info:fedora/demo:10' xmlns='info:fedora/fedora-system:def/relations-external#'/>
+            <isPartOf rdf:resource='info:fedora/demo:11' xmlns='info:fedora/fedora-system:def/relations-external#'/>
+            <hasPart rdf:resource='info:fedora/demo:12' xmlns='info:fedora/fedora-system:def/relations-external#'/>
+            <hasModel rdf:resource='info:fedora/afmodel:OtherModel' xmlns='info:fedora/fedora-system:def/model#'/>
+            <hasModel rdf:resource='info:fedora/afmodel:SampleModel' xmlns='info:fedora/fedora-system:def/model#'/>
+            <missing:hasOtherRelationship rdf:resource='info:fedora/demo:13' xmlns:missing='http://example.org/ns/missing'/>
+          </rdf:Description>
+        </rdf:RDF>
+      EOS
+      model = ActiveFedora::Base.new
+      new_ds = ActiveFedora::RelsExtDatastream.new(nil, nil)
+      new_ds.model = model
+      lambda { ActiveFedora::RelsExtDatastream.from_xml(xml, new_ds) }.should_not raise_exception
+      new_ds.to_rels_ext.should =~ /missing:hasOtherRelationship/
+    end
     it "should handle un-mapped literals" do
       xml = "
                 <rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"  xmlns:oai=\"http://www.openarchives.org/OAI/2.0/\">
