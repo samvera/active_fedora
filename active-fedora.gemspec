@@ -16,8 +16,8 @@ Gem::Specification.new do |s|
   s.rubygems_version = %q{1.3.7}
 
   s.add_dependency('rsolr')
-  s.add_dependency('om', '~> 1.7.0')
-  s.add_dependency('solrizer', '~>2.0.0.rc4')
+  s.add_dependency('om', '~> 1.8.0.rc1')
+  s.add_dependency('solrizer', '~>2.0.0.rc5')
   s.add_dependency("activeresource", '>= 3.0.0')
   s.add_dependency("activesupport", '>= 3.0.0')
   s.add_dependency("builder", '~> 3.0.0')
