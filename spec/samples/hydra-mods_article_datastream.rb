@@ -89,7 +89,7 @@ module Hydra
       }
       t.publication_url(:proxy=>[:location,:url])
       t.peer_reviewed(:proxy=>[:journal,:origin_info,:issuance], :index_as=>[:facetable])
-      t.title(:proxy=>[:mods,:title_info, :main_title])
+      t.title(:proxy=>[:title_info, :main_title])
       t.journal_title(:proxy=>[:journal, :title_info, :main_title])
     end
     
