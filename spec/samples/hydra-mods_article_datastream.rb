@@ -80,7 +80,7 @@ module Hydra
           }
           t.start_page(:proxy=>[:pages, :start])
           t.end_page(:proxy=>[:pages, :end])
-          t.publication_date(:path=>"date")
+          t.publication_date(:path=>"date", :type=>:date, :index_as=>[:searchable])
         }
       }
       t.note
@@ -89,7 +89,7 @@ module Hydra
       }
       t.publication_url(:proxy=>[:location,:url])
       t.peer_reviewed(:proxy=>[:journal,:origin_info,:issuance], :index_as=>[:facetable])
-      t.title(:proxy=>[:mods,:title_info, :main_title])
+      t.title(:proxy=>[:title_info, :main_title])
       t.journal_title(:proxy=>[:journal, :title_info, :main_title])
     end
     

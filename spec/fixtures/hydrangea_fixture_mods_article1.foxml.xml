@@ -141,7 +141,7 @@ xsi:schemaLocation="info:fedora/fedora-system:def/foxml# http://www.fedora.info/
           </titleInfo>
           <originInfo>
               <publisher>PUBLISHER</publisher>
-              <dateIssued>DATE</dateIssued>
+              <dateIssued>FEB. 2007</dateIssued>
           </originInfo>
           <identifier type="issn">0013-8908</identifier>    
           <part>
