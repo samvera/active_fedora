@@ -273,7 +273,7 @@ describe ActiveFedora::NokogiriDatastream do
  
     it "should return correct values from solr_doc given different term pointers" do
       mock_term = mock("OM::XML::Term")
-      mock_term.stubs(:data_type).returns(:text)
+      mock_term.stubs(:type).returns(:text)
       mock_terminology = mock("OM::XML::Terminology")
       mock_terminology.stubs(:retrieve_term).returns(mock_term)
       ActiveFedora::NokogiriDatastream.stubs(:terminology).returns(mock_terminology)
