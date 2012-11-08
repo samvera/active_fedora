@@ -81,7 +81,7 @@ describe ActiveFedora::NokogiriDatastream do
 
     end
     it "should solrize terms with :type=>'date' to *_dt solr terms" do
-      @test_object.to_solr['mods_journal_issue_publication_date_dt'].should == ['2012-11-02T04:00:00Z']
+      @test_object.to_solr['mods_journal_issue_publication_date_dt'].should == [Date.parse('2012-11-02').to_time.utc.iso8601]
     end
   end
 end
