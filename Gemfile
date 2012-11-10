@@ -11,3 +11,4 @@ group :development, :test do
 end
 
 gem 'jruby-openssl', :platform=> :jruby
+gem 'nom-xml', :git => 'https://github.com/cbeer/nom.git'

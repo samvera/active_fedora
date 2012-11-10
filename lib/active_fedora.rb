@@ -43,6 +43,7 @@ module ActiveFedora #:nodoc:
     autoload :MetadataDatastream
     autoload :MetadataDatastreamHelper
     autoload :NokogiriDatastream
+    autoload :NomDatastream
     autoload :NtriplesRDFDatastream
     autoload :Property
     autoload :Persistence
