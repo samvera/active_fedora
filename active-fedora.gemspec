@@ -22,7 +22,6 @@ Gem::Specification.new do |s|
   s.add_dependency("activesupport", '>= 3.0.0')
   s.add_dependency("builder", '~> 3.0.0')
   s.add_dependency("mediashelf-loggable")
-  s.add_dependency("equivalent-xml")
   s.add_dependency("rubydora", '~>0.5.13')
   s.add_dependency("rdf")
   s.add_dependency("rdf-rdfxml", '~>0.3.8')
@@ -32,6 +31,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("rake")
   s.add_development_dependency("jettywrapper", ">=1.2.0")
   s.add_development_dependency("rspec", ">= 2.9.0")
+  s.add_development_dependency("equivalent-xml")
   s.add_development_dependency("mocha", "0.10.5")
   
   s.files         = `git ls-files`.split("\n")
