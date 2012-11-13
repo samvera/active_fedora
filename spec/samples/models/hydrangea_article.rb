@@ -1,6 +1,6 @@
 require "active-fedora"
-require 'samples/hydra-mods_article_datastream.rb'
-require 'samples/hydra-rights_metadata_datastream.rb'
+require_relative '../hydra-mods_article_datastream.rb'
+require_relative '../hydra-rights_metadata_datastream.rb'
 
 # This Model is used to load & index the hydrangea:fixture_mods_article1 fixture for use in tests.
 #
