@@ -741,23 +741,6 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
       end
     end
 
-    it "should expose solr for real." do
-      sinmock = mock('solr instance')
-      conmock = mock("solr conn")
-      sinmock.expects(:conn).returns(conmock)
-      conmock.expects(:query).with('pid: foobar', {}).returns({:baz=>:bif})
-      ActiveFedora::SolrService.expects(:instance).returns(sinmock)
-      FooHistory.solr_search("pid: foobar").should == {:baz=>:bif}
-    end
-    it "should expose solr for real. and pass args through" do
-      sinmock = mock('solr instance')
-      conmock = mock("solr conn")
-      sinmock.expects(:conn).returns(conmock)
-      conmock.expects(:query).with('pid: foobar', {:ding => :dang}).returns({:baz=>:bif})
-      ActiveFedora::SolrService.expects(:instance).returns(sinmock)
-      FooHistory.solr_search("pid: foobar", {:ding=>:dang}).should == {:baz=>:bif}
-    end
-
     describe '#relationships_by_name' do
       
       before do

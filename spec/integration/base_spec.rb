@@ -238,14 +238,6 @@ describe ActiveFedora::Base do
     end
   end
   
-  describe "#load_instance" do
-    it "should return an object loaded from fedora" do
-      ActiveSupport::Deprecation.expects(:warn).with("load_instance is deprecated.  Use find instead")
-      result = ActiveFedora::Base.load_instance(@test_object.pid)
-      result.should be_instance_of(ActiveFedora::Base)
-    end
-  end
-  
   describe ".datastreams" do
     it "should return a Hash of datastreams from fedora" do
       datastreams = @test_object.datastreams

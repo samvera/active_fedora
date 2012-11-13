@@ -194,21 +194,6 @@ describe ActiveFedora::Model do
     end
   end
   
-  describe '#find_by_solr' do
-    it "(:all) should query solr for all objects with :active_fedora_model_s of self.class and return a Solr result" do
-      mock_response = mock("SolrResponse")
-      ActiveFedora::SolrService.expects(:query).with('active_fedora_model_s:SpecModel\:\:Basic', {}).returns(mock_response)
-    
-      SpecModel::Basic.find_by_solr(:all).should equal(mock_response)
-    end
-    it "(String) should query solr for an object with the given id and return the Solr Result" do
-      mock_response = mock("SolrResponse")
-      ActiveFedora::SolrService.expects(:query).with('id:changeme\:30', {}).returns(mock_response)
-    
-      SpecModel::Basic.find_by_solr("changeme:30").should equal(mock_response)
-    end
-  end
-
   describe '#find_with_conditions' do
     it "should make a query to solr and return the results" do
       mock_result = stub('Result')
@@ -246,14 +231,6 @@ describe ActiveFedora::Model do
       mock_result = stub('Result')
       ActiveFedora::SolrService.expects(:query).with('chunky:monkey', {:sort => ['system_create_dt asc']}).returns(mock_result)
       ActiveFedora::Base.find_with_conditions('chunky:monkey').should == mock_result
-    end
-  end
-  
-  describe "load_instance" do
-    it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
-      ActiveSupport::Deprecation.expects(:warn).with("load_instance is deprecated.  Use find instead")
-      SpecModel::Basic.expects(:find).with("_PID_")
-      SpecModel::Basic.load_instance("_PID_")
     end
   end
   

@@ -47,16 +47,6 @@ describe ActiveFedora::Model do
     end
   end
 
-  
-  describe '#load_instance' do
-    it "should return an object of the given Model whose inner object is nil" do
-      ActiveSupport::Deprecation.expects(:warn).with("load_instance is deprecated.  Use find instead")
-      result = ModelIntegrationSpec::Basic.load_instance(@test_instance.pid)
-      result.class.should == ModelIntegrationSpec::Basic
-      result.inner_object.new?.should be_false
-    end
-  end
-  
   describe "#load_instance_from_solr" do
     describe "with a valid pid" do
       subject { ActiveFedora::Base.load_instance_from_solr('hydrangea:fixture_mods_article1') }

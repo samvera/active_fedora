@@ -65,22 +65,6 @@ module ActiveFedora
     #   fieldname_append(val)
     #     *appends val to the values array.
     module ClassMethods
-
-      # Retrieve the Fedora object with the given pid and deserialize it as an instance of the current model
-      # Note that you can actually pass a pid into this method, regardless of Fedora model type, and
-      # ActiveFedora will try to parse the results into the current type of self, which may or may not be what you want.
-      #
-      # @param [String] pid of the object to load
-      #
-      # @example this will return an instance of Book, even if the object hydra:dataset1 asserts that it is a Dataset
-      #   Book.load_instance("hydra:dataset1") 
-      def load_instance(pid)
-        ActiveSupport::Deprecation.warn("load_instance is deprecated.  Use find instead")
-        find(pid)
-      end
- 
-
-      
       # Returns a suitable uri object for :has_model
       # Should reverse Model#from_class_uri
       def to_class_uri(attrs = {})
@@ -175,135 +159,12 @@ module ActiveFedora
         !inner.new?
       end
 
-      #@deprecated
-      def find_model(pid)
-        ActiveSupport::Deprecation.warn("find_model is deprecated.  Use find instead")
-        find(pid)
-      end
-
-
       # Get a count of the number of objects from solr
       # Takes :conditions as an argument
       def count(args = {})
         q = search_model_clause ? [search_model_clause] : []
         q << "#{args[:conditions]}"  if args[:conditions]
         SolrService.query(q.join(' AND '), :raw=>true, :rows=>0)['response']['numFound']
-      end
-
-      #@deprecated
-      #Sends a query directly to SolrService
-      def solr_search(query, args={})
-        ActiveSupport::Deprecation.warn("solr_search is deprecated and will be removed in the next release. Use SolrService.query instead")
-        SolrService.instance.conn.query(query, args)
-      end
-
-      #  @deprecated
-      #  If query is :all, this method will query Solr for all instances
-      #  of self.type (based on active_fedora_model_s as indexed
-      #  by Solr). If the query is any other string, this method simply does
-      #  a pid based search (id:query). 
-      #
-      #  Note that this method does _not_ return ActiveFedora::Model 
-      #  objects, but rather an array of SolrResults.
-      #
-      #  Args is an options hash, which is passed into the SolrService 
-      #  connection instance.
-      def find_by_solr(query, args={})
-        ActiveSupport::Deprecation.warn("find_by_fields_by_solr is deprecated and will be removed in 5.0. Use find_with_conditions instead.")
-        if query == :all
-          escaped_class_name = self.name.gsub(/(:)/, '\\:')
-          SolrService.query("#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}", args) 
-        elsif query.class == String
-          escaped_id = query.gsub(/(:)/, '\\:')          
-          SolrService.query("#{SOLR_DOCUMENT_ID}:#{escaped_id}", args) 
-        end
-      end
-
-      # @deprecated
-      # Find all ActiveFedora objects for this model that match arguments
-      # passed in by querying Solr.  Like find_by_solr this returns a solr result.
-      #
-      # @param query_fields [Hash] field names and values to filter on (query_fields must be the solr_field_name for non-MetadataDatastream derived datastreams)
-      # @param opts [Hash] specifies options for the solr query
-      #
-      #   options may include:
-      # 
-      #   :sort             => array of hash with one hash per sort by field... defaults to [{system_create=>:descending}]
-      #   :default_field, :rows, :filter_queries, :debug_query,
-      #   :explain_other, :facets, :highlighting, :mlt,
-      #   :operator         => :or / :and
-      #   :start            => defaults to 0
-      #   :field_list       => array, defaults to ["*", "score"]
-      #
-      def find_by_fields_by_solr(query_fields,opts={})
-        ActiveSupport::Deprecation.warn("find_by_fields_by_solr is deprecated and will be removed in 5.0")
-        #create solr_args from fields passed in, needs to be comma separated list of form field1=value1,field2=value2,...
-        escaped_class_name = self.name.gsub(/(:)/, '\\:')
-        query = "#{ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol)}:#{escaped_class_name}" 
-        
-        query_fields.each_pair do |key,value|
-          unless value.nil?
-            solr_key = key
-            #convert to symbol if need be
-            key = key.to_sym if !class_fields.has_key?(key)&&class_fields.has_key?(key.to_sym)
-            #do necessary mapping with suffix in most cases, otherwise ignore as a solr field key that activefedora does not know about
-            if class_fields.has_key?(key) && class_fields[key].has_key?(:type)
-              type = class_fields[key][:type]
-              type = :string unless type.kind_of?(Symbol)
-              solr_key = ActiveFedora::SolrService.solr_name(key,type)
-            end
-            
-            escaped_value = value.gsub(/(:)/, '\\:')
-            #escaped_value = escaped_value.gsub(/ /, '\\ ')
-            key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
-            query = key.to_s.eql?(SOLR_DOCUMENT_ID) ? "#{query} AND #{key}:#{escaped_value}" : "#{query} AND #{solr_key}:#{escaped_value}"  
-          end
-        end
-      
-        query_opts = {}
-        opts.each do |key,value|
-          key = key.to_sym
-          query_opts[key] = value
-        end
-      
-        #set default sort to created date ascending
-        unless query_opts.include?(:sort)
-          query_opts.merge!({:sort=>[ActiveFedora::SolrService.solr_name(:system_create,:date)+' asc']}) 
-        else
-          #need to convert to solr names for all fields
-          sort_array =[]
-        
-          opts[:sort].collect do |sort|
-            sort_direction = 'ascending'
-            if sort.respond_to?(:keys)
-              key = sort.keys[0]
-              sort_direction = sort[key]
-            else
-              key = sort.to_s
-            end
-            sort_direction = sort_direction =~ /^desc/ ? 'desc' : 'asc'
-            field_name = key
-            
-            if key.to_s =~ /^system_create/
-              field_name = :system_create_date
-              key = :system_create
-            elsif key.to_s =~ /^system_mod/  
-              field_name = :system_modified_date
-              key = :system_modified
-            end
-         
-            solr_name = field_name 
-            if class_fields.include?(field_name.to_sym)
-              solr_name = ActiveFedora::SolrService.solr_name(key,class_fields[field_name.to_sym][:type])
-            end
-            sort_array.push("#{solr_name} #{sort_direction}")
-          end
-        
-          query_opts[:sort] = sort_array.join(",")
-        end
-
-        logger.debug "Querying solr for #{self.name} objects with query: '#{query}'"
-        SolrService.query(query, query_opts) 
       end
 
       # Returns a solr result matching the supplied conditions
@@ -326,16 +187,6 @@ module ActiveFedora
         '"' + value.gsub(/(:)/, '\\:').gsub(/(\/)/, '\\/').gsub(/"/, '\\"') + '"'
       end
     
-      # @deprecated
-      def class_fields
-        #create dummy object that is empty by passing in fake pid
-        object = self.new()#{:pid=>'FAKE'})
-        fields = object.fields
-        #reset id to nothing
-        fields[:id][:values] = []
-        return fields
-      end
-
       private 
 
       # Returns a solr query for the supplied conditions
