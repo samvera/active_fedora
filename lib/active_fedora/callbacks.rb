@@ -232,6 +232,9 @@ module ActiveFedora
       run_callbacks(:destroy) { super }
     end
 
+    def delete #:nodoc:
+      run_callbacks(:delete) { super }
+    end
 
   private
 
