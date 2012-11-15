@@ -1,4 +1,3 @@
-require 'rdf'
 module ActiveFedora
   module SemanticNode 
     extend ActiveSupport::Concern

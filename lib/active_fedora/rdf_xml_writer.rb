@@ -1,6 +1,5 @@
 require 'uri'
 require 'rdf/rdfxml'
-require 'rdf'
 
 module ActiveFedora
 # This class ensures that the RELS-EXT datastream is always serialized

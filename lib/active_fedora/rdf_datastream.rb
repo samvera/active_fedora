@@ -1,5 +1,3 @@
-require 'rdf'
-
 module ActiveFedora
   class RDFDatastream < Datastream
     # this enables a cleaner API for solr integration
