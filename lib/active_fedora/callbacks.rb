@@ -92,7 +92,7 @@ module ActiveFedora
   # The method reference callbacks work by specifying a protected or private method available in the object, like this:
   #
   #   class Topic < ActiveFedora::Base
-  #     before_delete :delete_parents
+  #     before_destroy :delete_parents
   #
   #     private
   #       def delete_parents
@@ -168,14 +168,14 @@ module ActiveFedora
   # pass a "method string", which will then be evaluated within the binding of the callback. Example:
   #
   #   class Topic < ActiveFedora::Base
-  #     before_delete 'self.class.delete_all "parent_id = #{id}"'
+  #     before_destroy 'self.class.delete_all "parent_id = #{id}"'
   #   end
   #
   # Notice that single quotes (') are used so the <tt>#{id}</tt> part isn't evaluated until the callback
   # is triggered. Also note that these inline callbacks can be stacked just like the regular ones:
   #
   #   class Topic < ActiveFedora::Base
-  #     before_delete 'self.class.delete_all "parent_id = #{id}"',
+  #     before_destroy 'self.class.delete_all "parent_id = #{id}"',
   #                    'puts "Evaluated after parents are deleted"'
   #   end
   #
@@ -217,7 +217,7 @@ module ActiveFedora
       :after_initialize, :after_find, :before_validation, :after_validation,
       :before_save, :around_save, :after_save, :before_create, :around_create,
       :after_create, :before_update, :around_update, :after_update,
-      :before_delete, :around_delete, :after_delete
+      :before_destroy, :around_destroy, :after_destroy
     ]
 
     included do
@@ -225,13 +225,12 @@ module ActiveFedora
       include ActiveModel::Validations::Callbacks
 
       define_model_callbacks :initialize, :find, :only => :after
-      define_model_callbacks :save, :create, :update, :delete
+      define_model_callbacks :save, :create, :update, :destroy
     end
 
     def destroy #:nodoc:
       run_callbacks(:destroy) { super }
     end
-
 
   private
 
