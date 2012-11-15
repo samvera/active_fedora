@@ -44,9 +44,7 @@ require 'rspec/core/rake_task'
   end
 
   desc "Loads or refreshes the fixtures needed to run the tests"
-  task :load_fixtures => :environment do
-   # ActiveFedora.init unless Thread.current[:repo]
-    
+  task :fixtures => :environment do
     ENV["pid"] = "hydrangea:fixture_mods_article1"
     Rake::Task["repo:refresh"].invoke
     ENV["pid"] = nil
@@ -82,7 +80,7 @@ task :coverage do
   ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
   ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
 
-  Rake::Task["active_fedora:load_fixtures"].invoke
+  Rake::Task["active_fedora:fixtures"].invoke
   Rake::Task["active_fedora:rspec"].invoke
 end
 
