@@ -19,7 +19,7 @@ describe ActiveFedora::Base do
       after_update :a_update
       after_find :a_find
 
-      before_delete :do_stuff
+      before_destroy :do_stuff
 
       def do_stuff
         :noop
@@ -30,7 +30,7 @@ describe ActiveFedora::Base do
     Object.send(:remove_const, :CallbackStub)
   end
 
-  it "Should have after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_delete" do
+  it "Should have after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
     CallbackStub.any_instance.expects(:a_init).twice
     CallbackStub.any_instance.expects :b_create
     CallbackStub.any_instance.expects :a_create
@@ -46,6 +46,6 @@ describe ActiveFedora::Base do
     cb2 = CallbackStub.find(cb.pid)
     cb2.save
 
-    cb2.delete
+    cb2.destroy
   end
 end

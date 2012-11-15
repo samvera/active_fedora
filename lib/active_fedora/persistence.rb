@@ -66,6 +66,10 @@ module ActiveFedora
       end
     end
 
+    def destroy
+      delete
+    end
+
     # Updates Solr index with self.
     def update_index
       if defined?( Solrizer::Fedora::Solrizer ) 
