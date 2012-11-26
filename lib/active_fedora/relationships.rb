@@ -488,6 +488,7 @@ module ActiveFedora
       #  similar_audio_append: Add an AudioRecord object to the similar_audio relationship
       #  similar_audio_remove: Remove an AudioRecord from the similar_audio relationship
       def has_relationship(name, predicate, opts = {})
+        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#has_relationship has been deprecated use ActiveFedora::Base.has_many or ActiveFedora::Base.belongs_to")
         opts = {:singular => nil, :inbound => false}.merge(opts)
         if opts[:inbound] == true
           register_relationship_desc(:inbound, name, predicate, opts)
@@ -536,6 +537,7 @@ module ActiveFedora
       # The third method combines the results of both and handles generating appropriate 
       # solr queries where necessary.
       def has_bidirectional_relationship(name, outbound_predicate, inbound_predicate, opts={})
+        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#has_bidirectional_relationship has been deprecated, reference ActiveFedora::Base.has_and_belongs_to_many")
         create_bidirectional_relationship_finders(name, outbound_predicate, inbound_predicate, opts)
       end
       
