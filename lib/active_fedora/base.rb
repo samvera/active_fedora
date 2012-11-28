@@ -11,7 +11,7 @@ module ActiveFedora
   #
   # =The Basics
   #   class Oralhistory < ActiveFedora::Base
-  #     has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|
+  #     has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream do |m|
   #       m.field "narrator",  :string
   #       m.field "narrator",  :text
   #     end
@@ -84,7 +84,7 @@ module ActiveFedora
     # example:
     #
     #   class Post < ActiveFedora::Base
-    #     has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream
+    #     has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream
     #   end
     #
     #   post = Post.allocate
@@ -249,14 +249,14 @@ module ActiveFedora
     end
 
     #Return a hash of all available metadata fields for all 
-    #ActiveFedora::MetadataDatastream datastreams, as well as 
+    #ActiveFedora::SimpleDatastream datastreams, as well as 
     #system_create_date, system_modified_date, active_fedora_model_field, 
     #and the object id.
     def fields
     # TODO this can likely be removed once find_by_fields_by_solr is removed
       fields = {:id => {:values => [pid]}, :system_create_date => {:values => [self.create_date], :type=>:date}, :system_modified_date => {:values => [self.modified_date], :type=>:date}, :active_fedora_model => {:values => [self.class.inspect], :type=>:symbol}}
       datastreams.values.each do |ds|        
-        fields.merge!(ds.fields) if [ActiveFedora::MetadataDatastream, ActiveFedora::SimpleDatastream, ActiveFedora::QualifiedDublinCoreDatastream].include?(ds.class)
+        fields.merge!(ds.fields) if [ActiveFedora::SimpleDatastream, ActiveFedora::QualifiedDublinCoreDatastream].include?(ds.class)
       end
       return fields
     end

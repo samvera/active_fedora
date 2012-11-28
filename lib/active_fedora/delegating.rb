@@ -58,7 +58,7 @@ module ActiveFedora
       def create_delegate_accessor(field, args)
         define_method field do
           ds = self.send(args[:to])
-          val = if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::RDFDatastream)
+          val = if ds.kind_of?(ActiveFedora::RDFDatastream)
                   ds.send(:get_values, field)
                 else
                   terminology = args[:at] || [field]
@@ -71,7 +71,7 @@ module ActiveFedora
       def create_delegate_setter(field, args)
         define_method "#{field}=".to_sym do |v|
           ds = self.send(args[:to])
-          if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::RDFDatastream)
+          if ds.kind_of?(ActiveFedora::RDFDatastream)
             ds.send(:set_value, field, v)
           else
             terminology = args[:at] || [field]

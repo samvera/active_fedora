@@ -2,7 +2,7 @@ require "nokogiri"
 require  "om"
 require "solrizer/xml"
 
-#this class represents a MetadataDatastream, a special case of ActiveFedora::Datastream
+#this class represents a xml metadata datastream
 module ActiveFedora
   class NokogiriDatastream < Datastream
       
@@ -10,8 +10,6 @@ module ActiveFedora
     include OM::XML::Document
     include Solrizer::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
     
-    # extend(OM::XML::Container::ClassMethods)
-
     alias_method(:om_term_values, :term_values) unless method_defined?(:om_term_values)
     alias_method(:om_update_values, :update_values) unless method_defined?(:om_update_values)
     
@@ -23,7 +21,7 @@ module ActiveFedora
 
     # Create an instance of this class based on xml content
     # @param [String, File, Nokogiri::XML::Node] xml the xml content to build from
-    # @param [ActiveFedora::MetadataDatastream] tmpl the Datastream object that you are building @default a new instance of this class
+    # @param [ActiveFedora::NokogiriDatastream] tmpl the Datastream object that you are building @default a new instance of this class
     # Careful! If you call this from a constructor, be sure to provide something 'ie. self' as the @tmpl. Otherwise, you will get an infinite loop!
     def self.from_xml(xml, tmpl=nil)
       tmpl = self.new(nil, nil) if tmpl.nil?  ## This path is used only for unit testing (e.g. MarpaDCDatastream.from_xml(fixture("data.xml")) )

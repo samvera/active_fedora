@@ -4,7 +4,7 @@ require 'active-fedora'
 require "rexml/document"
 
 class MockMetaHelperSolr < ActiveFedora::Base
-  has_metadata :name => "properties", :type => ActiveFedora::MetadataDatastream do |m|
+  has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream do |m|
     m.field "holding_id", :string
   end
   

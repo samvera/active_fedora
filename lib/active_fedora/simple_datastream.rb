@@ -29,13 +29,12 @@ module ActiveFedora
     # opts is an options hash, which  will affect the generation of the xml representation of this datastream.
     #
     # Currently supported modifiers: 
-    # For +QualifiedDublinCorDatastreams+:
+    # For +SimpleDatastream+:
     #   :element_attrs =>{:foo=>:bar} -  hash of xml element attributes
     #   :xml_node => :nodename  - The xml node to be used to represent this object (in dcterms namespace)
     #   :encoding=>foo, or encodings_scheme  - causes an xsi:type attribute to be set to 'foo'
     #   :multiple=>true -  mark this field as a multivalue field (on by default)
     #
-    #At some point, these modifiers will be ported up to work for any +ActiveFedora::MetadataDatastream+.
     #
     #There is quite a good example of this class in use in spec/examples/oral_history.rb
     #

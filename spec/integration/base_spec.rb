@@ -32,7 +32,7 @@ describe "A base object with metadata" do
     describe "and has been changed" do
       before do
         @release.foo.person = 'frank'
-        @release.save
+        @release.save!
       end
       it "should save the datastream." do
         MockAFBaseRelationship.find(@release.pid).foo.person.should == ['frank']

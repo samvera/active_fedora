@@ -1,6 +1,5 @@
 require 'solrizer/field_name_mapper'
 
-#this class represents a MetadataDatastream, a special case of ActiveFedora::Datastream
 module ActiveFedora::MetadataDatastreamHelper 
   
   attr_accessor :fields, :xml_loaded

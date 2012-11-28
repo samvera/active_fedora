@@ -22,7 +22,7 @@ module ActiveFedora
     def serialize_datastreams
       datastreams.each {|k, ds| ds.serialize! }
       self.metadata_is_dirty = datastreams.any? do |k,ds| 
-        ds.changed? && (ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper) || ds.instance_of?(ActiveFedora::RelsExtDatastream) || ds.kind_of?(ActiveFedora::RDFDatastream))
+        ds.changed? && (ds.kind_of?(ActiveFedora::NokogiriDatastream) || ds.instance_of?(ActiveFedora::RelsExtDatastream) || ds.kind_of?(ActiveFedora::RDFDatastream))
       end
      true
     end
@@ -112,25 +112,25 @@ module ActiveFedora
       add_datastream(datastream)
     end
     
-    #return all datastreams of type ActiveFedora::MetadataDatastream
+    #return all datastreams of type ActiveFedora::RDFDatastream or ActiveFedora::NokogiriDatastream
     def metadata_streams
       results = []
       datastreams.each_value do |ds|
-        if ds.kind_of?(ActiveFedora::MetadataDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream)
+        if ds.kind_of?(ActiveFedora::RDFDatastream) || ds.kind_of?(ActiveFedora::NokogiriDatastream)
           results << ds
         end
       end
       return results
     end
     
-    #return all datastreams not of type ActiveFedora::MetadataDatastream 
+    #return all datastreams of type ActiveFedora::RDFDatastream or ActiveFedora::NokogiriDatastream
     #(that aren't Dublin Core or RELS-EXT streams either)
     #@deprecated
     def file_streams
       ActiveSupport::Deprecation.warn("ActiveFedora::Base#file_streams has been deprecated and will be removed in 5.0")
       results = []
       datastreams.each_value do |ds|
-        if !ds.kind_of?(ActiveFedora::MetadataDatastream) && !ds.kind_of?(ActiveFedora::NokogiriDatastream)
+        if !ds.kind_of?(ActiveFedora::RDFDatastream) && !ds.kind_of?(ActiveFedora::NokogiriDatastream)
           dsid = ds.dsid
           if dsid != "DC" && dsid != "RELS-EXT"
             results << ds
@@ -156,8 +156,7 @@ module ActiveFedora
     # Return the Dublin Core (DC) Datastream. You can also get at this via 
     # the +datastreams["DC"]+.
     def dc
-      #dc = REXML::Document.new(datastreams["DC"].content)
-      return  datastreams["DC"] 
+      return datastreams["DC"] 
     end
 
     # Returns the RELS-EXT Datastream
