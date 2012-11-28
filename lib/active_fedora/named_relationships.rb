@@ -1,6 +1,9 @@
 module ActiveFedora
   module NamedRelationships
     extend ActiveSupport::Concern
+    extend Deprecation
+    self.deprecation_horizon = 'active-fedora 6.0'
+
     included do
       class_attribute :class_named_relationships_desc
       self.class_named_relationships_desc = {}
@@ -91,5 +94,6 @@ module ActiveFedora
       end
 
     
+      deprecation_deprecate :named_predicate_exists_with_different_name?, :named_relationships_desc, :register_named_subject, :register_named_relationship, :create_named_relationship_methods, :create_bidirectional_named_relationship_methods
   end
 end

@@ -412,7 +412,6 @@ module ActiveFedora
     include Associations
     include NestedAttributes
     include Reflection
-    include NamedRelationships ##TODO don't include by default
   end
 
 end
