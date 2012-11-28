@@ -1,11 +1,15 @@
 module ActiveFedora
   module Relationships
     extend ActiveSupport::Concern
-
+    extend Deprecation
+    self.deprecation_horizon = 'active-fedora 6.0'
+    
 
     # Return array of objects for a given relationship name
     # @param [String] Name of relationship to find
     # @return [Array] Returns array of objects linked via the relationship name given
+    #
+    # @deprecated find_relationship_by_name will be removed in active-fedora 6.0
     def find_relationship_by_name(name)
       rels = nil
       if inbound_relationship_names.include?(name)
@@ -127,7 +131,6 @@ module ActiveFedora
       raise "Assertion failure: #{name}: #{object.pid} does not have model #{model_class}, it has model #{relationships[:self][:has_model]}" unless object.conforms_to?(model_class)
     end
     
-
 
 
     # Returns a Class symbol for the given string for the class name
@@ -262,6 +265,7 @@ module ActiveFedora
       end
     end
 
+    deprecation_deprecate :find_relationship_by_name, :inbound_relationship_names, :inbound_relationships_by_name, :relationship_query, :relationships_by_name, :relationships_by_name_from_class, :assert_conforms_to, :class_from_name, :outbound_relationship_names, :is_relationship_name?, :load_inbound_relationship, :load_bidirectional, :load_outbound_relationship, :relationship_has_solr_filter_query?, :add_relationship_by_name, :remove_relationship_by_name
 
     module ClassMethods
       # Tests if the relationship name passed is in bidirectional
@@ -487,8 +491,10 @@ module ActiveFedora
       #  similar_audio_query: Return solr query that can be used to retrieve related objects as solr documents
       #  similar_audio_append: Add an AudioRecord object to the similar_audio relationship
       #  similar_audio_remove: Remove an AudioRecord from the similar_audio relationship
+      #
+      # @deprecated use ActiveFedora::Base.has_many or ActiveFedora::Base.belongs_to. has_relationship will be removed in active-fedora 6.0
       def has_relationship(name, predicate, opts = {})
-        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#has_relationship has been deprecated use ActiveFedora::Base.has_many or ActiveFedora::Base.belongs_to")
+        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#has_relationship has been deprecated use ActiveFedora::Base.has_many or ActiveFedora::Base.belongs_to. has_relationship will be removed in active-fedora 6.0.")
         opts = {:singular => nil, :inbound => false}.merge(opts)
         if opts[:inbound] == true
           register_relationship_desc(:inbound, name, predicate, opts)
@@ -513,6 +519,8 @@ module ActiveFedora
       #
       #   Methods audio_records_append and audio_records_remove are created.
       #   Boths methods take an object that is kind_of? ActiveFedora::Base as a parameter
+      #
+      # @deprecated create_relationship_name_methods will be removed in active-fedora 6.0
       def create_relationship_name_methods(name)
         append_method_name = "#{name.to_s.downcase}_append"
         remove_method_name = "#{name.to_s.downcase}_remove"
@@ -536,8 +544,10 @@ module ActiveFedora
       # create_inbound_relationship_finders and create_outbound_relationship_finders
       # The third method combines the results of both and handles generating appropriate 
       # solr queries where necessary.
+      #
+      # @deprecated use ActiveFedora::Base.has_and_belongs_to_many. has_bidirectional_relationship will be removed in active-fedora 6.0
       def has_bidirectional_relationship(name, outbound_predicate, inbound_predicate, opts={})
-        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#has_bidirectional_relationship has been deprecated, reference ActiveFedora::Base.has_and_belongs_to_many")
+        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#has_bidirectional_relationship has been deprecated, reference ActiveFedora::Base.has_and_belongs_to_many. has_bidirectional_relationship will be removed in active-fedora 6.0.")
         create_bidirectional_relationship_finders(name, outbound_predicate, inbound_predicate, opts)
       end
       
@@ -584,7 +594,9 @@ module ActiveFedora
       # @param [Symbol] outbound_predicate Predicate used in outbound relationships
       # @param [Symbol] inbound_predicate Predicate used in inbound relationships
       # @param [Hash] opts (optional)
+      # @deprecated create_bidirectional_relationship_finders will be removed in active-fedora 6.0
       def create_bidirectional_relationship_finders(name, outbound_predicate, inbound_predicate, opts={})
+        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#create_bidirectional_relationship_finders has been deprecated and will be removed in active-fedora 6.0.")
         inbound_method_name = name.to_s+"_inbound"
         outbound_method_name = name.to_s+"_outbound"
         has_relationship(outbound_method_name, outbound_predicate, opts)
@@ -619,7 +631,10 @@ module ActiveFedora
       #    Method members_outbound_append and members_outbound_remove added
       #    This method will create members_append which does same thing as members_outbound_append
       #    and will create members_remove which does same thing as members_outbound_remove
+      #
+      # @deprecated create_bidirectional_relationship_name_methods will be removed in active-fedora 6.0
       def create_bidirectional_relationship_name_methods(name,outbound_name)
+        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#create_bidirectional_relationship_name_methods has been deprecated and will be removed in active-fedora 6.0.")
         append_method_name = "#{name.to_s.downcase}_append"
         remove_method_name = "#{name.to_s.downcase}_remove"
         self.send(:define_method,:"#{append_method_name}") {|object| add_relationship_by_name(outbound_name,object)}
