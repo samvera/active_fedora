@@ -113,23 +113,6 @@ module ActiveFedora
       return results
     end
     
-    #return all datastreams of type ActiveFedora::RDFDatastream or ActiveFedora::NokogiriDatastream
-    #(that aren't Dublin Core or RELS-EXT streams either)
-    #@deprecated
-    def file_streams
-      ActiveSupport::Deprecation.warn("ActiveFedora::Base#file_streams has been deprecated and will be removed in 5.0")
-      results = []
-      datastreams.each_value do |ds|
-        if !ds.kind_of?(ActiveFedora::RDFDatastream) && !ds.kind_of?(ActiveFedora::NokogiriDatastream)
-          dsid = ds.dsid
-          if dsid != "DC" && dsid != "RELS-EXT"
-            results << ds
-          end
-        end
-      end
-      return results
-    end
-    
     # return a valid dsid that is not currently in use.  Uses a prefix (default "DS") and an auto-incrementing integer
     # Example: if there are already datastreams with IDs DS1 and DS2, this method will return DS3.  If you specify FOO as the prefix, it will return FOO1.
     def generate_dsid(prefix="DS")

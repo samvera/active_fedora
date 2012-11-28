@@ -35,43 +35,6 @@ describe ActiveFedora::Base do
     end
   end
   
-  describe ".file_streams" do
-    #TODO move to datastreams_spec
-    it "should return all of the datastreams from the object that are kinds of SimpleDatastreams" do
-      mock_fds1 = mock("file ds", :dsid => "file1")
-      mock_fds1.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-      mock_fds1.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
-      mock_fds2 = mock("file ds", :dsid => "file2")
-      mock_fds2.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-      mock_fds2.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
-      mock_mds = mock("metadata ds")
-      mock_mds.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-      mock_mds.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
-      @test_object.expects(:datastreams).returns({:foo => mock_fds1, :bar=> mock_fds2, :baz => mock_mds})
-      
-      result = @test_object.file_streams
-      result.length.should == 2
-      result.should include(mock_fds1)
-      result.should include(mock_fds2)
-
-    end
-    it "should skip DC and RELS-EXT datastreams" do
-      mock_fds1 = mock("file ds", :dsid => "foo")
-      mock_fds1.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-      mock_fds1.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false)
-      dc = mock("DC")
-      dc.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-      dc.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
-      rels_ext = mock("RELS-EXT")
-      rels_ext.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-      rels_ext.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
-      @test_object.expects(:datastreams).returns({:foo => mock_fds1, :dc => dc, :rels_ext => rels_ext})
-      
-      result = @test_object.file_streams
-      result.length.should == 1
-      result.should include(mock_fds1)
-    end
-  end
 
   describe ".update_index" do
     before do

@@ -273,31 +273,6 @@ describe ActiveFedora::Base do
     end
   end
   
-  describe ".file_streams" do
-    it "should return all of the datastreams from the object that are kinds of NokogiriDatastream" do
-      fds1 = ActiveFedora::Datastream.new(@test_object.inner_object, "fds1")
-      fds2 = ActiveFedora::Datastream.new(@test_object.inner_object, "fds2")
-      mds = ActiveFedora::SimpleDatastream.new(@test_object.inner_object, "mds")
-      @test_object.add_datastream(fds1)  
-      @test_object.add_datastream(fds2)
-      @test_object.add_datastream(mds)    
-      
-      result = @test_object.file_streams
-      result.length.should == 2
-      result.should include(fds1)
-      result.should include(fds2)
-    end
-    it "should skip DC and RELS-EXT datastreams" do
-      fds1 = ActiveFedora::Datastream.new(@test_object.inner_object,"fds1")
-      dc = ActiveFedora::Datastream.new(@test_object.inner_object, "DC")
-      rels_ext = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
-      @test_object.add_datastream(fds1)  
-      @test_object.add_datastream(dc)
-      @test_object.add_datastream(rels_ext)    
-      @test_object.file_streams.should  == [fds1]
-    end
-  end
-  
   describe ".dc" do
     it "should expose the DC datastream" do
       dc = @test_object.dc
