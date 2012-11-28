@@ -42,16 +42,11 @@ module ActiveFedora
       end
     end
 
-
     # Has this object been saved?
     def new_object?
       inner_object.new?
     end
     
-    def new_object=(bool)
-      ActiveSupport::Deprecation.warn("ActiveFedora::Base.new_object= has been deprecated and nolonger has any effect. Will be removed in 5.0")
-    end
-
     ## Required by associations
     def new_record?
       self.new_object?
@@ -60,7 +55,6 @@ module ActiveFedora
     def persisted?
       !new_object?
     end
-
 
     # Constructor.  You may supply a custom +:pid+, or we call the Fedora Rest API for the
     # next available Fedora pid, and mark as new object.
