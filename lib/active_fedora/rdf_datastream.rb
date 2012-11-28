@@ -263,6 +263,7 @@ module ActiveFedora
       graph.delete(predicate)
       args = [args] unless args.respond_to? :each
       args.each do |arg|
+        arg = arg.to_s if arg.kind_of? RDF::Literal
         graph.add(predicate, arg, true) unless arg.empty?
       end
       graph.dirty = true
