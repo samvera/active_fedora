@@ -207,37 +207,6 @@ describe ActiveFedora::Base do
       end
     end
 
-
-
-    describe ".fields" do
-      it "should provide fields" do
-        @test_object.should respond_to(:fields)
-      end
-      it "should add pid, system_create_date and system_modified_date from object attributes" do
-        cdate = "2008-07-02T05:09:42.015Z"
-        mdate = "2009-07-07T23:37:18.991Z"
-        @test_object.expects(:create_date).returns(cdate)
-        @test_object.expects(:modified_date).returns(mdate)
-        fields = @test_object.fields
-        fields[:system_create_date][:values].should eql([cdate])
-        fields[:system_modified_date][:values].should eql([mdate])
-        fields[:id][:values].should eql([@test_object.pid])
-      end
-      
-      it "should add self.class as the :active_fedora_model" do
-        fields = @test_object.fields
-        fields[:active_fedora_model][:values].should eql([@test_object.class.inspect])
-      end
-      
-      it "should call .fields on all SimpleDatastreams and return the resulting document" do
-        mock1 = mock("ds1", :fields => {}, :class=>ActiveFedora::SimpleDatastream)
-        mock2 = mock("ds2", :fields => {}, :class=>ActiveFedora::SimpleDatastream)
-
-        @test_object.expects(:datastreams).returns({:ds1 => mock1, :ds2 => mock2})
-        @test_object.fields
-      end
-    end
-
     it 'should provide #find' do
       ActiveFedora::Base.should respond_to(:find)
     end
@@ -534,30 +503,6 @@ describe ActiveFedora::Base do
       end
     end
 
-    describe ".to_xml" do
-      it "should provide .to_xml" do
-        @test_object.should respond_to(:to_xml)
-      end
-
-      it "should add pid, system_create_date and system_modified_date from object attributes" do
-        @test_object.expects(:create_date).returns("2012-03-06T03:12:02Z")
-        @test_object.expects(:modified_date).returns("2012-03-07T03:12:02Z")
-        solr_doc = @test_object.to_solr
-        solr_doc["system_create_dt"].should eql("2012-03-06T03:12:02Z")
-        solr_doc["system_modified_dt"].should eql("2012-03-07T03:12:02Z")
-        solr_doc[:id].should eql("#{@test_object.pid}")
-      end
-
-      it "should call .to_xml on all SimpleDatastreams and return the resulting document" do
-        ds1 = ActiveFedora::SimpleDatastream.new(@test_object.inner_object, 'ds1')
-        ds2 = ActiveFedora::SimpleDatastream.new(@test_object.inner_object, 'ds2')
-        [ds1,ds2].each {|ds| ds.expects(:to_xml)}
-
-        @test_object.expects(:datastreams).returns({:ds1 => ds1, :ds2 => ds2})
-        @test_object.to_xml
-      end
-    end
-    
     describe ".to_solr" do
       after(:all) do
         # Revert to default mappings after running tests

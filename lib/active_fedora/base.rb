@@ -248,37 +248,6 @@ module ActiveFedora
       @inner_object.label = new_label
     end
 
-    #Return a hash of all available metadata fields for all 
-    #ActiveFedora::SimpleDatastream datastreams, as well as 
-    #system_create_date, system_modified_date, active_fedora_model_field, 
-    #and the object id.
-    def fields
-    # TODO this can likely be removed once find_by_fields_by_solr is removed
-      fields = {:id => {:values => [pid]}, :system_create_date => {:values => [self.create_date], :type=>:date}, :system_modified_date => {:values => [self.modified_date], :type=>:date}, :active_fedora_model => {:values => [self.class.inspect], :type=>:symbol}}
-      datastreams.values.each do |ds|        
-        fields.merge!(ds.fields) if [ActiveFedora::SimpleDatastream, ActiveFedora::QualifiedDublinCoreDatastream].include?(ds.class)
-      end
-      return fields
-    end
-    
-    #Returns the xml version of this object as a string.
-    def to_xml(xml=Nokogiri::XML::Document.parse("<xml><fields/><content/></xml>"))
-      ActiveSupport::Deprecation.warn("ActiveFedora::Base#to_xml has been deprecated and will be removed in version 5.0")
-      fields_xml = xml.xpath('//fields').first
-      builder = Nokogiri::XML::Builder.with(fields_xml) do |fields_xml|
-        fields_xml.id_ pid
-        fields_xml.system_create_date self.create_date
-        fields_xml.system_modified_date self.modified_date
-        fields_xml.active_fedora_model self.class.inspect
-      end
-      
-      datastreams.each_value do |ds|  
-        ds.to_xml(fields_xml) if ds.class.included_modules.include?(ActiveFedora::MetadataDatastreamHelper)
-        ds.to_rels_ext if ds.kind_of?(ActiveFedora::RelsExtDatastream)
-      end
-      return xml.to_s
-    end
-
     def ==(comparison_object)
          comparison_object.equal?(self) ||
            (comparison_object.instance_of?(self.class) &&

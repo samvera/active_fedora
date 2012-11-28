@@ -9,7 +9,6 @@ module ActiveFedora
 
     class_attribute :class_fields
     self.class_fields = []
-    attr_accessor :fields # TODO this can be removed when Model.find_by_fields_by_solr has been removed.
     
     
      set_terminology do |t|

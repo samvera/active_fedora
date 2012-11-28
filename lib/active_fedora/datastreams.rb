@@ -60,11 +60,6 @@ module ActiveFedora
       @datastreams ||= DatastreamHash.new(self)
     end
   
-    def datastreams_in_memory
-      ActiveSupport::Deprecation.warn("ActiveFedora::Base.datastreams_in_memory has been deprecated.  Use #datastreams instead")
-      datastreams
-    end
-
     def configure_datastream(ds, ds_spec=nil)
       ds_spec ||= self.class.ds_specs[ds.instance_variable_get(:@dsid)]
       if ds_spec
@@ -107,11 +102,6 @@ module ActiveFedora
       return datastream.dsid
     end
 
-    def add(datastream) # :nodoc:
-      ActiveSupport::Deprecation.warn "Warning: ActiveFedora::Base.add has been deprecatedand will be removed in 5.0.  Use add_datastream"
-      add_datastream(datastream)
-    end
-    
     #return all datastreams of type ActiveFedora::RDFDatastream or ActiveFedora::NokogiriDatastream
     def metadata_streams
       results = []

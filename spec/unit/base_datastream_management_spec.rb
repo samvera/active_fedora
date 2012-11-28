@@ -54,13 +54,4 @@ describe ActiveFedora::Base do
       @test_object.add_datastream(ds, :prefix => "FOO")
     end
   end
-
-
-  describe 'add' do
-    it "should call .add_datastream" do
-      @test_object.expects(:add_datastream)
-      @test_object.add(stub("datastream").stub_everything)
-    end
-  end
-  
 end
