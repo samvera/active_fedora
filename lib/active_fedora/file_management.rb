@@ -1,7 +1,9 @@
 module ActiveFedora
   module FileManagement
     extend ActiveSupport::Concern
-
+    extend Deprecation
+    self.deprecation_horizon = 'active-fedora 6.0'
+ 
     included do
       include ActiveFedora::Relationships
       has_relationship "collection_members", :has_collection_member
@@ -69,6 +71,9 @@ module ActiveFedora
       # will rely on SemanticNode.remove_relationship once it is implemented
     end
 
+    deprecation_deprecate :file_objects, :file_objects_append, :collection_members_append, :collection_members_remove
+    
+ 
   end
 end
 
