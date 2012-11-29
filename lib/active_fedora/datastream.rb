@@ -43,6 +43,12 @@ module ActiveFedora
       changed?
     end
     
+    # @abstract Override this in your concrete datastream class. 
+    # @return [boolean] does this datastream contain metadata (not file data)
+    def metadata?
+      false
+    end
+    
     # Deprecated
     def dirty
       changed?

@@ -22,6 +22,8 @@ describe ActiveFedora::RelsExtDatastream do
       @test_ds = ActiveFedora::RelsExtDatastream.new(mock_inner, "RELS-EXT")
   end
 
+  its(:metadata?) { should be_true}
+
   describe "#save" do
     before do
       @mock_repo.expects(:add_datastream).with(:pid => 'test:sample_pid', :dsid => 'RELS-EXT', :versionable => true, :content => 'fake xml', :controlGroup => 'M', :dsState => 'A', :mimeType=>'application/rdf+xml')

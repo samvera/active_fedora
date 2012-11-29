@@ -157,6 +157,10 @@ module ActiveFedora
       graph.dirty
     end
 
+    def metadata?
+      true
+    end
+
     def save
       super
       graph.dirty = false

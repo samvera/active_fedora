@@ -17,6 +17,10 @@ module ActiveFedora
       model.relationships_are_dirty or super
     end
 
+    def metadata?
+      true
+    end
+
     def serialize!
       self.content = to_rels_ext() if model.relationships_are_dirty
       model.relationships_are_dirty = false

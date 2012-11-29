@@ -9,6 +9,29 @@ describe ActiveFedora::Datastreams do
     ActiveFedora::Base.respond_to?(:has_metadata).should be_true
   end
 
+  describe ".metadata_streams" do
+    it "should return all of the datastreams from the object that are kinds of SimpleDatastreams " do
+      mock_mds1 = mock("metadata ds1")
+      mock_mds2 = mock("metadata ds2")
+      mock_fds = mock("file ds")
+      mock_fds.expects(:metadata?).returns(false)
+      mock_ngds = mock("nokogiri ds")
+      mock_ngds.expects(:metadata?).returns(true)
+      
+      [mock_mds1,mock_mds2].each do |ds|
+        ds.expects(:metadata?).returns(true)
+      end
+      
+      @test_object.expects(:datastreams).returns({:foo => mock_mds1, :bar => mock_mds2, :baz => mock_fds, :bork=>mock_ngds})
+      
+      result = @test_object.metadata_streams
+      result.length.should == 3
+      result.should include(mock_mds1)
+      result.should include(mock_mds2)
+      result.should include(mock_ngds)
+    end
+  end
+
   describe "datastream_from_spec" do
     it "should accept versionable" do
       ds = @test_object.datastream_from_spec({:type=>ActiveFedora::Datastream, :versionable=>false}, 'test')

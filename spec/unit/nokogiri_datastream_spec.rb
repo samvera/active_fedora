@@ -25,6 +25,8 @@ describe ActiveFedora::NokogiriDatastream do
   after(:each) do
   end
 
+  its(:metadata?) { should be_true}
+
   it "should include the Solrizer::XML::TerminologyBasedSolrizer for .to_solr support" do
     ActiveFedora::NokogiriDatastream.included_modules.should include(Solrizer::XML::TerminologyBasedSolrizer)
   end

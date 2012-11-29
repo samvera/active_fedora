@@ -5,36 +5,6 @@ describe ActiveFedora::Base do
   before(:each) do
     @test_object = ActiveFedora::Base.new
   end
-  
-  
-  describe ".metadata_streams" do
-    #TODO move to datastreams_spec
-    it "should return all of the datastreams from the object that are kinds of SimpleDatastreams " do
-      mock_mds1 = mock("metadata ds1")
-      mock_mds2 = mock("metadata ds2")
-      mock_fds = mock("file ds")
-      mock_fds.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-      mock_ngds = mock("nokogiri ds")
-      mock_ngds.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-      mock_ngds.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
-      
-      
-      [mock_mds1,mock_mds2].each do |ds|
-        ds.expects(:kind_of?).with(ActiveFedora::RDFDatastream).returns(false)
-        ds.expects(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(true)
-      end
-      mock_fds.stubs(:kind_of?).with(ActiveFedora::NokogiriDatastream).returns(false) 
-      
-      @test_object.expects(:datastreams).returns({:foo => mock_mds1, :bar => mock_mds2, :baz => mock_fds, :bork=>mock_ngds})
-      
-      result = @test_object.metadata_streams
-      result.length.should == 3
-      result.should include(mock_mds1)
-      result.should include(mock_mds2)
-      result.should include(mock_ngds)
-    end
-  end
-  
 
   describe ".update_index" do
     before do

@@ -78,6 +78,12 @@ module ActiveFedora
     def ng_xml_changed?
       changed_attributes.has_key? 'ng_xml'
     end
+
+    # Indicates that this datastream has metadata content. 
+    # @return true 
+    def metadata?
+      true
+    end
     
     def content=(content)
       super

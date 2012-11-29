@@ -8,9 +8,10 @@ describe ActiveFedora::Datastream do
   before(:each) do
     @test_object = ActiveFedora::Base.new
     @test_datastream = ActiveFedora::Datastream.new(@test_object.inner_object, 'abcd')
-    #:pid=>@test_object.pid, :dsid=>'abcd', :blob=>StringIO.new("hi there"))
     @test_datastream.content = "hi there"
   end
+
+  its(:metadata?) { should be_false}
 
   it "should escape dots in  to_param" do
     @test_datastream.stubs(:dsid).returns('foo.bar')
