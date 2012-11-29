@@ -43,7 +43,7 @@ describe ActiveFedora::NokogiriDatastream do
     end
     it "should initialize from #xml_template if no xml is provided" do
       ActiveFedora::NokogiriDatastream.expects(:xml_template).returns("<fake template/>")
-      n = ActiveFedora::NokogiriDatastream.new(nil, nil)
+      n = ActiveFedora::NokogiriDatastream.new
       n.ensure_xml_loaded
       n.ng_xml.should be_equivalent_to("<fake template/>")
     end
@@ -56,7 +56,7 @@ describe ActiveFedora::NokogiriDatastream do
   end
 
   describe "an instance" do
-    subject { ActiveFedora::NokogiriDatastream.new(nil, nil) }
+    subject { ActiveFedora::NokogiriDatastream.new }
     it{ should.respond_to? :to_solr }
     its(:to_solr) {should == { }}
   end
@@ -161,7 +161,7 @@ describe ActiveFedora::NokogiriDatastream do
   describe '#from_xml' do
     it "should work when a template datastream is passed in" do
       mods_xml = Nokogiri::XML::Document.parse( fixture(File.join("mods_articles", "hydrangea_article1.xml")) )
-      tmpl = Hydra::ModsArticleDatastream.new(nil, nil)
+      tmpl = Hydra::ModsArticleDatastream.new
       Hydra::ModsArticleDatastream.from_xml(mods_xml,tmpl).ng_xml.root.to_xml.should == mods_xml.root.to_xml
       tmpl.dirty?.should be_false
     end
@@ -265,7 +265,7 @@ describe ActiveFedora::NokogiriDatastream do
 
   describe '.get_values_from_solr' do
     before(:each) do
-      @mods_ds = ActiveFedora::NokogiriDatastream.new(nil, nil)
+      @mods_ds = ActiveFedora::NokogiriDatastream.new
       @mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
     end
 
@@ -321,7 +321,7 @@ describe ActiveFedora::NokogiriDatastream do
 
   describe '.update_values' do
     before(:each) do
-      @mods_ds = ActiveFedora::NokogiriDatastream.new(nil, nil)
+      @mods_ds = ActiveFedora::NokogiriDatastream.new
       @mods_ds.content= fixture(File.join("mods_articles","hydrangea_article1.xml")).read
     end
 
@@ -343,7 +343,7 @@ describe ActiveFedora::NokogiriDatastream do
     end
 
     it "should set @dirty to true" do
-      mods_ds = Hydra::ModsArticleDatastream.new(nil, nil)
+      mods_ds = Hydra::ModsArticleDatastream.new
       mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
       mods_ds.update_values([{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"})
       mods_ds.dirty?.should be_true
@@ -353,7 +353,7 @@ describe ActiveFedora::NokogiriDatastream do
   describe '.term_values' do
 
     before(:each) do
-      @mods_ds = ActiveFedora::NokogiriDatastream.new(nil, nil)
+      @mods_ds = ActiveFedora::NokogiriDatastream.new
       @mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
     end
 

@@ -29,8 +29,8 @@ module ActiveFedora
 
     #Constructor. this class will call self.field for each DCTERM. In short, all DCTERMS fields will already exist
     #when this method returns. Each term is marked as a multivalue string.
-    def initialize(digital_object, dsid )
-      super(digital_object, dsid)
+    def initialize(digital_object=nil, dsid=nil, options={})
+      super
       DCTERMS.each do |el|
         field el, :string, :multiple=>true
       end

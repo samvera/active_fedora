@@ -141,7 +141,7 @@ describe ActiveFedora::RelsExtDatastream do
         </rdf:RDF>
       EOS
       model = ActiveFedora::Base.new
-      new_ds = ActiveFedora::RelsExtDatastream.new(nil, nil)
+      new_ds = ActiveFedora::RelsExtDatastream.new
       new_ds.model = model
       lambda { ActiveFedora::RelsExtDatastream.from_xml(xml, new_ds) }.should_not raise_exception
       new_ds.to_rels_ext.should =~ /missing:hasOtherRelationship/
@@ -157,7 +157,7 @@ describe ActiveFedora::RelsExtDatastream do
                   </rdf:Description>
                 </rdf:RDF>"
       model = ActiveFedora::Base.new
-      new_ds = ActiveFedora::RelsExtDatastream.new(nil, nil)
+      new_ds = ActiveFedora::RelsExtDatastream.new
       new_ds.model = model
       ActiveFedora::RelsExtDatastream.from_xml(xml, new_ds)
       new_ext = new_ds.to_rels_ext()

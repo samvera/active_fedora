@@ -95,10 +95,10 @@ describe ActiveFedora::Datastream do
   end 
   
   it "should have mimeType accessors" do
-    ds1 = ActiveFedora::Datastream.new(nil, nil)#:mime_type=>"text/foo")    
+    ds1 = ActiveFedora::Datastream.new
     ds1.mimeType = "text/foo"
     ds1.mimeType.should == "text/foo"
-    ds2 = ActiveFedora::Datastream.new(nil, nil)#:mime_type=>"text/bar")
+    ds2 = ActiveFedora::Datastream.new
     ds2.mimeType = "text/bar"
     ds2.mimeType.should == "text/bar"
   end
