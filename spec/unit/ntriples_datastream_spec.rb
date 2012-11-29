@@ -9,6 +9,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
           map.created(:in => RDF::DC)
           map.title(:in => RDF::DC)
           map.publisher(:in => RDF::DC)
+          map.creator(:in => RDF::DC)
           map.based_near(:in => RDF::FOAF)
           map.related_url(:to => "seeAlso", :in => RDF::RDFS)
         end
@@ -58,6 +59,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
     it "should set fields" do
       @subject.publisher = "St. Martin's Press"
       @subject.publisher.should == ["St. Martin's Press"]
+    end
+    it "should set rdf literal fields" do
+      @subject.creator = RDF.Literal("Geoff Ryman")
+      @subject.creator.should == ["Geoff Ryman"]
     end
     it "should append fields" do
       @subject.publisher << "St. Martin's Press"
