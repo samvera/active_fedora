@@ -8,12 +8,12 @@ module ActiveFedora
       # If it's a new object, set the conformsTo relationship for Fedora CMA
       if new_object? 
         result = create
-        update_index if ENABLE_SOLR_UPDATES
+        update_index if create_needs_index?
       else
         result = update
-        update_index if @metadata_is_dirty == true && ENABLE_SOLR_UPDATES
+        update_index if update_needs_index?
       end
-      @metadata_is_dirty = false
+      self.metadata_is_dirty = false
       return result
     end
 
@@ -82,6 +82,19 @@ module ActiveFedora
       end
     end
 
+  protected
+
+    # Determines whether a create operation cause a solr index of this object.
+    # Override this if you need different behavior
+    def create_needs_index?
+      ENABLE_SOLR_UPDATES
+    end
+
+    # Determines whether an update operation cause a solr index of this object.
+    # Override this if you need different behavior
+    def update_needs_index?
+      @metadata_is_dirty && ENABLE_SOLR_UPDATES
+    end
 
   private
     
