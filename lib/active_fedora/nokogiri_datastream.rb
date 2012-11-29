@@ -24,7 +24,7 @@ module ActiveFedora
     # @param [ActiveFedora::NokogiriDatastream] tmpl the Datastream object that you are building @default a new instance of this class
     # Careful! If you call this from a constructor, be sure to provide something 'ie. self' as the @tmpl. Otherwise, you will get an infinite loop!
     def self.from_xml(xml, tmpl=nil)
-      tmpl = self.new(nil, nil) if tmpl.nil?  ## This path is used only for unit testing (e.g. MarpaDCDatastream.from_xml(fixture("data.xml")) )
+      tmpl = self.new if tmpl.nil?  ## This path is used only for unit testing (e.g. MarpaDCDatastream.from_xml(fixture("data.xml")) )
 
       if !xml.present?
         tmpl.ng_xml = self.xml_template
