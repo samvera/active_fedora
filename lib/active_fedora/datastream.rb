@@ -7,7 +7,7 @@ module ActiveFedora
     attr_accessor :last_modified, :fields
     before_create :add_mime_type, :add_ds_location, :validate_content_present
   
-    def initialize(digital_object, dsid, options={})
+    def initialize(digital_object=nil, dsid=nil, options={})
       ## When you use the versions feature of rubydora (0.5.x), you need to have a 3 argument constructor
       self.fields={}
       super
@@ -77,7 +77,6 @@ module ActiveFedora
         return create if new?
         repository.modify_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
         reset_profile_attributes
-        #Datastream.new(digital_object, dsid)
         self
       end
     end
