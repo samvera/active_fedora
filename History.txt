@@ -1,7 +1,20 @@
 5.0.0
 Depend on solrizer 2.0.0 (for HYDRA-827 DO NOT index terms by default)
 Lazily initialize solr, so that the message goes into the log, not the console
-
+Depend on om 1.8.0
+Require Ruby >= 1.9.3
+Support for ISO 8601 date formats
+New before_delete callback available on ActiveFedora objects
+HYDRA-883: RDFDatastreams should handle Literals as object values
+Zero argument constructors for datastreams
+Deprecated in this version:
+  * FileManagment
+  * named relationships
+Removed in this version:
+  * ruby-fedora
+  * MetadataDatastream
+  * methods: .field, .add, .to_xml, .file_streams, .new_object=
+  # rcov dependency
 
 4.5.1
 Removes .rvmrc and Gemfile.lock from version control (devs should deal with these themselves)
