@@ -1,0 +1,9 @@
+Description:
+  Generate ActiveFedora config files
+
+Example:
+  rails generate active_fedora:config
+
+  This will create:
+    config/fedora.yml
+    config/solr.yml
