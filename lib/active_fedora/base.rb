@@ -73,6 +73,10 @@ module ActiveFedora
       run_callbacks :initialize
     end
 
+    # Reloads the object from Fedora.
+    def reload
+      init_with(self.class.find(self.pid).inner_object)
+    end
 
     # Initialize an empty model object and set the +inner_obj+
     # example:
