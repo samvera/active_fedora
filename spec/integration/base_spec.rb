@@ -86,6 +86,31 @@ describe "A base object with metadata" do
       end
     end
   end
+
+  describe '#reload' do
+    before(:each) do
+      @object = MockAFBaseRelationship.new
+      @object.foo.person = 'bob'
+      @object.save
+
+      @object2 = @object.class.find(@object.pid)
+
+      @object2.foo.person = 'dave'
+      @object2.save
+    end
+    it 'should requery Fedora' do
+      @object.reload
+      @object.foo.person.should == ['dave']
+    end
+    it 'should raise an error if not persisted' do
+      @object = MockAFBaseRelationship.new
+      # You will want this stub or else it will be really chatty in your STDERR
+      @object.inner_object.logger.stubs(:error)
+      expect {
+        @object.reload
+      }.to raise_error(ActiveFedora::ObjectNotFoundError)
+    end
+  end
 end
 
 describe "Datastreams synched together" do
