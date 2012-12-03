@@ -153,3 +153,4 @@ end
 load File.join(File.dirname(__FILE__),"tasks/active_fedora.rake") if defined?(Rake)
 I18n.load_path << File.dirname(__FILE__) + '/active_fedora/locale/en.yml'
 
+require 'active_fedora/railtie' if defined?(Rails)
