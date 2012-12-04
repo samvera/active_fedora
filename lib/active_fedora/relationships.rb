@@ -494,7 +494,7 @@ module ActiveFedora
       #
       # @deprecated use ActiveFedora::Base.has_many or ActiveFedora::Base.belongs_to. has_relationship will be removed in active-fedora 6.0
       def has_relationship(name, predicate, opts = {})
-        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#has_relationship has been deprecated use ActiveFedora::Base.has_many or ActiveFedora::Base.belongs_to. has_relationship will be removed in active-fedora 6.0.")
+        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#has_relationship has been deprecated use ActiveFedora::Base.has_many or ActiveFedora::Base.belongs_to. has_relationship will be removed in active-fedora 6.0.", caller(1))
         opts = {:singular => nil, :inbound => false}.merge(opts)
         if opts[:inbound] == true
           register_relationship_desc(:inbound, name, predicate, opts)
@@ -547,7 +547,7 @@ module ActiveFedora
       #
       # @deprecated use ActiveFedora::Base.has_and_belongs_to_many. has_bidirectional_relationship will be removed in active-fedora 6.0
       def has_bidirectional_relationship(name, outbound_predicate, inbound_predicate, opts={})
-        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#has_bidirectional_relationship has been deprecated, reference ActiveFedora::Base.has_and_belongs_to_many. has_bidirectional_relationship will be removed in active-fedora 6.0.")
+        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#has_bidirectional_relationship has been deprecated, reference ActiveFedora::Base.has_and_belongs_to_many. has_bidirectional_relationship will be removed in active-fedora 6.0.", caller(1))
         create_bidirectional_relationship_finders(name, outbound_predicate, inbound_predicate, opts)
       end
       
@@ -596,7 +596,7 @@ module ActiveFedora
       # @param [Hash] opts (optional)
       # @deprecated create_bidirectional_relationship_finders will be removed in active-fedora 6.0
       def create_bidirectional_relationship_finders(name, outbound_predicate, inbound_predicate, opts={})
-        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#create_bidirectional_relationship_finders has been deprecated and will be removed in active-fedora 6.0.")
+        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#create_bidirectional_relationship_finders has been deprecated and will be removed in active-fedora 6.0.", caller(1))
         inbound_method_name = name.to_s+"_inbound"
         outbound_method_name = name.to_s+"_outbound"
         has_relationship(outbound_method_name, outbound_predicate, opts)
@@ -634,7 +634,7 @@ module ActiveFedora
       #
       # @deprecated create_bidirectional_relationship_name_methods will be removed in active-fedora 6.0
       def create_bidirectional_relationship_name_methods(name,outbound_name)
-        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#create_bidirectional_relationship_name_methods has been deprecated and will be removed in active-fedora 6.0.")
+        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#create_bidirectional_relationship_name_methods has been deprecated and will be removed in active-fedora 6.0.", caller(1))
         append_method_name = "#{name.to_s.downcase}_append"
         remove_method_name = "#{name.to_s.downcase}_remove"
         self.send(:define_method,:"#{append_method_name}") {|object| add_relationship_by_name(outbound_name,object)}

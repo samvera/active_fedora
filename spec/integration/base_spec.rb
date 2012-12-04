@@ -419,15 +419,12 @@ describe ActiveFedora::Base do
     end
 
     describe '#delete' do
-      it 'if inbound relationships exist should remove relationships from those inbound targets as well when deleting this object' do
-        @test_object2 = MockAFBaseRelationship.new
-        @test_object2.save
-        @test_object3 = MockAFBaseRelationship.new
-        @test_object3.save
-        @test_object4 = MockAFBaseRelationship.new
-        @test_object4.save
-        @test_object5 = MockAFBaseRelationship.new
-        @test_object5.save
+      before do
+        @test_object2 = MockAFBaseRelationship.create
+        @test_object3 = MockAFBaseRelationship.create
+        @test_object4 = MockAFBaseRelationship.create
+        @test_object5 = MockAFBaseRelationship.create
+        Deprecation.stubs(:warn)
         #append to relationship by 'testing'
         @test_object2.add_relationship_by_name("testing",@test_object3)
         @test_object2.add_relationship_by_name("testing2",@test_object4)
@@ -445,6 +442,9 @@ describe ActiveFedora::Base do
         @test_object4.relationships_by_name(false)[:inbound]["testing_inbound2"].should == [@test_object2.internal_uri]
 
         @test_object5.relationships_by_name(false)[:self]["testing"].should == [@test_object2.internal_uri]
+    end
+
+    it 'if inbound relationships exist should remove relationships from those inbound targets as well when deleting this object' do
 
         @test_object2.delete
         #need to reload since removed from rels_ext in memory

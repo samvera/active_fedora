@@ -157,6 +157,7 @@ module ActiveFedora
 
         def create_has_many_reflection(association_id, options)
           create_reflection(:has_many, association_id, options, self)
+          #collection_accessor_methods(reflection, HasManyAssociation)
         end
 
         def create_belongs_to_reflection(association_id, options)

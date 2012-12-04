@@ -84,6 +84,7 @@ module ActiveFedora
         # <tt>has_many :clients</tt> returns +{}+
         attr_reader :options
 
+        attr_reader :macro
 
         # Returns the class for the macro.
         #

@@ -65,7 +65,6 @@ describe ActiveFedora::Base do
       mock_ss = mock("SolrService")
       mock_ss.stubs(:conn).returns(mock_conn)
       ActiveFedora::SolrService.stubs(:instance).returns(mock_ss)
-      @test_object.expects(:inbound_relationships).returns({})
       @test_object.delete
     end
 

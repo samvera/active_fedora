@@ -39,11 +39,22 @@ module ActiveFedora
 #      inner_object.load_attributes_from_fedora
     end
 
+    def dependent_objects
+      # Loop over all the inbound associations (has_many reflections)
+      results = {}
+      reflections.each_pair do |name, reflection|
+        if reflection.macro == :has_many
+          results[reflection.options[:property]] = send(name)
+        end
+      end
+      results.merge (inbound_relationships(:object) )
+    end
+
     #Deletes a Base object, also deletes the info indexed in Solr, and 
     #the underlying inner_object.  If this object is held in any relationships (ie inbound relationships
     #outside of this object it will remove it from those items rels-ext as well
     def delete
-      inbound_relationships(:objects).each_pair do |predicate, objects|
+      dependent_objects.each_pair do |predicate, objects|
         objects.each do |obj|
           if obj.respond_to?(:remove_relationship)
             obj.remove_relationship(predicate,self)

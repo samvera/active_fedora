@@ -370,4 +370,34 @@ describe ActiveFedora::Base do
       end
     end
   end
+
+
+
+  describe "when a object is deleted" do
+    before (:all) do
+      class MasterFile < ActiveFedora::Base
+        belongs_to :media_object, :property=>:is_part_of
+      end
+      class MediaObject < ActiveFedora::Base
+        has_many :parts, :class_name=>'MasterFile', :property=>:is_part_of
+      end
+    end
+
+    before :each do
+      @master = MasterFile.create
+      @media = MediaObject.create
+      @master.media_object = @media
+      @master.save
+      @master.reload
+
+    end
+
+    it "should also remove the relationships that point at that object" do
+      @media.delete
+      @master = MasterFile.find(@master.pid)
+      @master.relationships(:is_part_of).should == []
+    end
+  end
+
+
 end
