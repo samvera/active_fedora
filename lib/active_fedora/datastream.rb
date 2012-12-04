@@ -2,7 +2,7 @@ module ActiveFedora
 
   #This class represents a Fedora datastream
   class Datastream < Rubydora::Datastream
-    
+    extend Deprecation
     attr_writer :digital_object
     attr_accessor :last_modified, :fields
     before_create :add_mime_type, :add_ds_location, :validate_content_present
@@ -42,6 +42,7 @@ module ActiveFedora
     def dirty?
       changed?
     end
+    deprecation_deprecate :dirty?
     
     # @abstract Override this in your concrete datastream class. 
     # @return [boolean] does this datastream contain metadata (not file data)
@@ -53,6 +54,7 @@ module ActiveFedora
     def dirty
       changed?
     end
+    deprecation_deprecate :dirty
     
     # Deprecated
     def dirty=(value)
@@ -62,10 +64,12 @@ module ActiveFedora
         changed_attributes.clear
       end
     end
+    deprecation_deprecate :dirty=
 
     def new_object?
       new?
     end
+    deprecation_deprecate :new_object?
 
     def validate_content_present
       case controlGroup
@@ -103,6 +107,7 @@ module ActiveFedora
     # @param [ActiveFedora::Datastream] tmpl the Datastream object that you are building
     # @param [Nokogiri::XML::Node] node the "foxml:datastream" node from a FOXML file
     def self.from_xml(tmpl, node)
+      Deprecation.deprecated_method_warning(self, :from_xml)
       tmpl.controlGroup= node['CONTROL_GROUP']
       tmpl
     end
