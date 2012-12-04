@@ -17,6 +17,12 @@ h2. Getting Started
 
 The "ActiveFedora Console Tour":https://github.com/projecthydra/active_fedora/wiki/Getting-Started:-Console-Tour  gives you a brief tour through ActiveFedora's features on the command line.
 
+h2. Generators
+
+You can generate a model inheriting from ActiveFedora::Base.
+
+<pre>rails generate active_fedora:model Book</pre>
+
 h2. Testing (this Gem)
 
 In order to run the RSpec tests, you need to have a copy of the ActiveFedora source code, and then run bundle install in the source directory.
