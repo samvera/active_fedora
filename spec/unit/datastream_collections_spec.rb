@@ -212,7 +212,6 @@ describe ActiveFedora::DatastreamCollections do
       thumb1.pid.should == @test_object2.pid
       thumb1.dsLabel.should == 'minivan.jpg'
       f.rewind
-      @test_object2.thumbnail.first.content.should == f.read
       @test_object2.update_named_datastream("thumbnail",{:file=>f2,:dsid=>"THUMB1"})
       @test_object2.thumbnail.size.should == 1
       @test_object2.thumbnail_ids == ["THUMB1"]
@@ -226,8 +225,6 @@ describe ActiveFedora::DatastreamCollections do
       thumb1.dsid.should == 'THUMB1'
       thumb1.pid.should == @test_object2.pid
       thumb1.dsLabel.should == 'dino.jpg'
-      f2.rewind
-      @test_object2.thumbnail.first.content.should == f2.read
     end
   end
   describe '#named_datastreams_desc' do
@@ -293,8 +290,6 @@ describe ActiveFedora::DatastreamCollections do
       datastreams["thumbnail"].first.dsid.should == 'THUMB1'
       datastreams["thumbnail"].first.dsLabel.should == 'minivan.jpg'
       datastreams["thumbnail"].first.controlGroup.should == "M"
-      f.rewind
-      datastreams["thumbnail"].first.content.should == f.read
 
       datastreams["external"].size.should == 1
       datastreams["external"].first.dsid.should == "EXTERNAL1"
@@ -306,8 +301,6 @@ describe ActiveFedora::DatastreamCollections do
       datastreams["high"].first.dsLabel.should == 'dino.jpg'
       datastreams["high"].first.controlGroup.should == "M"
       datastreams["high"].first.dsid.should == "HIGH1"
-      f2.rewind
-      datastreams["high"].first.content.should == f2.read
     end
   end
   

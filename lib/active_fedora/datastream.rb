@@ -5,29 +5,16 @@ module ActiveFedora
     extend Deprecation
     attr_writer :digital_object
     attr_accessor :last_modified, :fields
-    before_create :add_mime_type, :add_ds_location, :validate_content_present
+    before_create :validate_content_present
   
     def initialize(digital_object=nil, dsid=nil, options={})
       ## When you use the versions feature of rubydora (0.5.x), you need to have a 3 argument constructor
       self.fields={}
       super
     end
-    
-    def size
-      self.profile['dsSize']
-    end
-
-    def add_mime_type
-      self.mimeType = 'text/xml' unless self.mimeType
-    end
-
-    def add_ds_location
-      if self.controlGroup == 'E'
-      end
-    end
 
     def inspect
-      "#<#{self.class}:#{self.hash} @pid=\"#{digital_object ? pid : nil}\" @dsid=\"#{dsid}\" @controlGroup=\"#{controlGroup}\" @dirty=\"#{dirty}\" @mimeType=\"#{mimeType}\" >"
+      "#<#{self.class}:#{self.hash} @pid=\"#{digital_object ? pid : nil}\" @dsid=\"#{dsid}\" @controlGroup=\"#{controlGroup}\" changed=\"#{changed?}\" @mimeType=\"#{mimeType}\" >"
     end
 
     #compatibility method for rails' url generators. This method will 
@@ -59,7 +46,7 @@ module ActiveFedora
     # Deprecated
     def dirty=(value)
       if value
-        lastModifiedDate_will_change! # an innocent hack to pretend something has changed
+        content_will_change! # an innocent hack to pretend something has changed
       else
         changed_attributes.clear
       end
@@ -72,33 +59,18 @@ module ActiveFedora
     deprecation_deprecate :new_object?
 
     def validate_content_present
-      case controlGroup
-      when 'X','M'
-        @content.present?
-      when 'E','R'
-        dsLocation.present?
-      else
-        raise "Invalid control group: #{controlGroup.inspect}"
-      end      
+      has_content?
     end
     
     def save
-      run_callbacks :save do
-        return create if new?
-        repository.modify_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
-        reset_profile_attributes
-        self
-      end
+      super
+      self
     end
 
     def create
-      run_callbacks :create do
-        repository.add_datastream to_api_params.merge({ :pid => pid, :dsid => dsid })
-        reset_profile_attributes
-        self
-      end
+      super
+      self
     end
-
 
     # serializes any changed data into the content field
     def serialize!

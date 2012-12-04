@@ -27,7 +27,7 @@ describe ActiveFedora::RelsExtDatastream do
   describe "#save" do
     before do
       @mock_repo.expects(:add_datastream).with(:pid => 'test:sample_pid', :dsid => 'RELS-EXT', :versionable => true, :content => 'fake xml', :controlGroup => 'M', :dsState => 'A', :mimeType=>'application/rdf+xml')
-      @mock_repo.expects(:datastream).with(:pid => 'test:sample_pid', :dsid => 'RELS-EXT').returns("")
+      @mock_repo.expects(:datastream).with(:pid => 'test:sample_pid', :dsid => 'RELS-EXT').returns("").at_least_once
     end
     it 'should set the mime type' do
       @test_ds.content = 'fake xml'
