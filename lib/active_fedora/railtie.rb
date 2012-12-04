@@ -6,7 +6,7 @@ module ActiveFedora
     generators do
       puts 'hello'
       require(
-        'rails/generators/active_fedora/config/config_generator'
+        'generators/active_fedora/config/config_generator'
       )
     end
   end
