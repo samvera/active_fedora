@@ -153,6 +153,10 @@ module ActiveFedora
       end
     end
 
+    def changed?
+      super || dirty?
+    end
+
     def dirty?
       graph.dirty
     end

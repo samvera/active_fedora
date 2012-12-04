@@ -47,11 +47,11 @@ describe ActiveFedora::SemanticNode do
       end
       
       @node = SpecNode.new
-      @node.stubs(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>''))
+      @node.stubs(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content=>''))
       @node.pid = increment_pid
       @test_object = SpecNode2.new
       @test_object.pid = increment_pid    
-      @test_object.stubs(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>''))
+      @test_object.stubs(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content=>''))
     end
     
     after(:each) do
@@ -105,7 +105,7 @@ describe ActiveFedora::SemanticNode do
       it "adding relationship to an instance should not affect class-level relationships hash" do 
         local_test_node1 = SpecNode.new
         local_test_node2 = SpecNode.new
-        local_test_node1.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).at_least_once
+        local_test_node1.expects(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content=>'')).at_least_once
         local_test_node1.add_relationship(:is_member_of, 'demo:10')
         local_test_node2.expects(:rels_ext).returns(stub('rels-ext', :content=>''))
         
@@ -137,7 +137,7 @@ describe ActiveFedora::SemanticNode do
       
     describe '#remove_relationship' do
       it 'should remove a relationship from the relationships hash' do
-        @test_object.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).times(4)
+        @test_object.expects(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content=>'')).times(4)
         @test_object.add_relationship(:has_part, "info:fedora/3")
         @test_object.add_relationship(:has_part, "info:fedora/4")
         #check both are there

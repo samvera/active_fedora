@@ -64,9 +64,9 @@ describe ActiveFedora::NokogiriDatastream do
 
     it "should not be dirty after .update_values is saved" do
       @test_object.datastreams["descMetadata"].update_values([{:name=>0},{:role=>0},:text] =>"Funder")
-      @test_object.datastreams["descMetadata"].dirty?.should be_true
+      @test_object.datastreams["descMetadata"].should be_changed
       @test_object.save
-      @test_object.datastreams["descMetadata"].dirty?.should be_false
+      @test_object.datastreams["descMetadata"].should_not be_changed
       @test_object.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text).should == ["Funder"]
     end    
   end

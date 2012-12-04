@@ -271,18 +271,16 @@ describe ActiveFedora::NtriplesRDFDatastream do
       end
       describe '#save' do
         it "should set dirty? to false" do
-          @obj.dirty?.should be_false
+          @obj.should_not be_changed
           @obj.title = "something"
-          @obj.dirty?.should be_true
+          @obj.should be_changed
           @obj.save
-          @obj.dirty?.should be_false
+          @obj.should_not be_changed
         end
       end
       describe '.content=' do
         it "should update the content and graph, marking the datastream as changed" do
           mock_repo = mock('repository')
-          mock_repo.expects(:datastream_dissemination).with(:pid => 'test:123', 
-                                                            :dsid => 'solr_rdf')
           sample_rdf = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
           @obj.stubs(:pid).returns('test:123')
           @obj.stubs(:repository).returns(mock_repo)

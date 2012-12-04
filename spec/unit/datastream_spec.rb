@@ -19,7 +19,7 @@ describe ActiveFedora::Datastream do
   end
   
   it "should be inspectable" do
-    @test_datastream.inspect.should match /#<ActiveFedora::Datastream:-?\d+ @pid=\"__DO_NOT_USE__\" @dsid=\"abcd\" @controlGroup=\"M\" @dirty=\"true\" @mimeType=\"\" >/
+    @test_datastream.inspect.should match /#<ActiveFedora::Datastream:-?\d+ @pid=\"__DO_NOT_USE__\" @dsid=\"abcd\" @controlGroup=\"M\" changed=\"true\" @mimeType=\"\" >/
   end
 
   describe '#validate_content_present' do
@@ -62,14 +62,14 @@ describe ActiveFedora::Datastream do
   end
   
   describe '#save' do
-    it "should set dirty? to false" do
-      mock_repo = mock('repository', :config=>{})
-      mock_repo.stubs(:add_datastream).with(:mimeType=>'text/xml', :versionable => true, :pid => @test_object.pid, :dsid => 'abcd', :controlGroup => 'M', :dsState => 'A', :content => 'hi there')
-      mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).returns('')
+    it "should set changed" do
+      mock_repo = mock('repository')
+      mock_repo.stubs(:config).returns({})
+      mock_repo.stubs(:add_datastream).with(:versionable => true, :pid => @test_object.pid, :dsid => 'abcd', :controlGroup => 'M', :dsState => 'A', :content => 'hi there')
+      mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).returns('').at_least_once
       @test_object.inner_object.stubs(:repository).returns(mock_repo)
-      @test_datastream.dirty?.should be_true
       @test_datastream.save
-      @test_datastream.dirty?.should be_false
+      @test_datastream.should_not be_changed
     end
   end
   
@@ -84,15 +84,6 @@ describe ActiveFedora::Datastream do
       @test_datastream.content.should be_equivalent_to(sample_xml)
     end
   end
-  
-  describe ".dirty?" do
-    it "should return the value of the @dirty attribute or changed?" do
-      @test_datastream.instance_variable_get(:@changed_attributes).clear
-      @test_datastream.dirty?.should be_false  
-      @test_datastream.dirty = "boo"
-      @test_datastream.dirty?.should be_true   
-    end
-  end 
   
   it "should have mimeType accessors" do
     ds1 = ActiveFedora::Datastream.new

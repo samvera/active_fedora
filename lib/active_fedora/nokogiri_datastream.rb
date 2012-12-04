@@ -32,8 +32,10 @@ module ActiveFedora
         tmpl.ng_xml = xml
       else
         tmpl.ng_xml = Nokogiri::XML::Document.parse(xml)
-      end    
-      tmpl.send(:dirty=, false)
+      end
+
+      tmpl.ng_xml_doesnt_change!
+
       return tmpl
     end
     
@@ -72,6 +74,10 @@ module ActiveFedora
     # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods 
     def ng_xml_will_change!
       changed_attributes['ng_xml'] = nil
+    end
+
+    def ng_xml_doesnt_change!
+      changed_attributes.delete('ng_xml')
     end
     
     # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods 

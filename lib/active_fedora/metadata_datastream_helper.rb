@@ -30,7 +30,7 @@ module ActiveFedora::MetadataDatastreamHelper
   end
   
   def serialize! # :nodoc:
-    if dirty?
+    if changed?
       return unless xml_loaded 
       self.content = self.to_xml 
     end

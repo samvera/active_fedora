@@ -9,8 +9,8 @@ module ActiveFedora
     include Solrizer::FieldNameMapper
     attr_accessor :model
 
-    def add_mime_type
-      self.mimeType= 'application/rdf+xml'
+   def self.default_attributes
+      super.merge(:mimeType => 'application/rdf+xml')
     end
     
     def changed?

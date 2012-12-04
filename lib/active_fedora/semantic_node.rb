@@ -29,7 +29,7 @@ module ActiveFedora
     # @param object Either a string URI or an object that is a kind of ActiveFedora::Base 
     def add_relationship(predicate, target, literal=false)
       object_relations.add(predicate, target, literal)
-      rels_ext.dirty = true if object_relations.dirty
+      rels_ext.content_will_change! if object_relations.dirty
     end
 
     # Clears all relationships with the specified predicate
@@ -38,7 +38,7 @@ module ActiveFedora
       relationships(predicate).each do |target|
         object_relations.delete(predicate, target) 
       end
-      rels_ext.dirty = true if object_relations.dirty
+      rels_ext.content_will_change! if object_relations.dirty
     end
 
     # Checks that this object is matches the model class passed in.
@@ -111,7 +111,7 @@ module ActiveFedora
     def remove_relationship(predicate, obj, literal=false)
       object_relations.delete(predicate, obj)
       self.relationships_are_dirty = true
-      rels_ext.dirty = true
+      rels_ext.content_will_change!
     end
 
     def inbound_relationships(response_format=:uri)

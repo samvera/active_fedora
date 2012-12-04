@@ -244,7 +244,7 @@ describe ActiveFedora::Base do
 
       it "should update the RELS-EXT datastream and set the datastream as dirty when relationships are added" do
         mock_ds = mock("Rels-Ext")
-        mock_ds.expects(:dirty=).with(true).times(2)
+        mock_ds.stubs(:content_will_change!)
         @test_object.datastreams["RELS-EXT"] = mock_ds
         @test_object.add_relationship(:is_member_of, "info:fedora/demo:5")
         @test_object.add_relationship(:is_member_of, "info:fedora/demo:10")
@@ -585,7 +585,7 @@ describe ActiveFedora::Base do
       it "should call .to_solr on the relationships rels-ext is dirty" do
         @test_object.add_relationship(:has_collection_member, "info:fedora/foo:member")
         rels_ext = @test_object.rels_ext
-        rels_ext.dirty?.should == true
+        rels_ext.should be_changed
         @test_object.expects(:solrize_relationships)
         @test_object.to_solr
       end

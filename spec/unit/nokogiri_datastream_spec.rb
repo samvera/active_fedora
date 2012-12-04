@@ -20,6 +20,7 @@ describe ActiveFedora::NokogiriDatastream do
     @mock_inner.stubs(:pid)
     @test_ds = ActiveFedora::NokogiriDatastream.new(@mock_inner, "descMetadata")
     @test_ds.content="<test_xml/>"
+    @test_ds.stubs(:new? => false)
   end
   
   after(:each) do
@@ -133,10 +134,10 @@ describe ActiveFedora::NokogiriDatastream do
     #   @test_ds.fubar_values.should == ["val1", "val2"]
     # end
     
-    it "should set @dirty to true" do
+    it "should set changed to true" do
       @mods_ds.get_values([{:title_info=>0},:main_title]).should == ["ARTICLE TITLE", "TITLE OF HOST JOURNAL"]
       @mods_ds.update_indexed_attributes [{"title_info"=>"0"},"main_title"]=>{"-1"=>"mork"}
-      @mods_ds.dirty?.should be_true
+      @mods_ds.should be_changed
     end
   end
   
@@ -163,7 +164,7 @@ describe ActiveFedora::NokogiriDatastream do
       mods_xml = Nokogiri::XML::Document.parse( fixture(File.join("mods_articles", "hydrangea_article1.xml")) )
       tmpl = Hydra::ModsArticleDatastream.new
       Hydra::ModsArticleDatastream.from_xml(mods_xml,tmpl).ng_xml.root.to_xml.should == mods_xml.root.to_xml
-      tmpl.dirty?.should be_false
+      tmpl.should_not be_changed
     end
   end
   
@@ -177,7 +178,7 @@ describe ActiveFedora::NokogiriDatastream do
       @test_ds.should respond_to(:save)
     end
     it "should persist the product of .to_xml in fedora" do
-      @test_ds.expects(:new?).returns(true).twice
+      @test_ds.expects(:new?).returns(true).at_least_once
       @mock_repo.expects(:datastream).with(:pid => nil, :dsid => 'descMetadata').returns('').twice
       @mock_repo.expects(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'X', :dsState => 'A', :mimeType=>'text/xml')
       @test_ds.expects(:to_xml).returns("fake xml")
@@ -188,12 +189,12 @@ describe ActiveFedora::NokogiriDatastream do
   end
   
   describe '.content=' do
-    it "should update the content and ng_xml, marking the datastream as dirty" do
-      @test_ds.dirty = false  # pretend it isn't dirty to show that content= does it
+    it "should update the content and ng_xml, marking the datastream as changed" do
+      @test_ds.ng_xml_doesnt_change!
       @test_ds.content.should_not be_equivalent_to(@sample_raw_xml)
       @test_ds.ng_xml.to_xml.should_not be_equivalent_to(@sample_raw_xml)
       @test_ds.content = @sample_raw_xml
-      @test_ds.should be_dirty
+      @test_ds.should be_changed
       @test_ds.content.should be_equivalent_to(@sample_raw_xml)
       @test_ds.ng_xml.to_xml.should be_equivalent_to(@sample_raw_xml)
     end
@@ -214,11 +215,11 @@ describe ActiveFedora::NokogiriDatastream do
       @test_ds2.ng_xml.should be_kind_of Nokogiri::XML::Document
       @test_ds2.ng_xml.to_xml.should be_equivalent_to("<xmlelement/>")
     end
-    it "should mark the datastream as dirty" do
-      @test_ds2.dirty.should be_false 
+    it "should mark the datastream as changed" do
+      @test_ds2.should_not be_changed 
       @test_ds2.ng_xml = @sample_raw_xml
       @test_ds2.ng_xml_changed?.should be_true
-      @test_ds2.should be_dirty
+      @test_ds2.should be_changed
       @test_ds2.instance_variable_get(:@content).should be_nil
     end
   end
@@ -342,11 +343,11 @@ describe ActiveFedora::NokogiriDatastream do
       @mods_ds.update_values([{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"})
     end
 
-    it "should set @dirty to true" do
+    it "should set changed to true" do
       mods_ds = Hydra::ModsArticleDatastream.new
       mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
       mods_ds.update_values([{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"})
-      mods_ds.dirty?.should be_true
+      mods_ds.should be_changed
     end
   end
 

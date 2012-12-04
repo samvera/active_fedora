@@ -90,7 +90,7 @@ describe ActiveFedora::Relationships do
         #local_node.internal_uri = "info:fedora/#{@pid}"
         local_node.pid = @pid
         
-        local_node.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).at_least_once
+        local_node.expects(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content=>'')).at_least_once
         local_node.add_relationship(:is_member_of, "info:fedora/container:A")
         local_node.add_relationship(:is_member_of, "info:fedora/container:B")
 
@@ -122,7 +122,7 @@ describe ActiveFedora::Relationships do
           @test_object2 = MockHasRelationship.new
           @test_object2.pid = increment_pid
           @test_object2.stubs(:testing_inbound).returns({})
-          @test_object2.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content =>'')).at_least_once
+          @test_object2.expects(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content =>'')).at_least_once
           @test_object2.add_relationship(:has_model, SpecNode.to_class_uri)
           @test_object2.should respond_to(:testing_append)
           @test_object2.should respond_to(:testing_remove)
@@ -273,7 +273,7 @@ describe ActiveFedora::Relationships do
         it "(:response_format => :id_array) should return an array of fedora PIDs" do
           SpecNode.create_outbound_relationship_finders("containers", :is_member_of)
           local_node = SpecNode.new
-          local_node.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).at_least_once
+          local_node.expects(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content=>'')).at_least_once
           local_node.add_relationship(:is_member_of, "demo:10")
           result = local_node.containers_ids
           result.should be_instance_of(Array)
@@ -363,9 +363,9 @@ describe ActiveFedora::Relationships do
         @local_node2 = SpecNode.new
         @local_node2.pid = "mypid2"
         model_def = SpecNode.to_class_uri
-        @local_node.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).at_least_once
+        @local_node.expects(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content=>'')).at_least_once
         @local_node.add_relationship(:has_model, model_def)
-        @local_node2.expects(:rels_ext).returns(stub("rels_ext", :dirty= => true, :content=>'')).at_least_once
+        @local_node2.expects(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content=>'')).at_least_once
         @local_node2.add_relationship(:has_model, model_def)
         @local_node.add_relationship(:has_part, @local_node2)
         @local_node2.add_relationship(:has_part, @local_node)
