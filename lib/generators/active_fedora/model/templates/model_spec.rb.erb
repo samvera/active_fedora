@@ -1,0 +1,21 @@
+# Generated via
+#  `rails generate active_fedora::model <%= class_name %>`
+require 'spec_helper'
+require 'active_fedora/test_support'
+
+describe <%= class_name %> do
+  include ActiveFedora::TestSupport
+  subject { <%= class_name %>.new }
+
+  it 'should persist to Fedora' do
+    subject.save!
+    expect {
+      subject.reload
+    }.to_not raise_error(ActiveFedora::ObjectNotFoundError)
+
+    assert_rels_ext_has_model(subject, JournalEntry)
+
+    subject.destroy
+  end
+
+end

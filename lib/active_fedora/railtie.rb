@@ -4,9 +4,11 @@ module ActiveFedora
       load "tasks/active_fedora.rake"
     end
     generators do
-      puts 'hello'
       require(
         'generators/active_fedora/config/config_generator'
+      )
+      require(
+        'generators/active_fedora/model/model_generator'
       )
     end
   end
