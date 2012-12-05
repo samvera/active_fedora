@@ -14,7 +14,7 @@ module ActiveFedora
     end
     
     def changed?
-      model.relationships_are_dirty or super
+      (model.relationships_are_dirty if model) or super
     end
 
     def metadata?

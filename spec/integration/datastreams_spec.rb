@@ -4,6 +4,28 @@ require 'active_fedora'
 require "rexml/document"
 
 describe ActiveFedora::Datastreams do
+  describe "serializing datastreams" do
+    before :all do
+      class TestingMetadataSerializing < ActiveFedora::Base
+        has_metadata :name => "nokogiri_autocreate_on", :autocreate => true, :type => ActiveFedora::NokogiriDatastream
+        has_metadata :name => "nokogiri_autocreate_off", :autocreate => false, :type => ActiveFedora::NokogiriDatastream
+      end
+    end
+
+    after :all do
+      Object.send(:remove_const, :TestingMetadataSerializing)
+    end
+
+    subject { TestingMetadataSerializing.new }
+
+    it "should work" do
+      subject.save(:validate => false)
+      subject.nokogiri_autocreate_on.should_not be_new
+      subject.nokogiri_autocreate_off.should be_new
+    end
+  end
+
+
   describe "#has_metadata" do
     before :all do
       class HasMetadata < ActiveFedora::Base
