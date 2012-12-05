@@ -20,6 +20,7 @@ describe ActiveFedora::RelsExtDatastream do
       mock_inner.stubs(:repository).returns(@mock_repo)
       mock_inner.stubs(:pid).returns(@pid)
       @test_ds = ActiveFedora::RelsExtDatastream.new(mock_inner, "RELS-EXT")
+      @test_ds.stubs(:profile).returns({})
   end
 
   its(:metadata?) { should be_true}
