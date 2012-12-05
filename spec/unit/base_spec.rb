@@ -400,46 +400,6 @@ describe ActiveFedora::Base do
         
         @test_object.save
       end
-      it "should NOT update solr index if no SimpleDatastreams have changed" do
-        stub_ingest(@this_pid)
-        stub_add_ds(@this_pid, ['ds1', 'RELS-EXT'])
-        @test_object.save
-        @test_object.expects(:new_object?).returns(false).twice
-        ActiveFedora::DigitalObject.any_instance.stubs(:save)
-        mock1 = mock("ds1")
-        mock1.expects( :changed?).returns(false).at_least_once
-        mock1.expects(:serialize!)
-        mock2 = mock("ds2")
-        mock2.expects( :changed?).returns(false).at_least_once
-        mock2.expects(:serialize!)
-        @test_object.stubs(:datastreams).returns({:ds1 => mock1, :ds2 => mock2})
-        @test_object.expects(:update_index).never
-        @test_object.expects(:refresh)
-        @test_object.instance_variable_set(:@new_object, false)
-
-        @test_object.save
-      end
-      it "should update solr index if relationships have changed" do
-        stub_ingest(@this_pid)
-
-        rels_ext = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
-        rels_ext.model = @test_object
-        rels_ext.expects(:changed?).returns(true).twice
-        rels_ext.expects(:save).returns(true)
-        rels_ext.expects(:serialize!)
-        clean_ds = mock("ds2", :digital_object=)
-        clean_ds.stubs(:dirty? => false, :changed? => false, :new? => false)
-        clean_ds.expects(:serialize!)
-        @test_object.datastreams["RELS-EXT"] = rels_ext
-        @test_object.datastreams[:clean_ds] = clean_ds
-  #      @test_object.inner_object.stubs(:datastreams).returns({"RELS-EXT" => rels_ext, :clean_ds => clean_ds})
-  #      @test_object.stubs(:datastreams).returns({"RELS-EXT" => rels_ext, :clean_ds => clean_ds})
-        @test_object.instance_variable_set(:@new_object, false)
-        @test_object.expects(:refresh)
-        @test_object.expects(:update_index)
-        
-        @test_object.save
-      end
     end
 
     describe "#create" do

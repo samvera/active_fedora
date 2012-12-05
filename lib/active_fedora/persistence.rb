@@ -13,7 +13,6 @@ module ActiveFedora
         result = update
         update_index if update_needs_index?
       end
-      self.metadata_is_dirty = false
       return result
     end
 
@@ -26,7 +25,6 @@ module ActiveFedora
     def assert_content_model
       add_relationship(:has_model, self.class.to_class_uri)
     end
-
 
     def update_attributes(properties)
       self.attributes=properties
@@ -104,7 +102,7 @@ module ActiveFedora
     # Determines whether an update operation cause a solr index of this object.
     # Override this if you need different behavior
     def update_needs_index?
-      @metadata_is_dirty && ENABLE_SOLR_UPDATES
+      ENABLE_SOLR_UPDATES
     end
 
   private
@@ -125,10 +123,6 @@ module ActiveFedora
     # Pushes the object and all of its new or dirty datastreams into Fedora
     def update
       persist
-    end
-
-    def metadata_is_dirty=(bool)
-      @metadata_is_dirty = bool
     end
 
     def persist

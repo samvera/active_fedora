@@ -21,10 +21,6 @@ module ActiveFedora
 
     def serialize_datastreams
       datastreams.each {|k, ds| ds.serialize! }
-      self.metadata_is_dirty = datastreams.any? do |k,ds| 
-        ds.changed? && ds.metadata?
-      end
-      true
     end
 
     # Adds the disseminator location to the datastream after the pid has been established

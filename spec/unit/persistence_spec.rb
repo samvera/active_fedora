@@ -19,20 +19,9 @@ describe ActiveFedora::Persistence do
   end
 
   describe "#update_needs_index?" do
-    describe "when metadata is dirty" do
-      before do
-        subject.send(:metadata_is_dirty=, true)
-      end
       it "should be true" do
         subject.send(:update_needs_index?).should be_true
       end
-    end
-
-    describe "when metadata is not dirty" do
-      it "should be false" do
-        subject.send(:update_needs_index?).should be_false
-      end
-    end
   end
 
 
