@@ -6,12 +6,8 @@ module ActiveFedora
       :rdfxml 
     end
 
-    def mimeType
-      'text/xml'
-    end
-
-    def controlGroup
-      'M'
+    def self.default_attributes
+      super.merge(:mimeType => 'text/xml', :controlGroup => 'X')
     end
   end
 end
