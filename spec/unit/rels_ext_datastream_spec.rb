@@ -30,6 +30,16 @@ describe ActiveFedora::RelsExtDatastream do
       @test_ds.mimeType.should == 'application/rdf+xml'
     end
   end
+
+  describe "#changed?" do
+    it "should be false when no changes have been made" do
+      subject.changed?.should == false
+    end
+    it "should be true when the model has changes" do
+      subject.model = stub(:relationships_are_dirty=>true)
+      subject.changed?.should == true
+    end
+  end
   
   
   describe '#serialize!' do
