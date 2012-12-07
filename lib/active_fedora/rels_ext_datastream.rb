@@ -14,7 +14,7 @@ module ActiveFedora
     end
     
     def changed?
-      (model.relationships_are_dirty if model) or super
+      relationships_are_dirty? or super
     end
 
     def metadata?
@@ -22,10 +22,25 @@ module ActiveFedora
     end
 
     def serialize!
-      self.content = to_rels_ext() if model.relationships_are_dirty
+      self.content = to_rels_ext() if relationships_are_dirty?
       model.relationships_are_dirty = false
     end
     
+    def relationships_are_dirty?
+      model.relationships_are_dirty if model
+    end
+
+    def relationships_are_dirty!
+      model.relationships_are_dirty = true
+    end
+
+    def relationships_are_not_dirty!
+      model.relationships_are_dirty = false
+    end
+
+    def relationships
+      model.relationships
+    end
 
     def to_xml(fields_xml) 
       ActiveSupport::Deprecation.warn("to_xml is deprecated, use to_rels_ext")
@@ -49,7 +64,7 @@ module ActiveFedora
             tmpl.model.add_relationship(predicate, object, literal)
           end
         end
-        tmpl.model.relationships_are_dirty = false
+        tmpl.relationships_are_not_dirty!
         tmpl.changed_attributes.clear
         tmpl
       end
@@ -59,7 +74,7 @@ module ActiveFedora
     def to_rels_ext()
       xml = ActiveFedora::RDFXMLWriter.buffer do |writer|
         writer.prefixes.merge! ActiveFedora::Predicates.predicate_namespaces
-        model.relationships.each_statement do |statement|
+        relationships.each_statement do |statement|
           writer << statement
         end
       end
