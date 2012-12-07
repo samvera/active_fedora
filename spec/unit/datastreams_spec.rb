@@ -98,11 +98,11 @@ describe ActiveFedora::Datastreams do
     describe "creates datastreams" do
       before(:each) do
         class FooHistory < ActiveFedora::Base
-          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
+          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData", :autocreate => true do |m|
             m.field "fubar", :string
             m.field "swank", :text
           end
-          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel" do |m|
+          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel", :autocreate => true do |m|
             m.field "fubar", :text
           end 
           

@@ -29,8 +29,8 @@ describe ActiveFedora::Datastreams do
   describe "#has_metadata" do
     before :all do
       class HasMetadata < ActiveFedora::Base
-        has_metadata :name => "with_versions", :label => "Versioned DS", :type => ActiveFedora::SimpleDatastream
-        has_metadata :name => "without_versions", :versionable => false, :type => ActiveFedora::SimpleDatastream
+        has_metadata :name => "with_versions", :autocreate => true, :label => "Versioned DS", :type => ActiveFedora::SimpleDatastream
+        has_metadata :name => "without_versions", :autocreate => true, :versionable => false, :type => ActiveFedora::SimpleDatastream
       end
     end
     after :all do
