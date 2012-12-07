@@ -141,10 +141,37 @@ module ActiveFedora
       ds_specs[dsid] ? ds_specs[dsid].fetch(:type, ActiveFedora::Datastream) : ActiveFedora::Datastream
     end
 
-    def self.create(args = {})
-      obj = self.new(args)
-      obj.save
-      obj
+    # Creates an object (or multiple objects) and saves it to the repository, if validations pass.
+    # The resulting object is returned whether the object was saved successfully to the repository or not.
+    #
+    # The +attributes+ parameter can be either be a Hash or an Array of Hashes.  These Hashes describe the
+    # attributes on the objects that are to be created.
+    #
+    # ==== Examples
+    #   # Create a single new object
+    #   User.create(:first_name => 'Jamie')
+    #
+    #   # Create an Array of new objects
+    #   User.create([{ :first_name => 'Jamie' }, { :first_name => 'Jeremy' }])
+    #
+    #   # Create a single object and pass it into a block to set other attributes.
+    #   User.create(:first_name => 'Jamie') do |u|
+    #     u.is_admin = false
+    #   end
+    #
+    #   # Creating an Array of new objects using a block, where the block is executed for each object:
+    #   User.create([{ :first_name => 'Jamie' }, { :first_name => 'Jeremy' }]) do |u|
+    #     u.is_admin = false
+    #   end
+    def self.create(attributes = nil, &block)
+      if attributes.is_a?(Array)
+        attributes.collect { |attr| create(attr, &block) }
+      else
+        object = new(attributes)
+        yield(object) if block_given?
+        object.save
+        object
+      end
     end
 
     def clone
@@ -252,7 +279,9 @@ module ActiveFedora
              comparison_object.pid == pid &&
              !comparison_object.new_record?)
     end
-  
+
+
+
     def inspect
       "#<#{self.class}:#{self.hash} @pid=\"#{pid}\" >"
     end

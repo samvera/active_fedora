@@ -135,6 +135,16 @@ module ActiveFedora
           @primary_key_name ||= options[:foreign_key] || derive_primary_key_name
         end
 
+        
+        # Creates a new instance of the associated class, and immediately saves it
+        # with ActiveRecord::Base#save. +options+ will be passed to the class's
+        # creation method. Returns the newly created object.
+        def create_association(*options)
+          klass.create(*options)
+        end
+
+
+
         private
 
         def derive_primary_key_name

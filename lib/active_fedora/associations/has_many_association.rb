@@ -44,6 +44,8 @@ module ActiveFedora
             r.remove_relationship(@reflection.options[:property], @owner)
           end
         end
+
+        
     end
   end
 end

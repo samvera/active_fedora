@@ -32,41 +32,72 @@ describe ActiveFedora::Base do
         @book2.save
       end
 
-      it "should build" do
+      it "should build child" do
         new_book = @library.books.build({})
         new_book.should be_new_record
         new_book.should be_kind_of Book
+        new_book.library.should be_nil
+        @library.books.should == [new_book]
+        #TODO save the associated children too, requires something like ActiveRecord::AutosaveAssociation (ver 3.0.12) 
+        #@library.save
+        #new_book.library.should == @library
+      end
+
+      it "should not create children if the parent isn't saved" do
+        lambda {@library.books.create({})}.should raise_error ActiveFedora::RecordNotSaved, "You cannot call create unless the parent is saved"
+      end
+
+      it "should create children" do
+        @library.save!
+        new_book = @library.books.create({})
+        new_book.should_not be_new_record
+        new_book.should be_kind_of Book
+        new_book.library.should == @library
+      end
+
+      it "should build parent" do
+        new_library = @book.build_library({})
+        new_library.should be_new_record
+        new_library.should be_kind_of Library
+        @book.library.should == new_library
+      end
+
+      it "should create parent" do
+        new_library = @book.create_library({})
+        new_library.should_not be_new_record
+        new_library.should be_kind_of Library
+        @book.library.should == new_library
       end
 
       it "should let you shift onto the association" do
         @library.new_record?.should be_true
         @library.books.size == 0
-        @library.books.to_ary.should == []
+        @library.books.should == []
         @library.book_ids.should ==[]
         @library.books << @book
-        @library.books.to_a.should == [@book]
+        @library.books.should == [@book]
         @library.book_ids.should ==[@book.pid]
 
       end
 
       it "should let you set an array of objects" do
         @library.books = [@book, @book2]
-        @library.books.to_a.should == [@book, @book2]
+        @library.books.should == [@book, @book2]
         @library.save
 
         @library.books = [@book]
-        @library.books.to_a.should == [@book]
+        @library.books.should == [@book]
       
       end
       it "should let you set an array of object ids" do
         @library.book_ids = [@book.pid, @book2.pid]
-        @library.books.to_a.should == [@book, @book2]
+        @library.books.should == [@book, @book2]
       end
 
       it "setter should wipe out previously saved relations" do
         @library.book_ids = [@book.pid, @book2.pid]
         @library.book_ids = [@book2.pid]
-        @library.books.to_a.should == [@book2]
+        @library.books.should == [@book2]
         
       end
 
@@ -75,7 +106,7 @@ describe ActiveFedora::Base do
         @library.books = [@book, @book2]
         @library.save
         @library = Library.find(@library.pid)
-        @library.books.to_a.should == [@book, @book2]
+        @library.books.should == [@book, @book2]
       end
 
 
@@ -87,7 +118,7 @@ describe ActiveFedora::Base do
         @book2.save
 
         @library = Library.find(@library.pid)
-        @library.books.to_a.should == [@book, @book2]
+        @library.books.should == [@book, @book2]
       
         solr_resp =  @library.books(:response_format=>:solr)
         solr_resp.size.should == 2
@@ -138,7 +169,7 @@ describe ActiveFedora::Base do
         @book = Book.new
         @book.topics << @topic1
         @book.topics.map(&:pid).should == [@topic1.pid]
-        Topic.find(@topic1.pid).books.to_a.should == [] #Can't have saved it because @book isn't saved yet.
+        Topic.find(@topic1.pid).books.should == [] #Can't have saved it because @book isn't saved yet.
       end
       after do
         @topic1.delete
@@ -165,10 +196,10 @@ describe ActiveFedora::Base do
 
         @book.library.pid.should == @library.pid
         @library.books.reload
-        @library.books.to_a.should == [@book]
+        @library.books.should == [@book]
 
         @library2 = Library.find(@library.pid)
-        @library2.books.to_a.should == [@book]
+        @library2.books.should == [@book]
       end
 
       it "should have a count once it has been saved" do
@@ -177,7 +208,7 @@ describe ActiveFedora::Base do
 
         # @book.library.pid.should == @library.pid
         # @library.books.reload
-        # @library.books.to_a.should == [@book]
+        # @library.books.should == [@book]
 
         @library2 = Library.find(@library.pid)
         @library2.books.size.should == 2
@@ -226,11 +257,11 @@ describe ActiveFedora::Base do
         end
         it "should set relationships bidirectionally" do
           @book.topics << @topic1
-          @book.topics.to_a.should == [@topic1]
+          @book.topics.should == [@topic1]
           @book.relationships(:has_topic).should == [@topic1.internal_uri]
           @topic1.relationships(:has_topic).should == []
           @topic1.relationships(:is_topic_of).should == [@book.internal_uri]
-          Topic.find(@topic1.pid).books.to_a.should == [@book] #Can't have saved it because @book isn't saved yet.
+          Topic.find(@topic1.pid).books.should == [@book] #Can't have saved it because @book isn't saved yet.
         end
         it "should save new child objects" do
           @book.topics << Topic.new

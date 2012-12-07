@@ -97,6 +97,24 @@ module ActiveFedora
           _records.each { |record| @target.delete(record) }
         end
       end
+
+      def create(attrs = {})
+        if attrs.is_a?(Array)
+          attrs.collect { |attr| create(attr) }
+        else
+          create_record(attrs) do |record|
+            yield(record) if block_given?
+            record.save
+          end
+        end
+      end
+
+      def create!(attrs = {})
+        create_record(attrs) do |record|
+          yield(record) if block_given?
+          record.save!
+        end
+      end
       
 
       def load_target
@@ -167,6 +185,19 @@ module ActiveFedora
 
 
       private 
+        def create_record(attrs)
+          attrs.update(@reflection.options[:conditions]) if @reflection.options[:conditions].is_a?(Hash)
+          ensure_owner_is_not_new
+          record = @reflection.klass.create do
+            @reflection.build_association(attrs)
+          end
+          set_belongs_to_association_for(record)
+          if block_given?
+            add_record_to_target_with_callbacks(record) { |*block_args| yield(*block_args) }
+          else
+            add_record_to_target_with_callbacks(record)
+          end
+        end
 
         def build_record(attrs)
           #attrs.update(@reflection.options[:conditions]) if @reflection.options[:conditions].is_a?(Hash)
@@ -186,6 +217,12 @@ module ActiveFedora
           old_records = records.reject { |r| r.new_record? }
           yield(records, old_records)
           #records.each { |record| callback(:after_remove, record) }
+        end
+
+        def ensure_owner_is_not_new
+          if @owner.new_record?
+            raise ActiveFedora::RecordNotSaved, "You cannot call create unless the parent is saved"
+          end
         end
       
     end

@@ -19,6 +19,7 @@ module ActiveFedora #:nodoc:
   class ConfigurationError < RuntimeError; end # :nodoc:
   class AssociationTypeMismatch < RuntimeError; end # :nodoc:
   class UnregisteredPredicateError < RuntimeError; end # :nodoc:
+  class RecordNotSaved < RuntimeError; end # :nodoc:
 
 
   eager_autoload do

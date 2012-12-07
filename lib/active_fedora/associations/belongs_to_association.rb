@@ -2,6 +2,14 @@ module ActiveFedora
   module Associations
     class BelongsToAssociation < AssociationProxy #:nodoc:
 
+      def create(attributes = {})
+        replace(@reflection.create_association(attributes))
+      end
+
+      def build(attributes = {})
+        replace(@reflection.build_association(attributes))
+      end
+
       def replace(record)
         if record.nil?
           @owner.clear_relationship(@reflection.options[:property])

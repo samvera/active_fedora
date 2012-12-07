@@ -77,8 +77,8 @@ module ActiveFedora
         reflection = create_belongs_to_reflection(association_id, options)
 
         association_accessor_methods(reflection, BelongsToAssociation)
-          # association_constructor_method(:build,  reflection, BelongsToAssociation)
-          # association_constructor_method(:create, reflection, BelongsToAssociation)
+        association_constructor_method(:build,  reflection, BelongsToAssociation)
+        association_constructor_method(:create, reflection, BelongsToAssociation)
         #configure_dependency_for_belongs_to(reflection)
       end
 
@@ -265,6 +265,25 @@ module ActiveFedora
               #send("#{reflection.name}=", reflection.klass.find(ids))
               send("#{reflection.name}=", ids.collect { |id| reflection.klass.find(id)})
             end
+          end
+        end
+
+        def association_constructor_method(constructor, reflection, association_proxy_class)
+          redefine_method("#{constructor}_#{reflection.name}") do |*params|
+            attributees      = params.first unless params.empty?
+            replace_existing = params[1].nil? ? true : params[1]
+            association      = association_instance_get(reflection.name)
+
+            unless association
+              association = association_proxy_class.new(self, reflection)
+              association_instance_set(reflection.name, association)
+            end
+
+            # if association_proxy_class == HasOneAssociation
+            #   association.send(constructor, attributees, replace_existing)
+            # else
+            association.send(constructor, attributees)
+            #end
           end
         end
     end
