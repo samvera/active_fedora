@@ -18,9 +18,10 @@ describe ActiveFedora::NokogiriDatastream do
     @mock_repo.stubs(:datastream_dissemination=>'My Content', :config=>{})
     @mock_inner.stubs(:repository).returns(@mock_repo)
     @mock_inner.stubs(:pid)
+    @mock_inner.stubs(:new? => false)
     @test_ds = ActiveFedora::NokogiriDatastream.new(@mock_inner, "descMetadata")
+    @test_ds.stubs(:new? => false, :profile => {}, :datastream_content => '<test_xml/>')
     @test_ds.content="<test_xml/>"
-    @test_ds.stubs(:new? => false)
   end
   
   after(:each) do
@@ -45,7 +46,6 @@ describe ActiveFedora::NokogiriDatastream do
     it "should initialize from #xml_template if no xml is provided" do
       ActiveFedora::NokogiriDatastream.expects(:xml_template).returns("<fake template/>")
       n = ActiveFedora::NokogiriDatastream.new
-      n.ensure_xml_loaded
       n.ng_xml.should be_equivalent_to("<fake template/>")
     end
   end
@@ -179,9 +179,9 @@ describe ActiveFedora::NokogiriDatastream do
     end
     it "should persist the product of .to_xml in fedora" do
       @test_ds.expects(:new?).returns(true).at_least_once
-      @mock_repo.expects(:datastream).with(:pid => nil, :dsid => 'descMetadata').returns('').twice
+      @test_ds.stubs(:to_xml => "fake xml")
       @mock_repo.expects(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'X', :dsState => 'A', :mimeType=>'text/xml')
-      @test_ds.expects(:to_xml).returns("fake xml")
+
       @test_ds.serialize!
       @test_ds.save
       @test_ds.mimeType.should == 'text/xml'
@@ -189,14 +189,24 @@ describe ActiveFedora::NokogiriDatastream do
   end
   
   describe '.content=' do
-    it "should update the content and ng_xml, marking the datastream as changed" do
-      @test_ds.ng_xml_doesnt_change!
-      @test_ds.content.should_not be_equivalent_to(@sample_raw_xml)
-      @test_ds.ng_xml.to_xml.should_not be_equivalent_to(@sample_raw_xml)
-      @test_ds.content = @sample_raw_xml
-      @test_ds.should be_changed
-      @test_ds.content.should be_equivalent_to(@sample_raw_xml)
-      @test_ds.ng_xml.to_xml.should be_equivalent_to(@sample_raw_xml)
+    subject { ActiveFedora::NokogiriDatastream.new(@mock_inner, "descMetadata") }
+    it "should update the content" do
+      subject.stubs(:new? => false )
+      subject.content = "<a />"
+      subject.datastream_content.should == '<a />'
+    end
+
+    it "should mark the object as changed" do
+      subject.stubs(:new? => false )
+      subject.content = "<a />"
+      subject.should be_changed
+    end
+
+    it "update ngxml and mark the xml as loaded" do
+      subject.stubs(:new? => false )
+      subject.content = "<a />"
+      subject.ng_xml.to_xml.should =~ /<a\/>/
+      subject.xml_loaded.should be_true
     end
   end
   
