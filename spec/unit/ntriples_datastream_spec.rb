@@ -126,14 +126,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
       end
       @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
-      @subject.stubs(:pid => 'test:1')
+      @subject.stubs(:pid => 'test:1', :repository => ActiveFedora::Base.connection_for_pid(0))
     end
     after(:each) do
       Object.send(:remove_const, :MyDatastream)
-    end
-    it "should save and reload" do
-      @subject.publisher = ["St. Martin's Press"]
-      @subject.save
     end
     it "should support to_s method" do
       @subject.publisher.to_s.should == [].to_s
@@ -261,6 +257,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
           delegate :rights, :to => :descMetadata
         end
         @obj = MyDatastream.new(@inner_object, 'solr_rdf')
+          @obj.stubs(:repository => mock(), :pid => 'test:1')
+          @obj.repository.stubs(:modify_datastream)
+          @obj.repository.stubs(:add_datastream)
         @obj.created = "2012-03-04"
         @obj.title = "Of Mice and Men, The Sequel"
         @obj.publisher = "Bob's Blogtastic Publishing"
