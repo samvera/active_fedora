@@ -20,6 +20,18 @@ describe ActiveFedora::NokogiriDatastream do
     Object.send(:remove_const, :HydrangeaArticle2)
   end
 
+  describe "#changed?" do
+    it "should be changed if " do
+      
+      @pid = "hydrangea:fixture_mods_article2"
+      @test_object = HydrangeaArticle2.find(@pid)
+
+      @test_object.descMetadata.ng_xml = @test_object.descMetadata.ng_xml
+
+      @test_object.descMetadata.should_not be_changed
+    end
+  end
+
   describe '.term_values' do
     before do
       @pid = "hydrangea:fixture_mods_article2"
