@@ -221,7 +221,7 @@ module ActiveFedora
       # @option args [Boolean] :versionable Should versioned datastreams be stored
       # @yield block executed by some kinds of datastreams
       def has_metadata(args, &block)
-        spec = {:autocreate => args.fetch(:autocreate, true), :type => args[:type], :label =>  args.fetch(:label,""), :control_group => args[:control_group], :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
+        spec = {:autocreate => args.fetch(:autocreate, false), :type => args[:type], :label =>  args.fetch(:label,""), :control_group => args[:control_group], :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
         spec[:versionable] = args[:versionable] if args.has_key? :versionable
         ds_specs[args[:name]]= spec
       end
@@ -236,7 +236,7 @@ module ActiveFedora
       # @option args [Boolean] :autocreate Always create this datastream on new objects
       # @option args [Boolean] :versionable Should versioned datastreams be stored
       def has_file_datastream(args = {})
-        spec = {:autocreate => args.fetch(:autocreate, true), :type => args.fetch(:type,ActiveFedora::Datastream),
+        spec = {:autocreate => args.fetch(:autocreate, false), :type => args.fetch(:type,ActiveFedora::Datastream),
                 :label =>  args.fetch(:label,"File Datastream"), :control_group => args.fetch(:control_group,"M")}
         spec[:versionable] = args[:versionable] if args.has_key? :versionable
         ds_specs[args.fetch(:name, "content")]= spec

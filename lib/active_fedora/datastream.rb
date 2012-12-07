@@ -5,7 +5,6 @@ module ActiveFedora
     extend Deprecation
     attr_writer :digital_object
     attr_accessor :last_modified, :fields
-    before_create :validate_content_present
   
     def initialize(digital_object=nil, dsid=nil, options={})
       ## When you use the versions feature of rubydora (0.5.x), you need to have a 3 argument constructor

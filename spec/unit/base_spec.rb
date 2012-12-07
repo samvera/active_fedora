@@ -81,14 +81,14 @@ describe ActiveFedora::Base do
   describe "With a test class" do
     before :all do
       class FooHistory < ActiveFedora::Base
-        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
+        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData", :autocreate => true do |m|
           m.field "fubar", :string
           m.field "swank", :text
         end
-        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText" do |m|
+        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText", :autocreate => true do |m|
           m.field "fubar", :text
         end
-        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel" do |m|
+        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel", :autocreate => true do |m|
           m.field "fubar", :text
         end 
         delegate :fubar, :to=>'withText'
@@ -436,11 +436,11 @@ describe ActiveFedora::Base do
       it "should propagate modified datastreams to the adapted object" do
         @test_object = FooHistory.new()
         orig_ds = @test_object.datastreams['someData']
-        orig_ds.content="YYY"
+        orig_ds.content="<YYY/>"
         adapted = @test_object.adapt_to(FooAdaptation)
         adapted.datastreams.keys.should include 'someData'
         adapted.datastreams['someData'].should == orig_ds
-        adapted.datastreams['someData'].content.should == "YYY"
+        adapted.datastreams['someData'].content.strip.should == "<YYY/>"
         adapted.datastreams['someData'].changed?.should be_true
       end
       it "should use the datastream definitions from the adapted object" do
