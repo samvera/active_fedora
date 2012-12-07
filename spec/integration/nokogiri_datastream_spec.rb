@@ -21,7 +21,7 @@ describe ActiveFedora::NokogiriDatastream do
   end
 
   describe "#changed?" do
-    it "should be changed if " do
+    it "should not be changed if the new xml matches the old xml" do
       
       @pid = "hydrangea:fixture_mods_article2"
       @test_object = HydrangeaArticle2.find(@pid)
