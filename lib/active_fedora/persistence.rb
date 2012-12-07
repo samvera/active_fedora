@@ -6,7 +6,7 @@ module ActiveFedora
     #the Solr index for this object.
     def save(*)
       # If it's a new object, set the conformsTo relationship for Fedora CMA
-      if new_object? 
+      if new_record?
         result = create
         update_index if create_needs_index?
       else
