@@ -42,6 +42,10 @@ module ActiveFedora
       end
     end
 
+    def new?
+      new_object?
+    end
+
     # Has this object been saved?
     def new_object?
       inner_object.new?
