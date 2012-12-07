@@ -48,6 +48,14 @@ require 'rspec/core/rake_task'
     ENV["pid"] = "hydrangea:fixture_mods_article1"
     Rake::Task["repo:refresh"].invoke
     ENV["pid"] = nil
+
+    Rake::Task["repo:delete"].reenable
+    Rake::Task["repo:load"].reenable
+    Rake::Task["repo:refresh"].reenable
+
+    ENV["pid"] = "hydrangea:fixture_mods_article2"
+    Rake::Task["repo:refresh"].invoke
+    ENV["pid"] = nil
   end
 
   desc "Copies the default SOLR config for the bundled Testing Server"

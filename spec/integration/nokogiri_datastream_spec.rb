@@ -22,9 +22,12 @@ describe ActiveFedora::NokogiriDatastream do
 
   describe '.term_values' do
     before do
-      @pid = "hydrangea:fixture_mods_article1"
-      @test_solr_object = ActiveFedora::Base.load_instance_from_solr(@pid)
+      @pid = "hydrangea:fixture_mods_article2"
       @test_object = HydrangeaArticle2.find(@pid)
+      @test_object.descMetadata.content = File.read(fixture('mods_articles/hydrangea_article1.xml'))
+      @test_object.save
+      @test_object = HydrangeaArticle2.find(@pid)
+      @test_solr_object = ActiveFedora::Base.load_instance_from_solr(@pid)
     end
 
     it "should return the same values whether getting from solr or Fedora" do
@@ -58,7 +61,10 @@ describe ActiveFedora::NokogiriDatastream do
   
   describe '.update_values' do
     before do
-      @pid = "hydrangea:fixture_mods_article1"
+      @pid = "hydrangea:fixture_mods_article2"
+      @test_object = HydrangeaArticle2.find(@pid)
+      @test_object.descMetadata.content = File.read(fixture('mods_articles/hydrangea_article1.xml'))
+      @test_object.save
       @test_object = HydrangeaArticle2.find(@pid)
     end
 
