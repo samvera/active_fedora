@@ -93,7 +93,9 @@ module ActiveFedora
     # @param [Boolean] if false it will include inbound relationships (defaults to true)
     # @return [Hash] Returns a hash of subject name (:self or :inbound) mapped to nested hashs of each relationship name mapped to an Array of objects linked via the relationship
     def relationships_by_name(outbound_only=true)
-      @relationships_by_name = relationships_by_name_from_class()
+      Deprecation.silence(ActiveFedora::Relationships) do
+        @relationships_by_name = relationships_by_name_from_class()
+      end
       outbound_only ? @relationships_by_name : @relationships_by_name.merge(:inbound=>inbound_relationships_by_name)      
     end
 
@@ -152,10 +154,12 @@ module ActiveFedora
     # @param [String] Name of relationship
     # @param [Boolean] If false checks inbound relationships as well (defaults to true)
     def is_relationship_name?(name, outbound_only=true)
+      Deprecation.silence(ActiveFedora::Relationships) do
       if outbound_only
         outbound_relationship_names.include?(name)
       else
         (outbound_relationship_names.include?(name)||inbound_relationship_names.include?(name))
+      end
       end
     end
     
@@ -240,6 +244,7 @@ module ActiveFedora
     # @param [ActiveFedora::Base] object to add to the relationship (expects ActvieFedora::Base to be an ancestor)
     # @return [Boolean] returns true if add operation successful
     def add_relationship_by_name(name, object)
+      Deprecation.silence(ActiveFedora::Relationships) do
       if is_relationship_name?(name,true)
         if relationships_desc[:self][name].has_key?(:type)
           klass = class_from_name(relationships_desc[:self][name][:type])
@@ -250,6 +255,7 @@ module ActiveFedora
         add_relationship(outbound_relationship_predicates[name],object)
       else
         false
+      end
       end
     end
     
@@ -268,6 +274,7 @@ module ActiveFedora
     deprecation_deprecate :find_relationship_by_name, :inbound_relationship_names, :inbound_relationships_by_name, :relationship_query, :relationships_by_name, :relationships_by_name_from_class, :assert_conforms_to, :class_from_name, :outbound_relationship_names, :is_relationship_name?, :load_inbound_relationship, :load_bidirectional, :load_outbound_relationship, :relationship_has_solr_filter_query?, :add_relationship_by_name, :remove_relationship_by_name
 
     module ClassMethods
+      extend Deprecation
       # Tests if the relationship name passed is in bidirectional
       # @param [String] relationship name to test
       # @return [Boolean]
@@ -494,7 +501,6 @@ module ActiveFedora
       #
       # @deprecated use ActiveFedora::Base.has_many or ActiveFedora::Base.belongs_to. has_relationship will be removed in active-fedora 6.0
       def has_relationship(name, predicate, opts = {})
-        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#has_relationship has been deprecated use ActiveFedora::Base.has_many or ActiveFedora::Base.belongs_to. has_relationship will be removed in active-fedora 6.0.", caller(1))
         opts = {:singular => nil, :inbound => false}.merge(opts)
         if opts[:inbound] == true
           register_relationship_desc(:inbound, name, predicate, opts)
@@ -508,6 +514,7 @@ module ActiveFedora
           create_outbound_relationship_finders(name, predicate, opts)
         end
       end
+      deprecation_deprecate :has_relationship
 
       # Used in has_relationship call to create dynamic helper methods to 
       # append and remove objects to and from a relationship
@@ -524,8 +531,9 @@ module ActiveFedora
       def create_relationship_name_methods(name)
         append_method_name = "#{name.to_s.downcase}_append"
         remove_method_name = "#{name.to_s.downcase}_remove"
-        self.send(:define_method,:"#{append_method_name}") {|object| add_relationship_by_name(name,object)}
-        self.send(:define_method,:"#{remove_method_name}") {|object| remove_relationship_by_name(name,object)}
+
+        self.send(:define_method,:"#{append_method_name}") {|object| Deprecation.silence(ActiveFedora::Relationships) { add_relationship_by_name(name,object) } }
+        self.send(:define_method,:"#{remove_method_name}") {|object| Deprecation.silence(ActiveFedora::Relationships) {remove_relationship_by_name(name,object) } }        
       end 
 
       
@@ -547,14 +555,16 @@ module ActiveFedora
       #
       # @deprecated use ActiveFedora::Base.has_and_belongs_to_many. has_bidirectional_relationship will be removed in active-fedora 6.0
       def has_bidirectional_relationship(name, outbound_predicate, inbound_predicate, opts={})
-        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#has_bidirectional_relationship has been deprecated, reference ActiveFedora::Base.has_and_belongs_to_many. has_bidirectional_relationship will be removed in active-fedora 6.0.", caller(1))
         create_bidirectional_relationship_finders(name, outbound_predicate, inbound_predicate, opts)
       end
-      
+      deprecation_deprecate :has_bidirectional_relationship
+
       def create_inbound_relationship_finders(name, predicate, opts = {})
         class_eval <<-END, __FILE__, __LINE__
         def #{name}(opts={})
-          load_inbound_relationship('#{name}', '#{predicate}', opts)
+          Deprecation.silence(ActiveFedora::Relationships) do
+            load_inbound_relationship('#{name}', '#{predicate}', opts)
+          end
         end
         def #{name}_ids
           #{name}(:response_format => :id_array)
@@ -571,7 +581,9 @@ module ActiveFedora
       def create_outbound_relationship_finders(name, predicate, opts = {})
         class_eval <<-END, __FILE__, __LINE__
         def #{name}(opts={})
-          load_outbound_relationship(#{name.inspect}, #{predicate.inspect}, opts)
+          Deprecation.silence(ActiveFedora::Relationships) do
+            load_outbound_relationship(#{name.inspect}, #{predicate.inspect}, opts)
+          end
         end
         def #{name}_ids
           #{name}(:response_format => :id_array)
@@ -596,18 +608,22 @@ module ActiveFedora
       # @param [Hash] opts (optional)
       # @deprecated create_bidirectional_relationship_finders will be removed in active-fedora 6.0
       def create_bidirectional_relationship_finders(name, outbound_predicate, inbound_predicate, opts={})
-        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#create_bidirectional_relationship_finders has been deprecated and will be removed in active-fedora 6.0.", caller(1))
         inbound_method_name = name.to_s+"_inbound"
         outbound_method_name = name.to_s+"_outbound"
+        Deprecation.silence(ActiveFedora::Relationships::ClassMethods) do
         has_relationship(outbound_method_name, outbound_predicate, opts)
         has_relationship(inbound_method_name, inbound_predicate, opts.merge!(:inbound=>true))
 
         #create methods that mirror the outbound append and remove with our bidirectional name, assume just add and remove locally        
         create_bidirectional_relationship_name_methods(name,outbound_method_name)
 
+        end
+        
         class_eval <<-END, __FILE__, __LINE__
         def #{name}(opts={})
-          load_bidirectional("#{name}", :#{inbound_method_name}, :#{outbound_method_name}, opts)
+          Deprecation.silence(ActiveFedora::Relationships) do
+            load_bidirectional("#{name}", :#{inbound_method_name}, :#{outbound_method_name}, opts)
+          end
         end
         def #{name}_ids
           #{name}(:response_format => :id_array)
@@ -620,6 +636,7 @@ module ActiveFedora
         end
         END
       end
+      deprecation_deprecate :create_bidirectional_relationship_finders
 
       #  Similar to +create_relationship_name_methods+ except it is used when an ActiveFedora::Base model class
       #  declares has_bidirectional_relationship.  we are merely creating an alias for outbound portion of bidirectional
@@ -634,12 +651,12 @@ module ActiveFedora
       #
       # @deprecated create_bidirectional_relationship_name_methods will be removed in active-fedora 6.0
       def create_bidirectional_relationship_name_methods(name,outbound_name)
-        ActiveSupport::Deprecation.warn("ActiveFedora::Relationships#create_bidirectional_relationship_name_methods has been deprecated and will be removed in active-fedora 6.0.", caller(1))
         append_method_name = "#{name.to_s.downcase}_append"
         remove_method_name = "#{name.to_s.downcase}_remove"
         self.send(:define_method,:"#{append_method_name}") {|object| add_relationship_by_name(outbound_name,object)}
         self.send(:define_method,:"#{remove_method_name}") {|object| remove_relationship_by_name(outbound_name,object)}
       end
+      deprecation_deprecate :create_bidirectional_relationship_name_methods
 
     end
   end

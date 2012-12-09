@@ -6,9 +6,11 @@ module ActiveFedora
  
     included do
       include ActiveFedora::Relationships
-      has_relationship "collection_members", :has_collection_member
-      has_relationship "part_of", :is_part_of
-      has_bidirectional_relationship "parts", :has_part, :is_part_of
+      Deprecation.silence(ActiveFedora::Relationships::ClassMethods) do
+        has_relationship "collection_members", :has_collection_member
+        has_relationship "part_of", :is_part_of
+        has_bidirectional_relationship "parts", :has_part, :is_part_of
+      end
     end
 
     # List the objects that assert isPartOf pointing at this object _plus_ all objects that this object asserts hasPart for

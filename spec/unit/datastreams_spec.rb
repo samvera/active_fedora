@@ -50,6 +50,7 @@ describe ActiveFedora::Datastreams do
 
   describe "#add_disseminator_location_to_datastreams" do
     it "should infer dsLocations for E datastreams without hitting Fedora" do
+      
       mock_specs = {:e => { :disseminator => 'xyz' }}
       mock_ds = mock(:controlGroup => 'E')
       ActiveFedora::Base.stub(:ds_specs => mock_specs)
@@ -229,6 +230,14 @@ describe ActiveFedora::Datastreams do
   end
 
   describe "#additional_attributes_for_external_and_redirect_control_groups" do
+    before(:all) do
+      @behavior = ActiveFedora::Datastreams.deprecation_behavior
+      ActiveFedora::Datastreams.deprecation_behavior = :silence
+    end
+  
+     after :all do
+      ActiveFedora::Datastreams.deprecation_behavior = @behavior
+    end
 
   end
 end

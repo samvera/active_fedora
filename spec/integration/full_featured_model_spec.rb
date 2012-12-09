@@ -9,10 +9,9 @@ describe ActiveFedora::Base do
     class OralHistory < ActiveFedora::Base
         include ActiveFedora::Relationships
 
-        # Imitating DataMapper ...
-
-        has_relationship "parts", :is_part_of, :inbound => true
-        
+        Deprecation.silence(ActiveFedora::Relationships::ClassMethods) do
+          has_relationship "parts", :is_part_of, :inbound => true
+        end
         # These are all the properties that don't quite fit into Qualified DC
         # Put them on the object itself (in the properties datastream) for now.
         has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream do |m|

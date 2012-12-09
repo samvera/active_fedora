@@ -144,6 +144,18 @@ end
 
 
 describe ActiveFedora::Base do
+  before(:all) do
+    @behavior = ActiveFedora::Relationships.deprecation_behavior
+    @c_behavior = ActiveFedora::Relationships::ClassMethods.deprecation_behavior
+    ActiveFedora::Relationships.deprecation_behavior = :silence
+    ActiveFedora::Relationships::ClassMethods.deprecation_behavior = :silence
+  end
+  
+  after :all do
+    ActiveFedora::Relationships.deprecation_behavior = @behavior
+    ActiveFedora::Relationships::ClassMethods.deprecation_behavior = @c_behavior
+  end
+  
   before :all do
     class MockAFBaseRelationship < ActiveFedora::Base
       include ActiveFedora::FileManagement
@@ -280,7 +292,7 @@ describe ActiveFedora::Base do
     it "should initialize the datastream pointers with @new_object=false" do
       datastreams = @test_object.datastreams
       datastreams.each_value do |ds| 
-        ds.new_object?.should be_false
+        ds.should_not be_new
       end
     end
   end

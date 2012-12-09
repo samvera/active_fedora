@@ -3,7 +3,17 @@ require 'spec_helper'
 require 'active_fedora'
 
 describe ActiveFedora::SemanticNode do
+        before(:all) do
+        @behavior = ActiveFedora::Relationships.deprecation_behavior
+        @c_behavior = ActiveFedora::Relationships::ClassMethods.deprecation_behavior
+        ActiveFedora::Relationships.deprecation_behavior = :silence
+        ActiveFedora::Relationships::ClassMethods.deprecation_behavior = :silence
+      end
   
+      after :all do
+        ActiveFedora::Relationships.deprecation_behavior = @behavior
+        ActiveFedora::Relationships::ClassMethods.deprecation_behavior = @c_behavior
+      end
   before(:all) do 
     class SNSpecNode < ActiveFedora::Base
       include ActiveFedora::FileManagement

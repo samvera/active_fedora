@@ -1,6 +1,7 @@
 module ActiveFedora
   module Datastreams
     extend ActiveSupport::Concern
+    extend Deprecation
 
     included do
       class_attribute :ds_specs
@@ -200,6 +201,7 @@ module ActiveFedora
         ds.dsLocation= ds_config[:url]
       end
     end
+    deprecation_deprecate :additional_attributes_for_external_and_redirect_control_groups
 
 
     module ClassMethods

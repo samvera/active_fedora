@@ -1,13 +1,22 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
+  before(:all) do
+    @behavior = ActiveFedora::FileManagement.deprecation_behavior
+    ActiveFedora::FileManagement.deprecation_behavior = :silence
+  end
   
+  after :all do
+    ActiveFedora::FileManagement.deprecation_behavior = @behavior
+  end
+
   before(:all) do
     class FileMgmt < ActiveFedora::Base
       include ActiveFedora::FileManagement
     end
     @base = FileMgmt.new
   end
+
   before(:each) do
     @base.stub(:create_date).and_return("2008-07-02T05:09:42.015Z")
     @base.stub(:modified_date).and_return("2008-09-29T21:21:52.892Z")

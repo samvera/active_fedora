@@ -3,6 +3,18 @@ require 'spec_helper'
 @@last_pid = 0
 
 describe ActiveFedora::Relationships do
+    before(:all) do
+      @behavior = ActiveFedora::Relationships.deprecation_behavior
+      @c_behavior = ActiveFedora::Relationships::ClassMethods.deprecation_behavior
+      ActiveFedora::Relationships.deprecation_behavior = :silence
+      ActiveFedora::Relationships::ClassMethods.deprecation_behavior = :silence
+    end
+  
+    after :all do
+      ActiveFedora::Relationships.deprecation_behavior = @behavior
+      ActiveFedora::Relationships::ClassMethods.deprecation_behavior = @c_behavior
+    end
+
     def increment_pid
       @@last_pid += 1    
     end

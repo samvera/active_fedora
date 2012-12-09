@@ -567,7 +567,18 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
     end
 
     describe '#relationships_by_name' do
-      
+      before(:all) do
+        @behavior = ActiveFedora::Relationships.deprecation_behavior
+        @c_behavior = ActiveFedora::Relationships::ClassMethods.deprecation_behavior
+        ActiveFedora::Relationships.deprecation_behavior = :silence
+        ActiveFedora::Relationships::ClassMethods.deprecation_behavior = :silence
+      end
+  
+      after :all do
+        ActiveFedora::Relationships.deprecation_behavior = @behavior
+        ActiveFedora::Relationships::ClassMethods.deprecation_behavior = @c_behavior
+      end
+
       before do
         class MockNamedRelationships < ActiveFedora::Base
           include ActiveFedora::FileManagement
@@ -600,6 +611,18 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
 
     
     describe '#create_relationship_name_methods' do
+      before(:all) do
+        @behavior = ActiveFedora::Relationships.deprecation_behavior
+        @c_behavior = ActiveFedora::Relationships::ClassMethods.deprecation_behavior
+        ActiveFedora::Relationships.deprecation_behavior = :silence
+        ActiveFedora::Relationships::ClassMethods.deprecation_behavior = :silence
+      end
+  
+      after :all do
+        ActiveFedora::Relationships.deprecation_behavior = @behavior
+        ActiveFedora::Relationships::ClassMethods.deprecation_behavior = @c_behavior
+      end
+
       before do
         class MockCreateNamedRelationshipMethodsBase < ActiveFedora::Base
           include ActiveFedora::Relationships
