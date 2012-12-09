@@ -1,358 +1,234 @@
 require 'spec_helper'
 
 describe ActiveFedora::Datastreams do
-  before do
-    @test_object = ActiveFedora::Base.new
-  end
+  subject { ActiveFedora::Base.new }
 
-  it "should respond_to has_metadata" do
-    ActiveFedora::Base.respond_to?(:has_metadata).should be_true
-  end
-
-  describe ".metadata_streams" do
-    it "should return all of the datastreams from the object that are kinds of SimpleDatastreams " do
-      mock_mds1 = mock("metadata ds1")
-      mock_mds2 = mock("metadata ds2")
-      mock_fds = mock("file ds")
-      mock_fds.expects(:metadata?).returns(false)
-      mock_ngds = mock("nokogiri ds")
-      mock_ngds.expects(:metadata?).returns(true)
-      
-      [mock_mds1,mock_mds2].each do |ds|
-        ds.expects(:metadata?).returns(true)
-      end
-      
-      @test_object.expects(:datastreams).returns({:foo => mock_mds1, :bar => mock_mds2, :baz => mock_fds, :bork=>mock_ngds})
-      
-      result = @test_object.metadata_streams
-      result.length.should == 3
-      result.should include(mock_mds1)
-      result.should include(mock_mds2)
-      result.should include(mock_ngds)
-    end
-  end
-
-  describe "datastream_from_spec" do
-    it "should accept versionable" do
-      ds = @test_object.datastream_from_spec({:type=>ActiveFedora::Datastream, :versionable=>false}, 'test')
-      ds.versionable.should be_false
-      ds = @test_object.datastream_from_spec({:type=>ActiveFedora::Datastream, :versionable=>true}, 'test')
-      ds.versionable.should be_true
-    end
-    it "should default versionable to true" do
-      ds = @test_object.datastream_from_spec({:type=>ActiveFedora::Datastream}, 'test') 
-      ds.versionable.should be_true
-    end
-
-  end
-
-  describe "has_metadata" do
-    @@last_pid = 0
-    def increment_pid
-      @@last_pid += 1    
-    end
-
-    before(:each) do
-      @this_pid = increment_pid.to_s
-      stub_get(@this_pid)
-      Rubydora::Repository.any_instance.stubs(:client).returns(@mock_client)
-      ActiveFedora::Base.stubs(:assign_pid).returns(@this_pid)
-      #ActiveFedora::RubydoraConnection.instance.stubs(:nextid).returns(@this_pid)
-    end
-
-    describe "updates the spec" do
-      before do
-        class FooHistory < ActiveFedora::Base
-        end
-      end
-      after do
-        Object.send(:remove_const, :FooHistory)
-      end
-      subject { FooHistory}
-      it "should update the ds_spec" do
-        FooHistory.ds_specs.keys.should == ['RELS-EXT']
-        FooHistory.has_metadata :type=>ActiveFedora::Datastream, :name=>'new_ds'
-        FooHistory.ds_specs.keys.should include 'new_ds'
-      end
-      it "should be able to set a type" do
-        FooHistory.has_metadata :type=>ActiveFedora::Datastream, :name=>'new_ds', :control_group=>'R'
-        FooHistory.ds_specs['new_ds'][:control_group].should == 'R'
-      end
-      it "should be able to set versionable to false" do
-        FooHistory.has_metadata :type=>ActiveFedora::Datastream, :name=>'new_ds', :versionable=>false
-        FooHistory.has_file_datastream :type=>ActiveFedora::Datastream, :name=>'newer_ds', :versionable=>false
-        FooHistory.ds_specs['new_ds'][:versionable].should be_false
-        FooHistory.ds_specs['newer_ds'][:versionable].should be_false
-      end
-      it "should be able to set versionable to true" do
-        FooHistory.has_metadata :type=>ActiveFedora::Datastream, :name=>'new_ds', :versionable=>true
-        FooHistory.ds_specs['new_ds'][:versionable].should be_true
-      end
-      it "should not set versionable if it's not supplied" do
-        FooHistory.has_metadata :type=>ActiveFedora::Datastream, :name=>'new_ds'
-        FooHistory.ds_specs['new_ds'].keys.should_not include :versionable
-      end
-      
-    end
-
-    describe "creates datastreams" do
-      before(:each) do
-        class FooHistory < ActiveFedora::Base
-          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData", :autocreate => true do |m|
-            m.field "fubar", :string
-            m.field "swank", :text
-          end
-          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel", :autocreate => true do |m|
-            m.field "fubar", :text
-          end 
-          
-          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"no_autocreate", :autocreate => false, :label=>"withLabel" do |m|
-            m.field "fubar", :text
-          end 
-        end
-        stub_ingest(@this_pid)
-        stub_add_ds(@this_pid, ['RELS-EXT', 'someData', 'withText', 'withText2','no_autocreate'])
-
-        @n = FooHistory.new()
-        FooHistory.stubs(:assign_pid).returns(@this_pid)
-        @n.datastreams['RELS-EXT'].expects(:changed?).returns(true).at_least_once
-        @n.expects(:update_index)
-      end
-
-      after do
-        Object.send(:remove_const, :FooHistory)
-      end
-
-      it "should respect autocreate => false" do
-        @n.datastreams['no_autocreate'].expects(:save).never
-        @n.save
-      end
-
-      it "should default to autocreating datastreams" do
-        @n.datastreams['someData'].expects(:save).once
-        @n.save
-      end
-
-      it "should create specified datastreams with specified fields" do
-        @n.save
-        @n.datastreams["someData"].should_not be_nil
-        @n.datastreams["someData"].fubar='bar'
-        @n.datastreams["someData"].fubar.should == ['bar']
-        @n.datastreams["withText2"].dsLabel.should == "withLabel"
-      end
-    end
-
-
-    it "should create specified datastreams with appropriate control group" do
-      ActiveFedora.stubs(:config_for_environment).returns(:url=>'sub_url')
-      stub_ingest(@this_pid)
-      stub_add_ds(@this_pid, ['RELS-EXT', 'DC', 'rightsMetadata', 'properties', 'descMetadata', 'UKETD_DC'])
-      stub_get(@this_pid, ['RELS-EXT', 'DC', 'rightsMetadata', 'properties', 'descMetadata', 'UKETD_DC'])
-      class UketdObject < ActiveFedora::Base
-        has_metadata :name => "rightsMetadata", :label=>"Rights metadata", :type => ActiveFedora::NokogiriDatastream 
-        
-        # Uses the Hydra MODS Article profile for tracking most of the descriptive metadata
-        # TODO: define terminology for ETD
-        has_metadata :name => "descMetadata", :label=>"MODS metadata", :control_group=>"M", :type => ActiveFedora::NokogiriDatastream
-
-        has_metadata :name => "UKETD_DC", :label=>"UKETD_DC metadata", :control_group => "E", :disseminator=>"hull-sDef:uketdObject/getUKETDMetadata", :type => ActiveFedora::NokogiriDatastream
-
-        has_metadata :name => "DC", :type => ActiveFedora::NokogiriDatastream, :label=>"DC admin metadata"
-
-        # A place to put extra metadata values
-        has_metadata :name => "properties", :label=>"Workflow properties", :type => ActiveFedora::SimpleDatastream do |m|
-          m.field 'collection', :string
-          m.field 'depositor', :string
-        end
-
-      end
-      @n = UketdObject.new()
-      UketdObject.stubs(:assign_pid).returns(@this_pid)
-      @n.save
-      @n.datastreams["DC"].controlGroup.should eql("X")
-      @n.datastreams["rightsMetadata"].controlGroup.should eql("X")
-      @n.datastreams["properties"].controlGroup.should eql("X")
-      @n.datastreams["descMetadata"].controlGroup.should eql("M")
-      @n.datastreams["UKETD_DC"].controlGroup.should eql("E")
-      @n.datastreams["UKETD_DC"].dsLocation.should == "sub_url/objects/#{@this_pid}/methods/hull-sDef:uketdObject/getUKETDMetadata"
-    end
-
-
-    context ":control_group => 'E'" do
-      before do
-        stub_get(@this_pid)
-        stub_add_ds(@this_pid, ['RELS-EXT', 'externalDisseminator', 'externalUrl'])
-      end
-
-      after :each do
-        # clean up test class
-        Object.send(:remove_const, :MoreFooHistory)
-      end
-      
-      it "should allow :control_group => 'E' with a :url option" do
-        class MoreFooHistory < ActiveFedora::Base
-          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"externalDisseminator",:control_group => "E", :url => "http://exampl.com/mypic.jpg"
-        end
-        stub_ingest(@this_pid)
-        @n = MoreFooHistory.new
-        MoreFooHistory.stubs(:assign_pid).returns(@this_pid)
-        @n.save
-        @n.datastreams['externalDisseminator'].dsLocation.should == "http://exampl.com/mypic.jpg"
-      end
-      
-      describe "control_group E without a url" do
-        before do
-          class MoreFooHistory < ActiveFedora::Base
-            has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"externalDisseminator",:control_group => "E"
-          end
-          stub_ingest(@this_pid)
-          @n = MoreFooHistory.new
-          MoreFooHistory.stubs(:assign_pid).returns(@this_pid)
-        end
-        it "should allow :control_group => 'E' without a :url option" do
-          @n.datastreams['externalDisseminator'].dsLocation.present?.should == false
-          @n.save
-        end
-        
-        it "should fail validation if a :url is not added before save" do
-          @n.datastreams['externalDisseminator'].validate_content_present.should == false
-          @n.save
-        end
-        
-        it "should pass validation if a :url is added before save" do
-          @n.datastreams['externalDisseminator'].dsLocation = "http://exampl.com/mypic.jpg"
-          @n.datastreams['externalDisseminator'].validate_content_present.should == true
-          @n.save
-        end
-      end
-    end
-
-    context ":control_group => 'R'" do
-      before do
-        stub_get(@this_pid)
-        stub_add_ds(@this_pid, ['RELS-EXT', 'externalDisseminator' ])
-      end
-      
-      after :each do
-        Object.send(:remove_const, :MoreFooHistory)
-      end
-      
-      it "should allow :control_group => 'R' with a :url option" do
-        stub_ingest(@this_pid)
-        class MoreFooHistory < ActiveFedora::Base
-          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"externalDisseminator",:control_group => "R", :url => "http://exampl.com/mypic.jpg"
-        end
-        @n = MoreFooHistory.new
-        MoreFooHistory.stubs(:assign_pid).returns(@this_pid)
-        @n.save
-      end
-    
-      describe "control_group R without url" do
-        before do
-          class MoreFooHistory < ActiveFedora::Base
-            has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"externalDisseminator",:control_group => "R"
-          end
-          MoreFooHistory.stubs(:assign_pid).returns(@this_pid)
-          stub_ingest(@this_pid)
-          @n = MoreFooHistory.new
-        end
-        it "should allow :control_group => 'R' without a :url option" do
-          @n.datastreams['externalDisseminator'].dsLocation.present?.should == false
-          @n.save
-        end
-      
-        it "should fail validation if a :url is not added before save" do
-          @n.datastreams['externalDisseminator'].validate_content_present.should == false
-          @n.save
-        end
-      
-        it "should pass validation if a :url is added before save" do
-          @n.datastreams['externalDisseminator'].dsLocation = "http://exampl.com/mypic.jpg"
-          @n.datastreams['externalDisseminator'].validate_content_present.should == true
-          @n.save
-        end
-      end
-    end
-  end
-
-  describe "#create_datastream" do
-    it 'should create a datastream object using the type of object supplied in the string (does reflection)' do
-      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
-      f.stubs(:content_type).returns("image/jpeg")
-      f.stubs(:original_filename).returns("minivan.jpg")
-      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:blob=>f})
-      ds.class.should == ActiveFedora::Datastream
-      ds.dsLabel.should == "minivan.jpg"
-      ds.mimeType.should == "image/jpeg"
-    end
-    it 'should create a datastream object from a string' do
-      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:blob=>"My file data"})
-      ds.class.should == ActiveFedora::Datastream
-      ds.dsLabel.should == nil
-      ds.mimeType.should == "application/octet-stream"
-    end
-
-    it 'should not set dsLocation if dsLocation is nil' do
-      ActiveFedora::Datastream.any_instance.expects(:dsLocation=).never
-      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:dsLocation=>nil})
-    end
-
-    it 'should set attributes passed in onto the datastream' do
-      ds = @test_object.create_datastream("ActiveFedora::Datastream", 'NAME', {:dsLocation=>"a1", :mimeType=>'image/png', :controlGroup=>'X', :dsLabel=>'My Label', :checksumType=>'SHA-1'})
-      ds.location.should == 'a1'
-      ds.mimeType.should == 'image/png'
-      ds.controlGroup.should == 'X'
-      ds.label.should == 'My Label'
-      ds.checksumType.should == 'SHA-1'
-    end
-  end
-
-  describe ".has_file_datastream" do
+  describe '.has_metadata' do
     before do
-      class FileDS < ActiveFedora::Datastream; end
       class FooHistory < ActiveFedora::Base
-        has_file_datastream
-        has_file_datastream :name=>"second", :label=>"Second file", :type=>FileDS, :control_group=>'X'
+         has_metadata :name => 'dsid'
+         has_metadata :name => 'complex_ds', :versionable => true, :autocreate => true, :type => 'Z', :label => 'My Label', :control_group => 'Z'
       end
     end
-    after do
-      Object.send(:remove_const, :FooHistory)
-      Object.send(:remove_const, :FileDS)
+
+    it "should have a ds_specs entry" do
+      FooHistory.ds_specs.should have_key('dsid')
     end
-    it "Should add a line in ds_spec" do
-      FooHistory.ds_specs['content'][:type].should == ActiveFedora::Datastream
-      FooHistory.ds_specs['content'][:label].should == "File Datastream"
-      FooHistory.ds_specs['content'][:control_group].should == "M"
-      FooHistory.ds_specs['second'][:type].should == FileDS
-      FooHistory.ds_specs['second'][:label].should == "Second file"
-      FooHistory.ds_specs['second'][:control_group].should == "X"
+
+    it "should have reasonable defaults" do
+      FooHistory.ds_specs['dsid'].should include(:autocreate => false)
+    end
+
+    it "should let you override defaults" do
+      FooHistory.ds_specs['complex_ds'].should include(:versionable => true, :autocreate => true, :type => 'Z', :label => 'My Label', :control_group => 'Z')
+    end
+  end
+
+  describe '.has_file_datastream' do
+    before do
+      class FooHistory < ActiveFedora::Base
+         has_file_datastream :name => 'dsid'
+      end
+    end
+
+    it "should have reasonable defaults" do
+      FooHistory.ds_specs['dsid'].should include(:type => ActiveFedora::Datastream, :label => 'File Datastream', :control_group => 'M')
+    end
+  end
+
+  describe "#serialize_datastreams" do
+    it "should touch each datastream" do
+      m1 = mock()
+      m2 = mock()
+
+      m1.should_receive(:serialize!)
+      m2.should_receive(:serialize!)
+       subject.stub(:datastreams => { :m1 => m1, :m2 => m2})
+       subject.serialize_datastreams
+    end
+  end
+
+  describe "#add_disseminator_location_to_datastreams" do
+    it "should infer dsLocations for E datastreams without hitting Fedora" do
+      mock_specs = {:e => { :disseminator => 'xyz' }}
+      mock_ds = mock(:controlGroup => 'E')
+      ActiveFedora::Base.stub(:ds_specs => mock_specs)
+      ActiveFedora.stub(:config_for_environment => { :url => 'http://localhost'})
+      subject.stub(:pid => 'test:1', :datastreams => {:e => mock_ds})
+      mock_ds.should_receive(:dsLocation=).with("http://localhost/objects/test:1/methods/xyz")
+      subject.add_disseminator_location_to_datastreams
+    end
+  end
+
+  describe "#corresponding_datastream_name" do
+    before(:each) do
+      subject.stub(:datastreams => { 'abc' => mock(), 'a_b_c' => mock(), 'a-b' => mock()})
+    end
+
+    it "should use the name, if it exists" do
+      subject.corresponding_datastream_name('abc').should == 'abc'
+    end
+
+    it "should hash-erize underscores" do
+      subject.corresponding_datastream_name('a_b').should == 'a-b'
+    end
+
+    it "should return nil if nothing matches" do
+      subject.corresponding_datastream_name('xyz').should be_nil
+    end
+  end
+ 
+  describe "#datastreams" do
+    it "should return the datastream hash proxy" do
+      subject.stub(:load_datastreams)
+      subject.datastreams.should be_a_kind_of(ActiveFedora::DatastreamHash)
+    end
+  end
+
+  describe "#configure_datastream" do
+    it "should look up the ds_spec" do
+      mock_dsspec = { :type => nil }
+      subject.stub(:ds_specs => {'abc' => mock_dsspec})
+      subject.configure_datastream(mock(:dsid => 'abc'))
+    end
+
+    it "should be ok if there is no ds spec" do
+      mock_dsspec = mock()
+      subject.stub(:ds_specs => {})
+      subject.configure_datastream(mock(:dsid => 'abc'))
+    end
+
+    it "should configure RelsExtDatastream" do
+      mock_dsspec = { :type => ActiveFedora::RelsExtDatastream }
+      subject.stub(:ds_specs => {'abc' => mock_dsspec})
+
+      ds = mock(:dsid => 'abc')
+      ds.should_receive(:model=).with(subject)
+
+      subject.configure_datastream(ds)
+    end
+
+    it "should run a Proc" do
+      ds = mock(:dsid => 'abc')
+      @count = 0
+      mock_dsspec = { :block => lambda { |x| @count += 1 } }
+      subject.stub(:ds_specs => {'abc' => mock_dsspec})
+
+
+      expect {
+      subject.configure_datastream(ds)
+      }.to change { @count }.by(1)
+    end
+  end
+
+  describe "#datastream_from_spec" do
+    it "should fetch the rubydora datastream" do
+      subject.inner_object.should_receive(:datastream_object_for).with('dsid', {})
+      subject.datastream_from_spec({}, 'dsid')
+    end
+  end
+
+  describe "#load_datastreams" do
+    it "should load and configure persisted datastreams and should add any datastreams left over in the ds specs" do
+      pending
+    end
+  end
+
+  describe "#add_datastream" do
+    it "should add the datastream to the object" do
+      ds = mock(:dsid => 'Abc')
+      subject.add_datastream(ds)
+      subject.datastreams['Abc'].should == ds
+    end
+
+    it "should mint a dsid" do
+      ds = ActiveFedora::Datastream.new
+      subject.add_datastream(ds).should == 'DS1'
+    end
+  end
+
+  describe "#metadata_streams" do
+    it "should only be metadata datastreams" do
+      ds1 = mock(:metadata? => true)
+      ds2 = mock(:metadata? => true)
+      ds3 = mock(:metadata? => true)
+      relsextds = ActiveFedora::RelsExtDatastream.new
+      file_ds = mock(:metadata? => false)
+      subject.stub(:datastreams => {:a => ds1, :b => ds2, :c => ds3, :d => relsextds, :e => file_ds})
+      subject.metadata_streams.should include(ds1, ds2, ds3)
+      subject.metadata_streams.should_not include(relsextds)
+      subject.metadata_streams.should_not include(file_ds)
+    end
+  end
+
+  describe "#generate_dsid" do
+    it "should create an autoincrementing dsid" do
+      subject.generate_dsid('FOO').should == 'FOO1'
+    end
+
+    it "should start from the highest existin dsid" do
+      subject.stub(:datastreams => {'FOO56' => mock()})
+      subject.generate_dsid('FOO').should == 'FOO57'
+    end
+  end
+
+  describe "#dc" do
+    it "should be the DC datastream" do
+      m = mock
+      subject.stub(:datastreams => { 'DC' => m})
+      subject.dc.should == m
+    end
+  end
+
+
+  describe "#relsext" do
+    it "should be the RELS-EXT datastream" do
+      m = mock
+      subject.stub(:datastreams => { 'RELS-EXT' => m})
+      subject.rels_ext.should == m
+    end
+
+    it "should make one up otherwise" do
+      subject.stub(:datastreams => {})
+
+      subject.rels_ext.should be_a_kind_of(ActiveFedora::RelsExtDatastream)
     end
   end
 
   describe "#add_file_datastream" do
-    before do
-      @mock_file = mock('file')
+    # tested elsewhere :/
+  end 
+
+  describe "#create_datastream" do
+    it "should mint a DSID" do
+      ds = subject.create_datastream(ActiveFedora::Datastream, nil, {})
+      ds.dsid.should == 'DS1'
     end
-    it "should pass prefix" do
-      stub_add_ds(@test_object.pid, ['content1'])
-      @test_object.add_file_datastream(@mock_file, :prefix=>'content' )
-      @test_object.datastreams.keys.should include 'content1'
+
+    it "should raise an argument error if the supplied dsid is nonsense" do
+      expect { subject.create_datastream(ActiveFedora::Datastream, 0) }.to raise_error(ArgumentError)
     end
-    it "should pass dsid" do
-      stub_add_ds(@test_object.pid, ['MY_DSID'])
-      @test_object.add_file_datastream(@mock_file, :dsid=>'MY_DSID')
-      @test_object.datastreams.keys.should include 'MY_DSID'
+
+    it "should try to get a mime type from the blob" do
+      mock_file = mock(:content_type => 'x-application/asdf')
+      ds = subject.create_datastream(ActiveFedora::Datastream, nil, {:blob => mock_file})
+      ds.mimeType.should == 'x-application/asdf'
     end
-    it "without dsid or prefix" do
-      stub_add_ds(@test_object.pid, ['DS1'])
-      @test_object.add_file_datastream(@mock_file, {} )
-      @test_object.datastreams.keys.should include 'DS1'
+
+    it "should provide a default mime type" do
+      mock_file = mock()
+      ds = subject.create_datastream(ActiveFedora::Datastream, nil, {:blob => mock_file})
+      ds.mimeType.should == 'application/octet-stream'
     end
-    it "Should pass checksum Type" do
-      stub_add_ds(@test_object.pid, ['DS1'])
-      @test_object.add_file_datastream(@mock_file, {:checksumType=>'MD5'} )
-      @test_object.datastreams['DS1'].checksumType.should == 'MD5'
+
+    it "should use the filename as a default label" do
+     mock_file = mock(:path => '/asdf/fdsa')
+      ds = subject.create_datastream(ActiveFedora::Datastream, nil, {:blob => mock_file})
+      ds.dsLabel.should == 'fdsa'
     end
   end
 
+  describe "#additional_attributes_for_external_and_redirect_control_groups" do
+
+  end
 end

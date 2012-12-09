@@ -74,12 +74,12 @@ describe ActiveFedora::Relationships do
       end
       
       it 'should create inbound relationship finders' do
-        SpecNode.expects(:create_inbound_relationship_finders)
+        SpecNode.should_receive(:create_inbound_relationship_finders)
         SpecNode.has_relationship("parts", :is_part_of, :inbound => true) 
       end
       
       it 'should create outbound relationship finders' do
-        SpecNode.expects(:create_outbound_relationship_finders).times(2)
+        SpecNode.should_receive(:create_outbound_relationship_finders).exactly(2).times
         SpecNode.has_relationship("parts", :is_part_of, :inbound => false)
         SpecNode.has_relationship("container", :is_member_of)
       end
@@ -90,7 +90,7 @@ describe ActiveFedora::Relationships do
         #local_node.internal_uri = "info:fedora/#{@pid}"
         local_node.pid = @pid
         
-        local_node.expects(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content=>'')).at_least_once
+        local_node.stub(:rels_ext).and_return(stub("rels_ext", :content_will_change! => true, :content=>''))
         local_node.add_relationship(:is_member_of, "info:fedora/container:A")
         local_node.add_relationship(:is_member_of, "info:fedora/container:B")
 
@@ -121,8 +121,8 @@ describe ActiveFedora::Relationships do
         it 'should create relationship descriptions both inbound and outbound' do
           @test_object2 = MockHasRelationship.new
           @test_object2.pid = increment_pid
-          @test_object2.stubs(:testing_inbound).returns({})
-          @test_object2.expects(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content =>'')).at_least_once
+          @test_object2.stub(:testing_inbound).and_return({})
+          @test_object2.stub(:rels_ext).and_return(stub("rels_ext", :content_will_change! => true, :content =>''))
           @test_object2.add_relationship(:has_model, SpecNode.to_class_uri)
           @test_object2.should respond_to(:testing_append)
           @test_object2.should respond_to(:testing_remove)
@@ -173,9 +173,9 @@ describe ActiveFedora::Relationships do
                               {"id"=>"_PID3_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]}]
         SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
         local_node = SpecNode.new()
-        local_node.expects(:pid).returns("test:sample_pid")
-        SpecNode.expects(:relationships_desc).returns({:inbound=>{"parts"=>{:predicate=>:is_part_of}}}).at_least_once()
-        ActiveFedora::SolrService.expects(:query).with(@part_of_sample, :rows=>25).returns(@sample_solr_hits)
+        local_node.should_receive(:pid).and_return("test:sample_pid")
+        SpecNode.stub(:relationships_desc).and_return({:inbound=>{"parts"=>{:predicate=>:is_part_of}}})
+        ActiveFedora::SolrService.should_receive(:query).with(@part_of_sample, :rows=>25).and_return(@sample_solr_hits)
         local_node.parts_ids.should == ["_PID1_", "_PID2_", "_PID3_"]
       end
       
@@ -184,11 +184,11 @@ describe ActiveFedora::Relationships do
         SpecNode.create_inbound_relationship_finders("constituents", :is_constituent_of, :inbound => true)
         local_node = SpecNode.new
         mock_repo = mock("repo")
-        mock_repo.expects(:find).never
-        local_node.expects(:pid).returns("test:sample_pid")
-        SpecNode.expects(:relationships_desc).returns({:inbound=>{"constituents"=>{:predicate=>:is_constituent_of}}}).at_least_once()
+        mock_repo.should_receive(:find).never
+        local_node.should_receive(:pid).and_return("test:sample_pid")
+        SpecNode.stub(:relationships_desc).and_return({:inbound=>{"constituents"=>{:predicate=>:is_constituent_of}}})
         instance = stub(:conn=>stub(:conn))
-        ActiveFedora::SolrService.expects(:query).with(@constituent_of_sample, :raw=>true, :rows=>101).returns(solr_result)
+        ActiveFedora::SolrService.should_receive(:query).with(@constituent_of_sample, :raw=>true, :rows=>101).and_return(solr_result)
         local_node.constituents(:response_format => :solr, :rows=>101).should == solr_result
       end
       
@@ -196,23 +196,23 @@ describe ActiveFedora::Relationships do
       it "resulting _ids finder should search against solr and return an array of fedora PIDs" do
         SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
         local_node = SpecNode.new
-        local_node.expects(:pid).returns("test:sample_pid")
-        SpecNode.expects(:relationships_desc).returns({:inbound=>{"parts"=>{:predicate=>:is_part_of}}}).at_least_once() 
-        ActiveFedora::SolrService.expects(:query).with(@part_of_sample, :rows=>25).returns([Hash["id"=>"pid1"], Hash["id"=>"pid2"]])
+        local_node.should_receive(:pid).and_return("test:sample_pid")
+        SpecNode.stub(:relationships_desc).and_return({:inbound=>{"parts"=>{:predicate=>:is_part_of}}})
+        ActiveFedora::SolrService.should_receive(:query).with(@part_of_sample, :rows=>25).and_return([Hash["id"=>"pid1"], Hash["id"=>"pid2"]])
         local_node.parts(:response_format => :id_array).should == ["pid1", "pid2"]
       end
       
       it "resulting _ids finder should call the basic finder with :result_format => :id_array" do
         SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
         local_node = SpecNode.new
-        local_node.expects(:parts).with(:response_format => :id_array)
+        local_node.should_receive(:parts).with(:response_format => :id_array)
         local_node.parts_ids
       end
 
       it "resulting _query finder should call relationship_query" do
         SpecNode.create_inbound_relationship_finders("parts", :is_part_of, :inbound => true)
         local_node = SpecNode.new
-        local_node.expects(:relationship_query).with("parts")
+        local_node.should_receive(:relationship_query).with("parts")
         local_node.parts_query
       end
     end
@@ -240,15 +240,15 @@ describe ActiveFedora::Relationships do
         it "should read from relationships array and use Repository.find to build an array of objects" do
           SpecNode.create_outbound_relationship_finders("containers", :is_member_of)
           local_node = SpecNode.new
-          local_node.expects(:ids_for_outbound).with(:is_member_of).returns(["my:_PID1_", "my:_PID2_", "my:_PID3_"])
+          local_node.should_receive(:ids_for_outbound).with(:is_member_of).and_return(["my:_PID1_", "my:_PID2_", "my:_PID3_"])
 
-          #ActiveFedora::ContentModel.expects(:known_models_for).returns([SpecNode]).times(3)
-          ActiveFedora::SolrService.expects(:query).with("id:my\\:_PID1_ OR id:my\\:_PID2_ OR id:my\\:_PID3_").returns([{"id"=> "my:_PID1_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]},
+          #ActiveFedora::ContentModel.should_receive(:known_models_for).and_return([SpecNode]).times(3)
+          ActiveFedora::SolrService.should_receive(:query).with("id:my\\:_PID1_ OR id:my\\:_PID2_ OR id:my\\:_PID3_").and_return([{"id"=> "my:_PID1_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]},
                          {"id"=> "my:_PID2_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]}, 
                          {"id"=> "my:_PID3_", "has_model_s"=>["info:fedora/afmodel:SpecNode"]}])
-          ActiveFedora::DigitalObject.expects(:find).with(SpecNode, 'my:_PID1_').returns(stub("inner obj", :'new?'=>false, :pid=>'my:_PID1_'))
-          ActiveFedora::DigitalObject.expects(:find).with(SpecNode, 'my:_PID2_').returns(stub("inner obj", :'new?'=>false, :pid=>'my:_PID2_'))
-          ActiveFedora::DigitalObject.expects(:find).with(SpecNode, 'my:_PID3_').returns(stub("inner obj", :'new?'=>false, :pid=>'my:_PID3_'))
+          ActiveFedora::DigitalObject.should_receive(:find).with(SpecNode, 'my:_PID1_').and_return(stub("inner obj", :'new?'=>false, :pid=>'my:_PID1_'))
+          ActiveFedora::DigitalObject.should_receive(:find).with(SpecNode, 'my:_PID2_').and_return(stub("inner obj", :'new?'=>false, :pid=>'my:_PID2_'))
+          ActiveFedora::DigitalObject.should_receive(:find).with(SpecNode, 'my:_PID3_').and_return(stub("inner obj", :'new?'=>false, :pid=>'my:_PID3_'))
           local_node.containers.map(&:pid).should == ["my:_PID1_", "my:_PID2_", "my:_PID3_"]
         end
       
@@ -257,23 +257,23 @@ describe ActiveFedora::Relationships do
           SpecNode.create_outbound_relationship_finders("constituents", :is_constituent_of)
           local_node = SpecNode.new
           mock_repo = mock("repo")
-          mock_repo.expects(:find).never
-          local_node.expects(:rels_ext).returns(stub('rels-ext', :content=>''))
-          ActiveFedora::SolrService.expects(:query).returns(solr_result)
+          mock_repo.should_receive(:find).never
+          local_node.should_receive(:rels_ext).and_return(stub('rels-ext', :content=>''))
+          ActiveFedora::SolrService.should_receive(:query).and_return(solr_result)
           local_node.constituents(:response_format => :solr).should == solr_result
         end
         
         it "(:response_format => :id_array) should read from relationships array" do
           SpecNode.create_outbound_relationship_finders("containers", :is_member_of)
           local_node = SpecNode.new
-          local_node.expects(:ids_for_outbound).with(:is_member_of).returns([])
+          local_node.should_receive(:ids_for_outbound).with(:is_member_of).and_return([])
           local_node.containers_ids
         end
       
         it "(:response_format => :id_array) should return an array of fedora PIDs" do
           SpecNode.create_outbound_relationship_finders("containers", :is_member_of)
           local_node = SpecNode.new
-          local_node.expects(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content=>'')).at_least_once
+          local_node.stub(:rels_ext => mock("rels_ext", :content_will_change! => true, :content=>''))
           local_node.add_relationship(:is_member_of, "demo:10")
           result = local_node.containers_ids
           result.should be_instance_of(Array)
@@ -286,7 +286,7 @@ describe ActiveFedora::Relationships do
         it "should call the basic finder with :result_format => :id_array" do
           SpecNode.create_outbound_relationship_finders("parts", :is_part_of)
           local_node = SpecNode.new
-          local_node.expects(:parts).with(:response_format => :id_array)
+          local_node.should_receive(:parts).with(:response_format => :id_array)
           local_node.parts_ids
         end
       end
@@ -294,7 +294,7 @@ describe ActiveFedora::Relationships do
       it "resulting _query finder should call relationship_query" do
         SpecNode.create_outbound_relationship_finders("containers", :is_member_of)
         local_node = SpecNode.new
-        local_node.expects(:relationship_query).with("containers")
+        local_node.should_receive(:relationship_query).with("containers")
         local_node.containers_query
       end
     end
@@ -312,21 +312,21 @@ describe ActiveFedora::Relationships do
         @local_node.should respond_to(:all_parts_outbound)
       end
       it "should rely on inbound & outbound finders" do      
-        @local_node.expects(:all_parts_inbound).with(:rows => 25).returns(["foo1"])
-        @local_node.expects(:all_parts_outbound).with(:rows => 25).returns(["foo2"])
+        @local_node.should_receive(:all_parts_inbound).with(:rows => 25).and_return(["foo1"])
+        @local_node.should_receive(:all_parts_outbound).with(:rows => 25).and_return(["foo2"])
         @local_node.all_parts.should == ["foo1", "foo2"]
       end
       it "(:response_format => :id_array) should rely on inbound & outbound finders" do
-        @local_node.expects(:all_parts_inbound).with(:response_format=>:id_array, :rows => 34).returns(["fooA"])
-        @local_node.expects(:all_parts_outbound).with(:response_format=>:id_array, :rows => 34).returns(["fooB"])
+        @local_node.should_receive(:all_parts_inbound).with(:response_format=>:id_array, :rows => 34).and_return(["fooA"])
+        @local_node.should_receive(:all_parts_outbound).with(:response_format=>:id_array, :rows => 34).and_return(["fooB"])
         @local_node.all_parts(:response_format=>:id_array, :rows => 34).should == ["fooA", "fooB"]
       end
       it "(:response_format => :solr) should construct a solr query that combines inbound and outbound searches" do
         # get the id array for outbound relationships then construct solr query by combining id array with inbound relationship search
-        @local_node.expects(:ids_for_outbound).with(:has_part).returns(["mypid:1"])
+        @local_node.should_receive(:ids_for_outbound).with(:has_part).and_return(["mypid:1"])
         id_array_query = ActiveFedora::SolrService.construct_query_for_pids(["mypid:1"])
         solr_result = mock("solr result")
-        ActiveFedora::SolrService.expects(:query).with("#{id_array_query} OR (#{@part_of_sample})", :rows=>25).returns(solr_result)
+        ActiveFedora::SolrService.should_receive(:query).with("#{id_array_query} OR (#{@part_of_sample})", :rows=>25).and_return(solr_result)
         @local_node.all_parts(:response_format=>:solr)
       end
 
@@ -345,14 +345,14 @@ describe ActiveFedora::Relationships do
       it "resulting _query finder should call relationship_query" do
         SpecNode.create_bidirectional_relationship_finders("containers", :is_member_of, :has_member)
         local_node = SpecNode.new
-        local_node.expects(:relationship_query).with("containers")
+        local_node.should_receive(:relationship_query).with("containers")
         local_node.containers_query
       end
     end
     
     describe "#has_bidirectional_relationship" do
       it "should ..." do
-        SpecNode.expects(:create_bidirectional_relationship_finders).with("all_parts", :has_part, :is_part_of, {})
+        SpecNode.should_receive(:create_bidirectional_relationship_finders).with("all_parts", :has_part, :is_part_of, {})
         SpecNode.has_bidirectional_relationship("all_parts", :has_part, :is_part_of)
       end
 
@@ -363,9 +363,9 @@ describe ActiveFedora::Relationships do
         @local_node2 = SpecNode.new
         @local_node2.pid = "mypid2"
         model_def = SpecNode.to_class_uri
-        @local_node.expects(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content=>'')).at_least_once
+        @local_node.stub(:rels_ext => mock("rels_ext", :content_will_change! => true, :content=>''))
         @local_node.add_relationship(:has_model, model_def)
-        @local_node2.expects(:rels_ext).returns(stub("rels_ext", :content_will_change! => true, :content=>'')).at_least_once
+        @local_node2.stub(:rels_ext => mock("rels_ext", :content_will_change! => true, :content=>''))
         @local_node2.add_relationship(:has_model, model_def)
         @local_node.add_relationship(:has_part, @local_node2)
         @local_node2.add_relationship(:has_part, @local_node)
@@ -441,7 +441,7 @@ describe ActiveFedora::Relationships do
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(MockRelationshipNames.to_class_uri))
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_member),  RDF::URI.new(@test_object4.internal_uri))
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new(@test_object3.internal_uri))
-      @test_object2.expects(:relationships).returns(graph).at_least_once
+      @test_object2.stub(:relationships =>graph)
      @test_object2.find_relationship_by_name("testing").should == [@test_object3.internal_uri] 
     end
   end
@@ -470,22 +470,22 @@ describe ActiveFedora::Relationships do
     
     it "should call bidirectional_relationship_query if a bidirectional relationship" do
       ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
-      @mockrelsquery.expects(:ids_for_outbound).with(:has_part).returns(ids).at_least_once
-      @mockrelsquery.expects(:pid).returns("changeme:5")
-      MockNamedRelationshipQuery.expects(:bidirectional_relationship_query).with("changeme:5","testing_bi_query",ids)
+      @mockrelsquery.stub(:ids_for_outbound).with(:has_part).and_return(ids)
+      @mockrelsquery.should_receive(:pid).and_return("changeme:5")
+      MockNamedRelationshipQuery.should_receive(:bidirectional_relationship_query).with("changeme:5","testing_bi_query",ids)
       @mockrelsquery.relationship_query("testing_bi_query")
     end
     
     it "should call outbound_relationship_query if an outbound relationship" do
       ids = ["changeme:1","changeme:2","changeme:3","changeme:4"]
-      @mockrelsquery.expects(:ids_for_outbound).with(:is_part_of).returns(ids).at_least_once
-      MockNamedRelationshipQuery.expects(:outbound_relationship_query).with("testing_outbound_no_solr_fq",ids)
+      @mockrelsquery.stub(:ids_for_outbound).with(:is_part_of).and_return(ids)
+      MockNamedRelationshipQuery.should_receive(:outbound_relationship_query).with("testing_outbound_no_solr_fq",ids)
       @mockrelsquery.relationship_query("testing_outbound_no_solr_fq")
     end
     
     it "should call inbound_relationship_query if an inbound relationship" do
-      @mockrelsquery.expects(:pid).returns("changeme:5")
-      MockNamedRelationshipQuery.expects(:inbound_relationship_query).with("changeme:5","testing_inbound_query")
+      @mockrelsquery.should_receive(:pid).and_return("changeme:5")
+      MockNamedRelationshipQuery.should_receive(:inbound_relationship_query).with("changeme:5","testing_inbound_query")
       @mockrelsquery.relationship_query("testing_inbound_query")
     end
   end
@@ -529,7 +529,7 @@ describe ActiveFedora::Relationships do
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(SpecNode.to_class_uri))
-      @test_object.expects(:relationships).returns(graph).at_least_once
+      @test_object.stub(:relationships).and_return(graph)
       @test_object.conforms_to?(SpecNode).should == true
     end
   end
@@ -549,7 +549,7 @@ describe ActiveFedora::Relationships do
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(SpecNode.to_class_uri))
-      @test_object.expects(:relationships).returns(graph).at_least_once
+      @test_object.stub(:relationships).and_return(graph)
       @test_object3.assert_conforms_to('object',@test_object,SpecNode)
     end
   end
@@ -595,14 +595,14 @@ describe ActiveFedora::Relationships do
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(model_pid))
-      @test_object2.expects(:relationships).returns(graph).at_least_once
+      @test_object2.stub(:relationships).and_return(graph)
       #should return expected named relationships
       @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[]}}
       graph = RDF::Graph.new
       subject = RDF::URI.new "info:fedora/test:sample_pid"
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(model_pid))
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new(@test_object.internal_uri))
-      @test_object3.expects(:relationships).returns(graph).at_least_once
+      @test_object3.stub(:relationships).and_return(graph)
       @test_object3.relationships_by_name.should == {:self=>{"testing"=>[@test_object.internal_uri],"testing2"=>[]}}
     end 
   end

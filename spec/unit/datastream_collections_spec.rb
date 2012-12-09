@@ -65,8 +65,8 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2 = MockAddNamedDatastream.new
       @f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
       @f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
-      @f.stubs(:content_type).returns("image/jpeg")
-      @f2.stubs(:original_filename).returns("dino.jpg")
+      @f.stub(:content_type).and_return("image/jpeg")
+      @f2.stub(:original_filename).and_return("dino.jpg")
     end
       
     it 'cannot add a datastream with name that does not exist' do
@@ -96,7 +96,7 @@ describe ActiveFedora::DatastreamCollections do
     end 
 
     it "should check the file for a content type" do
-      @f.expects(:content_type).returns("image/jpeg")
+      @f.should_receive(:content_type).and_return("image/jpeg")
       @test_object2.add_named_datastream("thumbnail",{:file=>@f})
     end
 
@@ -105,7 +105,7 @@ describe ActiveFedora::DatastreamCollections do
     end
 
     it "should encsure mimetype and content type match" do
-      @f.stubs(:content_type).returns("image/tiff")
+      @f.stub(:content_type).and_return("image/tiff")
       expect { @test_object2.add_named_datastream("thumbnail",{:file=>f}) }.to raise_error
     end
       
@@ -118,7 +118,7 @@ describe ActiveFedora::DatastreamCollections do
 
     it "should cgecj that a dsid forms to the prefix" do
       #if dsid supplied check that conforms to prefix
-      @f.stubs(:content_type).returns("image/jpeg")
+      @f.stub(:content_type).and_return("image/jpeg")
       expect { @test_object2.add_named_datastream("thumbnail",{:file=>@f,:dsid=>"DS1"}) }.to raise_error
     end
 
@@ -155,8 +155,8 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2 = MockAddNamedFileDatastream.new
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
       #these normally supplied in multi-part post request
-      f.stubs(:original_filename).returns("minivan.jpg")
-      f.stubs(:content_type).returns("image/jpeg")
+      f.stub(:original_filename).and_return("minivan.jpg")
+      f.stub(:content_type).and_return("image/jpeg")
       @test_object2.add_named_file_datastream("thumbnail",f)
       thumb = @test_object2.thumbnail.first
       thumb.class.should == ActiveFedora::Datastream
@@ -183,10 +183,10 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2 = MockUpdateNamedDatastream.new
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
       f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
-      f.stubs(:content_type).returns("image/jpeg")
-      f.stubs(:original_filename).returns("minivan.jpg")
-      f2.stubs(:content_type).returns("image/jpeg")
-      f2.stubs(:original_filename).returns("dino.jpg")
+      f.stub(:content_type).and_return("image/jpeg")
+      f.stub(:original_filename).and_return("minivan.jpg")
+      f2.stub(:content_type).and_return("image/jpeg")
+      f2.stub(:original_filename).and_return("dino.jpg")
       #check raise exception if dsid not supplied
       @test_object2.add_named_datastream("thumbnail",{:file=>f})
       had_exception = false
@@ -273,11 +273,11 @@ describe ActiveFedora::DatastreamCollections do
     it 'should return a hash of datastream names to arrays of datastreams' do
       @test_object2 = MockNamedDatastreams.new
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg" ))
-      f.stubs(:content_type).returns("image/jpeg")
-      f.stubs(:original_filename).returns("minivan.jpg")
+      f.stub(:content_type).and_return("image/jpeg")
+      f.stub(:original_filename).and_return("minivan.jpg")
       f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
-      f2.stubs(:content_type).returns("image/jpeg")
-      f2.stubs(:original_filename).returns("dino.jpg")
+      f2.stub(:content_type).and_return("image/jpeg")
+      f2.stub(:original_filename).and_return("dino.jpg")
       @test_object2.thumbnail_file_append(f)
       @test_object2.high_file_append(f2)
       @test_object2.external_append({:dsLocation=>"http://myresource.com"})
@@ -319,11 +319,11 @@ describe ActiveFedora::DatastreamCollections do
     it 'should provide a hash of datastreams names to array of datastream ids' do
       @test_object2 = MockNamedDatastreamsIds.new
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg" ))
-      f.stubs(:content_type).returns("image/jpeg")
-      f.stubs(:original_filename).returns("minivan.jpg")
+      f.stub(:content_type).and_return("image/jpeg")
+      f.stub(:original_filename).and_return("minivan.jpg")
       f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
-      f2.stubs(:content_type).returns("image/jpeg")
-      f2.stubs(:original_filename).returns("dino.jpg")
+      f2.stub(:content_type).and_return("image/jpeg")
+      f2.stub(:original_filename).and_return("dino.jpg")
       @test_object2.thumbnail_file_append(f)
       @test_object2.high_file_append(f2)
       @test_object2.external_append({:dsLocation=>"http://myresource.com"})
@@ -349,8 +349,8 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2.should respond_to(:high_ids)
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
       f2 = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ))
-      f2.stubs(:original_filename).returns("dino.jpg")
-      f.stubs(:content_type).returns("image/jpeg")
+      f2.stub(:original_filename).and_return("dino.jpg")
+      f.stub(:content_type).and_return("image/jpeg")
       @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f, :label=>"testDS"})
       @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2})
       @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2})
@@ -388,8 +388,8 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2.should respond_to(:thumbnail_append)
       @test_object2.should respond_to(:ead_append)
       f = File.new(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"))
-      f.stubs(:content_type).returns("image/jpeg")
-      f.stubs(:original_filename).returns("minivan.jpg")
+      f.stub(:content_type).and_return("image/jpeg")
+      f.stub(:original_filename).and_return("minivan.jpg")
       @test_object2.thumbnail_file_append(f)
       t2_thumb1 = @test_object2.thumbnail.first
       t2_thumb1.mimeType.should == "image/jpeg"

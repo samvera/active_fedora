@@ -108,8 +108,8 @@ describe ActiveFedora::SolrService do
     it 'should call load_instance_from_solr if :load_from_solr option passed in' do
       query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@test_object.pid)} OR id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
       solr_result = ActiveFedora::SolrService.query(query)
-      ActiveFedora::Base.expects(:load_instance_from_solr).times(1)
-      FooObject.expects(:load_instance_from_solr).times(1)
+      ActiveFedora::Base.should_receive(:load_instance_from_solr).once
+      FooObject.should_receive(:load_instance_from_solr).once
       result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
     end
     

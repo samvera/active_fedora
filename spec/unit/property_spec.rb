@@ -2,8 +2,6 @@ require 'spec_helper'
 
 require 'active_fedora'
 require 'active_fedora/model'
-require 'mocha'
-include Mocha::API
 
 describe ActiveFedora::Property do
   

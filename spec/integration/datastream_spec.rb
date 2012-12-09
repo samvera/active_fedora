@@ -34,7 +34,7 @@ describe ActiveFedora::Datastream do
     title.namespace = xml_content.xpath('//oai_dc:dc/dc:identifier').first.namespace
     xml_content.root.add_child title
     
-    @test_object.datastreams["DC"].stubs(:before_save)
+    @test_object.datastreams["DC"].stub(:before_save)
     @test_object.datastreams["DC"].content = xml_content.to_s
     @test_object.datastreams["DC"].save
     

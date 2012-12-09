@@ -13,7 +13,7 @@ describe ActiveFedora::FileConfigurator do
 
   describe "#initialize" do
     it "should trigger configuration reset (to empty defaults)" do
-      ActiveFedora::FileConfigurator.any_instance.expects(:reset!)
+      ActiveFedora::FileConfigurator.any_instance.should_receive(:reset!)
       ActiveFedora::FileConfigurator.new
     end 
   end
@@ -32,7 +32,7 @@ describe ActiveFedora::FileConfigurator do
       subject.reset!
     end
     it "should trigger configuration to load" do
-      subject.expects(:load_fedora_config).at_least_once
+      subject.should_receive(:load_fedora_config)
       subject.fedora_config
     end 
   end
@@ -41,7 +41,7 @@ describe ActiveFedora::FileConfigurator do
       subject.reset!
     end
     it "should trigger configuration to load" do
-      subject.expects(:load_solr_config).at_least_once
+      subject.should_receive(:load_solr_config)
       subject.solr_config
     end 
   end
@@ -63,55 +63,55 @@ describe ActiveFedora::FileConfigurator do
     
     describe "get_config_path(:fedora)" do
       it "should use the config_options[:config_path] if it exists" do
-        subject.expects(:config_options).at_least_once.returns({:fedora_config_path => "/path/to/fedora.yml"})
-        File.expects(:file?).with("/path/to/fedora.yml").returns(true)
+        subject.should_receive(:config_options).and_return({:fedora_config_path => "/path/to/fedora.yml"})
+        File.should_receive(:file?).with("/path/to/fedora.yml").and_return(true)
         subject.get_config_path(:fedora).should eql("/path/to/fedora.yml")
       end
 
       it "should look in Rails.root/config/fedora.yml if it exists and no fedora_config_path passed in" do
-        subject.expects(:config_options).at_least_once.returns({})
+        subject.should_receive(:config_options).and_return({})
         stub_rails(:root => "/rails/root")
-        File.expects(:file?).with("/rails/root/config/fedora.yml").returns(true)
+        File.should_receive(:file?).with("/rails/root/config/fedora.yml").and_return(true)
         subject.get_config_path(:fedora).should eql("/rails/root/config/fedora.yml")
         unstub_rails
       end
 
       it "should look in ./config/fedora.yml if neither rails.root nor :fedora_config_path are set" do
-        subject.expects(:config_options).at_least_once.returns({})
-        Dir.expects(:getwd).at_least_once.returns("/current/working/directory")
-        File.expects(:file?).with("/current/working/directory/config/fedora.yml").returns(true)
+        subject.should_receive(:config_options).and_return({})
+        Dir.stub(:getwd => "/current/working/directory")
+        File.should_receive(:file?).with("/current/working/directory/config/fedora.yml").and_return(true)
         subject.get_config_path(:fedora).should eql("/current/working/directory/config/fedora.yml")
       end
 
       it "should return default fedora.yml that ships with active-fedora if none of the above" do
-        subject.expects(:config_options).at_least_once.returns({})
-        Dir.expects(:getwd).at_least_once.returns("/current/working/directory")
-        File.expects(:file?).with("/current/working/directory/config/fedora.yml").returns(false)
-        File.expects(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"),'config','fedora.yml'))).returns(true)
-        logger.expects(:warn).with("Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml to ActiveFedora - ie. ActiveFedora.init(:fedora_config_path => '/path/to/fedora.yml') - or set Rails.root and put fedora.yml into \#{Rails.root}/config.")
+        subject.should_receive(:config_options).and_return({})
+        Dir.should_receive(:getwd).and_return("/current/working/directory")
+        File.should_receive(:file?).with("/current/working/directory/config/fedora.yml").and_return(false)
+        File.should_receive(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"),'config','fedora.yml'))).and_return(true)
+        logger.should_receive(:warn).with("Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml to ActiveFedora - ie. ActiveFedora.init(:fedora_config_path => '/path/to/fedora.yml') - or set Rails.root and put fedora.yml into \#{Rails.root}/config.")
         subject.get_config_path(:fedora).should eql(File.expand_path(File.join(File.dirname("__FILE__"),'config','fedora.yml')))
       end
     end
 
     describe "get_config_path(:solr)" do
       it "should return the solr_config_path if set in config_options hash" do
-        subject.expects(:config_options).at_least_once.returns({:solr_config_path => "/path/to/solr.yml"})
-        File.expects(:file?).with("/path/to/solr.yml").returns(true)
+        subject.stub(:config_options => {:solr_config_path => "/path/to/solr.yml"})
+        File.should_receive(:file?).with("/path/to/solr.yml").and_return(true)
         subject.get_config_path(:solr).should eql("/path/to/solr.yml")
       end
       
       it "should return the solr.yml file in the same directory as the fedora.yml if it exists" do
-        subject.expects(:path).returns("/path/to/fedora/config/fedora.yml")
-        File.expects(:file?).with("/path/to/fedora/config/solr.yml").returns(true)
+        subject.should_receive(:path).and_return("/path/to/fedora/config/fedora.yml")
+        File.should_receive(:file?).with("/path/to/fedora/config/solr.yml").and_return(true)
         subject.get_config_path(:solr).should eql("/path/to/fedora/config/solr.yml")
       end
       
       context "no solr.yml in same directory as fedora.yml and fedora.yml does not contain solr url" do
 
         before :each do
-          subject.expects(:config_options).at_least_once.returns({})
-          subject.expects(:path).returns("/path/to/fedora/config/fedora.yml")
-          File.expects(:file?).with("/path/to/fedora/config/solr.yml").returns(false)
+          subject.stub(:config_options => {})
+          subject.should_receive(:path).and_return("/path/to/fedora/config/fedora.yml")
+          File.should_receive(:file?).with("/path/to/fedora/config/solr.yml").and_return(false)
         end
         after :each do
           unstub_rails
@@ -119,21 +119,21 @@ describe ActiveFedora::FileConfigurator do
 
         it "should not raise an error if there is not a solr.yml in the same directory as the fedora.yml and the fedora.yml has a solr url defined and look in rails.root" do
           stub_rails(:root=>"/rails/root")
-          File.expects(:file?).with("/rails/root/config/solr.yml").returns(true)
+          File.should_receive(:file?).with("/rails/root/config/solr.yml").and_return(true)
           subject.get_config_path(:solr).should eql("/rails/root/config/solr.yml")
         end
 
         it "should look in ./config/solr.yml if no rails root" do
-          Dir.expects(:getwd).at_least_once.returns("/current/working/directory")
-          File.expects(:file?).with("/current/working/directory/config/solr.yml").returns(true)
+          Dir.stub(:getwd => "/current/working/directory")
+          File.should_receive(:file?).with("/current/working/directory/config/solr.yml").and_return(true)
           subject.get_config_path(:solr).should eql("/current/working/directory/config/solr.yml")
         end
 
         it "should return the default solr.yml file that ships with active-fedora if no other option is set" do
-          Dir.expects(:getwd).at_least_once.returns("/current/working/directory")
-          File.expects(:file?).with("/current/working/directory/config/solr.yml").returns(false)
-          File.expects(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"),'config','solr.yml'))).returns(true)
-          logger.expects(:warn).with("Using the default solr.yml that comes with active-fedora.  If you want to override this, pass the path to solr.yml to ActiveFedora - ie. ActiveFedora.init(:solr_config_path => '/path/to/solr.yml') - or set Rails.root and put solr.yml into \#{Rails.root}/config.")
+          Dir.stub(:getwd => "/current/working/directory")
+          File.should_receive(:file?).with("/current/working/directory/config/solr.yml").and_return(false)
+          File.should_receive(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"),'config','solr.yml'))).and_return(true)
+          logger.should_receive(:warn).with("Using the default solr.yml that comes with active-fedora.  If you want to override this, pass the path to solr.yml to ActiveFedora - ie. ActiveFedora.init(:solr_config_path => '/path/to/solr.yml') - or set Rails.root and put solr.yml into \#{Rails.root}/config.")
           subject.get_config_path(:solr).should eql(File.expand_path(File.join(File.dirname("__FILE__"),'config','solr.yml')))
         end
       end
@@ -145,25 +145,25 @@ describe ActiveFedora::FileConfigurator do
         subject.reset!
       end
       it "should load the file specified in fedora_config_path" do
-        subject.expects(:get_config_path).with(:fedora).returns("/path/to/fedora.yml")
-        subject.expects(:load_solr_config)
-        IO.expects(:read).with("/path/to/fedora.yml").returns("development:\n url: http://devfedora:8983\ntest:\n  url: http://myfedora:8080")
+        subject.should_receive(:get_config_path).with(:fedora).and_return("/path/to/fedora.yml")
+        subject.should_receive(:load_solr_config)
+        IO.should_receive(:read).with("/path/to/fedora.yml").and_return("development:\n url: http://devfedora:8983\ntest:\n  url: http://myfedora:8080")
         subject.load_fedora_config.should == {:url=>"http://myfedora:8080"}
         subject.fedora_config.should == {:url=>"http://myfedora:8080"}
       end
 
       it "should allow sharding" do
-        subject.expects(:get_config_path).with(:fedora).returns("/path/to/fedora.yml")
-        subject.expects(:load_solr_config)
-        IO.expects(:read).with("/path/to/fedora.yml").returns("development:\n  url: http://devfedora:8983\ntest:\n- url: http://myfedora:8080\n- url: http://myfedora:8081")
+        subject.should_receive(:get_config_path).with(:fedora).and_return("/path/to/fedora.yml")
+        subject.should_receive(:load_solr_config)
+        IO.should_receive(:read).with("/path/to/fedora.yml").and_return("development:\n  url: http://devfedora:8983\ntest:\n- url: http://myfedora:8080\n- url: http://myfedora:8081")
         subject.load_fedora_config.should == [{:url=>"http://myfedora:8080"}, {:url=>"http://myfedora:8081"}]
         subject.fedora_config.should == [{:url=>"http://myfedora:8080"}, {:url=>"http://myfedora:8081"}]
       end
 
       it "should parse the file using ERb" do
-        subject.expects(:get_config_path).with(:fedora).returns("/path/to/fedora.yml")
-        subject.expects(:load_solr_config)
-        IO.expects(:read).with("/path/to/fedora.yml").returns("development:\n  url: http://devfedora:<%= 8983 %>\ntest:\n  url: http://myfedora:<%= 8081 %>")
+        subject.should_receive(:get_config_path).with(:fedora).and_return("/path/to/fedora.yml")
+        subject.should_receive(:load_solr_config)
+        IO.should_receive(:read).with("/path/to/fedora.yml").and_return("development:\n  url: http://devfedora:<%= 8983 %>\ntest:\n  url: http://myfedora:<%= 8081 %>")
         subject.load_fedora_config.should == {:url=>"http://myfedora:8081"}
         subject.fedora_config.should == {:url=>"http://myfedora:8081"}
       end
@@ -174,17 +174,17 @@ describe ActiveFedora::FileConfigurator do
         subject.reset!
       end
       it "should load the file specified in solr_config_path" do
-        subject.expects(:get_config_path).with(:solr).returns("/path/to/solr.yml")
-        subject.expects(:load_fedora_config)
-        IO.expects(:read).with("/path/to/solr.yml").returns("development:\n  default:\n    url: http://devsolr:8983\ntest:\n  default:\n    url: http://mysolr:8080")
+        subject.should_receive(:get_config_path).with(:solr).and_return("/path/to/solr.yml")
+        subject.should_receive(:load_fedora_config)
+        IO.should_receive(:read).with("/path/to/solr.yml").and_return("development:\n  default:\n    url: http://devsolr:8983\ntest:\n  default:\n    url: http://mysolr:8080")
         subject.load_solr_config.should == {:url=>"http://mysolr:8080"}
         subject.solr_config.should == {:url=>"http://mysolr:8080"}
       end
 
       it "should parse the file using ERb" do
-        subject.expects(:get_config_path).with(:solr).returns("/path/to/solr.yml")
-        subject.expects(:load_fedora_config)
-        IO.expects(:read).with("/path/to/solr.yml").returns("development:\n  default:\n    url: http://devsolr:<%= 8983 %>\ntest:\n  default:\n    url: http://mysolr:<%= 8081 %>")
+        subject.should_receive(:get_config_path).with(:solr).and_return("/path/to/solr.yml")
+        subject.should_receive(:load_fedora_config)
+        IO.should_receive(:read).with("/path/to/solr.yml").and_return("development:\n  default:\n    url: http://devsolr:<%= 8983 %>\ntest:\n  default:\n    url: http://mysolr:<%= 8081 %>")
         subject.load_solr_config.should == {:url=>"http://mysolr:8081"}
         subject.solr_config.should == {:url=>"http://mysolr:8081"}
       end
@@ -206,7 +206,7 @@ describe ActiveFedora::FileConfigurator do
           subject.instance_variable_set :@config_loaded, true
         end
         it "should load the fedora and solr configs" do
-          subject.expects(:load_config).never
+          subject.should_receive(:load_config).never
           subject.config_loaded?.should be_true
           subject.load_configs
           subject.config_loaded?.should be_true
@@ -216,13 +216,13 @@ describe ActiveFedora::FileConfigurator do
 
     describe "check_fedora_path_for_solr" do
       it "should find the solr.yml file and return it if it exists" do
-        subject.expects(:path).returns("/path/to/fedora/fedora.yml")
-        File.expects(:file?).with("/path/to/fedora/solr.yml").returns(true)
+        subject.should_receive(:path).and_return("/path/to/fedora/fedora.yml")
+        File.should_receive(:file?).with("/path/to/fedora/solr.yml").and_return(true)
         subject.check_fedora_path_for_solr.should == "/path/to/fedora/solr.yml"
       end
       it "should return nil if the solr.yml file is not there" do
-        subject.expects(:path).returns("/path/to/fedora/fedora.yml")
-        File.expects(:file?).with("/path/to/fedora/solr.yml").returns(false)
+        subject.should_receive(:path).and_return("/path/to/fedora/fedora.yml")
+        File.should_receive(:file?).with("/path/to/fedora/solr.yml").and_return(false)
         subject.check_fedora_path_for_solr.should be_nil
       end
     end
@@ -246,14 +246,14 @@ describe ActiveFedora::FileConfigurator do
       subject.should respond_to(:solr_config_path)
     end
     it "loads a config from the current working directory as a second choice" do
-      Dir.stubs(:getwd).returns(@fake_rails_root)
+      Dir.stub(:getwd).and_return(@fake_rails_root)
       subject.init
       subject.get_config_path(:fedora).should eql("#{@fake_rails_root}/config/fedora.yml")
       subject.solr_config_path.should eql("#{@fake_rails_root}/config/solr.yml")
     end
     it "loads the config that ships with this gem as a last choice" do
-      Dir.stubs(:getwd).returns("/fake/path")
-      logger.expects(:warn).with("Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml to ActiveFedora - ie. ActiveFedora.init(:fedora_config_path => '/path/to/fedora.yml') - or set Rails.root and put fedora.yml into \#{Rails.root}/config.").times(3)
+      Dir.stub(:getwd).and_return("/fake/path")
+      logger.should_receive(:warn).with("Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml to ActiveFedora - ie. ActiveFedora.init(:fedora_config_path => '/path/to/fedora.yml') - or set Rails.root and put fedora.yml into \#{Rails.root}/config.").exactly(3).times
       subject.init
       expected_config = File.expand_path(File.join(File.dirname(__FILE__), "..", "..", "config"))
       subject.get_config_path(:fedora).should eql(expected_config+'/fedora.yml')
@@ -298,14 +298,14 @@ describe ActiveFedora::FileConfigurator do
     end
 
     it "should return the path to the default config/predicate_mappings.yml if specified config file not found" do
-      File.expects(:exist?).with("/path/to/predicate_mappings.yml").returns(false)
-      File.expects(:exist?).with(default_predicate_mapping_file).returns(true)
+      File.should_receive(:exist?).with("/path/to/predicate_mappings.yml").and_return(false)
+      File.should_receive(:exist?).with(default_predicate_mapping_file).and_return(true)
       subject.send(:build_predicate_config_path,"/path/to").should == default_predicate_mapping_file
     end
 
     it "should return the path to the specified config_path if it exists" do
-      File.expects(:exist?).with("/path/to/predicate_mappings.yml").returns(true)
-      subject.expects(:valid_predicate_mapping?).returns(true)
+      File.should_receive(:exist?).with("/path/to/predicate_mappings.yml").and_return(true)
+      subject.should_receive(:valid_predicate_mapping?).and_return(true)
       subject.send(:build_predicate_config_path,"/path/to").should == "/path/to/predicate_mappings.yml"
     end    
   end

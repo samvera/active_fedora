@@ -31,19 +31,24 @@ describe ActiveFedora::Base do
   end
 
   it "Should have after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
-    CallbackStub.any_instance.expects(:a_init).twice
-    CallbackStub.any_instance.expects :b_create
-    CallbackStub.any_instance.expects :a_create
-    CallbackStub.any_instance.expects(:b_save).twice
-    CallbackStub.any_instance.expects(:a_save).twice
-    CallbackStub.any_instance.expects(:a_find)
-    CallbackStub.any_instance.expects(:b_update)
-    CallbackStub.any_instance.expects(:a_update)
-    CallbackStub.any_instance.expects(:do_stuff)
-    cb = CallbackStub.new
+    CallbackStub.any_instance.should_receive(:a_init)
+    CallbackStub.any_instance.should_receive :b_create
+    CallbackStub.any_instance.should_receive :a_create
+    CallbackStub.any_instance.should_receive(:b_save)
+    CallbackStub.any_instance.should_receive(:a_save)
+    cb = CallbackStub.new :pid => 'test:123'
     cb.save
+end
+ it "Should have after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
+    CallbackStub.any_instance.should_receive(:a_init)
+    CallbackStub.any_instance.should_receive(:b_save)
+    CallbackStub.any_instance.should_receive(:a_save)
+    CallbackStub.any_instance.should_receive(:a_find)
+    CallbackStub.any_instance.should_receive(:b_update)
+    CallbackStub.any_instance.should_receive(:a_update)
+    CallbackStub.any_instance.should_receive(:do_stuff)
 
-    cb2 = CallbackStub.find(cb.pid)
+    cb2 = CallbackStub.find('test:123')
     cb2.save
 
     cb2.destroy

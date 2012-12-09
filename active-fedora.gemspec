@@ -32,7 +32,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency("jettywrapper", ">=1.2.0")
   s.add_development_dependency("rspec", ">= 2.9.0")
   s.add_development_dependency("equivalent-xml")
-  s.add_development_dependency("mocha", "0.10.5")
   
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")

@@ -19,13 +19,17 @@ module ActiveFedora
       before_save :serialize_datastreams
     end
 
+    def ds_specs
+      self.class.ds_specs
+    end
+
     def serialize_datastreams
       datastreams.each {|k, ds| ds.serialize! }
     end
 
     # Adds the disseminator location to the datastream after the pid has been established
     def add_disseminator_location_to_datastreams
-      self.class.ds_specs.each do |name,ds_config|
+      self.ds_specs.each do |name,ds_config|
         ds = datastreams[name]
         if ds && ds.controlGroup == 'E' && ds_config[:disseminator].present?
           ds.dsLocation= "#{ActiveFedora.config_for_environment[:url]}/objects/#{pid}/methods/#{ds_config[:disseminator]}"
@@ -57,7 +61,7 @@ module ActiveFedora
     end
   
     def configure_datastream(ds, ds_spec=nil)
-      ds_spec ||= self.class.ds_specs[ds.instance_variable_get(:@dsid)]
+      ds_spec ||= self.ds_specs[ds.dsid]
       if ds_spec
         ds.model = self if ds_spec[:type] == RelsExtDatastream
         # If you called has_metadata with a block, pass the block into the Datastream class
@@ -72,13 +76,13 @@ module ActiveFedora
     end
 
     def load_datastreams
-      ds_specs = self.class.ds_specs.dup
+      local_ds_specs = self.ds_specs.dup
       inner_object.datastreams.each do |dsid, ds|
         self.add_datastream(ds)
         configure_datastream(datastreams[dsid])
-        ds_specs.delete(dsid)
+        local_ds_specs.delete(dsid)
       end
-      ds_specs.each do |name,ds_spec|
+      local_ds_specs.each do |name,ds_spec|
         ds = datastream_from_spec(ds_spec, name)
         self.add_datastream(ds)
         configure_datastream(ds, ds_spec)
@@ -100,13 +104,7 @@ module ActiveFedora
 
     #return all datastreams of type ActiveFedora::RDFDatastream or ActiveFedora::NokogiriDatastream
     def metadata_streams
-      results = []
-      datastreams.each_value do |ds|
-        if ds.metadata? && !ds.kind_of?(ActiveFedora::RelsExtDatastream)
-          results << ds
-        end
-      end
-      return results
+      datastreams.select { |k, ds| ds.metadata? }.reject { |k, ds| ds.kind_of?(ActiveFedora::RelsExtDatastream) }.values
     end
     
     # return a valid dsid that is not currently in use.  Uses a prefix (default "DS") and an auto-incrementing integer
@@ -167,9 +165,9 @@ module ActiveFedora
     
     
     def create_datastream(type, dsid, opts={})
-      dsid = generate_dsid(opts[:prefix] || "DS") if dsid == nil
+      dsid ||= generate_dsid(opts[:prefix] || "DS")
       klass = type.kind_of?(Class) ? type : type.constantize
-      raise ArgumentError, "Argument dsid must be of type string" unless dsid.kind_of?(String) || dsid.kind_of?(NilClass)
+      raise ArgumentError, "Argument dsid must be of type string" unless dsid.kind_of?(String)
       ds = klass.new(inner_object, dsid)
       [:mimeType, :controlGroup, :dsLabel, :dsLocation, :checksumType, :versionable].each do |key|
         ds.send("#{key}=".to_sym, opts[key]) unless opts[key].nil?

@@ -103,8 +103,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
       end
       @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
-      @subject.stubs(:pid => 'test:1')
-      @subject.stubs(:new? => false)
+      @subject.stub(:pid => 'test:1')
+      @subject.stub(:new? => false)
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
 
@@ -126,7 +126,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
       end
       @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
-      @subject.stubs(:pid => 'test:1', :repository => ActiveFedora::Base.connection_for_pid(0))
+      @subject.stub(:pid => 'test:1', :repository => ActiveFedora::Base.connection_for_pid(0))
     end
     after(:each) do
       Object.send(:remove_const, :MyDatastream)
@@ -168,8 +168,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
       end
       @subject = MyDatastream.new(@inner_object, 'solr_rdf')
       @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
-      @subject.stubs(:pid => 'test:1')
-      @subject.stubs(:new? => false)
+      @subject.stub(:pid => 'test:1')
+      @subject.stub(:new? => false)
       @sample_fields = {:my_datastream__publisher => {:values => ["publisher1"], :type => :string, :behaviors => [:facetable, :sortable, :searchable, :displayable]}, 
         :my_datastream__based_near => {:values => ["coverage1", "coverage2"], :type => :text, :behaviors => [:displayable, :facetable, :searchable]}, 
         :my_datastream__created => {:values => "fake-date", :type => :date, :behaviors => [:sortable, :displayable]},
@@ -195,7 +195,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.to_solr(doc).should == doc
     end
     it "should iterate through @fields hash" do
-      @subject.expects(:fields).returns(@sample_fields)
+      @subject.should_receive(:fields).and_return(@sample_fields)
       solr_doc = @subject.to_solr
       solr_doc["my_datastream__publisher_t"].should == ["publisher1"]
       solr_doc["my_datastream__publisher_sort"].should == ["publisher1"]
@@ -213,7 +213,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       solr_doc["my_datastream__empty_field_t"].should be_nil
     end
     it 'should append create keys in format field_name + _ + field_type' do
-      @subject.stubs(:fields).returns(@sample_fields)
+      @subject.stub(:fields).and_return(@sample_fields)
       
       #should have these            
       @subject.to_solr["my_datastream__publisher_t"].should_not be_nil
@@ -228,7 +228,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
     it "should use Solr mappings to generate field names" do
       ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
-      @subject.stubs(:fields).returns(@sample_fields)
+      @subject.stub(:fields).and_return(@sample_fields)
       solr_doc =  @subject.to_solr
 
       #should have these            
@@ -257,9 +257,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
           delegate :rights, :to => :descMetadata
         end
         @obj = MyDatastream.new(@inner_object, 'solr_rdf')
-          @obj.stubs(:repository => mock(), :pid => 'test:1')
-          @obj.repository.stubs(:modify_datastream)
-          @obj.repository.stubs(:add_datastream)
+        repository = mock()
+          @obj.stub(:repository => repository, :pid => 'test:1')
+          repository.stub(:modify_datastream)
+          repository.stub(:add_datastream)
         @obj.created = "2012-03-04"
         @obj.title = "Of Mice and Men, The Sequel"
         @obj.publisher = "Bob's Blogtastic Publishing"
@@ -281,8 +282,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
         it "should update the content and graph, marking the datastream as changed" do
           mock_repo = mock('repository')
           sample_rdf = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
-          @obj.stubs(:pid).returns('test:123')
-          @obj.stubs(:repository).returns(mock_repo)
+          @obj.stub(:pid).and_return('test:123')
+          @obj.stub(:repository).and_return(mock_repo)
           @obj.should_not be_changed
           @obj.content.should_not be_equivalent_to(sample_rdf)
           @obj.content = sample_rdf
@@ -323,11 +324,11 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
         it "should solrize even when the object is not new" do
           foo = Foo.new
-          foo.expects(:update_index).once
+          foo.should_receive(:update_index).once
           foo.title = "title1"
           foo.save
           foo = Foo.find(foo.pid)
-          foo.expects(:update_index).once
+          foo.should_receive(:update_index).once
           foo.publisher = "Allah2"
           foo.title = "The Work2"
           foo.save  

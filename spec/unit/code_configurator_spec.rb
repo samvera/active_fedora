@@ -38,10 +38,10 @@ describe ActiveFedora::FileConfigurator do
   end
 
   it "should initialize from code" do
-    YAML.expects(:load).never
-    File.expects(:exists?).never
-    File.expects(:read).never
-    File.expects(:open).never
+    YAML.should_receive(:load).never
+    File.should_receive(:exists?).never
+    File.should_receive(:read).never
+    File.should_receive(:open).never
     ActiveFedora.init(@config_params)
     ActiveFedora.fedora_config.credentials.should == @config_params[:fedora_config]
     ActiveFedora.solr_config.should == @config_params[:solr_config]

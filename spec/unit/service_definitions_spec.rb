@@ -13,11 +13,16 @@ describe ActiveFedora::ServiceDefinitions do
 <fmm:Method operationName="getDocumentStyle2"/>
 </fmm:MethodMap>
     MMAP
-    stub_get("monkey:99")
-    Rubydora::Repository.any_instance.stubs(:client).returns @mock_client
-    Rubydora::Repository.any_instance.stubs(:datastream_dissemination).with({:pid=>'test:12',:dsid=>'METHODMAP'}).returns mmap
+    @repository = ActiveFedora::Base.connection_for_pid(0)
+    @repository.stub(:datastream_dissemination).with({:pid=>'test:12',:dsid=>'METHODMAP'}).and_return mmap
     Test.has_service_definition "test:12"
   end
+
+  subject { 
+      obj = Test.new()
+      obj.stub(:pid).and_return('monkey:99')
+      obj
+    }
   describe "method lookup" do
     it "should find method keys in the YAML config" do
       ActiveFedora::ServiceDefinitions.lookup_method("fedora-system:3", "viewObjectProfile").should == :object_profile
@@ -25,32 +30,29 @@ describe ActiveFedora::ServiceDefinitions do
   end
   describe "method creation" do
     it "should create the system sdef methods" do
-      obj = Test.new()
-      (obj.respond_to? :object_profile).should == true
+      subject.should respond_to(:object_profile)
     end
     it "should create the declared sdef methods" do
-      obj = Test.new()
-      (obj.respond_to? :document_style_1).should == true
+      subject.should respond_to(:document_style_1)
     end
   end
   describe "generated method" do
     it "should call the appropriate rubydora rest api method" do
-      Rubydora::Repository.any_instance.expects(:dissemination).with({:pid=>'monkey:99',:sdef=>'test:12', :method=>'getDocumentStyle1'})
-      #@mock_client.stubs(:[]).with('objects/monkey%3A99/methods/test%3A12/getDocumentStyle1')
-      obj = Test.new()
-      obj.stubs(:pid).returns('monkey:99')
-      obj.document_style_1
+      @repository.should_receive(:dissemination).with({:pid=>'monkey:99',:sdef=>'test:12', :method=>'getDocumentStyle1'})
+      #@mock_client.stub(:[]).with('objects/monkey%3A99/methods/test%3A12/getDocumentStyle1')
+
+      subject.document_style_1
     end
     it "should call the appropriate rubydora rest api method with parameters" do
-      Rubydora::Repository.any_instance.expects(:dissemination).with({:pid=>'monkey:99',:sdef=>'test:12', :method=>'getDocumentStyle1', :format=>'xml'})
+      @repository.should_receive(:dissemination).with({:pid=>'monkey:99',:sdef=>'test:12', :method=>'getDocumentStyle1', :format=>'xml'})
       obj = Test.new()
-      obj.stubs(:pid).returns('monkey:99')
+      obj.stub(:pid).and_return('monkey:99')
       obj.document_style_1({:format=>'xml'})
     end
     it "should call the appropriate rubydora rest api method with a block" do
-      Rubydora::Repository.any_instance.stubs(:dissemination).with({:pid=>'monkey:99',:sdef=>'test:12', :method=>'getDocumentStyle1'}).yields "ping!","pang!"
+      @repository.stub(:dissemination).with({:pid=>'monkey:99',:sdef=>'test:12', :method=>'getDocumentStyle1'}).and_yield "ping!","pang!"
       obj = Test.new()
-      obj.stubs(:pid).returns('monkey:99')
+      obj.stub(:pid).and_return('monkey:99')
       block_response = ""
       obj.document_style_1 {|res,req|
         block_response += 'pong!' if res == "ping!" and req == "pang!"

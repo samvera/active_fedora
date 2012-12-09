@@ -15,12 +15,12 @@ describe ActiveFedora::NokogiriDatastream do
   before(:each) do
     @mock_inner = mock('inner object')
     @mock_repo = mock('repository')
-    @mock_repo.stubs(:datastream_dissemination=>'My Content', :config=>{})
-    @mock_inner.stubs(:repository).returns(@mock_repo)
-    @mock_inner.stubs(:pid)
-    @mock_inner.stubs(:new? => false)
+    @mock_repo.stub(:datastream_dissemination=>'My Content', :config=>{})
+    @mock_inner.stub(:repository).and_return(@mock_repo)
+    @mock_inner.stub(:pid)
+    @mock_inner.stub(:new? => false)
     @test_ds = ActiveFedora::NokogiriDatastream.new(@mock_inner, "descMetadata")
-    @test_ds.stubs(:new? => false, :profile => {}, :datastream_content => '<test_xml/>')
+    @test_ds.stub(:new? => false, :profile => {}, :datastream_content => '<test_xml/>')
     @test_ds.content="<test_xml/>"
   end
   
@@ -44,7 +44,7 @@ describe ActiveFedora::NokogiriDatastream do
       test_ds1.ng_xml.to_xml.should == "<?xml version=\"1.0\"?>\n<xml>\n  <foo/>\n</xml>\n"
     end
     it "should initialize from #xml_template if no xml is provided" do
-      ActiveFedora::NokogiriDatastream.expects(:xml_template).returns("<fake template/>")
+      ActiveFedora::NokogiriDatastream.should_receive(:xml_template).and_return("<fake template/>")
       n = ActiveFedora::NokogiriDatastream.new
       n.ng_xml.should be_equivalent_to("<fake template/>")
     end
@@ -86,7 +86,7 @@ describe ActiveFedora::NokogiriDatastream do
     end
     it "should do nothing if field key is a string (must be an array or symbol).  Will not accept xpath queries!" do
       xml_before = @mods_ds.to_xml
-      logger.expects(:warn).with "WARNING: descMetadata ignoring {\"fubar\" => \"the role\"} because \"fubar\" is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it."
+      logger.should_receive(:warn).with "WARNING: descMetadata ignoring {\"fubar\" => \"the role\"} because \"fubar\" is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it."
       @mods_ds.update_indexed_attributes( { "fubar"=>"the role" } ).should == {}
       @mods_ds.to_xml.should == xml_before
     end
@@ -149,12 +149,12 @@ describe ActiveFedora::NokogiriDatastream do
     end
     
     it "should call lookup with field_name and return the text values from each resulting node" do
-      @mods_ds.expects(:term_values).with("--my xpath--").returns(["value1", "value2"])
+      @mods_ds.should_receive(:term_values).with("--my xpath--").and_return(["value1", "value2"])
       @mods_ds.get_values("--my xpath--").should == ["value1", "value2"]
     end
     it "should assume that field_names that are strings are xpath queries" do
-      ActiveFedora::NokogiriDatastream.expects(:accessor_xpath).never
-      @mods_ds.expects(:term_values).with("--my xpath--").returns(["abstract1", "abstract2"])
+      ActiveFedora::NokogiriDatastream.should_receive(:accessor_xpath).never
+      @mods_ds.should_receive(:term_values).with("--my xpath--").and_return(["abstract1", "abstract2"])
       @mods_ds.get_values("--my xpath--").should == ["abstract1", "abstract2"]
     end
   end
@@ -178,9 +178,9 @@ describe ActiveFedora::NokogiriDatastream do
       @test_ds.should respond_to(:save)
     end
     it "should persist the product of .to_xml in fedora" do
-      @test_ds.expects(:new?).returns(true).at_least_once
-      @test_ds.stubs(:to_xml => "fake xml")
-      @mock_repo.expects(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'X', :dsState => 'A', :mimeType=>'text/xml')
+      @test_ds.stub(:new? => true)
+      @test_ds.stub(:to_xml => "fake xml")
+      @mock_repo.should_receive(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'X', :dsState => 'A', :mimeType=>'text/xml')
 
       @test_ds.serialize!
       @test_ds.save
@@ -191,19 +191,19 @@ describe ActiveFedora::NokogiriDatastream do
   describe '.content=' do
     subject { ActiveFedora::NokogiriDatastream.new(@mock_inner, "descMetadata") }
     it "should update the content" do
-      subject.stubs(:new? => false )
+      subject.stub(:new? => false )
       subject.content = "<a />"
       subject.datastream_content.should == '<a />'
     end
 
     it "should mark the object as changed" do
-      subject.stubs(:new? => false )
+      subject.stub(:new? => false )
       subject.content = "<a />"
       subject.should be_changed
     end
 
     it "update ngxml and mark the xml as loaded" do
-      subject.stubs(:new? => false )
+      subject.stub(:new? => false )
       subject.content = "<a />"
       subject.ng_xml.to_xml.should =~ /<a\/>/
       subject.xml_loaded.should be_true
@@ -240,13 +240,13 @@ describe ActiveFedora::NokogiriDatastream do
     end
     
     it "should ng_xml.to_xml" do
-      @test_ds.expects(:ng_xml).returns(Nokogiri::XML::Document.parse("<text_document/>")).twice
+      @test_ds.stub(:ng_xml => Nokogiri::XML::Document.parse("<text_document/>"))
       @test_ds.to_xml.should == "<text_document/>\n"       
     end
     
     it 'should accept an optional Nokogiri::XML Document as an argument and insert its fields into that (mocked test)' do
       doc = Nokogiri::XML::Document.parse("<test_document/>")
-      doc.root.expects(:add_child)#.with(@test_ds.ng_xml.root)
+      doc.root.should_receive(:add_child)#.with(@test_ds.ng_xml.root)
       @test_ds.to_xml(doc)
     end
     
@@ -286,10 +286,10 @@ describe ActiveFedora::NokogiriDatastream do
  
     it "should return correct values from solr_doc given different term pointers" do
       mock_term = mock("OM::XML::Term")
-      mock_term.stubs(:type).returns(:text)
+      mock_term.stub(:type).and_return(:text)
       mock_terminology = mock("OM::XML::Terminology")
-      mock_terminology.stubs(:retrieve_term).returns(mock_term)
-      ActiveFedora::NokogiriDatastream.stubs(:terminology).returns(mock_terminology)
+      mock_terminology.stub(:retrieve_term).and_return(mock_term)
+      ActiveFedora::NokogiriDatastream.stub(:terminology).and_return(mock_terminology)
       @mods_ds.from_solr(@solr_doc)
       term_pointer = [:name,:role,:roleTerm]
       @mods_ds.get_values_from_solr(:name,:role,:roleTerm).should == ["creator","submitter","teacher"]
@@ -348,7 +348,7 @@ describe ActiveFedora::NokogiriDatastream do
     end
 
     it "should update a value internally call OM::XML::TermValueOperators::update_values if internal_solr_doc is not set" do
-      @mods_ds.stubs(:om_update_values).once()
+      @mods_ds.stub(:om_update_values).once()
       term_pointer = [:name,:role,:roleTerm]
       @mods_ds.update_values([{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"})
     end
@@ -369,7 +369,7 @@ describe ActiveFedora::NokogiriDatastream do
     end
 
     it "should call OM::XML::term_values if internal_solr_doc is not set and return values from xml" do
-      @mods_ds.stubs(:om_term_values).once()
+      @mods_ds.stub(:om_term_values).once()
       term_pointer = [:name,:role,:roleTerm]
       @mods_ds.term_values(*term_pointer)
     end
@@ -378,7 +378,7 @@ describe ActiveFedora::NokogiriDatastream do
     it "should call get_values_from_solr if internal_solr_doc is set" do
       @mods_ds.from_solr(@solr_doc)
       term_pointer = [:name,:role,:roleTerm]
-      @mods_ds.stubs(:get_values_from_solr).once()
+      @mods_ds.stub(:get_values_from_solr).once()
       @mods_ds.term_values(*term_pointer)
     end
   end

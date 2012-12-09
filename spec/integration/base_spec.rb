@@ -108,7 +108,7 @@ describe "A base object with metadata" do
     it 'should raise an error if not persisted' do
       @object = MockAFBaseRelationship.new
       # You will want this stub or else it will be really chatty in your STDERR
-      @object.inner_object.logger.stubs(:error)
+      @object.inner_object.logger.stub(:error)
       expect {
         @object.reload
       }.to raise_error(ActiveFedora::ObjectNotFoundError)
@@ -427,7 +427,7 @@ describe ActiveFedora::Base do
         @test_object3 = MockAFBaseRelationship.create
         @test_object4 = MockAFBaseRelationship.create
         @test_object5 = MockAFBaseRelationship.create
-        Deprecation.stubs(:warn)
+        Deprecation.stub(:warn)
         #append to relationship by 'testing'
         @test_object2.add_relationship_by_name("testing",@test_object3)
         @test_object2.add_relationship_by_name("testing2",@test_object4)

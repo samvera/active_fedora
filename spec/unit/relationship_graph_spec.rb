@@ -4,7 +4,7 @@ describe ActiveFedora::RelationshipGraph do
   before do 
     @graph = ActiveFedora::RelationshipGraph.new
     @n1 = ActiveFedora::Base.new()
-    @n1.stubs(:pid => 'foo:777')
+    @n1.stub(:pid => 'foo:777')
   end
 
   describe "#relationships" do

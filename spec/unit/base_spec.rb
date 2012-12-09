@@ -10,25 +10,22 @@ describe ActiveFedora::Base do
     context "When the repository is NOT sharded" do
       subject {ActiveFedora::Base.connection_for_pid('foo:bar')}
       before(:each) do
-        ActiveFedora.config.stubs(:sharded?).returns(false)
+        ActiveFedora.config.stub(:sharded?).and_return(false)
         ActiveFedora::Base.fedora_connection = {}
-        ActiveFedora.config.stubs(:credentials).returns(:url=>'myfedora')
+        ActiveFedora.config.stub(:credentials).and_return(:url=>'myfedora')
       end
       it { should be_kind_of Rubydora::Repository}
       it "should be the standard connection" do
         subject.client.url.should == 'myfedora'
       end
       describe "assign_pid" do
-        after do
-          ActiveFedora::RubydoraConnection.unstub(:new)
-        end
         it "should use fedora to generate pids" do
           # TODO: This juggling of Fedora credentials & establishing connections should be handled by an establish_fedora_connection method, 
           # possibly wrap it all into a fedora_connection method - MZ 06-05-2012
           stubfedora = mock("Fedora")
-          stubfedora.expects(:connection).returns(mock("Connection", :next_pid =>"<pid>sample:newpid</pid>"))
+          stubfedora.should_receive(:connection).and_return(mock("Connection", :next_pid =>"<pid>sample:newpid</pid>"))
           # Should use ActiveFedora.config.credentials as a single hash rather than an array of shards
-          ActiveFedora::RubydoraConnection.expects(:new).with(ActiveFedora.config.credentials).returns(stubfedora)
+          ActiveFedora::RubydoraConnection.should_receive(:new).with(ActiveFedora.config.credentials).and_return(stubfedora)
           ActiveFedora::Base.assign_pid(ActiveFedora::Base.new.inner_object)
         end
       end
@@ -40,17 +37,17 @@ describe ActiveFedora::Base do
     end
     context "When the repository is sharded" do
       before :each do
-        ActiveFedora.config.stubs(:sharded?).returns(true)
+        ActiveFedora.config.stub(:sharded?).and_return(true)
         ActiveFedora::Base.fedora_connection = {}
-        ActiveFedora.config.stubs(:credentials).returns([{:url=>'shard1'}, {:url=>'shard2'} ])
+        ActiveFedora.config.stub(:credentials).and_return([{:url=>'shard1'}, {:url=>'shard2'} ])
       end
       describe "assign_pid" do
         it "should always use the first shard to generate pids" do
-          stubshard1 = mock("Shard")
-          stubshard2 = mock("Shard")
-          stubshard1.expects(:connection).returns(mock("Connection", :next_pid =>"<pid>sample:newpid</pid>"))
-          stubshard2.expects(:connection).never
-          ActiveFedora::Base.fedora_connection = {0 => stubshard1, 1 => stubshard2}
+          stubhard1 = mock("Shard")
+          stubhard2 = mock("Shard")
+          stubhard1.should_receive(:connection).and_return(mock("Connection", :next_pid =>"<pid>sample:newpid</pid>"))
+          stubhard2.should_receive(:connection).never
+          ActiveFedora::Base.fedora_connection = {0 => stubhard1, 1 => stubhard2}
           ActiveFedora::Base.assign_pid(ActiveFedora::Base.new.inner_object)
         end
       end
@@ -111,15 +108,15 @@ describe ActiveFedora::Base do
     before(:each) do
       @this_pid = increment_pid.to_s
       stub_get(@this_pid)
-      Rubydora::Repository.any_instance.stubs(:client).returns(@mock_client)
-      ActiveFedora::Base.stubs(:assign_pid).returns(@this_pid)
+      Rubydora::Repository.any_instance.stub(:client).and_return(@mock_client)
+      ActiveFedora::Base.stub(:assign_pid).and_return(@this_pid)
 
       @test_object = ActiveFedora::Base.new
     end
 
     after(:each) do
       begin
-      ActiveFedora::SolrService.stubs(:instance)
+      ActiveFedora::SolrService.stub(:instance)
       #@test_object.delete
       rescue
       end
@@ -129,14 +126,14 @@ describe ActiveFedora::Base do
     describe '#new' do
       it "should create an inner object" do  
         # for doing AFObject.new(params[:foo]) when nothing is in params[:foo]
-        Rubydora::DigitalObject.any_instance.expects(:save).never
+        Rubydora::DigitalObject.any_instance.should_receive(:save).never
         result = ActiveFedora::Base.new(nil)  
         result.inner_object.should be_kind_of(ActiveFedora::UnsavedDigitalObject)    
       end
 
       it "should not save or get an pid on init" do
-        Rubydora::DigitalObject.any_instance.expects(:save).never
-        ActiveFedora::Base.expects(:assign_pid).never
+        Rubydora::DigitalObject.any_instance.should_receive(:save).never
+        ActiveFedora::Base.should_receive(:assign_pid).never
         f = FooHistory.new
       end
 
@@ -165,13 +162,13 @@ describe ActiveFedora::Base do
     it "should have to_param once it's saved" do
 
       @test_object.to_param.should be_nil
-      @test_object.inner_object.expects(:new?).returns(false).at_least_once
+      @test_object.inner_object.stub(:new? => false)
       @test_object.to_param.should == @test_object.pid
     end
 
     it "should have to_key once it's saved" do 
       @test_object.to_key.should be_nil
-      @test_object.inner_object.expects(:new?).returns(false).at_least_once
+      @test_object.inner_object.stub(:new? => false)
       @test_object.to_key.should == [@test_object.pid]
     end
 
@@ -226,7 +223,7 @@ describe ActiveFedora::Base do
     describe '.rels_ext' do
 
       it 'should return the RelsExtDatastream object from the datastreams array' do
-        @test_object.expects(:datastreams).returns({"RELS-EXT" => "foo"}).at_least_once
+        @test_object.stub(:datastreams => {"RELS-EXT" => "foo"})
         @test_object.rels_ext.should == "foo"
       end
     end
@@ -244,7 +241,7 @@ describe ActiveFedora::Base do
 
       it "should update the RELS-EXT datastream and set the datastream as dirty when relationships are added" do
         mock_ds = mock("Rels-Ext")
-        mock_ds.stubs(:content_will_change!)
+        mock_ds.stub(:content_will_change!)
         @test_object.datastreams["RELS-EXT"] = mock_ds
         @test_object.add_relationship(:is_member_of, "info:fedora/demo:5")
         @test_object.add_relationship(:is_member_of, "info:fedora/demo:10")
@@ -252,7 +249,7 @@ describe ActiveFedora::Base do
       
       it 'should add a relationship to an object only if it does not exist already' do
         next_pid = increment_pid.to_s
-        ActiveFedora::Base.stubs(:assign_pid).returns(next_pid)
+        ActiveFedora::Base.stub(:assign_pid).and_return(next_pid)
         stub_get(next_pid)
 
         @test_object3 = ActiveFedora::Base.new
@@ -276,9 +273,9 @@ describe ActiveFedora::Base do
     describe '#remove_relationship' do
       it 'should remove a relationship from the relationships hash' do
         @test_object3 = ActiveFedora::Base.new()
-        @test_object3.stubs(:pid=>'7')
+        @test_object3.stub(:pid=>'7')
         @test_object4 = ActiveFedora::Base.new()
-        @test_object4.stubs(:pid=>'8')
+        @test_object4.stub(:pid=>'8')
         @test_object.add_relationship(:has_part,@test_object3)
         @test_object.add_relationship(:has_part,@test_object4)
         #check both are there
@@ -314,104 +311,27 @@ describe ActiveFedora::Base do
     end
 
     describe '.save' do
-      it "should return true and set persisted if object and datastreams all save successfully" do
-        stub_get(@this_pid)
-        stub_add_ds(@this_pid, ['RELS-EXT'])
-        @test_object.persisted?.should be false
-        @test_object.expects(:update_index)
-        stub_get(@this_pid, nil, true)
-        @test_object.save.should == true
-        @test_object.persisted?.should be true
+      it "should create a new record" do
+        @test_object.stub(:new_record? => true)
+        @test_object.should_receive(:create)
+        @test_object.should_receive(:update_index)
+        @test_object.save     
       end
 
-      it "should call assert_content_model" do
-        stub_ingest(@this_pid)
-        stub_add_ds(@this_pid, ['RELS-EXT'])
-        @test_object.expects(:assert_content_model)
-        @test_object.save.should == true
-        
-        
-      end
-      
-      it "should call .save on any datastreams that are dirty" do
-        stub_ingest(@this_pid)
-        stub_add_ds(@this_pid, ['withText2', 'withText', 'RELS-EXT'])
-        to = FooHistory.new
-        to.expects(:update_index)
-
-        to.datastreams["someData"].stubs(:changed?).returns(true)
-        to.datastreams["someData"].stubs(:new_object?).returns(true)
-        to.datastreams["someData"].expects(:save)
-        to.expects(:refresh)
-        FooHistory.expects(:assign_pid).with(to.inner_object).returns(@this_pid)
-        to.save
-      end
-      it "should call .save on any datastreams that are new" do
-        stub_ingest(@this_pid)
-        stub_add_ds(@this_pid, ['RELS-EXT'])
-        ds = ActiveFedora::Datastream.new(@test_object.inner_object, 'ds_to_add')
-        ds.content = "DS CONTENT"
-        @test_object.add_datastream(ds)
-        ds.expects(:save)
-        @test_object.instance_variable_set(:@new_object, false)
-        @test_object.expects(:refresh)
-        @test_object.expects(:update_index)
-        @test_object.save
-      end
-      it "should not call .save on any datastreams that are not dirty" do
-        stub_ingest(@this_pid)
-        @test_object = FooHistory.new
-        @test_object.expects(:update_index)
-        @test_object.expects(:refresh)
-
-        @test_object.datastreams["someData"].should_not be_nil
-        @test_object.datastreams['someData'].stubs(:changed?).returns(false)
-        @test_object.datastreams['someData'].stubs(:new?).returns(false)
-        @test_object.datastreams['someData'].expects(:save).never
-        @test_object.datastreams['withText2'].expects(:save)
-        @test_object.datastreams['withText'].expects(:save)
-        @test_object.datastreams['RELS-EXT'].expects(:save)
-        FooHistory.expects(:assign_pid).with(@test_object.inner_object).returns(@this_pid)
-        @test_object.save
-      end
-      it "should update solr index with all metadata if any SimpleDatastreams have changed" do
-        stub_ingest(@this_pid)
-        stub_add_ds(@this_pid, ['ds1', 'RELS-EXT'])
-
-        dirty_ds = ActiveFedora::SimpleDatastream.new(@test_object.inner_object, 'ds1')
-        rels_ds = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
-        rels_ds.model = @test_object
-        @test_object.add_datastream(rels_ds)
-        @test_object.add_datastream(dirty_ds)
-        @test_object.expects(:update_index)
-        
-        @test_object.save
-      end
-      it "should update solr index with all metadata if any RDFDatastreams have changed" do
-        stub_ingest(@this_pid)
-        stub_add_ds(@this_pid, ['ds1', 'RELS-EXT'])
-
-        dirty_ds = ActiveFedora::NtriplesRDFDatastream.new(@test_object.inner_object, 'ds1')
-        rels_ds = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
-        rels_ds.model = @test_object
-        @test_object.add_datastream(rels_ds)
-        @test_object.add_datastream(dirty_ds)
-        @test_object.expects(:update_index)
-        
-        @test_object.save
+      it "should update an existing record" do
+        @test_object.stub(:new_record? => false)
+        @test_object.should_receive(:update)
+        @test_object.should_receive(:update_index)
+        @test_object.save     
       end
     end
 
     describe "#create" do
-      before do
-        stub_ingest(@this_pid)
-        stub_add_ds(@this_pid, ['someData', 'withText', 'withText2', 'RELS-EXT'])
-      end
       it "should build a new record and save it" do
-        FooHistory.expects(:assign_pid).returns(@this_pid)
+        obj = mock()
+        obj.should_receive(:save)
+        FooHistory.should_receive(:new).and_return(obj)
         @hist = FooHistory.create(:fubar=>'ta', :swank=>'da')
-        @hist.fubar.should == ['ta']
-        @hist.swank.should == ['da']
       end
       
     end
@@ -454,11 +374,11 @@ describe ActiveFedora::Base do
     describe ".adapt_to_cmodel" do
       subject { FooHistory.new } 
       it "should cast when a cmodel is found" do
-        ActiveFedora::ContentModel.expects(:known_models_for).with( subject).returns([FooAdaptation])
+        ActiveFedora::ContentModel.should_receive(:known_models_for).with( subject).and_return([FooAdaptation])
         subject.adapt_to_cmodel.should be_kind_of FooAdaptation
       end
       it "should not cast when a cmodel is same as the class" do
-        ActiveFedora::ContentModel.expects(:known_models_for).with( subject).returns([FooHistory])
+        ActiveFedora::ContentModel.should_receive(:known_models_for).with( subject).and_return([FooHistory])
         subject.adapt_to_cmodel.should === subject
       end
     end
@@ -474,8 +394,8 @@ describe ActiveFedora::Base do
       end
 
       it "should add pid, system_create_date and system_modified_date from object attributes" do
-        @test_object.expects(:create_date).returns("2012-03-04T03:12:02Z")
-        @test_object.expects(:modified_date).returns("2012-03-07T03:12:02Z")
+        @test_object.should_receive(:create_date).and_return("2012-03-04T03:12:02Z")
+        @test_object.should_receive(:modified_date).and_return("2012-03-07T03:12:02Z")
         solr_doc = @test_object.to_solr
         solr_doc["system_create_dt"].should eql("2012-03-04T03:12:02Z")
         solr_doc["system_modified_dt"].should eql("2012-03-07T03:12:02Z")
@@ -502,8 +422,8 @@ describe ActiveFedora::Base do
       it "should use mappings.yml to decide names of solr fields" do      
         cdate = "2008-07-02T05:09:42Z"
         mdate = "2009-07-07T23:37:18Z"
-        @test_object.stubs(:create_date).returns(cdate)
-        @test_object.stubs(:modified_date).returns(mdate)
+        @test_object.stub(:create_date).and_return(cdate)
+        @test_object.stub(:modified_date).and_return(mdate)
         solr_doc = @test_object.to_solr
         solr_doc["system_create_dt"].should eql(cdate)
         solr_doc["system_modified_dt"].should eql(mdate)
@@ -522,23 +442,23 @@ describe ActiveFedora::Base do
       end
       
       it "should call .to_solr on all SimpleDatastreams and NokogiriDatastreams, passing the resulting document to solr" do
-        mock1 = mock("ds1", :to_solr)
-        mock2 = mock("ds2", :to_solr)
-        ngds = mock("ngds", :to_solr)
-        ngds.expects(:solrize_profile)
-        mock1.expects(:solrize_profile)
-        mock2.expects(:solrize_profile)
+        mock1 = mock("ds1", :to_solr => {})
+        mock2 = mock("ds2", :to_solr => {})
+        ngds = mock("ngds", :to_solr => {})
+        ngds.should_receive(:solrize_profile)
+        mock1.should_receive(:solrize_profile)
+        mock2.should_receive(:solrize_profile)
         
-        @test_object.expects(:datastreams).twice.returns({:ds1 => mock1, :ds2 => mock2, :ngds => ngds})
-        @test_object.expects(:solrize_relationships)
+        @test_object.should_receive(:datastreams).twice.and_return({:ds1 => mock1, :ds2 => mock2, :ngds => ngds})
+        @test_object.should_receive(:solrize_relationships)
         @test_object.to_solr
       end
       it "should call .to_solr on all RDFDatastreams, passing the resulting document to solr" do
-        mock = mock("ds1", :to_solr)
-        mock.expects(:solrize_profile)
+        mock = mock("ds1", :to_solr => {})
+        mock.should_receive(:solrize_profile)
         
-        @test_object.expects(:datastreams).twice.returns({:ds1 => mock})
-        @test_object.expects(:solrize_relationships)
+        @test_object.should_receive(:datastreams).twice.and_return({:ds1 => mock})
+        @test_object.should_receive(:solrize_relationships)
         @test_object.to_solr
       end
 
@@ -546,7 +466,7 @@ describe ActiveFedora::Base do
         @test_object.add_relationship(:has_collection_member, "info:fedora/foo:member")
         rels_ext = @test_object.rels_ext
         rels_ext.should be_changed
-        @test_object.expects(:solrize_relationships)
+        @test_object.should_receive(:solrize_relationships)
         @test_object.to_solr
       end
       
@@ -554,7 +474,7 @@ describe ActiveFedora::Base do
 
     describe ".label" do
       it "should return the label of the inner object" do 
-        @test_object.inner_object.expects(:label).returns("foo label")
+        @test_object.inner_object.should_receive(:label).and_return("foo label")
         @test_object.label.should == "foo label"
       end
     end
@@ -571,7 +491,7 @@ describe ActiveFedora::Base do
     describe "get_values_from_datastream" do
       it "should look up the named datastream and call get_values with the given pointer/field_name" do
         mock_ds = mock("Datastream", :get_values=>["value1", "value2"])
-        @test_object.stubs(:datastreams).returns({"ds1"=>mock_ds})
+        @test_object.stub(:datastreams).and_return({"ds1"=>mock_ds})
         @test_object.get_values_from_datastream("ds1", "--my xpath--").should == ["value1", "value2"]
       end
     end
@@ -587,9 +507,9 @@ describe ActiveFedora::Base do
           "properties"=>{ "notes"=>"foo" }
         }
         m = FooHistory.new
-        m.stubs(:datastreams).returns(mock_ds_hash)
-        mock_desc_metadata.expects(:update_indexed_attributes).with( ds_values_hash['descMetadata'] )
-        mock_properties.expects(:update_indexed_attributes).with( ds_values_hash['properties'] )
+        m.stub(:datastreams).and_return(mock_ds_hash)
+        mock_desc_metadata.should_receive(:update_indexed_attributes).with( ds_values_hash['descMetadata'] )
+        mock_properties.should_receive(:update_indexed_attributes).with( ds_values_hash['properties'] )
         m.update_datastream_attributes( ds_values_hash )
       end
       it "should not do anything and should return an empty hash if the specified datastream does not exist" do
@@ -610,9 +530,9 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
         m = FooHistory.new
         att= {"fubar"=> '1234', "baz" =>'stuff'}
         
-        m.expects(:fubar=).with('1234')
-        m.expects(:baz=).with('stuff')
-        m.expects(:save)
+        m.should_receive(:fubar=).with('1234')
+        m.should_receive(:baz=).with('stuff')
+        m.should_receive(:save)
         m.update_attributes(att)
       end
     end
@@ -622,9 +542,9 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
         m = FooHistory.new
         att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
         
-        m.datastreams['someData'].expects(:update_indexed_attributes)
-        m.datastreams["withText"].expects(:update_indexed_attributes)
-        m.datastreams['withText2'].expects(:update_indexed_attributes)
+        m.datastreams['someData'].should_receive(:update_indexed_attributes)
+        m.datastreams["withText"].should_receive(:update_indexed_attributes)
+        m.datastreams['withText2'].should_receive(:update_indexed_attributes)
         m.update_indexed_attributes(att)
       end
       it "should take a :datastreams argument" do 
@@ -659,7 +579,7 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
       
       it 'should return current relationships by name' do
         next_pid = increment_pid.to_s
-        ActiveFedora::Base.stubs(:assign_pid).returns(next_pid)
+        ActiveFedora::Base.stub(:assign_pid).and_return(next_pid)
         stub_get(next_pid)
         @test_object2 = MockNamedRelationships.new
         @test_object2.add_relationship(:has_model, MockNamedRelationships.to_class_uri)
@@ -690,7 +610,7 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
         
       it 'should append and remove using helper methods for each outbound relationship' do
         next_pid = increment_pid.to_s
-        ActiveFedora::Base.stubs(:assign_pid).returns(next_pid)
+        ActiveFedora::Base.stub(:assign_pid).and_return(next_pid)
         stub_get(next_pid)
         @test_object2 = MockCreateNamedRelationshipMethodsBase.new 
         @test_object2.should respond_to(:testing_append)
@@ -716,7 +636,7 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
         graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new('info:fedora/demo:12'))
         graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:conforms_to),  "AnInterface")
 
-        @test_object.expects(:relationships).returns(graph)
+        @test_object.should_receive(:relationships).and_return(graph)
         solr_doc = @test_object.solrize_relationships
         solr_doc["is_member_of_s"].should == ["info:fedora/demo:10"]
         solr_doc["is_part_of_s"].should == ["info:fedora/demo:11"]

@@ -14,20 +14,20 @@ describe ActiveFedora do
   describe "initialization methods" do
     describe "environment" do
       it "should use config_options[:environment] if set" do
-        ActiveFedora.expects(:config_options).at_least_once.returns(:environment=>"ballyhoo")
+        ActiveFedora.stub(:config_options => {:environment=>"ballyhoo"})
         ActiveFedora.environment.should eql("ballyhoo")
       end
 
       it "should use Rails.env if no config_options and Rails.env is set" do
         stub_rails(:env => "bedbugs")
-        ActiveFedora.expects(:config_options).at_least_once.returns({})
+        ActiveFedora.stub(:config_options => {})
         ActiveFedora.environment.should eql("bedbugs")
         unstub_rails
       end
 
       it "should use ENV['environment'] if neither config_options nor Rails.env are set" do
         ENV['environment'] = "wichita"
-        ActiveFedora.expects(:config_options).at_least_once.returns({})
+        ActiveFedora.stub(:config_options => {})
         ActiveFedora.environment.should eql("wichita")
         ENV['environment']='test'
       end
@@ -42,7 +42,7 @@ describe ActiveFedora do
       it "should be development if none of the above are present" do
         ENV['environment']=nil
         ENV['RAILS_ENV'] = nil
-        ActiveFedora.expects(:config_options).at_least_once.returns({})
+        ActiveFedora.stub(:config_options => {})
         ActiveFedora.environment.should == 'development'
         ENV['environment']="test"
       end
@@ -79,12 +79,12 @@ describe ActiveFedora do
             solr_config_path = File.expand_path(File.join(File.dirname(__FILE__),"../fixtures/rails_root/config/solr.yml"))
             pred_config_path = File.expand_path(File.join(File.dirname(__FILE__),"../fixtures/rails_root/config/predicate_mappings.yml"))
             
-            File.stubs(:open).with(fedora_config_path).returns(fedora_config)
-            File.stubs(:open).with(solr_config_path).returns(solr_config)
-            ActiveFedora::SolrService.stubs(:load_mappings) #For the solrizer solr_mappings.yml
+            File.stub(:open).with(fedora_config_path).and_return(fedora_config)
+            File.stub(:open).with(solr_config_path).and_return(solr_config)
+            ActiveFedora::SolrService.stub(:load_mappings) #For the solrizer solr_mappings.yml
 
 
-#            ActiveSupport::Deprecation.expects(:warn).with("Configuring fedora with \":url\" without :user and :password is no longer supported.")
+#            ActiveSupport::Deprecation.should_receive(:warn).with("Configuring fedora with \":url\" without :user and :password is no longer supported.")
             ActiveFedora.init(:fedora_config_path=>fedora_config_path,:solr_config_path=>solr_config_path)
             ActiveFedora.solr.class.should == ActiveFedora::SolrService
           end

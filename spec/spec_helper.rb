@@ -1,13 +1,11 @@
 ENV["environment"] ||= 'test'
 require "bundler/setup"
 
-if ENV['COVERAGE'] and RUBY_VERSION =~ /^1.9/
-  require 'simplecov'
-  require 'simplecov-rcov'
+require 'simplecov'
+require 'simplecov-rcov'
 
-  SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter
-  SimpleCov.start
-end
+SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter
+SimpleCov.start
 
 require 'active-fedora'
 require 'rspec'
@@ -31,7 +29,6 @@ restore_spec_configuration
 ActiveSupport::Deprecation.behavior= Proc.new { |message, callstack| }
 
 RSpec.configure do |config|
-  config.mock_with :mocha
   config.color_enabled = true
 end
 

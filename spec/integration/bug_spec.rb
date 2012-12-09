@@ -3,10 +3,7 @@ require 'spec_helper'
 require 'active_fedora'
 require 'active_fedora/model'
 require "rexml/document"
-require 'mocha'
-
 include ActiveFedora::Model
-include Mocha::API
 
 describe 'bugs' do
   before :all do

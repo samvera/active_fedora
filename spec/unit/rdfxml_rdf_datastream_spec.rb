@@ -10,7 +10,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
         end
       end
       @subject = MyRdfxmlDatastream.new(@inner_object, 'mixed_rdf')
-      @subject.stubs(:pid => 'test:1')
+      @subject.stub(:pid => 'test:1')
     end
     after(:each) do
       Object.send(:remove_const, :MyRdfxmlDatastream)

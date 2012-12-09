@@ -94,7 +94,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   
   describe '.to_xml' do
     it 'should output the fields hash as Qualified Dublin Core XML' do
-      #@test_ds.expects(:new?).returns(true).twice
+      #@test_ds.should_receive(:new?).and_return(true).twice
       sample_xml = "<dc xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'><dcterms:title>title1</dcterms:title><dcterms:publisher>publisher1</dcterms:publisher><dcterms:creator>creator1</dcterms:creator><dcterms:creator>creator2</dcterms:creator></dc>"
       @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new(nil, 'qdc' )
 

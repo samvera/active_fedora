@@ -17,8 +17,8 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2 = MockAFBaseDatastream.new
       f = File.open(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"), 'rb')
       f2 = File.open(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ), 'rb')
-      f2.stubs(:original_filename).returns("dino.jpg")
-      f.stubs(:content_type).returns("image/jpeg")
+      f2.stub(:original_filename).and_return("dino.jpg")
+      f.stub(:content_type).and_return("image/jpeg")
       @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f, :label=>"testDS"})
       @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2})
       ds = @test_object2.thumbnail.first
@@ -50,7 +50,7 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2 = MockAFBaseDatastream.new
 #      @test_object2.new_object = true
       f = File.open(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"), 'rb')
-      f.stubs(:content_type).returns("image/jpeg")
+      f.stub(:content_type).and_return("image/jpeg")
       @test_object2.add_named_file_datastream("thumbnail",f)
       ds = @test_object2.thumbnail.first
       @test_object2.save
@@ -79,10 +79,10 @@ describe ActiveFedora::DatastreamCollections do
       f2 = File.open(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ), 'rb')
       dino = f2.read
       f2.rewind
-      f.stubs(:content_type).returns("image/jpeg")
-      f.stubs(:original_filename).returns("minivan.jpg")
-      f2.stubs(:content_type).returns("image/jpeg")
-      f2.stubs(:original_filename).returns("dino.jpg")
+      f.stub(:content_type).and_return("image/jpeg")
+      f.stub(:original_filename).and_return("minivan.jpg")
+      f2.stub(:content_type).and_return("image/jpeg")
+      f2.stub(:original_filename).and_return("dino.jpg")
       #check raise exception if dsid not supplied
       @test_object2.add_named_datastream("thumbnail",{:file=>f})
       @test_object2.save
@@ -119,8 +119,8 @@ describe ActiveFedora::DatastreamCollections do
 #      @test_object2.new_object = true
       f = File.open(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"), 'rb')
       f2 = File.open(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ), 'rb')
-      f2.stubs(:original_filename).returns("dino.jpg")
-      f.stubs(:content_type).returns("image/jpeg")
+      f2.stub(:original_filename).and_return("dino.jpg")
+      f.stub(:content_type).and_return("image/jpeg")
       @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f, :label=>"testDS"})
       @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f2})
       @test_object2.save

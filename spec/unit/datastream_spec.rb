@@ -14,7 +14,7 @@ describe ActiveFedora::Datastream do
   its(:metadata?) { should be_false}
 
   it "should escape dots in  to_param" do
-    @test_datastream.stubs(:dsid).returns('foo.bar')
+    @test_datastream.stub(:dsid).and_return('foo.bar')
     @test_datastream.to_param.should == 'foo%2ebar'
   end
   
@@ -64,10 +64,10 @@ describe ActiveFedora::Datastream do
   describe '#save' do
     it "should set changed" do
       mock_repo = mock('repository')
-      mock_repo.stubs(:config).returns({})
-      mock_repo.stubs(:add_datastream).with(:versionable => true, :pid => @test_object.pid, :dsid => 'abcd', :controlGroup => 'M', :dsState => 'A', :content => 'hi there')
-      mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).returns('').at_least_once
-      @test_object.inner_object.stubs(:repository).returns(mock_repo)
+      mock_repo.stub(:config).and_return({})
+      mock_repo.stub(:add_datastream).with(:versionable => true, :pid => @test_object.pid, :dsid => 'abcd', :controlGroup => 'M', :dsState => 'A', :content => 'hi there')
+      mock_repo.stub(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).and_return('')
+      @test_object.inner_object.stub(:repository).and_return(mock_repo)
       @test_datastream.save
       @test_datastream.should_not be_changed
     end
@@ -122,8 +122,8 @@ describe ActiveFedora::Datastream do
       EOS
 
       mock_repo = mock('repository', :config=>{})
-      @test_object.inner_object.stubs(:repository).returns(mock_repo)
-      mock_repo.expects(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).returns(ds_profile)
+      @test_object.inner_object.stub(:repository).and_return(mock_repo)
+      mock_repo.should_receive(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).and_return(ds_profile)
       @test_datastream.size.should == 9999
     end
 
