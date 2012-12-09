@@ -1,7 +1,9 @@
 require 'solrizer/field_name_mapper'
 
 module ActiveFedora::MetadataDatastreamHelper 
-  
+  extend Deprecation
+  self.deprecation_horizon = 'active-fedora 6.0'  
+
   attr_accessor :fields, :xml_loaded
   
   module ClassMethods
@@ -28,6 +30,7 @@ module ActiveFedora::MetadataDatastreamHelper
       self.class.from_xml content, self
     end
   end
+  deprecation_deprecate :ensure_xml_loaded
   
   def serialize! # :nodoc:
     if changed?
@@ -35,5 +38,6 @@ module ActiveFedora::MetadataDatastreamHelper
       self.content = self.to_xml 
     end
   end
+  deprecation_deprecate :serialize!
 
 end
