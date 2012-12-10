@@ -269,23 +269,17 @@ describe ActiveFedora::NtriplesRDFDatastream do
         @obj.rights = "Totally open, y'all"
         @obj.save
       end
-      describe '#save' do
-        it "should set dirty? to false" do
-          @obj.should_not be_changed
-          @obj.title = "something"
-          @obj.should be_changed
-          @obj.save
-          @obj.should_not be_changed
-        end
-      end
+
       describe '.content=' do
         it "should update the content and graph, marking the datastream as changed" do
+          # it's not clear to me that be_equivalent_to works with the ntriples rdf?
           mock_repo = mock('repository')
           sample_rdf = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
           @obj.stub(:pid).and_return('test:123')
           @obj.stub(:repository).and_return(mock_repo)
+          @obj.serialize.should == @obj.datastream_content
           @obj.should_not be_changed
-          @obj.content.should_not be_equivalent_to(sample_rdf)
+          @obj.content.should_not == sample_rdf
           @obj.content = sample_rdf
           @obj.should be_changed
           @obj.content.should be_equivalent_to(sample_rdf)

@@ -43,7 +43,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.related_url = "http://en.wikipedia.org/wiki/War_and_Peace"
     @subject.part = "this is a part"
     @subject.save
-
     loaded = RdfTest.find(@subject.pid)
     loaded.title.should == 'War and Peace'
     loaded.based_near.should == ['Moscow, Russia']
