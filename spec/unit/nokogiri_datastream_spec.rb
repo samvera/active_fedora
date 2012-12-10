@@ -164,7 +164,6 @@ describe ActiveFedora::NokogiriDatastream do
       mods_xml = Nokogiri::XML::Document.parse( fixture(File.join("mods_articles", "hydrangea_article1.xml")) )
       tmpl = Hydra::ModsArticleDatastream.new
       Hydra::ModsArticleDatastream.from_xml(mods_xml,tmpl).ng_xml.root.to_xml.should == mods_xml.root.to_xml
-      tmpl.should_not be_changed
     end
   end
   

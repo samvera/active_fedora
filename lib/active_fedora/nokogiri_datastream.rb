@@ -47,6 +47,12 @@ module ActiveFedora
       Nokogiri::XML::Document.parse("<xml/>")
     end
 
+    def save
+      @content = to_xml
+      super
+    end
+
+
     def ng_xml 
       @ng_xml ||= begin
       self.xml_loaded = true
@@ -76,7 +82,7 @@ module ActiveFedora
 
       new_xml_string = nokogiri_document.to_xml {|config| config.no_declaration}
 
-      ng_xml_will_change! unless (xml_loaded && (new_xml_string.to_s.strip == datastream_content.strip))
+      ng_xml_will_change! unless (xml_loaded && (new_xml_string.to_s.strip == (datastream_content || '').strip))
       self.xml_loaded=true
 
       @ng_xml = nokogiri_document
@@ -94,12 +100,12 @@ module ActiveFedora
     
     # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods 
     def ng_xml_changed?
-      changed_attributes.has_key? 'ng_xml' ||
-       (xml_loaded && (to_xml != datastream_content) )
+      changed_attributes.has_key?('ng_xml') ||
+       (xml_loaded && (to_xml.strip != (datastream_content || '').strip) )
     end
 
     def changed?
-     ng_xml_changed? || super
+      ng_xml_changed? || super
     end
 
     def content_changed?

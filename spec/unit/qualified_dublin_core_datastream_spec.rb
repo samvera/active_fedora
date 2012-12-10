@@ -60,7 +60,6 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
     n = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(stream.to_xml, ds)
     n.spatial.should == ["Boston [7013445]", "Dorchester [7013575]", "Roxbury [7015002]"] 
     n.title.should ==  ["Oral history with Frances Addelson, 1997 November 14"]
-    n.should_not be_changed
   end
 
 
