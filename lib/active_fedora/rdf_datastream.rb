@@ -26,131 +26,135 @@ module ActiveFedora
       end
     end
 
-    module ModelMethods
-      extend ActiveSupport::Concern
-      module ClassMethods
-        attr_accessor :vocabularies
-        def config
-          ActiveFedora::Predicates.predicate_config
-        end
-        def prefix(name)
-          name = name.to_s unless name.is_a? String
-          pre = self.to_s.sub(/RDFDatastream$/i, '').underscore
-          return "#{pre}__#{name}".to_sym
+    class << self 
+      attr_accessor :vocabularies
+      def config
+        ActiveFedora::Predicates.predicate_config
+      end
+      def prefix(name)
+        name = name.to_s unless name.is_a? String
+        pre = self.to_s.sub(/RDFDatastream$/i, '').underscore
+        return "#{pre}__#{name}".to_sym
+      end
+
+      ##
+      # Register a ruby block that evaluates to the subject of the graph
+      # By default, the block returns the current object's pid
+      # @yield [ds] 'ds' is the datastream instance
+      def rdf_subject &block
+        if block_given?
+           return @subject_block = block
         end
 
-        ##
-        # Register a ruby block that evaluates to the subject of the graph
-        # By default, the block returns the current object's pid
-        # @yield [ds] 'ds' is the datastream instance
-        def rdf_subject &block
-          if block_given?
-             return @subject_block = block
-          end
+        @subject_block ||= lambda { |ds| RDF::URI.new("info:fedora/#{ds.pid}") }
+      end
 
-          @subject_block ||= lambda { |ds| "info:fedora/#{ds.pid}" }
-        end
-
-        def register_vocabularies(*vocabs)
-          @vocabularies ||= {}
-          vocabs.each do |v|
-            if v.is_a?(RDF::Vocabulary) or (v.respond_to? :property and v.respond_to? :to_uri)
-              @vocabularies[v.to_uri] = v 
-            else
-              raise "not an RDF vocabulary: #{v}"
-            end
-          end
-          ActiveFedora::Predicates.vocabularies(@vocabularies)
-          @vocabularies
-        end
-
-        def map_predicates(&block)
-          yield self
-        end
-        def method_missing(name, *args, &block)
-          args = args.first if args.respond_to? :first
-          raise "mapping must specify RDF vocabulary as :in argument" unless args.has_key? :in
-          vocab = args[:in]
-          predicate = args.fetch(:to, name)
-          raise "Vocabulary '#{vocab.inspect}' does not define property '#{predicate.inspect}'" unless vocab.respond_to? predicate
-          indexing = false
-          if block_given?
-            # needed for solrizer integration
-            indexing = true
-            iobj = IndexObject.new
-            yield iobj
-            data_type = iobj.data_type
-            behaviors = iobj.behaviors
-          end
-          # needed for AF::Predicates integration & drives all other
-          # functionality below
-          vocab = vocab.to_s
-          name = self.prefix(name)
-          if config
-            if config[:predicate_mapping].has_key? vocab
-              config[:predicate_mapping][vocab][name] = predicate
-            else
-              config[:predicate_mapping][vocab] = { name => predicate } 
-            end
-            # stuff data_type and behaviors in there for to_solr support
-            config[:predicate_mapping][vocab]["#{name}__type".to_sym] = data_type if indexing
-            config[:predicate_mapping][vocab]["#{name}__behaviors".to_sym] = behaviors if indexing
+      def register_vocabularies(*vocabs)
+        @vocabularies ||= {}
+        vocabs.each do |v|
+          if v.is_a?(RDF::Vocabulary) or (v.respond_to? :property and v.respond_to? :to_uri)
+            @vocabularies[v.to_uri] = v 
           else
-            config = {
-              :default_namespace => vocab,
-              :predicate_mapping => {
-                vocab => { name => predicate }
-              }
-            }
-            # stuff data_type and behaviors in there for to_solr support
-            config[:predicate_mapping][vocab]["#{name}__type".to_sym] = data_type if indexing
-            config[:predicate_mapping][vocab]["#{name}__behaviors".to_sym] = behaviors if indexing
+            raise "not an RDF vocabulary: #{v}"
           end
+        end
+        ActiveFedora::Predicates.vocabularies(@vocabularies)
+        @vocabularies
+      end
+
+      def map_predicates(&block)
+        yield self
+      end
+      def method_missing(name, *args, &block)
+        args = args.first if args.respond_to? :first
+        raise "mapping must specify RDF vocabulary as :in argument" unless args.has_key? :in
+        vocab = args[:in]
+        predicate = args.fetch(:to, name)
+        raise "Vocabulary '#{vocab.inspect}' does not define property '#{predicate.inspect}'" unless vocab.respond_to? predicate
+        indexing = false
+        if block_given?
+          # needed for solrizer integration
+          indexing = true
+          iobj = IndexObject.new
+          yield iobj
+          data_type = iobj.data_type
+          behaviors = iobj.behaviors
+        end
+        # needed for AF::Predicates integration & drives all other
+        # functionality below
+        vocab = vocab.to_s
+        name = self.prefix(name)
+        if config
+          if config[:predicate_mapping].has_key? vocab
+            config[:predicate_mapping][vocab][name] = predicate
+          else
+            config[:predicate_mapping][vocab] = { name => predicate } 
+          end
+          # stuff data_type and behaviors in there for to_solr support
+          config[:predicate_mapping][vocab]["#{name}__type".to_sym] = data_type if indexing
+          config[:predicate_mapping][vocab]["#{name}__behaviors".to_sym] = behaviors if indexing
+        else
+          config = {
+            :default_namespace => vocab,
+            :predicate_mapping => {
+              vocab => { name => predicate }
+            }
+          }
+          # stuff data_type and behaviors in there for to_solr support
+          config[:predicate_mapping][vocab]["#{name}__type".to_sym] = data_type if indexing
+          config[:predicate_mapping][vocab]["#{name}__behaviors".to_sym] = behaviors if indexing
         end
       end
     end
+
+
     class TermProxy
-      # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
-      # @param [ActiveFedora::RelationshipGraph] graph  the graph
-      # @param [Array] values  an array of object values
-      instance_methods.each { |m| undef_method m unless m.to_s =~ /^(?:nil\?|send|object_id|to_a)$|^__|^respond_to|proxy_/ }
-      
-      def initialize(graph, predicate, values=[])
+
+      attr_reader :graph, :subject, :predicate
+      delegate :class, :to_s, :==, :kind_of?, :each, :map, :empty?, :to => :values
+
+      def initialize(graph, subject, predicate)
         @graph = graph
+
+        @subject = subject
         @predicate = predicate
-        @values = values
       end
+
       def <<(*values)
-        @values.concat(values)
-        values.each { |value| @graph.add(@predicate, value, true) }
-        @graph.dirty = true
-        @values
+        values.each { |value| graph.append(subject, predicate, value) }
+        values
       end
+
       def delete(*values)
         values.each do |value| 
-          unless @values.delete(value).nil?
-            @graph.delete(@predicate, value)
-            @graph.dirty = true
-          end
-        end
-        @values
-      end
-      def method_missing(method, *args)
-        unless @values.respond_to?(method)
-          message = "undefined method `#{method.to_s}' for \"#{@values}\":#{@values.class.to_s}"
-          raise NoMethodError, message
+          graph.delete_predicate(subject, predicate, value)
         end
 
-        if block_given?
-          @values.send(method, *args)  { |*block_args| yield(*block_args) }
-        else
-          @values.send(method, *args)
+        values
+      end
+
+      def values
+        values = []
+
+        graph.query(subject, predicate).each do |solution|
+          v = solution.value
+          v = v.to_s if v.is_a? RDF::Literal
+          values << v
         end
-  
+
+        values
+      end
+      
+      def method_missing(method, *args, &block)
+
+        if values.respond_to? method
+          values.send(method, *args, &block)
+        else
+          super
+        end
       end
     end
     
-    include ModelMethods
     attr_accessor :loaded
     def metadata?
       true
@@ -179,7 +183,16 @@ module ActiveFedora
     # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
     def fields
       field_map = {}
-      graph.relationships.each do |predicate, values|
+
+      rdf_subject = self.rdf_subject
+      query = RDF::Query.new do
+        pattern [rdf_subject, :predicate, :value]
+      end
+
+      query.execute(graph).each do |solution|
+        predicate = solution.predicate
+        value = solution.value
+        
         vocab_sym, name = predicate.qname
         uri, vocab = self.class.vocabularies.select { |ns, v| v.__prefix__ == vocab_sym }.first
         next unless vocab
@@ -190,7 +203,8 @@ module ActiveFedora
         next unless name and config.has_key?("#{name}__type".to_sym) and config.has_key?("#{name}__behaviors".to_sym)
         type = config["#{name}__type".to_sym]
         behaviors = config["#{name}__behaviors".to_sym]
-        field_map[name.to_sym] = {:values => values.map {|v| v.to_s}, :type => type, :behaviors => behaviors}
+        field_map[name.to_sym] ||= {:values => [], :type => type, :behaviors => behaviors}
+        field_map[name.to_sym][:values] << value.to_s
       end
       field_map
     end
@@ -222,26 +236,18 @@ module ActiveFedora
     # Assumes that the datastream contains RDF content
     # @param [String] data the "rdf" node 
     def deserialize(data = nil)
-      graph = RelationshipGraph.new
+      repository = RDF::Repository.new
+      return repository if new? and data.nil?
 
-      return graph if new? and data.nil?
-      
       data ||= datastream_content
 
-      unless data.nil?
-        RDF::Reader.for(serialization_format).new(data) do |reader|
-          reader.each_statement do |statement|
-            begin
-              next unless statement.subject == rdf_subject
-            rescue
-            end
-            literal = statement.object.kind_of?(RDF::Literal)
-            object = literal ? statement.object.value : statement.object.to_s
-            graph.add(statement.predicate, object, literal)
-          end
+      RDF::Reader.for(serialization_format).new(data) do |reader|
+        reader.each_statement do |statement|
+          repository << statement
         end
       end
-      graph
+
+      repository
     end
 
     def graph
@@ -251,37 +257,69 @@ module ActiveFedora
       end      
     end
 
-    # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
-    def get_values(predicate)
+    def query subject, predicate, &block
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
-      results = graph[predicate]
-      return if results.nil?
-      values = []
-      results.each do |object|
-        values << (object.kind_of?(RDF::Literal) ? object.value : object.to_s)
+      
+      q = RDF::Query.new do
+        pattern [subject, predicate, :value]
       end
-      TermProxy.new(graph, predicate, values)
+
+      q.execute(graph, &block)
+    end
+
+    # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
+    def get_values(subject, predicate)
+
+      predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
+
+      return TermProxy.new(self, subject, predicate)
     end
 
     # if there are any existing statements with this predicate, replace them
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
-    def set_value(predicate, args)
+
+    def set_value(subject, predicate, values)
+      
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
-      graph.delete(predicate)
-      args = [args] unless args.respond_to? :each
-      args.each do |arg|
+
+      delete_predicate(subject, predicate)
+
+      Array(values).each do |arg|
         arg = arg.to_s if arg.kind_of? RDF::Literal
-        graph.add(predicate, arg, true) unless arg.empty?
+        next if arg.empty?
+
+        graph.insert([subject, predicate, arg])
       end
-      return TermProxy.new(graph, predicate, args)
+
+      return TermProxy.new(self, subject, predicate)
+    end
+ 
+    def delete_predicate(subject, predicate, values = nil)
+      predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
+
+      if values.nil?
+        query = RDF::Query.new do
+          pattern [subject, predicate, :value]
+        end
+
+        query.execute(graph).each do |solution|
+          graph.delete [subject, predicate, solution.value]
+        end
+      else
+        Array(values).each do |v|
+          graph.delete [subject, predicate, v]
+        end
+      end
+
     end
 
     # append a value 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
-    def append(predicate, args)
-      predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
-      graph.add(predicate, args, true)
-      return TermProxy.new(graph, predicate, args)
+    def append(subject, predicate, args)
+      graph.insert([subject, predicate, args])
+
+
+      return TermProxy.new(self, subject, predicate)
     end
 
     def serialization_format
@@ -290,9 +328,9 @@ module ActiveFedora
 
     def method_missing(name, *args)
       if (md = /^([^=]+)=$/.match(name.to_s)) && pred = find_predicate(md[1])
-        set_value(pred, *args)  
+        set_value(rdf_subject, pred, *args)  
        elsif pred = find_predicate(name)
-        get_values(name)
+        get_values(rdf_subject, name)
       else 
         super
       end
@@ -301,8 +339,16 @@ module ActiveFedora
     ##
     # Get the subject for this rdf/xml datastream
     def rdf_subject
-      @subject ||= self.class.rdf_subject.call(self)
+      @subject ||= begin
+        s = self.class.rdf_subject.call(self)
+        s &&= RDF::URI.new(s) if s.is_a? String
+        s
+      end
     end   
+
+    def reset_rdf_subject!
+      @subject = nil
+    end
 
     # Creates a RDF datastream for insertion into a Fedora Object
     # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
