@@ -102,22 +102,24 @@ module ActiveFedora
 
     class TermProxy
 
-      attr_reader :graph, :predicate
+      attr_reader :graph, :subject, :predicate
       delegate :class, :to_s, :==, :kind_of?, :each, :map, :empty?, :to => :values
 
-      def initialize(graph, predicate)
+      def initialize(graph, subject, predicate)
         @graph = graph
+
+        @subject = subject
         @predicate = predicate
       end
 
       def <<(*values)
-        values.each { |value| graph.append(predicate, value) }
+        values.each { |value| graph.append(subject, predicate, value) }
         values
       end
 
       def delete(*values)
         values.each do |value| 
-          graph.delete_predicate(predicate, value)
+          graph.delete_predicate(subject, predicate, value)
         end
 
         values
@@ -126,7 +128,7 @@ module ActiveFedora
       def values
         values = []
 
-        graph.query(predicate).each do |solution|
+        graph.query(subject, predicate).each do |solution|
           v = solution.value
           v = v.to_s if v.is_a? RDF::Literal
           values << v
@@ -176,10 +178,10 @@ module ActiveFedora
       new_repository = RDF::Repository.new
 
       graph.each_statement do |statement|
-          subject = statement.subject
+        subject = statement.subject
 
-          subject &&= new_subject if subject == bad_subject
-          new_repository << [subject, statement.predicate, statement.object]
+        subject &&= new_subject if subject == bad_subject
+        new_repository << [subject, statement.predicate, statement.object]
       end
 
       @graph = new_repository
@@ -273,56 +275,57 @@ module ActiveFedora
       end      
     end
 
-    def query predicate, &block
-      rdf_subject = self.rdf_subject
+    def query subject, predicate, &block
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       
       q = RDF::Query.new do
-        pattern [rdf_subject, predicate, :value]
+        pattern [subject, predicate, :value]
       end
 
       q.execute(graph, &block)
     end
 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
-    def get_values(predicate)
+    def get_values(subject, predicate)
+
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
 
-      return TermProxy.new(self, predicate)
+      return TermProxy.new(self, subject, predicate)
     end
 
     # if there are any existing statements with this predicate, replace them
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
-    def set_value(predicate, args)
+
+    def set_value(subject, predicate, values)
+      
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
 
-      delete_predicate(predicate)
+      delete_predicate(subject, predicate)
 
-      Array(args).each do |arg|
+      Array(values).each do |arg|
         arg = arg.to_s if arg.kind_of? RDF::Literal
         next if arg.empty?
 
-        graph.insert([rdf_subject, predicate, arg])
+        graph.insert([subject, predicate, arg])
       end
 
-      return TermProxy.new(self, predicate)
+      return TermProxy.new(self, subject, predicate)
     end
  
-    def delete_predicate(predicate, values = nil)
+    def delete_predicate(subject, predicate, values = nil)
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
-      rdf_subject = self.rdf_subject
 
       if values.nil?
         query = RDF::Query.new do
-          pattern [rdf_subject, predicate, :value]
+          pattern [subject, predicate, :value]
         end
 
         query.execute(graph).each do |solution|
-          graph.delete [rdf_subject, predicate, solution.value]
+          graph.delete [subject, predicate, solution.value]
         end
       else
         Array(values).each do |v|
-          graph.delete [rdf_subject, predicate, v]
+          graph.delete [subject, predicate, v]
         end
       end
 
@@ -330,11 +333,11 @@ module ActiveFedora
 
     # append a value 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
-    def append(predicate, args)
-      graph.insert([rdf_subject, predicate, args])
+    def append(subject, predicate, args)
+      graph.insert([subject, predicate, args])
 
 
-      return TermProxy.new(self, predicate)
+      return TermProxy.new(self, subject, predicate)
     end
 
     def serialization_format
@@ -343,9 +346,9 @@ module ActiveFedora
 
     def method_missing(name, *args)
       if (md = /^([^=]+)=$/.match(name.to_s)) && pred = find_predicate(md[1])
-        set_value(pred, *args)  
+        set_value(rdf_subject, pred, *args)  
        elsif pred = find_predicate(name)
-        get_values(name)
+        get_values(rdf_subject, name)
       else 
         super
       end
