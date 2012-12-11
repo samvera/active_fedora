@@ -30,14 +30,14 @@ describe ActiveFedora::SolrDigitalObject do
       end
       subject { ActiveFedora::SolrDigitalObject.new({}, {'datastreams'=>{'properties'=>{'dsMIME'=>'text/xml'}}},WithoutMetadataDs) }
       it "should create an xml datastream" do
-        subject.datastreams['properties'].should be_kind_of ActiveFedora::NokogiriDatastream
+        subject.datastreams['properties'].should be_kind_of ActiveFedora::OmDatastream
       end
     end
     
     describe "with a ds spec that's not part of the solrized object" do
       before do
         class MissingMetadataDs < ActiveFedora::Base
-          has_metadata :name => "foo", :type => ActiveFedora::NokogiriDatastream, :label => 'Foo Data'
+          has_metadata :name => "foo", :type => ActiveFedora::OmDatastream, :label => 'Foo Data'
         end
         after do
           Object.send(:remove_const, MissingMetadataDs)

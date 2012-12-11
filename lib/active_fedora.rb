@@ -46,6 +46,7 @@ module ActiveFedora #:nodoc:
     autoload :NokogiriDatastream
     autoload :NomDatastream
     autoload :NtriplesRDFDatastream
+    autoload :OmDatastream
     autoload :Property
     autoload :Persistence
     autoload :QualifiedDublinCoreDatastream

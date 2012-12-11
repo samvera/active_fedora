@@ -1,6 +1,6 @@
 module ActiveFedora
   #This class represents a simple xml datastream. 
-  class SimpleDatastream < NokogiriDatastream
+  class SimpleDatastream < OmDatastream
 
     class_attribute :class_fields
     self.class_fields = []

@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::Base do
 
   describe "first level delegation" do 
-    class BarStream2 < ActiveFedora::NokogiriDatastream 
+    class BarStream2 < ActiveFedora::OmDatastream 
       set_terminology do |t|
         t.root(:path=>"animals", :xmlns=>"urn:zoobar")
         t.waterfowl do

@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::Base do
 
   describe "active model methods" do 
-    class BarStream < ActiveFedora::NokogiriDatastream 
+    class BarStream < ActiveFedora::OmDatastream 
       set_terminology do |t|
         t.root(:path=>"first", :xmlns=>"urn:foobar")
         t.duck()

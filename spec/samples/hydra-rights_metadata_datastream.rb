@@ -1,5 +1,5 @@
 module Hydra
-  # This is an example of a NokogiriDatastream that defines a terminology for Hydra rightsMetadata xml
+  # This is an example of a OmDatastream that defines a terminology for Hydra rightsMetadata xml
   # The documentation for Hydra rightsMetadata is on the Hydra wiki at https://wiki.duraspace.org/display/hydra/Hydra+rights+metadata
   # The real version of this Terminology is part of the hydra-head plugin.  See https://github.com/projecthydra/hydra-head/blob/master/lib/hydra/rights_metadata.rb
   #
@@ -12,7 +12,7 @@ module Hydra
   #
   # Another interesting thing in this Class: it extends to_solr, first calling "super" (the default to_solr behavior) and then inserting an additional embargo_release_date_dt field
   # It uses Solrizer::Extractor.insert_solr_field_value to do this.  That method handles inserting new values into a Hash while ensuring that you don't destroy or overwrite any existing values in the hash.
-  class RightsMetadataDatastream < ActiveFedora::NokogiriDatastream       
+  class RightsMetadataDatastream < ActiveFedora::OmDatastream       
   
     set_terminology do |t|
       t.root(:path=>"rightsMetadata", :xmlns=>"http://hydra-collab.stanford.edu/schemas/rightsMetadata/v1", :schema=>"http://github.com/projecthydra/schemas/tree/v1/rightsMetadata.xsd") 

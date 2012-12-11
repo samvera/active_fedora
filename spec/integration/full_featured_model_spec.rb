@@ -28,7 +28,7 @@ describe ActiveFedora::Base do
           m.field "location", :string
         end
         
-        # has_metadata :name=>"arbitrary_xml", :type=> ActiveFedora::NokogiriDatastream do |m|
+        # has_metadata :name=>"arbitrary_xml", :type=> ActiveFedora::OmDatastream do |m|
         #   m.root_property :myxml, "my_xml", "http://www.example.gov/schema/v3"
         # end
         

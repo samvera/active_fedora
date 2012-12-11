@@ -7,8 +7,8 @@ describe ActiveFedora::Datastreams do
   describe "serializing datastreams" do
     before :all do
       class TestingMetadataSerializing < ActiveFedora::Base
-        has_metadata :name => "nokogiri_autocreate_on", :autocreate => true, :type => ActiveFedora::NokogiriDatastream
-        has_metadata :name => "nokogiri_autocreate_off", :autocreate => false, :type => ActiveFedora::NokogiriDatastream
+        has_metadata :name => "nokogiri_autocreate_on", :autocreate => true, :type => ActiveFedora::OmDatastream
+        has_metadata :name => "nokogiri_autocreate_off", :autocreate => false, :type => ActiveFedora::OmDatastream
       end
     end
 

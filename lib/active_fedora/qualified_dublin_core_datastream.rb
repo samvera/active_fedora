@@ -5,7 +5,7 @@ module ActiveFedora
   #Fedora Dublin Core XML datastreams structure.
   #
   #Fields can still be overridden if more specificity is desired (see ActiveFedora::Datastream#fields method).
-  class QualifiedDublinCoreDatastream < NokogiriDatastream
+  class QualifiedDublinCoreDatastream < OmDatastream
 
     class_attribute :class_fields
     self.class_fields = []

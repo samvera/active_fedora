@@ -298,7 +298,7 @@ describe ActiveFedora::Base do
   end
   
   describe ".metadata_streams" do
-    it "should return all of the datastreams from the object that are kinds of NokogiriDatastream " do
+    it "should return all of the datastreams from the object that are kinds of OmDatastream " do
       mds1 = ActiveFedora::SimpleDatastream.new(@test_object.inner_object, "md1")
       mds2 = ActiveFedora::QualifiedDublinCoreDatastream.new(@test_object.inner_object, "qdc")
       fds = ActiveFedora::Datastream.new(@test_object.inner_object, "fds")

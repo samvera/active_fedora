@@ -1,5 +1,5 @@
 require 'spec_helper'
-describe ActiveFedora::NokogiriDatastream do
+describe ActiveFedora::OmDatastream do
   
   before(:all) do
     @sample_fields = {:publisher => {:values => ["publisher1"], :type => :string}, 
@@ -19,7 +19,7 @@ describe ActiveFedora::NokogiriDatastream do
     @mock_inner.stub(:repository).and_return(@mock_repo)
     @mock_inner.stub(:pid)
     @mock_inner.stub(:new? => false)
-    @test_ds = ActiveFedora::NokogiriDatastream.new(@mock_inner, "descMetadata")
+    @test_ds = ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata")
     @test_ds.stub(:new? => false, :profile => {}, :datastream_content => '<test_xml/>')
     @test_ds.content="<test_xml/>"
   end
@@ -30,34 +30,34 @@ describe ActiveFedora::NokogiriDatastream do
   its(:metadata?) { should be_true}
 
   it "should include the Solrizer::XML::TerminologyBasedSolrizer for .to_solr support" do
-    ActiveFedora::NokogiriDatastream.included_modules.should include(Solrizer::XML::TerminologyBasedSolrizer)
+    ActiveFedora::OmDatastream.included_modules.should include(Solrizer::XML::TerminologyBasedSolrizer)
   end
   
   describe '#new' do
     it 'should provide #new' do
-      ActiveFedora::NokogiriDatastream.should respond_to(:new)
+      ActiveFedora::OmDatastream.should respond_to(:new)
       @test_ds.ng_xml.should be_instance_of(Nokogiri::XML::Document)
     end
     it 'should load xml from blob if provided' do
-      test_ds1 = ActiveFedora::NokogiriDatastream.new(nil, 'ds1')
+      test_ds1 = ActiveFedora::OmDatastream.new(nil, 'ds1')
       test_ds1.content="<xml><foo/></xml>"
       test_ds1.ng_xml.to_xml.should == "<?xml version=\"1.0\"?>\n<xml>\n  <foo/>\n</xml>\n"
     end
     it "should initialize from #xml_template if no xml is provided" do
-      ActiveFedora::NokogiriDatastream.should_receive(:xml_template).and_return("<fake template/>")
-      n = ActiveFedora::NokogiriDatastream.new
+      ActiveFedora::OmDatastream.should_receive(:xml_template).and_return("<fake template/>")
+      n = ActiveFedora::OmDatastream.new
       n.ng_xml.should be_equivalent_to("<fake template/>")
     end
   end
   
   describe '#xml_template' do
     it "should return an empty xml document" do
-      ActiveFedora::NokogiriDatastream.xml_template.to_xml.should == "<?xml version=\"1.0\"?>\n<xml/>\n"
+      ActiveFedora::OmDatastream.xml_template.to_xml.should == "<?xml version=\"1.0\"?>\n<xml/>\n"
     end
   end
 
   describe "an instance" do
-    subject { ActiveFedora::NokogiriDatastream.new }
+    subject { ActiveFedora::OmDatastream.new }
     it{ should.respond_to? :to_solr }
     its(:to_solr) {should == { }}
   end
@@ -153,7 +153,7 @@ describe ActiveFedora::NokogiriDatastream do
       @mods_ds.get_values("--my xpath--").should == ["value1", "value2"]
     end
     it "should assume that field_names that are strings are xpath queries" do
-      ActiveFedora::NokogiriDatastream.should_receive(:accessor_xpath).never
+      ActiveFedora::OmDatastream.should_receive(:accessor_xpath).never
       @mods_ds.should_receive(:term_values).with("--my xpath--").and_return(["abstract1", "abstract2"])
       @mods_ds.get_values("--my xpath--").should == ["abstract1", "abstract2"]
     end
@@ -188,7 +188,7 @@ describe ActiveFedora::NokogiriDatastream do
   end
   
   describe '.content=' do
-    subject { ActiveFedora::NokogiriDatastream.new(@mock_inner, "descMetadata") }
+    subject { ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata") }
     it "should update the content" do
       subject.stub(:new? => false )
       subject.content = "<a />"
@@ -211,7 +211,7 @@ describe ActiveFedora::NokogiriDatastream do
   
   describe 'ng_xml=' do
     before do
-      @test_ds2 = ActiveFedora::NokogiriDatastream.new(@mock_inner, "descMetadata")
+      @test_ds2 = ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata")
     end
     it "should parse raw xml for you" do
       @test_ds2.ng_xml = @sample_raw_xml
@@ -275,7 +275,7 @@ describe ActiveFedora::NokogiriDatastream do
 
   describe '.get_values_from_solr' do
     before(:each) do
-      @mods_ds = ActiveFedora::NokogiriDatastream.new
+      @mods_ds = ActiveFedora::OmDatastream.new
       @mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
     end
 
@@ -288,7 +288,7 @@ describe ActiveFedora::NokogiriDatastream do
       mock_term.stub(:type).and_return(:text)
       mock_terminology = mock("OM::XML::Terminology")
       mock_terminology.stub(:retrieve_term).and_return(mock_term)
-      ActiveFedora::NokogiriDatastream.stub(:terminology).and_return(mock_terminology)
+      ActiveFedora::OmDatastream.stub(:terminology).and_return(mock_terminology)
       @mods_ds.from_solr(@solr_doc)
       term_pointer = [:name,:role,:roleTerm]
       @mods_ds.get_values_from_solr(:name,:role,:roleTerm).should == ["creator","submitter","teacher"]
@@ -331,7 +331,7 @@ describe ActiveFedora::NokogiriDatastream do
 
   describe '.update_values' do
     before(:each) do
-      @mods_ds = ActiveFedora::NokogiriDatastream.new
+      @mods_ds = ActiveFedora::OmDatastream.new
       @mods_ds.content= fixture(File.join("mods_articles","hydrangea_article1.xml")).read
     end
 
@@ -363,7 +363,7 @@ describe ActiveFedora::NokogiriDatastream do
   describe '.term_values' do
 
     before(:each) do
-      @mods_ds = ActiveFedora::NokogiriDatastream.new
+      @mods_ds = ActiveFedora::OmDatastream.new
       @mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
     end
 

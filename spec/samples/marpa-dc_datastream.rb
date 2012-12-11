@@ -1,7 +1,7 @@
 require "active-fedora"
 module Marpa
 
-  # This is an example of a NokogiriDatastream that defines a terminology for Dublin Core xml
+  # This is an example of a OmDatastream that defines a terminology for Dublin Core xml
   #
   # Some things to observe about this Class:
   # * Defines a couple of custom terms, tibetan_title and english_title, that map to dc:title with varying @language attributes
@@ -10,7 +10,7 @@ module Marpa
   # * Sets the namespace using :xmlns argument on the root term
   # * Does not override or extend to_solr, so the default solrization approach will be used (Solrizer::XML::TerminologyBasedSolrizer)
   #
-  class DcDatastream < ActiveFedora::NokogiriDatastream
+  class DcDatastream < ActiveFedora::OmDatastream
   
     set_terminology do |t|
       t.root(:path=>"dc", :xmlns=>'http://purl.org/dc/terms/')

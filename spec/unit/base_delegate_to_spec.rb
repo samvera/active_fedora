@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::Base do
 
   describe "deletgating multiple terms to one datastream" do
-    class BarnyardDocument < ActiveFedora::NokogiriDatastream
+    class BarnyardDocument < ActiveFedora::OmDatastream
       set_terminology do |t|
         t.root(:path=>"animals", :xmlns=>"urn:zoobar")
         t.waterfowl do

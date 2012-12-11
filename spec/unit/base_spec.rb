@@ -92,7 +92,7 @@ describe ActiveFedora::Base do
         delegate :swank, :to=>'someData'
       end
       class FooAdaptation < ActiveFedora::Base
-        has_metadata :type=>ActiveFedora::NokogiriDatastream, :name=>'someData'
+        has_metadata :type=>ActiveFedora::OmDatastream, :name=>'someData'
       end
     end
 
@@ -145,7 +145,7 @@ describe ActiveFedora::Base do
 
     describe ".datastream_class_for_name" do
       it "should return the specifed class" do
-        FooAdaptation.datastream_class_for_name('someData').should == ActiveFedora::NokogiriDatastream
+        FooAdaptation.datastream_class_for_name('someData').should == ActiveFedora::OmDatastream
       end
       it "should return the specifed class" do
         FooAdaptation.datastream_class_for_name('content').should == ActiveFedora::Datastream
@@ -367,7 +367,7 @@ describe ActiveFedora::Base do
         @test_object = FooHistory.new()
         adapted = @test_object.adapt_to(FooAdaptation)
         adapted.datastreams.keys.should include 'someData'
-        adapted.datastreams['someData'].class.should == ActiveFedora::NokogiriDatastream
+        adapted.datastreams['someData'].class.should == ActiveFedora::OmDatastream
       end
     end
 
@@ -441,7 +441,7 @@ describe ActiveFedora::Base do
         solr_doc["active_fedora_model_field"].should eql(@test_object.class.inspect)
       end
       
-      it "should call .to_solr on all SimpleDatastreams and NokogiriDatastreams, passing the resulting document to solr" do
+      it "should call .to_solr on all SimpleDatastreams and OmDatastreams, passing the resulting document to solr" do
         mock1 = mock("ds1", :to_solr => {})
         mock2 = mock("ds2", :to_solr => {})
         ngds = mock("ngds", :to_solr => {})

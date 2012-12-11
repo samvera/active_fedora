@@ -1,7 +1,7 @@
 require 'spec_helper'
 require "solrizer"
 
-describe ActiveFedora::NokogiriDatastream do
+describe ActiveFedora::OmDatastream do
   
   before(:all) do
     class HydrangeaArticle2 < ActiveFedora::Base
