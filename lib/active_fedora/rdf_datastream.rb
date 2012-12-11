@@ -157,6 +157,8 @@ module ActiveFedora
 
     def save
       @content = serialize
+
+
       super
     end
 
@@ -241,11 +243,14 @@ module ActiveFedora
       end
     end
 
+    # alias the original datastream content
     alias :datastream_content :content
 
     def content
+      # return the RDF graph content if it's available (or all we have)
       return serialize if loaded or new?
 
+      # otherwise, grab the data from the datastore
       super
     end
     
@@ -254,8 +259,15 @@ module ActiveFedora
     end
 
     def graph_changed?
-      changed_attributes.has_key?('graph') ||
-       (loaded && (serialize != datastream_content) )
+      return true if changed_attributes.has_key?('graph')
+      return false unless loaded
+
+      if new?
+        !serialize.empty?
+      else
+        serialize.strip != (datastream_content || '').strip
+      end
+
     end
 
     def changed?

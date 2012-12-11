@@ -100,8 +100,15 @@ module ActiveFedora
     
     # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods 
     def ng_xml_changed?
-      changed_attributes.has_key?('ng_xml') ||
-       (xml_loaded && (to_xml.strip != (datastream_content || '').strip) )
+      return true if changed_attributes.has_key?('ng_xml')
+
+      return false unless xml_loaded
+
+      if new?
+        !to_xml.empty?
+      else
+       (to_xml.strip != (datastream_content || '').strip)
+     end
     end
 
     def changed?
