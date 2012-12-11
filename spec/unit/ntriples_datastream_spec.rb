@@ -166,6 +166,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
           map.rights(:in => RDF::DC)
         end
       end
+    end
+    before(:each) do
       @subject = MyDatastream.new(@inner_object, 'solr_rdf')
       @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
       @subject.stub(:pid => 'test:1')
@@ -272,17 +274,11 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
       describe '.content=' do
         it "should update the content and graph, marking the datastream as changed" do
-          # it's not clear to me that be_equivalent_to works with the ntriples rdf?
-          mock_repo = mock('repository')
           sample_rdf = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
-          @obj.stub(:pid).and_return('test:123')
-          @obj.stub(:repository).and_return(mock_repo)
-          @obj.serialize.should == @obj.datastream_content
+          @obj.stub(:new? => false)
           @obj.should_not be_changed
-          @obj.content.should_not == sample_rdf
           @obj.content = sample_rdf
           @obj.should be_changed
-          @obj.content.should be_equivalent_to(sample_rdf)
         end
       end
       it "should save content properly upon save" do
