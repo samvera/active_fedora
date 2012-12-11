@@ -412,19 +412,24 @@ module ActiveFedora
     #     </mods:role>
     #     </mods:name>
     #   </mods>
-    def update_indexed_attributes(params={}, opts={})    
+    def update_indexed_attributes(input_params={}, opts={})
       if self.class.terminology.nil?
         raise "No terminology is set for this NokogiriDatastream class.  Cannot perform update_indexed_attributes"
       end
-      # remove any fields from params that this datastream doesn't recognize    
-      # make sure to make a copy of params so not to modify hash that might be passed to other methods
-      current_params = params.clone
-      current_params.delete_if do |term_pointer,new_values| 
+
+      params = extract_normalized_params(input_params)
+
+      # Removing the destructive clone and delete in favor of building a new
+      # hash
+      current_params = {}
+      params.each do |term_pointer,new_values|
         if term_pointer.kind_of?(String)
           logger.warn "WARNING: #{dsid} ignoring {#{term_pointer.inspect} => #{new_values.inspect}} because #{term_pointer.inspect} is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it."
           true
         else
-          !self.class.terminology.has_term?(*OM.destringify(term_pointer))
+          if self.class.terminology.has_term?(*OM.destringify(term_pointer))
+            current_params[term_pointer] = new_values
+          end
         end
       end
 
@@ -435,7 +440,21 @@ module ActiveFedora
       
       return result
     end
-    
+
+    def extract_normalized_params(params)
+      # if the params are just keys, not an array, make then into an array.
+      new_params = {}
+      params.each do |key, val|
+        if key.is_a? Array
+          new_params[key] = val
+        else
+          new_params[[key.to_sym]] = val
+        end
+      end
+      new_params
+    end
+    protected :extract_normalized_params
+
     def get_values(field_key,default=[])
       term_values(*field_key)
     end

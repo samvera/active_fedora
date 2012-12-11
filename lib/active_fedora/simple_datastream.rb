@@ -22,20 +22,6 @@ module ActiveFedora
     end
     protected :om_term_options
 
-    def update_indexed_attributes(params={}, opts={})
-      # if the params are just keys, not an array, make then into an array.
-      new_params = {}
-      params.each do |key, val|
-        if key.is_a? Array
-          new_params[key] = val
-        else
-          new_params[[key.to_sym]] = val
-        end
-      end
-      super(new_params, opts)
-    end
-    
-
     def self.xml_template
        Nokogiri::XML::Document.parse("<fields/>")
     end
