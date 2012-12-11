@@ -59,7 +59,7 @@ module ActiveFedora
         define_method field do
           ds = self.send(args[:to])
           val = if ds.kind_of?(ActiveFedora::RDFDatastream)
-                  ds.send(:get_values, field)
+                  ds.send(field)
                 else
                   terminology = args[:at] || [field]
                   ds.send(:term_values, *terminology)
@@ -72,7 +72,7 @@ module ActiveFedora
         define_method "#{field}=".to_sym do |v|
           ds = self.send(args[:to])
           if ds.kind_of?(ActiveFedora::RDFDatastream)
-            ds.send(:set_value, field, v)
+            ds.send("#{field}=", v)
           else
             terminology = args[:at] || [field]
             ds.send(:update_indexed_attributes, {terminology => v})
