@@ -156,8 +156,7 @@ module ActiveFedora
     end
 
     def save
-      @content = serialize
-
+      @content = serialize  if graph_changed? and content_will_change!
 
       super
     end

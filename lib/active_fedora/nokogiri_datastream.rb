@@ -48,7 +48,7 @@ module ActiveFedora
     end
 
     def save
-      @content = to_xml
+      @content = to_xml if ng_xml_changed? and content_will_change!
       super
     end
 

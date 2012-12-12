@@ -26,6 +26,18 @@ describe ActiveFedora::NtriplesRDFDatastream do
     Object.send(:remove_const, :MyDatastream)
   end
 
+  it "should set and recall" do
+    @subject.title = "John Doe"
+    @subject.save
+    f = RdfTest.find(@subject.pid)
+    f.title.should == "John Doe"
+    f.title = "Jane Doe"
+    f.save
+    new_object = RdfTest.find(@subject.pid)
+    new_object.title.should == "Jane Doe"
+
+  end
+
   it "should set and recall values" do
     @subject.title = 'War and Peace'
     @subject.based_near = "Moscow, Russia"
