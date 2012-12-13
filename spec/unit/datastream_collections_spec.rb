@@ -81,6 +81,12 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:file=>@f})
     end
 
+    it "should  allow access to file content" do
+      @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:file=>@f})
+      @test_object2.save!
+      @test_object2.thumbnail[0].content
+    end
+
     it "should raise an error if neither a blob nor file is set" do
       expect { @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg"}) }.to raise_error
     end
