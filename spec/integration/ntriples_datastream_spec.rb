@@ -26,8 +26,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
     Object.send(:remove_const, :MyDatastream)
   end
 
+  it "should not try to send an empty datastream" do
+    @subject.save
+  end
+
   it "should set and recall values" do
     @subject.title = 'War and Peace'
+    @subject.rdf.should be_changed
     @subject.based_near = "Moscow, Russia"
     @subject.related_url = "http://en.wikipedia.org/wiki/War_and_Peace"
     @subject.part = "this is a part"

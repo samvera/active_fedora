@@ -152,47 +152,33 @@ module ActiveFedora
     
     include ModelMethods
     attr_accessor :loaded
-
-    def ensure_loaded
-      return if loaded 
-      self.loaded = true
-      unless new?
-        deserialize content
-      end
-    end
-
-    def changed?
-      super || dirty?
-    end
-
-    def dirty?
-      graph.dirty
-    end
-
     def metadata?
       true
     end
-
-    def save
-      super
-      graph.dirty = false
+    def ensure_loaded
     end
 
-    def serialize! # :nodoc:
-      return unless dirty?
-      return unless loaded
-      self.content = serialize
+    def content
+      serialize
     end
 
     def content=(content)
       super
-      @graph = RelationshipGraph.new
-      deserialize(content)
+      self.loaded = true
+      @graph = deserialize(content)
+    end
+
+    def content_changed?
+      return false if new? and !loaded
+      super
+    end
+
+    def changed?
+      super || content_changed?
     end
 
     # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
     def fields
-      ensure_loaded
       field_map = {}
       graph.relationships.each do |predicate, values|
         vocab_sym, name = predicate.qname
@@ -211,7 +197,6 @@ module ActiveFedora
     end
 
     def to_solr(solr_doc = Hash.new) # :nodoc:
-      ensure_loaded
       fields.each do |field_key, field_info|
         values = field_info.fetch(:values, false)
         if values
@@ -237,7 +222,13 @@ module ActiveFedora
     # Populate a RDFDatastream object based on the "datastream" content 
     # Assumes that the datastream contains RDF content
     # @param [String] data the "rdf" node 
-    def deserialize(data)
+    def deserialize(data = nil)
+      graph = RelationshipGraph.new
+
+      return graph if new? and data.nil?
+      
+      data ||= datastream_content
+
       unless data.nil?
         RDF::Reader.for(serialization_format).new(data) do |reader|
           reader.each_statement do |statement|
@@ -255,12 +246,14 @@ module ActiveFedora
     end
 
     def graph
-      @graph ||= RelationshipGraph.new
+      @graph ||= begin
+        self.loaded = true
+        deserialize
+      end      
     end
 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def get_values(predicate)
-      ensure_loaded
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       results = graph[predicate]
       return if results.nil?
@@ -274,7 +267,6 @@ module ActiveFedora
     # if there are any existing statements with this predicate, replace them
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def set_value(predicate, args)
-      ensure_loaded
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       graph.delete(predicate)
       args = [args] unless args.respond_to? :each
@@ -282,17 +274,14 @@ module ActiveFedora
         arg = arg.to_s if arg.kind_of? RDF::Literal
         graph.add(predicate, arg, true) unless arg.empty?
       end
-      graph.dirty = true
       return TermProxy.new(graph, predicate, args)
     end
 
     # append a value 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def append(predicate, args)
-      ensure_loaded
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       graph.add(predicate, args, true)
-      graph.dirty = true
       return TermProxy.new(graph, predicate, args)
     end
 
@@ -319,13 +308,27 @@ module ActiveFedora
     # Creates a RDF datastream for insertion into a Fedora Object
     # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
     def serialize
-      out = RDF::Writer.for(serialization_format).buffer do |writer|
-        graph.to_graph(rdf_subject).each_statement do |statement|
-          writer << statement
-        end
+      update_subjects_to_use_a_real_pid!
+      RDF::Writer.for(serialization_format).dump(graph)
+    end
+
+    def update_subjects_to_use_a_real_pid!
+      return unless new?
+
+      bad_subject = rdf_subject
+      reset_rdf_subject!
+      new_subject = rdf_subject
+
+      new_repository = RDF::Repository.new
+
+      graph.each_statement do |statement|
+          subject = statement.subject
+
+          subject &&= new_subject if subject == bad_subject
+          new_repository << [subject, statement.predicate, statement.object]
       end
-      graph.dirty = false
-      out
+
+      @graph = new_repository
     end
   end
 end

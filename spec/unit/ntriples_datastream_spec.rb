@@ -271,6 +271,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       end
       describe '#save' do
         it "should set dirty? to false" do
+          puts @obj.content_changed?.inspect
           @obj.should_not be_changed
           @obj.title = "something"
           @obj.should be_changed
