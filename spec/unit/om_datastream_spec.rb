@@ -22,6 +22,7 @@ describe ActiveFedora::OmDatastream do
     @test_ds = ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata")
     @test_ds.stub(:new? => false, :profile => {}, :datastream_content => '<test_xml/>')
     @test_ds.content="<test_xml/>"
+    @test_ds.stub(:new? => false)
   end
   
   after(:each) do
@@ -46,6 +47,7 @@ describe ActiveFedora::OmDatastream do
     it "should initialize from #xml_template if no xml is provided" do
       ActiveFedora::OmDatastream.should_receive(:xml_template).and_return("<fake template/>")
       n = ActiveFedora::OmDatastream.new
+      n.ensure_xml_loaded
       n.ng_xml.should be_equivalent_to("<fake template/>")
     end
   end
@@ -164,6 +166,7 @@ describe ActiveFedora::OmDatastream do
       mods_xml = Nokogiri::XML::Document.parse( fixture(File.join("mods_articles", "hydrangea_article1.xml")) )
       tmpl = Hydra::ModsArticleDatastream.new
       Hydra::ModsArticleDatastream.from_xml(mods_xml,tmpl).ng_xml.root.to_xml.should == mods_xml.root.to_xml
+      tmpl.should_not be_changed
     end
   end
   
@@ -177,6 +180,7 @@ describe ActiveFedora::OmDatastream do
       @test_ds.should respond_to(:save)
     end
     it "should persist the product of .to_xml in fedora" do
+      @mock_repo.stub(:datastream).and_return('')
       @test_ds.stub(:new? => true)
       @test_ds.stub(:to_xml => "fake xml")
       @mock_repo.should_receive(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'X', :dsState => 'A', :mimeType=>'text/xml')
@@ -192,7 +196,7 @@ describe ActiveFedora::OmDatastream do
     it "should update the content" do
       subject.stub(:new? => false )
       subject.content = "<a />"
-      subject.datastream_content.should == '<a />'
+      subject.content.should == '<a />'
     end
 
     it "should mark the object as changed" do
