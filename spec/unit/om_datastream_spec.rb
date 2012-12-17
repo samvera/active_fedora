@@ -160,16 +160,6 @@ describe ActiveFedora::OmDatastream do
       @mods_ds.get_values("--my xpath--").should == ["abstract1", "abstract2"]
     end
   end
-  
-  describe '#from_xml' do
-    it "should work when a template datastream is passed in" do
-      mods_xml = Nokogiri::XML::Document.parse( fixture(File.join("mods_articles", "hydrangea_article1.xml")) )
-      tmpl = Hydra::ModsArticleDatastream.new
-      Hydra::ModsArticleDatastream.from_xml(mods_xml,tmpl).ng_xml.root.to_xml.should == mods_xml.root.to_xml
-      tmpl.should_not be_changed
-    end
-  end
-  
 
   it 'should provide .fields' do
     @test_ds.should respond_to(:fields)
@@ -215,6 +205,7 @@ describe ActiveFedora::OmDatastream do
   
   describe 'ng_xml=' do
     before do
+      @mock_inner.stub(:new? => true)
       @test_ds2 = ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata")
     end
     it "should parse raw xml for you" do
