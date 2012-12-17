@@ -5,8 +5,8 @@ require "solrizer/xml"
 #this class represents a xml metadata datastream
 module ActiveFedora
   class NokogiriDatastream < Datastream
-      
-    include MetadataDatastreamHelper
+      extend Deprecation
+  #  include MetadataDatastreamHelper
     include OM::XML::Document
     include Solrizer::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
     
@@ -14,7 +14,7 @@ module ActiveFedora
     alias_method(:om_update_values, :update_values) unless method_defined?(:om_update_values)
     
     attr_accessor :internal_solr_doc
-
+    
     def self.default_attributes
       super.merge(:controlGroup => 'X', :mimeType => 'text/xml')
     end
@@ -45,20 +45,16 @@ module ActiveFedora
 
     def ng_xml 
       @ng_xml ||= begin
-      self.xml_loaded = true
-
       if new?
         ## Load up the template
         self.class.xml_template
       else
-        Nokogiri::XML::Document.parse(content)
+        Nokogiri::XML::Document.parse(datastream_content)
       end
       end
     end
     
     def ng_xml=(new_xml)
-      ng_xml_will_change!
-      self.xml_loaded=true
       case new_xml 
       when Nokogiri::XML::Document
         @ng_xml = new_xml
@@ -90,14 +86,24 @@ module ActiveFedora
     def metadata?
       true
     end
-    
-    def content=(content)
-      super
-      self.xml_loaded=true
-      @ng_xml = Nokogiri::XML::Document.parse(content)
+
+    def content
+      to_xml
+    end
+
+    def datastream_content
+      @datastream_content ||= Nokogiri::XML(super).to_xml  {|config| config.no_declaration}.strip
     end
     
-    
+    def content=(content)
+      @ng_xml = Nokogiri::XML::Document.parse(content)
+    end
+
+    def content_changed?
+      return false if new? and !xml_loaded
+      super
+    end
+
     def to_xml(xml = nil)
       xml = self.ng_xml if xml.nil?
       ng_xml = self.ng_xml
@@ -118,7 +124,7 @@ module ActiveFedora
         end
       end
       
-      return xml.to_xml {|config| config.no_declaration}
+      return xml.to_xml {|config| config.no_declaration}.strip
     end
     
     # ** Experimental **
@@ -381,6 +387,18 @@ module ActiveFedora
         om_term_values(*term_pointer)
       end
     end
+
+    # Deprecated methods left here for backwards compatibility
+    def ensure_xml_loaded; end
+    deprecation_deprecate :ensure_xml_loaded
+
+    def serialize!
+    end
+    
+    def xml_loaded
+      instance_variable_defined? :@ng_xml
+    end
+    
   end
 end
 
