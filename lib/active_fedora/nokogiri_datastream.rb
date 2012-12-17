@@ -91,6 +91,10 @@ module ActiveFedora
     def content
       to_xml
     end
+
+    def datastream_content
+      @datastream_content ||= Nokogiri::XML(super).to_xml  {|config| config.no_declaration}.strip
+    end
     
     def content=(content)
       super
@@ -102,7 +106,6 @@ module ActiveFedora
       super
     end
 
-    
     def to_xml(xml = nil)
       xml = self.ng_xml if xml.nil?
       ng_xml = self.ng_xml
