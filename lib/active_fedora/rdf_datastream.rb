@@ -334,6 +334,8 @@ module ActiveFedora
       else 
         super
       end
+    rescue ActiveFedora::UnregisteredPredicateError
+      super
     end
 
     ##

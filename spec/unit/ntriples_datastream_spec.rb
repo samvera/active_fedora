@@ -53,7 +53,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.created.should be_kind_of Array
     end
     it "should have method missing" do
-      lambda{@subject.frank}.should raise_exception ActiveFedora::UnregisteredPredicateError
+      lambda{@subject.frank}.should raise_exception NoMethodError
     end
 
     it "should set fields" do
@@ -168,6 +168,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
       end
       @subject = MyDatastream.new(@inner_object, 'solr_rdf')
       @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
+    end
+    before(:each) do  
       @subject.stub(:pid => 'test:1')
       @subject.stub(:new? => false)
       @sample_fields = {:my_datastream__publisher => {:values => ["publisher1"], :type => :string, :behaviors => [:facetable, :sortable, :searchable, :displayable]}, 
@@ -269,29 +271,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
         @obj.rights = "Totally open, y'all"
         @obj.save
       end
-      describe '#save' do
-        it "should set dirty? to false" do
-          puts @obj.content_changed?.inspect
-          @obj.should_not be_changed
-          @obj.title = "something"
-          @obj.should be_changed
-          @obj.save
-          @obj.should_not be_changed
-        end
-      end
-      describe '.content=' do
-        it "should update the content and graph, marking the datastream as changed" do
-          mock_repo = mock('repository')
-          sample_rdf = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
-          @obj.stub(:pid).and_return('test:123')
-          @obj.stub(:repository).and_return(mock_repo)
-          @obj.should_not be_changed
-          @obj.content.should_not be_equivalent_to(sample_rdf)
-          @obj.content = sample_rdf
-          @obj.should be_changed
-          @obj.content.should be_equivalent_to(sample_rdf)
-        end
-      end
+
       it "should save content properly upon save" do
         foo = Foo.new(:pid => 'test:1')
         foo.title = 'Hamlet'
