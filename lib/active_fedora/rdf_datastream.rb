@@ -152,41 +152,6 @@ module ActiveFedora
     def ensure_loaded
     end
 
-    def changed?
-      super
-    end
-
-    def metadata?
-      true
-    end
-
-    def serialize!
-    end
-
-    def content
-      update_subjects_to_use_a_real_pid
-      serialize
-    end
-
-    def update_subjects_to_use_a_real_pid
-      return unless new?
-
-      bad_subject = rdf_subject
-      reset_rdf_subject!
-      new_subject = rdf_subject
-
-      new_repository = RDF::Repository.new
-
-      graph.each_statement do |statement|
-        subject = statement.subject
-
-        subject &&= new_subject if subject == bad_subject
-        new_repository << [subject, statement.predicate, statement.object]
-      end
-
-      @graph = new_repository
-    end
-
     def content=(content)
       super
       self.loaded = true
@@ -352,6 +317,8 @@ module ActiveFedora
       else 
         super
       end
+    rescue ActiveFedora::UnregisteredPredicateError
+      super
     end
 
     ##
