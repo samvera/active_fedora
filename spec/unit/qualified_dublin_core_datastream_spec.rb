@@ -53,17 +53,6 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
 
   end
 
-  it "should parse dcterms and dcelements from xml" do
-    doc = Nokogiri::XML::Document.parse(File.open( File.dirname(__FILE__)+'/../fixtures/changeme155.xml') )
-    stream = doc.xpath('//foxml:datastream[@ID=\'dublin_core\']/foxml:datastreamVersion/foxml:xmlContent/dc')
-    ds = ActiveFedora::QualifiedDublinCoreDatastream.new
-    n = ActiveFedora::QualifiedDublinCoreDatastream.from_xml(stream.to_xml, ds)
-    n.spatial.should == ["Boston [7013445]", "Dorchester [7013575]", "Roxbury [7015002]"] 
-    n.title.should ==  ["Oral history with Frances Addelson, 1997 November 14"]
-    n.should_not be_changed
-  end
-
-
   it "should default dc elements to :multiple=>true" do
     @test_ds.fields.values.each do |s|
       s.has_key?(:multiple).should == true

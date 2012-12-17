@@ -48,11 +48,11 @@ describe ActiveFedora::Datastream do
     ds.content = fixture('dino.jpg')
     @test_object.add_datastream(ds).should be_true
     @test_object.save
+    @test_object.datastreams[dsid].should_not be_changed
     to = ActiveFedora::Base.find(@test_object.pid) 
     to.should_not be_nil 
     to.datastreams[dsid].should_not be_nil
     to.datastreams[dsid].content.should == fixture('dino.jpg').read
-    
   end
   
   it "should be able to set the versionable attribute" do
