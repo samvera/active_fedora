@@ -97,6 +97,11 @@ module ActiveFedora
       @ng_xml = Nokogiri::XML::Document.parse(content)
     end
 
+    def content_changed?
+      return false if new? and !xml_loaded
+      super
+    end
+
     
     def to_xml(xml = nil)
       xml = self.ng_xml if xml.nil?
