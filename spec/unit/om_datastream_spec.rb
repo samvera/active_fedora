@@ -196,7 +196,7 @@ describe ActiveFedora::OmDatastream do
     it "should update the content" do
       subject.stub(:new? => false )
       subject.content = "<a />"
-      subject.content.should == '<a />'
+      subject.content.should == '<a/>'
     end
 
     it "should mark the object as changed" do
@@ -244,7 +244,7 @@ describe ActiveFedora::OmDatastream do
     
     it "should ng_xml.to_xml" do
       @test_ds.stub(:ng_xml => Nokogiri::XML::Document.parse("<text_document/>"))
-      @test_ds.to_xml.should == "<text_document/>\n"       
+      @test_ds.to_xml.should == "<text_document/>"       
     end
     
     it 'should accept an optional Nokogiri::XML Document as an argument and insert its fields into that (mocked test)' do
