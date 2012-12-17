@@ -45,8 +45,6 @@ module ActiveFedora
 
     def ng_xml 
       @ng_xml ||= begin
-      self.xml_loaded = true
-
       if new?
         ## Load up the template
         self.class.xml_template
@@ -58,7 +56,6 @@ module ActiveFedora
     
     def ng_xml=(new_xml)
       ng_xml_will_change!
-      self.xml_loaded=true
       case new_xml 
       when Nokogiri::XML::Document
         @ng_xml = new_xml
@@ -93,8 +90,11 @@ module ActiveFedora
     
     def content=(content)
       super
-      self.xml_loaded=true
       @ng_xml = Nokogiri::XML::Document.parse(content)
+    end
+
+    def xml_loaded
+      instance_variable_defined? :@ng_xml
     end
     
     
