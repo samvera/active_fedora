@@ -71,6 +71,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.save
     @subject.title.should be_nil
   end
+
+  it "should be able to save a blank document" do
+    @subject.title = ""
+    @subject.save
+  end
+
+
   it "should delete values" do
     @subject.title = "Hamlet"
     @subject.related_url = "http://psu.edu/"
