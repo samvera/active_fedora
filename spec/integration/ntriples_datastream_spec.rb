@@ -32,6 +32,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
   it "should set and recall values" do
     @subject.title = 'War and Peace'
+    @subject.rdf.should be_changed
     @subject.based_near = "Moscow, Russia"
     @subject.related_url = "http://en.wikipedia.org/wiki/War_and_Peace"
     @subject.part = "this is a part"

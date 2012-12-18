@@ -152,6 +152,10 @@ module ActiveFedora
     def ensure_loaded
     end
 
+    def content
+      serialize
+    end
+
     def content=(content)
       super
       self.loaded = true
@@ -161,6 +165,10 @@ module ActiveFedora
     def content_changed?
       return false if new? and !loaded
       super
+    end
+
+    def changed?
+      super || content_changed?
     end
 
     # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
@@ -338,7 +346,27 @@ module ActiveFedora
     # Creates a RDF datastream for insertion into a Fedora Object
     # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
     def serialize
+      update_subjects_to_use_a_real_pid!
       RDF::Writer.for(serialization_format).dump(graph)
+    end
+
+    def update_subjects_to_use_a_real_pid!
+      return unless new?
+
+      bad_subject = rdf_subject
+      reset_rdf_subject!
+      new_subject = rdf_subject
+
+      new_repository = RDF::Repository.new
+
+      graph.each_statement do |statement|
+          subject = statement.subject
+
+          subject &&= new_subject if subject == bad_subject
+          new_repository << [subject, statement.predicate, statement.object]
+      end
+
+      @graph = new_repository
     end
   end
 end
