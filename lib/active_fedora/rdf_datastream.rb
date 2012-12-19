@@ -148,7 +148,9 @@ module ActiveFedora
     end
     
     attr_accessor :loaded
-
+    def metadata?
+      true
+    end
     def ensure_loaded
     end
 
