@@ -304,7 +304,6 @@ module ActiveFedora
         solrize_profile(solr_doc)
       end
       datastreams.each_value do |ds|
-        ds.ensure_xml_loaded if ds.respond_to? :ensure_xml_loaded  ### Can't put this in the model because it's often implemented in Solrizer::XML::TerminologyBasedSolrizer 
         solr_doc = ds.to_solr(solr_doc)
       end
       solr_doc = solrize_relationships(solr_doc) unless opts[:model_only]
