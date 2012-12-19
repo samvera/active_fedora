@@ -1,5 +1,13 @@
 module ActiveFedora
   class RDFDatastream < Datastream
+
+    before_save do
+      if content.blank?
+        logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}"
+        false
+      end
+    end
+    
     # this enables a cleaner API for solr integration
     class IndexObject
       attr_accessor :data_type, :behaviors

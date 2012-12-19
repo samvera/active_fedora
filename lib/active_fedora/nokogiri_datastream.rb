@@ -5,6 +5,14 @@ require "solrizer/xml"
 #this class represents a xml metadata datastream
 module ActiveFedora
   class NokogiriDatastream < Datastream
+
+    before_save do
+      if content.blank?
+        logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}"
+        false
+      end
+    end
+    
       extend Deprecation
   #  include MetadataDatastreamHelper
     include OM::XML::Document
