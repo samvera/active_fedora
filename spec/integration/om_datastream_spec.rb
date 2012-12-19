@@ -43,6 +43,15 @@ describe ActiveFedora::OmDatastream do
     end
   end
 
+  describe "empty datastream content" do
+    it "should not break when there is empty datastream content" do
+      obj = HydrangeaArticle2.new
+      obj.descMetadata.content = ""
+      obj.save
+
+    end
+  end
+
   describe '.term_values' do
     before do
       @pid = "hydrangea:fixture_mods_article2"
