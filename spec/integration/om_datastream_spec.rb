@@ -22,13 +22,24 @@ describe ActiveFedora::OmDatastream do
 
   describe "#changed?" do
     it "should not be changed if the new xml matches the old xml" do
-      pending "doesn't work yet."
       @pid = "hydrangea:fixture_mods_article2"
       @test_object = HydrangeaArticle2.find(@pid)
 
       @test_object.descMetadata.ng_xml = @test_object.descMetadata.ng_xml
 
       @test_object.descMetadata.should_not be_changed
+    end
+
+
+    it "should not be changed if there are minor differences in whitespace" do
+
+      obj = HydrangeaArticle2.new
+      obj.descMetadata.content = "<a>1</a>"
+      obj.save
+      obj.descMetadata.should_not be_changed
+      obj.descMetadata.content = "<a>1</a>\n"
+      obj.descMetadata.should_not be_changed
+
     end
   end
 
