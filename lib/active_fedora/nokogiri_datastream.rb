@@ -63,7 +63,6 @@ module ActiveFedora
     end
     
     def ng_xml=(new_xml)
-      ng_xml_will_change!
       case new_xml 
       when Nokogiri::XML::Document
         @ng_xml = new_xml
@@ -105,7 +104,6 @@ module ActiveFedora
     end
     
     def content=(content)
-      super
       @ng_xml = Nokogiri::XML::Document.parse(content)
     end
 
