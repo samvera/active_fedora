@@ -41,6 +41,15 @@ describe ActiveFedora::OmDatastream do
       obj.descMetadata.should_not be_changed
 
     end
+
+    it "should do something clever to ensure fedora doesn't screw up content_changed?" do
+      obj = HydrangeaArticle2.new
+      obj.descMetadata.content = "<a b='1' a='1'>1</a>"
+      obj.save
+      obj.descMetadata.should_not be_changed
+      obj.descMetadata.content = "<a b='1' a='1'>1</a>\n"
+      obj.descMetadata.should_not be_changed
+    end
   end
 
   describe "empty datastream content" do
