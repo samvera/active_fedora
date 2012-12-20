@@ -163,7 +163,6 @@ module ActiveFedora
     end
 
     def content=(content)
-      super
       self.loaded = true
       @graph = deserialize(content)
     end
