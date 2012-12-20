@@ -82,6 +82,14 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.save
   end
 
+  it "should load n-triples into the graph" do
+    ntrip = '<http://oregondigital.org/ns/62> <http://purl.org/dc/terms/type> "Image" .
+<http://oregondigital.org/ns/62> <http://purl.org/dc/terms/spatial> "Benton County (Ore.)" .
+'
+    @subject.rdf.content = ntrip
+    @subject.rdf.graph.dump(:ntriples).should == ntrip
+  end
+
 
   it "should delete values" do
     @subject.title = "Hamlet"
