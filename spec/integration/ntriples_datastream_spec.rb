@@ -26,20 +26,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
     Object.send(:remove_const, :MyDatastream)
   end
 
-  it "should set and recall" do
-    @subject.title = "John Doe"
+  it "should not try to send an empty datastream" do
     @subject.save
-    f = RdfTest.find(@subject.pid)
-    f.title.should == "John Doe"
-    f.title = "Jane Doe"
-    f.save
-    new_object = RdfTest.find(@subject.pid)
-    new_object.title.should == "Jane Doe"
-
   end
 
   it "should set and recall values" do
     @subject.title = 'War and Peace'
+    @subject.rdf.should be_changed
     @subject.based_near = "Moscow, Russia"
     @subject.related_url = "http://en.wikipedia.org/wiki/War_and_Peace"
     @subject.part = "this is a part"
@@ -55,6 +48,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.related_url = "http://en.wikipedia.org/wiki/War_and_Peace"
     @subject.part = "this is a part"
     @subject.save
+
     loaded = RdfTest.find(@subject.pid)
     loaded.title.should == 'War and Peace'
     loaded.based_near.should == ['Moscow, Russia']
@@ -82,6 +76,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.save
     @subject.title.should be_nil
   end
+
+  it "should be able to save a blank document" do
+    @subject.title = ""
+    @subject.save
+  end
+
+
   it "should delete values" do
     @subject.title = "Hamlet"
     @subject.related_url = "http://psu.edu/"

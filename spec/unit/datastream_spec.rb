@@ -61,30 +61,6 @@ describe ActiveFedora::Datastream do
     end
   end
   
-  describe '#save' do
-    it "should set changed" do
-      mock_repo = mock('repository')
-      mock_repo.stub(:config).and_return({})
-      mock_repo.stub(:add_datastream).with(:versionable => true, :pid => @test_object.pid, :dsid => 'abcd', :controlGroup => 'M', :dsState => 'A', :content => 'hi there')
-      mock_repo.stub(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).and_return('')
-      @test_object.inner_object.stub(:repository).and_return(mock_repo)
-      @test_datastream.save
-      @test_datastream.should_not be_changed
-    end
-  end
-  
-  describe '.content=' do
-    it "should update the content and ng_xml, marking the datastream as changed" do
-      sample_xml = "<foo><xmlelement/></foo>"
-      @test_datastream.instance_variable_get(:@changed_attributes).clear
-      @test_datastream.should_not be_changed
-      @test_datastream.content.should_not be_equivalent_to(sample_xml)
-      @test_datastream.content = sample_xml
-      @test_datastream.should be_changed
-      @test_datastream.content.should be_equivalent_to(sample_xml)
-    end
-  end
-  
   it "should have mimeType accessors" do
     ds1 = ActiveFedora::Datastream.new
     ds1.mimeType = "text/foo"

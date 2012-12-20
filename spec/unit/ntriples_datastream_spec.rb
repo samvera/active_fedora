@@ -53,7 +53,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.created.should be_kind_of Array
     end
     it "should have method missing" do
-      lambda{@subject.frank}.should raise_exception ActiveFedora::UnregisteredPredicateError
+      lambda{@subject.frank}.should raise_exception NoMethodError
     end
 
     it "should set fields" do
@@ -69,7 +69,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.publisher.should == ["Penn State", "St. Martin's Press"]
     end
     it "should delete fields" do
-      @subject.related_url.delete("http://google.com/")
+      @subject.related_url.delete(RDF::URI("http://google.com/"))
       @subject.related_url.should == []
     end
   end
@@ -166,10 +166,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
           map.rights(:in => RDF::DC)
         end
       end
-    end
-    before(:each) do
       @subject = MyDatastream.new(@inner_object, 'solr_rdf')
       @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
+    end
+    before(:each) do  
       @subject.stub(:pid => 'test:1')
       @subject.stub(:new? => false)
       @sample_fields = {:my_datastream__publisher => {:values => ["publisher1"], :type => :string, :behaviors => [:facetable, :sortable, :searchable, :displayable]}, 
@@ -272,15 +272,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
         @obj.save
       end
 
-      describe '.content=' do
-        it "should update the content and graph, marking the datastream as changed" do
-          sample_rdf = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
-          @obj.stub(:new? => false)
-          @obj.should_not be_changed
-          @obj.content = sample_rdf
-          @obj.should be_changed
-        end
-      end
       it "should save content properly upon save" do
         foo = Foo.new(:pid => 'test:1')
         foo.title = 'Hamlet'
