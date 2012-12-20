@@ -111,7 +111,7 @@ module ActiveFedora
     class TermProxy
 
       attr_reader :graph, :subject, :predicate
-      delegate :class, :to_s, :==, :kind_of?, :each, :map, :empty?, :to => :values
+      delegate :class, :to_s, :==, :kind_of?, :each, :map, :empty?, :as_json, :to => :values
 
       def initialize(graph, subject, predicate)
         @graph = graph

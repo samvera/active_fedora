@@ -49,6 +49,12 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.based_near.should == ["New York, NY, US"]
       @subject.related_url.should == ["http://google.com/"]
     end
+
+    it "should delegate as_json to the fields" do
+      @subject.title.as_json.should == ["Title of work"]
+      @subject.title.to_json.should == "\[\"Title of work\"\]"
+    end
+
     it "should return fields that are not TermProxies" do
       @subject.created.should be_kind_of Array
     end
