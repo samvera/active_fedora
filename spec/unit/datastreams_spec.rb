@@ -7,7 +7,7 @@ describe ActiveFedora::Datastreams do
     before do
       class FooHistory < ActiveFedora::Base
          has_metadata :name => 'dsid'
-         has_metadata :name => 'complex_ds', :versionable => true, :autocreate => true, :type => 'Z', :label => 'My Label', :control_group => 'Z'
+         has_metadata 'complex_ds', :versionable => true, :autocreate => true, :type => 'Z', :label => 'My Label', :control_group => 'Z'
       end
     end
 
@@ -28,11 +28,13 @@ describe ActiveFedora::Datastreams do
     before do
       class FooHistory < ActiveFedora::Base
          has_file_datastream :name => 'dsid'
+         has_file_datastream 'another'
       end
     end
 
     it "should have reasonable defaults" do
       FooHistory.ds_specs['dsid'].should include(:type => ActiveFedora::Datastream, :label => 'File Datastream', :control_group => 'M')
+      FooHistory.ds_specs['another'].should include(:type => ActiveFedora::Datastream, :label => 'File Datastream', :control_group => 'M')
     end
   end
 

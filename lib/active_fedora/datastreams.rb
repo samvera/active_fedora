@@ -206,9 +206,10 @@ module ActiveFedora
 
     module ClassMethods
       #This method is used to specify the details of a datastream. 
-      #args must include :name. Note that this method doesn't actually
-      #execute the block, but stores it at the class level, to be executed
-      #by any future instantiations.
+      # You can pass the name as the first argument and a hash of options as the second argument
+      # or you can pass the :name as a value in the args hash. Either way, name is required.
+      # Note that this method doesn't actually execute the block, but stores it , to be executed
+      # by any the implementation of the datastream(specified as :type)
       #
       # @param [Hash] args 
       # @option args [Class] :type The class that will represent this datastream, should extend ``Datastream''
@@ -220,7 +221,17 @@ module ActiveFedora
       # @option args [Boolean] :autocreate Always create this datastream on new objects
       # @option args [Boolean] :versionable Should versioned datastreams be stored
       # @yield block executed by some kinds of datastreams
-      def has_metadata(args, &block)
+      def has_metadata(*args, &block)
+
+        if args.first.is_a? String 
+          name = args.first
+          args = args[1] || {}
+          args[:name] = name
+        else
+          args = args.first
+        end
+        
+        
         spec = {:autocreate => args.fetch(:autocreate, false), :type => args[:type], :label =>  args.fetch(:label,""), :control_group => args[:control_group], :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
         spec[:versionable] = args[:versionable] if args.has_key? :versionable
         ds_specs[args[:name]]= spec
@@ -235,7 +246,14 @@ module ActiveFedora
       # @option args :control_group ("M") The type of controlGroup to store the datastream as. Defaults to M
       # @option args [Boolean] :autocreate Always create this datastream on new objects
       # @option args [Boolean] :versionable Should versioned datastreams be stored
-      def has_file_datastream(args = {})
+      def has_file_datastream(*args)
+        if args.first.is_a? String 
+          name = args.first
+          args = args[1] || {}
+          args[:name] = name
+        else
+          args = args.first || {}
+        end
         spec = {:autocreate => args.fetch(:autocreate, false), :type => args.fetch(:type,ActiveFedora::Datastream),
                 :label =>  args.fetch(:label,"File Datastream"), :control_group => args.fetch(:control_group,"M")}
         spec[:versionable] = args[:versionable] if args.has_key? :versionable
