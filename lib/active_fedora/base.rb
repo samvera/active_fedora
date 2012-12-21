@@ -285,9 +285,12 @@ module ActiveFedora
     end
 
 
-
-    def inspect
-      "#<#{self.class}:#{self.hash} @pid=\"#{pid}\" >"
+    def pretty_pid
+      if self.pid == UnsavedDigitalObject::PLACEHOLDER
+        nil
+      else
+        self.pid
+      end
     end
 
     # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.

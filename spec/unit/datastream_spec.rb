@@ -19,7 +19,7 @@ describe ActiveFedora::Datastream do
   end
   
   it "should be inspectable" do
-    @test_datastream.inspect.should match /#<ActiveFedora::Datastream:-?\d+ @pid=\"__DO_NOT_USE__\" @dsid=\"abcd\" @controlGroup=\"M\" changed=\"true\" @mimeType=\"\" >/
+    @test_datastream.inspect.should match /#<ActiveFedora::Datastream @pid=\"__DO_NOT_USE__\" @dsid=\"abcd\" @controlGroup=\"M\" changed=\"true\" @mimeType=\"\" >/
   end
 
   describe '#validate_content_present' do

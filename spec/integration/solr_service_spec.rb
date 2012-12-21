@@ -36,8 +36,9 @@ describe ActiveFedora::SolrService do
       @foo_content = @foo_object.datastreams['descMetadata'].content
     end
     after(:all) do
-      # @test_object.delete
-      # @foo_object.delete
+      @test_object.delete
+      @foo_object.delete
+      Object.send(:remove_const, :FooObject)
     end
     it "should return an array of objects that are of the class stored in active_fedora_model_s" do
       query = "id\:#{ActiveFedora::SolrService.escape_uri_for_query(@test_object.pid)} OR id\:#{ActiveFedora::SolrService.escape_uri_for_query(@foo_object.pid)}"
