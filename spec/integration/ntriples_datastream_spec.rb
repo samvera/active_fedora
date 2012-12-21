@@ -90,6 +90,33 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.rdf.graph.dump(:ntriples).should == ntrip
   end
 
+  describe "using rdf_subject" do
+    before do
+      # reopening existing class
+      class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+        rdf_subject { |ds| RDF::URI.new("http://oregondigital.org/ns/#{ds.pid.split(':')[1]}") }
+        map_predicates do |map|
+          map.type(:in => RDF::DC)
+          map.spatial(:in => RDF::DC)
+        end
+      end
+    end
+    after do
+      @subject.destroy
+    end
+
+    it "should write rdf with proper subjects" do
+      @subject.rdf.type = "Frog"
+      @subject.inner_object.pid = 'foo:99'
+      @subject.save!
+      @subject.reload
+      @subject.rdf.graph.dump(:ntriples).should == "<http://oregondigital.org/ns/99> <http://purl.org/dc/terms/type> \"Frog\" .\n"
+      @subject.rdf.type == ['Frog']
+
+    end
+
+  end
+
 
   it "should delete values" do
     @subject.title = "Hamlet"
