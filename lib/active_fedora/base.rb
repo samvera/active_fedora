@@ -434,12 +434,6 @@ module ActiveFedora
         return arr
       end
     end
-
-
-    def self.relation
-      Relation.new(self)
-    end
-    
   end
 
   Base.class_eval do
