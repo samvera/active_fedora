@@ -29,6 +29,7 @@ module ActiveFedora
     self.fedora_connection = {}
     self.profile_solr_name = ActiveFedora::SolrService.solr_name("object_profile", :string, :displayable)
 
+
     def method_missing(name, *args)
       dsid = corresponding_datastream_name(name)
       if dsid
@@ -433,6 +434,11 @@ module ActiveFedora
         return arr
       end
     end
+
+
+    def self.relation
+      Relation.new(self)
+    end
     
   end
 
@@ -451,6 +457,7 @@ module ActiveFedora
     include Associations
     include NestedAttributes
     include Reflection
+    extend Querying
   end
 
 end
