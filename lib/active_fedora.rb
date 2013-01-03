@@ -50,8 +50,10 @@ module ActiveFedora #:nodoc:
     autoload :Property
     autoload :Persistence
     autoload :QualifiedDublinCoreDatastream
+    autoload :Querying
     autoload :RDFDatastream
     autoload :RdfxmlRDFDatastream
+    autoload :Relation
     autoload :RelsExtDatastream
     autoload :ServiceDefinitions
     autoload :SemanticNode

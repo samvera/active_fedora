@@ -29,6 +29,7 @@ module ActiveFedora
     self.fedora_connection = {}
     self.profile_solr_name = ActiveFedora::SolrService.solr_name("object_profile", :string, :displayable)
 
+
     def method_missing(name, *args)
       dsid = corresponding_datastream_name(name)
       if dsid
@@ -285,9 +286,12 @@ module ActiveFedora
     end
 
 
-
-    def inspect
-      "#<#{self.class}:#{self.hash} @pid=\"#{pid}\" >"
+    def pretty_pid
+      if self.pid == UnsavedDigitalObject::PLACEHOLDER
+        nil
+      else
+        self.pid
+      end
     end
 
     # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.
@@ -304,7 +308,6 @@ module ActiveFedora
         solrize_profile(solr_doc)
       end
       datastreams.each_value do |ds|
-        ds.ensure_xml_loaded if ds.respond_to? :ensure_xml_loaded  ### Can't put this in the model because it's often implemented in Solrizer::XML::TerminologyBasedSolrizer 
         solr_doc = ds.to_solr(solr_doc)
       end
       solr_doc = solrize_relationships(solr_doc) unless opts[:model_only]
@@ -431,7 +434,6 @@ module ActiveFedora
         return arr
       end
     end
-    
   end
 
   Base.class_eval do
@@ -449,6 +451,7 @@ module ActiveFedora
     include Associations
     include NestedAttributes
     include Reflection
+    extend Querying
   end
 
 end

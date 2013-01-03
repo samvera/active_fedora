@@ -26,20 +26,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
     Object.send(:remove_const, :MyDatastream)
   end
 
-  it "should set and recall" do
-    @subject.title = "John Doe"
+  it "should not try to send an empty datastream" do
     @subject.save
-    f = RdfTest.find(@subject.pid)
-    f.title.should == "John Doe"
-    f.title = "Jane Doe"
-    f.save
-    new_object = RdfTest.find(@subject.pid)
-    new_object.title.should == "Jane Doe"
-
   end
 
   it "should set and recall values" do
     @subject.title = 'War and Peace'
+    @subject.rdf.should be_changed
     @subject.based_near = "Moscow, Russia"
     @subject.related_url = "http://en.wikipedia.org/wiki/War_and_Peace"
     @subject.part = "this is a part"
@@ -55,6 +48,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.related_url = "http://en.wikipedia.org/wiki/War_and_Peace"
     @subject.part = "this is a part"
     @subject.save
+
     loaded = RdfTest.find(@subject.pid)
     loaded.title.should == 'War and Peace'
     loaded.based_near.should == ['Moscow, Russia']
@@ -82,6 +76,48 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.save
     @subject.title.should be_nil
   end
+
+  it "should be able to save a blank document" do
+    @subject.title = ""
+    @subject.save
+  end
+
+  it "should load n-triples into the graph" do
+    ntrip = '<http://oregondigital.org/ns/62> <http://purl.org/dc/terms/type> "Image" .
+<http://oregondigital.org/ns/62> <http://purl.org/dc/terms/spatial> "Benton County (Ore.)" .
+'
+    @subject.rdf.content = ntrip
+    @subject.rdf.graph.dump(:ntriples).should == ntrip
+  end
+
+  describe "using rdf_subject" do
+    before do
+      # reopening existing class
+      class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+        rdf_subject { |ds| RDF::URI.new("http://oregondigital.org/ns/#{ds.pid.split(':')[1]}") }
+        map_predicates do |map|
+          map.type(:in => RDF::DC)
+          map.spatial(:in => RDF::DC)
+        end
+      end
+    end
+    after do
+      @subject.destroy
+    end
+
+    it "should write rdf with proper subjects" do
+      @subject.rdf.type = "Frog"
+      @subject.inner_object.pid = 'foo:99'
+      @subject.save!
+      @subject.reload
+      @subject.rdf.graph.dump(:ntriples).should == "<http://oregondigital.org/ns/99> <http://purl.org/dc/terms/type> \"Frog\" .\n"
+      @subject.rdf.type == ['Frog']
+
+    end
+
+  end
+
+
   it "should delete values" do
     @subject.title = "Hamlet"
     @subject.related_url = "http://psu.edu/"

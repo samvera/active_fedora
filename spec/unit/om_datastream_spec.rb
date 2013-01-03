@@ -22,6 +22,7 @@ describe ActiveFedora::OmDatastream do
     @test_ds = ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata")
     @test_ds.stub(:new? => false, :profile => {}, :datastream_content => '<test_xml/>')
     @test_ds.content="<test_xml/>"
+    @test_ds.stub(:new? => false)
   end
   
   after(:each) do
@@ -46,6 +47,7 @@ describe ActiveFedora::OmDatastream do
     it "should initialize from #xml_template if no xml is provided" do
       ActiveFedora::OmDatastream.should_receive(:xml_template).and_return("<fake template/>")
       n = ActiveFedora::OmDatastream.new
+      n.ensure_xml_loaded
       n.ng_xml.should be_equivalent_to("<fake template/>")
     end
   end
@@ -158,15 +160,6 @@ describe ActiveFedora::OmDatastream do
       @mods_ds.get_values("--my xpath--").should == ["abstract1", "abstract2"]
     end
   end
-  
-  describe '#from_xml' do
-    it "should work when a template datastream is passed in" do
-      mods_xml = Nokogiri::XML::Document.parse( fixture(File.join("mods_articles", "hydrangea_article1.xml")) )
-      tmpl = Hydra::ModsArticleDatastream.new
-      Hydra::ModsArticleDatastream.from_xml(mods_xml,tmpl).ng_xml.root.to_xml.should == mods_xml.root.to_xml
-    end
-  end
-  
 
   it 'should provide .fields' do
     @test_ds.should respond_to(:fields)
@@ -177,6 +170,7 @@ describe ActiveFedora::OmDatastream do
       @test_ds.should respond_to(:save)
     end
     it "should persist the product of .to_xml in fedora" do
+      @mock_repo.stub(:datastream).and_return('')
       @test_ds.stub(:new? => true)
       @test_ds.stub(:to_xml => "fake xml")
       @mock_repo.should_receive(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'X', :dsState => 'A', :mimeType=>'text/xml')
@@ -192,11 +186,11 @@ describe ActiveFedora::OmDatastream do
     it "should update the content" do
       subject.stub(:new? => false )
       subject.content = "<a />"
-      subject.datastream_content.should == '<a />'
+      subject.content.should == '<a/>'
     end
 
     it "should mark the object as changed" do
-      subject.stub(:new? => false )
+      subject.stub(:new? => false, :controlGroup => 'M')
       subject.content = "<a />"
       subject.should be_changed
     end
@@ -211,6 +205,7 @@ describe ActiveFedora::OmDatastream do
   
   describe 'ng_xml=' do
     before do
+      @mock_inner.stub(:new? => true)
       @test_ds2 = ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata")
     end
     it "should parse raw xml for you" do
@@ -225,9 +220,9 @@ describe ActiveFedora::OmDatastream do
       @test_ds2.ng_xml.to_xml.should be_equivalent_to("<xmlelement/>")
     end
     it "should mark the datastream as changed" do
+      @test_ds2.stub(:new? => false, :controlGroup => 'M')
       @test_ds2.should_not be_changed 
       @test_ds2.ng_xml = @sample_raw_xml
-      @test_ds2.ng_xml_changed?.should be_true
       @test_ds2.should be_changed
       @test_ds2.instance_variable_get(:@content).should be_nil
     end
@@ -240,7 +235,7 @@ describe ActiveFedora::OmDatastream do
     
     it "should ng_xml.to_xml" do
       @test_ds.stub(:ng_xml => Nokogiri::XML::Document.parse("<text_document/>"))
-      @test_ds.to_xml.should == "<text_document/>\n"       
+      @test_ds.to_xml.should == "<text_document/>"       
     end
     
     it 'should accept an optional Nokogiri::XML Document as an argument and insert its fields into that (mocked test)' do

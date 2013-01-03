@@ -3,6 +3,8 @@ module ActiveFedora
   class UnsavedDigitalObject 
     include DigitalObject::DatastreamBootstrap
     attr_accessor :original_class, :ownerId, :datastreams, :label, :namespace
+
+    PLACEHOLDER = '__DO_NOT_USE__'
     
     def initialize(original_class, namespace, pid=nil)
       @pid = pid
@@ -12,7 +14,7 @@ module ActiveFedora
     end
 
     def pid
-      @pid || '__DO_NOT_USE__'
+      @pid || PLACEHOLDER
     end
 
 

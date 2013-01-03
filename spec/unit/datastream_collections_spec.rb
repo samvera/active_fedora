@@ -84,7 +84,6 @@ describe ActiveFedora::DatastreamCollections do
     it "should  allow access to file content" do
       @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:file=>@f})
       @test_object2.save!
-      puts @test_object2.thumbnail[0].inspect
       @test_object2.thumbnail[0].content
     end
 

@@ -1,2 +1,0 @@
-Get rid of ActiveFedora::Relationships methods in specs (except in relationships_spec.rb of course)
-Remove calls to ActiveFedora::MetadataDatastream from the specs

@@ -30,6 +30,7 @@ describe ActiveFedora::Relationships do
         include ActiveFedora::Relationships
         include ActiveFedora::SemanticNode
         include ActiveFedora::Model
+        extend ActiveFedora::Querying
         
         attr_accessor :pid
         def init_with(inner_obj)

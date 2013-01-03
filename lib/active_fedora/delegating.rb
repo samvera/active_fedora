@@ -2,6 +2,17 @@ module ActiveFedora
   module Delegating
     extend ActiveSupport::Concern
 
+    included do
+      class_attribute  :delegate_registry
+      self.delegate_registry = []
+    end
+
+    # Calling inspect may trigger a bunch of loads, but it's mainly for debugging, so no worries.
+    def inspect
+      values = delegate_registry.map {|r| "#{r}:#{send(r).inspect}"}
+      "#<#{self.class} pid:\"#{pretty_pid}\", #{values.join(', ')}>"
+    end
+
     module ClassMethods
       # Provides a delegate class method to expose methods in metadata streams
       # as member of the base object. Pass the target datastream via the
@@ -56,10 +67,11 @@ module ActiveFedora
 
       private
       def create_delegate_accessor(field, args)
+        self.delegate_registry += [field]
         define_method field do
           ds = self.send(args[:to])
           val = if ds.kind_of?(ActiveFedora::RDFDatastream)
-                  ds.send(:get_values, field)
+                  ds.send(field)
                 else
                   terminology = args[:at] || [field]
                   ds.send(:term_values, *terminology)
@@ -72,7 +84,7 @@ module ActiveFedora
         define_method "#{field}=".to_sym do |v|
           ds = self.send(args[:to])
           if ds.kind_of?(ActiveFedora::RDFDatastream)
-            ds.send(:set_value, field, v)
+            ds.send("#{field}=", v)
           else
             terminology = args[:at] || [field]
             ds.send(:update_indexed_attributes, {terminology => v})

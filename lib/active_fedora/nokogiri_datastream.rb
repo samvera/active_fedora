@@ -5,20 +5,24 @@ require "solrizer/xml"
 #this class represents a xml metadata datastream
 module ActiveFedora
   class NokogiriDatastream < Datastream
-      
-    before_save do
-      return unless xml_loaded
-      content_will_change! if ng_xml_changed?
-    end  
 
+    before_save do
+      if content.blank?
+        logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}"
+        false
+      end
+    end
+    
+      extend Deprecation
+  #  include MetadataDatastreamHelper
     include OM::XML::Document
     include Solrizer::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
     
     alias_method(:om_term_values, :term_values) unless method_defined?(:om_term_values)
     alias_method(:om_update_values, :update_values) unless method_defined?(:om_update_values)
     
-    attr_accessor :internal_solr_doc, :xml_loaded
-
+    attr_accessor :internal_solr_doc
+    
     def self.default_attributes
       super.merge(:controlGroup => 'X', :mimeType => 'text/xml')
     end
@@ -47,16 +51,8 @@ module ActiveFedora
       Nokogiri::XML::Document.parse("<xml/>")
     end
 
-    def save
-      @content = to_xml if ng_xml_changed? and content_will_change!
-      super
-    end
-
-
     def ng_xml 
       @ng_xml ||= begin
-      self.xml_loaded = true
-
       if new?
         ## Load up the template
         self.class.xml_template
@@ -67,26 +63,16 @@ module ActiveFedora
     end
     
     def ng_xml=(new_xml)
-
-      nokogiri_document = case new_xml 
+      case new_xml 
       when Nokogiri::XML::Document
-        new_xml
+        @ng_xml = new_xml
       when  Nokogiri::XML::Node 
-        Nokogiri::XML(new_xml.to_s) ## Cast a fragment to a document
+        @ng_xml = Nokogiri::XML(new_xml.to_s) ## Cast a fragment to a document
       when String 
-        Nokogiri::XML::Document.parse(new_xml)
+        @ng_xml = Nokogiri::XML::Document.parse(new_xml)
       else
         raise TypeError, "You passed a #{new_xml.class} into the ng_xml of the #{self.dsid} datastream. NokogiriDatastream.ng_xml= only accepts Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node, or raw XML (String) as inputs."
       end
-
-
-      new_xml_string = nokogiri_document.to_xml {|config| config.no_declaration}
-
-      ng_xml_will_change! unless (xml_loaded && (new_xml_string.to_s.strip == (datastream_content || '').strip))
-      self.xml_loaded=true
-
-      @ng_xml = nokogiri_document
-
     end
     
     # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods 
@@ -100,27 +86,7 @@ module ActiveFedora
     
     # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods 
     def ng_xml_changed?
-      return true if changed_attributes.has_key?('ng_xml')
-
-      return false unless xml_loaded
-
-      if new?
-        !to_xml.empty?
-      else
-       (to_xml.strip != (datastream_content || '').strip)
-     end
-    end
-
-    def changed?
-      ng_xml_changed? || super
-    end
-
-    def content_changed?
-      ng_xml_changed? || super
-    end
-
-    def has_content?
-      xml_loaded || super
+      changed_attributes.has_key? 'ng_xml'
     end
 
     # Indicates that this datastream has metadata content. 
@@ -129,21 +95,23 @@ module ActiveFedora
       true
     end
 
-    def content=(content)
-      content_will_change! unless (xml_loaded && (content == datastream_content))
-      @content = content
-      self.xml_loaded=true
-      self.ng_xml = Nokogiri::XML::Document.parse(datastream_content)
+    def content
+      to_xml
     end
 
-    alias :datastream_content :content
-
-    def content
-      return to_xml if xml_loaded or new?
-      
-      datastream_content
+    def datastream_content
+      @datastream_content ||= Nokogiri::XML(super).to_xml  {|config| config.no_declaration}.strip
     end
     
+    def content=(content)
+      @ng_xml = Nokogiri::XML::Document.parse(content)
+    end
+
+    def content_changed?
+      return false if new? and !xml_loaded
+      super
+    end
+
     def to_xml(xml = nil)
       xml = self.ng_xml if xml.nil?
       ng_xml = self.ng_xml
@@ -164,7 +132,7 @@ module ActiveFedora
         end
       end
       
-      return xml.to_xml {|config| config.no_declaration}
+      return xml.to_xml {|config| config.no_declaration}.strip
     end
     
     # ** Experimental **
@@ -427,6 +395,18 @@ module ActiveFedora
         om_term_values(*term_pointer)
       end
     end
+
+    # Deprecated methods left here for backwards compatibility
+    def ensure_xml_loaded; end
+    deprecation_deprecate :ensure_xml_loaded
+
+    def serialize!
+    end
+    
+    def xml_loaded
+      instance_variable_defined? :@ng_xml
+    end
+    
   end
 end
 

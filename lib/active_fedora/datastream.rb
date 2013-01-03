@@ -5,7 +5,7 @@ module ActiveFedora
     extend Deprecation
     attr_writer :digital_object
     attr_accessor :last_modified, :fields
-  
+
     def initialize(digital_object=nil, dsid=nil, options={})
       ## When you use the versions feature of rubydora (0.5.x), you need to have a 3 argument constructor
       self.fields={}
@@ -13,7 +13,7 @@ module ActiveFedora
     end
 
     def inspect
-      "#<#{self.class}:#{self.hash} @pid=\"#{digital_object ? pid : nil}\" @dsid=\"#{dsid}\" @controlGroup=\"#{controlGroup}\" changed=\"#{changed?}\" @mimeType=\"#{mimeType}\" >"
+      "#<#{self.class} @pid=\"#{digital_object ? pid : nil}\" @dsid=\"#{dsid}\" @controlGroup=\"#{controlGroup}\" changed=\"#{changed?}\" @mimeType=\"#{mimeType}\" >"
     end
 
     #compatibility method for rails' url generators. This method will 

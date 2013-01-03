@@ -1,3 +1,9 @@
+5.4.0 (unreleased)
+HYDRA-850 Added finder methods like Base.where().limit().order().first
+
+5.3.1
+Fixed delegating rdf terms as_json
+
 5.0.0
 Depend on solrizer 2.0.0 (for HYDRA-827 DO NOT index terms by default)
 Lazily initialize solr, so that the message goes into the log, not the console
