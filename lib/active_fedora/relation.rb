@@ -91,8 +91,6 @@ module ActiveFedora
 
       if options.present?
         options = {conditions: options}
-      puts "Applying options #{options.inspect}"
-      puts "Args #{args.inspect}"
         apply_finder_options(options).all
       else
         case args.first
