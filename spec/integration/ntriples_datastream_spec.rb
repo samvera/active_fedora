@@ -183,7 +183,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.title.delete("title1", "title2", "title3")
       @subject.title.empty?.should be_true
     end
-    it "should suppost the is_a? method" do
+    it "should support the is_a? method" do
       @subject.title.is_a?(Array).should == true
     end
   end
