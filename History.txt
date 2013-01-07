@@ -1,5 +1,8 @@
-5.4.0 (unreleased)
+5.4.0
 HYDRA-850 Added finder methods like Base.where().limit().order().first
+Added Base.delete_all and Base.destroy_all
+Fixed RDF proxy delegates that weren't delegating 'is_a?'
+Better looking output for the Base#inspect method
 
 5.3.1
 Fixed delegating rdf terms as_json
