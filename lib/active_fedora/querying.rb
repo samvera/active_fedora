@@ -1,6 +1,6 @@
 module ActiveFedora
   module Querying
-    delegate :find, :first, :where, :limit, :order, :all, :to=>:relation
+    delegate :find, :first, :where, :limit, :order, :all, :delete_all, :destroy_all, :to=>:relation
     def relation
       Relation.new(self)
     end

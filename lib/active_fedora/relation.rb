@@ -13,6 +13,12 @@ module ActiveFedora
       self.order_values = []
     end
 
+    def reset
+      @first = @loaded = nil
+      @records = []
+      self
+    end
+
 
     # Returns the first records that was found.
     #
@@ -146,7 +152,7 @@ module ActiveFedora
     def ==(other)
       case other
       when Relation
-        other.to_sql == to_sql
+        other.where_values == where_values
       when Array
         to_a == other
       end
@@ -154,6 +160,48 @@ module ActiveFedora
 
     def inspect
       to_a.inspect
+    end
+
+    # Destroys the records matching +conditions+ by instantiating each
+    # record and calling its +destroy+ method. Each object's callbacks are
+    # executed (including <tt>:dependent</tt> association options and
+    # +before_destroy+/+after_destroy+ Observer methods). Returns the
+    # collection of objects that were destroyed; each will be frozen, to
+    # reflect that no changes should be made (since they can't be
+    # persisted).
+    #
+    # Note: Instantiation, callback execution, and deletion of each
+    # record can be time consuming when you're removing many records at
+    # once. It generates at least one fedora +DELETE+ query per record (or
+    # possibly more, to enforce your callbacks). If you want to delete many
+    # rows quickly, without concern for their associations or callbacks, use
+    # +delete_all+ instead.
+    #
+    # ==== Parameters
+    #
+    # * +conditions+ - A string, array, or hash that specifies which records
+    #   to destroy. If omitted, all records are destroyed. See the
+    #   Conditions section in the ActiveFedora::Relation#where for
+    #   more information.
+    #
+    # ==== Examples
+    #
+    #   Person.destroy_all(:status_s => "inactive")
+    #   Person.where(:age_i => 18).destroy_all
+    def destroy_all(conditions = nil)
+      if conditions
+        where(conditions).destroy_all
+      else
+        to_a.each {|object| object.destroy }.tap { reset }
+      end
+    end
+
+    def delete_all(conditions = nil)
+      if conditions
+        where(conditions).delete_all
+      else
+        to_a.each {|object| object.delete }.tap { reset }
+      end
     end
 
 
