@@ -10,4 +10,3 @@ group :development, :test do
 end
 
 gem 'jruby-openssl', :platform=> :jruby
-gem 'nom-xml', '>=0.5.1'
