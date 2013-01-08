@@ -2,8 +2,13 @@ require  "nom"
 
 module ActiveFedora
   class NomDatastream < Datastream
-      def self.set_terminology &block
+      def self.set_terminology(options = {}, &block)
+        @terminology_options = options || {}
         @terminology = block
+      end
+
+      def self.terminology_options
+        @terminology_options
       end
 
       def self.terminology
@@ -27,7 +32,7 @@ module ActiveFedora
     def ng_xml
       @ng_xml ||= begin
          xml = Nokogiri::XML content
-         xml.set_terminology &self.class.terminology
+         xml.set_terminology self.class.terminology_options, &self.class.terminology
          xml.nom!
          xml
       end
@@ -35,7 +40,7 @@ module ActiveFedora
     
     def ng_xml= ng_xml
       @ng_xml = ng_xml
-      @ng_xml.set_terminology &self.class.terminology
+      @ng_xml.set_terminology self.class.terminology_options, &self.class.terminology
       content_will_change!
       @ng_xml
     end
