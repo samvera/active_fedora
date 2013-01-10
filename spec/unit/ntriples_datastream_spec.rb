@@ -4,7 +4,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "an instance with content" do
     before do 
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
         map_predicates do |map|
           map.created(:in => RDF::DC)
           map.title(:in => RDF::DC)
@@ -29,6 +28,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
     after do
       @object.delete
+      Object.send(:remove_const, :MyDatastream)
+      Object.send(:remove_const, :Foo)
     end
     it "should have a subject" do
       @subject.rdf_subject.should == "info:fedora/test:1"
@@ -98,7 +99,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "an instance with a custom subject" do
     before do 
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
         rdf_subject { |ds| "info:fedora/#{ds.pid}/content" }
         map_predicates do |map|
           map.created(:in => RDF::DC)
@@ -126,7 +126,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "a new instance" do
     before(:each) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        register_vocabularies RDF::DC
         map_predicates do |map|
           map.publisher(:in => RDF::DC)
         end
@@ -149,7 +148,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "solr integration" do
     before(:all) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
         map_predicates do |map|
           map.created(:in => RDF::DC) do |index| 
             index.as :sortable, :displayable
@@ -292,22 +290,22 @@ describe ActiveFedora::NtriplesRDFDatastream do
           @obj.fields.keys.count.should == 5
         end
         it "should return the right fields" do
-          @obj.fields.keys.should include(:my_datastream__related_url)
-          @obj.fields.keys.should include(:my_datastream__publisher)
-          @obj.fields.keys.should include(:my_datastream__created)
-          @obj.fields.keys.should include(:my_datastream__title)
-          @obj.fields.keys.should include(:my_datastream__based_near)
+          @obj.fields.keys.should include(:related_url)
+          @obj.fields.keys.should include(:publisher)
+          @obj.fields.keys.should include(:created)
+          @obj.fields.keys.should include(:title)
+          @obj.fields.keys.should include(:based_near)
         end
         it "should return the right values" do
-          @obj.fields[:my_datastream__related_url][:values].should == ["http://example.org/blogtastic/"]
+          @obj.fields[:related_url][:values].should == ["http://example.org/blogtastic/"]
         end
         it "should return the right type information" do
-          @obj.fields[:my_datastream__created][:type].should == :date
+          @obj.fields[:created][:type].should == :date
         end
         it "should return multi-value fields as expected" do
-          @obj.fields[:my_datastream__based_near][:values].count.should == 2
-          @obj.fields[:my_datastream__based_near][:values].should include("Tacoma, WA")
-          @obj.fields[:my_datastream__based_near][:values].should include("Renton, WA")
+          @obj.fields[:based_near][:values].count.should == 2
+          @obj.fields[:based_near][:values].should include("Tacoma, WA")
+          @obj.fields[:based_near][:values].should include("Renton, WA")
         end
         it "should solrize even when the object is not new" do
           foo = Foo.new
@@ -326,27 +324,27 @@ describe ActiveFedora::NtriplesRDFDatastream do
           @obj.to_solr.keys.count.should == 13
         end
         it "should return the right fields" do
-          @obj.to_solr.keys.should include("my_datastream__related_url_t")
-          @obj.to_solr.keys.should include("my_datastream__publisher_t")
-          @obj.to_solr.keys.should include("my_datastream__publisher_sort")
-          @obj.to_solr.keys.should include("my_datastream__publisher_display")
-          @obj.to_solr.keys.should include("my_datastream__publisher_facet")
-          @obj.to_solr.keys.should include("my_datastream__created_sort")
-          @obj.to_solr.keys.should include("my_datastream__created_display")
-          @obj.to_solr.keys.should include("my_datastream__title_t")
-          @obj.to_solr.keys.should include("my_datastream__title_sort")
-          @obj.to_solr.keys.should include("my_datastream__title_display")
-          @obj.to_solr.keys.should include("my_datastream__based_near_t")
-          @obj.to_solr.keys.should include("my_datastream__based_near_facet")
-          @obj.to_solr.keys.should include("my_datastream__based_near_display")
+          @obj.to_solr.keys.should include("related_url_t")
+          @obj.to_solr.keys.should include("publisher_t")
+          @obj.to_solr.keys.should include("publisher_sort")
+          @obj.to_solr.keys.should include("publisher_display")
+          @obj.to_solr.keys.should include("publisher_facet")
+          @obj.to_solr.keys.should include("created_sort")
+          @obj.to_solr.keys.should include("created_display")
+          @obj.to_solr.keys.should include("title_t")
+          @obj.to_solr.keys.should include("title_sort")
+          @obj.to_solr.keys.should include("title_display")
+          @obj.to_solr.keys.should include("based_near_t")
+          @obj.to_solr.keys.should include("based_near_facet")
+          @obj.to_solr.keys.should include("based_near_display")
         end
         it "should return the right values" do
-          @obj.to_solr["my_datastream__related_url_t"].should == ["http://example.org/blogtastic/"]
+          @obj.to_solr["related_url_t"].should == ["http://example.org/blogtastic/"]
         end
         it "should return multi-value fields as expected" do
-          @obj.to_solr["my_datastream__based_near_t"].count.should == 2
-          @obj.to_solr["my_datastream__based_near_t"].should include("Tacoma, WA")
-          @obj.to_solr["my_datastream__based_near_t"].should include("Renton, WA")
+          @obj.to_solr["based_near_t"].count.should == 2
+          @obj.to_solr["based_near_t"].should include("Tacoma, WA")
+          @obj.to_solr["based_near_t"].should include("Renton, WA")
         end
       end
     end

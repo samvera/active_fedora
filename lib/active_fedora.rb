@@ -52,6 +52,8 @@ module ActiveFedora #:nodoc:
     autoload :QualifiedDublinCoreDatastream
     autoload :Querying
     autoload :RDFDatastream
+    autoload :RdfNode
+    autoload :RdfObject
     autoload :RdfxmlRDFDatastream
     autoload :Relation
     autoload :RelsExtDatastream
