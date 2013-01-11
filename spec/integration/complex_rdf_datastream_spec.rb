@@ -27,10 +27,6 @@ describe "Nested Rdf Objects" do
     comp = SpecDatastream::Component.new
     comp.my_label = ["Alternator"]
     ds.our_parts = comp
-
-    puts 'oe ' + ds.our_parts.first.inspect
-    puts 'lab ' + ds.our_parts.first.my_label.inspect
     ds.our_parts.first.my_label.should == ["Alternator"]
-
   end
 end
