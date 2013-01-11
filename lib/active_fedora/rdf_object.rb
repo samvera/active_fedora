@@ -4,20 +4,17 @@ module ActiveFedora
 
     included do
       include RdfNode
-      # class_attribute :config
-      # self.config = {:predicate_mapping=>{}}
     end
 
     def graph
       @graph ||= RDF::Graph.new
-      assert_type
+      insert_type_assertion
       @graph 
     end
 
     def initialize(graph=RDF::Graph.new, subject=nil)
       @graph = graph
       @subject = subject
-      #assert_type
     end
 
     def get_values(subject, predicate)
@@ -27,7 +24,7 @@ module ActiveFedora
 
     private
     
-    def assert_type
+    def insert_type_assertion
       rdf_type = self.class.rdf_type
       @graph.insert([@subject, RDF.type, rdf_type]) if rdf_type
     end
