@@ -43,18 +43,15 @@ module ActiveFedora
       Array(values).each do |arg|
         arg = arg.to_s if arg.kind_of? RDF::Literal
         next if arg.kind_of?(String) && arg.empty?
-        if arg.respond_to? :graph
-          arg.graph.statements.each do |s|
-            graph.insert(s)
-          end
-          arg = arg.rdf_subject
-        end
+
+        # If arg is a b-node, then copy it's statements onto the parent graph
+        arg = merge_subgraph(arg) if arg.respond_to? :graph
         graph.insert([subject, predicate, arg])
-        
       end
 
       return TermProxy.new(self, subject, predicate)
     end
+
  
     def delete_predicate(subject, predicate, values = nil)
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
@@ -79,9 +76,7 @@ module ActiveFedora
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def append(subject, predicate, args)
       graph.insert([subject, predicate, args])
-
-
-      return TermProxy.new(self, subject, predicate)
+      TermProxy.new(self, subject, predicate)
     end
 
 
@@ -121,14 +116,24 @@ module ActiveFedora
       super
     end
 
+    private
+    # If arg is a b-node, then copy it's statements onto the parent graph
+    def merge_subgraph(rdf_object)
+      rdf_object.graph.statements.each do |s|
+        graph.insert(s)
+      end
+      # Return the arg to point at the new b-node
+      rdf_object.rdf_subject
+    end
+
     class Builder
       def initialize(parent)
         @parent = parent
       end
+
       def build(&block)
         yield self
       end
-
 
       def method_missing(name, *args, &block)
         args = args.first if args.respond_to? :first
@@ -220,9 +225,19 @@ module ActiveFedora
       end
     end
     module ClassMethods
+      def config
+        @config ||= {}
+      end
+
       def map_predicates(&block)
         builder = Builder.new(self)
         builder.build &block
+      end
+
+      def rdf_type(uri_or_string)
+        uri = RDF::URI.new(uri_or_string) unless uri_or_string.kind_of? RDF::URI
+        self.config[:type] = {predicate: RDF.type}
+        self.config[:rdf_type] = uri
       end
 
       def config_for_predicate(predicate)
