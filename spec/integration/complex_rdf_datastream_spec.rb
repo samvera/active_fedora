@@ -99,6 +99,7 @@ END
       ds.mediator = comp
       ds.mediator.first.type.first.should be_instance_of RDF::URI
       ds.mediator.first.type.first.to_s.should == "http://purl.org/dc/terms/AgentClass"
+      ds.mediator.first.title.first.should == 'Doctor'
     end
 
     it "should add the type of complex object when it is not provided" do

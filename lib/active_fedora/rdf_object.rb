@@ -28,7 +28,7 @@ module ActiveFedora
     private
     
     def assert_type
-      rdf_type = self.class.config[:rdf_type]
+      rdf_type = self.class.rdf_type
       @graph.insert([@subject, RDF.type, rdf_type]) if rdf_type
     end
   end

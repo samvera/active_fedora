@@ -234,10 +234,13 @@ module ActiveFedora
         builder.build &block
       end
 
-      def rdf_type(uri_or_string)
-        uri = RDF::URI.new(uri_or_string) unless uri_or_string.kind_of? RDF::URI
-        self.config[:type] = {predicate: RDF.type}
-        self.config[:rdf_type] = uri
+      def rdf_type(uri_or_string=nil)
+        if uri_or_string
+          uri = RDF::URI.new(uri_or_string) unless uri_or_string.kind_of? RDF::URI
+          self.config[:type] = {predicate: RDF.type}
+          @rdf_type = uri
+        end
+        @rdf_type
       end
 
       def config_for_predicate(predicate)
