@@ -5,6 +5,7 @@ module ActiveFedora
     source_root File.expand_path('../templates', __FILE__)
 
     def generate
+      copy_file('jetty.yml', 'config/jetty.yml')
       copy_file('solr.yml', 'config/solr.yml')
       directory('solr_conf', 'solr_conf')
     end
