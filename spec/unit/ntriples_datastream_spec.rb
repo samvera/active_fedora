@@ -175,14 +175,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
     before(:each) do  
       @subject.stub(:pid => 'test:1')
-      @subject.stub(:new? => false)
-      @sample_fields = {:publisher => {:values => ["publisher1"], :type => :string, :behaviors => [:facetable, :sortable, :searchable, :displayable]}, 
-        :based_near => {:values => ["coverage1", "coverage2"], :type => :text, :behaviors => [:displayable, :facetable, :searchable]}, 
-        :created => {:values => "fake-date", :type => :date, :behaviors => [:sortable, :displayable]},
-        :title => {:values => "fake-title", :type => :text, :behaviors => [:searchable, :displayable, :sortable]},
-        :related_url => {:values => "http://example.org/", :type =>:string, :behaviors => [:searchable]},
-        :empty_field => {:values => [], :type => :string, :behaviors => [:searchable]}
-      } 
     end
     after(:all) do
       # Revert to default mappings after running tests
@@ -201,7 +193,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.to_solr(doc).should == doc
     end
     it "should iterate through @fields hash" do
-      @subject.should_receive(:fields).and_return(@sample_fields)
       solr_doc = @subject.to_solr
       solr_doc["my_datastream__publisher_t"].should == ["publisher1"]
       solr_doc["my_datastream__publisher_sort"].should == ["publisher1"]
@@ -217,24 +208,15 @@ describe ActiveFedora::NtriplesRDFDatastream do
       solr_doc["my_datastream__title_display"].should == ["fake-title"]
       solr_doc["my_datastream__related_url_t"].should == ["http://example.org/"]
       solr_doc["my_datastream__empty_field_t"].should be_nil
-    end
-    it 'should append create keys in format field_name + _ + field_type' do
-      @subject.stub(:fields).and_return(@sample_fields)
-      
-      #should have these            
-      @subject.to_solr["my_datastream__publisher_t"].should_not be_nil
-      @subject.to_solr["my_datastream__based_near_t"].should_not be_nil
-      @subject.to_solr["my_datastream__title_t"].should_not be_nil
-      @subject.to_solr["my_datastream__related_url_t"].should_not be_nil
 
       #should NOT have these
-      @subject.to_solr["my_datastream__narrator"].should be_nil
-      @subject.to_solr["my_datastream__empty_field"].should be_nil
-      @subject.to_solr["my_datastream__creator"].should be_nil
+      solr_doc["my_datastream__narrator"].should be_nil
+      solr_doc["my_datastream__empty_field"].should be_nil
+      solr_doc["my_datastream__creator"].should be_nil
     end
+
     it "should use Solr mappings to generate field names" do
       ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
-      @subject.stub(:fields).and_return(@sample_fields)
       solr_doc =  @subject.to_solr
 
       #should have these            
@@ -320,30 +302,17 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
       end
       describe ".to_solr()" do
-        it "should return the right # of fields" do
-          @obj.to_solr.keys.count.should == 13
-        end
         it "should return the right fields" do
-          @obj.to_solr.keys.should include("my_datastream__related_url_t")
-          @obj.to_solr.keys.should include("my_datastream__publisher_t")
-          @obj.to_solr.keys.should include("my_datastream__publisher_sort")
-          @obj.to_solr.keys.should include("my_datastream__publisher_display")
-          @obj.to_solr.keys.should include("my_datastream__publisher_facet")
-          @obj.to_solr.keys.should include("my_datastream__created_sort")
-          @obj.to_solr.keys.should include("my_datastream__created_display")
-          @obj.to_solr.keys.should include("my_datastream__title_t")
-          @obj.to_solr.keys.should include("my_datastream__title_sort")
-          @obj.to_solr.keys.should include("my_datastream__title_display")
-          @obj.to_solr.keys.should include("my_datastream__based_near_t")
-          @obj.to_solr.keys.should include("my_datastream__based_near_facet")
-          @obj.to_solr.keys.should include("my_datastream__based_near_display")
+          @obj.to_solr.keys.count.should == 13
+          @obj.to_solr.keys.should include("my_datastream__related_url_t", "my_datastream__publisher_t", "my_datastream__publisher_sort",
+                "my_datastream__publisher_display", "my_datastream__publisher_facet", "my_datastream__created_sort",
+                "my_datastream__created_display", "my_datastream__title_t", "my_datastream__title_sort", "my_datastream__title_display",
+                "my_datastream__based_near_t", "my_datastream__based_near_facet", "my_datastream__based_near_display")
         end
+
         it "should return the right values" do
           @obj.to_solr["my_datastream__related_url_t"].should == ["http://example.org/blogtastic/"]
-        end
-        it "should return multi-value fields as expected" do
-          @obj.to_solr["my_datastream__based_near_t"].count.should == 2
-          @obj.to_solr["my_datastream__based_near_t"].should include("Tacoma, WA","Renton, WA")
+          @obj.to_solr["my_datastream__based_near_t"].should == ["Tacoma, WA","Renton, WA"]
         end
       end
     end
