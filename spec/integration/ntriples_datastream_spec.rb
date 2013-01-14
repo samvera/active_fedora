@@ -4,7 +4,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
   before do
     class MyDatastream < ActiveFedora::NtriplesRDFDatastream
       map_predicates do |map|
-        map.title(:in => RDF::DC)
+        map.title(:in => RDF::DC) do |index|
+          index.as :searchable, :facetable, :displayable
+        end
         map.part(:to => "hasPart", :in => RDF::DC)
         map.based_near(:in => RDF::FOAF)
         map.related_url(:to => "seeAlso", :in => RDF::RDFS)
@@ -27,6 +29,14 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
   it "should not try to send an empty datastream" do
     @subject.save
+  end
+
+  it "should produce a solr document" do
+    @subject = RdfTest.new(title: "War and Peace")
+    solr_document = @subject.to_solr
+    solr_document["my_datastream__title_display"].should == ["War and Peace"]
+    solr_document["my_datastream__title_facet"].should == ["War and Peace"]
+    solr_document["my_datastream__title_t"].should == ["War and Peace"]
   end
 
   it "should set and recall values" do

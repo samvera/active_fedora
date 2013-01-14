@@ -176,12 +176,12 @@ describe ActiveFedora::NtriplesRDFDatastream do
     before(:each) do  
       @subject.stub(:pid => 'test:1')
       @subject.stub(:new? => false)
-      @sample_fields = {:my_datastream__publisher => {:values => ["publisher1"], :type => :string, :behaviors => [:facetable, :sortable, :searchable, :displayable]}, 
-        :my_datastream__based_near => {:values => ["coverage1", "coverage2"], :type => :text, :behaviors => [:displayable, :facetable, :searchable]}, 
-        :my_datastream__created => {:values => "fake-date", :type => :date, :behaviors => [:sortable, :displayable]},
-        :my_datastream__title => {:values => "fake-title", :type => :text, :behaviors => [:searchable, :displayable, :sortable]},
-        :my_datastream__related_url => {:values => "http://example.org/", :type =>:string, :behaviors => [:searchable]},
-        :my_datastream__empty_field => {:values => [], :type => :string, :behaviors => [:searchable]}
+      @sample_fields = {:publisher => {:values => ["publisher1"], :type => :string, :behaviors => [:facetable, :sortable, :searchable, :displayable]}, 
+        :based_near => {:values => ["coverage1", "coverage2"], :type => :text, :behaviors => [:displayable, :facetable, :searchable]}, 
+        :created => {:values => "fake-date", :type => :date, :behaviors => [:sortable, :displayable]},
+        :title => {:values => "fake-title", :type => :text, :behaviors => [:searchable, :displayable, :sortable]},
+        :related_url => {:values => "http://example.org/", :type =>:string, :behaviors => [:searchable]},
+        :empty_field => {:values => [], :type => :string, :behaviors => [:searchable]}
       } 
     end
     after(:all) do
@@ -324,27 +324,26 @@ describe ActiveFedora::NtriplesRDFDatastream do
           @obj.to_solr.keys.count.should == 13
         end
         it "should return the right fields" do
-          @obj.to_solr.keys.should include("related_url_t")
-          @obj.to_solr.keys.should include("publisher_t")
-          @obj.to_solr.keys.should include("publisher_sort")
-          @obj.to_solr.keys.should include("publisher_display")
-          @obj.to_solr.keys.should include("publisher_facet")
-          @obj.to_solr.keys.should include("created_sort")
-          @obj.to_solr.keys.should include("created_display")
-          @obj.to_solr.keys.should include("title_t")
-          @obj.to_solr.keys.should include("title_sort")
-          @obj.to_solr.keys.should include("title_display")
-          @obj.to_solr.keys.should include("based_near_t")
-          @obj.to_solr.keys.should include("based_near_facet")
-          @obj.to_solr.keys.should include("based_near_display")
+          @obj.to_solr.keys.should include("my_datastream__related_url_t")
+          @obj.to_solr.keys.should include("my_datastream__publisher_t")
+          @obj.to_solr.keys.should include("my_datastream__publisher_sort")
+          @obj.to_solr.keys.should include("my_datastream__publisher_display")
+          @obj.to_solr.keys.should include("my_datastream__publisher_facet")
+          @obj.to_solr.keys.should include("my_datastream__created_sort")
+          @obj.to_solr.keys.should include("my_datastream__created_display")
+          @obj.to_solr.keys.should include("my_datastream__title_t")
+          @obj.to_solr.keys.should include("my_datastream__title_sort")
+          @obj.to_solr.keys.should include("my_datastream__title_display")
+          @obj.to_solr.keys.should include("my_datastream__based_near_t")
+          @obj.to_solr.keys.should include("my_datastream__based_near_facet")
+          @obj.to_solr.keys.should include("my_datastream__based_near_display")
         end
         it "should return the right values" do
-          @obj.to_solr["related_url_t"].should == ["http://example.org/blogtastic/"]
+          @obj.to_solr["my_datastream__related_url_t"].should == ["http://example.org/blogtastic/"]
         end
         it "should return multi-value fields as expected" do
-          @obj.to_solr["based_near_t"].count.should == 2
-          @obj.to_solr["based_near_t"].should include("Tacoma, WA")
-          @obj.to_solr["based_near_t"].should include("Renton, WA")
+          @obj.to_solr["my_datastream__based_near_t"].count.should == 2
+          @obj.to_solr["my_datastream__based_near_t"].should include("Tacoma, WA","Renton, WA")
         end
       end
     end
