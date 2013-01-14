@@ -63,29 +63,6 @@ module ActiveFedora
       super || content_changed?
     end
 
-    # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
-    def fields
-      field_map = {}
-
-      rdf_subject = self.rdf_subject
-      query = RDF::Query.new do
-        pattern [rdf_subject, :predicate, :value]
-      end
-
-      query.execute(graph).each do |solution|
-        predicate = solution.predicate
-        value = solution.value
-        
-        name, config = self.class.config_for_predicate(predicate)
-        next unless config
-        type = config[:type]
-        behaviors = config[:behaviors]
-        next unless type and behaviors 
-        field_map[name] ||= {:values => [], :type => type, :behaviors => behaviors}
-        field_map[name][:values] << value.to_s
-      end
-      field_map
-    end
 
     def to_solr(solr_doc = Hash.new) # :nodoc:
       fields.each do |field_key, field_info|
@@ -159,6 +136,32 @@ module ActiveFedora
       end
 
       @graph = new_repository
+    end
+    
+    private 
+
+    # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
+    def fields
+      field_map = {}
+
+      rdf_subject = self.rdf_subject
+      query = RDF::Query.new do
+        pattern [rdf_subject, :predicate, :value]
+      end
+
+      query.execute(graph).each do |solution|
+        predicate = solution.predicate
+        value = solution.value
+        
+        name, config = self.class.config_for_predicate(predicate)
+        next unless config
+        type = config[:type]
+        behaviors = config[:behaviors]
+        next unless type and behaviors 
+        field_map[name] ||= {:values => [], :type => type, :behaviors => behaviors}
+        field_map[name][:values] << value.to_s
+      end
+      field_map
     end
   end
 end

@@ -184,10 +184,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.should respond_to(:to_solr)
       @subject.to_solr.should be_kind_of(Hash)
     end
-    it "should provide .fields and return a Hash" do
-      @subject.should respond_to(:fields)
-      @subject.fields.should be_kind_of(Hash)
-    end   
     it "should optionally allow you to provide the Solr::Document to add fields to and return that document when done" do
       doc = Hash.new
       @subject.to_solr(doc).should == doc
@@ -268,26 +264,17 @@ describe ActiveFedora::NtriplesRDFDatastream do
         foo.title.should == ['Title of work']
       end
       describe ".fields()" do
-        it "should return the right # of fields" do
-          @obj.fields.keys.count.should == 5
-        end
         it "should return the right fields" do
-          @obj.fields.keys.should include(:related_url)
-          @obj.fields.keys.should include(:publisher)
-          @obj.fields.keys.should include(:created)
-          @obj.fields.keys.should include(:title)
-          @obj.fields.keys.should include(:based_near)
+          @obj.send(:fields).keys.should == [:created, :title, :publisher, :based_near, :related_url]
         end
         it "should return the right values" do
-          @obj.fields[:related_url][:values].should == ["http://example.org/blogtastic/"]
+          fields = @obj.send(:fields)
+          fields[:related_url][:values].should == ["http://example.org/blogtastic/"]
+          fields[:based_near][:values].should == ["Tacoma, WA", "Renton, WA"]
         end
         it "should return the right type information" do
-          @obj.fields[:created][:type].should == :date
-        end
-        it "should return multi-value fields as expected" do
-          @obj.fields[:based_near][:values].count.should == 2
-          @obj.fields[:based_near][:values].should include("Tacoma, WA")
-          @obj.fields[:based_near][:values].should include("Renton, WA")
+          fields = @obj.send(:fields)
+          fields[:created][:type].should == :date
         end
         it "should solrize even when the object is not new" do
           foo = Foo.new
