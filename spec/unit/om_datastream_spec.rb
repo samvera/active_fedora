@@ -161,10 +161,6 @@ describe ActiveFedora::OmDatastream do
     end
   end
 
-  it 'should provide .fields' do
-    @test_ds.should respond_to(:fields)
-  end
-  
   describe '.save' do
     it "should provide .save" do
       @test_ds.should respond_to(:save)
