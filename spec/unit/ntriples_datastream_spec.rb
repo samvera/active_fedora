@@ -13,23 +13,11 @@ describe ActiveFedora::NtriplesRDFDatastream do
           map.related_url(:to => "seeAlso", :in => RDF::RDFS)
         end
       end
-      class Foo < ActiveFedora::Base
-        has_metadata :name => "descMetadata", :type => MyDatastream
-        delegate :created, :to => :descMetadata
-        delegate :title, :to => :descMetadata
-        delegate :publisher, :to => :descMetadata
-        delegate :based_near, :to => :descMetadata
-        delegate :related_url, :to => :descMetadata
-      end
-      @object = Foo.new(:pid => 'test:1')
-      @subject = @object.descMetadata
+      @subject = MyDatastream.new(stub('inner object', :pid=>'test:1', :new? =>true), 'descMetadata')
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
-      @object.save
     end
     after do
-      @object.delete
       Object.send(:remove_const, :MyDatastream)
-      Object.send(:remove_const, :Foo)
     end
     it "should have a subject" do
       @subject.rdf_subject.should == "info:fedora/test:1"
@@ -51,10 +39,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.related_url.should == ["http://google.com/"]
     end
 
-    it "should delegate as_json to the fields" do
-      @subject.title.as_json.should == ["Title of work"]
-      @subject.title.to_json.should == "\[\"Title of work\"\]"
-    end
 
     it "should return fields that are not TermProxies" do
       @subject.created.should be_kind_of Array
@@ -254,15 +238,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
         @obj.save
       end
 
-      it "should save content properly upon save" do
-        foo = Foo.new(:pid => 'test:1')
-        foo.title = 'Hamlet'
-        foo.save
-        foo.title.should == ['Hamlet']
-        foo.descMetadata.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
-        foo.save
-        foo.title.should == ['Title of work']
-      end
       describe ".fields()" do
         it "should return the right fields" do
           @obj.send(:fields).keys.should == [:created, :title, :publisher, :based_near, :related_url]
@@ -275,17 +250,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
         it "should return the right type information" do
           fields = @obj.send(:fields)
           fields[:created][:type].should == :date
-        end
-        it "should solrize even when the object is not new" do
-          foo = Foo.new
-          foo.should_receive(:update_index).once
-          foo.title = "title1"
-          foo.save
-          foo = Foo.find(foo.pid)
-          foo.should_receive(:update_index).once
-          foo.publisher = "Allah2"
-          foo.title = "The Work2"
-          foo.save  
         end
       end
       describe ".to_solr()" do

@@ -31,6 +31,33 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.save
   end
 
+  it "should save content properly upon save" do
+    foo = RdfTest.new(:pid=>'test:1') #Pid needs to match the subject in the loaded file
+    foo.title = 'Hamlet'
+    foo.save
+    foo.title.should == 'Hamlet'
+    foo.rdf.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
+    foo.save
+    foo.title.should == 'Title of work'
+  end
+
+  it "should delegate as_json to the fields" do
+    @subject = RdfTest.new(title: "Title of work")
+    @subject.rdf.title.as_json.should == ["Title of work"]
+    @subject.rdf.title.to_json.should == "\[\"Title of work\"\]"
+  end
+
+  it "should solrize even when the object is not new" do
+    foo = RdfTest.new
+    foo.should_receive(:update_index).once
+    foo.title = "title1"
+    foo.save
+    foo = RdfTest.find(foo.pid)
+    foo.should_receive(:update_index).once
+    foo.title = "The Work2"
+    foo.save  
+  end
+
   it "should produce a solr document" do
     @subject = RdfTest.new(title: "War and Peace")
     solr_document = @subject.to_solr
