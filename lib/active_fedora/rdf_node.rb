@@ -18,9 +18,8 @@ module ActiveFedora
 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def get_values(subject, predicate)
-
-      predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
-      return TermProxy.new(self, subject, predicate)
+      options = config_for_term_or_uri(predicate)
+      return TermProxy.new(self, subject, options)
     end
 
 
@@ -36,7 +35,9 @@ module ActiveFedora
 
     def set_value(subject, predicate, values)
       
-      predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
+      #predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
+      options = config_for_term_or_uri(predicate)
+      predicate = options[:predicate]
 
       delete_predicate(subject, predicate)
 
@@ -49,7 +50,7 @@ module ActiveFedora
         graph.insert([subject, predicate, arg])
       end
 
-      return TermProxy.new(self, subject, predicate)
+      return TermProxy.new(self, subject, options)
     end
 
  
@@ -75,15 +76,24 @@ module ActiveFedora
     # append a value 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def append(subject, predicate, args)
+      options = config_for_term_or_uri(predicate)
       graph.insert([subject, predicate, args])
-      TermProxy.new(self, subject, predicate)
+      TermProxy.new(self, subject, options)
     end
 
+    def config_for_term_or_uri(term)
+      case term
+      when RDF::URI
+        self.class.config.each { |k, v| return v if v[:predicate] == term}
+      else
+        self.class.config[term.to_sym]
+      end
+    end
 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def find_predicate(term)
-      term = self.class.config[term.to_sym]
-      term ? term[:predicate] : nil
+      conf = config_for_term_or_uri(term)
+      conf ? conf[:predicate] : nil
     end
 
     def query subject, predicate, &block
@@ -181,14 +191,15 @@ module ActiveFedora
 
     class TermProxy
 
-      attr_reader :graph, :subject, :predicate
+      attr_reader :graph, :subject, :predicate, :options
       delegate :class, :to_s, :==, :kind_of?, :each, :map, :empty?, :as_json, :is_a?, :to => :values
 
-      def initialize(graph, subject, predicate)
+      def initialize(graph, subject, options)
         @graph = graph
 
         @subject = subject
-        @predicate = predicate
+        @predicate = options[:predicate]
+        @options = options
       end
 
       def <<(*values)
@@ -210,6 +221,9 @@ module ActiveFedora
         graph.query(subject, predicate).each do |solution|
           v = solution.value
           v = v.to_s if v.is_a? RDF::Literal
+          if options[:type] == :date
+            v = Date.parse(v)
+          end
           values << v
         end
 

@@ -160,10 +160,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
     before(:each) do  
       @subject.stub(:pid => 'test:1')
     end
-    after(:all) do
-      # Revert to default mappings after running tests
-      ActiveFedora::SolrService.load_mappings
-    end
     it "should provide .to_solr and return a SolrDocument" do
       @subject.should respond_to(:to_solr)
       @subject.to_solr.should be_kind_of(Hash)
@@ -181,8 +177,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
       solr_doc["my_datastream__based_near_t"].sort.should == ["coverage1", "coverage2"]
       solr_doc["my_datastream__based_near_display"].sort.should == ["coverage1", "coverage2"]
       solr_doc["my_datastream__based_near_facet"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["my_datastream__created_sort"].should == ["fake-date"]
-      solr_doc["my_datastream__created_display"].should == ["fake-date"]
+      solr_doc["my_datastream__created_sort"].should == ["2009-10-10"]
+      solr_doc["my_datastream__created_display"].should == ["2009-10-10"]
       solr_doc["my_datastream__title_t"].should == ["fake-title"]
       solr_doc["my_datastream__title_sort"].should == ["fake-title"]
       solr_doc["my_datastream__title_display"].should == ["fake-title"]
@@ -195,24 +191,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
       solr_doc["my_datastream__creator"].should be_nil
     end
 
-    it "should use Solr mappings to generate field names" do
-      ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
-      solr_doc =  @subject.to_solr
-
-      #should have these            
-      solr_doc["my_datastream__publisher_field"].should == ["publisher1"]
-      solr_doc["my_datastream__based_near_field"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["my_datastream__created_display"].should == ["fake-date"]
-      solr_doc["my_datastream__title_field"].should == ["fake-title"]
-        
-      solr_doc["my_datastream__title_t"].should be_nil
-      solr_doc["my_datastream__publisher_t"].should be_nil
-      solr_doc["my_datastream__based_near_t"].should be_nil
-      solr_doc["my_datastream__created_dt"].should be_nil
-      
-      # Reload default mappings
-      ActiveFedora::SolrService.load_mappings
-    end
     describe "with an actual object" do
       before(:each) do
         class Foo < ActiveFedora::Base
@@ -259,6 +237,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
                 "my_datastream__publisher_display", "my_datastream__publisher_facet", "my_datastream__created_sort",
                 "my_datastream__created_display", "my_datastream__title_t", "my_datastream__title_sort", "my_datastream__title_display",
                 "my_datastream__based_near_t", "my_datastream__based_near_facet", "my_datastream__based_near_display")
+
         end
 
         it "should return the right values" do

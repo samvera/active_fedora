@@ -54,7 +54,7 @@ module Hydra
         t.computing_id
       }
       # lookup :person, :first_name        
-      t.person(:ref=>:name, :attributes=>{:type=>"personal"}, :index_as=>[:facetable])
+      t.person(:ref=>:name, :attributes=>{:type=>"personal"}, :index_as=>[:facetable, :searchable])
       t.department(:proxy=>[:person,:description],:index_as=>[:facetable])
       t.organization(:ref=>:name, :attributes=>{:type=>"corporate"}, :index_as=>[:facetable])
       t.conference(:ref=>:name, :attributes=>{:type=>"conference"}, :index_as=>[:facetable])

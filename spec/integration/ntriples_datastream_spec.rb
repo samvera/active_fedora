@@ -7,6 +7,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
         map.title(:in => RDF::DC) do |index|
           index.as :searchable, :facetable, :displayable
         end
+        map.date_uploaded(:to => "dateSubmitted", :in => RDF::DC) do |index|
+          index.type :date
+          index.as :searchable, :displayable, :sortable
+        end
         map.part(:to => "hasPart", :in => RDF::DC)
         map.based_near(:in => RDF::FOAF)
         map.related_url(:to => "seeAlso", :in => RDF::RDFS)
@@ -14,13 +18,15 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
     class RdfTest < ActiveFedora::Base 
       has_metadata :name=>'rdf', :type=>MyDatastream
-      delegate :based_near, :to=>'rdf'
-      delegate :related_url, :to=>'rdf'
-      delegate :part, :to=>'rdf'
+      delegate_to 'rdf', [:based_near, :related_url, :part, :date_uploaded]
       delegate :title, :to=>'rdf', :unique=>true
     end
     @subject = RdfTest.new
   end
+
+  subject {
+    @subject
+  }
 
   after do
     Object.send(:remove_const, :RdfTest)
@@ -56,6 +62,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
     foo.should_receive(:update_index).once
     foo.title = "The Work2"
     foo.save  
+  end
+
+  it "should serialize dates" do
+    subject.date_uploaded = Date.parse('2012-11-02')
+    subject.date_uploaded.first.should be_kind_of Date
+    solr_document = subject.to_solr
+    solr_document["my_datastream__date_uploaded_dt"].should == ['2012-11-02T00:00:00Z']
   end
 
   it "should produce a solr document" do

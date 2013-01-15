@@ -1,6 +1,8 @@
 module ActiveFedora
   class RDFDatastream < Datastream
 
+    include Solrizer::Common
+
     before_save do
       if content.blank?
         logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}"
@@ -8,10 +10,8 @@ module ActiveFedora
       end
     end
     include RdfNode
-
     
     class << self 
-      attr_accessor :vocabularies
       ##
       # Register a ruby block that evaluates to the subject of the graph
       # By default, the block returns the current object's pid
@@ -36,13 +36,9 @@ module ActiveFedora
       end
     end
 
-
-    
     attr_accessor :loaded
     def metadata?
       true
-    end
-    def ensure_loaded
     end
 
     def content
@@ -66,14 +62,12 @@ module ActiveFedora
 
     def to_solr(solr_doc = Hash.new) # :nodoc:
       fields.each do |field_key, field_info|
-        values = field_info.fetch(:values, false)
+        values = get_values(rdf_subject, field_key)
+        directive = Solrizer::Directive.new(field_info[:type], field_info[:behaviors])
         if values
-          field_info[:behaviors].each do |index_type|
-            field_symbol = ActiveFedora::SolrService.solr_name(self.class.prefix(field_key), field_info[:type], index_type)
-            values = [values] unless values.respond_to? :each
-            values.each do |val|    
-              ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val)         
-            end
+          Array(values).each do |val|    
+            val = val.to_s if val.kind_of? RDF::URI
+            self.class.create_and_insert_terms(self.class.prefix(field_key), val, directive, solr_doc)
           end
         end
       end
@@ -106,11 +100,9 @@ module ActiveFedora
       end      
     end
 
-
     def serialization_format
       raise "you must override the `serialization_format' method in a subclass"
     end
-
 
     # Creates a RDF datastream for insertion into a Fedora Object
     # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
@@ -118,6 +110,9 @@ module ActiveFedora
       update_subjects_to_use_a_real_pid!
       RDF::Writer.for(serialization_format).dump(graph)
     end
+
+    
+    private 
 
     def update_subjects_to_use_a_real_pid!
       return unless new?
@@ -137,8 +132,6 @@ module ActiveFedora
 
       @graph = new_repository
     end
-    
-    private 
 
     # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
     def fields
