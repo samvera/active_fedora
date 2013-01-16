@@ -31,11 +31,10 @@ module ActiveFedora
     end
 
     # if there are any existing statements with this predicate, replace them
+    # @param [RDF::URI] subject  the subject to insert into the graph
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
-
+    # @param [Array,#to_s] values  the value/values to insert into the graph
     def set_value(subject, predicate, values)
-      
-      #predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
       options = config_for_term_or_uri(predicate)
       predicate = options[:predicate]
 
