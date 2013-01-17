@@ -4,6 +4,7 @@ module ActiveFedora
 
     included do
       include RdfNode
+      attr_reader :subject
     end
 
     def graph
@@ -12,7 +13,8 @@ module ActiveFedora
       @graph 
     end
 
-    def initialize(graph=RDF::Graph.new, subject=nil)
+
+    def initialize(graph, subject=nil)
       @graph = graph
       @subject = subject
     end

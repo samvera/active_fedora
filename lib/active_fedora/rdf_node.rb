@@ -1,6 +1,9 @@
 module ActiveFedora
   module RdfNode
     extend ActiveSupport::Concern
+    extend ActiveSupport::Autoload
+
+    autoload :TermProxy
 
     ##
     # Get the subject for this rdf object
@@ -19,7 +22,7 @@ module ActiveFedora
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     def get_values(subject, predicate)
       options = config_for_term_or_uri(predicate)
-      return TermProxy.new(self, subject, options)
+      TermProxy.new(self, subject, predicate, options)
     end
 
 
@@ -35,21 +38,23 @@ module ActiveFedora
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     # @param [Array,#to_s] values  the value/values to insert into the graph
     def set_value(subject, predicate, values)
+
       options = config_for_term_or_uri(predicate)
       predicate = options[:predicate]
 
       delete_predicate(subject, predicate)
-
       Array(values).each do |arg|
-        arg = arg.to_s if arg.kind_of? RDF::Literal
-        next if arg.kind_of?(String) && arg.empty?
+        if arg.respond_to?(:subject) # an RdfObject
+          graph.insert([subject, predicate, arg.subject ])
+        else
+          arg = arg.to_s if arg.kind_of? RDF::Literal
+          next if arg.kind_of?(String) && arg.empty?
 
-        # If arg is a b-node, then copy it's statements onto the parent graph
-        arg = merge_subgraph(arg) if arg.respond_to? :graph
-        graph.insert([subject, predicate, arg])
+          graph.insert([subject, predicate, arg])
+        end
       end
 
-      return TermProxy.new(self, subject, options)
+      TermProxy.new(self, subject, predicate, options)
     end
 
  
@@ -77,7 +82,7 @@ module ActiveFedora
     def append(subject, predicate, args)
       options = config_for_term_or_uri(predicate)
       graph.insert([subject, predicate, args])
-      TermProxy.new(self, subject, options)
+      TermProxy.new(self, subject, options[:predicate], options)
     end
 
     def config_for_term_or_uri(term)
@@ -111,13 +116,19 @@ module ActiveFedora
       elsif pred = find_predicate(name)
         klass = target_class(pred)
         if klass
-          # return an array of klass.new from each of the values
-          query(rdf_subject, pred).map do |solution|
-            klass.new(graph, solution.value)
+          # Find the nodes for rdf_subject / pred and return as a term_proxy
+          if query(rdf_subject, pred).empty?
+            bnode = RDF::Node.new
+            graph.insert([rdf_subject, pred, bnode])
+
+            TermProxy.new(self, bnode, pred, config_for_term_or_uri(pred))
+          else
+            get_values(rdf_subject, pred)
           end
         else
           get_values(rdf_subject, pred)
         end
+        
       else 
         super
       end
@@ -126,15 +137,6 @@ module ActiveFedora
     end
 
     private
-    # If arg is a b-node, then copy it's statements onto the parent graph
-    def merge_subgraph(rdf_object)
-      rdf_object.graph.statements.each do |s|
-        graph.insert(s)
-      end
-      # Return the arg to point at the new b-node
-      rdf_object.rdf_subject
-    end
-
     class Builder
       def initialize(parent)
         @parent = parent
@@ -188,55 +190,6 @@ module ActiveFedora
       end
     end
 
-    class TermProxy
-
-      attr_reader :graph, :subject, :predicate, :options
-      delegate :class, :to_s, :==, :kind_of?, :each, :map, :empty?, :as_json, :is_a?, :to => :values
-
-      def initialize(graph, subject, options)
-        @graph = graph
-
-        @subject = subject
-        @predicate = options[:predicate]
-        @options = options
-      end
-
-      def <<(*values)
-        values.each { |value| graph.append(subject, predicate, value) }
-        values
-      end
-
-      def delete(*values)
-        values.each do |value| 
-          graph.delete_predicate(subject, predicate, value)
-        end
-
-        values
-      end
-
-      def values
-        values = []
-
-        graph.query(subject, predicate).each do |solution|
-          v = solution.value
-          v = v.to_s if v.is_a? RDF::Literal
-          if options[:type] == :date
-            v = Date.parse(v)
-          end
-          values << v
-        end
-
-        values
-      end
-      
-      def method_missing(method, *args, &block)
-        if values.respond_to? method
-          values.send(method, *args, &block)
-        else
-          super
-        end
-      end
-    end
     module ClassMethods
       def config
         @config ||= {}

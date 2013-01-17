@@ -29,15 +29,15 @@ describe "Nested Rdf Objects" do
 
 
     it "should be able to nest a complex object" do
-      comp = SpecDatastream::Component.new
+      comp = SpecDatastream::Component.new(ds.graph)
       comp.label = ["Alternator"]
       ds.parts = comp
       ds.parts.first.label.should == ["Alternator"]
     end
     it "should be able to nest many complex objects" do
-      comp1 = SpecDatastream::Component.new
+      comp1 = SpecDatastream::Component.new ds.graph
       comp1.label = ["Alternator"]
-      comp2 = SpecDatastream::Component.new
+      comp2 = SpecDatastream::Component.new ds.graph
       comp2.label = ["Crankshaft"]
       ds.parts = [comp1, comp2]
       ds.parts.first.label.should == ["Alternator"]
@@ -45,9 +45,9 @@ describe "Nested Rdf Objects" do
     end
 
     it "should be able to clear complex objects" do
-      comp1 = SpecDatastream::Component.new
+      comp1 = SpecDatastream::Component.new ds.graph
       comp1.label = ["Alternator"]
-      comp2 = SpecDatastream::Component.new
+      comp2 = SpecDatastream::Component.new ds.graph
       comp2.label = ["Crankshaft"]
       ds.parts = [comp1, comp2]
       ds.parts = []
@@ -62,6 +62,12 @@ _:g70350851837440 <http://purl.org/dc/terms/title> "Alternator" .
 _:g70350851833380 <http://purl.org/dc/terms/title> "Crankshaft" .
 END
       ds.parts.first.label.should == ["Alternator"]
+    end
+
+    it "should build complex objects" do
+      part = ds.parts.build
+      part.should be_kind_of SpecDatastream::Component
+      part.label = "Wheel bearing"
     end
   end
 
@@ -94,7 +100,7 @@ END
 
 
     it "should store the type of complex objects when type is specified" do
-      comp = SpecDatastream::MediatorUser.new
+      comp = SpecDatastream::MediatorUser.new ds.graph
       comp.title = ["Doctor"]
       ds.mediator = comp
       ds.mediator.first.type.first.should be_instance_of RDF::URI
