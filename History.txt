@@ -1,5 +1,6 @@
 5.5.0 (Unreleased)
 Added support for complex rdf structures.
+Changed RdfDatastream to_solr so that it uses the dsid as the solr prefix, not the datastream class name
 
 5.4.0
 HYDRA-850 Added finder methods like Base.where().limit().order().first

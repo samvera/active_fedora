@@ -29,16 +29,17 @@ module ActiveFedora
         Deprecation.warn(RDFDatastream, "register_vocabularies no longer has any effect and will be removed in active-fedora 6.0", caller)
       end
 
-      def prefix(name)
-        name = name.to_s unless name.is_a? String
-        pre = self.to_s.sub(/RDFDatastream$/i, '').underscore
-        return "#{pre}__#{name}".to_sym
-      end
     end
 
     attr_accessor :loaded
     def metadata?
       true
+    end
+
+    def prefix(name)
+      name = name.to_s unless name.is_a? String
+      pre = dsid.underscore
+      return "#{pre}__#{name}".to_sym
     end
 
     def content
@@ -67,7 +68,7 @@ module ActiveFedora
         if values
           Array(values).each do |val|    
             val = val.to_s if val.kind_of? RDF::URI
-            self.class.create_and_insert_terms(self.class.prefix(field_key), val, directive, solr_doc)
+            self.class.create_and_insert_terms(prefix(field_key), val, directive, solr_doc)
           end
         end
       end

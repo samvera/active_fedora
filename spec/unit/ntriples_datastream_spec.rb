@@ -67,16 +67,12 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
   describe "some dummy instances" do
     before do
-      class MyFoobarRDFDatastream < ActiveFedora::NtriplesRDFDatastream
-      end
-      class MyFoobarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
-      end
+      @one = ActiveFedora::RDFDatastream.new('fakepid', 'myFoobar')
+      @two = ActiveFedora::RDFDatastream.new('fakepid', 'myQuix')
     end
     it "should generate predictable prexies" do
-      MyFoobarRDFDatastream.prefix("baz").should == :my_foobar__baz
-    end
-    it "should generate prefixes case-insensitively" do
-      MyFoobarRDFDatastream.prefix("quux").should == MyFoobarRdfDatastream.prefix("quux")
+      @one .prefix("baz").should == :my_foobar__baz
+      @two.prefix("baz").should == :my_quix__baz
     end
   end
 
@@ -170,25 +166,25 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
     it "should iterate through @fields hash" do
       solr_doc = @subject.to_solr
-      solr_doc["my_datastream__publisher_t"].should == ["publisher1"]
-      solr_doc["my_datastream__publisher_sort"].should == ["publisher1"]
-      solr_doc["my_datastream__publisher_display"].should == ["publisher1"]
-      solr_doc["my_datastream__publisher_facet"].should == ["publisher1"]
-      solr_doc["my_datastream__based_near_t"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["my_datastream__based_near_display"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["my_datastream__based_near_facet"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["my_datastream__created_sort"].should == ["2009-10-10"]
-      solr_doc["my_datastream__created_display"].should == ["2009-10-10"]
-      solr_doc["my_datastream__title_t"].should == ["fake-title"]
-      solr_doc["my_datastream__title_sort"].should == ["fake-title"]
-      solr_doc["my_datastream__title_display"].should == ["fake-title"]
-      solr_doc["my_datastream__related_url_t"].should == ["http://example.org/"]
-      solr_doc["my_datastream__empty_field_t"].should be_nil
+      solr_doc["solr_rdf__publisher_t"].should == ["publisher1"]
+      solr_doc["solr_rdf__publisher_sort"].should == ["publisher1"]
+      solr_doc["solr_rdf__publisher_display"].should == ["publisher1"]
+      solr_doc["solr_rdf__publisher_facet"].should == ["publisher1"]
+      solr_doc["solr_rdf__based_near_t"].sort.should == ["coverage1", "coverage2"]
+      solr_doc["solr_rdf__based_near_display"].sort.should == ["coverage1", "coverage2"]
+      solr_doc["solr_rdf__based_near_facet"].sort.should == ["coverage1", "coverage2"]
+      solr_doc["solr_rdf__created_sort"].should == ["2009-10-10"]
+      solr_doc["solr_rdf__created_display"].should == ["2009-10-10"]
+      solr_doc["solr_rdf__title_t"].should == ["fake-title"]
+      solr_doc["solr_rdf__title_sort"].should == ["fake-title"]
+      solr_doc["solr_rdf__title_display"].should == ["fake-title"]
+      solr_doc["solr_rdf__related_url_t"].should == ["http://example.org/"]
+      solr_doc["solr_rdf__empty_field_t"].should be_nil
 
       #should NOT have these
-      solr_doc["my_datastream__narrator"].should be_nil
-      solr_doc["my_datastream__empty_field"].should be_nil
-      solr_doc["my_datastream__creator"].should be_nil
+      solr_doc["solr_rdf__narrator"].should be_nil
+      solr_doc["solr_rdf__empty_field"].should be_nil
+      solr_doc["solr_rdf__creator"].should be_nil
     end
 
     describe "with an actual object" do
@@ -233,16 +229,16 @@ describe ActiveFedora::NtriplesRDFDatastream do
       describe ".to_solr()" do
         it "should return the right fields" do
           @obj.to_solr.keys.count.should == 13
-          @obj.to_solr.keys.should include("my_datastream__related_url_t", "my_datastream__publisher_t", "my_datastream__publisher_sort",
-                "my_datastream__publisher_display", "my_datastream__publisher_facet", "my_datastream__created_sort",
-                "my_datastream__created_display", "my_datastream__title_t", "my_datastream__title_sort", "my_datastream__title_display",
-                "my_datastream__based_near_t", "my_datastream__based_near_facet", "my_datastream__based_near_display")
+          @obj.to_solr.keys.should include("solr_rdf__related_url_t", "solr_rdf__publisher_t", "solr_rdf__publisher_sort",
+                "solr_rdf__publisher_display", "solr_rdf__publisher_facet", "solr_rdf__created_sort",
+                "solr_rdf__created_display", "solr_rdf__title_t", "solr_rdf__title_sort", "solr_rdf__title_display",
+                "solr_rdf__based_near_t", "solr_rdf__based_near_facet", "solr_rdf__based_near_display")
 
         end
 
         it "should return the right values" do
-          @obj.to_solr["my_datastream__related_url_t"].should == ["http://example.org/blogtastic/"]
-          @obj.to_solr["my_datastream__based_near_t"].should == ["Tacoma, WA","Renton, WA"]
+          @obj.to_solr["solr_rdf__related_url_t"].should == ["http://example.org/blogtastic/"]
+          @obj.to_solr["solr_rdf__based_near_t"].should == ["Tacoma, WA","Renton, WA"]
         end
       end
     end
