@@ -44,8 +44,8 @@ module ActiveFedora
 
       delete_predicate(subject, predicate)
       Array(values).each do |arg|
-        if arg.respond_to?(:subject) # an RdfObject
-          graph.insert([subject, predicate, arg.subject ])
+        if arg.respond_to?(:rdf_subject) # an RdfObject
+          graph.insert([subject, predicate, arg.rdf_subject ])
         else
           arg = arg.to_s if arg.kind_of? RDF::Literal
           next if arg.kind_of?(String) && arg.empty?
@@ -112,23 +112,9 @@ module ActiveFedora
 
     def method_missing(name, *args)
       if (md = /^([^=]+)=$/.match(name.to_s)) && pred = find_predicate(md[1])
-        set_value(rdf_subject, pred, *args)  
+          set_value(rdf_subject, pred, *args)  
       elsif pred = find_predicate(name)
-        klass = target_class(pred)
-        if klass
-          # Find the nodes for rdf_subject / pred and return as a term_proxy
-          if query(rdf_subject, pred).empty?
-            bnode = RDF::Node.new
-            graph.insert([rdf_subject, pred, bnode])
-
-            TermProxy.new(self, bnode, pred, config_for_term_or_uri(pred))
-          else
-            get_values(rdf_subject, pred)
-          end
-        else
           get_values(rdf_subject, pred)
-        end
-        
       else 
         super
       end

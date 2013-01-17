@@ -64,10 +64,19 @@ END
       ds.parts.first.label.should == ["Alternator"]
     end
 
-    it "should build complex objects" do
+    it "should build complex objects when a parent node doesn't exist" do
       part = ds.parts.build
       part.should be_kind_of SpecDatastream::Component
       part.label = "Wheel bearing"
+      ds.parts.first.label.should == ['Wheel bearing']
+    end
+
+    it "should build complex objects when a parent node exists" do
+      ds.parts  #this creates a parts node, but it shouldn't
+      part = ds.parts.build
+      part.should be_kind_of SpecDatastream::Component
+      part.label = "Wheel bearing"
+      ds.parts.first.label.should == ['Wheel bearing']
     end
   end
 

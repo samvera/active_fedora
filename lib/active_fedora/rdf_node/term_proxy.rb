@@ -16,7 +16,9 @@ module ActiveFedora
       end
 
       def build
-        graph.target_class(predicate).new(graph.graph, subject)
+        new_subject = RDF::Node.new
+        graph.graph.insert([subject, predicate, new_subject])
+        graph.target_class(predicate).new(graph.graph, new_subject)
       end
 
       def <<(*values)
