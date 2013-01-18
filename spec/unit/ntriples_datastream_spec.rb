@@ -94,6 +94,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
 
+    after do
+      Object.send(:remove_const, :MyDatastream)
+    end
+
     it "should have fields" do
       @subject.title.should == ["Title of datastream"]
     end
@@ -152,6 +156,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
       end
       @subject = MyDatastream.new(@inner_object, 'solr_rdf')
       @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
+    end
+    after(:all) do
+      Object.send(:remove_const, :MyDatastream)
     end
     before(:each) do  
       @subject.stub(:pid => 'test:1')

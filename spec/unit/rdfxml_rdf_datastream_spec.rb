@@ -17,7 +17,6 @@ describe ActiveFedora::RdfxmlRDFDatastream do
     it "should save and reload" do
       @subject.publisher = ["St. Martin's Press"]
       @subject.serialize.should =~ /<rdf:RDF/
-      puts @subject.content
     end
   end
 
