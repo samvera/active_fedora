@@ -4,7 +4,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "an instance with content" do
     before do 
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
         map_predicates do |map|
           map.created(:in => RDF::DC)
           map.title(:in => RDF::DC)
@@ -14,21 +13,11 @@ describe ActiveFedora::NtriplesRDFDatastream do
           map.related_url(:to => "seeAlso", :in => RDF::RDFS)
         end
       end
-      class Foo < ActiveFedora::Base
-        has_metadata :name => "descMetadata", :type => MyDatastream
-        delegate :created, :to => :descMetadata
-        delegate :title, :to => :descMetadata
-        delegate :publisher, :to => :descMetadata
-        delegate :based_near, :to => :descMetadata
-        delegate :related_url, :to => :descMetadata
-      end
-      @object = Foo.new(:pid => 'test:1')
-      @subject = @object.descMetadata
+      @subject = MyDatastream.new(stub('inner object', :pid=>'test:1', :new? =>true), 'descMetadata')
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
-      @object.save
     end
     after do
-      @object.delete
+      Object.send(:remove_const, :MyDatastream)
     end
     it "should have a subject" do
       @subject.rdf_subject.should == "info:fedora/test:1"
@@ -50,10 +39,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.related_url.should == ["http://google.com/"]
     end
 
-    it "should delegate as_json to the fields" do
-      @subject.title.as_json.should == ["Title of work"]
-      @subject.title.to_json.should == "\[\"Title of work\"\]"
-    end
 
     it "should return fields that are not TermProxies" do
       @subject.created.should be_kind_of Array
@@ -82,23 +67,18 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
   describe "some dummy instances" do
     before do
-      class MyFoobarRDFDatastream < ActiveFedora::NtriplesRDFDatastream
-      end
-      class MyFoobarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
-      end
+      @one = ActiveFedora::RDFDatastream.new('fakepid', 'myFoobar')
+      @two = ActiveFedora::RDFDatastream.new('fakepid', 'myQuix')
     end
     it "should generate predictable prexies" do
-      MyFoobarRDFDatastream.prefix("baz").should == :my_foobar__baz
-    end
-    it "should generate prefixes case-insensitively" do
-      MyFoobarRDFDatastream.prefix("quux").should == MyFoobarRdfDatastream.prefix("quux")
+      @one .prefix("baz").should == :my_foobar__baz
+      @two.prefix("baz").should == :my_quix__baz
     end
   end
 
   describe "an instance with a custom subject" do
     before do 
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
         rdf_subject { |ds| "info:fedora/#{ds.pid}/content" }
         map_predicates do |map|
           map.created(:in => RDF::DC)
@@ -114,6 +94,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
 
+    after do
+      Object.send(:remove_const, :MyDatastream)
+    end
+
     it "should have fields" do
       @subject.title.should == ["Title of datastream"]
     end
@@ -126,7 +110,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "a new instance" do
     before(:each) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        register_vocabularies RDF::DC
         map_predicates do |map|
           map.publisher(:in => RDF::DC)
         end
@@ -149,7 +132,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "solr integration" do
     before(:all) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
         map_predicates do |map|
           map.created(:in => RDF::DC) do |index| 
             index.as :sortable, :displayable
@@ -175,84 +157,43 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject = MyDatastream.new(@inner_object, 'solr_rdf')
       @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
     end
+    after(:all) do
+      Object.send(:remove_const, :MyDatastream)
+    end
     before(:each) do  
       @subject.stub(:pid => 'test:1')
-      @subject.stub(:new? => false)
-      @sample_fields = {:my_datastream__publisher => {:values => ["publisher1"], :type => :string, :behaviors => [:facetable, :sortable, :searchable, :displayable]}, 
-        :my_datastream__based_near => {:values => ["coverage1", "coverage2"], :type => :text, :behaviors => [:displayable, :facetable, :searchable]}, 
-        :my_datastream__created => {:values => "fake-date", :type => :date, :behaviors => [:sortable, :displayable]},
-        :my_datastream__title => {:values => "fake-title", :type => :text, :behaviors => [:searchable, :displayable, :sortable]},
-        :my_datastream__related_url => {:values => "http://example.org/", :type =>:string, :behaviors => [:searchable]},
-        :my_datastream__empty_field => {:values => [], :type => :string, :behaviors => [:searchable]}
-      } 
-    end
-    after(:all) do
-      # Revert to default mappings after running tests
-      ActiveFedora::SolrService.load_mappings
     end
     it "should provide .to_solr and return a SolrDocument" do
       @subject.should respond_to(:to_solr)
       @subject.to_solr.should be_kind_of(Hash)
     end
-    it "should provide .fields and return a Hash" do
-      @subject.should respond_to(:fields)
-      @subject.fields.should be_kind_of(Hash)
-    end   
     it "should optionally allow you to provide the Solr::Document to add fields to and return that document when done" do
       doc = Hash.new
       @subject.to_solr(doc).should == doc
     end
     it "should iterate through @fields hash" do
-      @subject.should_receive(:fields).and_return(@sample_fields)
       solr_doc = @subject.to_solr
-      solr_doc["my_datastream__publisher_t"].should == ["publisher1"]
-      solr_doc["my_datastream__publisher_sort"].should == ["publisher1"]
-      solr_doc["my_datastream__publisher_display"].should == ["publisher1"]
-      solr_doc["my_datastream__publisher_facet"].should == ["publisher1"]
-      solr_doc["my_datastream__based_near_t"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["my_datastream__based_near_display"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["my_datastream__based_near_facet"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["my_datastream__created_sort"].should == ["fake-date"]
-      solr_doc["my_datastream__created_display"].should == ["fake-date"]
-      solr_doc["my_datastream__title_t"].should == ["fake-title"]
-      solr_doc["my_datastream__title_sort"].should == ["fake-title"]
-      solr_doc["my_datastream__title_display"].should == ["fake-title"]
-      solr_doc["my_datastream__related_url_t"].should == ["http://example.org/"]
-      solr_doc["my_datastream__empty_field_t"].should be_nil
-    end
-    it 'should append create keys in format field_name + _ + field_type' do
-      @subject.stub(:fields).and_return(@sample_fields)
-      
-      #should have these            
-      @subject.to_solr["my_datastream__publisher_t"].should_not be_nil
-      @subject.to_solr["my_datastream__based_near_t"].should_not be_nil
-      @subject.to_solr["my_datastream__title_t"].should_not be_nil
-      @subject.to_solr["my_datastream__related_url_t"].should_not be_nil
+      solr_doc["solr_rdf__publisher_t"].should == ["publisher1"]
+      solr_doc["solr_rdf__publisher_sort"].should == ["publisher1"]
+      solr_doc["solr_rdf__publisher_display"].should == ["publisher1"]
+      solr_doc["solr_rdf__publisher_facet"].should == ["publisher1"]
+      solr_doc["solr_rdf__based_near_t"].sort.should == ["coverage1", "coverage2"]
+      solr_doc["solr_rdf__based_near_display"].sort.should == ["coverage1", "coverage2"]
+      solr_doc["solr_rdf__based_near_facet"].sort.should == ["coverage1", "coverage2"]
+      solr_doc["solr_rdf__created_sort"].should == ["2009-10-10"]
+      solr_doc["solr_rdf__created_display"].should == ["2009-10-10"]
+      solr_doc["solr_rdf__title_t"].should == ["fake-title"]
+      solr_doc["solr_rdf__title_sort"].should == ["fake-title"]
+      solr_doc["solr_rdf__title_display"].should == ["fake-title"]
+      solr_doc["solr_rdf__related_url_t"].should == ["http://example.org/"]
+      solr_doc["solr_rdf__empty_field_t"].should be_nil
 
       #should NOT have these
-      @subject.to_solr["my_datastream__narrator"].should be_nil
-      @subject.to_solr["my_datastream__empty_field"].should be_nil
-      @subject.to_solr["my_datastream__creator"].should be_nil
+      solr_doc["solr_rdf__narrator"].should be_nil
+      solr_doc["solr_rdf__empty_field"].should be_nil
+      solr_doc["solr_rdf__creator"].should be_nil
     end
-    it "should use Solr mappings to generate field names" do
-      ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
-      @subject.stub(:fields).and_return(@sample_fields)
-      solr_doc =  @subject.to_solr
 
-      #should have these            
-      solr_doc["my_datastream__publisher_field"].should == ["publisher1"]
-      solr_doc["my_datastream__based_near_field"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["my_datastream__created_display"].should == ["fake-date"]
-      solr_doc["my_datastream__title_field"].should == ["fake-title"]
-        
-      solr_doc["my_datastream__title_t"].should be_nil
-      solr_doc["my_datastream__publisher_t"].should be_nil
-      solr_doc["my_datastream__based_near_t"].should be_nil
-      solr_doc["my_datastream__created_dt"].should be_nil
-      
-      # Reload default mappings
-      ActiveFedora::SolrService.load_mappings
-    end
     describe "with an actual object" do
       before(:each) do
         class Foo < ActiveFedora::Base
@@ -278,75 +219,33 @@ describe ActiveFedora::NtriplesRDFDatastream do
         @obj.save
       end
 
-      it "should save content properly upon save" do
-        foo = Foo.new(:pid => 'test:1')
-        foo.title = 'Hamlet'
-        foo.save
-        foo.title.should == ['Hamlet']
-        foo.descMetadata.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
-        foo.save
-        foo.title.should == ['Title of work']
-      end
       describe ".fields()" do
-        it "should return the right # of fields" do
-          @obj.fields.keys.count.should == 5
-        end
         it "should return the right fields" do
-          @obj.fields.keys.should include(:my_datastream__related_url)
-          @obj.fields.keys.should include(:my_datastream__publisher)
-          @obj.fields.keys.should include(:my_datastream__created)
-          @obj.fields.keys.should include(:my_datastream__title)
-          @obj.fields.keys.should include(:my_datastream__based_near)
+          @obj.send(:fields).keys.should == [:created, :title, :publisher, :based_near, :related_url]
         end
         it "should return the right values" do
-          @obj.fields[:my_datastream__related_url][:values].should == ["http://example.org/blogtastic/"]
+          fields = @obj.send(:fields)
+          fields[:related_url][:values].should == ["http://example.org/blogtastic/"]
+          fields[:based_near][:values].should == ["Tacoma, WA", "Renton, WA"]
         end
         it "should return the right type information" do
-          @obj.fields[:my_datastream__created][:type].should == :date
-        end
-        it "should return multi-value fields as expected" do
-          @obj.fields[:my_datastream__based_near][:values].count.should == 2
-          @obj.fields[:my_datastream__based_near][:values].should include("Tacoma, WA")
-          @obj.fields[:my_datastream__based_near][:values].should include("Renton, WA")
-        end
-        it "should solrize even when the object is not new" do
-          foo = Foo.new
-          foo.should_receive(:update_index).once
-          foo.title = "title1"
-          foo.save
-          foo = Foo.find(foo.pid)
-          foo.should_receive(:update_index).once
-          foo.publisher = "Allah2"
-          foo.title = "The Work2"
-          foo.save  
+          fields = @obj.send(:fields)
+          fields[:created][:type].should == :date
         end
       end
       describe ".to_solr()" do
-        it "should return the right # of fields" do
-          @obj.to_solr.keys.count.should == 13
-        end
         it "should return the right fields" do
-          @obj.to_solr.keys.should include("my_datastream__related_url_t")
-          @obj.to_solr.keys.should include("my_datastream__publisher_t")
-          @obj.to_solr.keys.should include("my_datastream__publisher_sort")
-          @obj.to_solr.keys.should include("my_datastream__publisher_display")
-          @obj.to_solr.keys.should include("my_datastream__publisher_facet")
-          @obj.to_solr.keys.should include("my_datastream__created_sort")
-          @obj.to_solr.keys.should include("my_datastream__created_display")
-          @obj.to_solr.keys.should include("my_datastream__title_t")
-          @obj.to_solr.keys.should include("my_datastream__title_sort")
-          @obj.to_solr.keys.should include("my_datastream__title_display")
-          @obj.to_solr.keys.should include("my_datastream__based_near_t")
-          @obj.to_solr.keys.should include("my_datastream__based_near_facet")
-          @obj.to_solr.keys.should include("my_datastream__based_near_display")
+          @obj.to_solr.keys.count.should == 13
+          @obj.to_solr.keys.should include("solr_rdf__related_url_t", "solr_rdf__publisher_t", "solr_rdf__publisher_sort",
+                "solr_rdf__publisher_display", "solr_rdf__publisher_facet", "solr_rdf__created_sort",
+                "solr_rdf__created_display", "solr_rdf__title_t", "solr_rdf__title_sort", "solr_rdf__title_display",
+                "solr_rdf__based_near_t", "solr_rdf__based_near_facet", "solr_rdf__based_near_display")
+
         end
+
         it "should return the right values" do
-          @obj.to_solr["my_datastream__related_url_t"].should == ["http://example.org/blogtastic/"]
-        end
-        it "should return multi-value fields as expected" do
-          @obj.to_solr["my_datastream__based_near_t"].count.should == 2
-          @obj.to_solr["my_datastream__based_near_t"].should include("Tacoma, WA")
-          @obj.to_solr["my_datastream__based_near_t"].should include("Renton, WA")
+          @obj.to_solr["solr_rdf__related_url_t"].should == ["http://example.org/blogtastic/"]
+          @obj.to_solr["solr_rdf__based_near_t"].should == ["Tacoma, WA","Renton, WA"]
         end
       end
     end

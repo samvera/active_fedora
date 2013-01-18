@@ -4,11 +4,10 @@ module ActiveFedora
   class Datastream < Rubydora::Datastream
     extend Deprecation
     attr_writer :digital_object
-    attr_accessor :last_modified, :fields
+    attr_accessor :last_modified
 
     def initialize(digital_object=nil, dsid=nil, options={})
       ## When you use the versions feature of rubydora (0.5.x), you need to have a 3 argument constructor
-      self.fields={}
       super
     end
 

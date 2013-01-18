@@ -46,6 +46,7 @@ module ActiveFedora
     #     url: http://127.0.0.1:8983/fedora2
     #
 
+    include Solrizer::FieldNameMapper
     attr_accessor :config_env
     attr_reader :config_options, :fedora_config_path, :solr_config_path
 
@@ -100,6 +101,7 @@ module ActiveFedora
       
       load_fedora_config
       load_solr_config
+      load_solrizer_config
       @config_loaded = true
     end
 
@@ -148,6 +150,20 @@ module ActiveFedora
       @solr_config = {:url=> get_solr_url(config[ActiveFedora.environment.to_sym].symbolize_keys)}
     end
 
+    def load_solrizer_config
+      if solrizer_config_path
+        logger.warn "loading_solrizer_config at #{solrizer_config_path}, this overwrites the default field mapper class."
+        ActiveFedora::SolrService.load_mappings 
+      end
+    end
+
+    def solrizer_config_path
+      begin
+        get_config_path('solr_mappings')
+      rescue ActiveFedora::ConfigurationError
+      end
+    end
+
     # Given the solr_config that's been loaded for this environment, 
     # determine which solr url to use
     def get_solr_url(solr_config)
@@ -194,9 +210,12 @@ module ActiveFedora
     
       # Last choice, check for the default config file
       config_path = File.join(ActiveFedora.root, "config", "#{config_type}.yml")
-      logger.warn "Using the default #{config_type}.yml that comes with active-fedora.  If you want to override this, pass the path to #{config_type}.yml to ActiveFedora - ie. ActiveFedora.init(:#{config_type}_config_path => '/path/to/#{config_type}.yml') - or set Rails.root and put #{config_type}.yml into \#{Rails.root}/config."
-      return config_path if File.file? config_path
-      raise ConfigurationError "Couldn't load #{config_type} config file!"
+      if File.file? config_path
+        logger.warn "Using the default #{config_type}.yml that comes with active-fedora.  If you want to override this, pass the path to #{config_type}.yml to ActiveFedora - ie. ActiveFedora.init(:#{config_type}_config_path => '/path/to/#{config_type}.yml') - or set Rails.root and put #{config_type}.yml into \#{Rails.root}/config."
+        return config_path
+      else
+        raise ConfigurationError, "Couldn't load #{config_type} config file!"
+      end
     end
   
     # Checks the existing fedora_config.path to see if there is a solr.yml there

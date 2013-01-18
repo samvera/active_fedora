@@ -1,4 +1,3 @@
-require "solrizer"
 require 'rsolr'
 
 module ActiveFedora
@@ -10,7 +9,6 @@ module ActiveFedora
     attr_reader :conn
 
     def self.register(host=nil, args={})
-      load_mappings
       Thread.current[:solr_service]=self.new(host, args)
     end
 

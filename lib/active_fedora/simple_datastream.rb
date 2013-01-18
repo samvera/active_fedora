@@ -3,6 +3,7 @@ module ActiveFedora
   class SimpleDatastream < OmDatastream
 
     class_attribute :class_fields
+    attr_accessor :fields
     self.class_fields = []
     
     
@@ -16,6 +17,13 @@ module ActiveFedora
       end
     end
     
+
+    #Constructor. this class will call self.field for each DCTERM. In short, all DCTERMS fields will already exist
+    #when this method returns. Each term is marked as a multivalue string.
+    def initialize(digital_object=nil, dsid=nil, options={})
+      super
+      self.fields={}
+    end
 
     # This method generates the various accessor and mutator methods on self for the datastream metadata attributes.
     # each field will have the 2 magic methods:

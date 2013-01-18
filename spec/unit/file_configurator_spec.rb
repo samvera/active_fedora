@@ -145,6 +145,7 @@ describe ActiveFedora::FileConfigurator do
         subject.reset!
       end
       it "should load the file specified in fedora_config_path" do
+        subject.stub(:load_solrizer_config)
         subject.should_receive(:get_config_path).with(:fedora).and_return("/path/to/fedora.yml")
         subject.should_receive(:load_solr_config)
         IO.should_receive(:read).with("/path/to/fedora.yml").and_return("development:\n url: http://devfedora:8983\ntest:\n  url: http://myfedora:8080")
@@ -153,6 +154,7 @@ describe ActiveFedora::FileConfigurator do
       end
 
       it "should allow sharding" do
+        subject.stub(:load_solrizer_config)
         subject.should_receive(:get_config_path).with(:fedora).and_return("/path/to/fedora.yml")
         subject.should_receive(:load_solr_config)
         IO.should_receive(:read).with("/path/to/fedora.yml").and_return("development:\n  url: http://devfedora:8983\ntest:\n- url: http://myfedora:8080\n- url: http://myfedora:8081")
@@ -161,6 +163,7 @@ describe ActiveFedora::FileConfigurator do
       end
 
       it "should parse the file using ERb" do
+        subject.stub(:load_solrizer_config)
         subject.should_receive(:get_config_path).with(:fedora).and_return("/path/to/fedora.yml")
         subject.should_receive(:load_solr_config)
         IO.should_receive(:read).with("/path/to/fedora.yml").and_return("development:\n  url: http://devfedora:<%= 8983 %>\ntest:\n  url: http://myfedora:<%= 8081 %>")
@@ -174,6 +177,7 @@ describe ActiveFedora::FileConfigurator do
         subject.reset!
       end
       it "should load the file specified in solr_config_path" do
+        subject.stub(:load_solrizer_config)
         subject.should_receive(:get_config_path).with(:solr).and_return("/path/to/solr.yml")
         subject.should_receive(:load_fedora_config)
         IO.should_receive(:read).with("/path/to/solr.yml").and_return("development:\n  default:\n    url: http://devsolr:8983\ntest:\n  default:\n    url: http://mysolr:8080")
@@ -182,6 +186,7 @@ describe ActiveFedora::FileConfigurator do
       end
 
       it "should parse the file using ERb" do
+        subject.stub(:load_solrizer_config)
         subject.should_receive(:get_config_path).with(:solr).and_return("/path/to/solr.yml")
         subject.should_receive(:load_fedora_config)
         IO.should_receive(:read).with("/path/to/solr.yml").and_return("development:\n  default:\n    url: http://devsolr:<%= 8983 %>\ntest:\n  default:\n    url: http://mysolr:<%= 8081 %>")
@@ -246,6 +251,7 @@ describe ActiveFedora::FileConfigurator do
       subject.should respond_to(:solr_config_path)
     end
     it "loads a config from the current working directory as a second choice" do
+      subject.stub(:load_solrizer_config)
       Dir.stub(:getwd).and_return(@fake_rails_root)
       subject.init
       subject.get_config_path(:fedora).should eql("#{@fake_rails_root}/config/fedora.yml")
@@ -253,6 +259,7 @@ describe ActiveFedora::FileConfigurator do
     end
     it "loads the config that ships with this gem as a last choice" do
       Dir.stub(:getwd).and_return("/fake/path")
+      subject.stub(:load_solrizer_config)
       logger.should_receive(:warn).with("Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml to ActiveFedora - ie. ActiveFedora.init(:fedora_config_path => '/path/to/fedora.yml') - or set Rails.root and put fedora.yml into \#{Rails.root}/config.").exactly(3).times
       subject.init
       expected_config = File.expand_path(File.join(File.dirname(__FILE__), "..", "..", "config"))
@@ -276,6 +283,7 @@ describe ActiveFedora::FileConfigurator do
       end
       
       it "loads a config from Rails.root as a first choice" do
+        subject.stub(:load_solrizer_config)
         subject.init
         subject.get_config_path(:fedora).should eql("#{Rails.root}/config/fedora.yml")
         subject.solr_config_path.should eql("#{Rails.root}/config/solr.yml")

@@ -1,13 +1,14 @@
 require "loggable"
 require 'active_support'
-require 'active_fedora/solr_service'
+require "solrizer"
+require 'active_fedora/file_configurator'
 require 'active_fedora/rubydora_connection'
 require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/object'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'rdf'
 
-SOLR_DOCUMENT_ID = ActiveFedora::SolrService.id_field unless defined?(SOLR_DOCUMENT_ID)
+SOLR_DOCUMENT_ID = ActiveFedora::FileConfigurator.id_field unless defined?(SOLR_DOCUMENT_ID)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 
 module ActiveFedora #:nodoc:
@@ -52,12 +53,15 @@ module ActiveFedora #:nodoc:
     autoload :QualifiedDublinCoreDatastream
     autoload :Querying
     autoload :RDFDatastream
+    autoload :RdfNode
+    autoload :RdfObject
     autoload :RdfxmlRDFDatastream
     autoload :Relation
     autoload :RelsExtDatastream
     autoload :ServiceDefinitions
     autoload :SemanticNode
     autoload :SimpleDatastream
+    autoload :SolrService
     autoload :NestedAttributes
     autoload :FixtureLoader
     autoload :FixtureExporter

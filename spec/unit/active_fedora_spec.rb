@@ -92,6 +92,8 @@ describe ActiveFedora do
 
         describe "with no explicit config path" do
           it "should look for the file in the path defined at Rails.root" do
+            ActiveFedora::SolrService.stub(:load_mappings) #necessary or else it will load the solrizer config and it breaks other tests in the suite.
+            
             stub_rails(:root=>File.join(File.dirname(__FILE__),"../fixtures/rails_root"))
             ActiveFedora.init()
             ActiveFedora.config.credentials[:url].should == "http://testhost.com:8983/fedora"

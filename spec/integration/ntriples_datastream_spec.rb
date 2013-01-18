@@ -3,9 +3,14 @@ require 'spec_helper'
 describe ActiveFedora::NtriplesRDFDatastream do
   before do
     class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-      register_vocabularies RDF::DC, RDF::FOAF, RDF::RDFS
       map_predicates do |map|
-        map.title(:in => RDF::DC)
+        map.title(:in => RDF::DC) do |index|
+          index.as :searchable, :facetable, :displayable
+        end
+        map.date_uploaded(:to => "dateSubmitted", :in => RDF::DC) do |index|
+          index.type :date
+          index.as :searchable, :displayable, :sortable
+        end
         map.part(:to => "hasPart", :in => RDF::DC)
         map.based_near(:in => RDF::FOAF)
         map.related_url(:to => "seeAlso", :in => RDF::RDFS)
@@ -13,13 +18,15 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
     class RdfTest < ActiveFedora::Base 
       has_metadata :name=>'rdf', :type=>MyDatastream
-      delegate :based_near, :to=>'rdf'
-      delegate :related_url, :to=>'rdf'
-      delegate :part, :to=>'rdf'
+      delegate_to 'rdf', [:based_near, :related_url, :part, :date_uploaded]
       delegate :title, :to=>'rdf', :unique=>true
     end
     @subject = RdfTest.new
   end
+
+  subject {
+    @subject
+  }
 
   after do
     Object.send(:remove_const, :RdfTest)
@@ -28,6 +35,48 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
   it "should not try to send an empty datastream" do
     @subject.save
+  end
+
+  it "should save content properly upon save" do
+    foo = RdfTest.new(:pid=>'test:1') #Pid needs to match the subject in the loaded file
+    foo.title = 'Hamlet'
+    foo.save
+    foo.title.should == 'Hamlet'
+    foo.rdf.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
+    foo.save
+    foo.title.should == 'Title of work'
+  end
+
+  it "should delegate as_json to the fields" do
+    @subject = RdfTest.new(title: "Title of work")
+    @subject.rdf.title.as_json.should == ["Title of work"]
+    @subject.rdf.title.to_json.should == "\[\"Title of work\"\]"
+  end
+
+  it "should solrize even when the object is not new" do
+    foo = RdfTest.new
+    foo.should_receive(:update_index).once
+    foo.title = "title1"
+    foo.save
+    foo = RdfTest.find(foo.pid)
+    foo.should_receive(:update_index).once
+    foo.title = "The Work2"
+    foo.save  
+  end
+
+  it "should serialize dates" do
+    subject.date_uploaded = Date.parse('2012-11-02')
+    subject.date_uploaded.first.should be_kind_of Date
+    solr_document = subject.to_solr
+    solr_document["rdf__date_uploaded_dt"].should == ['2012-11-02T00:00:00Z']
+  end
+
+  it "should produce a solr document" do
+    @subject = RdfTest.new(title: "War and Peace")
+    solr_document = @subject.to_solr
+    solr_document["rdf__title_display"].should == ["War and Peace"]
+    solr_document["rdf__title_facet"].should == ["War and Peace"]
+    solr_document["rdf__title_t"].should == ["War and Peace"]
   end
 
   it "should set and recall values" do
@@ -149,7 +198,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "term proxy methods" do
     before(:each) do
       class TitleDatastream < ActiveFedora::NtriplesRDFDatastream
-        register_vocabularies RDF::DC
         map_predicates { |map| map.title(:in => RDF::DC) }
       end
       class Foobar < ActiveFedora::Base 

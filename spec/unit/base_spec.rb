@@ -384,11 +384,6 @@ describe ActiveFedora::Base do
     end
 
     describe ".to_solr" do
-      after(:all) do
-        # Revert to default mappings after running tests
-        ActiveFedora::SolrService.load_mappings
-      end
-      
       it "should provide .to_solr" do
         @test_object.should respond_to(:to_solr)
       end
@@ -419,26 +414,30 @@ describe ActiveFedora::Base do
         solr_doc["active_fedora_model_s"].should eql("FooHistory")
       end
 
-      it "should use mappings.yml to decide names of solr fields" do      
-        cdate = "2008-07-02T05:09:42Z"
-        mdate = "2009-07-07T23:37:18Z"
-        @test_object.stub(:create_date).and_return(cdate)
-        @test_object.stub(:modified_date).and_return(mdate)
-        solr_doc = @test_object.to_solr
-        solr_doc["system_create_dt"].should eql(cdate)
-        solr_doc["system_modified_dt"].should eql(mdate)
-        solr_doc[:id].should eql("#{@test_object.pid}")
-        solr_doc["active_fedora_model_s"].should eql(@test_object.class.inspect)
-        
-        ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
-        solr_doc = @test_object.to_solr
-        [:system_create_dt, :system_modified_dt, :active_fedora_model_s].each do |fn|
-          solr_doc[fn].should == nil
+      describe "using mappings.yml" do
+        before do
+          @old_mapper = ActiveFedora::SolrService.default_field_mapper.dup
+          ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
         end
-        solr_doc["system_create_date"].should eql(cdate)
-        solr_doc["system_modified_date"].should eql(mdate)
-        solr_doc[:id].should eql("#{@test_object.pid}")
-        solr_doc["active_fedora_model_field"].should eql(@test_object.class.inspect)
+        after do
+          ActiveFedora::SolrService.default_field_mapper = @old_mapper
+        end
+
+        it "should decide names of solr fields" do      
+          cdate = "2008-07-02T05:09:42Z"
+          mdate = "2009-07-07T23:37:18Z"
+          @test_object.stub(:create_date).and_return(cdate)
+          @test_object.stub(:modified_date).and_return(mdate)
+          
+          solr_doc = @test_object.to_solr
+          [:system_create_dt, :system_modified_dt, :active_fedora_model_s].each do |fn|
+            solr_doc[fn].should == nil
+          end
+          solr_doc["system_create_date"].should eql(cdate)
+          solr_doc["system_modified_date"].should eql(mdate)
+          solr_doc[:id].should eql("#{@test_object.pid}")
+          solr_doc["active_fedora_model_field"].should eql(@test_object.class.inspect)
+        end
       end
       
       it "should call .to_solr on all SimpleDatastreams and OmDatastreams, passing the resulting document to solr" do

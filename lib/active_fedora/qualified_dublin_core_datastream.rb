@@ -7,6 +7,7 @@ module ActiveFedora
   #Fields can still be overridden if more specificity is desired (see ActiveFedora::Datastream#fields method).
   class QualifiedDublinCoreDatastream < OmDatastream
 
+    attr_accessor :fields
     class_attribute :class_fields
     self.class_fields = []
     
@@ -31,6 +32,7 @@ module ActiveFedora
     #when this method returns. Each term is marked as a multivalue string.
     def initialize(digital_object=nil, dsid=nil, options={})
       super
+      self.fields={}
       DCTERMS.each do |el|
         field el, :string, :multiple=>true
       end
