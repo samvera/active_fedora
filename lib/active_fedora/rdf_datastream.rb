@@ -16,7 +16,7 @@ module ActiveFedora
       # Register a ruby block that evaluates to the subject of the graph
       # By default, the block returns the current object's pid
       # @yield [ds] 'ds' is the datastream instance
-      # This should override the method in rdf_object, which just creates a b-node by default
+      # This should override the method in RdfObject, which just creates a b-node by default
       def rdf_subject &block
         if block_given?
            return @subject_block = block
