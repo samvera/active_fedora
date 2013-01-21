@@ -3,7 +3,6 @@ require 'rsolr'
 module ActiveFedora
   class SolrService 
     
-    include Solrizer::FieldNameMapper
     include Loggable
     
     attr_reader :conn
@@ -66,6 +65,10 @@ module ActiveFedora
       end
       query = "id:NEVER_USE_THIS_ID" if query.empty? || query == "id:"
       return query
+    end
+
+    def self.solr_name(*args)
+      Solrizer.default_field_mapper.solr_name(*args)
     end
     
     def self.escape_uri_for_query(uri)
