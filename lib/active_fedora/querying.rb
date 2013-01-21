@@ -115,20 +115,26 @@ module ActiveFedora
     def create_query_from_hash(conditions)
       clauses = search_model_clause ?  [search_model_clause] : []
       conditions.each_pair do |key,value|
-        unless value.nil?
-          if value.is_a? Array
-            value.each do |val|
-              clauses << "#{key}:#{quote_for_solr(val)}"  
-            end
-          else
-            key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
-            escaped_value = quote_for_solr(value)
-            clauses << (key.to_s.eql?(SOLR_DOCUMENT_ID) ? "#{key}:#{escaped_value}" : "#{key}:#{escaped_value}")
-          end
-        end
+        clauses << condition_to_clauses(key, value)
       end
       return "*:*" if clauses.empty?
       clauses.compact.join(" AND ")
+    end
+
+    def condition_to_clauses(key, value)
+      unless value.nil?
+        # if the key is a property name, turn it into a solr field
+        if self.delegate_registry.include?(key.to_sym)
+          key = ActiveFedora::SolrService.solr_name(key, :string, :searchable)
+        end
+        if value.is_a? Array
+          value.map { |val| "#{key}:#{quote_for_solr(val)}" }
+        else
+          key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
+          escaped_value = quote_for_solr(value)
+          key.to_s.eql?(SOLR_DOCUMENT_ID) ? "#{key}:#{escaped_value}" : "#{key}:#{escaped_value}"
+        end
+      end
     end
 
     def create_query_from_string(conditions)
