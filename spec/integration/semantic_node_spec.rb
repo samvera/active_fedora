@@ -28,11 +28,11 @@ describe ActiveFedora::SemanticNode do
     class SpecNodeSolrFilterQuery < ActiveFedora::Base
       include ActiveFedora::Relationships
       has_relationship("parts", :is_part_of, :inbound => true)
-      has_relationship("special_parts", :is_part_of, :inbound => true, :solr_fq=>"has_model_s:info\\:fedora\\/afmodel\\:SpecialPart")
+      has_relationship("special_parts", :is_part_of, :inbound => true, :solr_fq=>"#{ActiveFedora::SolrService.solr_name("has_model", :symbol)}:info\\:fedora\\/afmodel\\:SpecialPart")
       has_relationship("containers", :is_member_of)
-      has_relationship("special_containers", :is_member_of, :solr_fq=>"has_model_s:info\\:fedora\\/afmodel\\:SpecialContainer")
+      has_relationship("special_containers", :is_member_of, :solr_fq=>"#{ActiveFedora::SolrService.solr_name("has_model", :symbol)}:info\\:fedora\\/afmodel\\:SpecialContainer")
       has_bidirectional_relationship("bi_containers", :is_member_of, :has_member)
-      has_bidirectional_relationship("bi_special_containers", :is_member_of, :has_member, :solr_fq=>"has_model_s:info\\:fedora\\/afmodel\\:SpecialContainer")
+      has_bidirectional_relationship("bi_special_containers", :is_member_of, :has_member, :solr_fq=>"#{ActiveFedora::SolrService.solr_name("has_model", :symbol)}:info\\:fedora\\/afmodel\\:SpecialContainer")
     end
 
     @test_object = SNSpecModel.new
@@ -100,8 +100,8 @@ describe ActiveFedora::SemanticNode do
     @special_part.add_relationship(:is_part_of, @test_object_query)
     @special_part.save
     
-    @special_container_query = "has_model_s:#{solr_uri("info:fedora/afmodel:SpecialContainer")}"
-    @special_part_query = "has_model_s:#{solr_uri("info:fedora/afmodel:SpecialPart")}"
+    @special_container_query = "#{ActiveFedora::SolrService.solr_name("has_model", :symbol)}:#{solr_uri("info:fedora/afmodel:SpecialContainer")}"
+    @special_part_query = "#{ActiveFedora::SolrService.solr_name("has_model", :symbol)}:#{solr_uri("info:fedora/afmodel:SpecialPart")}"
   end
   
   after(:all) do
@@ -263,17 +263,17 @@ describe ActiveFedora::SemanticNode do
     end
 
     it "should return a solr query for an inbound relationship" do
-      @test_object_query.special_parts_query.should == "#{@test_object_query.relationship_predicates[:inbound]['special_parts']}_s:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_part_query}"
+      @test_object_query.special_parts_query.should == "#{ActiveFedora::SolrService.solr_name(@test_object_query.relationship_predicates[:inbound]['special_parts'], :symbol)}:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_part_query}"
     end
   end
 
   describe "inbound relationship query" do
     it "should return a properly formatted query for a relationship that has a solr filter query defined" do
-      SpecNodeSolrFilterQuery.inbound_relationship_query(@test_object_query.pid,"special_parts").should == "#{@test_object_query.relationship_predicates[:inbound]['special_parts']}_s:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_part_query}"
+      SpecNodeSolrFilterQuery.inbound_relationship_query(@test_object_query.pid,"special_parts").should == "#{ActiveFedora::SolrService.solr_name(@test_object_query.relationship_predicates[:inbound]['special_parts'], :symbol)}:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_part_query}"
     end
 
     it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
-      SpecNodeSolrFilterQuery.inbound_relationship_query(@test_object_query.pid,"parts").should == "is_part_of_s:#{solr_uri(@test_object_query.internal_uri)}"
+      SpecNodeSolrFilterQuery.inbound_relationship_query(@test_object_query.pid,"parts").should == "#{ActiveFedora::SolrService.solr_name('is_part_of', :symbol)}:#{solr_uri(@test_object_query.internal_uri)}"
     end
   end
 
@@ -305,7 +305,7 @@ describe ActiveFedora::SemanticNode do
         expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND #{@special_container_query})"
       end
       expected_string << " OR "
-      expected_string << "(#{@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_container_query})"
+      expected_string << "(#{ActiveFedora::SolrService.solr_name(@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound'], :symbol)}:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_container_query})"
       SpecNodeSolrFilterQuery.bidirectional_relationship_query(@test_object_query.pid,"bi_special_containers",@test_object_query.bi_containers_outbound_ids).should == expected_string
     end
 
@@ -316,7 +316,7 @@ describe ActiveFedora::SemanticNode do
         expected_string << "id:" + id.gsub(/(:)/, '\\:')
       end
       expected_string << " OR "
-      expected_string << "(#{@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{solr_uri(@test_object_query.internal_uri)})"
+      expected_string << "(#{ActiveFedora::SolrService.solr_name(@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound'], :symbol)}:#{solr_uri(@test_object_query.internal_uri)})"
       SpecNodeSolrFilterQuery.bidirectional_relationship_query(@test_object_query.pid,"bi_containers",@test_object_query.bi_containers_outbound_ids).should == expected_string
     end
   end
@@ -427,7 +427,7 @@ describe ActiveFedora::SemanticNode do
         expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND #{@special_container_query})"
       end
       expected_string << " OR "
-      expected_string << "(#{@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound']}_s:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_container_query})"
+      expected_string << "(#{ActiveFedora::SolrService.solr_name(@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound'], :symbol)}:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_container_query})"
       @test_object_query.bi_special_containers_query.should == expected_string
     end
   end

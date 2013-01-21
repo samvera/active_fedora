@@ -398,7 +398,7 @@ module ActiveFedora
       else
         raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
       end
-      klass = if class_str = solr_doc['has_model_s']
+      klass = if class_str = solr_doc[ActiveFedora::SolrService.solr_name('has_model', :symbol)]
         ActiveFedora::SolrService.class_from_solr_document(solr_doc)
       else
         ActiveFedora::Base

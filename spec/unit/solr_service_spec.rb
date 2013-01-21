@@ -45,9 +45,9 @@ describe ActiveFedora::SolrService do
         def self.connection_for_pid(pid)
         end
       end
-      @sample_solr_hits = [{"id"=>"my:_PID1_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
-                            {"id"=>"my:_PID2_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]},
-                            {"id"=>"my:_PID3_", "has_model_s"=>["info:fedora/afmodel:AudioRecord"]}]
+      @sample_solr_hits = [{"id"=>"my:_PID1_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["info:fedora/afmodel:AudioRecord"]},
+                            {"id"=>"my:_PID2_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["info:fedora/afmodel:AudioRecord"]},
+                            {"id"=>"my:_PID3_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["info:fedora/afmodel:AudioRecord"]}]
     end
     it "should use Repository.find to instantiate objects" do
       AudioRecord.should_receive(:find).with("my:_PID1_")

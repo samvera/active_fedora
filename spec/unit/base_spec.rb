@@ -392,18 +392,18 @@ describe ActiveFedora::Base do
         @test_object.should_receive(:create_date).and_return("2012-03-04T03:12:02Z")
         @test_object.should_receive(:modified_date).and_return("2012-03-07T03:12:02Z")
         solr_doc = @test_object.to_solr
-        solr_doc["system_create_dt"].should eql("2012-03-04T03:12:02Z")
-        solr_doc["system_modified_dt"].should eql("2012-03-07T03:12:02Z")
+        solr_doc[ActiveFedora::SolrService.solr_name("system_create", :date, :searchable)].should eql("2012-03-04T03:12:02Z")
+        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :date, :searchable)].should eql("2012-03-07T03:12:02Z")
         solr_doc[:id].should eql("#{@test_object.pid}")
       end
 
       it "should omit base metadata and RELS-EXT if :model_only==true" do
         @test_object.add_relationship(:has_part, "foo", true)
         solr_doc = @test_object.to_solr(Hash.new, :model_only => true)
-        solr_doc["system_create_dt"].should be_nil
-        solr_doc["system_modified_dt"].should be_nil
+        solr_doc[ActiveFedora::SolrService.solr_name("system_create", :date, :searchable)].should be_nil
+        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :date, :searchable)].should be_nil
         solr_doc["id"].should be_nil
-        solr_doc["has_part_s"].should be_nil
+        solr_doc[ActiveFedora::SolrService.solr_name("has_part", :symbol)].should be_nil
       end
       
       it "should add self.class as the :active_fedora_model" do
@@ -411,35 +411,9 @@ describe ActiveFedora::Base do
         stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
         @test_history = FooHistory.new()
         solr_doc = @test_history.to_solr
-        solr_doc["active_fedora_model_s"].should eql("FooHistory")
+        solr_doc[ActiveFedora::SolrService.solr_name("active_fedora_model", :symbol)].should eql("FooHistory")
       end
 
-      describe "using mappings.yml" do
-        before do
-          @old_mapper = ActiveFedora::SolrService.default_field_mapper.dup
-          ActiveFedora::SolrService.load_mappings(File.join(File.dirname(__FILE__), "..", "..", "config", "solr_mappings_af_0.1.yml"))
-        end
-        after do
-          ActiveFedora::SolrService.default_field_mapper = @old_mapper
-        end
-
-        it "should decide names of solr fields" do      
-          cdate = "2008-07-02T05:09:42Z"
-          mdate = "2009-07-07T23:37:18Z"
-          @test_object.stub(:create_date).and_return(cdate)
-          @test_object.stub(:modified_date).and_return(mdate)
-          
-          solr_doc = @test_object.to_solr
-          [:system_create_dt, :system_modified_dt, :active_fedora_model_s].each do |fn|
-            solr_doc[fn].should == nil
-          end
-          solr_doc["system_create_date"].should eql(cdate)
-          solr_doc["system_modified_date"].should eql(mdate)
-          solr_doc[:id].should eql("#{@test_object.pid}")
-          solr_doc["active_fedora_model_field"].should eql(@test_object.class.inspect)
-        end
-      end
-      
       it "should call .to_solr on all SimpleDatastreams and OmDatastreams, passing the resulting document to solr" do
         mock1 = mock("ds1", :to_solr => {})
         mock2 = mock("ds2", :to_solr => {})
@@ -660,10 +634,10 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
 
         @test_object.should_receive(:relationships).and_return(graph)
         solr_doc = @test_object.solrize_relationships
-        solr_doc["is_member_of_s"].should == ["info:fedora/demo:10"]
-        solr_doc["is_part_of_s"].should == ["info:fedora/demo:11"]
-        solr_doc["has_part_s"].should == ["info:fedora/demo:12"]
-        solr_doc["conforms_to_s"].should == ["AnInterface"]
+        solr_doc[ActiveFedora::SolrService.solr_name("is_member_of", :symbol)].should == ["info:fedora/demo:10"]
+        solr_doc[ActiveFedora::SolrService.solr_name("is_part_of", :symbol)].should == ["info:fedora/demo:11"]
+        solr_doc[ActiveFedora::SolrService.solr_name("has_part", :symbol)].should == ["info:fedora/demo:12"]
+        solr_doc[ActiveFedora::SolrService.solr_name("conforms_to", :symbol)].should == ["AnInterface"]
       end
     end
   end

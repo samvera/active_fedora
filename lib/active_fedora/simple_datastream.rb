@@ -48,7 +48,7 @@ module ActiveFedora
     #!! Careful: If you declare two fields that correspond to the same xml node without any qualifiers to differentiate them, 
     #you will end up replicating the values in the underlying datastream, resulting in mysterious dubling, quadrupling, etc. 
     #whenever you edit the field's values.
-    def field(name, datatype=nil, opts={})
+    def field(name, datatype=:string, opts={})
       fields ||= {}
       @fields[name.to_s.to_sym]={:type=>datatype, :values=>[]}.merge(opts)
       # add term to template

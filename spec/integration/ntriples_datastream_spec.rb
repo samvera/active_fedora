@@ -68,15 +68,15 @@ describe ActiveFedora::NtriplesRDFDatastream do
     subject.date_uploaded = Date.parse('2012-11-02')
     subject.date_uploaded.first.should be_kind_of Date
     solr_document = subject.to_solr
-    solr_document["rdf__date_uploaded_dt"].should == ['2012-11-02T00:00:00Z']
+    solr_document[ActiveFedora::SolrService.solr_name('rdf__date_uploaded', :date, :searchable)].should == ['2012-11-02T00:00:00Z']
   end
 
   it "should produce a solr document" do
     @subject = RdfTest.new(title: "War and Peace")
     solr_document = @subject.to_solr
-    solr_document["rdf__title_display"].should == ["War and Peace"]
-    solr_document["rdf__title_facet"].should == ["War and Peace"]
-    solr_document["rdf__title_t"].should == ["War and Peace"]
+    solr_document[ActiveFedora::SolrService.solr_name('rdf__title', :string, :displayable)].should == ["War and Peace"]
+    solr_document[ActiveFedora::SolrService.solr_name('rdf__title', :string, :facetable)].should == ["War and Peace"]
+    solr_document[ActiveFedora::SolrService.solr_name('rdf__title', :string, :searchable)].should == ["War and Peace"]
   end
 
   it "should set and recall values" do

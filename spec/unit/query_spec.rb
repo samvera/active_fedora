@@ -7,7 +7,8 @@ describe ActiveFedora::Base do
       class Basic < ActiveFedora::Base
       end
     end
-    @model_query = "has_model_s:#{solr_uri("info:fedora/afmodel:SpecModel_Basic")}"
+    @model_query = ActiveFedora::SolrService.solr_name("has_model", :symbol) + ":#{solr_uri("info:fedora/afmodel:SpecModel_Basic")}"
+    @sort_query = ActiveFedora::SolrService.solr_name("system_create", :date, :searchable) + ' asc'
   end
   
   after(:all) do
@@ -23,7 +24,7 @@ describe ActiveFedora::Base do
             SpecModel::Basic.should_receive(:find_one).with("changeme:22", nil).and_return("Fake Object2")
             mock_docs = [{"id" => "changeme:30"}, {"id" => "changeme:22"}]
             mock_docs.should_receive(:has_next?).and_return(false)
-            ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => ['system_create_dt asc'], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
+            ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
             SpecModel::Basic.find(:all).should == ["Fake Object1", "Fake Object2"]
           end
         end
@@ -33,7 +34,7 @@ describe ActiveFedora::Base do
             ActiveFedora::Base.should_receive(:find_one).with("changeme:22", nil).and_return("Fake Object2")
             mock_docs = [{"id" => "changeme:30"},{"id" => "changeme:22"}]
             mock_docs.should_receive(:has_next?).and_return(false)
-            ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>'*:*', :qt => 'standard', :sort => ['system_create_dt asc'], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
+            ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>'*:*', :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
             ActiveFedora::Base.find(:all).should == ["Fake Object1", "Fake Object2"]
           end
         end
@@ -71,7 +72,7 @@ describe ActiveFedora::Base do
             rows == 1000 &&
             method == 'select' &&
             hash[:params] &&
-            hash[:params][:sort] == ['system_create_dt asc'] &&
+            hash[:params][:sort] == [@sort_query] &&
             hash[:params][:fl] == 'id' && 
             hash[:params][:q].split(" AND ").include?(@model_query) &&
             hash[:params][:q].split(" AND ").include?("foo:\"bar\"") &&
@@ -88,7 +89,7 @@ describe ActiveFedora::Base do
     it "should query solr for all objects with :active_fedora_model_s of self.class" do
       mock_docs = [{"id" => "changeme:30"},{"id" => "changeme:22"}]
       mock_docs.should_receive(:has_next?).and_return(false)
-      ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => ['system_create_dt asc'], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
+      ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
       
       SpecModel::Basic.should_receive(:find_one).with("changeme:30", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:30'))
       SpecModel::Basic.should_receive(:find_one).with("changeme:22", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:22'))
@@ -108,7 +109,7 @@ describe ActiveFedora::Base do
             rows == 1000 &&
             method == 'select' &&
             hash[:params] &&
-            hash[:params][:sort] == ['system_create_dt asc'] && 
+            hash[:params][:sort] == [@sort_query] && 
             hash[:params][:fl] == 'id' && 
             hash[:params][:q].split(" AND ").include?(@model_query) &&
             hash[:params][:q].split(" AND ").include?("foo:\"bar\"") &&
@@ -132,7 +133,7 @@ describe ActiveFedora::Base do
             rows == 1002 &&
             method == 'select' &&
             hash[:params] &&
-            hash[:params][:sort] == ['system_create_dt asc'] && 
+            hash[:params][:sort] == [@sort_query] && 
             hash[:params][:fl] == 'id' && 
             hash[:params][:q].split(" AND ").include?(@model_query) &&
             hash[:params][:q].split(" AND ").include?("foo:\"bar\"") &&
@@ -196,12 +197,12 @@ describe ActiveFedora::Base do
 
     it "shouldn't use the class if it's called on AF:Base " do
       mock_result = stub('Result')
-      ActiveFedora::SolrService.should_receive(:query).with('baz:"quack"', {:sort => ['system_create_dt asc']}).and_return(mock_result)
+      ActiveFedora::SolrService.should_receive(:query).with('baz:"quack"', {:sort => [@sort_query]}).and_return(mock_result)
       ActiveFedora::Base.find_with_conditions(:baz=>'quack').should == mock_result
     end
     it "should use the query string if it's provided" do
       mock_result = stub('Result')
-      ActiveFedora::SolrService.should_receive(:query).with('chunky:monkey', {:sort => ['system_create_dt asc']}).and_return(mock_result)
+      ActiveFedora::SolrService.should_receive(:query).with('chunky:monkey', {:sort => [@sort_query]}).and_return(mock_result)
       ActiveFedora::Base.find_with_conditions('chunky:monkey').should == mock_result
     end
   end

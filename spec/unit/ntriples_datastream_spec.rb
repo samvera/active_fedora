@@ -173,25 +173,19 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
     it "should iterate through @fields hash" do
       solr_doc = @subject.to_solr
-      solr_doc["solr_rdf__publisher_t"].should == ["publisher1"]
-      solr_doc["solr_rdf__publisher_sort"].should == ["publisher1"]
-      solr_doc["solr_rdf__publisher_display"].should == ["publisher1"]
-      solr_doc["solr_rdf__publisher_facet"].should == ["publisher1"]
-      solr_doc["solr_rdf__based_near_t"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["solr_rdf__based_near_display"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["solr_rdf__based_near_facet"].sort.should == ["coverage1", "coverage2"]
-      solr_doc["solr_rdf__created_sort"].should == ["2009-10-10"]
-      solr_doc["solr_rdf__created_display"].should == ["2009-10-10"]
-      solr_doc["solr_rdf__title_t"].should == ["fake-title"]
-      solr_doc["solr_rdf__title_sort"].should == ["fake-title"]
-      solr_doc["solr_rdf__title_display"].should == ["fake-title"]
-      solr_doc["solr_rdf__related_url_t"].should == ["http://example.org/"]
-      solr_doc["solr_rdf__empty_field_t"].should be_nil
-
-      #should NOT have these
-      solr_doc["solr_rdf__narrator"].should be_nil
-      solr_doc["solr_rdf__empty_field"].should be_nil
-      solr_doc["solr_rdf__creator"].should be_nil
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :string, :searchable)].should == ["publisher1"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :string, :sortable)].should == ["publisher1"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :string, :displayable)].should == ["publisher1"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :string, :facetable)].should == ["publisher1"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :string, :searchable)].should == ["coverage1", "coverage2"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :string, :displayable)].should == ["coverage1", "coverage2"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :string, :facetable)].should == ["coverage1", "coverage2"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__created", :string, :sortable)].should == ["2009-10-10"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__created", :string, :displayable)].should == ["2009-10-10"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__title", :string, :searchable)].should == ["fake-title"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__title", :string, :sortable)].should == ["fake-title"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__title", :string, :displayable)].should == ["fake-title"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__related_url", :string, :searchable)].should == ["http://example.org/"]
     end
 
     describe "with an actual object" do
@@ -235,17 +229,25 @@ describe ActiveFedora::NtriplesRDFDatastream do
       end
       describe ".to_solr()" do
         it "should return the right fields" do
-          @obj.to_solr.keys.count.should == 13
-          @obj.to_solr.keys.should include("solr_rdf__related_url_t", "solr_rdf__publisher_t", "solr_rdf__publisher_sort",
-                "solr_rdf__publisher_display", "solr_rdf__publisher_facet", "solr_rdf__created_sort",
-                "solr_rdf__created_display", "solr_rdf__title_t", "solr_rdf__title_sort", "solr_rdf__title_display",
-                "solr_rdf__based_near_t", "solr_rdf__based_near_facet", "solr_rdf__based_near_display")
+          @obj.to_solr.keys.should include(ActiveFedora::SolrService.solr_name("solr_rdf__related_url", :string, :searchable),
+                ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :string, :searchable),
+                ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :string, :sortable),
+                ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :string, :displayable),
+                ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :string, :facetable), 
+                ActiveFedora::SolrService.solr_name("solr_rdf__created", :string, :sortable),
+                ActiveFedora::SolrService.solr_name("solr_rdf__created", :string, :displayable), 
+                ActiveFedora::SolrService.solr_name("solr_rdf__title", :string, :searchable),
+                ActiveFedora::SolrService.solr_name("solr_rdf__title", :string, :sortable),
+                ActiveFedora::SolrService.solr_name("solr_rdf__title", :string, :displayable),
+                ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :string, :searchable),
+                ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :string, :facetable),
+                ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :string, :displayable))
 
         end
 
         it "should return the right values" do
-          @obj.to_solr["solr_rdf__related_url_t"].should == ["http://example.org/blogtastic/"]
-          @obj.to_solr["solr_rdf__based_near_t"].should == ["Tacoma, WA","Renton, WA"]
+          @obj.to_solr[ActiveFedora::SolrService.solr_name("solr_rdf__related_url", :string, :searchable)].should == ["http://example.org/blogtastic/"]
+          @obj.to_solr[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :string, :searchable)].should == ["Tacoma, WA","Renton, WA"]
         end
       end
     end

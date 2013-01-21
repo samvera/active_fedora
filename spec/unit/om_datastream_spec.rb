@@ -9,7 +9,13 @@ describe ActiveFedora::OmDatastream do
                       :empty_field => {:values => {}}
                       } 
     @sample_raw_xml = "<foo><xmlelement/></foo>"
-    @solr_doc = {"id"=>"hydrange_article1","name_role_roleTerm_t"=>["creator","submitter","teacher"],"name_0_role_t"=>"\r\ncreator\r\nsubmitter\r\n","name_1_role_t"=>"\r\n teacher \r\n","name_0_role_0_roleTerm_t"=>"creator","name_0_role_1_roleTerm_t"=>"submitter","name_1_role_0_roleTerm_t"=>["teacher"]}
+    @solr_doc = {"id"=>"hydrange_article1",
+      ActiveFedora::SolrService.solr_name("name_role_roleTerm", :string, :searchable) =>["creator","submitter","teacher"],
+      ActiveFedora::SolrService.solr_name("name_0_role", :string, :searchable)=>"\r\ncreator\r\nsubmitter\r\n",
+      ActiveFedora::SolrService.solr_name("name_1_role", :string, :searchable)=>"\r\n teacher \r\n",
+      ActiveFedora::SolrService.solr_name("name_0_role_0_roleTerm", :string, :searchable)=>"creator",
+      ActiveFedora::SolrService.solr_name("name_0_role_1_roleTerm", :string, :searchable)=>"submitter",
+      ActiveFedora::SolrService.solr_name("name_1_role_0_roleTerm", :string, :searchable)=>["teacher"]}
   end
   
   before(:each) do
@@ -47,7 +53,6 @@ describe ActiveFedora::OmDatastream do
     it "should initialize from #xml_template if no xml is provided" do
       ActiveFedora::OmDatastream.should_receive(:xml_template).and_return("<fake template/>")
       n = ActiveFedora::OmDatastream.new
-      n.ensure_xml_loaded
       n.ng_xml.should be_equivalent_to("<fake template/>")
     end
   end
@@ -303,11 +308,11 @@ describe ActiveFedora::OmDatastream do
 
   describe '.has_solr_name?' do
     it "should return true if the given key exists in the solr document passed in" do
-      @test_ds.has_solr_name?("name_0_role_0_roleTerm_t",@solr_doc).should == true
-      @test_ds.has_solr_name?(:name_0_role_0_roleTerm_t,@solr_doc).should == true
-      @test_ds.has_solr_name?("name_1_role_1_roleTerm_t",@solr_doc).should == false
+      @test_ds.has_solr_name?(ActiveFedora::SolrService.solr_name("name_0_role_0_roleTerm", :string, :searchable),@solr_doc).should == true
+      @test_ds.has_solr_name?(ActiveFedora::SolrService.solr_name("name_0_role_0_roleTerm", :string, :searchable).to_sym,@solr_doc).should == true
+      @test_ds.has_solr_name?(ActiveFedora::SolrService.solr_name("name_1_role_1_roleTerm", :string, :searchable),@solr_doc).should == false
       #if not doc passed in should be new empty solr doc and always return false
-      @test_ds.has_solr_name?("name_0_role_0_roleTerm_t").should == false
+      @test_ds.has_solr_name?(ActiveFedora::SolrService.solr_name("name_0_role_0_roleTerm", :string, :searchable)).should == false
     end
   end
 

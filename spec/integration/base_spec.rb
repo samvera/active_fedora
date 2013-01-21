@@ -20,7 +20,8 @@ describe "A base object with metadata" do
       obj = ActiveFedora::Base.find(@obj.pid, :cast=>true)
       obj.foo.should_not be_new
       obj.foo.person.should == ['bob']
-      ActiveFedora::SolrService.query("id:#{@obj.pid.gsub(":", "\\:")}", :fl=>'id person_t').first.should == {"id"=>@obj.pid, 'person_t'=>['bob']}
+      person_field = ActiveFedora::SolrService.solr_name('person', :string, :searchable)
+      ActiveFedora::SolrService.query("id:#{@obj.pid.gsub(":", "\\:")}", :fl=>"id #{person_field}").first.should == {"id"=>@obj.pid, person_field =>['bob']}
     end
   end
 
@@ -39,7 +40,8 @@ describe "A base object with metadata" do
       end
       it "should save the datastream." do
         MockAFBaseRelationship.find(@release.pid).foo.person.should == ['frank']
-        ActiveFedora::SolrService.query("id:#{@release.pid.gsub(":", "\\:")}", :fl=>'id person_t').first.should == {"id"=>@release.pid, 'person_t'=>['frank']}
+        person_field = ActiveFedora::SolrService.solr_name('person', :string, :searchable)
+        ActiveFedora::SolrService.query("id:#{@release.pid.gsub(":", "\\:")}", :fl=>"id #{person_field}").first.should == {"id"=>@release.pid, person_field =>['frank']}
       end
     end
     describe "clone_into a new object" do

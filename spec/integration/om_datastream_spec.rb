@@ -119,7 +119,7 @@ describe ActiveFedora::OmDatastream do
 
     end
     it "should solrize terms with :type=>'date' to *_dt solr terms" do
-      @test_object.to_solr['mods_journal_issue_publication_date_dt'].should == ['2012-11-02T00:00:00Z']
+      @test_object.to_solr[ActiveFedora::SolrService.solr_name('mods_journal_issue_publication_date', :date)].should == ['2012-11-02T00:00:00Z']
     end
   end
 end
