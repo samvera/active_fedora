@@ -1,5 +1,3 @@
-require 'solrizer/field_name_mapper'
-
 module ActiveFedora::MetadataDatastreamHelper 
   extend Deprecation
   self.deprecation_horizon = 'active-fedora 6.0'  
