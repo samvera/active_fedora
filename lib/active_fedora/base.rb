@@ -317,6 +317,10 @@ module ActiveFedora
       solr_doc
     end
 
+    def solr_name(*args)
+      ActiveFedora::SolrService.solr_name(*args)
+    end
+
     def solrize_profile(solr_doc = Hash.new) # :nodoc:
       profile_hash = { 'datastreams' => {} }
       if inner_object.respond_to? :profile
@@ -443,7 +447,6 @@ module ActiveFedora
     include Attributes
     include ActiveFedora::Persistence
     include Model
-    include Solrizer::FieldNameMapper
     include Loggable
     include ActiveModel::Conversion
     include Validations

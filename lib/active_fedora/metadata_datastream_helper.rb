@@ -17,7 +17,6 @@ module ActiveFedora::MetadataDatastreamHelper
   
   def self.included(klass)
     klass.extend(ClassMethods)
-    klass.send(:include, Solrizer::FieldNameMapper)
   end
 
   def ensure_xml_loaded
