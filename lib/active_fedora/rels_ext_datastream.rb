@@ -1,4 +1,3 @@
-require 'solrizer/field_name_mapper'
 require 'uri'
 require 'rdf/rdfxml'
 require 'active_fedora/rdf_xml_writer'
