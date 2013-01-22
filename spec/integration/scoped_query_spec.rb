@@ -72,6 +72,7 @@ describe ActiveFedora::Model do
     end
     it "should query" do
       ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('foo', type: :string)=> 'Beta').should == [@test_instance1]
+      ModelIntegrationSpec::Basic.where('foo' => 'Beta').should == [@test_instance1]
     end
     it "should order" do
       ModelIntegrationSpec::Basic.order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').should == [@test_instance2, @test_instance1, @test_instance3]
