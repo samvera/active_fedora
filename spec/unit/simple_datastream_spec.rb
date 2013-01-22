@@ -54,8 +54,8 @@ describe ActiveFedora::SimpleDatastream do
   describe "#to_solr" do
     it "should have title" do
       solr = @test_ds.to_solr
-      solr[ActiveFedora::SolrService.solr_name('publisher', :string, :searchable)].should == ["publisher1"]
-      solr[ActiveFedora::SolrService.solr_name('creation_date', :date)].should == ["2012-01-15"]
+      solr[ActiveFedora::SolrService.solr_name('publisher', type: :string)].should == ["publisher1"]
+      solr[ActiveFedora::SolrService.solr_name('creation_date', type: :date)].should == ["2012-01-15"]
     end
   end
 

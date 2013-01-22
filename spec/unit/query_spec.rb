@@ -8,7 +8,7 @@ describe ActiveFedora::Base do
       end
     end
     @model_query = ActiveFedora::SolrService.solr_name("has_model", :symbol) + ":#{solr_uri("info:fedora/afmodel:SpecModel_Basic")}"
-    @sort_query = ActiveFedora::SolrService.solr_name("system_create", :date, :searchable) + ' asc'
+    @sort_query = ActiveFedora::SolrService.solr_name("system_create", type: :date) + ' asc'
   end
   
   after(:all) do
