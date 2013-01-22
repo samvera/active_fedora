@@ -151,7 +151,7 @@ describe ActiveFedora::Base do
     @properties_sample_values.each_pair do |field, value|
       next if field == :hard_copy_availability #FIXME HYDRA-824
       next if field == :location #FIXME HYDRA-825 
-      (@solr_result[ActiveFedora::SolrService.solr_name(field, :string, :searchable)] || @solr_result[ActiveFedora::SolrService.solr_name(field, :date)]).should == [::Solrizer::Extractor.format_node_value(value)] 
+      (@solr_result[ActiveFedora::SolrService.solr_name(field, type: :string)] || @solr_result[ActiveFedora::SolrService.solr_name(field, type: :date)]).should == [::Solrizer::Extractor.format_node_value(value)] 
     end
     
     @dublin_core_sample_values.each_pair do |field, value|

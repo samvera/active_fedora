@@ -27,7 +27,7 @@ module ActiveFedora
 
     class_attribute :fedora_connection, :profile_solr_name
     self.fedora_connection = {}
-    self.profile_solr_name = ActiveFedora::SolrService.solr_name("object_profile", :string, :displayable)
+    self.profile_solr_name = ActiveFedora::SolrService.solr_name("object_profile", :displayable)
 
 
     def method_missing(name, *args)
@@ -307,7 +307,7 @@ module ActiveFedora
         c_time = Time.parse(c_time) unless c_time.is_a?(Time)
         m_time = modified_date
         m_time = Time.parse(m_time) unless m_time.is_a?(Time)
-        solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid, ActiveFedora::SolrService.solr_name(:system_create, :date) => c_time.utc.xmlschema, ActiveFedora::SolrService.solr_name(:system_modified, :date) => m_time.utc.xmlschema, ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol) => self.class.inspect)
+        solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid, ActiveFedora::SolrService.solr_name(:system_create, type: :date) => c_time.utc.xmlschema, ActiveFedora::SolrService.solr_name(:system_modified, type: :date) => m_time.utc.xmlschema, ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol) => self.class.inspect)
         solrize_profile(solr_doc)
       end
       datastreams.each_value do |ds|

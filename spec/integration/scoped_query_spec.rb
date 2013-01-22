@@ -15,7 +15,7 @@ describe ActiveFedora::Model do
 
         def to_solr(doc = {})
           doc = super
-          doc[ActiveFedora::SolrService.solr_name('foo', :string, :sortable)] = doc[ActiveFedora::SolrService.solr_name('foo', :string, :searchable)]
+          doc[ActiveFedora::SolrService.solr_name('foo', :sortable)] = doc[ActiveFedora::SolrService.solr_name('foo', type: :string)]
           doc
         end
       
@@ -71,18 +71,18 @@ describe ActiveFedora::Model do
       @test_instance3.delete
     end
     it "should query" do
-      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('foo', :string, :searchable)=> 'Beta').should == [@test_instance1]
+      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('foo', type: :string)=> 'Beta').should == [@test_instance1]
       ModelIntegrationSpec::Basic.where('foo' => 'Beta').should == [@test_instance1]
     end
     it "should order" do
-      ModelIntegrationSpec::Basic.order(ActiveFedora::SolrService.solr_name('foo', :string, :sortable) + ' asc').should == [@test_instance2, @test_instance1, @test_instance3]
+      ModelIntegrationSpec::Basic.order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').should == [@test_instance2, @test_instance1, @test_instance3]
     end
     it "should limit" do
       ModelIntegrationSpec::Basic.limit(1).should == [@test_instance1]
     end
 
     it "should chain them" do
-      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', :string, :searchable) => 'Peanuts').order(ActiveFedora::SolrService.solr_name('foo', :string, :sortable) + ' asc').limit(1).should == [@test_instance2]
+      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').limit(1).should == [@test_instance2]
     end
   end
 end
