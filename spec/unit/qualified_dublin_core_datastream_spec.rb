@@ -110,7 +110,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
       @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new(nil, 'qdc' )
       @test_ds.title = "War and Peace"
       solr = @test_ds.to_solr
-      solr[ActiveFedora::SolrService.solr_name('title', :string, :searchable)].should == ["War and Peace"]
+      solr[ActiveFedora::SolrService.solr_name('title', type: :string)].should == ["War and Peace"]
     end
 
   end
