@@ -69,41 +69,6 @@ module ActiveFedora
       return false
     end
 
-    # Create an RDF statement
-    # @param uri a string represending the subject
-    # @param predicate a predicate symbol
-    # @param target an object to store
-    def build_statement(uri, predicate, target, literal=false)
-      ActiveSupport::Deprecation.warn("ActiveFedora::Base#build_statement has been deprecated.")
-      raise "Not allowed anymore" if uri == :self
-      target = target.internal_uri if target.respond_to? :internal_uri
-      subject =  RDF::URI.new(uri)  #TODO cache
-      unless literal or target.is_a? RDF::Resource
-        begin
-          target_uri = (target.is_a? URI) ? target : URI.parse(target)
-          if target_uri.scheme.nil?
-            raise ArgumentError, "Invalid target \"#{target}\". Must have namespace."
-          end
-          if target_uri.to_s =~ /\A[\w\-]+:[\w\-]+\Z/
-            raise ArgumentError, "Invalid target \"#{target}\". Target should be a complete URI, and not a pid."
-          end
-        rescue URI::InvalidURIError
-          raise ArgumentError, "Invalid target \"#{target}\". Target must be specified as a literal, or be a valid URI."
-        end
-      end
-      if literal
-        object = RDF::Literal.new(target)
-      elsif target.is_a? RDF::Resource
-        object = target
-      else
-        object = RDF::URI.new(target)
-      end
-      RDF::Statement.new(subject, find_graph_predicate(predicate), object)
-    
-    end
-                  
-    
-
     #
     # Remove a Rels-Ext relationship from the Object.
     # @param predicate

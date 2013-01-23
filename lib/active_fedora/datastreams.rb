@@ -1,7 +1,6 @@
 module ActiveFedora
   module Datastreams
     extend ActiveSupport::Concern
-    extend Deprecation
 
     included do
       class_attribute :ds_specs
@@ -187,22 +186,6 @@ module ActiveFedora
       ds.content = blob || "" 
       ds
     end
-
-    # This method provides validation of proper options for control_group 'E' and 'R' and builds an attribute hash to be merged back into ds.attributes prior to saving
-    #
-    # @param [Object] ds The datastream
-    # @param [Object] ds_config hash of options which may contain :disseminator and :url
-    def additional_attributes_for_external_and_redirect_control_groups(ds,ds_config)
-      if ds.controlGroup=='E'
-        if !ds_config[:disseminator].present? && ds_config[:url].present?
-          ds.dsLocation= ds_config[:url]
-        end
-      elsif ds.controlGroup=='R'
-        ds.dsLocation= ds_config[:url]
-      end
-    end
-    deprecation_deprecate :additional_attributes_for_external_and_redirect_control_groups
-
 
     module ClassMethods
       #This method is used to specify the details of a datastream. 

@@ -40,11 +40,6 @@ module ActiveFedora
       model.relationships
     end
 
-    def to_xml(fields_xml) 
-      ActiveSupport::Deprecation.warn("to_xml is deprecated, use to_rels_ext")
-      to_rels_ext() 
-    end
-      
     # Populate a RelsExtDatastream object based on the "datastream" content 
     # Assumes that the datastream contains RDF XML from a Fedora RELS-EXT datastream 
     # @param [ActiveFedora::Datastream] tmpl the Datastream object that you are populating
