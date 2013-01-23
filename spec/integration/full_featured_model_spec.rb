@@ -7,11 +7,6 @@ describe ActiveFedora::Base do
 
   before(:all) do
     class OralHistory < ActiveFedora::Base
-        include ActiveFedora::Relationships
-
-        Deprecation.silence(ActiveFedora::Relationships::ClassMethods) do
-          has_relationship "parts", :is_part_of, :inbound => true
-        end
         # These are all the properties that don't quite fit into Qualified DC
         # Put them on the object itself (in the properties datastream) for now.
         has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream do |m|
@@ -28,9 +23,6 @@ describe ActiveFedora::Base do
           m.field "location", :string
         end
         
-        # has_metadata :name=>"arbitrary_xml", :type=> ActiveFedora::OmDatastream do |m|
-        #   m.root_property :myxml, "my_xml", "http://www.example.gov/schema/v3"
-        # end
         
         has_metadata :name=>"mods_article", :type=> Hydra::ModsArticleDatastream 
         
