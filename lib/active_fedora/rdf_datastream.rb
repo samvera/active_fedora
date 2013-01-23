@@ -58,11 +58,10 @@ module ActiveFedora
     def to_solr(solr_doc = Hash.new) # :nodoc:
       fields.each do |field_key, field_info|
         values = get_values(rdf_subject, field_key)
-        directive = Solrizer::Directive.new(field_info[:type], field_info[:behaviors])
         if values
           Array(values).each do |val|    
             val = val.to_s if val.kind_of? RDF::URI
-            self.class.create_and_insert_terms(prefix(field_key), val, directive, solr_doc)
+            self.class.create_and_insert_terms(prefix(field_key), val, field_info[:behaviors], solr_doc)
           end
         end
       end
