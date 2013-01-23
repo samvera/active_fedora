@@ -392,16 +392,16 @@ describe ActiveFedora::Base do
         @test_object.should_receive(:create_date).and_return("2012-03-04T03:12:02Z")
         @test_object.should_receive(:modified_date).and_return("2012-03-07T03:12:02Z")
         solr_doc = @test_object.to_solr
-        solr_doc[ActiveFedora::SolrService.solr_name("system_create", :date, :searchable)].should eql("2012-03-04T03:12:02Z")
-        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :date, :searchable)].should eql("2012-03-07T03:12:02Z")
+        solr_doc[ActiveFedora::SolrService.solr_name("system_create", type: :date)].should eql("2012-03-04T03:12:02Z")
+        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", type: :date)].should eql("2012-03-07T03:12:02Z")
         solr_doc[:id].should eql("#{@test_object.pid}")
       end
 
       it "should omit base metadata and RELS-EXT if :model_only==true" do
         @test_object.add_relationship(:has_part, "foo", true)
         solr_doc = @test_object.to_solr(Hash.new, :model_only => true)
-        solr_doc[ActiveFedora::SolrService.solr_name("system_create", :date, :searchable)].should be_nil
-        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :date, :searchable)].should be_nil
+        solr_doc[ActiveFedora::SolrService.solr_name("system_create", type: :date)].should be_nil
+        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", type: :date)].should be_nil
         solr_doc["id"].should be_nil
         solr_doc[ActiveFedora::SolrService.solr_name("has_part", :symbol)].should be_nil
       end

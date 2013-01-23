@@ -1,4 +1,3 @@
-require 'solrizer/field_name_mapper'
 require 'uri'
 require 'rdf/rdfxml'
 require 'active_fedora/rdf_xml_writer'
@@ -6,7 +5,6 @@ require 'active_fedora/rdf_xml_writer'
 module ActiveFedora
   class RelsExtDatastream < Datastream
     
-    include Solrizer::FieldNameMapper
     attr_accessor :model
 
    def self.default_attributes
@@ -110,7 +108,7 @@ module ActiveFedora
     # 
     # This is utilized by ActiveFedora::Base.load_instance_from_solr to load 
     # the relationships hash using the Solr document passed in instead of from the RELS-EXT datastream
-    # in Fedora.  Utilizes solr_name method (provided by Solrizer::FieldNameMapper) to map solr key to
+    # in Fedora.  Utilizes solr_name method (provided by Solrizer::FieldMapper) to map solr key to
     # relationship predicate. 
     #
     # ====Warning

@@ -25,7 +25,7 @@ module ActiveFedora
       opts[:qt] = solr_query_handler
       #set default sort to created date ascending
       unless opts[:sort].present?
-        opts[:sort]=[ActiveFedora::SolrService.solr_name(:system_create,:date)+' asc'] 
+        opts[:sort]= default_sort_params
       end
 
       batch_size = opts.delete(:batch_size) || 1000
@@ -37,6 +37,10 @@ module ActiveFedora
         docs = response["response"]["docs"]
         yield docs
       end while docs.has_next? 
+    end
+
+    def default_sort_params
+      [ActiveFedora::SolrService.solr_name(:system_create, type: :date)+' asc'] 
     end
 
     # Yields the found ActiveFedora::Base object to the passed block
@@ -80,7 +84,7 @@ module ActiveFedora
     def find_with_conditions(conditions, opts={})
       #set default sort to created date ascending
       unless opts.include?(:sort)
-        opts[:sort]=[ActiveFedora::SolrService.solr_name(:system_create,:date)+' asc'] 
+        opts[:sort]=default_sort_params
       end
       SolrService.query(create_query(conditions), opts) 
     end
@@ -125,7 +129,7 @@ module ActiveFedora
       unless value.nil?
         # if the key is a property name, turn it into a solr field
         if self.delegate_registry.include?(key.to_sym)
-          key = ActiveFedora::SolrService.solr_name(key, :string, :searchable)
+          key = ActiveFedora::SolrService.solr_name(key, :searchable, type: :string)
         end
         if value.is_a? Array
           value.map { |val| "#{key}:#{quote_for_solr(val)}" }

@@ -4,6 +4,7 @@ source "http://rubygems.org"
 
 gemspec
 
+gem 'solrizer', github: 'projecthydra/solrizer', branch: 'solrizer-3'
 group :development, :test do
   gem 'simplecov', :platform => :mri_19
   gem 'simplecov-rcov', :platform => :mri_19

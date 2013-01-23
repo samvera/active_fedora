@@ -46,7 +46,6 @@ module ActiveFedora
     #     url: http://127.0.0.1:8983/fedora2
     #
 
-    include Solrizer::FieldNameMapper
     attr_accessor :config_env
     attr_reader :config_options, :fedora_config_path, :solr_config_path
 
