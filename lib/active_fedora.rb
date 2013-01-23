@@ -41,7 +41,6 @@ module ActiveFedora #:nodoc:
     autoload :UnsavedDigitalObject
     autoload :SolrDigitalObject
     autoload :Model
-    autoload :MetadataDatastreamHelper
     autoload :NokogiriDatastream
     autoload :NomDatastream
     autoload :NtriplesRDFDatastream

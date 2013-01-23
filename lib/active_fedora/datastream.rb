@@ -2,7 +2,6 @@ module ActiveFedora
 
   #This class represents a Fedora datastream
   class Datastream < Rubydora::Datastream
-    extend Deprecation
     attr_writer :digital_object
     attr_accessor :last_modified
 
