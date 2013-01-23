@@ -540,86 +540,12 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
     end
 
     describe '#relationships_by_name' do
-      before(:all) do
-        @behavior = ActiveFedora::Relationships.deprecation_behavior
-        @c_behavior = ActiveFedora::Relationships::ClassMethods.deprecation_behavior
-        ActiveFedora::Relationships.deprecation_behavior = :silence
-        ActiveFedora::Relationships::ClassMethods.deprecation_behavior = :silence
-      end
-  
-      after :all do
-        ActiveFedora::Relationships.deprecation_behavior = @behavior
-        ActiveFedora::Relationships::ClassMethods.deprecation_behavior = @c_behavior
-      end
-
       before do
         class MockNamedRelationships < ActiveFedora::Base
-          include ActiveFedora::FileManagement
-          has_relationship "testing", :has_part, :type=>ActiveFedora::Base
-          has_relationship "testing2", :has_member, :type=>ActiveFedora::Base
-          has_relationship "testing_inbound", :has_part, :type=>ActiveFedora::Base, :inbound=>true
+          # has_relationship "testing", :has_part, :type=>ActiveFedora::Base
+          # has_relationship "testing2", :has_member, :type=>ActiveFedora::Base
+          # has_relationship "testing_inbound", :has_part, :type=>ActiveFedora::Base, :inbound=>true
         end
-      end
-      
-      it 'should return current relationships by name' do
-        next_pid = increment_pid.to_s
-        ActiveFedora::Base.stub(:assign_pid).and_return(next_pid)
-        stub_get(next_pid)
-        @test_object2 = MockNamedRelationships.new
-        @test_object2.add_relationship(:has_model, MockNamedRelationships.to_class_uri)
-        @test_object.add_relationship(:has_model, ActiveFedora::Base.to_class_uri)
-        #should return expected named relationships
-        @test_object2.relationships_by_name
-        @test_object2.relationships_by_name[:self]["testing"].should == []
-        @test_object2.relationships_by_name[:self]["testing2"].should == []
-        @test_object2.relationships_by_name[:self]["parts_outbound"].should == []
-        @test_object2.add_relationship_by_name("testing",@test_object)
-        # @test_object2.relationships_by_name.should == {:self=>{"testing"=>[@test_object.internal_uri],"testing2"=>[],"part_of"=>[], "parts_outbound"=>[@test_object.internal_uri], "collection_members"=>[]}}
-
-        @test_object2.relationships_by_name[:self]["testing"].should == [@test_object.internal_uri]
-        @test_object2.relationships_by_name[:self]["testing2"].should == []
-        @test_object2.relationships_by_name[:self]["parts_outbound"].should == [@test_object.internal_uri]
-      end 
-    end
-
-    
-    describe '#create_relationship_name_methods' do
-      before(:all) do
-        @behavior = ActiveFedora::Relationships.deprecation_behavior
-        @c_behavior = ActiveFedora::Relationships::ClassMethods.deprecation_behavior
-        ActiveFedora::Relationships.deprecation_behavior = :silence
-        ActiveFedora::Relationships::ClassMethods.deprecation_behavior = :silence
-      end
-  
-      after :all do
-        ActiveFedora::Relationships.deprecation_behavior = @behavior
-        ActiveFedora::Relationships::ClassMethods.deprecation_behavior = @c_behavior
-      end
-
-      before do
-        class MockCreateNamedRelationshipMethodsBase < ActiveFedora::Base
-          include ActiveFedora::Relationships
-          register_relationship_desc :self, "testing", :is_part_of, :type=>ActiveFedora::Base
-          create_relationship_name_methods "testing"
-        end
-      end
-        
-      it 'should append and remove using helper methods for each outbound relationship' do
-        next_pid = increment_pid.to_s
-        ActiveFedora::Base.stub(:assign_pid).and_return(next_pid)
-        stub_get(next_pid)
-        @test_object2 = MockCreateNamedRelationshipMethodsBase.new 
-        @test_object2.should respond_to(:testing_append)
-        @test_object2.should respond_to(:testing_remove)
-        #test executing each one to make sure code added is correct
-        model_pid =ActiveFedora::Base.to_class_uri
-        @test_object.add_relationship(:has_model,model_pid)
-        @test_object2.add_relationship(:has_model,model_pid)
-        @test_object2.testing_append(@test_object)
-        #create relationship to access generate_uri method for an object
-        @test_object2.relationships_by_name[:self]["testing"].should == [@test_object.internal_uri]
-        @test_object2.testing_remove(@test_object)
-        @test_object2.relationships_by_name[:self]["testing"].should == []
       end
     end
 

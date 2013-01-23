@@ -22,40 +22,12 @@ module ActiveFedora
       dsid.gsub(/\./, '%2e')
     end
     
-    # Test whether this datastream been modified since it was last saved
-    # Deprecated
-    def dirty?
-      changed?
-    end
-    deprecation_deprecate :dirty?
-    
     # @abstract Override this in your concrete datastream class. 
     # @return [boolean] does this datastream contain metadata (not file data)
     def metadata?
       false
     end
     
-    # Deprecated
-    def dirty
-      changed?
-    end
-    deprecation_deprecate :dirty
-    
-    # Deprecated
-    def dirty=(value)
-      if value
-        content_will_change! # an innocent hack to pretend something has changed
-      else
-        changed_attributes.clear
-      end
-    end
-    deprecation_deprecate :dirty=
-
-    def new_object?
-      new?
-    end
-    deprecation_deprecate :new_object?
-
     def validate_content_present
       has_content?
     end
@@ -72,14 +44,6 @@ module ActiveFedora
 
     # serializes any changed data into the content field
     def serialize!
-    end
-    # Populate a Datastream object based on the "datastream" node from a FOXML file
-    # @param [ActiveFedora::Datastream] tmpl the Datastream object that you are building
-    # @param [Nokogiri::XML::Node] node the "foxml:datastream" node from a FOXML file
-    def self.from_xml(tmpl, node)
-      Deprecation.deprecated_method_warning(self, :from_xml)
-      tmpl.controlGroup= node['CONTROL_GROUP']
-      tmpl
     end
     
     def solrize_profile # :nodoc:
