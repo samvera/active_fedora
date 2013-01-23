@@ -146,38 +146,11 @@ end
 
 
 describe ActiveFedora::Base do
-  before(:all) do
-    @behavior = ActiveFedora::Relationships.deprecation_behavior
-    @c_behavior = ActiveFedora::Relationships::ClassMethods.deprecation_behavior
-    ActiveFedora::Relationships.deprecation_behavior = :silence
-    ActiveFedora::Relationships::ClassMethods.deprecation_behavior = :silence
-  end
-  
-  after :all do
-    ActiveFedora::Relationships.deprecation_behavior = @behavior
-    ActiveFedora::Relationships::ClassMethods.deprecation_behavior = @c_behavior
-  end
-  
   before :all do
     class MockAFBaseRelationship < ActiveFedora::Base
-      include ActiveFedora::FileManagement
-      has_relationship "testing", :has_part, :type=>MockAFBaseRelationship
-      has_relationship "testing2", :has_member, :type=>MockAFBaseRelationship
-      has_relationship "testing_inbound", :has_part, :type=>MockAFBaseRelationship, :inbound=>true
-      has_relationship "testing_inbound2", :has_member, :type=>MockAFBaseRelationship, :inbound=>true
-      has_bidirectional_relationship "testing_bidirectional", :has_collection_member, :is_member_of_collection
-      #next 2 used to test objects on opposite end of bidirectional relationship
-      has_relationship "testing_inbound3", :has_collection_member, :inbound=>true
-      has_relationship "testing3", :is_member_of_collection
     end
 
     class MockAFBaseFromSolr < ActiveFedora::Base
-      include ActiveFedora::Relationships
-      has_relationship "testing", :has_part, :type=>MockAFBaseFromSolr
-      has_relationship "testing2", :has_member, :type=>MockAFBaseFromSolr
-      has_relationship "testing_inbound", :has_part, :type=>MockAFBaseFromSolr, :inbound=>true
-      has_relationship "testing_inbound2", :has_member, :type=>MockAFBaseFromSolr, :inbound=>true
-      
       has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream do |m|
         m.field "holding_id", :string
       end
@@ -387,16 +360,12 @@ describe ActiveFedora::Base do
   
     it "should be able to add datastreams" do
       ds = ActiveFedora::Datastream.new(@test_object.inner_object, 'DS1')
-      # ds = ActiveFedora::Datastream.new(:dsID => 'DS1', :dsLabel => 'hello', :altIDs => '3333', 
-      #   :controlGroup => 'M', :blob => fixture('dino.jpg'))
       @test_object.add_datastream(ds).should be_true
     end
       
     it "adding and saving should add the datastream to the datastreams array" do
       ds = ActiveFedora::Datastream.new(@test_object.inner_object, 'DS1') 
       ds.content = fixture('dino.jpg').read
-      # ds = ActiveFedora::Datastream.new(:dsid => 'DS1', :dsLabel => 'hello', :altIDs => '3333', 
-      #   :controlGroup => 'M', :blob => fixture('dino.jpg'))
       @test_object.datastreams.should_not have_key("DS1")
       @test_object.add_datastream(ds)
       ds.save
@@ -434,47 +403,6 @@ describe ActiveFedora::Base do
       @test_object.delete
       ActiveFedora::Base.find_with_conditions(:id=>pid).should be_empty
     end
-
-    describe '#delete' do
-      before do
-        @test_object2 = MockAFBaseRelationship.create
-        @test_object3 = MockAFBaseRelationship.create
-        @test_object4 = MockAFBaseRelationship.create
-        @test_object5 = MockAFBaseRelationship.create
-        Deprecation.stub(:warn)
-        #append to relationship by 'testing'
-        @test_object2.add_relationship_by_name("testing",@test_object3)
-        @test_object2.add_relationship_by_name("testing2",@test_object4)
-        @test_object5.add_relationship_by_name("testing",@test_object2)
-        #@test_object5.add_relationship_by_name("testing2",@test_object3)
-        @test_object2.save
-        @test_object5.save
-        #check that the inbound relationships on test_object3 and test_object4 were eliminated
-        #testing goes to :has_part and testing2 goes to :has_member
-        @test_object2.relationships_by_name(false)[:inbound]["testing_inbound"].should == [@test_object5.internal_uri]
-        @test_object2.relationships_by_name(false)[:self]["parts_outbound"].should == [@test_object3.internal_uri]
-        @test_object2.relationships_by_name(false)[:self]["testing"].should == [@test_object3.internal_uri]
-
-        @test_object3.relationships_by_name(false)[:inbound]["testing_inbound"].should == [@test_object2.internal_uri]
-        @test_object4.relationships_by_name(false)[:inbound]["testing_inbound2"].should == [@test_object2.internal_uri]
-
-        @test_object5.relationships_by_name(false)[:self]["testing"].should == [@test_object2.internal_uri]
-    end
-
-    it 'if inbound relationships exist should remove relationships from those inbound targets as well when deleting this object' do
-
-        @test_object2.delete
-        #need to reload since removed from rels_ext in memory
-        @test_object5 = MockAFBaseRelationship.find(@test_object5.pid)
-      
-        #check any test_object2 inbound rels gone from source
-        @test_object3.relationships_by_name(false)[:inbound]["testing_inbound"].should == []
-
-        @test_object4.relationships_by_name(false)[:inbound]["testing_inbound2"].should == []
-        @test_object5.relationships_by_name(false)[:self]["testing"].should == []
-    end
-  end
-    
   end
 
   describe '#remove_relationship' do
@@ -498,280 +426,7 @@ describe ActiveFedora::Base do
     end
   end
 
-  describe '#relationships' do
-    it 'should return internal relationships with no parameters and include inbound if false passed in' do
-      @test_object2 = MockAFBaseRelationship.new
-      @test_object2.save
-      @test_object3 = MockAFBaseRelationship.new
-      @test_object3.save
-      @test_object4 = MockAFBaseRelationship.new
-      @test_object4.save
-      @test_object5 = MockAFBaseRelationship.new
-      @test_object5.save
-      #append to named relationship 'testing'
-      @test_object2.testing_append(@test_object3)
-      @test_object2.testing2_append(@test_object4)
-      @test_object2.testing3_append(@test_object5)
-      @test_object5.testing_append(@test_object2)
-      @test_object5.testing2_append(@test_object3)
-      @test_object5.testing_bidirectional_append(@test_object4)
-      @test_object2.save
-      @test_object5.save
-      model_rel = MockAFBaseRelationship.to_class_uri
-      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
-      @test_object2.object_relations[:has_model].should include model_rel
-      @test_object2.object_relations[:has_part].should include @test_object3
-
-      @test_object2.object_relations[:has_member].should include @test_object4 
-      @test_object2.object_relations[:is_member_of_collection].should include @test_object5
-      @test_object2.inbound_relationships.should == {:has_part=>[@test_object5.internal_uri]}
-
-      @test_object3.object_relations[:has_model].should include model_rel
-      @test_object3.inbound_relationships.should == {:has_part=>[@test_object2.internal_uri],
-                                                               :has_member=>[@test_object5.internal_uri]}
-      @test_object4.object_relations[:has_model].should include model_rel
-      @test_object4.inbound_relationships.should == {:has_member=>[@test_object2.internal_uri],:has_collection_member=>[@test_object5.internal_uri]}
-
-      @test_object5.object_relations[:has_model].should include model_rel
-      @test_object5.object_relations[:has_part].should include @test_object2
-      @test_object5.object_relations[:has_member].should include @test_object3 
-      @test_object5.object_relations[:has_collection_member].should include @test_object4 
-      @test_object5.inbound_relationships.should == {:is_member_of_collection=>[@test_object2.internal_uri]}
-    end
-  end
   
-  describe '#inbound_relationships' do
-    it 'should return a hash of inbound relationships' do
-      @test_object2 = MockAFBaseRelationship.new
-      @test_object2.save
-      @test_object3 = MockAFBaseRelationship.new
-      @test_object3.save
-      @test_object4 = MockAFBaseRelationship.new
-      @test_object4.save
-      @test_object5 = MockAFBaseRelationship.new
-      @test_object5.save
-      #append to named relationship 'testing'
-      @test_object2.testing_append(@test_object3)
-      @test_object2.testing2_append(@test_object4)
-      @test_object5.testing_append(@test_object2)
-      @test_object5.testing2_append(@test_object3)
-      #@test_object5.testing_bidirectional_append(@test_object4)
-      @test_object2.save
-      @test_object5.save
-      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
-      @test_object2.inbound_relationships.should == {:has_part=>[@test_object5.internal_uri]}
-      @test_object3.inbound_relationships.should == {:has_part=>[@test_object2.internal_uri],:has_member=>[@test_object5.internal_uri]}
-      @test_object4.inbound_relationships.should == {:has_member=>[@test_object2.internal_uri]}
-      @test_object5.inbound_relationships.should == {}
-    end
-  end
-  
-  describe '#inbound_relationships_by_name' do
-    it 'should return a hash of inbound relationship names to array of objects' do
-      @test_object2 = MockAFBaseRelationship.new
-      @test_object2.save
-      @test_object3 = MockAFBaseRelationship.new
-      @test_object3.save
-      @test_object4 = MockAFBaseRelationship.new
-      @test_object4.save
-      @test_object5 = MockAFBaseRelationship.new
-      @test_object5.save
-      #append to named relationship 'testing'
-      @test_object2.testing_append(@test_object3)
-      @test_object2.testing2_append(@test_object4)
-      @test_object5.testing_append(@test_object2)
-      @test_object5.testing2_append(@test_object3)
-      @test_object2.save
-      @test_object5.save
-      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
-      @test_object2.inbound_relationships_by_name.should == {"testing_inbound"=>[@test_object5.internal_uri],"testing_inbound2"=>[],
-                                                           "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[], "parts_inbound" => []}
-      @test_object3.inbound_relationships_by_name.should == {"testing_inbound"=>[@test_object2.internal_uri],"testing_inbound2"=>[@test_object5.internal_uri],
-                                                           "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[], "parts_inbound" => []}
-      @test_object4.inbound_relationships_by_name.should == {"testing_inbound"=>[],"testing_inbound2"=>[@test_object2.internal_uri],
-                                                           "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[], "parts_inbound" => []}
-      @test_object5.inbound_relationships_by_name.should == {"testing_inbound"=>[],"testing_inbound2"=>[],
-                                                           "testing_bidirectional_inbound"=>[],"testing_inbound3"=>[], "parts_inbound" => []}
-    end
-  end
-  
-  describe '#relationships_by_name' do
-    it '' do
-      @test_object2 = MockAFBaseRelationship.new
-      @test_object2.save
-      @test_object3 = MockAFBaseRelationship.new
-      @test_object3.save
-      @test_object4 = MockAFBaseRelationship.new
-      @test_object4.save
-      @test_object5 = MockAFBaseRelationship.new
-      @test_object5.save
-      #append to named relationship 'testing'
-      @test_object2.testing_append(@test_object3)
-      @test_object2.testing2_append(@test_object4)
-      @test_object5.testing_append(@test_object2)
-      @test_object5.testing2_append(@test_object3)
-      @test_object2.save
-      @test_object5.save
-      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
-      @test_object2.relationships_by_name(false)[:self]["testing"].should == [@test_object3.internal_uri]
-      @test_object2.relationships_by_name(false)[:self]["testing2"].should == [@test_object4.internal_uri]
-      @test_object2.relationships_by_name(false)[:self]["parts_outbound"].should == [@test_object3.internal_uri]
-      @test_object2.relationships_by_name(false)[:inbound]["testing_inbound"].should == [@test_object5.internal_uri]
-
-      @test_object3.relationships_by_name(false)[:inbound]["testing_inbound"].should == [@test_object2.internal_uri]
-      @test_object3.relationships_by_name(false)[:inbound]["testing_inbound2"].should == [@test_object5.internal_uri]
-
-      @test_object4.relationships_by_name(false)[:inbound]["testing_inbound2"].should == [@test_object2.internal_uri]
-
-      @test_object5.relationships_by_name(false)[:self]["testing"].should == [@test_object2.internal_uri]
-      @test_object5.relationships_by_name(false)[:self]["testing2"].should == [@test_object3.internal_uri]
-      @test_object5.relationships_by_name(false)[:self]["parts_outbound"].should == [@test_object2.internal_uri]
-
-      #all inbound should now be empty if no parameter supplied to relationships
-      @test_object2.relationships_by_name[:self]["testing"].should == [@test_object3.internal_uri]
-      @test_object2.relationships_by_name[:self]["testing2"].should == [@test_object4.internal_uri]
-      @test_object2.relationships_by_name[:self]["parts_outbound"].should == [@test_object3.internal_uri]
-      @test_object2.relationships_by_name.should_not have_key :inbound
-
-      @test_object3.relationships_by_name.should_not have_key :inbound
-      @test_object4.relationships_by_name.should_not have_key :inbound
-
-
-      @test_object5.relationships_by_name[:self]["testing"].should == [@test_object2.internal_uri]
-      @test_object5.relationships_by_name[:self]["testing2"].should == [@test_object3.internal_uri]
-      @test_object5.relationships_by_name[:self]["parts_outbound"].should == [@test_object2.internal_uri]
-      @test_object5.relationships_by_name.should_not have_key :inbound
-      # @test_object2.relationships_by_name.should == {:self=>{"testing2"=>[@test_object4.internal_uri], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[@test_object3.internal_uri], "parts_outbound"=>[@test_object3.internal_uri], "testing_bidirectional_outbound"=>[]}}
-      # @test_object3.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
-      # @test_object4.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[], "testing_bidirectional_outbound"=>[]}}
-      # @test_object5.relationships_by_name.should == {:self=>{"testing2"=>[@test_object3.internal_uri], "collection_members"=>[], "testing3"=>[], "part_of"=>[], "testing"=>[@test_object2.internal_uri], "parts_outbound"=>[@test_object2.internal_uri], "testing_bidirectional_outbound"=>[]}}
-    end
-  end
-  
-  describe '#add_relationship_by_name' do
-    it 'should add a named relationship to an object' do
-      @test_object2 = MockAFBaseRelationship.new
-      #@test_object2.new_object = true
-      @test_object2.save
-      @test_object3 = MockAFBaseRelationship.new
-      #@test_object3.new_object = true
-      @test_object3.save
-      @test_object4 = MockAFBaseRelationship.new
-      #@test_object4.new_object = true
-      @test_object4.save
-      @test_object5 = MockAFBaseRelationship.new
-      #@test_object5.new_object = true
-      @test_object5.save
-      #append to named relationship 'testing'
-      @test_object2.add_relationship_by_name("testing",@test_object3)
-      @test_object2.add_relationship_by_name("testing2",@test_object4)
-      @test_object5.add_relationship_by_name("testing",@test_object2)
-      @test_object5.add_relationship_by_name("testing2",@test_object3)
-      @test_object2.save
-      @test_object5.save
-      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
-      @test_object2.relationships_by_name(false)[:self]["testing"].should == [@test_object3.internal_uri]
-      @test_object2.relationships_by_name(false)[:self]["testing2"].should == [@test_object4.internal_uri]
-      @test_object2.relationships_by_name(false)[:self]["parts_outbound"].should == [@test_object3.internal_uri]
-      @test_object2.relationships_by_name(false)[:inbound]["testing_inbound"].should == [@test_object5.internal_uri]
-
-      @test_object3.relationships_by_name(false)[:inbound]["testing_inbound"].should == [@test_object2.internal_uri]
-      @test_object3.relationships_by_name(false)[:inbound]["testing_inbound2"].should == [@test_object5.internal_uri]
-
-      @test_object4.relationships_by_name(false)[:inbound]["testing_inbound2"].should == [@test_object2.internal_uri]
-
-      @test_object5.relationships_by_name(false)[:self]["testing"].should == [@test_object2.internal_uri]
-      @test_object5.relationships_by_name(false)[:self]["testing2"].should == [@test_object3.internal_uri]
-      @test_object5.relationships_by_name(false)[:self]["parts_outbound"].should == [@test_object2.internal_uri]
-    end
-  end
-  
-  describe '#remove_named_relationship' do
-    it 'should remove an existing relationship from an object' do
-      @test_object2 = MockAFBaseRelationship.new
-      #@test_object2.new_object = true
-      @test_object2.save
-      @test_object3 = MockAFBaseRelationship.new
-      #@test_object3.new_object = true
-      @test_object3.save
-      @test_object4 = MockAFBaseRelationship.new
-      #@test_object4.new_object = true
-      @test_object4.save
-      @test_object5 = MockAFBaseRelationship.new
-      #@test_object5.new_object = true
-      @test_object5.save
-      #append to named relationship 'testing'
-      @test_object2.add_relationship_by_name("testing",@test_object3)
-      @test_object2.add_relationship_by_name("testing2",@test_object4)
-      @test_object5.add_relationship_by_name("testing",@test_object2)
-      @test_object5.add_relationship_by_name("testing2",@test_object3)
-      @test_object2.save
-      @test_object5.save
-      #check inbound correct, testing goes to :has_part and testing2 goes to :has_member
-      @test_object2.relationships_by_name(false)[:self]["testing"].should == [@test_object3.internal_uri]
-      @test_object2.relationships_by_name(false)[:self]["testing2"].should == [@test_object4.internal_uri]
-      @test_object2.relationships_by_name(false)[:self]["parts_outbound"].should == [@test_object3.internal_uri]
-      @test_object2.relationships_by_name(false)[:inbound]["testing_inbound"].should == [@test_object5.internal_uri]
-
-      @test_object3.relationships_by_name(false)[:inbound]["testing_inbound"].should == [@test_object2.internal_uri]
-      @test_object3.relationships_by_name(false)[:inbound]["testing_inbound2"].should == [@test_object5.internal_uri]
-
-      @test_object4.relationships_by_name(false)[:inbound]["testing_inbound2"].should == [@test_object2.internal_uri]
-
-      @test_object5.relationships_by_name(false)[:self]["testing"].should == [@test_object2.internal_uri]
-      @test_object5.relationships_by_name(false)[:self]["testing2"].should == [@test_object3.internal_uri]
-      @test_object5.relationships_by_name(false)[:self]["parts_outbound"].should == [@test_object2.internal_uri]
-
-      @test_object2.remove_relationship_by_name("testing",@test_object3.internal_uri)
-      @test_object2.save
-      #check now removed for both outbound and inbound
-      @test_object2.relationships_by_name(false)[:self]["testing"].should == []
-      @test_object2.relationships_by_name(false)[:self]["testing2"].should == [@test_object4.internal_uri]
-      @test_object2.relationships_by_name(false)[:self]["parts_outbound"].should == []
-      @test_object2.relationships_by_name(false)[:inbound]["testing_inbound"].should == [@test_object5.internal_uri]
-
-      @test_object3.relationships_by_name(false)[:inbound]["testing_inbound"].should == []
-      @test_object3.relationships_by_name(false)[:inbound]["testing_inbound2"].should == [@test_object5.internal_uri]
-    end
-  end
-
-  describe '#find_relationship_by_name' do
-    it 'should find relationships based on name passed in for inbound or outbound' do
-      @test_object2 = MockAFBaseRelationship.new
-      @test_object2.save
-      @test_object3 = MockAFBaseRelationship.new
-      @test_object3.save
-      @test_object4 = MockAFBaseRelationship.new
-      @test_object4.save
-      @test_object5 = MockAFBaseRelationship.new
-      @test_object5.save
-      #append to named relationship 'testing'
-      @test_object2.add_relationship_by_name("testing",@test_object3)
-      @test_object2.add_relationship_by_name("testing2",@test_object4)
-      @test_object5.add_relationship_by_name("testing",@test_object2)
-      @test_object5.add_relationship_by_name("testing2",@test_object3)
-      @test_object2.save
-      @test_object5.save
-      @test_object2.find_relationship_by_name("testing").should == [@test_object3.internal_uri]
-      @test_object2.find_relationship_by_name("testing2").should == [@test_object4.internal_uri]
-      @test_object2.find_relationship_by_name("testing_inbound").should == [@test_object5.internal_uri]
-      @test_object2.find_relationship_by_name("testing_inbound2").should == []
-      @test_object3.find_relationship_by_name("testing").should == []
-      @test_object3.find_relationship_by_name("testing2").should == []
-      @test_object3.find_relationship_by_name("testing_inbound").should == [@test_object2.internal_uri]
-      @test_object3.find_relationship_by_name("testing_inbound2").should == [@test_object5.internal_uri]
-      @test_object4.find_relationship_by_name("testing").should == []
-      @test_object4.find_relationship_by_name("testing2").should == []
-      @test_object4.find_relationship_by_name("testing_inbound").should == []
-      @test_object4.find_relationship_by_name("testing_inbound2").should == [@test_object2.internal_uri]
-      @test_object5.find_relationship_by_name("testing").should == [@test_object2.internal_uri]
-      @test_object5.find_relationship_by_name("testing2").should == [@test_object3.internal_uri]
-      @test_object5.find_relationship_by_name("testing_inbound").should == []
-      @test_object5.find_relationship_by_name("testing_inbound2").should == []
-      
-    end
-  end
-
   describe "#exists?" do
     it "should return true for objects that exist" do
       ActiveFedora::Base.exists?('hydrangea:fixture_mods_article1').should be_true
