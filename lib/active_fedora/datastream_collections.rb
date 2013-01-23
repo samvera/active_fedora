@@ -323,15 +323,5 @@ module ActiveFedora
         @named_datastreams_desc ||= self.class.class_named_datastreams_desc
       end
       
-      # ** EXPERIMENTAL **
-      #
-      # Get class variable hash that stores has_datastream arguments.
-      # It is used to initialize the value returned by public named_datastreams_desc method
-      # Deprecated
-      def named_datastreams_desc_from_class
-        logger.warn "named_datastreams_desc_from_class is deprecated and will be removed in the next version"
-        self.class.class_named_datastreams_desc
-      end
-
   end
 end

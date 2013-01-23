@@ -72,12 +72,6 @@ module ActiveFedora
       @solr_config
     end
 
-    def config_reload!
-      ActiveSupport::Deprecation.warn("config_reload! is not supported")
-      reset!
-      load_configs
-    end
-
     def path
       get_config_path(:fedora)
     end
@@ -100,7 +94,6 @@ module ActiveFedora
       
       load_fedora_config
       load_solr_config
-      load_solrizer_config
       @config_loaded = true
     end
 
@@ -147,20 +140,6 @@ module ActiveFedora
       config = solr_yml.symbolize_keys
       raise "The #{ActiveFedora.environment.to_sym} environment settings were not found in the solr.yml config.  If you already have a solr.yml file defined, make sure it defines settings for the #{ActiveFedora.environment.to_sym} environment" unless config[ActiveFedora.environment.to_sym]
       @solr_config = {:url=> get_solr_url(config[ActiveFedora.environment.to_sym].symbolize_keys)}
-    end
-
-    def load_solrizer_config
-      if solrizer_config_path
-        logger.warn "loading_solrizer_config at #{solrizer_config_path}, this overwrites the default field mapper class."
-        ActiveFedora::SolrService.load_mappings 
-      end
-    end
-
-    def solrizer_config_path
-      begin
-        get_config_path('solr_mappings')
-      rescue ActiveFedora::ConfigurationError
-      end
     end
 
     # Given the solr_config that's been loaded for this environment, 
