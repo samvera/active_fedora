@@ -32,8 +32,6 @@ module ActiveFedora #:nodoc:
     autoload :Config
     autoload :FileConfigurator
     autoload :Reflection
-    autoload :Relationships
-    autoload :FileManagement
     autoload :RelationshipGraph
     autoload :Datastream
     autoload :DatastreamHash
@@ -66,7 +64,6 @@ module ActiveFedora #:nodoc:
     autoload :FixtureLoader
     autoload :FixtureExporter
     autoload :DatastreamCollections
-    autoload :NamedRelationships
     autoload :Predicates
     autoload :Validations
   end
@@ -129,21 +126,10 @@ module ActiveFedora #:nodoc:
     end
   end
   
-  def self.config_for_environment
-    ActiveSupport::Deprecation.warn("config_for_environment has been deprecated use `config' instead")
-    config
-  end
-
   def self.solr
     ActiveFedora::SolrService.instance
   end
   
-  def self.fedora
-    ActiveSupport::Deprecation.warn("ActiveFedora.fedora() is deprecated and will be removed in the next release use ActiveFedora::Base.connection_for_pid(pid) instead")
-    
-    ActiveFedora::Base.connection_for_pid('0')
-  end
-
   def self.predicate_config
     configurator.predicate_config
   end
