@@ -24,11 +24,6 @@ module ActiveFedora
 
         @subject_block ||= lambda { |ds| RDF::URI.new("info:fedora/#{ds.pid}") }
       end
-
-      def register_vocabularies(*vocabs)
-        Deprecation.warn(RDFDatastream, "register_vocabularies no longer has any effect and will be removed in active-fedora 6.0", caller)
-      end
-
     end
 
     def metadata?

@@ -13,7 +13,6 @@ module ActiveFedora
       end
     end
     
-    extend Deprecation
     include OM::XML::Document
     include Solrizer::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
     
@@ -397,13 +396,6 @@ module ActiveFedora
       end
     end
 
-    # Deprecated methods left here for backwards compatibility
-    def ensure_xml_loaded; end
-    deprecation_deprecate :ensure_xml_loaded
-
-    def serialize!
-    end
-    
     def xml_loaded
       instance_variable_defined? :@ng_xml
     end
