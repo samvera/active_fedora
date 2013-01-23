@@ -129,7 +129,7 @@ module ActiveFedora
       unless value.nil?
         # if the key is a property name, turn it into a solr field
         if self.delegate_registry.include?(key.to_sym)
-          key = ActiveFedora::SolrService.solr_name(key, :string, :searchable)
+          key = ActiveFedora::SolrService.solr_name(key, :searchable, type: :string)
         end
         if value.is_a? Array
           value.map { |val| "#{key}:#{quote_for_solr(val)}" }
