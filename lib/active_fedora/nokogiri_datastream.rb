@@ -13,8 +13,7 @@ module ActiveFedora
       end
     end
     
-      extend Deprecation
-  #  include MetadataDatastreamHelper
+    extend Deprecation
     include OM::XML::Document
     include Solrizer::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
     
