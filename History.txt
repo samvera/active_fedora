@@ -1,3 +1,6 @@
+5.5.1
+#34 Allow passing RDF::URI to rdf_type
+
 5.5.0
 Added support for complex rdf structures.
 Changed RdfDatastream to_solr so that it uses the dsid as the solr prefix, not the datastream class name
