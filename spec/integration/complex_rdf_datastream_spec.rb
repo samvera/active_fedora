@@ -89,7 +89,7 @@ END
 
         class MediatorUser
           include ActiveFedora::RdfObject
-          rdf_type "http://purl.org/dc/terms/AgentClass"
+          rdf_type RDF::DC.AgentClass
           map_predicates do |map|
             map.title(:in=> RDF::DC)
           end

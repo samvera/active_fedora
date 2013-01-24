@@ -188,7 +188,7 @@ module ActiveFedora
 
       def rdf_type(uri_or_string=nil)
         if uri_or_string
-          uri = RDF::URI.new(uri_or_string) unless uri_or_string.kind_of? RDF::URI
+          uri = uri_or_string.kind_of?(RDF::URI) ? uri_or_string : RDF::URI.new(uri_or_string) 
           self.config[:type] = {predicate: RDF.type}
           @rdf_type = uri
         end
