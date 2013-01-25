@@ -105,7 +105,9 @@ module ActiveFedora
         def #{name}(opts={})
           id_array = []
           keys = datastreams.keys
-          id_array = keys.select {|v| v =~ /#{prefix}\d*/}
+
+          id_array = keys.select {|v| v =~ /^#{prefix}\\d+$/}
+
           if opts[:response_format] == :id_array
             return id_array
           else
