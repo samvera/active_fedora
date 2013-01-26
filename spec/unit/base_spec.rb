@@ -392,8 +392,8 @@ describe ActiveFedora::Base do
         @test_object.should_receive(:create_date).and_return("2012-03-04T03:12:02Z")
         @test_object.should_receive(:modified_date).and_return("2012-03-07T03:12:02Z")
         solr_doc = @test_object.to_solr
-        solr_doc[ActiveFedora::SolrService.solr_name("system_create", type: :date)].should eql("2012-03-04T03:12:02Z")
-        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", type: :date)].should eql("2012-03-07T03:12:02Z")
+        solr_doc[ActiveFedora::SolrService.solr_name("system_create", type: :date)].should eql(["2012-03-04T03:12:02Z"])
+        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", type: :date)].should eql(["2012-03-07T03:12:02Z"])
         solr_doc[:id].should eql("#{@test_object.pid}")
       end
 
@@ -411,7 +411,7 @@ describe ActiveFedora::Base do
         stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
         @test_history = FooHistory.new()
         solr_doc = @test_history.to_solr
-        solr_doc[ActiveFedora::SolrService.solr_name("active_fedora_model", :symbol)].should eql("FooHistory")
+        solr_doc[ActiveFedora::SolrService.solr_name("active_fedora_model", :symbol)].should eql(["FooHistory"])
       end
 
       it "should call .to_solr on all SimpleDatastreams and OmDatastreams, passing the resulting document to solr" do

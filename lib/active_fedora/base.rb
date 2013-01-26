@@ -307,7 +307,10 @@ module ActiveFedora
         c_time = Time.parse(c_time) unless c_time.is_a?(Time)
         m_time = modified_date
         m_time = Time.parse(m_time) unless m_time.is_a?(Time)
-        solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid, ActiveFedora::SolrService.solr_name(:system_create, type: :date) => c_time.utc.xmlschema, ActiveFedora::SolrService.solr_name(:system_modified, type: :date) => m_time.utc.xmlschema, ActiveFedora::SolrService.solr_name(:active_fedora_model, :symbol) => self.class.inspect)
+        Solrizer.set_field(solr_doc, 'system_create', c_time)
+        Solrizer.set_field(solr_doc, 'system_modified', m_time)
+        Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.inspect, :symbol)
+        solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid)
         solrize_profile(solr_doc)
       end
       datastreams.each_value do |ds|
