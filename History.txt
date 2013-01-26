@@ -1,3 +1,7 @@
+6.0.0
+New solr schema with descriptive field suffixes
+Added support for RDF lists
+
 5.5.2
 #25 When multiple has_many relationships share a predicate, the solr_query should use class_name to distinguish the sets.
 
