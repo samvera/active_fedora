@@ -1,3 +1,7 @@
+6.0.0
+New solr schema with descriptive field suffixes
+Added support for RDF lists
+
 5.5.1
 #34 Allow passing RDF::URI to rdf_type
 
