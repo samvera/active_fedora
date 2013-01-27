@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.add_dependency("mediashelf-loggable")
   s.add_dependency("rubydora", '~>1.2')
   s.add_dependency("rdf")
-  s.add_dependency("rdf-rdfxml", '~>0.3.8')
+  s.add_dependency("rdf-rdfxml", '~>1.0.0')
   s.add_dependency("deprecation")
   s.add_development_dependency("yard")
   s.add_development_dependency("RedCloth") # for RDoc formatting
