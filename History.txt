@@ -1,3 +1,6 @@
+5.5.2
+#25 When multiple has_many relationships share a predicate, the solr_query should use class_name to distinguish the sets.
+
 5.5.1
 #34 Allow passing RDF::URI to rdf_type
 
