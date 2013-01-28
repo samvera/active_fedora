@@ -365,7 +365,7 @@ module ActiveFedora
         subject = :inbound
         if relationships_desc.has_key?(subject) && relationships_desc[subject].has_key?(relationship_name)
           predicate = relationships_desc[subject][relationship_name][:predicate]
-          query = ActiveFedora::SolrService.construct_query_for_rel(predicate, "info:fedora/#{pid}")
+          query = ActiveFedora::SolrService.construct_query_for_rel(predicate => "info:fedora/#{pid}")
           if relationships_desc.has_key?(subject) && relationships_desc[subject].has_key?(relationship_name) && relationships_desc[subject][relationship_name].has_key?(:solr_fq)
             solr_fq = relationships_desc[subject][relationship_name][:solr_fq]
             query << " AND " unless query.empty?

@@ -72,8 +72,13 @@ module ActiveFedora
       return uri.gsub(/(:)/, '\\:').gsub(/(\/)/, '\\/')
     end
     
-    def self.construct_query_for_rel(predicate, target_uri)
-      "#{solr_name(predicate, :symbol)}:#{escape_uri_for_query(target_uri)}"
+    # Create a query with a clause for each key, value
+    # @param [Hash] args key is the predicate, value is the target_uri
+    def self.construct_query_for_rel(args)
+      clauses = args.map do |predicate, target_uri|
+        "#{solr_name(predicate, :symbol)}:#{escape_uri_for_query(target_uri)}"
+      end
+      clauses.join(" AND ")
     end
 
     def self.query(query, args={})
