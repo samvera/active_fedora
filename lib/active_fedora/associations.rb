@@ -12,23 +12,26 @@ module ActiveFedora
 
     autoload :AssociationCollection, 'active_fedora/associations/association_collection'
     autoload :AssociationProxy, 'active_fedora/associations/association_proxy'
+
+    # Clears out the association cache.
+    def clear_association_cache #:nodoc:
+      @association_cache.clear if persisted?
+    end
+
+    # :nodoc:
+    attr_reader :association_cache
+    
     private 
 
       # Returns the specified association instance if it responds to :loaded?, nil otherwise.
       def association_instance_get(name)
-        ivar = "@#{name}"
-        if instance_variable_defined?(ivar)
-          association = instance_variable_get(ivar)
-          association if association.respond_to?(:loaded?)
-        end
+        @association_cache[name.to_sym]
       end
 
       # Set the specified association instance.
       def association_instance_set(name, association)
-        instance_variable_set("@#{name}", association)
+        @association_cache[name] = association
       end
-
-    
 
     module ClassMethods
 

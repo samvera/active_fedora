@@ -68,6 +68,7 @@ module ActiveFedora
     # the given namespace.
     def initialize(attrs = nil)
       attrs = {} if attrs.nil?
+      @association_cache = {}
       attributes = attrs.dup
       @inner_object = UnsavedDigitalObject.new(self.class, attributes.delete(:namespace), attributes.delete(:pid))
       self.relationships_loaded = true
@@ -80,6 +81,7 @@ module ActiveFedora
 
     # Reloads the object from Fedora.
     def reload
+      clear_association_cache
       init_with(self.class.find(self.pid).inner_object)
     end
 
@@ -94,6 +96,7 @@ module ActiveFedora
     #   post.init_with(DigitalObject.find(pid))
     #   post.properties.title # => 'hello world'
     def init_with(inner_obj)
+      @association_cache = {}
       @inner_object = inner_obj
       unless @inner_object.is_a? SolrDigitalObject
         @inner_object.original_class = self.class
