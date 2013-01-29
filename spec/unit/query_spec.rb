@@ -81,6 +81,29 @@ describe ActiveFedora::Base do
         }.and_return('response'=>{'docs'=>mock_docs})
         SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}).should == ["Fake Object1", "Fake Object2"]
       end
+
+      it "should add options" do
+        SpecModel::Basic.should_receive(:find_one).with("changeme:30", nil).and_return("Fake Object1")
+        SpecModel::Basic.should_receive(:find_one).with("changeme:22", nil).and_return("Fake Object2")
+
+        mock_docs = [{"id" => "changeme:30"},{"id" => "changeme:22"}]
+        mock_docs.should_receive(:has_next?).and_return(false)
+        ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with() { |page, rows, method, hash|
+            page == 1 &&
+            rows == 1000 &&
+            method == 'select' &&
+            hash[:params] &&
+            hash[:params][:sort] == [@sort_query] &&
+            hash[:params][:fl] == 'id' && 
+            hash[:params][:sort] == ["system_create_dt asc"] &&
+            hash[:params][:q].split(" AND ").include?(@model_query) &&
+            hash[:params][:q].split(" AND ").include?("foo:\"bar\"") &&
+            hash[:params][:q].split(" AND ").include?("baz:\"quix\"") &&
+            hash[:params][:q].split(" AND ").include?("baz:\"quack\"")
+        }.and_return('response'=>{'docs'=>mock_docs})
+        SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}, :sort=>'title_t desc').should == ["Fake Object1", "Fake Object2"]
+      end
+
     end
   end
 

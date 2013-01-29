@@ -94,8 +94,8 @@ module ActiveFedora
         options[:order] ||= sort if sort.present?
       end
 
-
       if options.present?
+        options = args.first unless args.empty?
         options = {conditions: options}
         apply_finder_options(options).all
       else
