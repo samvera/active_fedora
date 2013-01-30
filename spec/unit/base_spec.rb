@@ -392,8 +392,8 @@ describe ActiveFedora::Base do
         @test_object.should_receive(:create_date).and_return("2012-03-04T03:12:02Z")
         @test_object.should_receive(:modified_date).and_return("2012-03-07T03:12:02Z")
         solr_doc = @test_object.to_solr
-        solr_doc[ActiveFedora::SolrService.solr_name("system_create", type: :date)].should eql(["2012-03-04T03:12:02Z"])
-        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", type: :date)].should eql(["2012-03-07T03:12:02Z"])
+        solr_doc[ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)].should eql(["2012-03-04T03:12:02Z"])
+        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :stored_sortable, type: :date)].should eql(["2012-03-07T03:12:02Z"])
         solr_doc[:id].should eql("#{@test_object.pid}")
       end
 

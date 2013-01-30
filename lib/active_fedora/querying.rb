@@ -40,7 +40,7 @@ module ActiveFedora
     end
 
     def default_sort_params
-      [ActiveFedora::SolrService.solr_name(:system_create, type: :date)+' asc'] 
+      [ActiveFedora::SolrService.solr_name(:system_create, :stored_sortable, type: :date)+' asc'] 
     end
 
     # Yields the found ActiveFedora::Base object to the passed block
