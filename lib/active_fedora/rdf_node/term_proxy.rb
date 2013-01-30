@@ -3,7 +3,10 @@ module ActiveFedora
     class TermProxy
 
       attr_reader :graph, :subject, :predicate, :options
-      delegate :class, :to_s, :==, :kind_of?, :each, :map, :empty?, :as_json, :is_a?, :to => :values
+
+      delegate :class, :to_s, :==, :kind_of?, :each, :map, :empty?, :as_json, 
+               :is_a?, :to_ary, :inspect, :first, :last, :include?, :count, 
+               :to => :values
 
       # @param graph RDF::Graph
       # @param subject RDF::URI
@@ -51,14 +54,7 @@ module ActiveFedora
         
         values
       end
-      
-      def method_missing(method, *args, &block)
-        if values.respond_to? method
-          values.send(method, *args, &block)
-        else
-          super
-        end
-      end
+
     end
   end
 end
