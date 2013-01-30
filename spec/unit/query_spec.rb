@@ -8,7 +8,7 @@ describe ActiveFedora::Base do
       end
     end
     @model_query = ActiveFedora::SolrService.solr_name("has_model", :symbol) + ":#{solr_uri("info:fedora/afmodel:SpecModel_Basic")}"
-    @sort_query = ActiveFedora::SolrService.solr_name("system_create", type: :date) + ' asc'
+    @sort_query = ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date) + ' asc'
   end
   
   after(:all) do
@@ -93,9 +93,8 @@ describe ActiveFedora::Base do
             rows == 1000 &&
             method == 'select' &&
             hash[:params] &&
-            hash[:params][:sort] == [@sort_query] &&
             hash[:params][:fl] == 'id' && 
-            hash[:params][:sort] == ["system_create_dt asc"] &&
+            hash[:params][:sort] == [@sort_query] &&
             hash[:params][:q].split(" AND ").include?(@model_query) &&
             hash[:params][:q].split(" AND ").include?("foo:\"bar\"") &&
             hash[:params][:q].split(" AND ").include?("baz:\"quix\"") &&
