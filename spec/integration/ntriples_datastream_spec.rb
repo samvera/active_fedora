@@ -5,11 +5,11 @@ describe ActiveFedora::NtriplesRDFDatastream do
     class MyDatastream < ActiveFedora::NtriplesRDFDatastream
       map_predicates do |map|
         map.title(:in => RDF::DC) do |index|
-          index.as :searchable, :facetable, :displayable
+          index.as :stored_searchable, :facetable
         end
         map.date_uploaded(:to => "dateSubmitted", :in => RDF::DC) do |index|
           index.type :date
-          index.as :searchable, :displayable, :sortable
+          index.as :stored_searchable, :sortable
         end
         map.part(:to => "hasPart", :in => RDF::DC)
         map.based_near(:in => RDF::FOAF)
@@ -74,7 +74,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
   it "should produce a solr document" do
     @subject = RdfTest.new(title: "War and Peace")
     solr_document = @subject.to_solr
-    solr_document[ActiveFedora::SolrService.solr_name('rdf__title', :displayable)].should == ["War and Peace"]
     solr_document[ActiveFedora::SolrService.solr_name('rdf__title', :facetable)].should == ["War and Peace"]
     solr_document[ActiveFedora::SolrService.solr_name('rdf__title', type: :string)].should == ["War and Peace"]
   end

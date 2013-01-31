@@ -54,12 +54,12 @@ module Hydra
         t.computing_id
       }
       # lookup :person, :first_name        
-      t.person(:ref=>:name, :attributes=>{:type=>"personal"}, :index_as=>[:facetable, :searchable])
+      t.person(:ref=>:name, :attributes=>{:type=>"personal"}, :index_as=>[:facetable, :stored_searchable])
       t.department(:proxy=>[:person,:description],:index_as=>[:facetable])
       t.organization(:ref=>:name, :attributes=>{:type=>"corporate"}, :index_as=>[:facetable])
       t.conference(:ref=>:name, :attributes=>{:type=>"conference"}, :index_as=>[:facetable])
-      t.role(:index_as=>[:searchable]) {
-        t.text(:path=>"roleTerm",:attributes=>{:type=>"text"}, :index_as=>[:searchable])
+      t.role(:index_as=>[:stored_searchable]) {
+        t.text(:path=>"roleTerm",:attributes=>{:type=>"text"}, :index_as=>[:stored_searchable])
         t.code(:path=>"roleTerm",:attributes=>{:type=>"code"})
       }
       t.journal(:path=>'relatedItem', :attributes=>{:type=>"host"}) {
@@ -80,7 +80,7 @@ module Hydra
           }
           t.start_page(:proxy=>[:pages, :start])
           t.end_page(:proxy=>[:pages, :end])
-          t.publication_date(:path=>"date", :type=>:date, :index_as=>[:searchable])
+          t.publication_date(:path=>"date", :type=>:date, :index_as=>[:stored_searchable])
         }
       }
       t.note
