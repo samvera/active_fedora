@@ -149,18 +149,18 @@ describe ActiveFedora::NtriplesRDFDatastream do
             index.type :date
           end
           map.title(:in => RDF::DC) do |index|
-            index.as :searchable, :displayable, :sortable
+            index.as :stored_searchable, :sortable
             index.type :text 
           end
           map.publisher(:in => RDF::DC) do |index| 
-            index.as :facetable, :sortable, :searchable, :displayable
+            index.as :facetable, :sortable, :stored_searchable
           end
           map.based_near(:in => RDF::FOAF) do |index|
-            index.as :displayable, :facetable, :searchable 
+            index.as :facetable, :stored_searchable 
             index.type :text
           end
           map.related_url(:to => "seeAlso", :in => RDF::RDFS) do |index|
-            index.defaults
+            index.as :stored_searchable
           end
           map.rights(:in => RDF::DC)
         end
@@ -186,16 +186,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
       solr_doc = @subject.to_solr
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", type: :string)].should == ["publisher1"]
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :sortable)].should == ["publisher1"]
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :displayable)].should == ["publisher1"]
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :facetable)].should == ["publisher1"]
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", type: :string)].should == ["coverage1", "coverage2"]
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :displayable)].should == ["coverage1", "coverage2"]
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :facetable)].should == ["coverage1", "coverage2"]
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__created", :sortable)].should == ["2009-10-10"]
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__created", :displayable)].should == ["2009-10-10"]
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__title", type: :string)].should == ["fake-title"]
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__title", :sortable)].should == ["fake-title"]
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__title", :displayable)].should == ["fake-title"]
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string)].should == ["http://example.org/"]
     end
 
@@ -243,16 +240,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
           @obj.to_solr.keys.should include(ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string),
                 ActiveFedora::SolrService.solr_name("solr_rdf__publisher", type: :string),
                 ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :sortable),
-                ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :displayable),
                 ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :facetable), 
                 ActiveFedora::SolrService.solr_name("solr_rdf__created", :sortable),
                 ActiveFedora::SolrService.solr_name("solr_rdf__created", :displayable), 
                 ActiveFedora::SolrService.solr_name("solr_rdf__title", type: :string),
                 ActiveFedora::SolrService.solr_name("solr_rdf__title", :sortable),
-                ActiveFedora::SolrService.solr_name("solr_rdf__title", :displayable),
                 ActiveFedora::SolrService.solr_name("solr_rdf__based_near", type: :string),
-                ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :facetable),
-                ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :displayable))
+                ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :facetable))
 
         end
 
