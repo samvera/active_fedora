@@ -167,7 +167,7 @@ module ActiveFedora
       class IndexObject
         attr_accessor :data_type, :behaviors
         def initialize
-          @behaviors = [:searchable]
+          @behaviors = []
           @data_type = :string
         end
         def as(*args)

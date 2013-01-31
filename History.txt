@@ -1,6 +1,7 @@
 6.0.0
 New solr schema with descriptive field suffixes
 Added support for RDF lists
+RDF does not index terms by default
 
 5.6.1
 Fixed delegating enumerable methods (join, [], each_with_index, to_a, etc) on an RdfNode::TermProxy
