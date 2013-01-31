@@ -192,7 +192,7 @@ module ActiveFedora
       if conditions
         where(conditions).destroy_all
       else
-        to_a.each {|object| object.destroy }.tap { reset }
+        to_a.each {|object| object.destroy }.tap { reset }.size
       end
     end
 
@@ -200,7 +200,7 @@ module ActiveFedora
       if conditions
         where(conditions).delete_all
       else
-        to_a.each {|object| object.delete }.tap { reset }
+        to_a.each {|object| object.delete }.tap { reset }.size
       end
     end
 
