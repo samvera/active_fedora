@@ -149,6 +149,21 @@ module ActiveFedora
       @records
     end
 
+    # Get a count of the number of objects from solr
+    # Takes :conditions as an argument
+    def count(*args)
+      return apply_finder_options(args.first).count  if args.any?
+      opts = {}
+      opts[:rows] = @limit_value if @limit_value
+      opts[:sort] = @order_values if @order_values
+      
+      query = @where_values.present? ? @where_values : {}
+      @klass.calculate :count, query, opts
+
+    end
+
+
+
     def ==(other)
       case other
       when Relation

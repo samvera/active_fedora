@@ -81,8 +81,12 @@ describe ActiveFedora::Model do
       ModelIntegrationSpec::Basic.limit(1).should == [@test_instance1]
     end
 
-    it "should chain them" do
+    it "should chain queries" do
       ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').limit(1).should == [@test_instance2]
+    end
+
+    it "should chain count" do
+      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').count.should == 2 
     end
   end
 end
