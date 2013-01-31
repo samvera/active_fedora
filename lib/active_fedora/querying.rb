@@ -1,6 +1,6 @@
 module ActiveFedora
   module Querying
-    delegate :find, :first, :where, :limit, :order, :all, :delete_all, :destroy_all, :to=>:relation
+    delegate :find, :first, :where, :limit, :order, :all, :delete_all, :destroy_all, :count, :to=>:relation
     def relation
       Relation.new(self)
     end
@@ -39,6 +39,10 @@ module ActiveFedora
       end while docs.has_next? 
     end
 
+    def calculate(calculation, conditions, opts={})
+      SolrService.query(create_query(conditions), :raw=>true, :rows=>0)['response']['numFound']
+    end
+
     def default_sort_params
       [ActiveFedora::SolrService.solr_name(:system_create, :stored_sortable, type: :date)+' asc'] 
     end
@@ -63,14 +67,6 @@ module ActiveFedora
     def exists?(pid)
       inner = DigitalObject.find_or_initialize(self, pid)
       !inner.new?
-    end
-
-    # Get a count of the number of objects from solr
-    # Takes :conditions as an argument
-    def count(args = {})
-      q = search_model_clause ? [search_model_clause] : []
-      q << "#{args[:conditions]}"  if args[:conditions]
-      SolrService.query(q.join(' AND '), :raw=>true, :rows=>0)['response']['numFound']
     end
 
     # Returns a solr result matching the supplied conditions
@@ -144,7 +140,11 @@ module ActiveFedora
 
     def create_query_from_string(conditions)
       model_clause = search_model_clause
-      model_clause ? "#{model_clause} AND (#{conditions})" : conditions
+      if model_clause 
+        conditions ? "#{model_clause} AND (#{conditions})" : model_clause
+      else
+        conditions
+      end
     end
 
     # Return the solr clause that queries for this type of class
