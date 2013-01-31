@@ -2,6 +2,7 @@
 New solr schema with descriptive field suffixes
 Added support for RDF lists
 RDF does not index terms by default
+count is now a scoped query.
 
 5.5.2
 #25 When multiple has_many relationships share a predicate, the solr_query should use class_name to distinguish the sets.
