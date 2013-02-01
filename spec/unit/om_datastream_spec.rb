@@ -182,7 +182,7 @@ describe ActiveFedora::OmDatastream do
     end
   end
   
-  describe '.content=' do
+  describe 'setting content' do
     subject { ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata") }
     it "should update the content" do
       subject.stub(:new? => false )
@@ -225,7 +225,6 @@ describe ActiveFedora::OmDatastream do
       @test_ds2.should_not be_changed 
       @test_ds2.ng_xml = @sample_raw_xml
       @test_ds2.should be_changed
-      @test_ds2.instance_variable_get(:@content).should be_nil
     end
   end
   

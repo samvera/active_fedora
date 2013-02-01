@@ -26,7 +26,6 @@ describe ActiveFedora::OmDatastream do
       @test_object = HydrangeaArticle2.find(@pid)
 
       @test_object.descMetadata.ng_xml = @test_object.descMetadata.ng_xml
-
       @test_object.descMetadata.should_not be_changed
     end
 

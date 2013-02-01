@@ -31,7 +31,6 @@ module ActiveFedora
 
     end
 
-    attr_accessor :loaded
     def metadata?
       true
     end
@@ -42,24 +41,19 @@ module ActiveFedora
       return "#{pre}__#{name}".to_sym
     end
 
+    # Overriding so that one can call ds.content on an unsaved datastream and they will see the serialized format
     def content
       serialize
     end
 
     def content=(content)
-      self.loaded = true
       @graph = deserialize(content)
     end
 
     def content_changed?
-      return false if new? and !loaded
+      @content = serialize
       super
     end
-
-    def changed?
-      super || content_changed?
-    end
-
 
     def to_solr(solr_doc = Hash.new) # :nodoc:
       fields.each do |field_key, field_info|
@@ -96,7 +90,6 @@ module ActiveFedora
 
     def graph
       @graph ||= begin
-        self.loaded = true
         deserialize
       end      
     end

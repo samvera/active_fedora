@@ -65,11 +65,12 @@ module ActiveFedora
     def ng_xml=(new_xml)
       case new_xml 
       when Nokogiri::XML::Document
-        @ng_xml = new_xml
+        self.content=new_xml.to_xml
       when  Nokogiri::XML::Node 
-        @ng_xml = Nokogiri::XML(new_xml.to_s) ## Cast a fragment to a document
+        ## Cast a fragment to a document
+        self.content=new_xml.to_s
       when String 
-        @ng_xml = Nokogiri::XML::Document.parse(new_xml)
+        self.content=new_xml
       else
         raise TypeError, "You passed a #{new_xml.class} into the ng_xml of the #{self.dsid} datastream. NokogiriDatastream.ng_xml= only accepts Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node, or raw XML (String) as inputs."
       end
@@ -105,6 +106,7 @@ module ActiveFedora
     
     def content=(content)
       @ng_xml = Nokogiri::XML::Document.parse(content)
+      super(@ng_xml.to_s)
     end
 
     def content_changed?
