@@ -39,6 +39,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.related_url.should == ["http://google.com/"]
     end
 
+    it "should be able to call enumerable methods on the fields" do
+      @subject.title.join(', ').should == "Title of work"
+    end
+
 
     it "should return fields that are not TermProxies" do
       @subject.created.should be_kind_of Array
