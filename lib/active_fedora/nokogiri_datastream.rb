@@ -14,7 +14,7 @@ module ActiveFedora
     end
     
     include OM::XML::Document
-    include Solrizer::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
+    include OM::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
     
     alias_method(:om_term_values, :term_values) unless method_defined?(:om_term_values)
     alias_method(:om_update_values, :update_values) unless method_defined?(:om_update_values)
