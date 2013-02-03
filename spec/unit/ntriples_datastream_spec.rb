@@ -44,6 +44,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.title.join(', ').should == "Title of work"
       @subject.title.count.should == 1 
       @subject.title.size.should == 1 
+      @subject.title[0].should == "Title of work" 
     end
 
     it "should return fields that are not TermProxies" do
