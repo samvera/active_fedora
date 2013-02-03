@@ -37,7 +37,7 @@ describe ActiveFedora::OmDatastream do
   its(:metadata?) { should be_true}
 
   it "should include the Solrizer::XML::TerminologyBasedSolrizer for .to_solr support" do
-    ActiveFedora::OmDatastream.included_modules.should include(Solrizer::XML::TerminologyBasedSolrizer)
+    ActiveFedora::OmDatastream.included_modules.should include(OM::XML::TerminologyBasedSolrizer)
   end
   
   describe '#new' do
