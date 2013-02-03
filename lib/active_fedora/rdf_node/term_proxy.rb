@@ -6,7 +6,7 @@ module ActiveFedora
 
       delegate :class, :to_s, :==, :kind_of?, :each, :map, :empty?, :as_json, 
                :is_a?, :to_ary, :inspect, :first, :last, :include?, :count, 
-               :join, :to => :values
+               :size, :join, :to => :values
 
       # @param graph RDF::Graph
       # @param subject RDF::URI

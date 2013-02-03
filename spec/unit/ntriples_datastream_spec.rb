@@ -9,6 +9,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
           map.title(:in => RDF::DC)
           map.publisher(:in => RDF::DC)
           map.creator(:in => RDF::DC)
+          map.educationLevel(:in => RDF::DC)
           map.based_near(:in => RDF::FOAF)
           map.related_url(:to => "seeAlso", :in => RDF::RDFS)
         end
@@ -41,8 +42,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
     it "should be able to call enumerable methods on the fields" do
       @subject.title.join(', ').should == "Title of work"
+      @subject.title.count.should == 1 
+      @subject.title.size.should == 1 
     end
-
 
     it "should return fields that are not TermProxies" do
       @subject.created.should be_kind_of Array
