@@ -4,9 +4,9 @@ module ActiveFedora
 
       attr_reader :graph, :subject, :predicate, :options
 
-      delegate :class, :to_s, :==, :kind_of?, :each, :map, :empty?, :as_json, 
-               :is_a?, :to_ary, :inspect, :first, :last, :include?, :count, 
-               :size, :join, :[], :to => :values
+      delegate :class, :to_s, :==, :kind_of?, :each, :each_with_index, :map,
+               :empty?, :as_json, :is_a?, :to_ary, :to_a, :inspect, :first,
+               :last, :include?, :count, :size, :join, :[], :to => :values
 
       # @param graph RDF::Graph
       # @param subject RDF::URI

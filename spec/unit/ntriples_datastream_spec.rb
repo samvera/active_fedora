@@ -45,6 +45,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.title.count.should == 1 
       @subject.title.size.should == 1 
       @subject.title[0].should == "Title of work" 
+      @subject.title.to_a.should == ["Title of work"]
+      val = []
+      @subject.title.each_with_index {|v, i| val << "#{i}. #{v}"}
+      val.should == ["0. Title of work"]
     end
 
     it "should return fields that are not TermProxies" do
