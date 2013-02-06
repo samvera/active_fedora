@@ -181,7 +181,7 @@ module ActiveFedora
 
         def construct_query
           clauses = {@reflection.options[:property] => @owner.internal_uri}
-          clauses[:has_model] = @reflection.class_name.constantize.to_class_uri if @reflection.class_name
+          clauses[:has_model] = @reflection.class_name.constantize.to_class_uri if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base'
           @counter_query = @finder_query = ActiveFedora::SolrService.construct_query_for_rel(clauses)
         end
 

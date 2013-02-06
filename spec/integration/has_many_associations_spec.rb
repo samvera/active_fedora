@@ -4,7 +4,7 @@ describe "When two or more relationships share the same property" do
   before do
     class Book < ActiveFedora::Base 
       has_many :collections, :property=>:is_part_of, :class_name=>'Collection'
-      has_many :people, :property=>:is_part_of#, :class_name=>'Person'
+      has_many :people, :property=>:is_part_of
     end
 
     class Person < ActiveFedora::Base
@@ -15,7 +15,7 @@ describe "When two or more relationships share the same property" do
       belongs_to :book, :property=>:is_part_of
     end
 
-    @book = Book.create!#(:collections=>[@collection1, @collection2], :people=>[@person1, @person2])
+    @book = Book.create!
     @person1 = Person.create!(:book=>@book)
     @person2 = Person.create!(:book=>@book)
   end
@@ -29,5 +29,36 @@ describe "When two or more relationships share the same property" do
     @book.reload
     @book.people.should == [@person1, @person2]
     @book.collections.should == []
+  end
+end
+
+describe "When relationship is restricted to AF::Base" do
+  before do
+    class Email < ActiveFedora::Base 
+      has_many :attachments, :property=>:is_part_of, :class_name=>'ActiveFedora::Base'
+    end
+
+    class Image < ActiveFedora::Base
+      belongs_to :email, :property=>:is_part_of
+    end
+
+    class PDF < ActiveFedora::Base
+      belongs_to :email, :property=>:is_part_of
+    end
+
+    @book = Email.create!
+    @image = Image.create!(:email=>@book)
+    @pdf = PDF.create!(:email=>@book)
+  end
+  after do
+      Object.send(:remove_const, :Image)
+      Object.send(:remove_const, :PDF)
+      Object.send(:remove_const, :Email)
+  end
+
+
+  it "Should not restrict relationships " do
+    @book.reload
+    @book.attachments.should == [@image, @pdf]
   end
 end
