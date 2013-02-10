@@ -42,6 +42,7 @@ describe ActiveFedora::Datastream do
       @test_datastream.validate_content_present.should be_false
       @test_datastream.content = "<foo><xmlelement/></foo>"
       @test_datastream.validate_content_present.should be_true
+      @test_datastream.should_not be_external
     end
 
     it "should expect a dsLocation on an External (E) datastream" do
@@ -50,6 +51,7 @@ describe ActiveFedora::Datastream do
       @test_datastream.validate_content_present.should be_false
       @test_datastream.dsLocation = "http://example.com/test/content/abcd"
       @test_datastream.validate_content_present.should be_true
+      @test_datastream.should be_external
     end
 
     it "should expect a dsLocation on a Redirect (R) datastream" do
