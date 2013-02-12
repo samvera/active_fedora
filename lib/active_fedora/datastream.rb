@@ -27,12 +27,6 @@ module ActiveFedora
       false
     end
 
-    # @return [boolean] is this an external datastream?
-    def external?
-      controlGroup == 'E'
-    end
-
-    
     def validate_content_present
       has_content?
     end
