@@ -1,4 +1,5 @@
 default:
+  startup_wait: 45
   jetty_port: 8983
   java_opts:
     - "-Xmx256m" 
