@@ -1,10 +1,12 @@
 #this class represents a xml metadata datastream
 module ActiveFedora
   class NokogiriDatastream < OmDatastream
+    extend Deprecation
     def initialize(digital_object=nil, dsid=nil, options={})
-      ActiveSupport::Deprecation.warn("NokogiriDatastream is deprecated and will be removed in active-fedora 7.0, use OmDatastream instead", caller(1))
       super
     end
+    self.deprecation_horizon= "hydra-head 7.0"
+    deprecation_deprecate :initialize
   end
 end
 
