@@ -26,7 +26,7 @@ module ActiveFedora
 
     # Add a relationship to the Object.
     # @param predicate
-    # @param object Either a string URI or an object that is a kind of ActiveFedora::Base 
+    # @param target Either a string URI or an object that is a kind of ActiveFedora::Base 
     def add_relationship(predicate, target, literal=false)
       object_relations.add(predicate, target, literal)
       rels_ext.content_will_change! if object_relations.dirty
@@ -47,7 +47,7 @@ module ActiveFedora
     #   2. kind_of? returns true for the model passed in
     # This method can most often be used to detect if an object from Fedora that was created
     # with a different model was then used to populate this object.
-    # @param [Class] the model class name to check if an object conforms_to that model
+    # @param [Class] model_class the model class name to check if an object conforms_to that model
     # @return [Boolean] true if this object conforms to the given model name
     def conforms_to?(model_class)
       if self.kind_of?(model_class)
@@ -72,7 +72,7 @@ module ActiveFedora
     #
     # Remove a Rels-Ext relationship from the Object.
     # @param predicate
-    # @param object Either a string URI or an object that responds to .pid 
+    # @param obj Either a string URI or an object that responds to .pid 
     def remove_relationship(predicate, obj, literal=false)
       object_relations.delete(predicate, obj)
       self.relationships_are_dirty = true

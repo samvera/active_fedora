@@ -79,9 +79,8 @@ module ActiveFedora
     # called on
     #
     # @param[String,Symbol,Hash] args either a pid or :all or a hash of conditions
-    # @param [Hash] opts the options to create a message with.
-    # @option opts [Integer] :rows when :all is passed, the maximum number of rows to load from solr
-    # @option opts [Boolean] :cast when true, examine the model and cast it to the first known cModel
+    # @option args [Integer] :rows when :all is passed, the maximum number of rows to load from solr
+    # @option args [Boolean] :cast when true, examine the model and cast it to the first known cModel
     def find(*args)
       return to_a.find { |*block_args| yield(*block_args) } if block_given?
       options = args.extract_options!

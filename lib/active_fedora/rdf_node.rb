@@ -100,7 +100,7 @@ module ActiveFedora
       end
     end
 
-    # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
+    # @param [Symbol, RDF::URI] term predicate  the predicate to insert into the graph
     def find_predicate(term)
       conf = config_for_term_or_uri(term)
       conf ? conf[:predicate] : nil

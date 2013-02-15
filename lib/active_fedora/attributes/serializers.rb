@@ -3,7 +3,7 @@ module ActiveFedora
     module Serializers
 
       ## This allows you to use date_select helpers in rails views 
-      # @param [Hash] parms parameters hash
+      # @param [Hash] params parameters hash
       # @return [Hash] a parameters list with the date select parameters replaced with dates
       def deserialize_dates_from_form(params)
         dates = {}

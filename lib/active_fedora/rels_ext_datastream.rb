@@ -42,8 +42,8 @@ module ActiveFedora
 
     # Populate a RelsExtDatastream object based on the "datastream" content 
     # Assumes that the datastream contains RDF XML from a Fedora RELS-EXT datastream 
+    # @param [String] xml the "rdf" node 
     # @param [ActiveFedora::Datastream] tmpl the Datastream object that you are populating
-    # @param [String] the "rdf" node 
     def self.from_xml(xml, tmpl) 
       if (xml.nil?)
         ### maybe put the template here?
