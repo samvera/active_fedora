@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
   s.add_dependency("rdf")
   s.add_dependency("rdf-rdfxml", '~>1.0.0')
   s.add_dependency("deprecation")
+  s.add_development_dependency("rdoc")
   s.add_development_dependency("yard")
   s.add_development_dependency("RedCloth") # for RDoc formatting
   s.add_development_dependency("rake")
