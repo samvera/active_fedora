@@ -103,7 +103,6 @@ module ActiveFedora
       cast ? af_base.adapt_to_cmodel : af_base
     end
     
-  
     private 
 
     # Returns a solr query for the supplied conditions

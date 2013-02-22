@@ -30,17 +30,15 @@ module ActiveFedora #:nodoc:
     autoload :ContentModel
     autoload :Callbacks
     autoload :Config
-    autoload :FileConfigurator
-    autoload :Reflection
-    autoload :RelationshipGraph
     autoload :Datastream
     autoload :DatastreamHash
     autoload :Datastreams
     autoload :Delegating
     autoload :DigitalObject
-    autoload :UnsavedDigitalObject
-    autoload :SolrDigitalObject
+    autoload :FileConfigurator
+    autoload :Indexing
     autoload :Model
+    autoload :NestedAttributes
     autoload :NokogiriDatastream
     autoload :NomDatastream
     autoload :NtriplesRDFDatastream
@@ -54,13 +52,16 @@ module ActiveFedora #:nodoc:
     autoload :RdfNode
     autoload :RdfObject
     autoload :RdfxmlRDFDatastream
+    autoload :Reflection
     autoload :Relation
+    autoload :RelationshipGraph
     autoload :RelsExtDatastream
     autoload :ServiceDefinitions
     autoload :SemanticNode
     autoload :SimpleDatastream
+    autoload :SolrDigitalObject
     autoload :SolrService
-    autoload :NestedAttributes
+    autoload :UnsavedDigitalObject
     autoload :FixtureLoader
     autoload :FixtureExporter
     autoload :DatastreamCollections

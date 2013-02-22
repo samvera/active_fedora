@@ -1,6 +1,7 @@
 module ActiveFedora
   # = Active Fedora Persistence
   module Persistence
+    extend ActiveSupport::Concern
 
     #Saves a Base object, and any dirty datastreams, then updates 
     #the Solr index for this object.
@@ -79,15 +80,38 @@ module ActiveFedora
       delete
     end
 
-    # Updates Solr index with self.
-    def update_index
-      if defined?( Solrizer::Fedora::Solrizer ) 
-        #logger.info("Trying to solrize pid: #{pid}")
-        solrizer = Solrizer::Fedora::Solrizer.new
-        solrizer.solrize( self )
-      else
-        SolrService.add(self.to_solr)
-        SolrService.commit
+    module ClassMethods
+      # Creates an object (or multiple objects) and saves it to the repository, if validations pass.
+      # The resulting object is returned whether the object was saved successfully to the repository or not.
+      #
+      # The +attributes+ parameter can be either be a Hash or an Array of Hashes.  These Hashes describe the
+      # attributes on the objects that are to be created.
+      #
+      # ==== Examples
+      #   # Create a single new object
+      #   User.create(:first_name => 'Jamie')
+      #
+      #   # Create an Array of new objects
+      #   User.create([{ :first_name => 'Jamie' }, { :first_name => 'Jeremy' }])
+      #
+      #   # Create a single object and pass it into a block to set other attributes.
+      #   User.create(:first_name => 'Jamie') do |u|
+      #     u.is_admin = false
+      #   end
+      #
+      #   # Creating an Array of new objects using a block, where the block is executed for each object:
+      #   User.create([{ :first_name => 'Jamie' }, { :first_name => 'Jeremy' }]) do |u|
+      #     u.is_admin = false
+      #   end
+      def create(attributes = nil, &block)
+        if attributes.is_a?(Array)
+          attributes.collect { |attr| create(attr, &block) }
+        else
+          object = new(attributes)
+          yield(object) if block_given?
+          object.save
+          object
+        end
       end
     end
 
@@ -107,7 +131,6 @@ module ActiveFedora
 
   private
     
-
     # Deals with preparing new object to be saved to Fedora, then pushes it and its datastreams into Fedora. 
     def create
       assign_pid
@@ -136,7 +159,5 @@ module ActiveFedora
       refresh
       return !!result
     end
-
-
   end
 end

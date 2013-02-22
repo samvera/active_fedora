@@ -149,39 +149,6 @@ module ActiveFedora
       ds_specs[dsid] ? ds_specs[dsid].fetch(:type, ActiveFedora::Datastream) : ActiveFedora::Datastream
     end
 
-    # Creates an object (or multiple objects) and saves it to the repository, if validations pass.
-    # The resulting object is returned whether the object was saved successfully to the repository or not.
-    #
-    # The +attributes+ parameter can be either be a Hash or an Array of Hashes.  These Hashes describe the
-    # attributes on the objects that are to be created.
-    #
-    # ==== Examples
-    #   # Create a single new object
-    #   User.create(:first_name => 'Jamie')
-    #
-    #   # Create an Array of new objects
-    #   User.create([{ :first_name => 'Jamie' }, { :first_name => 'Jeremy' }])
-    #
-    #   # Create a single object and pass it into a block to set other attributes.
-    #   User.create(:first_name => 'Jamie') do |u|
-    #     u.is_admin = false
-    #   end
-    #
-    #   # Creating an Array of new objects using a block, where the block is executed for each object:
-    #   User.create([{ :first_name => 'Jamie' }, { :first_name => 'Jeremy' }]) do |u|
-    #     u.is_admin = false
-    #   end
-    def self.create(attributes = nil, &block)
-      if attributes.is_a?(Array)
-        attributes.collect { |attr| create(attr, &block) }
-      else
-        object = new(attributes)
-        yield(object) if block_given?
-        object.save
-        object
-      end
-    end
-
     def clone
       new_object = self.class.create
       clone_into(new_object)
@@ -297,61 +264,6 @@ module ActiveFedora
       end
     end
 
-    # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.
-    # @param [Hash] solr_doc (optional) Hash to insert the fields into
-    # @param [Hash] opts (optional) 
-    # If opts[:model_only] == true, the base object metadata and the RELS-EXT datastream will be omitted.  This is mainly to support shelver, which calls .to_solr for each model an object subscribes to. 
-    def to_solr(solr_doc = Hash.new, opts={})
-      unless opts[:model_only]
-        c_time = create_date
-        c_time = Time.parse(c_time) unless c_time.is_a?(Time)
-        m_time = modified_date
-        m_time = Time.parse(m_time) unless m_time.is_a?(Time)
-        Solrizer.set_field(solr_doc, 'system_create', c_time, :stored_sortable)
-        Solrizer.set_field(solr_doc, 'system_modified', m_time, :stored_sortable)
-        Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.inspect, :symbol)
-        solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid)
-        solrize_profile(solr_doc)
-      end
-      datastreams.each_value do |ds|
-        solr_doc = ds.to_solr(solr_doc)
-      end
-      solr_doc = solrize_relationships(solr_doc) unless opts[:model_only]
-      solr_doc
-    end
-
-    def solr_name(*args)
-      ActiveFedora::SolrService.solr_name(*args)
-    end
-
-    def solrize_profile(solr_doc = Hash.new) # :nodoc:
-      profile_hash = { 'datastreams' => {} }
-      if inner_object.respond_to? :profile
-        inner_object.profile.each_pair do |property,value|
-          if property =~ /Date/
-            value = Time.parse(value) unless value.is_a?(Time)
-            value = value.xmlschema
-          end
-          profile_hash[property] = value
-        end
-      end
-      self.datastreams.each_pair { |dsid,ds| profile_hash['datastreams'][dsid] = ds.solrize_profile }
-      solr_doc[self.class.profile_solr_name] = profile_hash.to_json
-    end
-    
-    # Serialize the datastream's RDF relationships to solr
-    # @param [Hash] solr_doc @deafult an empty Hash
-    def solrize_relationships(solr_doc = Hash.new)
-      relationships.each_statement do |statement|
-        predicate = RelsExtDatastream.short_predicate(statement.predicate)
-        literal = statement.object.kind_of?(RDF::Literal)
-        val = literal ? statement.object.value : statement.object.to_str
-        ::Solrizer::Extractor.insert_solr_field_value(solr_doc, solr_name(predicate, :symbol), val )
-      end
-      return solr_doc
-    end
-
-    
     # This method adapts the inner_object to a new ActiveFedora::Base implementation
     # This is intended to minimize redundant interactions with Fedora
     def adapt_to(klass)
@@ -387,52 +299,6 @@ module ActiveFedora
       self.init_with DigitalObject.find(self.class,self.pid)
     end
     
-    # This method can be used instead of ActiveFedora::Model::ClassMethods.find.  
-    # It works similarly except it populates an object from Solr instead of Fedora.
-    # It is most useful for objects used in read-only displays in order to speed up loading time.  If only
-    # a pid is passed in it will query solr for a corresponding solr document and then use it
-    # to populate this object.
-    # 
-    # If a value is passed in for optional parameter solr_doc it will not query solr again and just use the
-    # one passed to populate the object.
-    #
-    # It will anything stored within solr such as metadata and relationships.  Non-metadata datastreams will not
-    # be loaded and if needed you should use find instead.
-    def self.load_instance_from_solr(pid,solr_doc=nil)
-      if solr_doc.nil?
-        result = find_with_conditions(:id=>pid)
-        raise ActiveFedora::ObjectNotFoundError, "Object #{pid} not found in solr" if result.empty?
-        solr_doc = result.first
-        #double check pid and id in record match
-        raise ActiveFedora::ObjectNotFoundError, "Object #{pid} not found in Solr" unless !result.nil? && !solr_doc.nil? && pid == solr_doc[SOLR_DOCUMENT_ID]
-      else
-        raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
-      end
-      klass = if class_str = solr_doc[ActiveFedora::SolrService.solr_name('has_model', :symbol)]
-        ActiveFedora::SolrService.class_from_solr_document(solr_doc)
-      else
-        ActiveFedora::Base
-      end
-
-      profile_json = Array(solr_doc[ActiveFedora::Base.profile_solr_name]).first
-      unless profile_json.present?
-        raise ActiveFedora::ObjectNotFoundError, "Object #{pid} does not contain a solrized profile"
-      end
-      profile_hash = ActiveSupport::JSON.decode(profile_json)
-      obj = klass.allocate.init_with(SolrDigitalObject.new(solr_doc, profile_hash, klass))
-      #set by default to load any dependent relationship objects from solr as well
-      #need to call rels_ext once so it exists when iterating over datastreams
-      obj.rels_ext
-      obj.datastreams.each_value do |ds|
-        if ds.respond_to?(:profile_from_hash) and (ds_prof = profile_hash['datastreams'][ds.dsid])
-          ds.profile_from_hash(ds_prof)
-        end
-        ds.from_solr(solr_doc) if ds.respond_to?(:from_solr)
-      end
-      obj.inner_object.freeze
-      obj
-    end
-    
     def self.pids_from_uris(uris) 
       if uris.class == String
         return uris.gsub("info:fedora/", "")
@@ -451,6 +317,7 @@ module ActiveFedora
     include ActiveFedora::Persistence
     include Model
     include Loggable
+    include Indexing
     include ActiveModel::Conversion
     include Validations
     include Callbacks
