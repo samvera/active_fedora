@@ -376,4 +376,23 @@ describe ActiveFedora::OmDatastream do
       @mods_ds.term_values(*term_pointer)
     end
   end
+  describe "an instance that exists in the datastore, but hasn't been loaded" do
+    before do 
+      class MyObj < ActiveFedora::Base
+        has_metadata 'descMetadata', type: Hydra::ModsArticleDatastream
+      end
+      @obj = MyObj.new
+      @obj.descMetadata.title = 'Foobar'
+      @obj.save
+    end
+    after do
+      @obj.destroy
+      Object.send(:remove_const, :MyObj)
+    end
+    subject { @obj.reload.descMetadata } 
+    it "should not load the descMetadata datastream when calling content_changed?" do
+      @obj.inner_object.repository.should_not_receive(:datastream_dissemination).with(hash_including(:dsid=>'descMetadata'))
+      subject.should_not be_content_changed
+    end
+  end
 end

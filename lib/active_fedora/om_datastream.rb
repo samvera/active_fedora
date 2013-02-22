@@ -106,7 +106,7 @@ module ActiveFedora
     end
 
     def content_changed?
-      return false if new? and !xml_loaded
+      return false if !xml_loaded
       super
     end
 

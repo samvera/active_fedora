@@ -46,6 +46,8 @@ module ActiveFedora
     end
 
     def content_changed?
+      # we haven't touched the graph, so it isn't changed (avoid a force load)
+      return false unless instance_variable_defined? :@graph
       @content = serialize
       super
     end
