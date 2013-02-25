@@ -1,7 +1,6 @@
 require "spec_helper"
 require 'ostruct'
-require 'webmock/rspec'
-require File.expand_path("../../../lib/active_fedora/rspec_matchers/have_predicate_matcher", File.dirname(__FILE__))
+require "active_fedora/rspec_matchers/have_predicate_matcher"
 
 describe RSpec::Matchers, "have_predicate_matcher" do
   subject { OpenStruct.new(:pid => pid )}
