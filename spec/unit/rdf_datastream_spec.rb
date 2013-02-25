@@ -29,5 +29,10 @@ describe ActiveFedora::RDFDatastream do
       @obj.inner_object.repository.should_not_receive(:datastream_dissemination).with(hash_including(:dsid=>'descMetadata'))
       subject.should_not be_content_changed
     end
+
+    it "should allow asserting an empty string" do
+      @obj.descMetadata.title = ['']
+      @obj.descMetadata.title.should == ['']
+    end
   end
 end

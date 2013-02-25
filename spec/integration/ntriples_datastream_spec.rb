@@ -117,13 +117,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.part << "thing 2"
     @subject.part.should == ["thing 1", "thing 2"]
   end
-  it "should delete a value" do
-    @subject.title = "Hamlet"
-    @subject.save
-    @subject.title = ""
-    @subject.save
-    @subject.title.should be_nil
-  end
 
   it "should be able to save a blank document" do
     @subject.title = ""
@@ -170,13 +163,17 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.title = "Hamlet"
     @subject.related_url = "http://psu.edu/"
     @subject.related_url << "http://projecthydra.org/"
-    @subject.save
+
     @subject.title.should == "Hamlet"
     @subject.related_url.should include("http://psu.edu/")
     @subject.related_url.should include("http://projecthydra.org/")
-    @subject.title = ""
+
+    @subject.title = "" #empty string can be meaningful, don't assume delete.
+    @subject.title.should == ''
+
+    @subject.title = nil
     @subject.related_url.delete("http://projecthydra.org/")
-    @subject.save
+
     @subject.title.should be_nil
     @subject.related_url.should == ["http://psu.edu/"]
   end
