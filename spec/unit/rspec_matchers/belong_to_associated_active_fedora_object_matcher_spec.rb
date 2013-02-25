@@ -1,7 +1,6 @@
 require "spec_helper"
 require 'ostruct'
-require 'webmock/rspec'
-require File.expand_path("../../../lib/active_fedora/rspec_matchers/belong_to_associated_active_fedora_object_matcher", File.dirname(__FILE__))
+require "active_fedora/rspec_matchers/belong_to_associated_active_fedora_object_matcher"
 
 describe RSpec::Matchers, "belong_to_associated_active_fedora_object_matcher" do
   subject { OpenStruct.new(:pid => pid )}
