@@ -50,6 +50,7 @@ describe ActiveFedora::Base do
     before :each do
       @n = BarHistory2.new()
     end
+
     it "should save a delegated property uniquely" do
       @n.fubar="Quack"
       @n.fubar.should == "Quack"
@@ -69,6 +70,10 @@ describe ActiveFedora::Base do
       @n.duck.should == ["Quack", "Peep"]
     end
 
+    it "should accept the array getters and setters" do
+      @n[:duck]= ["Cluck", "Gobble"]
+      @n[:duck].should == ["Cluck", "Gobble"]
+    end
   end
 end
 
