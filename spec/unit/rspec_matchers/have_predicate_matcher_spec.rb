@@ -1,7 +1,7 @@
 require "spec_helper"
 require 'ostruct'
 require 'webmock/rspec'
-require 'active_fedora/rspec_matchers/have_predicate_matcher'
+require File.expand_path("../../../lib/active_fedora/rspec_matchers/have_predicate_matcher", File.dirname(__FILE__))
 
 describe RSpec::Matchers, "have_predicate_matcher" do
   subject { OpenStruct.new(:pid => pid )}
@@ -11,16 +11,14 @@ describe RSpec::Matchers, "have_predicate_matcher" do
   let(:object3) { Object.new }
   let(:predicate) { :predicate }
 
-  before(:each) do
-    subject.class.should_receive(:find).with(pid).and_return(subject)
-  end
-
   it 'should match when relationship is "what we have in Fedora"' do
+    subject.class.should_receive(:find).with(pid).and_return(subject)
     subject.should_receive(:relationships).with(predicate).and_return([object1,object2])
     subject.should have_predicate(predicate).with_objects([object1, object2])
   end
 
   it 'should not match when relationship is different' do
+    subject.class.should_receive(:find).with(pid).and_return(subject)
     subject.should_receive(:relationships).with(predicate).and_return([object1,object3])
     lambda {
       subject.should have_predicate(predicate).with_objects([object1, object2])
