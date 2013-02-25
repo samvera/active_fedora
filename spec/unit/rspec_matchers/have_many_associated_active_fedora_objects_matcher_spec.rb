@@ -1,7 +1,7 @@
 require "spec_helper"
 require 'ostruct'
 require 'webmock/rspec'
-require 'active_fedora/rspec_matchers/have_many_associated_active_fedora_objects_matcher'
+require File.expand_path("../../../lib/active_fedora/rspec_matchers/have_many_associated_active_fedora_objects_matcher", File.dirname(__FILE__))
 
 describe RSpec::Matchers, "have_many_associated_active_fedora_objects_matcher" do
   subject { OpenStruct.new(:pid => pid )}
@@ -11,16 +11,14 @@ describe RSpec::Matchers, "have_many_associated_active_fedora_objects_matcher" d
   let(:object3) { Object.new }
   let(:association) { :association }
 
-  before(:each) do
-    subject.class.should_receive(:find).with(pid).and_return(subject)
-  end
-
   it 'should match when association is properly stored in fedora' do
+    subject.class.should_receive(:find).with(pid).and_return(subject)
     subject.should_receive(association).and_return([object1,object2])
     subject.should have_many_associated_active_fedora_objects(association).with_objects([object1, object2])
   end
 
   it 'should not match when association is different' do
+    subject.class.should_receive(:find).with(pid).and_return(subject)
     subject.should_receive(association).and_return([object1,object3])
     lambda {
       subject.should have_many_associated_active_fedora_objects(association).with_objects([object1, object2])

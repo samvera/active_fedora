@@ -1,7 +1,7 @@
 require "spec_helper"
 require 'ostruct'
 require 'webmock/rspec'
-require 'active_fedora/rspec_matchers/match_fedora_datastream_matcher'
+require File.expand_path("../../../lib/active_fedora/rspec_matchers/match_fedora_datastream_matcher", File.dirname(__FILE__))
 
 describe RSpec::Matchers, "match_fedora_datastream" do
   let(:pid) { 123 }
