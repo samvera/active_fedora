@@ -2,6 +2,37 @@ APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/../../")
 
 require 'jettywrapper'
 
+namespace :jetty do
+  JETTY_URL = 'https://github.com/projecthydra/hydra-jetty/archive/new-solr-schema.zip'
+  JETTY_ZIP = File.join 'tmp', JETTY_URL.split('/').last
+  JETTY_DIR = 'jetty'
+
+  desc "download the jetty zip file"
+  task :download do
+    puts "Downloading jetty..."
+    system "curl -L #{JETTY_URL} -o #{JETTY_ZIP}"
+    abort "Unable to download jetty from #{JETTY_URL}" unless $?.success?
+  end
+
+  task :unzip do
+    Rake::Task["jetty:download"].invoke unless File.exists? JETTY_ZIP
+    puts "Unpacking jetty..."
+    tmp_save_dir = File.join 'tmp', 'jetty_generator'
+    system "unzip -d #{tmp_save_dir} -qo #{JETTY_ZIP}"
+    abort "Unable to unzip #{JETTY_ZIP} into tmp_save_dir/" unless $?.success?
+
+    expanded_dir = Dir[File.join(tmp_save_dir, "hydra-jetty-*")].first        
+
+    system "mv #{expanded_dir} #{JETTY_DIR}"
+    abort "Unable to move #{expanded_dir} into #{JETTY_DIR}/" unless $?.success?
+  end
+
+  task :clean do
+    system "rm -rf #{JETTY_DIR}"
+    Rake::Task["jetty:unzip"].invoke
+  end
+end
+
 namespace :active_fedora do
   require 'active-fedora'
 
@@ -36,13 +67,6 @@ require 'rspec/core/rake_task'
     spec.rcov = true
   end
 
-  task :clean_jetty do
-    Dir.chdir("./jetty")
-    system("git clean -f -d")
-    system("git checkout .")
-    Dir.chdir("..")
-  end
-
   desc "Loads or refreshes the fixtures needed to run the tests"
   task :fixtures => :environment do
     ENV["pid"] = "hydrangea:fixture_mods_article1"
@@ -60,7 +84,6 @@ require 'rspec/core/rake_task'
 
   desc "Copies the default SOLR config for the bundled Testing Server"
   task :configure_jetty do
-    Rake::Task["active_fedora:clean_jetty"].invoke
     FileList['solr/conf/*'].each do |f|  
       cp("#{f}", 'jetty/solr/development-core/conf/', :verbose => true)
       cp("#{f}", 'jetty/solr/test-core/conf/', :verbose => true)
@@ -68,8 +91,8 @@ require 'rspec/core/rake_task'
   end
 
 
-desc "Hudson build"
-task :hudson do
+desc "CI build"
+task :ci do
   ENV['environment'] = "test"
   Rake::Task["active_fedora:configure_jetty"].invoke
   jetty_params = Jettywrapper.load_config
