@@ -9,6 +9,7 @@ namespace :jetty do
 
   desc "download the jetty zip file"
   task :download do
+    system 'mkdir tmp' unless File.directory? 'tmp'
     puts "Downloading jetty..."
     system "curl -L #{JETTY_URL} -o #{JETTY_ZIP}"
     abort "Unable to download jetty from #{JETTY_URL}" unless $?.success?
