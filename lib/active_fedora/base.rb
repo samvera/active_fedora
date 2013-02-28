@@ -315,7 +315,7 @@ module ActiveFedora
   Base.class_eval do
     include Attributes
     include ActiveFedora::Persistence
-    include Model
+    extend Model
     include Loggable
     include Indexing
     include ActiveModel::Conversion
@@ -324,10 +324,10 @@ module ActiveFedora
     include Datastreams
     extend ActiveModel::Naming
     include Delegating
+    extend Querying
     include Associations
     include NestedAttributes
     include Reflection
-    extend Querying
   end
 
 end
