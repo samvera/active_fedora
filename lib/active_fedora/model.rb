@@ -6,7 +6,7 @@ module ActiveFedora
   # much in the way ActiveRecord does.  
   module Model 
     # Takes a Fedora URI for a cModel and returns classname, namespace
-    def classname_from_uri(uri)
+    def self.classname_from_uri(uri)
       local_path = uri.split('/')[1]
       parts = local_path.split(':')
       return parts[-1].split(/_/).map(&:camelize).join('::'), parts[0]
@@ -16,7 +16,7 @@ module ActiveFedora
     # corresponding Model if available
     # This method should reverse ClassMethods#to_class_uri
     # @return [Class, False] the class of the model or false, if it does not exist
-    def from_class_uri(uri)
+    def self.from_class_uri(uri)
       model_value, pid_ns = classname_from_uri(uri)
       raise "model URI incorrectly formatted: #{uri}" unless model_value
 
@@ -57,7 +57,7 @@ module ActiveFedora
 
     private 
     
-    def class_exists?(class_name)
+    def self.class_exists?(class_name)
       klass = class_name.constantize
       return klass.is_a?(Class)
     rescue NameError
