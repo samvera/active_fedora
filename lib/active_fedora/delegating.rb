@@ -53,9 +53,18 @@ module ActiveFedora
       #   foo.field1                 # => "My Value"
       #   foo.field2                 # => NoMethodError: undefined method `field2' for #<Foo:0x1af30c>
 
-      def delegate(field, args ={})
-        create_delegate_reader(field, args)
-        create_delegate_setter(field, args)
+      def delegate(*methods)
+        fields = methods.dup
+        options = fields.pop
+        unless options.is_a?(Hash) && to = options[:to]
+          raise ArgumentError, "Target is required"
+        end
+        if ds_specs.has_key? to.to_s 
+          create_delegate_reader(fields.first, options)
+          create_delegate_setter(fields.first, options)
+        else
+          super(*methods)
+        end
       end
 
       def delegate_registry
