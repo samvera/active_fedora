@@ -59,6 +59,9 @@ module ActiveFedora
     end
     
     def ng_xml=(new_xml)
+      # before we set ng_xml, we load the datastream so we know if the new value differs.
+      local_or_remote_content(true)
+
       case new_xml 
       when Nokogiri::XML::Document
         self.content=new_xml.to_xml
@@ -93,15 +96,22 @@ module ActiveFedora
     end
 
     def content
-      to_xml
+      return to_xml if ng_xml_changed? || autocreate?
+      val = local_or_remote_content(false)
+      val unless val == "<?xml version=\"1.0\"?>\n"
+    end
+
+    def autocreate?
+      changed_attributes.has_key? :profile
     end
 
     def datastream_content
       @datastream_content ||= Nokogiri::XML(super).to_xml  {|config| config.no_declaration}.strip
     end
     
-    def content=(content)
-      @ng_xml = Nokogiri::XML::Document.parse(content)
+    def content=(new_content)
+      ng_xml_will_change! unless EquivalentXml.equivalent?(datastream_content, new_content)
+      @ng_xml = Nokogiri::XML::Document.parse(new_content)
       super(@ng_xml.to_s)
     end
 

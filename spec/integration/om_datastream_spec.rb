@@ -20,6 +20,25 @@ describe ActiveFedora::OmDatastream do
     Object.send(:remove_const, :HydrangeaArticle2)
   end
 
+  describe "an new instance with a inline datastream" do
+    before do 
+      @obj = HydrangeaArticle2.new
+      @obj.save
+      @obj.descMetadata.should be_inline
+    end
+    after do
+      @obj.destroy
+    end
+    it "should not be changed when no fields have been set" do
+      @obj.descMetadata.should_not be_content_changed
+    end
+    it "should be changed when a field has been set" do
+      @obj.descMetadata.title = 'Foobar'
+      @obj.descMetadata.should be_content_changed
+    end
+  end
+
+
   describe "#changed?" do
     it "should not be changed if the new xml matches the old xml" do
       @pid = "hydrangea:fixture_mods_article2"

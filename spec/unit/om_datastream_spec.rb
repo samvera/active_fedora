@@ -173,6 +173,7 @@ describe ActiveFedora::OmDatastream do
     it "should persist the product of .to_xml in fedora" do
       @mock_repo.stub(:datastream).and_return('')
       @test_ds.stub(:new? => true)
+      @test_ds.stub(:ng_xml_changed? => true)
       @test_ds.stub(:to_xml => "fake xml")
       @mock_repo.should_receive(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'X', :dsState => 'A', :mimeType=>'text/xml')
 
@@ -376,6 +377,7 @@ describe ActiveFedora::OmDatastream do
       @mods_ds.term_values(*term_pointer)
     end
   end
+
   describe "an instance that exists in the datastore, but hasn't been loaded" do
     before do 
       class MyObj < ActiveFedora::Base
