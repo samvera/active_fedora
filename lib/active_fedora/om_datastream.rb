@@ -96,14 +96,8 @@ module ActiveFedora
     end
 
     def local_or_remote_content(ensure_fetch = true)
-      @content = to_xml if ng_xml_changed?
+      @content = to_xml if ng_xml_changed? || autocreate?
       super
-    end
-
-    def content
-      return to_xml if ng_xml_changed? || autocreate?
-      val = local_or_remote_content(false)
-      val unless val == "<?xml version=\"1.0\"?>\n"
     end
 
     def autocreate?
