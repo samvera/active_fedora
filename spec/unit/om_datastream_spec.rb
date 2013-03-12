@@ -31,10 +31,9 @@ describe ActiveFedora::OmDatastream do
     @test_ds.stub(:new? => false)
   end
   
-  after(:each) do
-  end
-
   its(:metadata?) { should be_true}
+
+  its(:controlGroup) { should == "M"}
 
   it "should include the Solrizer::XML::TerminologyBasedSolrizer for .to_solr support" do
     ActiveFedora::OmDatastream.included_modules.should include(OM::XML::TerminologyBasedSolrizer)
@@ -175,7 +174,7 @@ describe ActiveFedora::OmDatastream do
       @test_ds.stub(:new? => true)
       @test_ds.stub(:ng_xml_changed? => true)
       @test_ds.stub(:to_xml => "fake xml")
-      @mock_repo.should_receive(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'X', :dsState => 'A', :mimeType=>'text/xml')
+      @mock_repo.should_receive(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'M', :dsState => 'A', :mimeType=>'text/xml')
 
       @test_ds.serialize!
       @test_ds.save

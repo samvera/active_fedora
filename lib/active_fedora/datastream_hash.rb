@@ -8,7 +8,7 @@ module ActiveFedora
 
     def [] (key)
       if key == 'DC' && !has_key?(key)
-        ds = Datastream.new(@obj.inner_object, key)
+        ds = Datastream.new(@obj.inner_object, key, :controlGroup=>'X')
         self[key] = ds
       end
       super

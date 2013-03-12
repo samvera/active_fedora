@@ -10,7 +10,7 @@ module ActiveFedora
         false
       end
     end
-    
+
     include OM::XML::Document
     include OM::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
     
@@ -20,7 +20,7 @@ module ActiveFedora
     attr_accessor :internal_solr_doc
     
     def self.default_attributes
-      super.merge(:controlGroup => 'X', :mimeType => 'text/xml')
+      super.merge(:controlGroup => 'M', :mimeType => 'text/xml')
     end
 
     # Create an instance of this class based on xml content
@@ -93,6 +93,11 @@ module ActiveFedora
     # @return true 
     def metadata?
       true
+    end
+
+    def local_or_remote_content(ensure_fetch = true)
+      @content = to_xml if ng_xml_changed?
+      super
     end
 
     def content
