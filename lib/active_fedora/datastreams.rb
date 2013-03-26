@@ -4,7 +4,7 @@ module ActiveFedora
 
     included do
       class_attribute :ds_specs
-      self.ds_specs = {'RELS-EXT'=> {:type=> ActiveFedora::RelsExtDatastream, :label=>"Fedora Object-to-Object Relationship Metadata", :control_group=>'X', :block=>nil}}
+      self.ds_specs = {'RELS-EXT'=> {:type=> ActiveFedora::RelsExtDatastream, :label=>"Fedora Object-to-Object Relationship Metadata", :block=>nil}}
       class << self
         def inherited_with_datastreams(kls) #:nodoc:
           ## Do some inheritance logic that doesn't override Base.inherited

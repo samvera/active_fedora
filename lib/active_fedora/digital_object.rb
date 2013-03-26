@@ -32,13 +32,10 @@ module ActiveFedora
 
     def self.find(original_class, pid)
       conn = original_class.connection_for_pid(pid)
-      obj = Deprecation.silence(Rubydora::DigitalObject) do
-        begin
-          super(pid, conn)
-        rescue Rubydora::FedoraInvalidRequest => e
-          # PID is nil
-          raise ActiveFedora::ObjectNotFoundError, "Unable to find '#{pid}' in fedora. See logger for details."
-        end
+      obj = begin
+        super(pid, conn)
+      rescue Rubydora::RecordNotFound
+        raise ActiveFedora::ObjectNotFoundError, "Unable to find '#{pid}' in fedora. See logger for details."
       end
       obj.original_class = original_class
       # PID is not found, but was "well-formed" for its Fedora request. So

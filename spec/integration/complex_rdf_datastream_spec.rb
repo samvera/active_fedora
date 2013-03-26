@@ -34,6 +34,7 @@ describe "Nested Rdf Objects" do
       ds.parts = comp
       ds.parts.first.label.should == ["Alternator"]
     end
+
     it "should be able to nest many complex objects" do
       comp1 = SpecDatastream::Component.new ds.graph
       comp1.label = ["Alternator"]

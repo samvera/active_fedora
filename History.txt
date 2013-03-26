@@ -3,6 +3,9 @@ New solr schema with descriptive field suffixes
 Added support for RDF lists
 RDF does not index terms by default
 count is now a scoped query.
+ActiveFedora::Base.reindex_everything
+RDF terms can store empty string
+Access properties by using hash notation.
 
 5.6.1
 Fixed delegating enumerable methods (join, [], each_with_index, to_a, etc) on an RdfNode::TermProxy

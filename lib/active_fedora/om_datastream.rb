@@ -10,7 +10,7 @@ module ActiveFedora
         false
       end
     end
-    
+
     include OM::XML::Document
     include OM::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
     
@@ -20,7 +20,7 @@ module ActiveFedora
     attr_accessor :internal_solr_doc
     
     def self.default_attributes
-      super.merge(:controlGroup => 'X', :mimeType => 'text/xml')
+      super.merge(:controlGroup => 'M', :mimeType => 'text/xml')
     end
 
     # Create an instance of this class based on xml content
@@ -59,6 +59,9 @@ module ActiveFedora
     end
     
     def ng_xml=(new_xml)
+      # before we set ng_xml, we load the datastream so we know if the new value differs.
+      local_or_remote_content(true)
+
       case new_xml 
       when Nokogiri::XML::Document
         self.content=new_xml.to_xml
@@ -92,21 +95,27 @@ module ActiveFedora
       true
     end
 
-    def content
-      to_xml
+    def local_or_remote_content(ensure_fetch = true)
+      @content = to_xml if ng_xml_changed? || autocreate?
+      super
+    end
+
+    def autocreate?
+      changed_attributes.has_key? :profile
     end
 
     def datastream_content
       @datastream_content ||= Nokogiri::XML(super).to_xml  {|config| config.no_declaration}.strip
     end
     
-    def content=(content)
-      @ng_xml = Nokogiri::XML::Document.parse(content)
+    def content=(new_content)
+      ng_xml_will_change! unless EquivalentXml.equivalent?(datastream_content, new_content)
+      @ng_xml = Nokogiri::XML::Document.parse(new_content)
       super(@ng_xml.to_s)
     end
 
     def content_changed?
-      return false if new? and !xml_loaded
+      return false if !xml_loaded
       super
     end
 

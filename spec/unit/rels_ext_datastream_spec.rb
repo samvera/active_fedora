@@ -24,6 +24,7 @@ describe ActiveFedora::RelsExtDatastream do
   end
 
   its(:metadata?) { should be_true}
+  its(:controlGroup) { should == "X"}
 
   describe "#mimeType" do
     it 'should use the application/rdf+xml mime type' do

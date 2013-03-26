@@ -1,6 +1,13 @@
 module ActiveFedora
   module Querying
     delegate :find, :first, :where, :limit, :order, :all, :delete_all, :destroy_all, :count, :to=>:relation
+
+    def self.extended(base)
+      base.class_attribute  :solr_query_handler
+      base.solr_query_handler = 'standard'
+    end
+    
+
     def relation
       Relation.new(self)
     end
@@ -103,7 +110,6 @@ module ActiveFedora
       cast ? af_base.adapt_to_cmodel : af_base
     end
     
-  
     private 
 
     # Returns a solr query for the supplied conditions

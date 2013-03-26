@@ -177,9 +177,10 @@ describe ActiveFedora::Datastreams do
 
   describe "#dc" do
     it "should be the DC datastream" do
-      m = mock
-      subject.stub(:datastreams => { 'DC' => m})
-      subject.dc.should == m
+      subject.dc.should be_kind_of ActiveFedora::Datastream
+    end
+    it "should be an inline datastream" do
+      subject.dc.controlGroup.should == 'X'
     end
   end
 

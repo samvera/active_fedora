@@ -5,13 +5,6 @@ module ActiveFedora
   # This module mixes various methods into the including class,
   # much in the way ActiveRecord does.  
   module Model 
-    extend ActiveSupport::Concern
-
-    included do
-      class_attribute  :solr_query_handler
-      self.solr_query_handler = 'standard'
-    end
-    
     # Takes a Fedora URI for a cModel and returns classname, namespace
     def self.classname_from_uri(uri)
       local_path = uri.split('/')[1]
@@ -45,33 +38,31 @@ module ActiveFedora
       result
     end
 
-    module ClassMethods
-      # Returns a suitable uri object for :has_model
-      # Should reverse Model#from_class_uri
-      def to_class_uri(attrs = {})
-        unless self.respond_to? :pid_suffix
-          pid_suffix = attrs.has_key?(:pid_suffix) ? attrs[:pid_suffix] : ContentModel::CMODEL_PID_SUFFIX
-        else
-          pid_suffix = self.pid_suffix
-        end
-        unless self.respond_to? :pid_namespace
-          namespace = attrs.has_key?(:namespace) ? attrs[:namespace] : ContentModel::CMODEL_NAMESPACE   
-        else
-          namespace = self.pid_namespace
-        end
-        "info:fedora/#{namespace}:#{ContentModel.sanitized_class_name(self)}#{pid_suffix}" 
+    # Returns a suitable uri object for :has_model
+    # Should reverse Model#from_class_uri
+    def to_class_uri(attrs = {})
+      unless self.respond_to? :pid_suffix
+        pid_suffix = attrs.has_key?(:pid_suffix) ? attrs[:pid_suffix] : ContentModel::CMODEL_PID_SUFFIX
+      else
+        pid_suffix = self.pid_suffix
       end
-      
+      unless self.respond_to? :pid_namespace
+        namespace = attrs.has_key?(:namespace) ? attrs[:namespace] : ContentModel::CMODEL_NAMESPACE   
+      else
+        namespace = self.pid_namespace
+      end
+      "info:fedora/#{namespace}:#{ContentModel.sanitized_class_name(self)}#{pid_suffix}" 
     end
+      
 
     private 
     
-      def self.class_exists?(class_name)
-        klass = class_name.constantize
-        return klass.is_a?(Class)
-      rescue NameError
-        return false
-      end
+    def self.class_exists?(class_name)
+      klass = class_name.constantize
+      return klass.is_a?(Class)
+    rescue NameError
+      return false
+    end
     
   end
 end

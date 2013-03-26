@@ -2,18 +2,38 @@ module ActiveFedora
   module Delegating
     extend ActiveSupport::Concern
 
-    included do
-      class_attribute  :delegate_registry
-      self.delegate_registry = []
-    end
-
     # Calling inspect may trigger a bunch of loads, but it's mainly for debugging, so no worries.
     def inspect
-      values = delegate_registry.map {|r| "#{r}:#{send(r).inspect}"}
+      values = self.class.delegate_registry.map {|r| "#{r}:#{send(r).inspect}"}
       "#<#{self.class} pid:\"#{pretty_pid}\", #{values.join(', ')}>"
     end
 
+    def [](key)
+      array_reader(key)
+    end
+
+    def []=(key, value)
+      array_setter(key, value)
+    end
+
+    private
+    def array_reader(field)
+      instance_exec(&self.class.delegates[field][:reader])
+    end
+
+    def array_setter(field, args)
+      instance_exec(args, &self.class.delegates[field][:setter])
+    end
+
     module ClassMethods
+      def delegates
+        @delegates ||= {}
+      end
+
+      def delegates= val
+        @delegates = val
+      end
+
       # Provides a delegate class method to expose methods in metadata streams
       # as member of the base object. Pass the target datastream via the
       # <tt>:to</tt> argument. If you want to return a unique result, (e.g. string
@@ -33,11 +53,23 @@ module ActiveFedora
       #   foo.field1                 # => "My Value"
       #   foo.field2                 # => NoMethodError: undefined method `field2' for #<Foo:0x1af30c>
 
-      def delegate(field, args ={})
-        create_delegate_accessor(field, args)
-        create_delegate_setter(field, args)
+      def delegate(*methods)
+        fields = methods.dup
+        options = fields.pop
+        unless options.is_a?(Hash) && to = options[:to]
+          raise ArgumentError, "Target is required"
+        end
+        if ds_specs.has_key? to.to_s 
+          create_delegate_reader(fields.first, options)
+          create_delegate_setter(fields.first, options)
+        else
+          super(*methods)
+        end
       end
 
+      def delegate_registry
+        self.delegates.keys
+      end
 
       # Allows you to delegate multiple terminologies to the same datastream, instead
       # having to call the method each time for each term.  The target datastream is the
@@ -60,28 +92,34 @@ module ActiveFedora
       def delegate_to(datastream,fields,args={})
         fields.each do |f|
           args.merge!({:to=>datastream})
-          create_delegate_accessor(f, args)
+          create_delegate_reader(f, args)
           create_delegate_setter(f, args)
         end
       end
 
       private
-      def create_delegate_accessor(field, args)
-        self.delegate_registry += [field]
-        define_method field do
+      def create_delegate_reader(field, args)
+        self.delegates[field] ||= {}
+        self.delegates[field][:reader] = lambda do
           ds = self.send(args[:to])
-          val = if ds.kind_of?(ActiveFedora::RDFDatastream)
-                  ds.send(field)
-                else
-                  terminology = args[:at] || [field]
-                  ds.send(:term_values, *terminology)
-                end
+          if ds.kind_of?(ActiveFedora::RDFDatastream)
+            ds.send(field)
+          else
+            terminology = args[:at] || [field]
+            ds.send(:term_values, *terminology)
+          end
+        end
+
+        define_method field do
+          val = self[field]
           args[:unique] ? val.first : val
         end
       end
 
+
       def create_delegate_setter(field, args)
-        define_method "#{field}=".to_sym do |v|
+        self.delegates[field] ||= {}
+        self.delegates[field][:setter] = lambda do |v|
           ds = self.send(args[:to])
           if ds.kind_of?(ActiveFedora::RDFDatastream)
             ds.send("#{field}=", v)
@@ -90,7 +128,11 @@ module ActiveFedora
             ds.send(:update_indexed_attributes, {terminology => v})
           end
         end
+        define_method "#{field}=".to_sym do |v|
+          self[field]=v
+        end
       end
+
     end
   end
 end

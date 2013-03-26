@@ -54,7 +54,6 @@ module ActiveFedora
           graph.insert([subject, predicate, arg.rdf_subject ])
         else
           arg = arg.to_s if arg.kind_of? RDF::Literal
-          next if arg.kind_of?(String) && arg.empty?
 
           graph.insert([subject, predicate, arg])
         end

@@ -75,6 +75,19 @@ describe ActiveFedora::Base do
 
   end
 
+  describe "reindex_everything" do
+    it "should call update_index on every object" do
+       Rubydora::Repository.any_instance.should_receive(:search).
+            and_yield(stub(pid:'XXX')).and_yield(stub(pid:'YYY')).and_yield(stub(pid:'ZZZ'))
+       mock_update = stub(:mock_obj)
+       mock_update.should_receive(:update_index).exactly(3).times
+       ActiveFedora::Base.should_receive(:find).with('XXX', :cast=>true).and_return(mock_update)
+       ActiveFedora::Base.should_receive(:find).with('YYY', :cast=>true).and_return(mock_update)
+       ActiveFedora::Base.should_receive(:find).with('ZZZ', :cast=>true).and_return(mock_update)
+       ActiveFedora::Base.reindex_everything
+    end
+  end
+
   describe "With a test class" do
     before :all do
       class FooHistory < ActiveFedora::Base

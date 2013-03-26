@@ -11,8 +11,9 @@ load "lib/tasks/active_fedora_dev.rake" if defined?(Rake)
 
 CLEAN.include %w[**/.DS_Store tmp *.log *.orig *.tmp **/*~]
 
+task :ci => ['jetty:clean', 'active_fedora:ci']
 task :spec => ['active_fedora:rspec']
 task :rcov => ['active_fedora:rcov']
 
 
-task :default => [:spec]
+task :default => [:ci]

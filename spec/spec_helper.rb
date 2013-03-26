@@ -1,11 +1,17 @@
 ENV["environment"] ||= 'test'
 require "bundler/setup"
 
-require 'simplecov'
-require 'simplecov-rcov'
 
-SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter
-SimpleCov.start
+begin
+  require 'simplecov'
+  require 'simplecov-rcov'
+
+  SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter
+  SimpleCov.start
+rescue LoadError
+  #It's nbd if we don't have simplecov
+  $stderr.puts "Couldn't load simplecov"
+end
 
 require 'active-fedora'
 require 'rspec'

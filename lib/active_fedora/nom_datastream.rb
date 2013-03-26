@@ -16,7 +16,7 @@ module ActiveFedora
       end
 
     def self.default_attributes
-      super.merge(:controlGroup => 'X', :mimeType => 'text/xml')
+      super.merge(:controlGroup => 'M', :mimeType => 'text/xml')
     end
 
     # Create an instance of this class based on xml content

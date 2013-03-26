@@ -36,13 +36,6 @@ require 'rspec/core/rake_task'
     spec.rcov = true
   end
 
-  task :clean_jetty do
-    Dir.chdir("./jetty")
-    system("git clean -f -d")
-    system("git checkout .")
-    Dir.chdir("..")
-  end
-
   desc "Loads or refreshes the fixtures needed to run the tests"
   task :fixtures => :environment do
     ENV["pid"] = "hydrangea:fixture_mods_article1"
@@ -60,7 +53,6 @@ require 'rspec/core/rake_task'
 
   desc "Copies the default SOLR config for the bundled Testing Server"
   task :configure_jetty do
-    Rake::Task["active_fedora:clean_jetty"].invoke
     FileList['solr/conf/*'].each do |f|  
       cp("#{f}", 'jetty/solr/development-core/conf/', :verbose => true)
       cp("#{f}", 'jetty/solr/test-core/conf/', :verbose => true)
@@ -68,8 +60,8 @@ require 'rspec/core/rake_task'
   end
 
 
-desc "Hudson build"
-task :hudson do
+desc "CI build"
+task :ci do
   ENV['environment'] = "test"
   Rake::Task["active_fedora:configure_jetty"].invoke
   jetty_params = Jettywrapper.load_config

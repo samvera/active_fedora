@@ -2,9 +2,7 @@ module ActiveFedora
   module SemanticNode 
     extend ActiveSupport::Concern
     included do
-      class_attribute  :class_relationships, :internal_uri
       class_attribute  :class_relationships_desc
-      self.class_relationships = {}
     end
     attr_accessor :relationships_loaded, :load_from_solr, :subject
 
