@@ -67,6 +67,7 @@ module ActiveFedora #:nodoc:
     autoload :DatastreamCollections
     autoload :Predicates
     autoload :Validations
+    autoload :SolrInstanceLoader
   end
   
   

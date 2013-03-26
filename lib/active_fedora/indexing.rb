@@ -4,8 +4,8 @@ module ActiveFedora
 
     # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.
     # @param [Hash] solr_doc (optional) Hash to insert the fields into
-    # @param [Hash] opts (optional) 
-    # If opts[:model_only] == true, the base object metadata and the RELS-EXT datastream will be omitted.  This is mainly to support shelver, which calls .to_solr for each model an object subscribes to. 
+    # @param [Hash] opts (optional)
+    # If opts[:model_only] == true, the base object metadata and the RELS-EXT datastream will be omitted.  This is mainly to support shelver, which calls .to_solr for each model an object subscribes to.
     def to_solr(solr_doc = Hash.new, opts={})
       unless opts[:model_only]
         c_time = create_date
@@ -43,7 +43,7 @@ module ActiveFedora
       self.datastreams.each_pair { |dsid,ds| profile_hash['datastreams'][dsid] = ds.solrize_profile }
       solr_doc[self.class.profile_solr_name] = profile_hash.to_json
     end
-    
+
     # Serialize the datastream's RDF relationships to solr
     # @param [Hash] solr_doc @deafult an empty Hash
     def solrize_relationships(solr_doc = Hash.new)
@@ -58,7 +58,7 @@ module ActiveFedora
 
     # Updates Solr index with self.
     def update_index
-      if defined?( Solrizer::Fedora::Solrizer ) 
+      if defined?( Solrizer::Fedora::Solrizer )
         #logger.info("Trying to solrize pid: #{pid}")
         solrizer = Solrizer::Fedora::Solrizer.new
         solrizer.solrize( self )
@@ -70,63 +70,32 @@ module ActiveFedora
 
 
     module ClassMethods
-      # This method can be used instead of ActiveFedora::Model::ClassMethods.find.  
+      # This method can be used instead of ActiveFedora::Model::ClassMethods.find.
       # It works similarly except it populates an object from Solr instead of Fedora.
       # It is most useful for objects used in read-only displays in order to speed up loading time.  If only
       # a pid is passed in it will query solr for a corresponding solr document and then use it
       # to populate this object.
-      # 
+      #
       # If a value is passed in for optional parameter solr_doc it will not query solr again and just use the
       # one passed to populate the object.
       #
       # It will anything stored within solr such as metadata and relationships.  Non-metadata datastreams will not
       # be loaded and if needed you should use find instead.
       def load_instance_from_solr(pid,solr_doc=nil)
-        if solr_doc.nil?
-          result = find_with_conditions(:id=>pid)
-          raise ActiveFedora::ObjectNotFoundError, "Object #{pid} not found in solr" if result.empty?
-          solr_doc = result.first
-          #double check pid and id in record match
-          raise ActiveFedora::ObjectNotFoundError, "Object #{pid} not found in Solr" unless !result.nil? && !solr_doc.nil? && pid == solr_doc[SOLR_DOCUMENT_ID]
-        else
-          raise "Solr document record id and pid do not match" unless pid == solr_doc[SOLR_DOCUMENT_ID]
-        end
-        klass = if class_str = solr_doc[ActiveFedora::SolrService.solr_name('has_model', :symbol)]
-          ActiveFedora::SolrService.class_from_solr_document(solr_doc)
-        else
-          ActiveFedora::Base
-        end
-
-        profile_json = Array(solr_doc[ActiveFedora::Base.profile_solr_name]).first
-        unless profile_json.present?
-          raise ActiveFedora::ObjectNotFoundError, "Object #{pid} does not contain a solrized profile"
-        end
-        profile_hash = ActiveSupport::JSON.decode(profile_json)
-        obj = klass.allocate.init_with(SolrDigitalObject.new(solr_doc, profile_hash, klass))
-        #set by default to load any dependent relationship objects from solr as well
-        #need to call rels_ext once so it exists when iterating over datastreams
-        obj.rels_ext
-        obj.datastreams.each_value do |ds|
-          if ds.respond_to?(:profile_from_hash) and (ds_prof = profile_hash['datastreams'][ds.dsid])
-            ds.profile_from_hash(ds_prof)
-          end
-          ds.from_solr(solr_doc) if ds.respond_to?(:from_solr)
-        end
-        obj.inner_object.freeze
-        obj
+        SolrInstanceLoader.new(self, pid, solr_doc).object
       end
-      
-      # Using the fedora search (not solr), get every object and reindex it. 
+
+      # Using the fedora search (not solr), get every object and reindex it.
       def reindex_everything
         connections.each do |conn|
           conn.search(nil) do |object|
             ActiveFedora::Base.find(object.pid, :cast=>true).update_index
           end
         end
-      end 
+      end
 
       private
-      
+
       def connections
         if ActiveFedora.config.sharded?
           return ActiveFedora.config.credentials.map { |cred| ActiveFedora::RubydoraConnection.new(cred).connection}
