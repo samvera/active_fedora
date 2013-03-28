@@ -12,13 +12,11 @@ Gem::Specification.new do |s|
   s.summary     = %q{A convenience libary for manipulating documents in the Fedora Repository.}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
 
-  s.rubyforge_project = "rubyfedora"
   s.required_ruby_version     = '>= 1.9.3'
 
   s.add_dependency('rsolr')
-  s.add_dependency('om', '~> 1.9.0.pre1')
+  s.add_dependency('om', '~> 2.0.0')
   s.add_dependency('nom-xml', '>=0.5.1')
-  s.add_dependency('solrizer', '~>3.0.0.pre7')
   s.add_dependency("activeresource", '>= 3.0.0')
   s.add_dependency("activesupport", '>= 3.0.0')
   s.add_dependency("builder", '~> 3.0.0')
