@@ -33,14 +33,20 @@ module ActiveFedora
           @owner.add_relationship(@reflection.options[:property], record)
           if (@reflection.options[:inverse_of])
             record.add_relationship(@reflection.options[:inverse_of], @owner)
+            record.save
           end
-          record.save
+
           return true
         end
 
         def delete_records(records)
           records.each do |r| 
-            r.remove_relationship(@reflection.options[:property], @owner)
+            @owner.remove_relationship(@reflection.options[:property], r)
+            
+            if (@reflection.options[:inverse_of])
+              r.remove_relationship(@reflection.options[:inverse_of], @owner)
+              r.save
+            end
           end
         end
     end
