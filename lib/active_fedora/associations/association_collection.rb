@@ -74,7 +74,7 @@ module ActiveFedora
         flatten_deeper(records).each do |record|
           raise_on_type_mismatch(record)
           add_record_to_target_with_callbacks(record) do |r|
-            result &&= insert_record(record) unless @owner.new_record?
+            result &&= insert_record(record)
           end
         end
 
