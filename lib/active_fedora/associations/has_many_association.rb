@@ -31,6 +31,10 @@ module ActiveFedora
       end
 
       def insert_record(record, force = false, validate = true)
+        if @owner.new_record?
+          logger.warn("has_many #{@reflection.inspect} is cowardly refusing to insert a relationship into #{record}, because #{@owner} is not persisted yet.")
+          return true 
+        end
         set_belongs_to_association_for(record)
         #force ? record.save! : record.save(:validate => validate)
         record.save
