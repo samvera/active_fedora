@@ -35,7 +35,7 @@ module ActiveFedora
       obj = Deprecation.silence(Rubydora::DigitalObject) do
         begin
           super(pid, conn)
-        rescue Rubydora::FedoraInvalidRequest => e
+        rescue Rubydora::FedoraInvalidRequest, (Rubydora::RecordNotFound rescue nil)
           # PID is nil
           raise ActiveFedora::ObjectNotFoundError, "Unable to find '#{pid}' in fedora. See logger for details."
         end

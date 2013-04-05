@@ -14,7 +14,7 @@ module ActiveFedora
       begin
         ActiveFedora::Base.find(pid).delete
         1
-      rescue ActiveFedora::ObjectNotFoundError
+      rescue ActiveFedora::ObjectNotFoundError, (Rubydora::RecordNotFound rescue ActiveFedora::ObjectNotFoundError)
         logger.debug "The object #{pid} has already been deleted (or was never created)."
         0
       rescue Errno::ECONNREFUSED => e
