@@ -74,7 +74,17 @@ describe ActiveFedora::RelsExtDatastream do
     # make sure that _something_ was actually added to the object's relationships hash
     @test_object.ids_for_outbound(:is_member_of).size.should == 1
     new_rels = ActiveFedora::Base.find(@test_object.pid).relationships
-    new_rels.should == @test_object.relationships
+
+    new_rels.to_a.each do |stmt|
+      @test_object.relationships.should have_statement(stmt)
+    end
+
+
+    @test_object.relationships.to_a.each do |stmt|
+      new_rels.should have_statement(stmt)
+    end
+
+ #   new_rels.should == @test_object.relationships
   end
 
   describe '#from_solr' do     
