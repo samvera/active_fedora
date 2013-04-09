@@ -1,4 +1,4 @@
-"!https://travis-ci.org/projecthydra/active_fedora.png!":https://travis-ci.org/projecthydra/active_fedora
+!https://travis-ci.org/projecthydra/active_fedora.png?branch=master!:https://travis-ci.org/projecthydra/active_fedora
 
 h2. Description
 
