@@ -2,6 +2,10 @@ module ActiveFedora
   module Attributes
     extend ActiveSupport::Concern
     extend ActiveSupport::Autoload
+    extend Deprecation
+    self.deprecation_horizon = 'active-fedora 7.0.0'
+    
+    
     autoload :Serializers
 
     included do
@@ -70,6 +74,7 @@ module ActiveFedora
       end
       return result
     end
+    deprecation_deprecate :update_datastream_attributes
     
     def get_values_from_datastream(dsid,field_key,default=[])
       if datastreams.include?(dsid)
