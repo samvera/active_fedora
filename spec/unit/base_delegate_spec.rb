@@ -1,55 +1,67 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
+  before :all do
+      class BarStream2 < ActiveFedora::OmDatastream 
+        set_terminology do |t|
+          t.root(:path=>"animals", :xmlns=>"urn:zoobar")
+          t.waterfowl do
+            t.ducks do 
+              t.duck
+            end
+          end
+          t.donkey()
+          t.cow()
+        end
+
+        def self.xml_template
+              Nokogiri::XML::Document.parse '<animals xmlns="urn:zoobar"> 
+                <waterfowl>
+                  <ducks>
+                    <duck/>
+                  </ducks>
+                </waterfowl>
+                <donkey></donkey>
+                <cow></cow>
+              </animals>'
+        end
+      end
+  end
+  after :all do
+    Object.send(:remove_const, :BarStream2)
+  end
 
   describe "first level delegation" do 
-    class BarStream2 < ActiveFedora::OmDatastream 
-      set_terminology do |t|
-        t.root(:path=>"animals", :xmlns=>"urn:zoobar")
-        t.waterfowl do
-          t.ducks do 
-            t.duck
-          end
+    before :all do
+      class BarHistory2 < ActiveFedora::Base
+        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
+          m.field "fubar", :string
+          m.field "bandana", :string
+          m.field "swank", :text
         end
-        t.donkey()
-        t.cow()
-      end
+        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText" do |m|
+          m.field "fubar", :text
+        end
+        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel" do |m|
+          m.field "fubar", :text
+        end 
 
-      def self.xml_template
-            Nokogiri::XML::Document.parse '<animals xmlns="urn:zoobar"> 
-              <waterfowl>
-                <ducks>
-                  <duck/>
-                </ducks>
-              </waterfowl>
-              <donkey></donkey>
-              <cow></cow>
-            </animals>'
+        has_metadata :type=>BarStream2, :name=>"xmlish"
+        delegate :fubar, :to=>'withText', :unique=>true
+        delegate :donkey, :to=>'xmlish', :unique=>true
+        delegate :cow, :to=>'xmlish'
+        delegate :duck, :to=>'xmlish', :at=>[:waterfowl, :ducks]
       end
     end
 
-    class BarHistory2 < ActiveFedora::Base
-      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
-        m.field "fubar", :string
-        m.field "bandana", :string
-        m.field "swank", :text
-      end
-      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText" do |m|
-        m.field "fubar", :text
-      end
-      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel" do |m|
-        m.field "fubar", :text
-      end 
-
-      has_metadata :type=>BarStream2, :name=>"xmlish"
-      delegate :fubar, :to=>'withText', :unique=>true
-      delegate :donkey, :to=>'xmlish', :unique=>true
-      delegate :cow, :to=>'xmlish'
-      delegate :duck, :to=>'xmlish', :at=>[:waterfowl, :ducks]
+    after :all do
+      Object.send(:remove_const, :BarHistory2)
     end
+
     before :each do
       @n = BarHistory2.new()
     end
+
 
     it "should save a delegated property uniquely" do
       @n.fubar="Quack"
@@ -73,6 +85,30 @@ describe ActiveFedora::Base do
     it "should accept the array getters and setters" do
       @n[:duck]= ["Cluck", "Gobble"]
       @n[:duck].should == ["Cluck", "Gobble"]
+    end
+
+  end
+
+  describe "with a superclass" do
+    before :all do
+      class BarHistory2 < ActiveFedora::Base
+        has_metadata 'xmlish', :type=>BarStream2
+        delegate_to 'xmlish', [:donkey, :cow]
+      end
+      class BarHistory3 < BarHistory2
+      end
+    end
+
+    after :all do
+      Object.send(:remove_const, :BarHistory3)
+      Object.send(:remove_const, :BarHistory2)
+    end
+
+    subject { BarHistory3.new }
+
+    it "should be able to delegate deeply into the terminology" do
+      subject.donkey=["Bray", "Hee-haw"]
+      subject.donkey.should == ["Bray", "Hee-haw"]
     end
   end
 end
