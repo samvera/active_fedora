@@ -27,13 +27,15 @@ module ActiveFedora
 
     module ClassMethods
       def delegates
-        @delegates ||= {}
+        @local_delegates ||= {}
+        return @local_delegates unless superclass.respond_to?(:delegates) and value = superclass.delegates
+        @local_delegates = value.dup if @local_delegates.empty?
+        @local_delegates
       end
 
       def delegates= val
-        @delegates = val
+        @local_delegates = val
       end
-
       # Provides a delegate class method to expose methods in metadata streams
       # as member of the base object. Pass the target datastream via the
       # <tt>:to</tt> argument. If you want to return a unique result, (e.g. string
