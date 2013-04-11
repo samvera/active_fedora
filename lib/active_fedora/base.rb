@@ -1,6 +1,7 @@
 SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 require "digest"
+require 'active_support/descendants_tracker'
 
 module ActiveFedora
   
@@ -315,6 +316,7 @@ module ActiveFedora
   Base.class_eval do
     include Attributes
     include ActiveFedora::Persistence
+    extend ActiveSupport::DescendantsTracker
     extend Model
     include Loggable
     include Indexing
