@@ -13,30 +13,6 @@
     <field name="lat" type="tdouble" stored="true" indexed="true" multiValued="false"/>
     <field name="lng" type="tdouble" stored="true" indexed="true" multiValued="false"/>
 
-	<!--these fields are hard coded in places in hydra-head -->
-	<field name="active_fedora_model_s" type="string" stored="true" indexed="true"/>
-	<field name="object_profile_display" type="string" stored="true" indexed="true"/>
-	<field name="has_model_s" type="string" stored="true" indexed="true"/>
-	<field name="is_governed_by_s" type="string" stored="true" indexed="true"/>
-	
-	<!--
-	These are hard coded in places in hydra-head, but we hope to fix that.
-	
-	<field name="inheritable_discover_access_person_t" type="string" stored="true" indexed="true" multiValued="true"/>
-	<field name="inheritable_read_access_person_t" type="string" stored="true" indexed="true" multiValued="true"/>
-	<field name="inheritable_edit_access_person_t" type="string" stored="true" indexed="true" multiValued="true"/>
-	<field name="inheritable_discover_access_group_t" type="string" stored="true" indexed="true" multiValued="true"/>
-	<field name="inheritable_read_access_group_t" type="string" stored="true" indexed="true" multiValued="true"/>
-	<field name="inheritable_edit_access_group_t" type="string" stored="true" indexed="true" multiValued="true"/>
-	<field name="read_access_person_t" type="string" stored="true" indexed="true" multiValued="true"/>
-	<field name="discover_access_person_t" type="string" stored="true" indexed="true" multiValued="true"/>
-	<field name="edit_access_person_t" type="string" stored="true" indexed="true" multiValued="true"/>
-	<field name="read_access_group_t" type="string" stored="true" indexed="true" multiValued="true"/>
-	<field name="edit_access_group_t" type="string" stored="true" indexed="true" multiValued="true"/>
-	<field name="discover_access_group_t" type="string" stored="true" indexed="true" multiValued="true"/>
-	-->	
-
-
     <!-- NOTE:  not all possible Solr field types are represented in the dynamic fields -->
 
     <!-- text (_t...) -->
@@ -173,152 +149,16 @@
     <!-- you must define copyField source and dest fields explicity or schemaBrowser doesn't work -->
     <field name="all_text_timv" type="text" stored="false" indexed="true" multiValued="true" termVectors="true" termPositions="true" termOffsets="true"/>
 
-    <!-- deprecated fields from pre-Solr 4.0 pre-hydra 5.0 -->
-<!--    
-    <field name="marc_display" type="string" indexed="false" stored="true" multiValued="false"/>
-    <field name="title_display" type="string" indexed="false" stored="true" multiValued="false"/>
-    <field name="title_vern_display" type="string" indexed="false" stored="true" multiValued="false"/>
-    <field name="subtitle_display" type="string" indexed="false" stored="true" multiValued="false"/>
-    <field name="subtitle_vern_display" type="string" indexed="false" stored="true" multiValued="false"/>
-    <field name="author_display" type="string" indexed="false" stored="true" multiValued="false"/>
-    <field name="author_vern_display" type="string" indexed="false" stored="true" multiValued="false"/>
--->
-    <!-- these fields are also used for display, so they must be stored -->
-<!--    
-    <field name="isbn_t" type="text" indexed="true" stored="true" multiValued="true"/>
-    <field name="language_facet" type="string" indexed="true" stored="true" multiValued="true" />
-    <field name="subject_topic_facet" type="string" indexed="true" stored="true" multiValued="true" />
-    <field name="subject_era_facet" type="string" indexed="true" stored="true" multiValued="true" />
-    <field name="subject_geo_facet" type="string" indexed="true" stored="true" multiValued="true" />
--->
-     <!-- pub_date is used for facet and display so it must be indexed and stored -->
-<!--    
-    <field name="pub_date" type="string" indexed="true" stored="true" multiValued="true"/>
--->
-    <!-- pub_date sort uses new trie-based int fields, which are recommended for any int and are displayable, sortable, and range-quer
-    we use 'tint' for faster range-queries. -->
-<!--    
-    <field name="pub_date_sort" type="tint" indexed="true" stored="true" multiValued="false"/>
--->
-    <!-- format is used for facet, display, and choosing which partial to use for the show view, so it must be stored and indexed -->
-<!--    
-    <field name="format" type="string" indexed="true" stored="true"/>
-
-    <dynamicField name="*_i"  type="int"    indexed="true"  stored="true"/>
-    <dynamicField name="*_s"  type="string"  indexed="true"  stored="true" multiValued="true"/>
-    <dynamicField name="*_l"  type="long"   indexed="true"  stored="true"/>
-    <dynamicField name="*_t"  type="text"    indexed="true"  stored="true" multiValued="true"/>
-    <dynamicField name="*_txt" type="text_general"    indexed="true"  stored="true" multiValued="true"/>
-    <dynamicField name="*_b"  type="boolean" indexed="true"  stored="true"/>
-    <dynamicField name="*_f"  type="float"  indexed="true"  stored="true"/>
-    <dynamicField name="*_d"  type="double" indexed="true"  stored="true"/>
-
-    <dynamicField name="ignored_*" type="ignored" multiValued="true"/>
-    <dynamicField name="attr_*" type="text_general" indexed="true" stored="true" multiValued="true"/>
-
-    <dynamicField name="random_*" type="random" />
-
-    <dynamicField name="*_display" type="string" indexed="false" stored="true" multiValued="true" />
-    <dynamicField name="*_facet" type="string" indexed="true" stored="true" multiValued="true" />
-    <dynamicField name="*_sort" type="string" indexed="true" stored="false" multiValued="false" />
-    <dynamicField name="*_unstem_search" type="text_general" indexed="true" stored="false" multiValued="true" />
-    <dynamicField name="*spell" type="textSpell" indexed="true" stored="false" multiValued="true" />
--->
-    <!-- uncomment the following to ignore any fields that don't already match an existing
-         field name or dynamic field, rather than reporting them as an error.
-         alternately, change the type="ignored" to some other type e.g. "text" if you want
-         unknown fields indexed and/or stored by default -->
-    <!--dynamicField name="*" type="ignored" multiValued="true" /-->
-
-    <!-- END hydra deprecated items -->
 
   </fields>
 
-  <!-- START hydra deprecated items -->
-<!--  
-  <defaultSearchField>text</defaultSearchField>
--->
-  <!-- SolrQueryParser configuration: defaultOperator="AND|OR" -->
-<!--  
-  <solrQueryParser defaultOperator="AND"/>
-
-  <copyField source="title_t" dest="title_unstem_search"/>
-  <copyField source="subtitle_t" dest="subtitle_unstem_search"/>
-  <copyField source="title_addl_t" dest="title_addl_unstem_search"/>
-  <copyField source="title_added_entry_t" dest="title_added_entry_unstem_search"/>
-  <copyField source="title_series_t" dest="title_series_unstem_search"/>
-  <copyField source="author_t" dest="author_unstem_search"/>
-  <copyField source="author_addl_t" dest="author_addl_unstem_search"/>
-  <copyField source="subject_t" dest="subject_unstem_search"/>
-  <copyField source="subject_addl_t" dest="subject_addl_unstem_search"/>
-  <copyField source="subject_topic_facet" dest="subject_topic_unstem_search"/>
--->
-  <!-- sort fields -->
-<!--  
-  <copyField source="pub_date" dest="pub_date_sort"/>
--->
-
-  <!-- spellcheck fields -->
-  <!-- default spell check;  should match fields for default request handler -->
-  <!-- it won't work with a copy of a copy field -->
-<!-- 
-  <copyField source="*_t" dest="spell"/>
-  <copyField source="*_facet" dest="spell"/>
--->
-  <!-- title spell check;  should match fields for title request handler -->
-<!-- 
-  <copyField source="title_t" dest="title_spell"/>
-  <copyField source="subtitle_t" dest="title_spell"/>
-  <copyField source="addl_titles_t" dest="title_spell"/>
-  <copyField source="title_added_entry_t" dest="title_spell"/>
-  <copyField source="title_series_t" dest="title_spell"/>
--->
-  <!-- author spell check; should match fields for author request handler -->
-<!-- 
-  <copyField source="author_t" dest="author_spell"/>
-  <copyField source="author_addl_t" dest="author_spell"/>
--->
-  <!-- subject spell check; should match fields for subject request handler -->
-<!-- 
-  <copyField source="subject_topic_facet" dest="subject_spell"/>
-  <copyField source="subject_t" dest="subject_spell"/>
-  <copyField source="subject_addl_t" dest="subject_spell"/>
--->
-  
-  <!-- OpenSearch query field should match request handler search fields -->
-<!--  
-  <copyField source="title_t" dest="opensearch_display"/>
-  <copyField source="subtitle_t" dest="opensearch_display"/>
-  <copyField source="addl_titles_t" dest="opensearch_display"/>
-  <copyField source="title_added_entry_t" dest="opensearch_display"/>
-  <copyField source="title_series_t" dest="opensearch_display"/>
-  <copyField source="author_t" dest="opensearch_display"/>
-  <copyField source="author_addl_t" dest="opensearch_display"/>
-  <copyField source="subject_topic_facet" dest="opensearch_display"/>
-  <copyField source="subject_t" dest="opensearch_display"/>
-  <copyField source="subject_addl_t" dest="opensearch_display"/>
--->
 
   <!-- Above, multiple source fields are copied to the [text] field.
       Another way to map multiple source fields to the same
       destination field is to use the dynamic field syntax.
       copyField also supports a maxChars to copy setting.  -->
 
-    <!-- <copyField source="*_t" dest="text" maxChars="3000"/> -->
-<!--  
-    <copyField source="*_s" dest="text"/>
-    <copyField source="*_t" dest="text"/>
-    <copyField source="*_facet" dest="text"/>
--->
-    <!-- copy name to alphaNameSort, a field designed for sorting by name -->
-    <!-- <copyField source="name" dest="alphaNameSort"/> -->
-
-    <!-- END hydra deprecated items -->
-
-  <!-- copy fields;  note that you must define copyField source and dest fields explicity or schemaBrowser doesn't work -->
-<!--
-  <copyField source="some_field" dest="all_text_timv" />
--->  
+    <!-- <copyField source="*_tesim" dest="all_text_timv" maxChars="3000"/> -->
 
   <types>
     <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
