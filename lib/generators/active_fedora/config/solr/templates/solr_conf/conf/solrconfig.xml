@@ -37,23 +37,27 @@
        -->
         <str name="qf">
           id
-          all_text_timv
           active_fedora_model_ssi
-          object_type_si
+          title_tesim
+          author_tesim
+          subject_tesim
         </str>
         <str name="pf">
           all_text_timv^10
         </str>
 
        <str name="author_qf">
+          author_tesim
        </str>
        <str name="author_pf">
        </str>
        <str name="title_qf">
+          title_tesim
        </str>
        <str name="title_pf">
        </str>
        <str name="subject_qf">
+          subject_tesim
        </str>
        <str name="subject_pf">
        </str>
@@ -67,7 +71,7 @@
        <str name="facet.mincount">1</str>
        <str name="facet.limit">10</str>
        <str name="facet.field">active_fedora_model_ssi</str>
-       <str name="facet.field">object_type_si</str>
+       <str name="facet.field">subject_sim</str>
        
        <str name="spellcheck">true</str>
        <str name="spellcheck.dictionary">default</str>
