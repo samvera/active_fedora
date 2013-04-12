@@ -424,7 +424,7 @@ describe ActiveFedora::Base do
         stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
         @test_history = FooHistory.new()
         solr_doc = @test_history.to_solr
-        solr_doc[ActiveFedora::SolrService.solr_name("active_fedora_model", :symbol)].should eql(["FooHistory"])
+        solr_doc[ActiveFedora::SolrService.solr_name("active_fedora_model", :stored_sortable)].should eql(["FooHistory"])
       end
 
       it "should call .to_solr on all SimpleDatastreams and OmDatastreams, passing the resulting document to solr" do
