@@ -2,6 +2,11 @@ require 'spec_helper'
 @@last_pid = 0  
 
 describe ActiveFedora::Base do
+  describe 'descendants' do
+    it "should record the decendants" do
+      ActiveFedora::Base.descendants.should include(HydrangeaArticle, SpecialThing)
+    end
+  end
   describe "sharding" do
     it "should have a shard_index" do
       ActiveFedora::Base.shard_index(@this_pid).should == 0
