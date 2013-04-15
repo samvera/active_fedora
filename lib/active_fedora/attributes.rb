@@ -64,6 +64,7 @@ module ActiveFedora
     #   }
     #   article.update_datastream_attributes( ds_values_hash )
     def update_datastream_attributes(params={}, opts={})
+      Deprecation.warn(Attributes, 'update_datastream_attributes is deprecated. Consider using delegate_to instead.', caller)
       result = params.dup
       params.each_pair do |dsid, ds_params| 
         if datastreams.include?(dsid)
@@ -74,9 +75,9 @@ module ActiveFedora
       end
       return result
     end
-    deprecation_deprecate :update_datastream_attributes
     
     def get_values_from_datastream(dsid,field_key,default=[])
+      Deprecation.warn(Attributes, 'get_values_from_datastream is deprecated. Consider using Datastream#get_values instead.', caller)
       if datastreams.include?(dsid)
         return datastreams[dsid].get_values(field_key,default)
       else
