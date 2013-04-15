@@ -53,7 +53,7 @@ require 'rspec/core/rake_task'
 
   desc "Copies the default SOLR config for the bundled Testing Server"
   task :configure_jetty do
-    FileList['solr/conf/*'].each do |f|  
+    FileList['lib/generators/active_fedora/config/solr/templates/solr_conf/conf/*'].each do |f|  
       cp("#{f}", 'jetty/solr/development-core/conf/', :verbose => true)
       cp("#{f}", 'jetty/solr/test-core/conf/', :verbose => true)
     end
