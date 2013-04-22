@@ -27,22 +27,27 @@ You can generate a model inheriting from ActiveFedora::Base.
 
 h2. Testing (this Gem)
 
-In order to run the RSpec tests, you need to have a copy of the ActiveFedora source code, and then run bundle install in the source directory.
+In order to run the RSpec tests, you need to have a copy of the ActiveFedora source code, and then run bundle install in the source directory.  Testing requires hydra-jetty, which contains version for Fedora and Solr.  Setting up and maintaining hydra-jetty for the purposes of testing this gem is all accomplished via
 
 <pre>
 git clone https://github.com/projecthydra/active_fedora.git
 cd /wherever/active_fedora/is
 bundle install
-git submodule init
-git submodule update
 </pre>
 
-h3. Testing with Hudson Rake Task
+h3. Using the continuous integration server
 
-The hudson rake task will spin up jetty, import the fixtures, and run the tests for you.
+You can test ActiveFedora using the same process as our continuous integration server.  To do that, unzip a copy
+of hydra-jetty first.  This includes copies of Fedora and Solr which are used during the testing process.
 
 <pre>
-  rake active_fedora:hudson
+  rake jetty:unzip 
+</pre>
+
+Once hydra-jetty is unzipped, the ci rake task will spin up jetty, import the fixtures, and run the tests for you.
+
+<pre>
+  rake active_fedora:ci
 </pre>
 
 h3. Testing Manually
