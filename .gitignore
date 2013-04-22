@@ -8,3 +8,4 @@ doc
 tmp
 Gemfile.lock
 jetty
+bin

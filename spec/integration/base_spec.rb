@@ -431,8 +431,14 @@ describe ActiveFedora::Base do
     it "should return true for objects that exist" do
       ActiveFedora::Base.exists?('hydrangea:fixture_mods_article1').should be_true
     end
-    it "should return false for objects that dont exist" do
+    it "should return false for objects that don't exist" do
       ActiveFedora::Base.exists?('nil:object').should be_false
+    end
+    it "should return false for nil" do
+      ActiveFedora::Base.exists?(nil).should be_false
+    end
+    it "should return false for empty" do
+      ActiveFedora::Base.exists?('').should be_false
     end
   end
 end
