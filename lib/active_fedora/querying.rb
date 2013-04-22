@@ -72,6 +72,7 @@ module ActiveFedora
     # @param[String] pid 
     # @return[boolean] 
     def exists?(pid)
+      return false if pid.nil? || pid.empty?
       inner = DigitalObject.find_or_initialize(self, pid)
       !inner.new?
     end
