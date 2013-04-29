@@ -1,7 +1,18 @@
-6.1.0 (unreleased)
+6.1.0
 Give a list of classes that decend from ActiveFedora::Base
-Allow inherited delegates. Fixes #59
-
+ActiveFedora::Base.exists?(nil) now returns false. Fixes #56
+Removed extraneous solr configs.
+Deprecated get_values_from_datastream. Fixes #52
+Added ActiveFedora::Base.decendants
+Added some sensible defaults to the solrconfig. Removed comments about old fields.
+active_fedora_model solr field corrected to be single-valued.
+Fixed fields for solrconfig permissions.
+Deprecated Attributes#update_datastream_attributes.
+Delegate registry works with descendants of ActiveFedora::Base, not just direct subclasses. Fixes #59
+New ActiveFedora::Auditable mixin - provides access to Fedora audit trail.
+Fixed has and belongs to many, so it calls remove_relationship on the right object.
+Added jetty.yml to solr generator to overwrite the Blacklight jetty.yml.
+Upgrade to om 2.1.0.
 
 6.0.0
 New solr schema with descriptive field suffixes
