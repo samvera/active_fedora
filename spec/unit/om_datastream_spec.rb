@@ -117,9 +117,9 @@ describe ActiveFedora::OmDatastream do
     end
     
     it "should return the new index of any added values" do
-      @mods_ds.get_values([{:title_info=>0},:main_title]).should == ["ARTICLE TITLE", "TITLE OF HOST JOURNAL"]
+      @mods_ds.get_values([{:title_info=>0},:main_title]).should == ["ARTICLE TITLE"]
       result = @mods_ds.update_indexed_attributes [{"title_info"=>"0"},"main_title"]=>{"-1"=>"mork"}
-      result.should == {"title_info_0_main_title"=>{"2"=>"mork"}}
+      result.should == {"title_info_0_main_title"=>{"1"=>"mork"}}
     end
 
     it "should allow deleting of values and should delete values so that to_xml does not return emtpy nodes" do
@@ -141,7 +141,7 @@ describe ActiveFedora::OmDatastream do
     # end
     
     it "should set changed to true" do
-      @mods_ds.get_values([{:title_info=>0},:main_title]).should == ["ARTICLE TITLE", "TITLE OF HOST JOURNAL"]
+      @mods_ds.get_values([{:title_info=>0},:main_title]).should == ["ARTICLE TITLE"]
       @mods_ds.update_indexed_attributes [{"title_info"=>"0"},"main_title"]=>{"-1"=>"mork"}
       @mods_ds.should be_changed
     end
