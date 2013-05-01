@@ -220,15 +220,25 @@ module ActiveFedora
         ds_specs[args[:name]]= spec
       end
 
-      # Specify the attributes of a file bearing datastream 
-      #
-      # @param [Hash] args 
-      # @option args :name ("content") The dsid of the datastream
-      # @option args :type (ActiveFedora::Datastream) The class the datastream should have
-      # @option args :label ("File Datastream") The default value to put in the dsLabel field
-      # @option args :control_group ("M") The type of controlGroup to store the datastream as. Defaults to M
-      # @option args [Boolean] :autocreate Always create this datastream on new objects
-      # @option args [Boolean] :versionable Should versioned datastreams be stored
+      
+      # @overload has_file_datastream(name, args)
+      #   Declares a file datastream exists for objects of this type
+      #   @param [String] name 
+      #   @param [Hash] args 
+      #     @option args :type (ActiveFedora::Datastream) The class the datastream should have
+      #     @option args :label ("File Datastream") The default value to put in the dsLabel field
+      #     @option args :control_group ("M") The type of controlGroup to store the datastream as. Defaults to M
+      #     @option args [Boolean] :autocreate Always create this datastream on new objects
+      #     @option args [Boolean] :versionable Should versioned datastreams be stored
+      # @overload has_file_datastream(args)
+      #   Declares a file datastream exists for objects of this type
+      #   @param [Hash] args 
+      #     @option args :name ("content") The dsid of the datastream
+      #     @option args :type (ActiveFedora::Datastream) The class the datastream should have
+      #     @option args :label ("File Datastream") The default value to put in the dsLabel field
+      #     @option args :control_group ("M") The type of controlGroup to store the datastream as. Defaults to M
+      #     @option args [Boolean] :autocreate Always create this datastream on new objects
+      #     @option args [Boolean] :versionable Should versioned datastreams be stored
       def has_file_datastream(*args)
         if args.first.is_a? String 
           name = args.first
