@@ -57,6 +57,10 @@ describe ActiveFedora::Model do
       it "should create an xml datastream" do
         subject.datastreams['properties'].should be_kind_of ActiveFedora::SimpleDatastream
       end
+
+      it "should know the datastreams properties" do
+        subject.properties.dsSize.should == 19
+      end
     end
   end
 end
