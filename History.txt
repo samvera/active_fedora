@@ -1,3 +1,7 @@
+6.1.1
+Rdf nodes should check for an RDF.type when resolving classes
+Objects loaded via Solr should have datastream properties of same class
+
 6.1.0
 Give a list of classes that decend from ActiveFedora::Base
 ActiveFedora::Base.exists?(nil) now returns false. Fixes #56
