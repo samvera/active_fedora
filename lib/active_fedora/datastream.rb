@@ -59,7 +59,7 @@ module ActiveFedora
     
     def profile_from_hash(profile_hash)
       profile_hash.each_pair do |key,value|
-        profile[key] = value.to_s
+        profile[key] = value
       end
     end
     
