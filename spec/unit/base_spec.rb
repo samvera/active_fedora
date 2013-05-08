@@ -410,8 +410,8 @@ describe ActiveFedora::Base do
         @test_object.should_receive(:create_date).and_return("2012-03-04T03:12:02Z")
         @test_object.should_receive(:modified_date).and_return("2012-03-07T03:12:02Z")
         solr_doc = @test_object.to_solr
-        solr_doc[ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)].should eql(["2012-03-04T03:12:02Z"])
-        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :stored_sortable, type: :date)].should eql(["2012-03-07T03:12:02Z"])
+        solr_doc[ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)].should eql("2012-03-04T03:12:02Z")
+        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :stored_sortable, type: :date)].should eql("2012-03-07T03:12:02Z")
         solr_doc[:id].should eql("#{@test_object.pid}")
       end
 
@@ -429,7 +429,7 @@ describe ActiveFedora::Base do
         stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
         @test_history = FooHistory.new()
         solr_doc = @test_history.to_solr
-        solr_doc[ActiveFedora::SolrService.solr_name("active_fedora_model", :stored_sortable)].should eql(["FooHistory"])
+        solr_doc[ActiveFedora::SolrService.solr_name("active_fedora_model", :stored_sortable)].should eql("FooHistory")
       end
 
       it "should call .to_solr on all SimpleDatastreams and OmDatastreams, passing the resulting document to solr" do
@@ -578,10 +578,10 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
 
         @test_object.should_receive(:relationships).and_return(graph)
         solr_doc = @test_object.solrize_relationships
-        solr_doc[ActiveFedora::SolrService.solr_name("is_member_of", :symbol)].should == ["info:fedora/demo:10"]
-        solr_doc[ActiveFedora::SolrService.solr_name("is_part_of", :symbol)].should == ["info:fedora/demo:11"]
-        solr_doc[ActiveFedora::SolrService.solr_name("has_part", :symbol)].should == ["info:fedora/demo:12"]
-        solr_doc[ActiveFedora::SolrService.solr_name("conforms_to", :symbol)].should == ["AnInterface"]
+        solr_doc[ActiveFedora::SolrService.solr_name("is_member_of", :symbol)].should == "info:fedora/demo:10"
+        solr_doc[ActiveFedora::SolrService.solr_name("is_part_of", :symbol)].should == "info:fedora/demo:11"
+        solr_doc[ActiveFedora::SolrService.solr_name("has_part", :symbol)].should == "info:fedora/demo:12"
+        solr_doc[ActiveFedora::SolrService.solr_name("conforms_to", :symbol)].should == "AnInterface"
       end
     end
   end

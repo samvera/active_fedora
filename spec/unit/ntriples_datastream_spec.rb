@@ -185,14 +185,14 @@ describe ActiveFedora::NtriplesRDFDatastream do
     it "should iterate through @fields hash" do
       solr_doc = @subject.to_solr
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", type: :string)].should == ["publisher1"]
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :sortable)].should == ["publisher1"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :sortable)].should == "publisher1"
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :facetable)].should == ["publisher1"]
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", type: :string)].should == ["coverage1", "coverage2"]
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :facetable)].should == ["coverage1", "coverage2"]
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__created", :sortable, type: :date)].should == ["2009-10-10T00:00:00Z"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__created", :sortable, type: :date)].should == "2009-10-10T00:00:00Z"
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__created", :displayable)].should == ["2009-10-10"]
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__title", type: :string)].should == ["fake-title"]
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__title", :sortable)].should == ["fake-title"]
+      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__title", :sortable)].should == "fake-title"
       solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string)].should == ["http://example.org/"]
     end
 
