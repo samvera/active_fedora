@@ -81,58 +81,118 @@ END
     end
   end
 
-  describe "with type" do
-    before(:each) do 
-      class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
-        map_predicates do |map|
-          map.mediator(:in=> RDF::DC, :class_name=>'MediatorUser')
-        end
 
-        class MediatorUser
-          include ActiveFedora::RdfObject
-          rdf_type RDF::DC.AgentClass
+  describe "with type" do
+    describe "one class per assertion" do 
+      before(:each) do 
+        class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
           map_predicates do |map|
-            map.title(:in=> RDF::DC)
+            map.mediator(:in=> RDF::DC, :class_name=>'MediatorUser')
+          end
+
+          class MediatorUser
+            include ActiveFedora::RdfObject
+            rdf_type RDF::DC.AgentClass
+            map_predicates do |map|
+              map.title(:in=> RDF::DC)
+            end
           end
         end
       end
+      
+      after(:each) do
+        Object.send(:remove_const, :SpecDatastream)
+      end
 
-    end
-    
-    after(:each) do
-      Object.send(:remove_const, :SpecDatastream)
-    end
-
-    let (:ds) do
-      mock_obj = stub(:mock_obj, :pid=>'test:124', :new? => true)
-      ds = SpecDatastream.new(mock_obj)
-    end
+      let (:ds) do
+        mock_obj = stub(:mock_obj, :pid=>'test:124', :new? => true)
+        ds = SpecDatastream.new(mock_obj)
+      end
 
 
-    it "should store the type of complex objects when type is specified" do
-      comp = SpecDatastream::MediatorUser.new ds.graph
-      comp.title = ["Doctor"]
-      ds.mediator = comp
-      ds.mediator.first.type.first.should be_instance_of RDF::URI
-      ds.mediator.first.type.first.to_s.should == "http://purl.org/dc/terms/AgentClass"
-      ds.mediator.first.title.first.should == 'Doctor'
-    end
+      it "should store the type of complex objects when type is specified" do
+        comp = SpecDatastream::MediatorUser.new ds.graph
+        comp.title = ["Doctor"]
+        ds.mediator = comp
+        ds.mediator.first.type.first.should be_instance_of RDF::URI
+        ds.mediator.first.type.first.to_s.should == "http://purl.org/dc/terms/AgentClass"
+        ds.mediator.first.title.first.should == 'Doctor'
+      end
 
-    it "should add the type of complex object when it is not provided" do
-      ds.content = <<END
-_:g70350851837440 <http://purl.org/dc/terms/title> "Mediation Person" .
-<info:fedora/test:124> <http://purl.org/dc/terms/mediator> _:g70350851837440 .
+      it "should add the type of complex object when it is not provided" do
+        ds.content = <<END
+  _:g70350851837440 <http://purl.org/dc/terms/title> "Mediation Person" .
+  <info:fedora/test:124> <http://purl.org/dc/terms/mediator> _:g70350851837440 .
 END
-      ds.mediator.first.type.first.to_s.should == "http://purl.org/dc/terms/AgentClass"
+        ds.mediator.first.type.first.to_s.should == "http://purl.org/dc/terms/AgentClass"
+      end
+
+      it "should add load the type of complex objects when provided (superceeding what is specified by the class)" do
+        ds.content = <<END
+  _:g70350851837440 <http://purl.org/dc/terms/title> "Mediation Orgainzation" .
+  _:g70350851837440 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.ebu.ch/metadata/ontologies/ebucore#Organisation> .
+  <info:fedora/test:124> <http://purl.org/dc/terms/mediator> _:g70350851837440 .
+END
+        ds.mediator.first.type.first.to_s.should == "http://www.ebu.ch/metadata/ontologies/ebucore#Organisation"
+      end
     end
 
-    it "should add load the type of complex objects when provided (superceeding what is specified by the class)" do
-      ds.content = <<END
-_:g70350851837440 <http://purl.org/dc/terms/title> "Mediation Orgainzation" .
-_:g70350851837440 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.ebu.ch/metadata/ontologies/ebucore#Organisation> .
-<info:fedora/test:124> <http://purl.org/dc/terms/mediator> _:g70350851837440 .
-END
-      ds.mediator.first.type.first.to_s.should == "http://www.ebu.ch/metadata/ontologies/ebucore#Organisation"
+    describe "shared assertion to different classes" do
+      before(:each) do 
+        class EbuCore < RDF::Vocabulary("http://www.ebu.ch/metadata/ontologies/ebucore#")
+          property :isEpisodeOf
+          property :title
+        end
+        
+        class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
+          map_predicates do |map|
+            map.series(:to => 'isEpisodeOf', :in=> EbuCore, :class_name=>'Series')
+            map.program(:to => 'isEpisodeOf', :in=> EbuCore, :class_name=>'Program')
+          end
+
+          class Series
+            include ActiveFedora::RdfObject
+            rdf_type 'http://www.ebu.ch/metadata/ontologies/ebucore#Series'
+            map_predicates do |map|
+              map.title(:in=> EbuCore)
+            end
+          end
+
+          class Program 
+            include ActiveFedora::RdfObject
+            rdf_type 'http://www.ebu.ch/metadata/ontologies/ebucore#Programme'
+            map_predicates do |map|
+              map.title(:in=> EbuCore)
+            end
+          end
+        end
+
+      end
+      
+      after(:each) do
+        Object.send(:remove_const, :SpecDatastream)
+      end
+
+      let (:ds) do
+        mock_obj = stub(:mock_obj, :pid=>'test:124', :new? => true)
+        ds = SpecDatastream.new(mock_obj)
+      end
+
+
+      it "should store the type of complex objects when type is specified" do
+        series = SpecDatastream::Series.new ds.graph
+        series.title = ["renovating bathrooms"]
+        ds.series = series
+        ds.series.first.type.size.should == 1
+        ds.series.first.type.first.to_s.should == 'http://www.ebu.ch/metadata/ontologies/ebucore#Series' 
+
+        program = SpecDatastream::Program.new ds.graph
+        program.title = ["This old House"]
+        ds.program = program
+        ds.program.first.type.size.should == 1
+        ds.program.first.type.first.to_s.should == 'http://www.ebu.ch/metadata/ontologies/ebucore#Programme' 
+      end
+
     end
   end
 end

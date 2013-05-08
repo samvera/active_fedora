@@ -48,11 +48,29 @@ module ActiveFedora
           end
           values << v
         end
+
         if options[:class_name]
-          values = values.map{ |found_subject| graph.target_class(predicate).new(graph.graph, found_subject)}
+          values = values.map{ |found_subject| class_from_rdf_type(found_subject, predicate).new(graph.graph, found_subject)}
         end
         
         values
+      end
+      
+      private 
+
+      def class_from_rdf_type(subject, predicate)
+        q = RDF::Query.new do
+          pattern [subject, RDF.type, :value]
+        end
+
+        type_uri = []
+        q.execute(graph.graph).each do |sol| 
+          type_uri << sol.value
+        end
+        
+        klass = ActiveFedora::RdfNode.rdf_registry[type_uri.first]
+        klass ||= graph.target_class(predicate)
+        klass
       end
 
     end
