@@ -1,6 +1,7 @@
-!https://travis-ci.org/projecthydra/active_fedora.png?branch=master!:https://travis-ci.org/projecthydra/active_fedora
-
 h2. Description
+
+!https://travis-ci.org/projecthydra/active_fedora.png?branch=master!:https://travis-ci.org/projecthydra/active_fedora !https://badge.fury.io/rb/active-fedora.png!:http://badge.fury.io/rb/active-fedora !https://gemnasium.com/projecthydra/active_fedora.png!:https://gemnasium.com/projecthydra/active_fedora
+
 
 RubyFedora and ActiveFedora provide a set of Ruby gems for creating and managing objects in the Fedora Repository Architecture ("http://fedora-commons.org":http://fedora-commons.org).  ActiveFedora is loosely based on "ActiveRecord" in Rails.  The 3.x series of ActiveFedora depends on Rails 3, specifically activemodel and activesupport.
 
