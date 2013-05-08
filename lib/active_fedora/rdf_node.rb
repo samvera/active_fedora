@@ -26,8 +26,9 @@ module ActiveFedora
     end
 
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
-    def get_values(subject, predicate)
-      options = config_for_term_or_uri(predicate)
+    def get_values(subject, term)
+      options = config_for_term_or_uri(term)
+      predicate = options[:predicate]
       TermProxy.new(self, subject, predicate, options)
     end
 
@@ -43,24 +44,23 @@ module ActiveFedora
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     # @param [Array,#to_s] values  the value/values to insert into the graph
     def set_value(subject, predicate, values)
-
       options = config_for_term_or_uri(predicate)
       predicate = options[:predicate]
+      values = Array(values)
 
-      delete_predicate(subject, predicate)
-      Array(values).each do |arg|
+      remove_existing_values(subject, predicate, values)
+
+      values.each do |arg|
         if arg.respond_to?(:rdf_subject) # an RdfObject
           graph.insert([subject, predicate, arg.rdf_subject ])
         else
           arg = arg.to_s if arg.kind_of? RDF::Literal
-
           graph.insert([subject, predicate, arg])
         end
       end
 
       TermProxy.new(self, subject, predicate, options)
     end
-
  
     def delete_predicate(subject, predicate, values = nil)
       predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
@@ -78,7 +78,6 @@ module ActiveFedora
           graph.delete [subject, predicate, v]
         end
       end
-
     end
 
     # append a value 
@@ -117,8 +116,8 @@ module ActiveFedora
     def method_missing(name, *args)
       if (md = /^([^=]+)=$/.match(name.to_s)) && pred = find_predicate(md[1])
           set_value(rdf_subject, pred, *args)  
-      elsif pred = find_predicate(name)
-          get_values(rdf_subject, pred)
+      elsif find_predicate(name)
+          get_values(rdf_subject, name)
       else 
         super
       end
@@ -127,6 +126,43 @@ module ActiveFedora
     end
 
     private
+
+    def remove_existing_values(subject, predicate, values)
+      if values.any? { |x| x.respond_to?(:rdf_subject)}
+        values.each do |arg|
+          if arg.respond_to?(:rdf_subject) # an RdfObject
+            # can't just delete_predicate, have to delete the predicate with the class
+            values_to_delete = find_values_with_class(subject, predicate, arg.class.rdf_type)
+            delete_predicate(subject, predicate, values_to_delete)
+          else
+            delete_predicate(subject, predicate)
+          end
+        end
+      else
+        delete_predicate(subject, predicate)
+      end
+    end
+
+
+    def find_values_with_class(subject, predicate, rdf_type)
+      matching = []
+      query = RDF::Query.new do
+        pattern [subject, predicate, :value]
+      end
+      query.execute(graph).each do |solution|
+        if rdf_type
+          query2 = RDF::Query.new do
+            pattern [solution.value, RDF.type, rdf_type]
+          end
+          query2.execute(graph).each do |sol2|
+            matching << solution.value
+          end
+        else
+          matching << solution.value
+        end
+      end
+      matching 
+    end
     class Builder
       def initialize(parent)
         @parent = parent

@@ -183,14 +183,15 @@ END
         series = SpecDatastream::Series.new ds.graph
         series.title = ["renovating bathrooms"]
         ds.series = series
-        ds.series.first.type.size.should == 1
-        ds.series.first.type.first.to_s.should == 'http://www.ebu.ch/metadata/ontologies/ebucore#Series' 
 
         program = SpecDatastream::Program.new ds.graph
         program.title = ["This old House"]
         ds.program = program
+
         ds.program.first.type.size.should == 1
         ds.program.first.type.first.to_s.should == 'http://www.ebu.ch/metadata/ontologies/ebucore#Programme' 
+        ds.series.first.type.size.should == 1
+        ds.series.first.type.first.to_s.should == 'http://www.ebu.ch/metadata/ontologies/ebucore#Series' 
       end
 
     end
