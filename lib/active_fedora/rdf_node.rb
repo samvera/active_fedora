@@ -31,7 +31,6 @@ module ActiveFedora
       TermProxy.new(self, subject, predicate, options)
     end
 
-    # TODO target_class can't be looked up from predicate necessarily.  Two classes may be valid for the same predicate (e.g. hasMember)
     def target_class(predicate)
       _, conf = self.class.config_for_predicate(predicate)
       class_name = conf[:class_name]

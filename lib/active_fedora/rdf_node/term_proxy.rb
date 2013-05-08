@@ -58,6 +58,9 @@ module ActiveFedora
       
       private 
 
+      # Look for a RDF.type assertion on this node to see if an RDF class is specified.
+      # Two classes may be valid for the same predicate (e.g. hasMember)
+      # If no RDF.type assertion is found, fall back to using target_class
       def class_from_rdf_type(subject, predicate)
         q = RDF::Query.new do
           pattern [subject, RDF.type, :value]
