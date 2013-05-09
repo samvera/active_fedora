@@ -25,7 +25,8 @@ module ActiveFedora
       @subject = nil
     end
 
-    # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
+    # @param [RDF::URI] subject the base node to start the search from
+    # @param [Symbol] term the term to get the values for
     def get_values(subject, term)
       options = config_for_term_or_uri(term)
       predicate = options[:predicate]
