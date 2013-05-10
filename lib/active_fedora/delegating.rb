@@ -16,6 +16,7 @@ module ActiveFedora
       array_setter(key, value)
     end
 
+
     private
     def array_reader(field)
       instance_exec(&self.class.delegates[field][:reader])
@@ -99,6 +100,13 @@ module ActiveFedora
         end
       end
 
+      # Reveal if the delegated field is unique or not
+      # @params [Symbol] field the field to query
+      # @returns [Boolean]
+      def unique?(field)
+        delegates[field][:unique]
+      end
+
       private
       def create_delegate_reader(field, args)
         self.delegates[field] ||= {}
@@ -112,9 +120,11 @@ module ActiveFedora
           end
         end
 
+        self.delegates[field][:unique] = args[:unique]
+
         define_method field do
           val = self[field]
-          args[:unique] ? val.first : val
+          self.class.unique?(field) ? val.first : val
         end
       end
 

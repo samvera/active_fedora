@@ -62,6 +62,10 @@ describe ActiveFedora::Base do
       @n = BarHistory2.new()
     end
 
+    it "should reveal the unique properties" do
+      BarHistory2.unique?(:fubar).should be_true
+      BarHistory2.unique?(:cow).should be_false
+    end
 
     it "should save a delegated property uniquely" do
       @n.fubar="Quack"
