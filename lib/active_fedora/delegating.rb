@@ -54,7 +54,8 @@ module ActiveFedora
       #   foo = Foo.new
       #   foo.field1 = "My Value"
       #   foo.field1                 # => "My Value"
-      #   foo.field2                 # => NoMethodError: undefined method `field2' for #<Foo:0x1af30c>
+      #   foo.field2                 # => [""]
+      #   foo.field3                 # => NoMethodError: undefined method `field3' for #<Foo:0x1af30c>
 
       def delegate(*methods)
         fields = methods.dup
@@ -90,7 +91,8 @@ module ActiveFedora
       #   foo = Foo.new
       #   foo.field1 = "My Value"
       #   foo.field1                 # => "My Value"
-      #   foo.field2                 # => NoMethodError: undefined method `field2' for #<Foo:0x1af30c>
+      #   foo.field2                 # => [""]
+      #   foo.field3                 # => NoMethodError: undefined method `field3' for #<Foo:0x1af30c>
 
       def delegate_to(datastream,fields,args={})
         fields.each do |f|
