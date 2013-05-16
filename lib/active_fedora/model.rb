@@ -24,11 +24,7 @@ module ActiveFedora
         logger.warn "#{model_value} is not a real class"
         return false
       end
-      if model_value.include?("::")
-        result = eval(model_value)
-      else
-        result = Kernel.const_get(model_value)
-      end
+      result = ActiveFedora.class_from_string(model_value)
       unless result.nil?
         model_ns = (result.respond_to? :pid_namespace) ? result.pid_namespace : ContentModel::CMODEL_NAMESPACE
         if model_ns != pid_ns

@@ -102,4 +102,13 @@ describe ActiveFedora do
       end
     end
   end
+  
+  describe "#class_from_string" do
+    it "should return class constants based on strings" do
+      ActiveFedora.class_from_string("Om").should == Om
+      ActiveFedora.class_from_string("ActiveFedora::RdfNode::TermProxy").should == ActiveFedora::RdfNode::TermProxy
+      ActiveFedora.class_from_string("TermProxy", ActiveFedora::RdfNode).should == ActiveFedora::RdfNode::TermProxy
+      
+    end
+  end
 end

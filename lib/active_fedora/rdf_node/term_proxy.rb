@@ -50,7 +50,7 @@ module ActiveFedora
           # potential solution is of the right RDF.type
           if options[:class_name]
             klass =  class_from_rdf_type(v, predicate)
-            values << v if klass == graph.class.const_get(options[:class_name].to_sym)
+            values << v if klass == ActiveFedora.class_from_string(options[:class_name], graph.class)
           else
             values << v
           end
