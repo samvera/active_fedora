@@ -2,6 +2,7 @@ module ActiveFedora
   module RdfNode
     extend ActiveSupport::Concern
     extend ActiveSupport::Autoload
+    include ActiveFedora::Rdf::NestedAttributes
 
     autoload :TermProxy
 
@@ -61,6 +62,17 @@ module ActiveFedora
       end
 
       TermProxy.new(self, subject, predicate, options)
+    end
+
+    def attributes=(values)
+      self.class.config.keys.each do |key|
+        if values.has_key?(key)
+          set_value(rdf_subject, key, values[key])
+        end
+      end
+      nested_attributes_options.keys.each do |key|
+        send("#{key}_attributes=".to_sym, values["#{key}_attributes".to_sym])
+      end
     end
  
     def delete_predicate(subject, predicate, values = nil)
