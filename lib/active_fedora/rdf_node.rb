@@ -11,7 +11,17 @@ module ActiveFedora
       @@rdf_registry ||= {}
     end
 
-
+    # Comparison Operator
+    # Checks that 
+    #   * RDF subject id (URI) is same
+    #   * Class is the same
+    #   * Both objects reference the same RDF graph in memory
+    def ==(other_object)
+      self.rdf_subject.id == other_object.rdf_subject.id &&
+      self.class == other_object.class &&
+      self.graph.object_id == other_object.graph.object_id
+    end
+    
     ##
     # Get the subject for this rdf object
     def rdf_subject

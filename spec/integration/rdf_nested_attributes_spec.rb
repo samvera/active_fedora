@@ -42,8 +42,9 @@ describe ActiveFedora::RDFDatastream do
           include ActiveFedora::RdfObject
           map_predicates do |map|
             map.elementList(in: DummyMADS, to: "elementList", class_name:"ComplexRDFDatastream::ElementList")
+            map.extraProperty(in: DummyMADS, to: "elementValue", class_name:"ComplexRDFDatastream::Topic")
           end
-          accepts_nested_attributes_for :elementList
+          accepts_nested_attributes_for :elementList, :extraProperty
         end
         class ElementList
           include ActiveFedora::RdfObject
@@ -70,9 +71,14 @@ describe ActiveFedora::RDFDatastream do
         { myResource: 
           {
             topic_attributes: [
-              { 
+              {
                 elementList_attributes: {
-                  fullNameElement: "Cosmology",
+                  topicElement:"Cosmology"
+                  }
+              },
+              {
+                elementList_attributes: {
+                  topicElement:"Quantum Behavior"
                 }
               }
             ],
@@ -101,14 +107,13 @@ describe ActiveFedora::RDFDatastream do
           # elem_list = topic.elementList.build
           # elem_list.fullNameElement = 'Cosmology'
 
-          puts "subject; #{subject.serialize}"
+          # puts "subject; #{subject.serialize}"
 
+          subject.topic.first.elementList.first.topicElement.should == ["Cosmology"]
+          subject.topic[1].elementList.first.topicElement.should == ["Quantum Behavior"]
           subject.personalName.first.elementList.first.fullNameElement.should == ["Jefferson, Thomas"]
           subject.personalName.first.elementList.first.dateNameElement.should == ["1743-1826"]
-          # Is there really a requirement for this?
-          #subject.personalName.last.should == ["Hemings, Sally"]
-          
-          subject.topic.first.elementList.first.fullNameElement.should == ["Cosmology"]
+
       end
     end    
 end

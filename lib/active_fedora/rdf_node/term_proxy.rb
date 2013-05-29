@@ -18,10 +18,14 @@ module ActiveFedora
         @options = options
       end
 
-      def build
+      def build(attributes=nil)
         new_subject = RDF::Node.new
         graph.graph.insert([subject, predicate, new_subject])
-        graph.target_class(predicate).new(graph.graph, new_subject)
+        built_node = graph.target_class(predicate).new(graph.graph, new_subject)        
+        unless attributes.nil?
+          built_node.attributes = attributes
+        end
+        return built_node
       end
 
       def <<(*values)
