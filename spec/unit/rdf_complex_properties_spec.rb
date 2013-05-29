@@ -32,6 +32,7 @@ describe ActiveFedora::RDFDatastream do
           map_predicates do |map|
             map.elementList(in: DummyMADS, class_name:"DummyMADS::ElementList")
           end
+          accepts_nested_attributes_for :elementList
         end
         class Temporal
           include ActiveFedora::RdfObject
@@ -41,6 +42,7 @@ describe ActiveFedora::RDFDatastream do
           map_predicates do |map|
             map.elementList(in: DummyMADS, class_name:"DummyMADS::ElementList")
           end
+          accepts_nested_attributes_for :elementList
         end
         class PersonalName
           include ActiveFedora::RdfObject
@@ -52,6 +54,7 @@ describe ActiveFedora::RDFDatastream do
           map_predicates do |map|
             map.elementList(in: DummyMADS, to: "elementList", class_name:"DummyMADS::ElementList")
           end
+          accepts_nested_attributes_for :elementList
         end
         class CorporateName
           include ActiveFedora::RdfObject
@@ -63,6 +66,7 @@ describe ActiveFedora::RDFDatastream do
           map_predicates do |map|
             map.elementList(in: DummyMADS, class_name:"DummyMADS::ElementList")
           end
+          accepts_nested_attributes_for :elementList
         end
         
         class ComplexSubject
@@ -74,6 +78,7 @@ describe ActiveFedora::RDFDatastream do
           map_predicates do |map|
             map.componentList(in: DummyMADS, class_name:"DummyMADS::ComponentList")
           end
+          accepts_nested_attributes_for :componentList
         end
         
         class ElementList
@@ -104,6 +109,7 @@ describe ActiveFedora::RDFDatastream do
             map.personalName(in: DummyMADS, to: "PersonalName", class_name:"DummyMADS::PersonalName")
             map.corporateName(in: DummyMADS, to: "CorporateName", class_name:"DummyMADS::CorporateName")
           end
+          accepts_nested_attributes_for :topic, :temporal, :personalName, :corporateName
         end
       end
       class ComplexRDFDatastream < ActiveFedora::NtriplesRDFDatastream
@@ -115,6 +121,7 @@ describe ActiveFedora::RDFDatastream do
           map.complexSubject(in: DummyMADS, to: "ComplexSubject", class_name:"DummyMADS::ComplexSubject")
           map.title(in: RDF::DC)
         end
+        accepts_nested_attributes_for :topic, :temporal, :personalName, :corporateName, :complexSubject
       end
       @ds = ComplexRDFDatastream.new(stub('inner object', :pid=>'foo', :new? =>true), 'descMetadata')
     end
@@ -123,23 +130,37 @@ describe ActiveFedora::RDFDatastream do
       Object.send(:remove_const, :DummyMADS)
     end
     subject { @ds } 
+
+
+    describe "assignment operator `=`" do
+      it "should wipe out existing values then append the given values"
+    end
     
-    describe "complex properties" do
-      it "should insert values at default_write_point_for_values" do
-        @ds.topic = "Software Testing"
-        @ds.topic.should = ["Software Testing"]
-        @ds.topic.nodeset.first.default_write_point_for_values.should == [:elementList, :topicElement]
-        @ds.topic(0).elementList(0).topicElement.should == ["Software Testing"]
+    describe "insertion operator `<<`" do
+      it "when given a Node should simply insert it" do
+        pending "TODO: Should this be the behavior?  -MZ 05/2013"
+        new_node = RDF::Node.new
+        @ds.topic << new_node
+        @ds.topic.first.should == new_node
       end
-      it "should support assignment operator and insertion operator" do
-        @ds.topic = ["Cosmology"]
-        @ds.topic << "Quantum States"
-        @ds.topic.should == ["Cosmology", "Quantum States"]
-        @ds.topic.nodeset.first.default_write_point_for_values.should == [:elementList, :topicElement]
-        @ds.topic(0).elementList(0).topicElement.should == ["Cosmology"] 
+      describe "when given a String" do
+        it "should raise an ArgumentError if corresponding property declares a class_name" do
+          pending "TODO: Should we be this strict, or just insert literals where they're not expected? -MZ 05/2013"
+          lambda{ @ds.topic << "A String Literal" }.should raise_error ArgumentError
+        end
+        it "should insert the String as a literal if possible" do
+          @ds.title << "My Title"
+          @ds.title.should == ["My Title"]
+        end
+      end
+      
+      it "should build proper rdf graph" do
+        @ds.topic.build("Cosmology")
+        @ds.topic.build("Quantum States")
         
-        list1_id = @ds.topic(0).elementList(0).rdf_subject.id
-        list2_id = @ds.topic(1).elementList(0).rdf_subject.id
+        # (Grabbing node ids for use in expected_xml assertion)
+        list1_id = @ds.topic[0].elementList[0].rdf_subject.id
+        list2_id = @ds.topic[1].elementList[0].rdf_subject.id
         
         expected_xml = '<?xml version="1.0" encoding="UTF-8"?>
                <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:ns0="http://www.loc.gov/mads/rdf/v1#">
@@ -165,172 +186,179 @@ describe ActiveFedora::RDFDatastream do
         
         @ds.graph.dump(:rdfxml).should be_equivalent_to expected_xml
       end
-      
-      it "should support mass-assignment" do
-          params = {
-            myResource: {
-              topic: "Cosmology",
-              temporal: "16th Century",
-              personalName: [
-                { 
-                  elementList: {
-                    fullNameElement: "Jefferson, Thomas",
-                    dateNameElement: "1743-1826"                  
-                  }
-                }, 
-                "Hemings, Sally"
-              ],
-              corporateName: {
-                elementList: {
-                  nameElement: "University of California, San Diego.",
-                  nameElement: "University Library",  
-                }
-              },
-              complexSubject: {
-                componentList: {
-                  personalName: {
-                    elementList: {
-                      fullNameElement: "Callender, James T.",
-                      dateNameElement: "1802" 
-                    }
-                  },
-                  topic: "Presidency", 
-                  temporal: "1801-1809"
-                },
-              },  
-
-            }
-          }
-          
-          # In this case, update_attributes is misleading because you can either replace the graph 
-          # or append to the graph but can't update it.
-          # @ds.update_attributes(params[:myResource])
-          
-          # Replace the graph's contents with the Hash
-          @ds.attributes = params[:myResource]
-          @ds.personalName.should == ["Jefferson, Thomas", "Hemings, Sally"]  
-          
-          @ds.personalName(0).elementList(0).fullNameElement.should == ["Jefferson, Thomas"]
-          @ds.personalName(0).elementList(0).dateNameElement.should == ["1743-1826"]
-          @ds.personalName(1).elementList(0).fullNameElement.should == ["Hemings, Sally"]
-          
-          @ds.topic.should == ["Cosmology"]
-      end
-      
-    end    
-
-    describe "Insertion Operator `<<`" do
-    
-      it "when given a String should create the necessary node and put the string into its default value location" do
-        @ds.personalName << "Jefferson Randolph, Martha"
-        @ds.personalName.should == ["Jefferson Randolph, Martha"]
-        @ds.personalName(0).elementList(0).fullNameElement.should == ["Jefferson Randolph, Martha"]
-      end
-      
-      it "when given a Node should simply insert it" do
-        new_name = DummyMADS::PersonalName.new(@ds.graph)
-        new_name.elementList.build
-        # new_name.elementList(0).fullNameElement.build
-        # new_name.elementList(0).dateNameElement.build
-        new_name.elementList(0).fullNameElement = "Callender, James T."
-        new_name.elementList(0).dateNameElement = "1802"
-        @ds.personalName << new_name
-        @ds.personalName.should == ["Callender, James T."]
-        @ds.personalName(0).elementList(0).fullNameElement.should == ["Callender, James T."]
-        @ds.personalName(0).elementList(0).dateNameElement.should == ["1802"]
-      end
-      
-      it "when given a Hash should rely on properties to build nodes" do
-        @ds.personalName << { 
-          elementList: {
-            fullNameElement: "Jefferson, Thomas",
-            dateNameElement: "1743-1826"                  
-          }
-        }
-        @ds.personalName.should == ["Jefferson, Thomas"]
-        @ds.personalName(0).elementList(0).fullNameElement.should == ["Jefferson, Thomas"]
-        @ds.personalName(0).elementList(0).dateNameElement.should == ["1743-1826"]
-      end
-      
     end
-      
-    describe "attributes=" do
-      it "when given a Hash should use update_attributes behavior" do
-        values_hash = {topic: "Cosmology",
-          temporal: "16th Century",
-          personalName: "Hemings, Sally"
-        }
-        @ds.attributes = values_hash
-        @ds.topic.should == ["Cosmology"]
-        @ds.temporal.should == ["16th Century"]
-        @ds.personalName.should == ["Hemings, Sally"]
-        @ds.topic(0).elementList(0).topicElement.should == ["Cosmology"]
-        @ds.temporal(0).elementList(0).temporalElement.should == ["16th Century"]
-        @ds.personalName(0).elementList(0).fullNameElement.should == ["Hemings, Sally"]
+    
+    describe "build" do
+      it "should create a node and insert it" do
+        @ds.personalName.count.should == 0
+        built_node = @ds.personalName.build 
+        @ds.personalName.count.should == 1
+        @ds.personalName.first.should == built_node
       end
       
-      it "when given an Array of Hashes should add each of the items from the array as a node corresponding to the specified property behavior" do
-        values_array = {
-          personalName:[
-          { 
+      it "when given an Array should return an Array of built nodes" do
+        pending "TODO: Should .build accept arrays (and return an Array of new nodes)?  Would this be useful? - MZ 05/2013"
+        attributes_array = [{ 
             elementList: {
               fullNameElement: "Jefferson, Thomas",
               dateNameElement: "1743-1826"                  
             }
           }, 
           "Hemings, Sally"
-        ]}
-        
-        @ds.attributes = values_array
-        debugger
-        @ds.personalName.should == ["Jefferson, Thomas", "Hemings, Sally"]
-        @ds.personalName(0).elementList(0).fullNameElement.should == ["Jefferson, Thomas"]
-        @ds.personalName(0).elementList(0).dateNameElement.should == ["1743-1826"]
-        @ds.personalName(1).elementList(0).fullNameElement.should == ["Hemings, Sally"]
+        ]
+        result = @ds.personalName.build(attributes_array)
+        result.should be_instance_of Array
+        result.length.should == 2
+        result.each {|built_node| built_node.should be_instance_of DummyMADS::PersonalName }
+        result[0].elementList[0].fullNameElement.should == ["Jefferson, Thomas"]
+        result[0].elementList[0].dateNameElement.should == ["1743-1826"]
+        result[1].elementList[0].fullNameElement.should == ["Hemings, Sally"]
       end
       
-      it "when given a complex Hash should rely on properties to build the graph" do
-        values_hash = {
-          complexSubject: [{
-            componentList: {
-              personalName: {
-                elementList: {
-                  fullNameElement: "Callender, James T.",
-                  dateNameElement: "1805" 
-                }
-              },
-              topic: "Presidency", 
-              temporal: "1801-1809"
-            },
-          },
-          {
-            componentList: {
-              personalName: {
-                elementList: {
-                  fullNameElement: "Hemings, Sally",
-                  dateNameElement: "1802" 
-                }
-              },
-              topic: "Slavery"
+    end
+    
+    describe "attributes=" do
+      
+      describe "(called on a Node)" do
+      
+        it "when given a String should create the necessary node and put the string into its default_write_point_for_values" do
+          built_node= @ds.topic.build
+          built_node.attributes = "Software Testing"
+          # built_node.value.should = ["Software Testing"]
+          built_node.should be_instance_of DummyMADS::Topic
+          built_node.default_write_point_for_values.should == [:elementList, :topicElement]
+          built_node.elementList[0].topicElement.should == ["Software Testing"]
+        end
+      
+        it "when given a Hash should rely on nested_attributes behavior to build nodes" do
+          values_hash = { 
+            elementList_attributes: {
+              fullNameElement: "Jefferson, Thomas",
+              dateNameElement: "1743-1826"                  
             }
-          }]
-        }
-        @ds.attributes = values_hash
-        @ds.complexSubject(0).componentList(0).personalName.should == ["Callender, James T."]
-        @ds.complexSubject(0).componentList(0).personalName(0).elementList(0).fullNameElement.should == ["Callender, James T."]
-        @ds.complexSubject(0).componentList(0).personalName(0).elementList(0).dateNameElement.should == ["1805"]
+          }
+          built_node = @ds.personalName.build
+          built_node.attributes = values_hash
+          built_node.should be_instance_of DummyMADS::PersonalName
+          built_node.elementList[0].fullNameElement.should == ["Jefferson, Thomas"]
+          built_node.elementList[0].dateNameElement.should == ["1743-1826"]
+        end
+      
+      end
+      
+    
+      describe "(called on a datastream)" do
+        describe "when given a Hash" do
+            it "should use nested attributes behavior" do
+              values_hash = {
+                topic_attributes: [
+                  {
+                    elementList_attributes: {
+                      topicElement:"Cosmology"
+                      }
+                  },
+                  {
+                    elementList_attributes: {
+                      topicElement:"Quantum Behavior"
+                    }
+                  }
+                ],
+                temporal_attributes: {
+                  elementList_attributes: {
+                    temporalElement:"16th Century"
+                  }
+                }
+              }
+              @ds.attributes = values_hash
+              @ds.topic[0].elementList[0].topicElement.should == ["Cosmology"]
+              @ds.temporal[0].elementList[0].temporalElement.should == ["16th Century"]
+            end
+              
+            it "should support auto-building of complex sub-nodes" do
+              values_hash = {
+                topic_attributes: "Cosmology",
+                temporal_attributes: "16th Century",
+                personalName_attributes: "Hemings, Sally"
+              }
+              @ds.attributes = values_hash
+              # @ds.topic.should == ["Cosmology"]
+              # @ds.temporal.should == ["16th Century"]
+              # @ds.personalName.values.should == ["Hemings, Sally"]
+              @ds.topic[0].elementList[0].topicElement.should == ["Cosmology"]
+              @ds.temporal[0].elementList[0].temporalElement.should == ["16th Century"]
+              @ds.personalName[0].elementList[0].fullNameElement.should == ["Hemings, Sally"]
+            end
+        end
+        it "when given an Array of values should build a node based on each of the items from the array as a node corresponding to the specified property behavior" do
+          values_hash = {
+            personalName_attributes:[
+            { 
+              elementList_attributes: {
+                fullNameElement: "Jefferson, Thomas",
+                dateNameElement: "1743-1826"                  
+              }
+            }, 
+            "Hemings, Sally"
+          ]}
+        
+          @ds.attributes = values_hash
+          debugger
+          @ds.personalName.map {|pn| pn.elementList[0].fullNameElement.first }.should == ["Jefferson, Thomas", "Hemings, Sally"]
+          @ds.personalName[0].elementList[0].fullNameElement.should == ["Jefferson, Thomas"]
+          @ds.personalName[0].elementList[0].dateNameElement.should == ["1743-1826"]
+          @ds.personalName[1].elementList[0].fullNameElement.should == ["Hemings, Sally"]
+        end
+      
+        it "when given a complex Hash should recursively call build on sub-properties" do
+          values_hash = {
+            complexSubject_attributes: [{
+              componentList_attributes: {
+                personalName_attributes: {
+                  elementList_attributes: {
+                    fullNameElement: "Callender, James T.",
+                    dateNameElement: "1805" 
+                  }
+                },
+                topic_attributes: {
+                  elementList_attributes: {
+                    topicElement:"Presidency"
+                  }
+                }, 
+                temporal_attributes: "1801-1809"
+              },
+            },
+            {
+              componentList_attributes: {
+                personalName_attributes: {
+                  elementList_attributes: {
+                    fullNameElement: "Hemings, Sally",
+                    dateNameElement: "1802" 
+                  }
+                },
+                topic_attributes: "Slavery"
+              }
+            }]
+          }
+          @ds.attributes = values_hash
+          debugger
+          # @ds.complexSubject[0].componentList[0].personalName.map {|pn| pn.values.first }.should == ["Callender, James T."]
+          @ds.complexSubject[0].componentList[0].personalName[0].elementList[0].fullNameElement.should == ["Callender, James T."]
+          @ds.complexSubject[0].componentList[0].personalName[0].elementList[0].dateNameElement.should == ["1805"]
           
-        @ds.complexSubject(0).componentList(0).topic.should == ["Presidency"]
-        @ds.complexSubject(0).componentList(0).topic(0).elementList(0).topicElement.should ==  ["Presidency"]
+          # @ds.complexSubject[0].componentList[0].topic.map {|t| t.value}.should == ["Presidency"]
+          @ds.complexSubject[0].componentList[0].topic[0].elementList[0].topicElement.should ==  ["Presidency"]
         
-        @ds.complexSubject(0).componentList(0).temporal.should == ["1801-1809"]
-        @ds.complexSubject(0).componentList(0).temporal(0).elementList(0).temporalElement.should ==  ["1801-1809"]
+          # @ds.complexSubject[0].componentList[0].temporal.map {|t| t.value}.should == ["1801-1809"]
+          @ds.complexSubject[0].componentList[0].temporal[0].elementList[0].temporalElement.should ==  ["1801-1809"]
         
-        @ds.complexSubject(1).componentList(0).personalName.should == ["Hemings, Sally"]
-        @ds.complexSubject(1).componentList(0).personalName(0).elementList(0).fullNameElement.should == ["Hemings, Sally"]
-        @ds.complexSubject(1).componentList(0).personalName(0).elementList(0).dateNameElement.should == ["1802"]
-        @ds.complexSubject(1).componentList(0).topic.should == ["Slavery"]
+          # @ds.complexSubject[1].componentList[0].personalName.map {|pn| pn.value}.should == ["Hemings, Sally"]
+          @ds.complexSubject[1].componentList[0].personalName[0].elementList[0].fullNameElement.should == ["Hemings, Sally"]
+          @ds.complexSubject[1].componentList[0].personalName[0].elementList[0].dateNameElement.should == ["1802"]
+          @ds.complexSubject[1].componentList[0].topic.first.elementList[0].topicElement.should == ["Slavery"]
+        end
       end
     end
+    
+    
 
 end

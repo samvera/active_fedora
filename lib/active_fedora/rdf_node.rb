@@ -17,8 +17,8 @@ module ActiveFedora
     #   * Class is the same
     #   * Both objects reference the same RDF graph in memory
     def ==(other_object)
-      self.rdf_subject.id == other_object.rdf_subject.id &&
       self.class == other_object.class &&
+      self.rdf_subject.id == other_object.rdf_subject.id &&
       self.graph.object_id == other_object.graph.object_id
     end
     
@@ -75,14 +75,79 @@ module ActiveFedora
     end
 
     def attributes=(values)
-      self.class.config.keys.each do |key|
-        if values.has_key?(key)
-          set_value(rdf_subject, key, values[key])
+      case values
+      when Hash
+        self.class.config.keys.each do |key|
+          if values.has_key?(key)
+            set_value(rdf_subject, key, values[key])
+          end
+        end
+        nested_attributes_options.keys.each do |key|
+          send("#{key}_attributes=".to_sym, values["#{key}_attributes".to_sym])
+        end
+      when String
+        populate_default(values)
+      end
+    end
+    
+    # Set values within the node according to its Class defaults
+    # If no defaults have been set on the Class, values are inserted as RDF.value properties, accessible on all nodes as .value
+    # If you want `.value` to map to somewhere else, simply set the :value property on your Class.
+    def populate_default(values)
+      parent = self
+      path = default_write_point_for_values.dup
+      path.each_with_index do |property_symbol, index|
+        if index == path.length-1
+          attrs = {}
+          attrs[property_symbol] = values
+          parent.attributes = attrs
+          debugger
+          puts "Added #{values} to #{default_write_point_for_values}"
+        else
+          parent = parent.send(property_symbol).build()
         end
       end
-      nested_attributes_options.keys.each do |key|
-        send("#{key}_attributes=".to_sym, values["#{key}_attributes".to_sym])
-      end
+    end
+    
+    # Specifies the default location for writing values on this type of Node.
+    # This primarily affects what happens when you use `=` or `<<` to set values on a Node or use `.value` to get the values of a node.
+    # To make your Node classes write/read values to/from a custom location, override this method
+    # Defaults to using :value property, which defaults to using the RDF.value predicate `http://www.w3.org/1999/02/22-rdf-syntax-ns#value`
+    # This method should always return an Array of properties that can be traversed using the current node as the starting point.
+    # 
+    # Note: Much of the behavior that this setting affects is implemented in the `populate_default` method.
+    #
+    # @example Use default behavior to put assertions in `http://www.w3.org/1999/02/22-rdf-syntax-ns#value`
+    #   @ds.topic = "Cosmology"
+    #   @ds.value
+    #   => ["Cosmology"]
+    #
+    # @example Set default write point to [:elementList, :topicElement]
+    #   class Topic
+    #     include ActiveFedora::RdfObject
+    #     def default_write_point_for_values 
+    #       [:elementList, :topicElement]
+    #     end
+    #   
+    #     # rdf_type DummyMADS.Topic
+    #     map_predicates do |map|
+    #       map.elementList(in: DummyMADS, to: "elementList", class_name:"DummyMADS::ElementList")
+    #     end
+    #   end
+    #   class ElementList
+    #     include ActiveFedora::RdfObject
+    #     rdf_type DummyMADS.elementList
+    #     map_predicates do |map|
+    #       map.topicElement(in: DummyMADS, to: "TopicElement")
+    #     end
+    #   end
+    #
+    #   @ds.topic = "Cosmology"
+    #   @ds.topic(0).elementList.topicElement
+    #   => "Cosmology"
+    #   @ds.topic.value = ["Cosmology"]
+    def default_write_point_for_values 
+      [:value]
     end
  
     def delete_predicate(subject, predicate, values = nil)
@@ -186,6 +251,36 @@ module ActiveFedora
       end
       matching 
     end
+    
+    # Retrieves a node based on path composed of node properties to traverse
+    def retrieve_node(node_path, options={build_nodes: true})
+      build_nodes = options.has_key?(:build_nodes) ? options[:build_nodes] : true
+      current_node = self
+      node_path.each do |property,i|
+        if current_node.send(property).empty?
+          if build_nodes
+            current_node = current_node.send(property).build
+          else
+            raise "Could not retrieve node at #{node_path}. There is no node at #{property}.  Would have automatically generated the missing nodes, but you set `:build_nodes` to `false`. Current graph: #{puts graph.dump(:ntriples)}"
+          end
+        else
+          current_node = current_node.send(property).nodeset.first
+        end
+      end
+      return current_node
+    end
+    
+    # Traverse a path of node properties and return the value of the last property
+    def retrieve_values(node_path)
+      last_property_from_path = node_path.pop
+      if node_path.empty?
+        node = self
+      else
+        node = retrieve_node(node_path)
+      end
+      return node.get_values(node.rdf_subject, last_property_from_path)
+    end
+    
     class Builder
       def initialize(parent)
         @parent = parent
