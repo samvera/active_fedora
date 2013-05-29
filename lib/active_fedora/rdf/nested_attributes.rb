@@ -66,7 +66,9 @@ module ActiveFedora
                 remove_method(:#{association_name}_attributes=)
               end
               def #{association_name}_attributes=(attributes)
-                assign_nested_attributes_for_collection_association(:#{association_name}, attributes)
+                unless attributes.nil?
+                  assign_nested_attributes_for_collection_association(:#{association_name}, attributes)
+                end
               end
             eoruby
         end
