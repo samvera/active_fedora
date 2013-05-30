@@ -75,6 +75,13 @@ describe ActiveFedora::Base do
       @n.donkey.should == "Bray"
       @n.xmlish.term_values(:donkey).first.should == 'Bray'
     end
+
+    it "should allow passing parameters to the delegate accessor" do
+      @n.cow=["one", "two"]
+      @n.cow(1).should == ['two']
+    end
+
+
     it "should return an array if not marked as unique" do
       ### Metadata datastream does not appear to support multiple value setting
       @n.cow=["one", "two"]

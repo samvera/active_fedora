@@ -18,8 +18,12 @@ module ActiveFedora
 
 
     private
-    def array_reader(field)
-      instance_exec(&self.class.delegates[field][:reader])
+    def array_reader(field, *args)
+      if args.present?
+        instance_exec(*args, &self.class.delegates[field][:reader])
+      else
+        instance_exec &self.class.delegates[field][:reader]
+      end
     end
 
     def array_setter(field, args)
@@ -112,20 +116,24 @@ module ActiveFedora
       private
       def create_delegate_reader(field, args)
         self.delegates[field] ||= {}
-        self.delegates[field][:reader] = lambda do
+        self.delegates[field][:reader] = lambda do |*opts|
           ds = self.send(args[:to])
           if ds.kind_of?(ActiveFedora::RDFDatastream)
             ds.send(field)
           else
             terminology = args[:at] || [field]
-            ds.send(:term_values, *terminology)
+            if terminology.length == 1 && opts.present?
+              ds.send(terminology.first, *opts)
+            else
+              ds.send(:term_values, *terminology)
+            end
           end
         end
 
         self.delegates[field][:unique] = args[:unique]
 
-        define_method field do
-          val = self[field]
+        define_method field do |*opts|
+          val = array_reader(field, *opts)
           self.class.unique?(field) ? val.first : val
         end
       end
