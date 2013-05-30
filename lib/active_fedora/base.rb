@@ -31,7 +31,7 @@ module ActiveFedora
     self.profile_solr_name = ActiveFedora::SolrService.solr_name("object_profile", :displayable)
 
     delegate :label, :label=, to: :inner_object
-
+    delegate :state=, :state, to: :inner_object
 
     def method_missing(name, *args)
       dsid = corresponding_datastream_name(name)
@@ -216,11 +216,6 @@ module ActiveFedora
     #return the internal fedora URI
     def internal_uri
       "info:fedora/#{pid}"
-    end
-
-    #return the state of the inner object
-    def state 
-      @inner_object.state
     end
 
     #return the owner id
