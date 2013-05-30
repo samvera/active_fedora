@@ -37,7 +37,7 @@ module ActiveFedora
       _, conf = self.class.config_for_predicate(predicate)
       class_name = conf[:class_name]
       return nil unless class_name
-      self.class.const_get(class_name.to_sym)
+      ActiveFedora.class_from_string(class_name, self.class)
     end
 
     # if there are any existing statements with this predicate, replace them

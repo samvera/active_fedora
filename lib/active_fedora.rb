@@ -144,6 +144,32 @@ module ActiveFedora #:nodoc:
   def self.version
     ActiveFedora::VERSION
   end
+  
+  # Convenience method for getting class constant based on a string
+  # @example
+  #   ActiveFedora.class_from_string("Om")
+  #   => Om
+  #   ActiveFedora.class_from_string("ActiveFedora::RdfNode::TermProxy")
+  #   => ActiveFedora::RdfNode::TermProxy
+  # @example Search within ActiveFedora::RdfNode for a class called "TermProxy"
+  #   ActiveFedora.class_from_string("TermProxy", ActiveFedora::RdfNode)
+  #   => ActiveFedora::RdfNode::TermProxy  
+  def self.class_from_string(class_name, container_class=nil)
+    if class_name.include?("::")
+      # result = eval(class_name)
+      class_name.split('::').inject(Object) do |mod, class_name|
+        mod.const_get(class_name)
+      end
+    elsif !container_class.nil?
+      begin
+        container_class.const_get(class_name.to_sym)
+      rescue NameError
+        Kernel.const_get(class_name)
+      end
+    else
+      Kernel.const_get(class_name)
+    end
+  end
 
 end
 
