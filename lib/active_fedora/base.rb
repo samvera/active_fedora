@@ -30,6 +30,8 @@ module ActiveFedora
     self.fedora_connection = {}
     self.profile_solr_name = ActiveFedora::SolrService.solr_name("object_profile", :displayable)
 
+    delegate :label, :label=, to: :inner_object
+
 
     def method_missing(name, *args)
       dsid = corresponding_datastream_name(name)
@@ -238,15 +240,6 @@ module ActiveFedora
     #return the modification date of the inner object (unless it's a new object)
     def modified_date
       @inner_object.new? ? Time.now : @inner_object.profile["objLastModDate"]
-    end
-
-    #return the label of the inner object (unless it's a new object)
-    def label
-      @inner_object.label
-    end
-    
-    def label=(new_label)
-      @inner_object.label = new_label
     end
 
     def ==(comparison_object)
