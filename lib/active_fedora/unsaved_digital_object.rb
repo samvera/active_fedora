@@ -2,7 +2,7 @@ module ActiveFedora
   # Helps Rubydora create datastreams of the type defined by the ActiveFedora::Base#datastream_class_for_name
   class UnsavedDigitalObject 
     include DigitalObject::DatastreamBootstrap
-    attr_accessor :original_class, :ownerId, :datastreams, :label, :namespace
+    attr_accessor :original_class, :ownerId, :state, :datastreams, :label, :namespace
 
     PLACEHOLDER = '__DO_NOT_USE__'
     
@@ -36,6 +36,7 @@ module ActiveFedora
       end
       obj.ownerId = ownerId if ownerId
       obj.label = label if label
+      obj.state = state if state
       obj
     end
 
