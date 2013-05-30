@@ -1,3 +1,19 @@
+6.2.0 (unreleased)
+
+You can set the object state attribute (objState)
+
+Object state is indexed in solr
+
+Label is now implemented as a delegate
+
+Added Base.unique? to test whether a field is specified as being unique or not.
+
+Removed dependency on builder
+
+When searching for an rdf term in a complex graph, it should match on predicate and type. Previously
+  it was just matching on type.
+
+
 6.1.1
 Rdf nodes should check for an RDF.type when resolving classes
 Objects loaded via Solr should have datastream properties of same class
