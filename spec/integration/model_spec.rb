@@ -52,7 +52,7 @@ describe ActiveFedora::Model do
       subject { ActiveFedora::Base.load_instance_from_solr('hydrangea:fixture_mods_article1') }
       it { should be_instance_of HydrangeaArticle}
     end
-    describe "with metadata datastrem spec" do
+    describe "with metadata datastream spec" do
       subject { ActiveFedora::Base.load_instance_from_solr('hydrangea:fixture_mods_article1') }
       it "should create an xml datastream" do
         subject.datastreams['properties'].should be_kind_of ActiveFedora::SimpleDatastream

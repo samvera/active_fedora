@@ -14,6 +14,7 @@ module ActiveFedora
         m_time = Time.parse(m_time) unless m_time.is_a?(Time)
         Solrizer.set_field(solr_doc, 'system_create', c_time, :stored_sortable)
         Solrizer.set_field(solr_doc, 'system_modified', m_time, :stored_sortable)
+        Solrizer.set_field(solr_doc, 'object_state', state, :stored_sortable)
         Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.inspect, :stored_sortable)
         solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid)
         solrize_profile(solr_doc)

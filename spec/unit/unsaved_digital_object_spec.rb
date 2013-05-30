@@ -11,6 +11,11 @@ describe ActiveFedora::UnsavedDigitalObject do
       @obj.ownerId.should == 'fooo'
     end
 
+    it "should have state" do
+      @obj.ownerId = 'D'
+      @obj.ownerId.should == 'D'
+    end
+
     it "should have a default pid" do
       @obj.pid.should == "__DO_NOT_USE__"
     end

@@ -25,6 +25,17 @@ describe "A base object with metadata" do
     end
   end
 
+  describe "setting object state" do
+    it "should store it" do
+      obj = MockAFBaseRelationship.create
+      obj.state.should == 'A'
+      obj.state='D'
+      obj.save!
+      obj.reload
+      obj.state.should == 'D'
+    end
+  end
+
   describe "that already exists in the repo" do
     before do
       @release = MockAFBaseRelationship.create()
@@ -245,10 +256,7 @@ describe ActiveFedora::Base do
       @test_object2.save
       inner_object = @test_object2.inner_object
       inner_object.pid.should == @test_object2.pid
-      inner_object.should respond_to(:state)
       inner_object.should respond_to(:lastModifiedDate)
-      inner_object.should respond_to(:ownerId)
-      inner_object.state.should == "A"
       inner_object.ownerId.should == "fedoraAdmin"
     end
   end

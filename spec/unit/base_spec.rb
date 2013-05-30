@@ -7,6 +7,7 @@ describe ActiveFedora::Base do
       ActiveFedora::Base.descendants.should include(HydrangeaArticle, SpecialThing)
     end
   end
+
   describe "sharding" do
     it "should have a shard_index" do
       ActiveFedora::Base.shard_index(@this_pid).should == 0
@@ -406,12 +407,14 @@ describe ActiveFedora::Base do
         @test_object.should respond_to(:to_solr)
       end
 
-      it "should add pid, system_create_date and system_modified_date from object attributes" do
+      it "should add pid, system_create_date, system_modified_date and object_state from object attributes" do
         @test_object.should_receive(:create_date).and_return("2012-03-04T03:12:02Z")
         @test_object.should_receive(:modified_date).and_return("2012-03-07T03:12:02Z")
+        @test_object.state = "D"
         solr_doc = @test_object.to_solr
         solr_doc[ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)].should eql("2012-03-04T03:12:02Z")
         solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :stored_sortable, type: :date)].should eql("2012-03-07T03:12:02Z")
+        solr_doc[ActiveFedora::SolrService.solr_name("object_state", :stored_sortable)].should eql("D")
         solr_doc[:id].should eql("#{@test_object.pid}")
       end
 
