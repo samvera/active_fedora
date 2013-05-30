@@ -7,6 +7,7 @@ describe ActiveFedora::Base do
       ActiveFedora::Base.descendants.should include(HydrangeaArticle, SpecialThing)
     end
   end
+
   describe "sharding" do
     it "should have a shard_index" do
       ActiveFedora::Base.shard_index(@this_pid).should == 0
