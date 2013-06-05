@@ -40,6 +40,9 @@ describe ActiveFedora::RDFDatastream do
         end
         class PersonalName
           include ActiveFedora::RdfObject
+          def default_write_point_for_values
+            [:elementList, :fullNameElement]
+          end
           map_predicates do |map|
             map.elementList(in: DummyMADS, to: "elementList", class_name:"ComplexRDFDatastream::ElementList")
             map.extraProperty(in: DummyMADS, to: "elementValue", class_name:"ComplexRDFDatastream::Topic")
@@ -66,54 +69,69 @@ describe ActiveFedora::RDFDatastream do
     end
     subject { ComplexRDFDatastream.new(stub('inner object', :pid=>'foo', :new? =>true), 'descMetadata') }
     
-    describe "complex properties" do
-      let(:params) do 
-        { myResource: 
-          {
-            topic_attributes: [
-              {
-                elementList_attributes: {
-                  topicElement:"Cosmology"
+    describe ".attributes=" do
+      describe "when given a string" do
+        it "should default to using RDF.value predicate" do
+          subject.topic_attributes = "My Topic"
+          subject.topic.default_write_point_for_values.should == [:value]
+          subject.topic.first.value.should == ["My Topic"]
+          subject.topic.first.value.predicate.to_s.should == "http://www.w3.org/1999/02/22-rdf-syntax-ns#value"
+        end
+        it "should use default_write_point_for_values" do
+          subject.personalName_attributes = "My Name"
+          subject.personalName.default_write_point_for_values.should == [:elementList, :fullNameElement]
+          subject.personalName.first.elementList.first.fullNameElement.should == ["My Name"]  
+        end
+      end
+    
+      describe "complex properties" do
+        let(:params) do 
+          { myResource: 
+            {
+              topic_attributes: [
+                {
+                  elementList_attributes: {
+                    topicElement:"Cosmology"
+                    }
+                },
+                {
+                  elementList_attributes: {
+                    topicElement:"Quantum Behavior"
                   }
-              },
-              {
-                elementList_attributes: {
-                  topicElement:"Quantum Behavior"
                 }
-              }
-            ],
-            personalName_attributes: [
-              { 
-                elementList_attributes: {
-                  fullNameElement: "Jefferson, Thomas",
-                  dateNameElement: "1743-1826"                  
-                }
-              } 
-              #, "Hemings, Sally"
-            ],
+              ],
+              personalName_attributes: [
+                { 
+                  elementList_attributes: {
+                    fullNameElement: "Jefferson, Thomas",
+                    dateNameElement: "1743-1826"                  
+                  }
+                } 
+                #, "Hemings, Sally"
+              ],
+            }
           }
-        }
-      end
-      it "should support mass-assignment" do
-          # Replace the graph's contents with the Hash
-          subject.attributes = params[:myResource]
+        end
+        it "should support mass-assignment" do
+            # Replace the graph's contents with the Hash
+            subject.attributes = params[:myResource]
 
-          # Here's how this would happen if we didn't have attributes=
-          # personal_name = subject.personalName.build 
-          # elem_list = personal_name.elementList.build
-          # elem_list.fullNameElement = "Jefferson, Thomas"
-          # elem_list.dateNameElement = "1743-1826"
-          # topic = subject.topic.build
-          # elem_list = topic.elementList.build
-          # elem_list.fullNameElement = 'Cosmology'
+            # Here's how this would happen if we didn't have attributes=
+            # personal_name = subject.personalName.build 
+            # elem_list = personal_name.elementList.build
+            # elem_list.fullNameElement = "Jefferson, Thomas"
+            # elem_list.dateNameElement = "1743-1826"
+            # topic = subject.topic.build
+            # elem_list = topic.elementList.build
+            # elem_list.fullNameElement = 'Cosmology'
 
-          # puts "subject; #{subject.serialize}"
+            # puts "subject; #{subject.serialize}"
 
-          subject.topic.first.elementList.first.topicElement.should == ["Cosmology"]
-          subject.topic[1].elementList.first.topicElement.should == ["Quantum Behavior"]
-          subject.personalName.first.elementList.first.fullNameElement.should == ["Jefferson, Thomas"]
-          subject.personalName.first.elementList.first.dateNameElement.should == ["1743-1826"]
-
-      end
-    end    
+            subject.topic.first.elementList.first.topicElement.should == ["Cosmology"]
+            subject.topic[1].elementList.first.topicElement.should == ["Quantum Behavior"]
+            subject.personalName.first.elementList.first.fullNameElement.should == ["Jefferson, Thomas"]
+            subject.personalName.first.elementList.first.dateNameElement.should == ["1743-1826"]
+        end
+      end    
+    end
 end

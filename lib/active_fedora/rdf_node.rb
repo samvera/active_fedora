@@ -1,3 +1,12 @@
+## Injecting fix into RDF (provided by rdf.rb) so that we can use RDF.value assertions
+module RDF
+  ##
+  # @return [URI]
+  def self.value
+    self[:value]
+  end
+end
+
 module ActiveFedora
   module RdfNode
     extend ActiveSupport::Concern
@@ -101,8 +110,7 @@ module ActiveFedora
           attrs = {}
           attrs[property_symbol] = values
           parent.attributes = attrs
-          debugger
-          puts "Added #{values} to #{default_write_point_for_values}"
+          # puts "Added #{values} to #{default_write_point_for_values}"
         else
           parent = parent.send(property_symbol).build()
         end
@@ -147,6 +155,8 @@ module ActiveFedora
     #   => "Cosmology"
     #   @ds.topic.value = ["Cosmology"]
     def default_write_point_for_values 
+      # When relying on the default write point :value, make sure :value predicate is declared by the class.  If not, map it to the RDF.value predicate.
+      self.class.map_predicates{|map| map.value(in: RDF)} unless self.class.respond_to?(:value)
       [:value]
     end
  
