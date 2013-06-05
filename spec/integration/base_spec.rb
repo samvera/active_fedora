@@ -296,16 +296,6 @@ describe ActiveFedora::Base do
     end
   end
   
-  describe ".dc" do
-    it "should expose the DC datastream" do
-      dc = @test_object.dc
-      dc.should be_a_kind_of(ActiveFedora::Datastream)
-      rexml = REXML::Document.new(dc.content)
-      rexml.root.elements["dc:identifier"].get_text.should_not be_nil
-    end
-  end
-
-  
   describe '.rels_ext' do
     it "should retrieve RelsExtDatastream object via rels_ext method" do
       @test_object.rels_ext.should be_instance_of(ActiveFedora::RelsExtDatastream)

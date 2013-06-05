@@ -175,16 +175,6 @@ describe ActiveFedora::Datastreams do
     end
   end
 
-  describe "#dc" do
-    it "should be the DC datastream" do
-      subject.dc.should be_kind_of ActiveFedora::Datastream
-    end
-    it "should be an inline datastream" do
-      subject.dc.controlGroup.should == 'X'
-    end
-  end
-
-
   describe "#relsext" do
     it "should be the RELS-EXT datastream" do
       m = mock
