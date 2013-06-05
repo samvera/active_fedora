@@ -116,16 +116,17 @@ describe ActiveFedora::DatastreamCollections do
   describe '#named_datastreams_ids' do
     it 'should return a hash of datastream name to an array of dsids' do
       @test_object2 = MockAFBaseDatastream.new
-#      @test_object2.new_object = true
       f = File.open(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"), 'rb')
       f2 = File.open(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" ), 'rb')
-      f2.stub(:original_filename).and_return("dino.jpg")
-      f.stub(:content_type).and_return("image/jpeg")
-      @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f, :label=>"testDS"})
+      @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f})
       @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg",:blob=>f2})
       @test_object2.save
       @test_object2 = MockAFBaseDatastream.find(@test_object2.pid)
-      @test_object2.named_datastreams_ids.should == {"high"=>[], "thumbnail"=>["THUMB1", "THUMB2"]}
+      named_datastreams_ids = @test_object2.named_datastreams_ids
+
+      expect(named_datastreams_ids.keys.sort).to eq(['high', 'thumbnail'])
+      expect(named_datastreams_ids['high']).to eq([])
+      expect(named_datastreams_ids['thumbnail'].sort).to eq(["THUMB1", "THUMB2"])
     end
   end
 
