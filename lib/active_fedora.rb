@@ -6,6 +6,7 @@ require 'active_fedora/rubydora_connection'
 require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/object'
 require 'active_support/core_ext/hash/indifferent_access'
+require "active_support/core_ext/hash/except"
 require 'rdf'
 
 SOLR_DOCUMENT_ID = Solrizer.default_field_mapper.id_field unless defined?(SOLR_DOCUMENT_ID)
