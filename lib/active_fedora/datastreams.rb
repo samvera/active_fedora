@@ -123,6 +123,7 @@ module ActiveFedora
     # Return the Dublin Core (DC) Datastream. You can also get at this via 
     # the +datastreams["DC"]+.
     def dc
+      Deprecation.warn(Datastreams, 'dc is deprecated. Consider using Base#datastreams["DC"] instead.', caller)
       return datastreams["DC"] 
     end
 

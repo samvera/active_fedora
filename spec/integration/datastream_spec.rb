@@ -4,42 +4,45 @@ require 'active_fedora'
 require "rexml/document"
 
 describe ActiveFedora::Datastream do
+
+  before(:all) do
+    class MockAFBase < ActiveFedora::Base
+      has_metadata :name => "descMetadata", :type => ActiveFedora::QualifiedDublinCoreDatastream, :autocreate => true
+    end
+  end
   
   before(:each) do
-    @test_object = ActiveFedora::Base.new
+    @test_object = MockAFBase.new
     @test_object.save
   end
   
   after(:each) do
     @test_object.delete
   end
-  
-  it "should be able to access Datastreams using datastreams method" do    
-    dc = @test_object.datastreams["DC"]
-    dc.should be_an_instance_of(ActiveFedora::Datastream)
-    dc.dsid.should eql("DC")
-    dc.pid.should_not be_nil
-    # dc.control_group.should == "X"
+
+  it "should be able to access Datastreams using datastreams method" do
+    descMetadata = @test_object.datastreams["descMetadata"]
+    descMetadata.should be_a_kind_of(ActiveFedora::Datastream)
+    descMetadata.dsid.should eql("descMetadata")
   end
-  
+
   it "should be able to access Datastream content using content method" do    
-    dc = @test_object.datastreams["DC"].content
-    dc.should_not be_nil
+    descMetadata = @test_object.datastreams["descMetadata"].content
+    descMetadata.should_not be_nil
   end
   
   it "should be able to update XML Datastream content and save to Fedora" do    
-    xml_content = Nokogiri::XML::Document.parse(@test_object.datastreams["DC"].content)
+    xml_content = Nokogiri::XML::Document.parse(@test_object.datastreams["descMetadata"].content)
     title = Nokogiri::XML::Element.new "title", xml_content
     title.content = "Test Title"
-    title.namespace = xml_content.xpath('//oai_dc:dc/dc:identifier').first.namespace
     xml_content.root.add_child title
     
-    @test_object.datastreams["DC"].stub(:before_save)
-    @test_object.datastreams["DC"].content = xml_content.to_s
-    @test_object.datastreams["DC"].save
+    @test_object.datastreams["descMetadata"].stub(:before_save)
+    @test_object.datastreams["descMetadata"].content = xml_content.to_s
+    @test_object.datastreams["descMetadata"].save
     
-    found = Nokogiri::XML::Document.parse(@test_object.class.find(@test_object.pid).datastreams['DC'].content)
-    found.xpath('*/dc:title/text()').first.inner_text.should == title.content
+    found = Nokogiri::XML::Document.parse(@test_object.class.find(@test_object.pid).datastreams['descMetadata'].content)
+    found.xpath('//dc/title/text()').first.inner_text.should == title.content
   end
   
   it "should be able to update Blob Datastream content and save to Fedora" do    
