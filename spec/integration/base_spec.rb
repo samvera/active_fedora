@@ -39,8 +39,8 @@ describe "A base object with metadata" do
   describe "that already exists in the repo" do
     before do
       @release = MockAFBaseRelationship.create()
-      @release.add_relationship(:is_governed_by, 'info:fedora/narmdemo:catalog-fixture')
-      @release.add_relationship(:is_part_of, 'info:fedora/narmdemo:777')
+      @release.add_relationship(:is_governed_by, 'info:fedora/test:catalog-fixture')
+      @release.add_relationship(:is_part_of, 'info:fedora/test:777')
       @release.foo.person = "test foo content"
       @release.save
     end
@@ -58,21 +58,21 @@ describe "A base object with metadata" do
     describe "clone_into a new object" do
       before do
         begin
-          new_object = MockAFBaseRelationship.find('narm:999')
+          new_object = MockAFBaseRelationship.find('test:999')
           new_object.delete
         rescue ActiveFedora::ObjectNotFoundError
         end
         
-        new_object = MockAFBaseRelationship.create(:pid => 'narm:999')
+        new_object = MockAFBaseRelationship.create(:pid => 'test:999')
         @release.clone_into(new_object)
-        @new_object = MockAFBaseRelationship.find('narm:999')
+        @new_object = MockAFBaseRelationship.find('test:999')
       end
       it "should have all the assertions" do
         @new_object.rels_ext.content.should be_equivalent_to '<rdf:RDF xmlns:ns1="info:fedora/fedora-system:def/model#" xmlns:ns2="info:fedora/fedora-system:def/relations-external#" xmlns:ns0="http://projecthydra.org/ns/relations#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-         <rdf:Description rdf:about="info:fedora/narm:999">
-           <ns0:isGovernedBy rdf:resource="info:fedora/narmdemo:catalog-fixture"/>
+         <rdf:Description rdf:about="info:fedora/test:999">
+           <ns0:isGovernedBy rdf:resource="info:fedora/test:catalog-fixture"/>
            <ns1:hasModel rdf:resource="info:fedora/afmodel:MockAFBaseRelationship"/>
-           <ns2:isPartOf rdf:resource="info:fedora/narmdemo:777"/>
+           <ns2:isPartOf rdf:resource="info:fedora/test:777"/>
 
          </rdf:Description>
        </rdf:RDF>'
@@ -89,9 +89,9 @@ describe "A base object with metadata" do
       it "should have all the assertions" do
         @new_object.rels_ext.content.should be_equivalent_to '<rdf:RDF xmlns:ns1="info:fedora/fedora-system:def/model#" xmlns:ns2="info:fedora/fedora-system:def/relations-external#" xmlns:ns0="http://projecthydra.org/ns/relations#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
          <rdf:Description rdf:about="info:fedora/'+ @new_object.pid+'">
-           <ns0:isGovernedBy rdf:resource="info:fedora/narmdemo:catalog-fixture"/>
+           <ns0:isGovernedBy rdf:resource="info:fedora/test:catalog-fixture"/>
            <ns1:hasModel rdf:resource="info:fedora/afmodel:MockAFBaseRelationship"/>
-           <ns2:isPartOf rdf:resource="info:fedora/narmdemo:777"/>
+           <ns2:isPartOf rdf:resource="info:fedora/test:777"/>
 
          </rdf:Description>
        </rdf:RDF>'
@@ -427,7 +427,7 @@ describe ActiveFedora::Base do
   
   describe "#exists?" do
     it "should return true for objects that exist" do
-      ActiveFedora::Base.exists?('hydrangea:fixture_mods_article1').should be_true
+      ActiveFedora::Base.exists?('test:fixture_mods_article1').should be_true
     end
     it "should return false for objects that don't exist" do
       ActiveFedora::Base.exists?('nil:object').should be_false
