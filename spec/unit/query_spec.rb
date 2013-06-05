@@ -7,7 +7,7 @@ describe ActiveFedora::Base do
       class Basic < ActiveFedora::Base
       end
     end
-    @model_query = ActiveFedora::SolrService.solr_name("has_model", :symbol) + ":#{solr_uri("info:fedora/afmodel:SpecModel_Basic")}"
+    @model_query = "_query_:\"{!raw f=" + ActiveFedora::SolrService.solr_name("has_model", :symbol) + "}info:fedora/afmodel:SpecModel_Basic" + "\""
     @sort_query = ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date) + ' asc'
   end
   
@@ -185,7 +185,7 @@ describe ActiveFedora::Base do
     it "should count without a class specified" do
       mock_result = {'response'=>{'numFound'=>7}}
       ActiveFedora::SolrService.should_receive(:query).with("foo:bar", :rows=>0, :raw=>true).and_return(mock_result)
-      ActiveFedora::Base.count(:conditions=>'foo:bar').should == 7
+      ActiveFedora::Base.count(:conditions=>'foo:bar').should == 7 
     end
   end
   

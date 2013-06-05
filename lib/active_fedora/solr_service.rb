@@ -58,13 +58,14 @@ module ActiveFedora
     # If the pid_array is empty, defaults to a query of "id:NEVER_USE_THIS_ID", which will return an empty solr response
     # @param [Array] pid_array the pids that you want included in the query
     def self.construct_query_for_pids(pid_array)
-      query = ""
-      pid_array.each_index do |i|
-        query << "#{SOLR_DOCUMENT_ID}:#{escape_uri_for_query(pid_array[i])}"
-        query << " OR " if i != pid_array.length-1
+
+      q = pid_array.reject { |x| x.empty? }.map do |pid|
+        "_query_:\"{!raw f=#{SOLR_DOCUMENT_ID}}#{pid.gsub('"', '\"')}\""
       end
-      query = "id:NEVER_USE_THIS_ID" if query.empty? || query == "id:"
-      return query
+
+      return "id:NEVER_USE_THIS_ID" if q.empty?
+
+      return q.join(" OR ")
     end
 
     def self.solr_name(*args)
@@ -79,7 +80,7 @@ module ActiveFedora
     # @param [Hash] args key is the predicate, value is the target_uri
     def self.construct_query_for_rel(args)
       clauses = args.map do |predicate, target_uri|
-        "#{solr_name(predicate, :symbol)}:#{escape_uri_for_query(target_uri)}"
+        "_query_:\"{!raw f=#{solr_name(predicate, :symbol)}}#{target_uri.gsub('"', '\"')}\""
       end
       clauses.join(" AND ")
     end
