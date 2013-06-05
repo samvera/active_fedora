@@ -68,7 +68,7 @@ describe ActiveFedora::SolrService do
     end
     
     it 'should instantiate all datastreams in the solr doc, even ones undeclared by the class' do
-      obj = ActiveFedora::Base.load_instance_from_solr "hydrangea:fixture_mods_article1"
+      obj = ActiveFedora::Base.load_instance_from_solr "test:fixture_mods_article1"
       obj.datastreams.keys.should include('descMetadata')
     end
     

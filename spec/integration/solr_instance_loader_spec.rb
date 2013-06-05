@@ -10,7 +10,7 @@ describe ActiveFedora::SolrInstanceLoader do
   subject { ActiveFedora::SolrInstanceLoader.new(context, pid, solr_doc) }
 
   describe 'existing pid' do
-    let(:pid) { 'hydrangea:fixture_mods_article1' }
+    let(:pid) { 'test:fixture_mods_article1' }
     describe 'without a solr document' do
       it 'it finds the SOLR document and casts into an AF::Base object' do
         expect(subject.object).to eq(active_fedora_object)
@@ -23,7 +23,7 @@ describe ActiveFedora::SolrInstanceLoader do
       end
     end
     describe 'with a mismatching solr document' do
-      let(:mismatching_pid) { 'hydrangea:fixture_mods_article2' }
+      let(:mismatching_pid) { 'test:fixture_mods_article2' }
       let(:solr_doc) { ActiveFedora::Base.find_with_conditions(:id=>mismatching_pid).first }
       it 'it raise ObjectNotFoundError' do
         expect {
@@ -33,7 +33,7 @@ describe ActiveFedora::SolrInstanceLoader do
     end
   end
   describe 'missing pid' do
-    let(:pid) { 'hydrangea:fixture_mods_article8675309' }
+    let(:pid) { 'test:fixture_mods_article8675309' }
     describe 'without a solr document' do
       it 'it raise ObjectNotFoundError' do
         expect {
@@ -50,7 +50,7 @@ describe ActiveFedora::SolrInstanceLoader do
       end
     end
     describe 'with a mismatching solr document' do
-      let(:mismatching_pid) { 'hydrangea:fixture_mods_article2' }
+      let(:mismatching_pid) { 'test:fixture_mods_article2' }
       let(:solr_doc) { ActiveFedora::Base.find_with_conditions(:id=>mismatching_pid).first }
       it 'it raise ObjectNotFoundError' do
         expect {

@@ -38,7 +38,7 @@ require 'rspec/core/rake_task'
 
   desc "Loads or refreshes the fixtures needed to run the tests"
   task :fixtures => :environment do
-    ENV["pid"] = "hydrangea:fixture_mods_article1"
+    ENV["pid"] = "test:fixture_mods_article1"
     Rake::Task["repo:refresh"].invoke
     ENV["pid"] = nil
 
@@ -46,7 +46,7 @@ require 'rspec/core/rake_task'
     Rake::Task["repo:load"].reenable
     Rake::Task["repo:refresh"].reenable
 
-    ENV["pid"] = "hydrangea:fixture_mods_article2"
+    ENV["pid"] = "test:fixture_mods_article2"
     Rake::Task["repo:refresh"].invoke
     ENV["pid"] = nil
   end
@@ -89,7 +89,7 @@ end
 desc 'Set up ActiveFedora environment.  !! Only for use while working within a working copy of active-fedora'
 task :environment do
   puts "Initializing ActiveFedora Rake environment.  This should only be called when working within a workign copy of the active-fedora code."
-  require "#{APP_ROOT}/spec/samples/models/hydrangea_article"
+  require "#{APP_ROOT}/spec/samples/models/mods_article"
 end
 
 end
