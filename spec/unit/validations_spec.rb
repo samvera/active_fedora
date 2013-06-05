@@ -8,7 +8,7 @@ describe ActiveFedora::Base do
         m.field "swank", :text
       end
       delegate :fubar, :to=>'someData'
-      delegate :swank, :to=>'someData'
+      delegate :swank, :to=>'someData', unique: true
 
       validates_presence_of :fubar
       validates_length_of :swank, :minimum=>5
@@ -25,7 +25,7 @@ describe ActiveFedora::Base do
     end
     
     it "should be valid" do
-      @obj.should_not be_valid
+      @obj.should be_valid
     end
   end
   describe "an invalid object" do
