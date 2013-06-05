@@ -29,7 +29,7 @@ describe ActiveFedora::Base do
           # TODO: This juggling of Fedora credentials & establishing connections should be handled by an establish_fedora_connection method, 
           # possibly wrap it all into a fedora_connection method - MZ 06-05-2012
           stubfedora = mock("Fedora")
-          stubfedora.should_receive(:connection).and_return(mock("Connection", :next_pid =>"<pid>sample:newpid</pid>"))
+          stubfedora.should_receive(:connection).and_return(mock("Connection", :mint =>"sample:newpid"))
           # Should use ActiveFedora.config.credentials as a single hash rather than an array of shards
           ActiveFedora::RubydoraConnection.should_receive(:new).with(ActiveFedora.config.credentials).and_return(stubfedora)
           ActiveFedora::Base.assign_pid(ActiveFedora::Base.new.inner_object)
@@ -51,7 +51,7 @@ describe ActiveFedora::Base do
         it "should always use the first shard to generate pids" do
           stubhard1 = mock("Shard")
           stubhard2 = mock("Shard")
-          stubhard1.should_receive(:connection).and_return(mock("Connection", :next_pid =>"<pid>sample:newpid</pid>"))
+          stubhard1.should_receive(:connection).and_return(mock("Connection", :mint =>"sample:newpid"))
           stubhard2.should_receive(:connection).never
           ActiveFedora::Base.fedora_connection = {0 => stubhard1, 1 => stubhard2}
           ActiveFedora::Base.assign_pid(ActiveFedora::Base.new.inner_object)

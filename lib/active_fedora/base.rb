@@ -184,9 +184,7 @@ module ActiveFedora
         credentials = ActiveFedora.config.credentials
       end
       fedora_connection[0] ||= ActiveFedora::RubydoraConnection.new(credentials)
-      d = Nokogiri::XML( fedora_connection[0].connection.next_pid(args))
-      pid = d.xpath('//fedora:pid', 'fedora' => 'http://www.fedora.info/definitions/1/0/management/').text
-      pid
+      fedora_connection[0].connection.mint(args)
     end
 
     def inner_object # :nodoc
