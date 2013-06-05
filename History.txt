@@ -1,4 +1,10 @@
-6.2.0 (unreleased)
+6.2.0 (2013-06-05)
+
+Support for rails 4
+
+Extracted the behavior of resolving a class from a string (ActiveFedora.class_from_string).
+
+You can now pass parameters to accessor delegates.
 
 You can set the object state attribute (objState)
 
