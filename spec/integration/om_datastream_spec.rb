@@ -5,19 +5,19 @@ describe ActiveFedora::OmDatastream do
   
   describe "an new instance with a inline datastream" do
     before do 
-      class HydrangeaArticle3 < ActiveFedora::Base
+      class ModsArticle3 < ActiveFedora::Base
         # Uses the Hydra MODS Article profile for tracking most of the descriptive metadata
         has_metadata :name => "descMetadata", :type => Hydra::ModsArticleDatastream, :control_group => 'X'
 
       end
 
-      @obj = HydrangeaArticle3.new
+      @obj = ModsArticle3.new
       @obj.save
       @obj.descMetadata.should be_inline
     end
     after do
       @obj.destroy
-      Object.send(:remove_const, :HydrangeaArticle3)
+      Object.send(:remove_const, :ModsArticle3)
     end
     it "should not be changed when no fields have been set" do
       @obj.descMetadata.should_not be_content_changed
@@ -28,15 +28,15 @@ describe ActiveFedora::OmDatastream do
     end
     describe "#changed?" do
       it "should not be changed if the new xml matches the old xml" do
-        @pid = "hydrangea:fixture_mods_article2"
-        @test_object = HydrangeaArticle3.find(@pid)
+        @pid = "test:fixture_mods_article2"
+        @test_object = ModsArticle3.find(@pid)
 
         @test_object.descMetadata.ng_xml = @test_object.descMetadata.ng_xml
         @test_object.descMetadata.should_not be_changed
       end
 
       it "should not be changed if there are minor differences in whitespace" do
-        obj = HydrangeaArticle3.new
+        obj = ModsArticle3.new
         obj.descMetadata.content = "<a>1</a>"
         obj.save
         obj.descMetadata.should_not be_changed
@@ -49,27 +49,27 @@ describe ActiveFedora::OmDatastream do
 
   describe "an instance that is a managed datastream" do
     before(:all) do
-      class HydrangeaArticle2 < ActiveFedora::Base
+      class ModsArticle2 < ActiveFedora::Base
         # Uses the Hydra MODS Article profile for tracking most of the descriptive metadata
         has_metadata :name => "descMetadata", :type => Hydra::ModsArticleDatastream
       end
     end
 
     after(:all) do
-      Object.send(:remove_const, :HydrangeaArticle2)
+      Object.send(:remove_const, :ModsArticle2)
     end
 
     describe "#changed?" do
       it "should not be changed if the new xml matches the old xml" do
-        @pid = "hydrangea:fixture_mods_article2"
-        @test_object = HydrangeaArticle2.find(@pid)
+        @pid = "test:fixture_mods_article2"
+        @test_object = ModsArticle2.find(@pid)
 
         @test_object.descMetadata.ng_xml = @test_object.descMetadata.ng_xml
         @test_object.descMetadata.should_not be_changed
       end
 
       it "should be changed if there are minor differences in whitespace" do
-        obj = HydrangeaArticle2.new
+        obj = ModsArticle2.new
         obj.descMetadata.content = "<a>1</a>"
         obj.save
         obj.descMetadata.should_not be_changed
@@ -82,7 +82,7 @@ describe ActiveFedora::OmDatastream do
 
     describe "empty datastream content" do
       it "should not break when there is empty datastream content" do
-        obj = HydrangeaArticle2.new
+        obj = ModsArticle2.new
         obj.descMetadata.content = ""
         obj.save
 
@@ -91,11 +91,11 @@ describe ActiveFedora::OmDatastream do
 
     describe '.term_values' do
       before do
-        @pid = "hydrangea:fixture_mods_article2"
-        @test_object = HydrangeaArticle2.find(@pid)
-        @test_object.descMetadata.content = File.read(fixture('mods_articles/hydrangea_article1.xml'))
+        @pid = "test:fixture_mods_article2"
+        @test_object = ModsArticle2.find(@pid)
+        @test_object.descMetadata.content = File.read(fixture('mods_articles/mods_article1.xml'))
         @test_object.save
-        @test_object = HydrangeaArticle2.find(@pid)
+        @test_object = ModsArticle2.find(@pid)
         @test_solr_object = ActiveFedora::Base.load_instance_from_solr(@pid)
       end
 
@@ -130,11 +130,11 @@ describe ActiveFedora::OmDatastream do
     
     describe '.update_values' do
       before do
-        @pid = "hydrangea:fixture_mods_article2"
-        @test_object = HydrangeaArticle2.find(@pid)
-        @test_object.descMetadata.content = File.read(fixture('mods_articles/hydrangea_article1.xml'))
+        @pid = "test:fixture_mods_article2"
+        @test_object = ModsArticle2.find(@pid)
+        @test_object.descMetadata.content = File.read(fixture('mods_articles/mods_article1.xml'))
         @test_object.save
-        @test_object = HydrangeaArticle2.find(@pid)
+        @test_object = ModsArticle2.find(@pid)
       end
 
       it "should not be dirty after .update_values is saved" do
@@ -149,10 +149,10 @@ describe ActiveFedora::OmDatastream do
 
     describe ".to_solr" do
       before do
-        object = HydrangeaArticle2.new
+        object = ModsArticle2.new
         object.descMetadata.journal.issue.publication_date = Date.parse('2012-11-02')
         object.save!
-        @test_object = HydrangeaArticle2.find(object.pid)
+        @test_object = ModsArticle2.find(object.pid)
 
       end
       it "should solrize terms with :type=>'date' to *_dt solr terms" do

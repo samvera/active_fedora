@@ -4,7 +4,7 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   describe 'descendants' do
     it "should record the decendants" do
-      ActiveFedora::Base.descendants.should include(HydrangeaArticle, SpecialThing)
+      ActiveFedora::Base.descendants.should include(ModsArticle, SpecialThing)
     end
   end
 
@@ -14,7 +14,7 @@ describe ActiveFedora::Base do
     end
 
     context "When the repository is NOT sharded" do
-      subject {ActiveFedora::Base.connection_for_pid('foo:bar')}
+      subject {ActiveFedora::Base.connection_for_pid('test:bar')}
       before(:each) do
         ActiveFedora.config.stub(:sharded?).and_return(false)
         ActiveFedora::Base.fedora_connection = {}
@@ -37,7 +37,7 @@ describe ActiveFedora::Base do
       end
       describe "shard_index" do
         it "should always return zero (the first and only connection)" do
-          ActiveFedora::Base.shard_index('foo:bar').should == 0
+          ActiveFedora::Base.shard_index('test:bar').should == 0
         end
       end
     end
@@ -59,19 +59,19 @@ describe ActiveFedora::Base do
       end
       describe "shard_index" do
         it "should use modulo of md5 of the pid to distribute objects across shards" do
-          ActiveFedora::Base.shard_index('foo:bar').should == 0
-          ActiveFedora::Base.shard_index('foo:nanana').should == 1
+          ActiveFedora::Base.shard_index('test:bar').should == 0
+          ActiveFedora::Base.shard_index('test:nanana').should == 1
         end
       end
       describe "the repository" do
-        describe "for foo:bar" do
-          subject {ActiveFedora::Base.connection_for_pid('foo:bar')}
+        describe "for test:bar" do
+          subject {ActiveFedora::Base.connection_for_pid('test:bar')}
           it "should be shard1" do
             subject.client.url.should == 'shard1'
           end
         end
-        describe "for foo:baz" do
-          subject {ActiveFedora::Base.connection_for_pid('foo:nanana')}
+        describe "for test:baz" do
+          subject {ActiveFedora::Base.connection_for_pid('test:nanana')}
           it "should be shard1" do
             subject.client.url.should == 'shard2'
           end
@@ -457,7 +457,7 @@ describe ActiveFedora::Base do
       end
 
       it "should call .to_solr on the relationships rels-ext is dirty" do
-        @test_object.add_relationship(:has_collection_member, "info:fedora/foo:member")
+        @test_object.add_relationship(:has_collection_member, "info:fedora/test:member")
         rels_ext = @test_object.rels_ext
         rels_ext.should be_changed
         @test_object.should_receive(:solrize_relationships)

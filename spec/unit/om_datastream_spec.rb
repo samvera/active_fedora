@@ -72,7 +72,7 @@ describe ActiveFedora::OmDatastream do
     
     before(:each) do
       @mods_ds = Hydra::ModsArticleDatastream.new(nil, 'descMetadata')
-      @mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
+      @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
     end
     
     it "should apply submitted hash to corresponding datastream field values" do
@@ -151,7 +151,7 @@ describe ActiveFedora::OmDatastream do
     
     before(:each) do
       @mods_ds = Hydra::ModsArticleDatastream.new(nil, 'modsDs')
-      @mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
+      @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
     end
     
     it "should call lookup with field_name and return the text values from each resulting node" do
@@ -271,7 +271,7 @@ describe ActiveFedora::OmDatastream do
   describe '.get_values_from_solr' do
     before(:each) do
       @mods_ds = ActiveFedora::OmDatastream.new
-      @mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
+      @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
     end
 
     it "should return empty array if internal_solr_doc not set" do
@@ -327,7 +327,7 @@ describe ActiveFedora::OmDatastream do
   describe '.update_values' do
     before(:each) do
       @mods_ds = ActiveFedora::OmDatastream.new
-      @mods_ds.content= fixture(File.join("mods_articles","hydrangea_article1.xml")).read
+      @mods_ds.content= fixture(File.join("mods_articles","mods_article1.xml")).read
     end
 
     it "should throw an exception if we have initialized the internal_solr_doc." do
@@ -349,7 +349,7 @@ describe ActiveFedora::OmDatastream do
 
     it "should set changed to true" do
       mods_ds = Hydra::ModsArticleDatastream.new
-      mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
+      mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
       mods_ds.update_values([{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"})
       mods_ds.should be_changed
     end
@@ -359,7 +359,7 @@ describe ActiveFedora::OmDatastream do
 
     before(:each) do
       @mods_ds = ActiveFedora::OmDatastream.new
-      @mods_ds.content=fixture(File.join("mods_articles","hydrangea_article1.xml")).read
+      @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
     end
 
     it "should call OM::XML::term_values if internal_solr_doc is not set and return values from xml" do
