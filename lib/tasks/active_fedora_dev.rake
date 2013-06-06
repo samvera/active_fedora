@@ -65,7 +65,6 @@ task :ci do
   ENV['environment'] = "test"
   Rake::Task["active_fedora:configure_jetty"].invoke
   jetty_params = Jettywrapper.load_config
-  jetty_params[:startup_wait]= 60
   error = Jettywrapper.wrap(jetty_params) do
     Rake::Task['active_fedora:coverage'].invoke
   end
