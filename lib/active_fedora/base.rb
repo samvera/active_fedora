@@ -234,7 +234,14 @@ module ActiveFedora
 
     #return the create_date of the inner object (unless it's a new object)
     def create_date
-      @inner_object.new? ? Time.now : Array(@inner_object.createdDate).first
+      if @inner_object.new?
+        Time.now
+      elsif @inner_object.respond_to? :createdDate
+        Array(@inner_object.createdDate).first
+      else
+        puts @inner_object.inspect
+        @inner_object.profile['objCreateDate']
+      end
     end
 
     #return the modification date of the inner object (unless it's a new object)
