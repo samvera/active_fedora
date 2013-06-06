@@ -418,7 +418,7 @@ describe ActiveFedora::Base do
       ActiveFedora::Base.exists?('test:fixture_mods_article1').should be_true
     end
     it "should return false for objects that don't exist" do
-      ActiveFedora::Base.exists?('nil:object').should be_false
+      ActiveFedora::Base.exists?('test:missing_object').should be_false
     end
     it "should return false for nil" do
       ActiveFedora::Base.exists?(nil).should be_false
