@@ -10,6 +10,13 @@ module ActiveFedora
       super
     end
 
+    alias_method :realLabel, :label
+
+    def label
+      Array(realLabel).first
+    end
+    alias_method :dsLabel, :label
+
     def inspect
       "#<#{self.class} @pid=\"#{digital_object ? pid : nil}\" @dsid=\"#{dsid}\" @controlGroup=\"#{controlGroup}\" changed=\"#{changed?}\" @mimeType=\"#{mimeType}\" >"
     end

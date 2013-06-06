@@ -30,8 +30,7 @@ module ActiveFedora
     self.fedora_connection = {}
     self.profile_solr_name = ActiveFedora::SolrService.solr_name("object_profile", :displayable)
 
-    delegate :label, :label=, to: :inner_object
-    delegate :state=, :state, to: :inner_object
+    delegate :state=,:label=, to: :inner_object
 
     def method_missing(name, *args)
       dsid = corresponding_datastream_name(name)
@@ -218,21 +217,29 @@ module ActiveFedora
 
     #return the owner id
     def owner_id
-      @inner_object.ownerId
+      Array(@inner_object.ownerId).first
     end
     
     def owner_id=(owner_id)
       @inner_object.ownerId=(owner_id)
     end
 
+    def label
+      Array(@inner_object.label).first
+    end
+
+    def state
+      Array(@inner_object.state).first
+    end
+
     #return the create_date of the inner object (unless it's a new object)
     def create_date
-      @inner_object.new? ? Time.now : @inner_object.profile["objCreateDate"]
+      @inner_object.new? ? Time.now : Array(@inner_object.createdDate).first
     end
 
     #return the modification date of the inner object (unless it's a new object)
     def modified_date
-      @inner_object.new? ? Time.now : @inner_object.profile["objLastModDate"]
+      @inner_object.new? ? Time.now : Array(@inner_object.lastModifiedDate).first
     end
 
     def ==(comparison_object)
