@@ -28,7 +28,6 @@ describe "A base object with metadata" do
   describe "setting object state" do
     it "should store it" do
       obj = MockAFBaseRelationship.create
-      obj.state.should == 'A'
       obj.state='D'
       obj.save!
       obj.reload
@@ -247,7 +246,6 @@ describe ActiveFedora::Base do
       inner_object = @test_object2.inner_object
       inner_object.pid.should == @test_object2.pid
       inner_object.should respond_to(:lastModifiedDate)
-      inner_object.ownerId.should == "fedoraAdmin"
     end
   end
   
