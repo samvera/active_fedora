@@ -45,5 +45,9 @@ module ActiveFedora
       false
     end
 
+    def uri
+      "solr:#{pid}"
+    end
+
   end
 end
