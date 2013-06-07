@@ -63,6 +63,19 @@ module ActiveFedora
       !new_object?
     end
 
+    def mark_for_destruction
+      @marked_for_destruction = true
+    end
+
+    def marked_for_destruction?
+      @marked_for_destruction
+    end
+
+    def reload(options = nil)
+      @marked_for_destruction = false
+      super
+    end
+
     # Constructor.  You may supply a custom +:pid+, or we call the Fedora Rest API for the
     # next available Fedora pid, and mark as new object.
     # Also, if +attrs+ does not contain +:pid+ but does contain +:namespace+ it will pass the
