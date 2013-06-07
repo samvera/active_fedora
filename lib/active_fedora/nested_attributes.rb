@@ -5,6 +5,9 @@ require 'active_support/core_ext/object/blank'
 
 module ActiveFedora
   module NestedAttributes #:nodoc:
+    class TooManyRecords < RuntimeError
+    end
+
     extend ActiveSupport::Concern
     included do
       class_attribute :nested_attributes_options, :instance_writer => false
@@ -50,10 +53,12 @@ module ActiveFedora
     #   # creates avatar_attributes= and posts_attributes=
     #   accepts_nested_attributes_for :avatar, :posts, :allow_destroy => true
     module ClassMethods
+      REJECT_ALL_BLANK_PROC = proc { |attributes| attributes.all? { |key, value| key == '_destroy' || value.blank? } }
+
       def accepts_nested_attributes_for(*attr_names)
         options = { :allow_destroy => false, :update_only => false }
         options.update(attr_names.extract_options!)
-        # options.assert_valid_keys(:allow_destroy, :reject_if, :limit, :update_only)
+        options.assert_valid_keys(:allow_destroy, :reject_if, :limit, :update_only)
         options[:reject_if] = REJECT_ALL_BLANK_PROC if options[:reject_if] == :all_blank
 
         attr_names.each do |association_name|
@@ -61,20 +66,23 @@ module ActiveFedora
             reflection.options[:autosave] = true
             # add_autosave_association_callbacks(reflection)
             ## TODO this ought to work, but doesn't seem to do the class inheitance right
+
+            nested_attributes_options = self.nested_attributes_options.dup
             nested_attributes_options[association_name.to_sym] = options
+            self.nested_attributes_options = nested_attributes_options
+
             type = (reflection.collection? ? :collection : :one_to_one)
 
             # def pirate_attributes=(attributes)
             #   assign_nested_attributes_for_one_to_one_association(:pirate, attributes)
             # end
             class_eval <<-eoruby, __FILE__, __LINE__ + 1
-              if method_defined?(:#{association_name}_attributes=)
-                remove_method(:#{association_name}_attributes=)
-              end
+              remove_possible_method(:#{association_name}_attributes=)
+
               def #{association_name}_attributes=(attributes)
                 assign_nested_attributes_for_#{type}_association(:#{association_name}, attributes)
                 ## in lieu of autosave_association_callbacks just save all of em.
-                send(:#{association_name}).each {|obj| obj.save}
+                send(:#{association_name}).each {|obj| obj.marked_for_destruction? ? obj.destroy : obj.save}
               end
             eoruby
           else
@@ -92,8 +100,12 @@ module ActiveFedora
 
 
     def assign_nested_attributes_for_collection_association(association_name, attributes_collection)
-      options= {}
-      #options = nested_attributes_options[association_name]
+      options = nested_attributes_options[association_name]
+
+      if options[:limit] && attributes_collection.size > options[:limit]
+        raise TooManyRecords, "Maximum #{options[:limit]} records are allowed. Got #{attributes_collection.size} records instead."
+      end
+
       if attributes_collection.is_a? Hash
         keys = attributes_collection.keys
         attributes_collection = if keys.include?('id') || keys.include?(:id)
@@ -116,11 +128,14 @@ module ActiveFedora
         attributes = attributes.with_indifferent_access
 
         if attributes['id'].blank?
-          association.build(attributes.except(*UNASSIGNABLE_KEYS))
+          association.build(attributes.except(*UNASSIGNABLE_KEYS)) unless call_reject_if(association_name, attributes)
 
         elsif existing_record = existing_records.detect { |record| record.id.to_s == attributes['id'].to_s }
           association.send(:add_record_to_target_with_callbacks, existing_record) if !association.loaded? && !call_reject_if(association_name, attributes)
-          assign_to_or_mark_for_destruction(existing_record, attributes, options[:allow_destroy])
+
+          if !call_reject_if(association_name, attributes)
+            assign_to_or_mark_for_destruction(existing_record, attributes, options[:allow_destroy])
+          end
 
         else
           raise_nested_attributes_record_not_found(association_name, attributes['id'])
@@ -144,6 +159,16 @@ module ActiveFedora
     def raise_nested_attributes_record_not_found(association_name, record_id)
       reflection = self.class.reflect_on_association(association_name)
       raise ObjectNotFoundError, "Couldn't find #{reflection.klass.name} with ID=#{record_id} for #{self.class.name} with ID=#{id}"
+    end
+
+    def call_reject_if(association_name, attributes)
+      return false if has_destroy_flag?(attributes)
+      case callback = self.nested_attributes_options[association_name][:reject_if]
+      when Symbol
+        method(callback).arity == 0 ? send(callback) : send(callback, attributes)
+      when Proc
+        callback.call(attributes)
+      end
     end
 
   end
