@@ -415,7 +415,8 @@ describe ActiveFedora::Base do
   
   describe "#exists?" do
     it "should return true for objects that exist" do
-      ActiveFedora::Base.exists?('test:fixture_mods_article1').should be_true
+      @obj = ActiveFedora::Base.create
+      ActiveFedora::Base.exists?(@obj.pid).should be_true
     end
     it "should return false for objects that don't exist" do
       ActiveFedora::Base.exists?('test:missing_object').should be_false
