@@ -29,11 +29,22 @@ module ActiveFedora
 
       private
         def find_target
-          pid = @owner.ids_for_outbound(@reflection.options[:property]).first
-          return if pid.nil?
-          query = ActiveFedora::SolrService.construct_query_for_pids([pid])
+          pid = @owner.ids_for_outbound(@reflection.options[:property])
+          return if pid.empty?          
+          class_name = @reflection.options[:class_name]
+          query = construct_query(pid, class_name)    
           solr_result = SolrService.query(query) 
           return ActiveFedora::SolrService.reify_solr_results(solr_result).first
+        end
+
+        def construct_query pid, class_name
+          if class_name
+            clauses = {}  
+            clauses[:has_model] = class_name.constantize.to_class_uri
+            query = ActiveFedora::SolrService.construct_query_for_rel(clauses) + " AND (" + ActiveFedora::SolrService.construct_query_for_pids(pid) + ")"
+          else
+            query = ActiveFedora::SolrService.construct_query_for_pids(pid)
+          end
         end
 
         def foreign_key_present
