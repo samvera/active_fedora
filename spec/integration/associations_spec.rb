@@ -160,16 +160,20 @@ describe ActiveFedora::Base do
 
     describe "of has_many_and_belongs_to" do
       before do
-        @topic1 = Topic.new
-        @topic1.save
-        @topic2 = Topic.new
-        @topic2.save
+        @topic1 = Topic.create
+        @topic2 = Topic.create
+        @book = Book.create
       end
-      it "habtm should set relationships bidirectionally" do
-        @book = Book.new
+      it "habtm should set and remove relationships bidirectionally" do
         @book.topics << @topic1
-        @book.topics.map(&:pid).should == [@topic1.pid]
-        Topic.find(@topic1.pid).books.should == [] #Can't have saved it because @book isn't saved yet.
+        @book.topics.should == [@topic1]
+        @topic1.books.should == [@book]
+        @topic1.reload.books.should == [@book]
+
+        @book.topics.delete(@topic1)
+        #@topic1.books.delete(@book)
+        @book.topics.should == []
+        @topic1.books.should == []
       end
       after do
         @topic1.delete
@@ -389,8 +393,16 @@ describe ActiveFedora::Base do
         @reloaded_book.pages.should == [@p2]
       end
 
+      it "should allow replacing the children" do
+        @p3 = Page.create()
+        @p4 = Page.create()
+        @book.pages = [@p3, @p4]
+        @book.save
+
+        @book.reload.pages.should == [@p3, @p4]
+      end
+
       it "should allow a child to be deleted from the has_and_belongs_to_many association" do
-        pending "This isn't working and we ought to fix it"
         @reloaded_book = LibraryBook.find(@book.pid)
         @reloaded_book.pages.delete(@p1)
         @reloaded_book.save
@@ -402,6 +414,34 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe "association hooks" do
+    before :all do
+      class LibraryBook < ActiveFedora::Base
+        has_and_belongs_to_many :pages, :property=>:is_part_of, after_remove: :say_hi
+
+      end
+      class Page < ActiveFedora::Base
+        has_many :library_books, :property=>:is_part_of
+      end
+        
+    end
+    after :all do
+      Object.send(:remove_const, :LibraryBook)
+      Object.send(:remove_const, :Page)
+    end
+
+    describe "removing association" do
+      subject {LibraryBook.new}
+      before do
+        @p1 = subject.pages.build
+        @p2 = subject.pages.build
+      end
+      it "should run the hooks" do
+        subject.should_receive(:say_hi).with(@p2)
+        subject.pages.delete(@p2)
+      end
+    end
+  end
 
 
   describe "when a object is deleted" do

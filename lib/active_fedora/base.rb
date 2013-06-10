@@ -252,7 +252,6 @@ module ActiveFedora
       elsif @inner_object.respond_to? :createdDate
         Array(@inner_object.createdDate).first
       else
-        puts @inner_object.inspect
         @inner_object.profile['objCreateDate']
       end
     end

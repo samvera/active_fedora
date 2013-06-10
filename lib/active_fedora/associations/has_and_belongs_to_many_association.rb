@@ -48,10 +48,16 @@ module ActiveFedora
             
             if (@reflection.options[:inverse_of])
               r.remove_relationship(@reflection.options[:inverse_of], @owner)
+              # It looks like inverse_of points at a predicate, not at a relationship name,
+              # which is what we should have done. Now we need a way to look up the
+              # reflection by predicate
+              name = r.class.reflection_name_for_predicate(@reflection.options[:inverse_of])
+              r.send(name).reset
               r.save
             end
           end
         end
+
     end
   end
 end
