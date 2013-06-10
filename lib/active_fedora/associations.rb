@@ -38,6 +38,7 @@ module ActiveFedora
       def has_many(association_id, options={})
         raise "You must specify a property name for #{name}" if !options[:property]
         reflection = create_has_many_reflection(association_id, options)
+        add_association_callbacks(reflection.name, reflection.options)
         collection_accessor_methods(reflection, HasManyAssociation)
       end
 
@@ -152,7 +153,7 @@ module ActiveFedora
         reflection = create_has_and_belongs_to_many_reflection(association_id, options, &extension)
         collection_accessor_methods(reflection, HasAndBelongsToManyAssociation)
         #configure_after_destroy_method_for_has_and_belongs_to_many(reflection)
-        #add_association_callbacks(reflection.name, options)
+        add_association_callbacks(reflection.name, options)
       end
 
 
@@ -169,6 +170,20 @@ module ActiveFedora
 
         def create_has_and_belongs_to_many_reflection(association_id, options)
           create_reflection(:has_and_belongs_to_many, association_id, options, self)
+        end
+
+        def add_association_callbacks(association_name, options)
+          callbacks = %w(before_add after_add before_remove after_remove)
+          callbacks.each do |callback_name|
+            full_callback_name = "#{callback_name}_for_#{association_name}"
+            defined_callbacks = options[callback_name.to_sym]
+            class_attribute full_callback_name.to_sym
+            if options.has_key?(callback_name.to_sym)
+              self.send((full_callback_name +'=').to_sym, [defined_callbacks].flatten)
+            else
+              self.send((full_callback_name +'=').to_sym, [])
+            end
+          end
         end
 
         def association_accessor_methods(reflection, association_proxy_class)

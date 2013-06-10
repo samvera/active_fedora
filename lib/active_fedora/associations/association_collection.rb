@@ -215,10 +215,28 @@ module ActiveFedora
           records = flatten_deeper(records)
           records.each { |record| raise_on_type_mismatch(record) }
 
-          #records.each { |record| callback(:before_remove, record) }
+          records.each { |record| callback(:before_remove, record) }
           old_records = records.reject { |r| r.new_record? }
           yield(records, old_records)
-          #records.each { |record| callback(:after_remove, record) }
+          records.each { |record| callback(:after_remove, record) }
+        end
+
+        def callback(method, record)
+          callbacks_for(method).each do |callback|
+            case callback
+            when Symbol
+              @owner.send(callback, record)
+            when Proc
+              callback.call(@owner, record)
+            else
+              callback.send(method, @owner, record)
+            end
+          end
+        end
+
+        def callbacks_for(callback_name)
+          full_callback_name = "#{callback_name}_for_#{@reflection.name}"
+          @owner.class.send(full_callback_name.to_sym) || []
         end
 
         def ensure_owner_is_not_new
