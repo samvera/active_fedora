@@ -56,6 +56,7 @@ module ActiveFedora
               r.save
             end
           end
+          @owner.save!
         end
 
     end

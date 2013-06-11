@@ -418,7 +418,18 @@ describe ActiveFedora::Base do
     describe "for habtm" do
       before :all do
         class LibraryBook < ActiveFedora::Base
-          has_and_belongs_to_many :pages, :property=>:is_part_of, after_remove: :say_hi
+          has_and_belongs_to_many :pages, :property=>:is_part_of, after_remove: :after_hook, before_remove: :before_hook
+
+          def before_hook(m)
+            say_hi(m)
+            m.reload.library_books.count.should == 1
+          end
+
+          def after_hook(m)
+            say_hi(m)
+            m.reload.library_books.count.should == 0
+          end
+
 
         end
         class Page < ActiveFedora::Base
@@ -432,13 +443,15 @@ describe ActiveFedora::Base do
       end
 
       describe "removing association" do
-        subject {LibraryBook.new}
+        subject {LibraryBook.create}
         before do
-          @p1 = subject.pages.build
-          @p2 = subject.pages.build
+          @p1 = Page.create
+          @p2 = Page.create
+          subject.pages << @p1 << @p2
+          subject.save!
         end
-        it "should run the hooks" do
-          subject.should_receive(:say_hi).with(@p2)
+        it "should save between the before and after hooks" do
+          subject.should_receive(:say_hi).with(@p2).twice
           subject.pages.delete(@p2)
         end
       end
