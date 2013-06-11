@@ -415,30 +415,60 @@ describe ActiveFedora::Base do
   end
 
   describe "association hooks" do
-    before :all do
-      class LibraryBook < ActiveFedora::Base
-        has_and_belongs_to_many :pages, :property=>:is_part_of, after_remove: :say_hi
+    describe "for habtm" do
+      before :all do
+        class LibraryBook < ActiveFedora::Base
+          has_and_belongs_to_many :pages, :property=>:is_part_of, after_remove: :say_hi
 
+        end
+        class Page < ActiveFedora::Base
+          has_many :library_books, :property=>:is_part_of
+        end
+          
       end
-      class Page < ActiveFedora::Base
-        has_many :library_books, :property=>:is_part_of
+      after :all do
+        Object.send(:remove_const, :LibraryBook)
+        Object.send(:remove_const, :Page)
       end
-        
-    end
-    after :all do
-      Object.send(:remove_const, :LibraryBook)
-      Object.send(:remove_const, :Page)
-    end
 
-    describe "removing association" do
-      subject {LibraryBook.new}
-      before do
-        @p1 = subject.pages.build
-        @p2 = subject.pages.build
+      describe "removing association" do
+        subject {LibraryBook.new}
+        before do
+          @p1 = subject.pages.build
+          @p2 = subject.pages.build
+        end
+        it "should run the hooks" do
+          subject.should_receive(:say_hi).with(@p2)
+          subject.pages.delete(@p2)
+        end
       end
-      it "should run the hooks" do
-        subject.should_receive(:say_hi).with(@p2)
-        subject.pages.delete(@p2)
+    end
+    describe "for has_many" do
+      before :all do
+        class LibraryBook < ActiveFedora::Base
+          has_many :pages, :property=>:is_part_of, after_remove: :say_hi
+
+        end
+        class Page < ActiveFedora::Base
+          belongs_to :library_book, :property=>:is_part_of
+        end
+          
+      end
+      after :all do
+        Object.send(:remove_const, :LibraryBook)
+        Object.send(:remove_const, :Page)
+      end
+
+      describe "removing association" do
+        subject {LibraryBook.new}
+        before do
+          @p1 = subject.pages.build
+          @p2 = subject.pages.build
+        end
+        it "should run the hooks" do
+          subject.should_receive(:say_hi).with(@p2)
+          subject.pages.delete(@p2)
+        end
       end
     end
   end
