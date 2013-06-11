@@ -91,6 +91,13 @@ describe ActiveFedora::SolrService do
       ActiveFedora::SolrService.stub(:instance =>stub("instance", :conn=>mock_conn))
       ActiveFedora::SolrService.count('querytext').should == 7 
     end
+    it "should accept query args" do
+      mock_conn = mock("Connection")
+      stub_result = {'response' => {'numFound'=>'7'}}
+      mock_conn.should_receive(:get).with('select', :params=>{:rows=>0, :q=>'querytext', :qt=>'standard', :fq=>'filter'}).and_return(stub_result)
+      ActiveFedora::SolrService.stub(:instance =>stub("instance", :conn=>mock_conn))
+      ActiveFedora::SolrService.count('querytext', :fq=>'filter', :rows=>10).should == 7 
+    end
   end
   describe ".add" do
     it "should call solr" do 
