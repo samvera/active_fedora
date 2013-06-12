@@ -96,8 +96,9 @@ module ActiveFedora
     # Get the count of records that match the query
     # @param [String] query a solr query 
     # @return [Integer] number of records matching
-    def self.count(query)
-        SolrService.query(query, :raw=>true, :rows=>0)['response']['numFound'].to_i
+    def self.count(query, args={})
+      args = args.merge(:raw=>true, :rows=>0)
+      SolrService.query(query, args)['response']['numFound'].to_i
     end
 
     def self.add(doc)
