@@ -2,7 +2,7 @@ source "http://rubygems.org"
 
 gemspec :path=>"../"
 
-gem 'activemodel', '4.0.0.rc1'
+gem 'activemodel', '4.0.0.rc2'
 
 group :development, :test do
   gem 'simplecov', :platform => :mri_19
