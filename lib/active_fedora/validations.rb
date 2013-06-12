@@ -69,6 +69,13 @@ module ActiveFedora
       output = super(context)
       errors.empty? && output
     end
+    
+    # Test to see if the given field is required
+    # @param [Symbol] key a field
+    # @return [Boolean] is it required or not
+    def required?(key)
+      self.class.validators_on(key).any?{|v| v.kind_of? ActiveModel::Validations::PresenceValidator}
+    end
 
   protected
 
