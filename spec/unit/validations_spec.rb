@@ -15,28 +15,35 @@ describe ActiveFedora::Base do
       
     end
   end
+
+  subject { ValidationStub.new }
+
   after :all do
     Object.send(:remove_const, :ValidationStub)
   end
 
   describe "a valid object" do
     before do
-      @obj = ValidationStub.new(:fubar=>'here', :swank=>'long enough')
+      subject.attributes={ fubar:'here', swank:'long enough'}
     end
     
-    it "should be valid" do
-      @obj.should be_valid
-    end
+    it { should be_valid}
   end
   describe "an invalid object" do
     before do
-      @obj = ValidationStub.new(:swank=>'smal')
+      subject.attributes={ swank:'smal'}
     end
-    
-    it "should be invalid" do
-      @obj.should_not be_valid
-      @obj.errors[:fubar].should == ["can't be blank"]
-      @obj.errors[:swank].should == ["is too short (minimum is 5 characters)"]
+    it "should have errors" do
+      subject.should_not be_valid
+      subject.errors[:fubar].should == ["can't be blank"]
+      subject.errors[:swank].should == ["is too short (minimum is 5 characters)"]
+    end
+  end
+
+  describe "required terms" do
+    it "should be required" do
+       subject.required?(:fubar).should be_true
+       subject.required?(:swank).should be_false
     end
   end
 
