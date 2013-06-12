@@ -7,7 +7,6 @@ module ActiveFedora
       self.reflections = {}
     end
 
-
     module ClassMethods
       def reflection_name_for_predicate(predicate)
         reflections.each do |k, v|
@@ -60,11 +59,8 @@ module ActiveFedora
         # a new association object. Use +build_association+ or +create_association+
         # instead. This allows plugins to hook into association object creation.
         def klass
-          #@klass ||= active_record.send(:compute_type, class_name)
-          @klass ||= class_name
+          @klass ||= class_name.constantize
         end
-
-
 
         def initialize(macro, name, options, active_fedora)
           @macro, @name, @options, @active_fedora = macro, name, options, active_fedora
@@ -78,35 +74,22 @@ module ActiveFedora
 
         # Returns the name of the macro.
         #
-        # <tt>composed_of :balance, :class_name => 'Money'</tt> returns <tt>:balance</tt>
         # <tt>has_many :clients</tt> returns <tt>:clients</tt>
         attr_reader :name
 
-
         # Returns the hash of options used for the macro.
         #
-        # <tt>composed_of :balance, :class_name => 'Money'</tt> returns <tt>{ :class_name => "Money" }</tt>
         # <tt>has_many :clients</tt> returns +{}+
         attr_reader :options
 
         attr_reader :macro
 
-        # Returns the class for the macro.
-        #
-        # <tt>composed_of :balance, :class_name => 'Money'</tt> returns the Money class
-        # <tt>has_many :clients</tt> returns the Client class
-        def klass
-          @klass ||= class_name.constantize
-        end
-
         # Returns the class name for the macro.
         #
-        # <tt>composed_of :balance, :class_name => 'Money'</tt> returns <tt>'Money'</tt>
         # <tt>has_many :clients</tt> returns <tt>'Client'</tt>
         def class_name
           @class_name ||= options[:class_name] || derive_class_name
         end
-
 
         # Returns whether or not this association reflection is for a collection
         # association. Returns +true+ if the +macro+ is either +has_many+ or
@@ -115,15 +98,12 @@ module ActiveFedora
           @collection
         end
 
-
-
         private
           def derive_class_name
             class_name = name.to_s.camelize
             class_name = class_name.singularize if collection?
             class_name
           end
-
 
       end
 
@@ -139,7 +119,6 @@ module ActiveFedora
         def primary_key_name
           @primary_key_name ||= options[:foreign_key] || derive_primary_key_name
         end
-
         
         # Creates a new instance of the associated class, and immediately saves it
         # with ActiveRecord::Base#save. +options+ will be passed to the class's
@@ -147,8 +126,6 @@ module ActiveFedora
         def create_association(*options)
           klass.create(*options)
         end
-
-
 
         private
 
