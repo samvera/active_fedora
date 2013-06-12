@@ -357,59 +357,59 @@ describe ActiveFedora::Base do
 
   describe "single direction habtm" do
     before :all do
-      class LibraryBook < ActiveFedora::Base
-        has_and_belongs_to_many :pages, :property=>:is_part_of
+      class Course < ActiveFedora::Base
+        has_and_belongs_to_many :textbooks, :property=>:is_part_of
       end
-      class Page < ActiveFedora::Base
-        has_many :library_books, :property=>:is_part_of
+      class Textbook < ActiveFedora::Base
+        has_many :courses, :property=>:is_part_of
       end
         
     end
     after :all do
-      Object.send(:remove_const, :LibraryBook)
-      Object.send(:remove_const, :Page)
+      Object.send(:remove_const, :Course)
+      Object.send(:remove_const, :Textbook)
     end
 
     describe "with a parent that has two children" do
       before do
-        @book = LibraryBook.create
-        @p1 = Page.create()
-        @p2 = Page.create()
-        @book.pages = [@p1, @p2]
-        @book.save
+        @course = Course.create
+        @t1 = Textbook.create()
+        @t2 = Textbook.create()
+        @course.textbooks = [@t1, @t2]
+        @course.save
       end
 
       it "should load the association stored in the parent" do
-        @reloaded_book = LibraryBook.find(@book.pid)
-        @reloaded_book.pages.should == [@p1, @p2]
+        @reloaded_course = Course.find(@course.pid)
+        @reloaded_course.textbooks.should == [@t1, @t2]
       end
 
       it "should allow a parent to be deleted from the has_many association" do
-        @reloaded_book = LibraryBook.find(@book.pid)
-        @p1.library_books.delete(@reloaded_book)
-        @reloaded_book.save
+        @reloaded_course = Course.find(@course.pid)
+        @t1.courses.delete(@reloaded_course)
+        @reloaded_course.save
 
-        @reloaded_book = LibraryBook.find(@book.pid)
-        @reloaded_book.pages.should == [@p2]
+        @reloaded_course = Course.find(@course.pid)
+        @reloaded_course.textbooks.should == [@t2]
       end
 
       it "should allow replacing the children" do
-        @p3 = Page.create()
-        @p4 = Page.create()
-        @book.pages = [@p3, @p4]
-        @book.save
+        @t3 = Textbook.create()
+        @t4 = Textbook.create()
+        @course.textbooks = [@t3, @t4]
+        @course.save
 
-        @book.reload.pages.should == [@p3, @p4]
+        @course.reload.textbooks.should == [@t3, @t4]
       end
 
       it "should allow a child to be deleted from the has_and_belongs_to_many association" do
-        @reloaded_book = LibraryBook.find(@book.pid)
-        @reloaded_book.pages.delete(@p1)
-        @reloaded_book.save
-        @p1.save
+        @reloaded_course = Course.find(@course.pid)
+        @reloaded_course.textbooks.delete(@t1)
+        @reloaded_course.save
+        @t1.save
 
-        @reloaded_book = LibraryBook.find(@book.pid)
-        @reloaded_book.pages.should == [@p2]
+        @reloaded_course = Course.find(@course.pid)
+        @reloaded_course.textbooks.should == [@t2]
       end
     end
   end
