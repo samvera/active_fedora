@@ -1,3 +1,55 @@
+6.3.0 (2013-06-14)
+
+Added method: ActiveFedora::Base#required? [Justin Coyne]
+
+Removed redundant MacroReflection#klass method definition. Removed some excessive whitespace. [David Chandek-Stark]
+
+Updated doc comment for .count to reflect change made in commit 1cd412a817f5d7b5c2f2cbc304b915b7423c499d. [David Chandek-Stark]
+
+Adding CONTRIBUTORS and mailmap [Jeremy Friesen]
+
+Test against rails 4.0.0.rc2 [Justin Coyne]
+
+Backwards compatible change adding optional `args' param to ActiveFedora::SolrService.count, enabling the method to pass args through to ActiveFedora::SolrService.query. [David Chandek-Stark]
+
+habtm#delete saves between the before and after hook. [Justin Coyne]
+
+Added association delete callbacks [Justin Coyne]
+
+Fix nested_attributes handling [Mirosław Boruta]
+
+Startup wait in one spot [Justin Coyne]
+
+Remove unnecessary environment task [Chris Colvard]
+
+try to use a createdDate accessor on @inner_object if it is available [Chris Beer]
+
+use our test namespace rather than minting a new one in base_spec [Chris Beer]
+
+remove checks for fedora default values [Chris Beer]
+
+remove unnecessary test [Chris Beer]
+
+add support for rubydora's #uri method (for fcrepo4 compatbility) [Chris Beer]
+
+wrap property accessors in multi -> single valued wrappers [Chris Beer]
+
+Closes #84 [David Chandek-Stark]
+
+Modify or remove tests that check for DC datastreams; deprecate Datastreams#dc in favor of Datastreams#datastreams["DC"] [Chris Colvard]
+
+Using Rubydora's mint for assign_pid [Jeremy Friesen]
+
+fix #87 - use solr's !raw and sub-query feature to handle solr query escaping [Chris Beer]
+
+Reworking datastream id spec to be order agnostic [Jeremy Friesen]
+
+fix #87 - use solr _query_ to encapsulate solr queries for escaping [Chris Beer]
+
+Fix validations unit test to pass legitimately [Andrew Curley]
+
+
+
 6.2.0 (2013-06-05)
 
 Support for rails 4
