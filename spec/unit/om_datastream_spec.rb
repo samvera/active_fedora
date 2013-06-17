@@ -9,7 +9,7 @@ describe ActiveFedora::OmDatastream do
                       :empty_field => {:values => {}}
                       } 
     @sample_raw_xml = "<foo><xmlelement/></foo>"
-    @solr_doc = {"id"=>"hydrange_article1",
+    @solr_doc = {"id"=>"mods_article1",
       ActiveFedora::SolrService.solr_name("name_role_roleTerm", type: :string) =>["creator","submitter","teacher"],
       ActiveFedora::SolrService.solr_name("name_0_role", type: :string)=>"\r\ncreator\r\nsubmitter\r\n",
       ActiveFedora::SolrService.solr_name("name_1_role", type: :string)=>"\r\n teacher \r\n",

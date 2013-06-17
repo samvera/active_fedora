@@ -6,25 +6,23 @@ describe ActiveFedora::Auditable do
     class AuditableModel < ActiveFedora::Base
       include ActiveFedora::Auditable
     end
-    path = File.join(File.dirname(__FILE__), '..', 'fixtures', 'auditable.foxml.xml')
-    pid = ActiveFedora::FixtureLoader.import_to_fedora(path)
-    ActiveFedora::FixtureLoader.index(pid)
-    @test_object = AuditableModel.find(pid)
+    @test_object = AuditableModel.create
+    @test_object.reload
   end
   after(:all) do
     @test_object.delete
   end
   it "should have the correct number of audit records" do
-    @test_object.audit_trail.records.length.should == 3
+    @test_object.audit_trail.records.length.should == 1
   end
   it "should return all the data from each audit record" do
-    record = @test_object.audit_trail.records.first
+    record = @test_object.audit_trail.records.last
     record.id.should == "AUDREC1"
     record.process_type.should == "Fedora API-M"
     record.action.should == "addDatastream"
     record.component_id.should == "RELS-EXT"
     record.responsibility.should == "fedoraAdmin"
-    record.date.should == "2013-02-25T16:43:06.219Z"
+    record.date.should == @test_object.modified_date
     record.justification.should == ""
   end
   
