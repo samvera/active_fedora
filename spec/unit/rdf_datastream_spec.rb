@@ -9,7 +9,7 @@ describe ActiveFedora::RDFDatastream do
     before do 
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         map_predicates do |map|
-          map.title(:in => RDF::DC)
+          map.title(in: RDF::DC)
         end
       end
       class MyObj < ActiveFedora::Base
@@ -33,6 +33,37 @@ describe ActiveFedora::RDFDatastream do
     it "should allow asserting an empty string" do
       @obj.descMetadata.title = ['']
       @obj.descMetadata.title.should == ['']
+    end
+
+  end
+
+  describe "a datastream with predicates that aren't explicitly defined in the vocabulary (using method_missing)" do
+    it "should not raise an error " do
+      expect {
+        class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+          map_predicates do |map|
+            map.foo(in: RDF, to: 'value')
+          end
+        end
+      }.to_not raise_error 
+    end
+    after do
+      Object.send(:remove_const, :MyDatastream)
+    end
+  end
+
+  describe "a datastream with an invalid predicates" do
+    it "should not raise an error " do
+      expect {
+        class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+          map_predicates do |map|
+            map.bhleah(in: RDF)
+          end
+        end
+      }.to raise_error 
+    end
+    after do
+      Object.send(:remove_const, :MyDatastream)
     end
   end
 end
