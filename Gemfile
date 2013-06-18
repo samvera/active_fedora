@@ -10,3 +10,5 @@ group :development, :test do
 end
 
 gem 'jruby-openssl', :platform=> :jruby
+
+gem 'rdf', github: 'ruby-rdf/rdf', ref: '3f131f8' # Keep until rdf 1.0.8 is released

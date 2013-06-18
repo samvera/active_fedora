@@ -8,3 +8,5 @@ group :development, :test do
   gem 'simplecov', :platform => :mri_19
   gem 'simplecov-rcov', :platform => :mri_19
 end
+
+gem 'rdf', github: 'ruby-rdf/rdf', ref: '3f131f8' # Keep until rdf 1.0.8 is released

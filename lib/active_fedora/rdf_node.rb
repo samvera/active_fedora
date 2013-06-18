@@ -175,7 +175,7 @@ module ActiveFedora
 
       def method_missing(name, *args, &block)
         args = args.first if args.respond_to? :first
-        raise "mapping must specify RDF vocabulary as :in argument" unless args.has_key? :in
+        raise ArgumentError, "mapping must specify RDF vocabulary as :in argument" unless args.has_key? :in
         vocab = args[:in]
         field = args.fetch(:to, name).to_sym
         class_name = args[:class_name]
