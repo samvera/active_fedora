@@ -2,6 +2,7 @@ module ActiveFedora
   module RdfNode
     extend ActiveSupport::Concern
     extend ActiveSupport::Autoload
+    include ActiveFedora::Rdf::NestedAttributes
 
     autoload :TermProxy
 
@@ -10,7 +11,17 @@ module ActiveFedora
       @@rdf_registry ||= {}
     end
 
-
+    # Comparison Operator
+    # Checks that 
+    #   * RDF subject id (URI) is same
+    #   * Class is the same
+    #   * Both objects reference the same RDF graph in memory
+    def ==(other_object)
+      self.class == other_object.class &&
+      self.rdf_subject.id == other_object.rdf_subject.id &&
+      self.graph.object_id == other_object.graph.object_id
+    end
+    
     ##
     # Get the subject for this rdf object
     def rdf_subject
@@ -61,6 +72,19 @@ module ActiveFedora
       end
 
       TermProxy.new(self, subject, predicate, options)
+    end
+
+    # @option [Hash] values the values to assign to this rdf node.
+    def attributes=(values)
+      raise ArgumentError, "values must be a Hash, you provided #{values.class}" unless values.kind_of? Hash
+      self.class.config.keys.each do |key|
+        if values.has_key?(key)
+          set_value(rdf_subject, key, values[key])
+        end
+      end
+      nested_attributes_options.keys.each do |key|
+        send("#{key}_attributes=".to_sym, values["#{key}_attributes".to_sym])
+      end
     end
  
     def delete_predicate(subject, predicate, values = nil)
@@ -164,6 +188,7 @@ module ActiveFedora
       end
       matching 
     end
+    
     class Builder
       def initialize(parent)
         @parent = parent
