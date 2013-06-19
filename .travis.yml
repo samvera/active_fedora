@@ -10,3 +10,5 @@ gemfile:
 notifications:
   irc: "irc.freenode.org#projecthydra"
 
+before_install:
+  - gem install bundler
