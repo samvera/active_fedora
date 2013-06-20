@@ -532,6 +532,9 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
     end
     
     describe "update_indexed_attributes" do
+      before do
+        Deprecation.should_receive(:warn).at_least(1).times
+      end
       it "should call .update_indexed_attributes on all metadata datastreams & nokogiri datastreams" do
         m = FooHistory.new
         att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
