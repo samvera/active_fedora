@@ -76,18 +76,14 @@ describe ActiveFedora::OmDatastream do
     end
     
     it "should apply submitted hash to corresponding datastream field values" do
-      pending if ENV['HUDSON_BUILD'] == 'true'  # This test fails en suite in hudson
       result = @mods_ds.update_indexed_attributes( {[{":person"=>"0"}, "role"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"} })
-      result.should == {"person_0_role"=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}}
-      # xpath = ds.class.accessor_xpath(*field_key)
-      # result = ds.property_values(xpath)
-      
+      result.should == {"person_0_role"=>["role1", "role2", "role3"]}
       @mods_ds.property_values('//oxns:name[@type="personal"][1]/oxns:role').should == ["role1","role2","role3"]
     end
     it "should support single-value arguments (as opposed to a hash of values with array indexes as keys)" do
       # In other words, { "fubar"=>"dork" } should have the same effect as { "fubar"=>{"0"=>"dork"} }
       result = @mods_ds.update_indexed_attributes( { [{":person"=>"0"}, "role"]=>"the role" } )
-      result.should == {"person_0_role"=>{"0"=>"the role"}}
+      result.should == {"person_0_role"=>["the role"]}
       @mods_ds.term_values('//oxns:name[@type="personal"][1]/oxns:role').first.should == "the role"
     end
     it "should do nothing if field key is a string (must be an array or symbol).  Will not accept xpath queries!" do
@@ -105,40 +101,27 @@ describe ActiveFedora::OmDatastream do
     ### Examples copied over form metadata_datastream_spec
     
     it "should work for text fields" do 
-      pending if ENV['HUDSON_BUILD'] == 'true'  # This test fails en suite in hudson
       att= {[{"person"=>"0"},"description"]=>{"-1"=>"mork", "1"=>"york"}}
       result = @mods_ds.update_indexed_attributes(att)
-      result.should == {"person_0_description"=>{"0"=>"mork","1"=>"york"}}
+      result.should == {"person_0_description"=>["mork","york"]}
       @mods_ds.get_values([{:person=>0},:description]).should == ['mork', 'york']
       att= {[{"person"=>"0"},"description"]=>{"-1"=>"dork"}}
       result2 = @mods_ds.update_indexed_attributes(att)
-      result2.should == {"person_0_description"=>{"2"=>"dork"}}
-      @mods_ds.get_values([{:person=>0},:description]).should == ['mork', 'york', 'dork']
+      result2.should == {"person_0_description"=>["dork"]}
+      @mods_ds.get_values([{:person=>0},:description]).should == ['dork']
     end
     
-    it "should return the new index of any added values" do
-      @mods_ds.get_values([{:title_info=>0},:main_title]).should == ["ARTICLE TITLE", "TITLE OF HOST JOURNAL"]
-      result = @mods_ds.update_indexed_attributes [{"title_info"=>"0"},"main_title"]=>{"-1"=>"mork"}
-      result.should == {"title_info_0_main_title"=>{"2"=>"mork"}}
-    end
-
     it "should allow deleting of values and should delete values so that to_xml does not return emtpy nodes" do
-      pending if ENV['HUDSON_BUILD'] == 'true'  # This test fails en suite in hudson
       att= {[{"person"=>"0"},"description"]=>{"0"=>"york", "1"=>"mangle","2"=>"mork"}}
       @mods_ds.update_indexed_attributes(att)
       @mods_ds.get_values([{"person"=>"0"},"description"]).should == ['york', 'mangle', 'mork']
       
-      @mods_ds.update_indexed_attributes({[{"person"=>"0"},"description"]=>{"1"=>""}})
+      @mods_ds.update_indexed_attributes({[{"person"=>"0"},{"description" => '1'} ]=> nil})
       @mods_ds.get_values([{"person"=>"0"},"description"]).should == ['york', 'mork']
       
-      @mods_ds.update_indexed_attributes({[{"person"=>"0"},"description"]=>{"0"=>:delete}})
+      @mods_ds.update_indexed_attributes({[{"person"=>"0"},{"description" => '0'}]=>:delete})
       @mods_ds.get_values([{"person"=>"0"},"description"]).should == ['mork']
     end
-    # it "should delete values so that to_xml does not return emtpy nodes" do
-    #   @test_ds.fubar_values = ["val1", nil, "val2"]
-    #   @test_ds.update_indexed_attributes({{[{"person"=>"0"},"description"]=>{"1"=>""}})
-    #   @test_ds.fubar_values.should == ["val1", "val2"]
-    # end
     
     it "should set changed to true" do
       @mods_ds.get_values([{:title_info=>0},:main_title]).should == ["ARTICLE TITLE", "TITLE OF HOST JOURNAL"]

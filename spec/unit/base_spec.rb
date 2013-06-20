@@ -552,14 +552,14 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
         m.update_indexed_attributes(att, :datastreams=>"withText")
         m.should_not be_nil
         m.datastreams['someData'].fubar.should == []
-        m.datastreams["withText"].fubar.should == ['york', 'mangle']
+        m.datastreams["withText"].fubar.should == ['mork', 'york', 'mangle']
         m.datastreams['withText2'].fubar.should == []
         
         att= {"fubar"=>{"-1"=>"tork", "0"=>"work", "1"=>"bork"}}
         m.update_indexed_attributes(att, :datastreams=>["someData", "withText2"])
         m.should_not be_nil
-        m.datastreams['someData'].fubar.should == ['work', 'bork']
-        m.datastreams['withText2'].fubar.should == ['work', 'bork']
+        m.datastreams['someData'].fubar.should == ['tork', 'work', 'bork']
+        m.datastreams['withText2'].fubar.should == ['tork', 'work', 'bork']
       end
     end
 
