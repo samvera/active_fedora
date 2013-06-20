@@ -24,7 +24,7 @@ describe ActiveFedora::SolrService do
                     "creator"=>{0=>"Linguist, A."},
                     "geography"=>{0=>"Italy"},
                     "title"=>{0=>"Italian and Spanish: A Comparison of Common Phrases"}}
-      @foo_object.update_indexed_attributes(attributes)
+      @foo_object.descMetadata.update_indexed_attributes(attributes)
       @test_object.save
       @foo_object.save
       @profiles = {
