@@ -6,6 +6,8 @@ module ActiveFedora
     check_class_collision
 
     class_option :directory, :type => :string, :default => 'models', :desc => "Which directory to generate? (i.e. app/DIRECTORY)"
+    class_option :has_file_datastream, :type => :string, :default => nil, :desc => "Name a file datastream to create"
+    class_option :descMetadata, :type => :string, :default => nil, :desc => "Add a descMetadata metadata datastream"
 
     def install
       template('model.rb.erb',File.join('app', directory, "#{file_name}.rb"))
