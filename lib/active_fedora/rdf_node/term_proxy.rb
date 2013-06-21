@@ -2,45 +2,57 @@ module ActiveFedora
   module RdfNode
     class TermProxy
 
-      attr_reader :graph, :subject, :predicate, :options
+      attr_reader :parent, :subject, :predicate, :options
+      delegate *(Array.public_instance_methods - [:__send__, :__id__, :class, :object_id] + [:as_json]), :to => :target
+      
 
-      delegate *(Array.public_instance_methods - [:__send__, :__id__, :class, :object_id] + [:as_json]), :to => :values
-
-      # @param graph RDF::Graph
+      # @param parent RdfNode
       # @param subject RDF::URI
       # @param options Hash
-      def initialize(graph, subject, predicate, options)
-        @graph = graph
+      def initialize(parent, subject, predicate, options)
+        @parent = parent
         @subject = subject
         @predicate = predicate
         @options = options
       end
 
+
       def build(attributes=nil)
         new_subject = RDF::Node.new
-        graph.graph.insert([subject, predicate, new_subject])
-        graph.target_class(predicate).new(graph.graph, new_subject).tap do |node|
+        parent.graph.insert([subject, predicate, new_subject])
+        parent.target_class(predicate).new(parent.graph, new_subject).tap do |node|
           node.attributes = attributes if attributes
         end
+        reset!
+        target.find { |n| n.rdf_subject == new_subject}
+      end
+
+      def reset!
+        @target = nil
       end
 
       def <<(*values)
-        values.each { |value| graph.append(subject, predicate, value) }
+        values.each { |value| parent.append(subject, predicate, value) }
+        reset!
         values
       end
 
       def delete(*values)
         values.each do |value| 
-          graph.delete_predicate(subject, predicate, value)
+          parent.delete_predicate(subject, predicate, value)
         end
 
         values
       end
 
-      def values
+      def target
+        @target ||= load_values
+      end
+
+      def load_values
         values = []
 
-        graph.query(subject, predicate).each do |solution|
+        parent.query(subject, predicate).each do |solution|
           v = solution.value
           v = v.to_s if v.is_a? RDF::Literal
           if options[:type] == :date
@@ -50,14 +62,14 @@ module ActiveFedora
           # potential solution is of the right RDF.type
           if options[:class_name]
             klass =  class_from_rdf_type(v)
-            values << v if klass == ActiveFedora.class_from_string(options[:class_name], graph.class)
+            values << v if klass == ActiveFedora.class_from_string(options[:class_name], parent.class)
           else
             values << v
           end
         end
 
         if options[:class_name]
-          values = values.map{ |found_subject| class_from_rdf_type(found_subject).new(graph.graph, found_subject)}
+          values = values.map{ |found_subject| class_from_rdf_type(found_subject).new(parent.graph, found_subject)}
         end
         
         values
@@ -66,7 +78,7 @@ module ActiveFedora
       private 
 
       def target_class
-        graph.target_class(predicate)
+        parent.target_class(predicate)
       end
 
       # Look for a RDF.type assertion on this node to see if an RDF class is specified.
@@ -78,7 +90,7 @@ module ActiveFedora
         end
 
         type_uri = []
-        q.execute(graph.graph).each do |sol| 
+        q.execute(parent.graph).each do |sol| 
           type_uri << sol.value
         end
         
