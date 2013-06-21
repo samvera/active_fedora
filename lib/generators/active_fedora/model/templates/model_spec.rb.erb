@@ -13,8 +13,6 @@ describe <%= class_name %> do
       subject.reload
     }.to_not raise_error(ActiveFedora::ObjectNotFoundError)
 
-    assert_rels_ext_has_model(subject, JournalEntry)
-
     subject.destroy
   end
 
