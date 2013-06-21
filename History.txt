@@ -1,3 +1,17 @@
+6.4.0 (unreleased)
+Bump dependency to om 3.0.0 [Justin Coyne]
+
+Updating "active_fedora:model" rails generator [Jeremy Friesen]
+
+Deprecated AF::Base#update_indexed_attributes [Justin Coyne]
+
+Delegate all the array methods for RdfNode::TermProxy [Justin Coyne]
+
+Updating travis config as per Travis instruction [Jeremy Friesen]
+
+Added accepts_nested_attributes_for on RDFNodes [Justin Coyne]
+
+
 6.3.0 (2013-06-14)
 
 Added method: ActiveFedora::Base#required? [Justin Coyne]
