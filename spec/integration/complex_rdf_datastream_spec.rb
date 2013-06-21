@@ -35,6 +35,23 @@ describe "Nested Rdf Objects" do
       ds.parts.first.label.should == ["Alternator"]
     end
 
+    it "should be able to replace attributes" do
+      v = ds.parts.build(label: 'Alternator')
+      ds.parts.first.label.should == ['Alternator']
+      ds.parts.first.label = ['Distributor']
+      ds.parts.first.label.should == ['Distributor']
+    end
+
+    it "should be able to replace objects" do
+      ds.parts.build(label: 'Alternator')
+      ds.parts.build(label: 'Distributor')
+      ds.parts.size.should == 2
+      comp = SpecDatastream::Component.new(ds.graph)
+      comp.label = "Injector port"
+      ds.parts = [comp]
+      ds.parts.size.should == 1
+    end
+
     it "should be able to nest many complex objects" do
       comp1 = SpecDatastream::Component.new ds.graph
       comp1.label = ["Alternator"]

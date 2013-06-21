@@ -9,6 +9,10 @@ module ActiveFedora
       graph.insert([subject, RDF.rest, RDF.nil])
     end
 
+    def rdf_subject
+      subject
+    end
+
     def first
       self[0] 
     end

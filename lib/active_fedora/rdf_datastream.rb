@@ -42,6 +42,7 @@ module ActiveFedora
     end
 
     def content=(content)
+      reset_child_cache!
       @graph = deserialize(content)
     end
 
@@ -98,6 +99,7 @@ module ActiveFedora
     # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
     def serialize
       update_subjects_to_use_a_real_pid!
+
       RDF::Writer.for(serialization_format).dump(graph)
     end
 
@@ -109,6 +111,7 @@ module ActiveFedora
 
       bad_subject = rdf_subject
       reset_rdf_subject!
+      reset_child_cache!
       new_subject = rdf_subject
 
       new_repository = RDF::Repository.new
@@ -125,7 +128,7 @@ module ActiveFedora
 
     # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
     def fields
-      field_map = {}
+      field_map = {}.with_indifferent_access
 
       rdf_subject = self.rdf_subject
       query = RDF::Query.new do

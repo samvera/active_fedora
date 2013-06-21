@@ -223,7 +223,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
       describe ".fields()" do
         it "should return the right fields" do
-          @obj.send(:fields).keys.should == [:created, :title, :publisher, :based_near, :related_url]
+          @obj.send(:fields).keys.should == ["created", "title", "publisher", "based_near", "related_url"]
         end
         it "should return the right values" do
           fields = @obj.send(:fields)
