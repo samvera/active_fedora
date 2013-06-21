@@ -15,7 +15,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version     = '>= 1.9.3'
 
   s.add_dependency('rsolr')
-  s.add_dependency('om', '~> 2.1.0')
+  s.add_dependency('om', '~> 3.0.0')
   s.add_dependency('nom-xml', '>=0.5.1')
   s.add_dependency("activesupport", '>= 3.0.0')
   s.add_dependency("mediashelf-loggable")
