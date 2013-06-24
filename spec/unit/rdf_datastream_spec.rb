@@ -34,5 +34,9 @@ describe ActiveFedora::RDFDatastream do
       @obj.descMetadata.title = ['']
       @obj.descMetadata.title.should == ['']
     end
+
+    it "should have a list of fields" do
+      MyDatastream.fields.should == [:title]
+    end
   end
 end
