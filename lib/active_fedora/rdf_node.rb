@@ -286,11 +286,24 @@ module ActiveFedora
         @config ||= {}.with_indifferent_access
       end
 
+      # List of symbols representing the fields for this terminology.
+      # ':type' is excluded because it represents RDF.type and is a fixed value
+      # @see rdf_type
+      def fields
+        config.keys.map(&:to_sym) - [:type]
+      end
+
       def map_predicates(&block)
         builder = Builder.new(self)
         builder.build &block
       end
 
+      # Provide the value for the RDF.type of this node
+      # @example
+      #   class Location 
+      #     include ActiveFedora::RdfObject
+      #     rdf_type RDF::EbuCore.Location
+      #   end
       def rdf_type(uri_or_string=nil)
         if uri_or_string
           uri = uri_or_string.kind_of?(RDF::URI) ? uri_or_string : RDF::URI.new(uri_or_string) 
