@@ -36,12 +36,17 @@ module ActiveFedora
       @subject = nil
     end
 
+    def reset_child_cache!
+      @target = {}
+    end
+
     # @param [RDF::URI] subject the base node to start the search from
     # @param [Symbol] term the term to get the values for
     def get_values(subject, term)
       options = config_for_term_or_uri(term)
       predicate = options[:predicate]
-      TermProxy.new(self, subject, predicate, options)
+      @target ||= {}
+      @target[term.to_s] ||= TermProxy.new(self, subject, predicate, options)
     end
 
     def target_class(predicate)
@@ -51,12 +56,20 @@ module ActiveFedora
       ActiveFedora.class_from_string(class_name, self.class)
     end
 
+    def mark_for_destruction
+      @marked_for_destruction = true
+    end
+
+    def marked_for_destruction?
+      @marked_for_destruction
+    end
+
     # if there are any existing statements with this predicate, replace them
     # @param [RDF::URI] subject  the subject to insert into the graph
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
     # @param [Array,#to_s] values  the value/values to insert into the graph
-    def set_value(subject, predicate, values)
-      options = config_for_term_or_uri(predicate)
+    def set_value(subject, term, values)
+      options = config_for_term_or_uri(term)
       predicate = options[:predicate]
       values = Array(values)
 
@@ -71,19 +84,45 @@ module ActiveFedora
         end
       end
 
-      TermProxy.new(self, subject, predicate, options)
+      @target ||= {}
+      proxy = @target[term.to_s]
+      proxy ||= TermProxy.new(self, subject, predicate, options)
+      proxy.reset!
+      proxy
+
+    end
+
+    # Be careful with destroy. It will still be in the cache untill you call reset()
+    def destroy
+      # delete any statements about this rdf_subject
+      subject = rdf_subject
+      query = RDF::Query.new do
+        pattern [subject, :predicate, :value]
+      end
+
+      query.execute(graph).each do |solution|
+        graph.delete [subject, solution.predicate, solution.value]
+      end
+
+      # delete any statements that reference this rdf_subject
+      query = RDF::Query.new do
+        pattern [:subject, :predicate, subject]
+      end
+
+      query.execute(graph).each do |solution|
+        graph.delete [solution.subject, solution.predicate, subject]
+      end
     end
 
     # @option [Hash] values the values to assign to this rdf node.
     def attributes=(values)
       raise ArgumentError, "values must be a Hash, you provided #{values.class}" unless values.kind_of? Hash
-      self.class.config.keys.each do |key|
-        if values.has_key?(key)
-          set_value(rdf_subject, key, values[key])
+      values.with_indifferent_access.each do |key, value|
+        if self.class.config.keys.include?(key)
+          set_value(rdf_subject, key, value)
+        elsif nested_attributes_options.keys.map{ |k| "#{k}_attributes"}.include?(key)
+          send("#{key}=".to_sym, value)
         end
-      end
-      nested_attributes_options.keys.each do |key|
-        send("#{key}_attributes=".to_sym, values["#{key}_attributes".to_sym])
       end
     end
  
@@ -103,6 +142,7 @@ module ActiveFedora
           graph.delete [subject, predicate, v]
         end
       end
+      reset_child_cache!
     end
 
     # append a value 
@@ -110,7 +150,6 @@ module ActiveFedora
     def append(subject, predicate, args)
       options = config_for_term_or_uri(predicate)
       graph.insert([subject, predicate, args])
-      TermProxy.new(self, subject, options[:predicate], options)
     end
 
     def config_for_term_or_uri(term)
@@ -139,8 +178,8 @@ module ActiveFedora
     end
 
     def method_missing(name, *args)
-      if (md = /^([^=]+)=$/.match(name.to_s)) && pred = find_predicate(md[1])
-          set_value(rdf_subject, pred, *args)  
+      if md = /^([^=]+)=$/.match(name.to_s)
+          set_value(rdf_subject, md[1], *args)  
       elsif find_predicate(name)
           get_values(rdf_subject, name)
       else 
@@ -244,7 +283,7 @@ module ActiveFedora
 
     module ClassMethods
       def config
-        @config ||= {}
+        @config ||= {}.with_indifferent_access
       end
 
       def map_predicates(&block)
