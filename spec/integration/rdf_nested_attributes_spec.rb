@@ -94,6 +94,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
           }
         }
       end
+
       it "should create nested objects" do
           # Replace the graph's contents with the Hash
           subject.attributes = params[:myResource]
