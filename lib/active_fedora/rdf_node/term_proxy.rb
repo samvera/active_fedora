@@ -30,6 +30,16 @@ module ActiveFedora
       def reset!
         @target = nil
       end
+      
+      def mint_node(attributes=nil)
+        new_subject = RDF::Node.new
+        # minted_node = assoc.graph.target_class(assoc.predicate).new(assoc.graph.graph)
+        minted_node = parent.target_class(predicate).new(parent.graph)
+        unless attributes.nil?
+          minted_node.attributes = attributes
+        end
+        minted_node
+      end
 
       def <<(*values)
         values.each { |value| parent.append(subject, predicate, value) }
