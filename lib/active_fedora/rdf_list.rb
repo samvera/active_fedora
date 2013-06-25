@@ -1,6 +1,10 @@
 module ActiveFedora
   module RdfList
+    extend ActiveSupport::Concern
+    include ActiveFedora::RdfNode
+    
     attr_reader :graph, :subject
+    
     def initialize(graph, subject)
       @graph = graph
       @subject = subject

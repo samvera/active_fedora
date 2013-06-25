@@ -29,7 +29,6 @@ describe ActiveFedora::RdfList do
       end
     end
     class ElementList
-      include ActiveFedora::RdfObject
       include ActiveFedora::RdfList
       
       map_predicates do |map|

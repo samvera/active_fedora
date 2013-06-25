@@ -18,13 +18,10 @@ module ActiveFedora
 
 
       def build(attributes=nil)
-        new_subject = RDF::Node.new
-        parent.graph.insert([subject, predicate, new_subject])
-        parent.target_class(predicate).new(parent.graph, new_subject).tap do |node|
-          node.attributes = attributes if attributes
-        end
+        node = mint_node(attributes)
+        parent.graph.insert([subject, predicate, node.rdf_subject])
         reset!
-        target.find { |n| n.rdf_subject == new_subject}
+        target.find { |n| n.rdf_subject == node.rdf_subject}
       end
 
       def reset!
@@ -33,12 +30,9 @@ module ActiveFedora
       
       def mint_node(attributes=nil)
         new_subject = RDF::Node.new
-        # minted_node = assoc.graph.target_class(assoc.predicate).new(assoc.graph.graph)
-        minted_node = parent.target_class(predicate).new(parent.graph)
-        unless attributes.nil?
-          minted_node.attributes = attributes
+        return parent.target_class(predicate).new(parent.graph, new_subject).tap do |node|
+          node.attributes = attributes if attributes
         end
-        minted_node
       end
 
       def <<(*values)
