@@ -1,12 +1,41 @@
 module ActiveFedora
   module RdfList
+    extend ActiveSupport::Concern
+    include ActiveFedora::RdfNode
+    
     attr_reader :graph, :subject
+    
     def initialize(graph, subject)
       @graph = graph
       @subject = subject
       first = graph.query([subject, RDF.first, nil]).first
       graph.insert([subject, RDF.first, RDF.nil]) unless first
       graph.insert([subject, RDF.rest, RDF.nil])
+    end
+    
+    # Override assign_nested_attributes
+    def assign_nested_attributes_for_collection_association(association_name, attributes_collection)
+      options = self.nested_attributes_options[association_name]
+    
+      # TODO
+      #check_record_limit!(options[:limit], attributes_collection)
+    
+      if attributes_collection.is_a?(Hash) || attributes_collection.is_a?(String)
+        attributes_collection = [attributes_collection]
+      end
+    
+      association = self.send(association_name)
+      
+      original_length_of_list = self.size
+      attributes_collection.each_with_index do |attributes, index|
+        if attributes.instance_of? Hash
+          attributes = attributes.with_indifferent_access
+          minted_node = association.mint_node(attributes.except(*UNASSIGNABLE_KEYS))
+        else
+          minted_node = association.mint_node(attributes)            
+        end
+        self[original_length_of_list+index] = minted_node
+      end
     end
 
     def rdf_subject
