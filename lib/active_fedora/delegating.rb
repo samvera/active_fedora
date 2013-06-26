@@ -32,7 +32,7 @@ module ActiveFedora
 
     module ClassMethods
       def delegates
-        @local_delegates ||= {}
+        @local_delegates ||= {}.with_indifferent_access
         return @local_delegates unless superclass.respond_to?(:delegates) and value = superclass.delegates
         @local_delegates = value.dup if @local_delegates.empty?
         @local_delegates
