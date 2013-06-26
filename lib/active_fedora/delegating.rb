@@ -4,7 +4,7 @@ module ActiveFedora
 
     # Calling inspect may trigger a bunch of loads, but it's mainly for debugging, so no worries.
     def inspect
-      values = self.class.delegate_registry.map {|r| "#{r}:#{send(r).inspect}"}
+      values = self.class.delegates.keys.map {|r| "#{r}:#{send(r).inspect}"}
       "#<#{self.class} pid:\"#{pretty_pid}\", #{values.join(', ')}>"
     end
 
@@ -73,10 +73,6 @@ module ActiveFedora
         else
           super(*methods)
         end
-      end
-
-      def delegate_registry
-        self.delegates.keys
       end
 
       # Allows you to delegate multiple terminologies to the same datastream, instead
