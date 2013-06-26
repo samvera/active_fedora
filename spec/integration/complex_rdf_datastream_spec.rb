@@ -27,7 +27,12 @@ describe "Nested Rdf Objects" do
       ds = SpecDatastream.new(mock_obj)
     end
 
-
+    it "should not choke on invalid data" do
+      # set a string in the graph where model expects a node
+      ds.parts = ["foo"]
+      expect {ds.parts.inspect}.to raise_error(ArgumentError, "Expected the value of http://purl.org/dc/terms/hasPart to be an RDF object but it is a String \"foo\"")
+    end
+    
     it "should be able to nest a complex object" do
       comp = SpecDatastream::Component.new(ds.graph)
       comp.label = ["Alternator"]
