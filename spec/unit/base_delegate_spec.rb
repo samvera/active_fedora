@@ -93,9 +93,16 @@ describe ActiveFedora::Base do
       @n.duck.should == ["Quack", "Peep"]
     end
 
-    it "should accept the array getters and setters" do
-      @n[:duck]= ["Cluck", "Gobble"]
-      @n[:duck].should == ["Cluck", "Gobble"]
+    describe "array getters and setters" do
+      it "should accept symbol keys" do
+        @n[:duck]= ["Cluck", "Gobble"]
+        @n[:duck].should == ["Cluck", "Gobble"]
+      end
+
+      it "should accept string keys" do
+        @n['duck']= ["Cluck", "Gobble"]
+        @n['duck'].should == ["Cluck", "Gobble"]
+      end
     end
 
   end
