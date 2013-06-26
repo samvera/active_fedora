@@ -89,6 +89,9 @@ module ActiveFedora
       # Two classes may be valid for the same predicate (e.g. hasMember)
       # If no RDF.type assertion is found, fall back to using target_class
       def class_from_rdf_type(subject)
+        unless subject.kind_of?(RDF::Node)
+          raise ArgumentError, "Expected the value of #{predicate} to be an RDF object but it is a #{subject.class} #{subject.inspect}"
+        end
         q = RDF::Query.new do
           pattern [subject, RDF.type, :value]
         end
