@@ -323,7 +323,7 @@ describe ActiveFedora::FileConfigurator do
       subject.instance_variable_set :@config_loaded, nil
     end
     it "should return the default mapping if it has not been initialized" do
-      subject.predicate_config().should == YAML.load(File.read(default_predicate_mapping_file))
+      subject.predicate_config().should == YAMLAdaptor.load(File.read(default_predicate_mapping_file))
     end
   end
 
