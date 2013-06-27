@@ -1,5 +1,5 @@
 require 'erb'
-require 'psych'
+require 'active_fedora/yaml_adaptor'
 
 module ActiveFedora
   class FileConfigurator
@@ -110,7 +110,7 @@ module ActiveFedora
       end
 
       begin
-        fedora_yml = Psych.load(config_erb)
+        fedora_yml = YAMLAdaptor.load(config_erb)
       rescue StandardError => e
         raise("fedora.yml was found, but could not be parsed.\n")
       end
@@ -133,7 +133,7 @@ module ActiveFedora
       end
 
       begin
-        solr_yml = Psych.load(config_erb)
+        solr_yml = YAMLAdaptor.load(config_erb)
       rescue StandardError => e
         raise("solr.yml was found, but could not be parsed.\n")
       end
@@ -209,7 +209,7 @@ module ActiveFedora
 
     def predicate_config
       @predicate_config_path ||= build_predicate_config_path(File.dirname(self.path))
-      Psych.load(File.open(@predicate_config_path)) if File.exist?(@predicate_config_path)
+      YAMLAdaptor.load(File.open(@predicate_config_path)) if File.exist?(@predicate_config_path)
     end
 
     protected
@@ -227,7 +227,7 @@ module ActiveFedora
     end
 
     def valid_predicate_mapping?(testfile)
-      mapping = Psych.load(File.open(testfile))
+      mapping = YAMLAdaptor.load(File.open(testfile))
       return false unless mapping.has_key?(:default_namespace) && mapping[:default_namespace].is_a?(String)
       return false unless mapping.has_key?(:predicate_mapping) && mapping[:predicate_mapping].is_a?(Hash)
       true
