@@ -3,7 +3,7 @@
 require 'active_fedora/base'
 class <%= class_name %> < ActiveFedora::Base
   <% if options['descMetadata'] %>
-  has_metadata name: "descMetadata", type: <% options['descMetadata'] %>
+  has_metadata name: "descMetadata", type: <%= options['descMetadata'] %>
   <% else %>
   # Uncomment the following lines to add a #descMetadata method that is a
   #   datastream. You will need to specify the :type:, which may involve
