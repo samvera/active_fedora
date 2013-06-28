@@ -18,8 +18,6 @@ module ActiveFedora
 
     module ClassMethods
 
-      # ** EXPERIMENTAL **
-      #
       # Allows for a datastream to be treated like any other attribute of a model class 
       # while enforcing mimeType and/or datastream type (ie. external, managed, etc.) if defined. 
       # ====Examples 
@@ -67,8 +65,6 @@ module ActiveFedora
         create_named_datastream_update_methods(args[:name])
       end
       
-      # ** EXPERIMENTAL **
-      #
       # Creates the following helper methods for a datastream name
       #   [datastream_name]_append  - Add a named datastream
       #
@@ -91,8 +87,6 @@ module ActiveFedora
         end
       end 
       
-      # ** EXPERIMENTAL **
-      #
       # Creates the following helper methods for a datastream name
       #   [datastream_name]  - Returns array of named datastreams
       #   [datastream_name]_ids - Returns array of named datastream dsids
@@ -130,8 +124,6 @@ module ActiveFedora
 
     end
 
-      # ** EXPERIMENTAL **
-      #
       # Accessor for class variable for hash that stores arguments passed to has_datastream calls within an
       # ActiveFedora::Base child class.    
       #  
@@ -147,15 +139,11 @@ module ActiveFedora
         self.class_named_datastreams_desc ||= {}
       end
 
-      # ** EXPERIMENTAL **
-      #
       # Returns array of datastream names defined for this object 
       def datastream_names
         named_datastreams_desc.keys
       end
       
-      # ** EXPERIMENTAL **
-      #
       # Calls add_named_datastream while assuming it will be managed content and sets :blob and :controlGroup values accordingly
       # ====Parameters
       #  name: Datastream name
@@ -166,8 +154,6 @@ module ActiveFedora
         add_named_datastream(name,opts)
       end
       
-      # ** EXPERIMENTAL **
-      #
       # This object is used by [datastream_name]_append helper to add a named datastream
       # but can also be called directly.
       # ====Parameters
@@ -236,8 +222,6 @@ module ActiveFedora
         add_datastream(ds,opts)
       end
 
-      # ** EXPERIMENTAL **
-      #
       # Update an existing named datastream.  It has same parameters as add_named_datastream
       # except the :dsid key is now required.
       #
@@ -251,26 +235,20 @@ module ActiveFedora
         add_named_datastream(name,opts)
       end
       
-      # ** EXPERIMENTAL **
-      #
       # Throws an assertion failure unless the object 'o' is kind_of? class 't'
       # ====Parameters
       #  n: Name of object
       #  o: The object to test
       #  t: The class type to check is kind_of?
-      def assert_kind_of(n, o,t)
+      def assert_kind_of(n,o,t)
         raise "Assertion failure: #{n}: #{o} is not of type #{t}" unless o.kind_of?(t)
       end
       
-      # ** EXPERIMENTAL **
-      #
       # Returns true if the name is a defined named datastream
       def is_named_datastream?(name)
         named_datastreams_desc.has_key?(name)
       end
 
-      # ** EXPERIMENTAL **
-      #
       # Returns hash of datastream names defined by has_datastream calls mapped to 
       # array of datastream objects that have been added
       # ====Example
@@ -288,8 +266,6 @@ module ActiveFedora
         return ds_values
       end
       
-      # ** EXPERIMENTAL **
-      #
       # Returns hash of datastream names mapped to an array
       # of dsid's for named datastream objects
       # === Example
@@ -308,8 +284,6 @@ module ActiveFedora
         return dsids
       end 
       
-      # ** EXPERIMENTAL **
-      #
       # Returns the hash that stores arguments passed to has_datastream calls within an
       # ActiveFedora::Base child class.    
       #  
