@@ -48,7 +48,6 @@ describe ActiveFedora::DatastreamCollections do
   describe '#add_named_file_datastream' do
     it 'should add a file datastream with the given name to the object in fedora' do
       @test_object2 = MockAFBaseDatastream.new
-#      @test_object2.new_object = true
       f = File.open(File.join( File.dirname(__FILE__), "../fixtures/minivan.jpg"), 'rb')
       f.stub(:content_type).and_return("image/jpeg")
       @test_object2.add_named_file_datastream("thumbnail",f)
@@ -62,11 +61,6 @@ describe ActiveFedora::DatastreamCollections do
       t2_thumb1.pid.should == @test_object2.pid
       t2_thumb1.dsLabel.should == "minivan.jpg"
       t2_thumb1.controlGroup.should == "M"
-
-# .attributes.should == {"label"=>ds.label,"dsid"=>ds.dsid,
-#                                                                                  "mimeType"=>ds.attributes[:mimeType],
-#                                                                                  :controlGroup=>ds.attributes[:controlGroup],
-#                                                                                  :pid=>ds.pid, :dsID=>ds.dsid, :dsLabel=>ds.attributes[:dsLabel]}
     end
   end
   
@@ -129,7 +123,5 @@ describe ActiveFedora::DatastreamCollections do
       expect(named_datastreams_ids['thumbnail'].sort).to eq(["THUMB1", "THUMB2"])
     end
   end
-
-  
 
 end
