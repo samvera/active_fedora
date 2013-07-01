@@ -6,4 +6,6 @@ Example:
 
   This will create:
     app/models/journal.rb
+    app/models/datastreams/journal_metadata.rb
     spec/models/journal_spec.rb
+    spec/models/datastreams/journal_metadata_spec.rb
