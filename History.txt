@@ -1,4 +1,11 @@
-6.4.0 (unreleased)
+6.4.0 (2013-07-01)
+
+Removing experimental designation, tidying-up the code [Adam Wead]
+
+Providing a YAMLAdaptor for Psych dependency [Jeremy Friesen]
+
+Increase startup wait to 90 seconds [Justin Coyne]
+
 Bump dependency to om 3.0.0 [Justin Coyne]
 
 Updating "active_fedora:model" rails generator [Jeremy Friesen]
