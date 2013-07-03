@@ -76,8 +76,9 @@ module ActiveFedora
                :tableOfContents,
                :temporal,
                :title,
+               :type,
                :valid
-              ] # removed :type, :format
+              ] # removed :format
     DCTERMS.freeze
 
     #Constructor. this class will call self.field for each DCTERM. In short, all DCTERMS fields will already exist
