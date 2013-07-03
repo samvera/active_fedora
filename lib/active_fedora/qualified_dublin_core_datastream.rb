@@ -123,7 +123,8 @@ module ActiveFedora
       self.class.class_fields << name.to_s
       # add term to terminology
       unless self.class.terminology.has_term?(name.to_sym)
-        term = OM::XML::Term.new(name.to_sym, {:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms"}, self.class.terminology)
+        om_term_opts = {:xmlns=>"http://purl.org/dc/terms/", :namespace_prefix => "dcterms", :path => opts[:path]}
+        term = OM::XML::Term.new(name.to_sym, om_term_opts, self.class.terminology)
         self.class.terminology.add_term(term)
         term.generate_xpath_queries!
       end
