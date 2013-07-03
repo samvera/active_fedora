@@ -45,7 +45,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   end
 
   it "should create the right number of fields" do
-    ActiveFedora::QualifiedDublinCoreDatastream::DCTERMS.size.should == 53
+    ActiveFedora::QualifiedDublinCoreDatastream::DCTERMS.size.should == 54
   end
 
   it "should have unmodifiable constants" do
