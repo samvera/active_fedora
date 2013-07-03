@@ -2,7 +2,6 @@ require  "om"
 
 module ActiveFedora
   class OmDatastream < Datastream
-    # right now, OmDatastream is just an alias for NokogiriDatastream
 
     before_save do
       if content.blank?
