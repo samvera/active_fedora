@@ -64,6 +64,14 @@ module ActiveFedora
       @marked_for_destruction
     end
 
+    def new_record= val
+      @new_record = val
+    end
+
+    def new_record?
+      @new_record
+    end
+
     # if there are any existing statements with this predicate, replace them
     # @param [RDF::URI] subject  the subject to insert into the graph
     # @param [Symbol, RDF::URI] predicate  the predicate to insert into the graph
