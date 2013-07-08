@@ -5,11 +5,9 @@ class <%= class_name %> < ActiveFedora::Base
   <% if options['descMetadata'] %>
   has_metadata name: "descMetadata", type: <%= options['descMetadata'] %>
   <% else %>
-  # Uncomment the following lines to add a #descMetadata method that is a
-  #   datastream. You will need to specify the :type:, which may involve
-  #   creating a new Datastream object.
+  # Creating a #descMetadata method that returns the datastream. 
   #
-  # has_metadata name: "descMetadata", type: <%= class_name %>MetadataDatastream
+  has_metadata name: "descMetadata", type: <%= class_name %>Metadata
   <%- end -%>
   <% if options['has_file_datastream'] %>
   has_file_datastream "<%= options['has_file_datastream'] %>"

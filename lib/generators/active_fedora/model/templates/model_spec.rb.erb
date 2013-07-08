@@ -16,4 +16,8 @@ describe <%= class_name %> do
     subject.destroy
   end
 
+  it 'should have a descMetadata datastream' do
+    subject.descMetadata.should be_kind_of <%= options['descMetadata'] ? options['descMetadata'] : "#{class_name}Metadata" %>
+  end
+
 end
