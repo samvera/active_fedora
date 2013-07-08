@@ -21,7 +21,9 @@ module ActiveFedora
         node = mint_node(attributes)
         parent.graph.insert([subject, predicate, node.rdf_subject])
         reset!
-        target.find { |n| n.rdf_subject == node.rdf_subject}
+        new_node = target.find { |n| n.rdf_subject == node.rdf_subject}
+        new_node.new_record = true
+        new_node
       end
 
       def reset!
