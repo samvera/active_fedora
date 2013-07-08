@@ -20,6 +20,12 @@ describe 'bugs' do
     Object.send(:remove_const, :FooHistory)
   end
 
+  it 'should raise ActiveFedora::ObjectNotFoundError when find("")' do
+    expect {
+      FooHistory.find('')
+    }.to raise_error(ActiveFedora::ObjectNotFoundError)
+  end
+
   it "should not clobber everything when setting a value" do
     @test_object.someData.fubar=['initial']
     @test_object.save!
