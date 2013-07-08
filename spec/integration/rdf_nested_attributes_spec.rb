@@ -153,6 +153,11 @@ describe "Nesting attribute behavior of RDFDatastream" do
         subject.parts.map{|p| p.label.first}.should == ['Alternator', 'Universal Joint', 'Transmission', 'Oil Pump']
 
       end
+      it "should raise an error when the object isn't found" do
+       expect {
+          subject.parts_attributes= [{id: '_:g70192865051320', label: "Universal Joint"}]
+       }.to raise_error ActiveFedora::RecordNotFound
+      end
     end    
   end
 end

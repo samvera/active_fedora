@@ -35,7 +35,7 @@ module ActiveFedora
               assign_to_or_mark_for_destruction(existing_record, attributes, options[:allow_destroy])
             end
           else
-            raise_nested_attributes_record_not_found(association_name, record.rdf_subject.to_s)
+            raise_nested_attributes_record_not_found(association_name, attributes['id'].to_s)
           end
         end
       end
@@ -48,7 +48,7 @@ module ActiveFedora
       end
 
       def raise_nested_attributes_record_not_found(association_name, record_id)
-        raise RecordNotFound, "Couldn't find #{association_name} with ID=#{record_id} for #{self.class.name} with ID=#{id}"
+        raise RecordNotFound, "Couldn't find #{association_name} with ID=#{record_id} for #{self.class.name} with ID=#{rdf_subject.to_s}"
       end
 
       def call_reject_if(association_name, attributes)
