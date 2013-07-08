@@ -12,14 +12,35 @@ module ActiveFedora
 
       UNASSIGNABLE_KEYS = %w( id _destroy )
 
+      # @params [Symbol] association_name
+      # @params [Hash, Array] attributes_collection
+      # @example
+      #
+      #   assign_nested_attributes_for_collection_association(:people, {
+      #     '1' => { id: '1', name: 'Peter' },
+      #     '2' => { name: 'John' },
+      #     '3' => { id: '2', _destroy: true }
+      #   })
+      #
+      # Will update the name of the Person with ID 1, build a new associated
+      # person with the name 'John', and mark the associated Person with ID 2
+      # for destruction.
+      #
+      # Also accepts an Array of attribute hashes:
+      #
+      #   assign_nested_attributes_for_collection_association(:people, [
+      #     { id: '1', name: 'Peter' },
+      #     { name: 'John' },
+      #     { id: '2', _destroy: true }
+      #   ])
       def assign_nested_attributes_for_collection_association(association_name, attributes_collection)
         options = self.nested_attributes_options[association_name]
 
         # TODO
         #check_record_limit!(options[:limit], attributes_collection)
 
-        if attributes_collection.is_a?(Hash) || attributes_collection.is_a?(String)
-          attributes_collection = [attributes_collection]
+        if attributes_collection.is_a?(Hash)# || attributes_collection.is_a?(String)
+          attributes_collection = attributes_collection.values
         end
 
         association = self.send(association_name)

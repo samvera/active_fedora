@@ -70,18 +70,20 @@ describe "Nesting attribute behavior of RDFDatastream" do
       let(:params) do 
         { myResource: 
           {
-            topic_attributes: [
+            topic_attributes: {
+              '0' =>
               {
                 elementList_attributes: [{
                   topicElement:"Cosmology"
                   }]
               },
+              '1' =>
               {
                 elementList_attributes: [{
                   topicElement:"Quantum Behavior"
                 }]
               }
-            ],
+            },
             personalName_attributes: [
               { 
                 elementList_attributes: [{
