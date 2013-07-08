@@ -1,6 +1,5 @@
 # Generated via
 #  `rails generate active_fedora::model <%= class_name %>`
-require 'active_fedora/base'
 class <%= class_name %> < ActiveFedora::Base
   <% if options['descMetadata'] %>
   has_metadata name: "descMetadata", type: <%= options['descMetadata'] %>
