@@ -2,11 +2,11 @@
 #  `rails generate active_fedora::model <%= class_name %>`
 class <%= class_name %> < ActiveFedora::Base
   <% if options['descMetadata'] %>
-  has_metadata name: "descMetadata", type: <%= options['descMetadata'] %>
+  has_metadata "descMetadata", type: <%= options['descMetadata'] %>
   <% else %>
   # Creating a #descMetadata method that returns the datastream. 
   #
-  has_metadata name: "descMetadata", type: <%= class_name %>Metadata
+  has_metadata "descMetadata", type: <%= class_name %>Metadata
   <%- end -%>
   <% if options['has_file_datastream'] %>
   has_file_datastream "<%= options['has_file_datastream'] %>"
