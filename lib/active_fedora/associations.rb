@@ -36,7 +36,6 @@ module ActiveFedora
     module ClassMethods
 
       def has_many(association_id, options={})
-        raise "You must specify a property name for #{name}" if !options[:property]
         reflection = create_has_many_reflection(association_id, options)
         add_association_callbacks(reflection.name, reflection.options)
         collection_accessor_methods(reflection, HasManyAssociation)

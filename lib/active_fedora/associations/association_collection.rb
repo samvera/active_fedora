@@ -180,13 +180,40 @@ module ActiveFedora
         end
 
         def construct_query
-          clauses = {@reflection.options[:property] => @owner.internal_uri}
+
+          clauses = {find_predicate => @owner.internal_uri}
           clauses[:has_model] = @reflection.class_name.constantize.to_class_uri if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base'
           @counter_query = @finder_query = ActiveFedora::SolrService.construct_query_for_rel(clauses)
         end
 
 
       private 
+
+        def find_predicate
+          if @reflection.options[:property]
+            @reflection.options[:property]
+          elsif @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base' && @reflection.macro != :has_and_belongs_to_many
+            inverse_relation = @owner.class.to_s.underscore.to_sym
+            begin
+            find_class_for_relation(@reflection.class_name.constantize)
+            rescue NameError
+              raise "No :property attribute was set or could be inferred for #{@reflection.macro} #{@reflection.name.inspect} on #{@owner.class}"
+            end
+          end
+        end
+
+        def find_class_for_relation(klass, inverse_relation=@owner.class.to_s.underscore.to_sym)
+          raise "Unable to find #{klass}." if inverse_relation == :'active_fedora/base'
+          if klass.reflections.key?(inverse_relation)
+            # Try it singular
+            return klass.reflections[inverse_relation].options[:property]
+          elsif klass.reflections.key?(inverse_relation.to_s.pluralize.to_sym)
+            # Try it plural 
+            return klass.reflections[inverse_relation.to_s.pluralize.to_sym].options[:property]
+          end
+          find_class_for_relation(klass, @owner.class.superclass.to_s.underscore.to_sym)
+        end
+
         def create_record(attrs)
           attrs.update(@reflection.options[:conditions]) if @reflection.options[:conditions].is_a?(Hash)
           ensure_owner_is_not_new
