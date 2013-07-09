@@ -45,7 +45,7 @@ module ActiveFedora
         # Deletes the records according to the <tt>:dependent</tt> option.
         def delete_records(records)
           records.each do |r| 
-            r.remove_relationship(@reflection.options[:property], @owner)
+            r.remove_relationship(find_predicate, @owner)
           end
         end
 
