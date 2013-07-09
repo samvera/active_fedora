@@ -3,8 +3,8 @@ require 'spec_helper'
 describe "When two or more relationships share the same property" do 
   before do
     class Book < ActiveFedora::Base 
-      has_many :collections, :property=>:is_part_of, :class_name=>'Collection'
-      has_many :people, :property=>:is_part_of
+      has_many :collections, :class_name=>'Collection'
+      has_many :people
     end
 
     class Person < ActiveFedora::Base
