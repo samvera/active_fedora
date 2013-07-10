@@ -11,7 +11,7 @@ module ActiveFedora
         result = create
         update_index if create_needs_index?
       else
-        result = update
+        result = update_record
         update_index if update_needs_index?
       end
       return result
@@ -27,11 +27,14 @@ module ActiveFedora
       add_relationship(:has_model, self.class.to_class_uri)
     end
 
-    def update_attributes(properties)
-      self.attributes=properties
+    # Pushes the object and all of its new or dirty datastreams into Fedora
+    def update(attributes)
+      self.attributes=attributes
       save
     end
 
+    alias update_attributes update
+    
     # Refreshes the object's info from Fedora
     # Note: Currently just registers any new datastreams that have appeared in fedora
     def refresh
@@ -138,16 +141,15 @@ module ActiveFedora
       persist
     end
 
+    def update_record
+      persist
+    end
+
     # replace the unsaved digital object with a saved digital object
     def assign_pid
       @inner_object = @inner_object.save 
     end
     
-    # Pushes the object and all of its new or dirty datastreams into Fedora
-    def update
-      persist
-    end
-
     def persist
       result = @inner_object.save
 

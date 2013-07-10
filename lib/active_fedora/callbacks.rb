@@ -242,7 +242,7 @@ module ActiveFedora
       run_callbacks(:create) { super }
     end
 
-    def update(*) #:nodoc:
+    def update_record(*) #:nodoc:
       run_callbacks(:update) { super }
     end
   end
