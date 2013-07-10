@@ -42,7 +42,7 @@ describe ActiveFedora::Base do
       describe "and a pid is specified" do
         it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
           SpecModel::Basic.any_instance.should_receive(:init_with).and_return(SpecModel::Basic.new)
-          ActiveFedora::DigitalObject.should_receive(:find).and_return(stub("inner obj", :'new?'=>false))
+          ActiveFedora::DigitalObject.should_receive(:find).and_return(double("inner obj", :'new?'=>false))
           SpecModel::Basic.find("_PID_").should be_a SpecModel::Basic
         end
         it "should raise an exception if it is not found" do
@@ -54,8 +54,8 @@ describe ActiveFedora::Base do
     end
     describe "with :cast" do
       it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
-        SpecModel::Basic.any_instance.should_receive(:init_with).and_return(mock("Model", :adapt_to_cmodel=>SpecModel::Basic.new ))
-        ActiveFedora::DigitalObject.should_receive(:find).and_return(stub("inner obj", :'new?'=>false))
+        SpecModel::Basic.any_instance.should_receive(:init_with).and_return(double("Model", :adapt_to_cmodel=>SpecModel::Basic.new ))
+        ActiveFedora::DigitalObject.should_receive(:find).and_return(double("inner obj", :'new?'=>false))
         SpecModel::Basic.find("_PID_", :cast=>true)
       end
     end
@@ -115,7 +115,7 @@ describe ActiveFedora::Base do
       
       SpecModel::Basic.should_receive(:find_one).with("changeme:30", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:30'))
       SpecModel::Basic.should_receive(:find_one).with("changeme:22", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:22'))
-      yielded = mock("yielded method")
+      yielded = double("yielded method")
       yielded.should_receive(:run).with { |obj| obj.class == SpecModel::Basic}.twice
       SpecModel::Basic.find_each(){|obj| yielded.run(obj) }
     end
@@ -138,7 +138,7 @@ describe ActiveFedora::Base do
             hash[:params][:q].split(" AND ").include?("baz:\"quix\"") &&
             hash[:params][:q].split(" AND ").include?("baz:\"quack\"")
         }.and_return('response'=>{'docs'=>mock_docs})
-        yielded = mock("yielded method")
+        yielded = double("yielded method")
         yielded.should_receive(:run).with { |obj| obj.class == SpecModel::Basic}.twice
         SpecModel::Basic.find_each({:foo=>'bar', :baz=>['quix','quack']}){|obj| yielded.run(obj) }
       end
@@ -148,7 +148,7 @@ describe ActiveFedora::Base do
   describe '#find_in_batches' do
     describe "with conditions hash" do
       it "should filter by the provided fields" do
-        mock_docs = mock('docs')
+        mock_docs = double('docs')
         mock_docs.should_receive(:has_next?).and_return(false)
         ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with() { |page, rows, method, hash|
             page == 1 &&
@@ -162,7 +162,7 @@ describe ActiveFedora::Base do
             hash[:params][:q].split(" AND ").include?("baz:\"quix\"") &&
             hash[:params][:q].split(" AND ").include?("baz:\"quack\"")
         }.and_return('response'=>{'docs'=>mock_docs})
-        yielded = mock("yielded method")
+        yielded = double("yielded method")
         yielded.should_receive(:run).with(mock_docs)
         SpecModel::Basic.find_in_batches({:foo=>'bar', :baz=>['quix','quack']}, {:batch_size=>1002, :fl=>'id'}){|group| yielded.run group }.should
       end
@@ -191,7 +191,7 @@ describe ActiveFedora::Base do
   
   describe '#find_with_conditions' do
     it "should make a query to solr and return the results" do
-      mock_result = stub('Result')
+      mock_result = double('Result')
            ActiveFedora::SolrService.should_receive(:query).with() { |args|
             q = args.first if args.is_a? Array
             q ||= args
@@ -204,7 +204,7 @@ describe ActiveFedora::Base do
     end
 
     it "should escape quotes" do
-      mock_result = stub('Result')
+      mock_result = double('Result')
            ActiveFedora::SolrService.should_receive(:query).with() { |args|
             q = args.first if args.is_a? Array
             q ||= args
@@ -218,12 +218,12 @@ describe ActiveFedora::Base do
     end
 
     it "shouldn't use the class if it's called on AF:Base " do
-      mock_result = stub('Result')
+      mock_result = double('Result')
       ActiveFedora::SolrService.should_receive(:query).with('baz:"quack"', {:sort => [@sort_query]}).and_return(mock_result)
       ActiveFedora::Base.find_with_conditions(:baz=>'quack').should == mock_result
     end
     it "should use the query string if it's provided" do
-      mock_result = stub('Result')
+      mock_result = double('Result')
       ActiveFedora::SolrService.should_receive(:query).with('chunky:monkey', {:sort => [@sort_query]}).and_return(mock_result)
       ActiveFedora::Base.find_with_conditions('chunky:monkey').should == mock_result
     end

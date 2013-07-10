@@ -99,7 +99,7 @@ describe ActiveFedora::Datastream do
          </datastreamProfile>"
       EOS
 
-      mock_repo = mock('repository', :config=>{})
+      mock_repo = double('repository', :config=>{})
       @test_object.inner_object.stub(:repository).and_return(mock_repo)
       mock_repo.should_receive(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).and_return(ds_profile)
       @test_datastream.size.should == 9999
