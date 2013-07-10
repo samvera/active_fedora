@@ -8,19 +8,19 @@ describe ActiveFedora::Base do
 
   describe ".update_index" do
     before do
-      mock_conn = mock("SolrConnection")
+      mock_conn = double("SolrConnection")
       mock_conn.should_receive(:add)
       mock_conn.should_receive(:commit)
-      mock_ss = mock("SolrService")
+      mock_ss = double("SolrService")
       mock_ss.stub(:conn).and_return(mock_conn)
       ActiveFedora::SolrService.stub(:instance).and_return(mock_ss)
     end
     
     it "should call .to_solr on all SimpleDatastreams AND RelsExtDatastreams and pass the resulting document to solr" do
       # Actually uses self.to_solr internally to gather solr info from all metadata datastreams
-      mock1 = mock("ds1", :to_solr => {})
-      mock2 = mock("ds2", :to_solr => {})
-      mock3 = mock("RELS-EXT", :to_solr => {})
+      mock1 = double("ds1", :to_solr => {})
+      mock2 = double("ds2", :to_solr => {})
+      mock3 = double("RELS-EXT", :to_solr => {})
       
       mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
       mock1.should_receive(:solrize_profile).and_return({})
@@ -33,9 +33,9 @@ describe ActiveFedora::Base do
 
     it "should call .to_solr on all RDFDatastreams and pass the resulting document to solr" do
       # Actually uses self.to_solr internally to gather solr info from all metadata datastreams
-      mock1 = mock("ds1", :to_solr => {})
-      mock2 = mock("ds2", :to_solr => {})
-      mock3 = mock("RELS-EXT", :to_solr => {})
+      mock1 = double("ds1", :to_solr => {})
+      mock2 = double("ds2", :to_solr => {})
+      mock3 = double("RELS-EXT", :to_solr => {})
       
       mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
       mock1.should_receive(:solrize_profile).and_return({})
@@ -59,10 +59,10 @@ describe ActiveFedora::Base do
     
     it "should delete object from repository and index" do
       @test_object.inner_object.stub(:delete)
-      mock_conn = mock("SolrConnection")
+      mock_conn = double("SolrConnection")
       mock_conn.should_receive(:delete_by_id).with("__DO_NOT_USE__") 
       mock_conn.should_receive(:commit)
-      mock_ss = mock("SolrService")
+      mock_ss = double("SolrService")
       mock_ss.stub(:conn).and_return(mock_conn)
       ActiveFedora::SolrService.stub(:instance).and_return(mock_ss)
       @test_object.delete

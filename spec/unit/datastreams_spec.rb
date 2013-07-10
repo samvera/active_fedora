@@ -40,8 +40,8 @@ describe ActiveFedora::Datastreams do
 
   describe "#serialize_datastreams" do
     it "should touch each datastream" do
-      m1 = mock()
-      m2 = mock()
+      m1 = double()
+      m2 = double()
 
       m1.should_receive(:serialize!)
       m2.should_receive(:serialize!)
@@ -54,7 +54,7 @@ describe ActiveFedora::Datastreams do
     it "should infer dsLocations for E datastreams without hitting Fedora" do
       
       mock_specs = {:e => { :disseminator => 'xyz' }}
-      mock_ds = mock(:controlGroup => 'E')
+      mock_ds = double(:controlGroup => 'E')
       ActiveFedora::Base.stub(:ds_specs => mock_specs)
       ActiveFedora.stub(:config_for_environment => { :url => 'http://localhost'})
       subject.stub(:pid => 'test:1', :datastreams => {:e => mock_ds})
@@ -65,7 +65,7 @@ describe ActiveFedora::Datastreams do
 
   describe "#corresponding_datastream_name" do
     before(:each) do
-      subject.stub(:datastreams => { 'abc' => mock(), 'a_b_c' => mock(), 'a-b' => mock()})
+      subject.stub(:datastreams => { 'abc' => double(), 'a_b_c' => double(), 'a-b' => double()})
     end
 
     it "should use the name, if it exists" do
@@ -92,27 +92,27 @@ describe ActiveFedora::Datastreams do
     it "should look up the ds_spec" do
       mock_dsspec = { :type => nil }
       subject.stub(:ds_specs => {'abc' => mock_dsspec})
-      subject.configure_datastream(mock(:dsid => 'abc'))
+      subject.configure_datastream(double(:dsid => 'abc'))
     end
 
     it "should be ok if there is no ds spec" do
-      mock_dsspec = mock()
+      mock_dsspec = double()
       subject.stub(:ds_specs => {})
-      subject.configure_datastream(mock(:dsid => 'abc'))
+      subject.configure_datastream(double(:dsid => 'abc'))
     end
 
     it "should configure RelsExtDatastream" do
       mock_dsspec = { :type => ActiveFedora::RelsExtDatastream }
       subject.stub(:ds_specs => {'abc' => mock_dsspec})
 
-      ds = mock(:dsid => 'abc')
+      ds = double(:dsid => 'abc')
       ds.should_receive(:model=).with(subject)
 
       subject.configure_datastream(ds)
     end
 
     it "should run a Proc" do
-      ds = mock(:dsid => 'abc')
+      ds = double(:dsid => 'abc')
       @count = 0
       mock_dsspec = { :block => lambda { |x| @count += 1 } }
       subject.stub(:ds_specs => {'abc' => mock_dsspec})
@@ -139,7 +139,7 @@ describe ActiveFedora::Datastreams do
 
   describe "#add_datastream" do
     it "should add the datastream to the object" do
-      ds = mock(:dsid => 'Abc')
+      ds = double(:dsid => 'Abc')
       subject.add_datastream(ds)
       subject.datastreams['Abc'].should == ds
     end
@@ -152,11 +152,11 @@ describe ActiveFedora::Datastreams do
 
   describe "#metadata_streams" do
     it "should only be metadata datastreams" do
-      ds1 = mock(:metadata? => true)
-      ds2 = mock(:metadata? => true)
-      ds3 = mock(:metadata? => true)
+      ds1 = double(:metadata? => true)
+      ds2 = double(:metadata? => true)
+      ds3 = double(:metadata? => true)
       relsextds = ActiveFedora::RelsExtDatastream.new
-      file_ds = mock(:metadata? => false)
+      file_ds = double(:metadata? => false)
       subject.stub(:datastreams => {:a => ds1, :b => ds2, :c => ds3, :d => relsextds, :e => file_ds})
       subject.metadata_streams.should include(ds1, ds2, ds3)
       subject.metadata_streams.should_not include(relsextds)
@@ -170,14 +170,14 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should start from the highest existin dsid" do
-      subject.stub(:datastreams => {'FOO56' => mock()})
+      subject.stub(:datastreams => {'FOO56' => double()})
       subject.generate_dsid('FOO').should == 'FOO57'
     end
   end
 
   describe "#relsext" do
     it "should be the RELS-EXT datastream" do
-      m = mock
+      m = double
       subject.stub(:datastreams => { 'RELS-EXT' => m})
       subject.rels_ext.should == m
     end
@@ -204,19 +204,19 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should try to get a mime type from the blob" do
-      mock_file = mock(:content_type => 'x-application/asdf')
+      mock_file = double(:content_type => 'x-application/asdf')
       ds = subject.create_datastream(ActiveFedora::Datastream, nil, {:blob => mock_file})
       ds.mimeType.should == 'x-application/asdf'
     end
 
     it "should provide a default mime type" do
-      mock_file = mock()
+      mock_file = double()
       ds = subject.create_datastream(ActiveFedora::Datastream, nil, {:blob => mock_file})
       ds.mimeType.should == 'application/octet-stream'
     end
 
     it "should use the filename as a default label" do
-     mock_file = mock(:path => '/asdf/fdsa')
+     mock_file = double(:path => '/asdf/fdsa')
       ds = subject.create_datastream(ActiveFedora::Datastream, nil, {:blob => mock_file})
       ds.dsLabel.should == 'fdsa'
     end

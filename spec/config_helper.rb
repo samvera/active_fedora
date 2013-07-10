@@ -1,5 +1,5 @@
 def mock_yaml(hash, path)
-  mock_file = mock(path.split("/")[-1])
+  mock_file = double(path.split("/")[-1])
   File.stub(:exist?).with(path).and_return(true)
   File.stub(:open).with(path).and_return(mock_file)
   YAMLAdaptor.stub(:load).and_return(hash)

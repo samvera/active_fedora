@@ -28,8 +28,8 @@ describe ActiveFedora::Base do
         it "should use fedora to generate pids" do
           # TODO: This juggling of Fedora credentials & establishing connections should be handled by an establish_fedora_connection method, 
           # possibly wrap it all into a fedora_connection method - MZ 06-05-2012
-          stubfedora = mock("Fedora")
-          stubfedora.should_receive(:connection).and_return(mock("Connection", :mint =>"sample:newpid"))
+          stubfedora = double("Fedora")
+          stubfedora.should_receive(:connection).and_return(double("Connection", :mint =>"sample:newpid"))
           # Should use ActiveFedora.config.credentials as a single hash rather than an array of shards
           ActiveFedora::RubydoraConnection.should_receive(:new).with(ActiveFedora.config.credentials).and_return(stubfedora)
           ActiveFedora::Base.assign_pid(ActiveFedora::Base.new.inner_object)
@@ -49,9 +49,9 @@ describe ActiveFedora::Base do
       end
       describe "assign_pid" do
         it "should always use the first shard to generate pids" do
-          stubhard1 = mock("Shard")
-          stubhard2 = mock("Shard")
-          stubhard1.should_receive(:connection).and_return(mock("Connection", :mint =>"sample:newpid"))
+          stubhard1 = double("Shard")
+          stubhard2 = double("Shard")
+          stubhard1.should_receive(:connection).and_return(double("Connection", :mint =>"sample:newpid"))
           stubhard2.should_receive(:connection).never
           ActiveFedora::Base.fedora_connection = {0 => stubhard1, 1 => stubhard2}
           ActiveFedora::Base.assign_pid(ActiveFedora::Base.new.inner_object)
@@ -84,8 +84,8 @@ describe ActiveFedora::Base do
   describe "reindex_everything" do
     it "should call update_index on every object" do
        Rubydora::Repository.any_instance.should_receive(:search).
-            and_yield(stub(pid:'XXX')).and_yield(stub(pid:'YYY')).and_yield(stub(pid:'ZZZ'))
-       mock_update = stub(:mock_obj)
+            and_yield(double(pid:'XXX')).and_yield(double(pid:'YYY')).and_yield(double(pid:'ZZZ'))
+       mock_update = double(:mock_obj)
        mock_update.should_receive(:update_index).exactly(3).times
        ActiveFedora::Base.should_receive(:find).with('XXX', :cast=>true).and_return(mock_update)
        ActiveFedora::Base.should_receive(:find).with('YYY', :cast=>true).and_return(mock_update)
@@ -212,12 +212,12 @@ describe ActiveFedora::Base do
         @test_history.withText.should == @test_history.datastreams['withText']
       end
       it "dynamic accessors should convert dashes to underscores" do
-        ds = stub('datastream', :dsid=>'eac-cpf')
+        ds = double('datastream', :dsid=>'eac-cpf')
         @test_history.add_datastream(ds)
         @test_history.eac_cpf.should == ds
       end
       it "dynamic accessors should not convert datastreams named with underscore" do
-        ds = stub('datastream', :dsid=>'foo_bar')
+        ds = double('datastream', :dsid=>'foo_bar')
         @test_history.add_datastream(ds)
         @test_history.foo_bar.should == ds
       end
@@ -259,7 +259,7 @@ describe ActiveFedora::Base do
       end
 
       it "should update the RELS-EXT datastream and set the datastream as dirty when relationships are added" do
-        mock_ds = mock("Rels-Ext")
+        mock_ds = double("Rels-Ext")
         mock_ds.stub(:content_will_change!)
         @test_object.datastreams["RELS-EXT"] = mock_ds
         @test_object.add_relationship(:is_member_of, "info:fedora/demo:5")
@@ -347,7 +347,7 @@ describe ActiveFedora::Base do
 
     describe "#create" do
       it "should build a new record and save it" do
-        obj = mock()
+        obj = double()
         obj.should_receive(:save)
         FooHistory.should_receive(:new).and_return(obj)
         @hist = FooHistory.create(:fubar=>'ta', :swank=>'da')
@@ -436,9 +436,9 @@ describe ActiveFedora::Base do
       end
 
       it "should call .to_solr on all SimpleDatastreams and OmDatastreams, passing the resulting document to solr" do
-        mock1 = mock("ds1", :to_solr => {})
-        mock2 = mock("ds2", :to_solr => {})
-        ngds = mock("ngds", :to_solr => {})
+        mock1 = double("ds1", :to_solr => {})
+        mock2 = double("ds2", :to_solr => {})
+        ngds = double("ngds", :to_solr => {})
         ngds.should_receive(:solrize_profile)
         mock1.should_receive(:solrize_profile)
         mock2.should_receive(:solrize_profile)
@@ -448,7 +448,7 @@ describe ActiveFedora::Base do
         @test_object.to_solr
       end
       it "should call .to_solr on all RDFDatastreams, passing the resulting document to solr" do
-        mock = mock("ds1", :to_solr => {})
+        mock = double("ds1", :to_solr => {})
         mock.should_receive(:solrize_profile)
         
         @test_object.should_receive(:datastreams).twice.and_return({:ds1 => mock})
@@ -484,7 +484,7 @@ describe ActiveFedora::Base do
     
     describe "get_values_from_datastream" do
       it "should look up the named datastream and call get_values with the given pointer/field_name" do
-        mock_ds = mock("Datastream", :get_values=>["value1", "value2"])
+        mock_ds = double("Datastream", :get_values=>["value1", "value2"])
         @test_object.stub(:datastreams).and_return({"ds1"=>mock_ds})
         @test_object.get_values_from_datastream("ds1", "--my xpath--").should == ["value1", "value2"]
       end
@@ -492,8 +492,8 @@ describe ActiveFedora::Base do
     
     describe "update_datastream_attributes" do
       it "should look up any datastreams specified as keys in the given hash and call update_attributes on the datastream" do
-        mock_desc_metadata = mock("descMetadata")
-        mock_properties = mock("properties")
+        mock_desc_metadata = double("descMetadata")
+        mock_properties = double("properties")
         mock_ds_hash = {'descMetadata'=>mock_desc_metadata, 'properties'=>mock_properties}
         
         ds_values_hash = {

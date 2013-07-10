@@ -14,8 +14,8 @@ describe ActiveFedora::RelsExtDatastream do
   end
   
   before(:each) do
-      mock_inner = mock('inner object')
-      @mock_repo = mock('repository')
+      mock_inner = double('inner object')
+      @mock_repo = double('repository')
       @mock_repo.stub(:datastream_dissemination=>'My Content', :config=>{})
       mock_inner.stub(:repository).and_return(@mock_repo)
       mock_inner.stub(:pid).and_return(@pid)
@@ -37,7 +37,7 @@ describe ActiveFedora::RelsExtDatastream do
       subject.changed?.should == false
     end
     it "should be true when the model has changes" do
-      subject.model = stub(:relationships_are_dirty=>true)
+      subject.model = double(:relationships_are_dirty=>true)
       subject.changed?.should == true
     end
   end
@@ -50,7 +50,7 @@ describe ActiveFedora::RelsExtDatastream do
       subject = RDF::URI.new "info:fedora/test:sample_pid"
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:is_member_of),  RDF::URI.new('demo:10'))
       
-      @test_ds.stub(:new? => true, :relationships_are_dirty? =>true, :relationships => graph, :model => mock(:relationships_are_dirty= => true))
+      @test_ds.stub(:new? => true, :relationships_are_dirty? =>true, :relationships => graph, :model => double(:relationships_are_dirty= => true))
       @test_ds.serialize!
       EquivalentXml.equivalent?(@test_ds.content, "<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>\n        <rdf:Description rdf:about='info:fedora/test:sample_pid'>\n        <isMemberOf rdf:resource='demo:10' xmlns='info:fedora/fedora-system:def/relations-external#'/></rdf:Description>\n      </rdf:RDF>").should be_true
     end
@@ -83,7 +83,7 @@ describe ActiveFedora::RelsExtDatastream do
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new("info:fedora/afmodel:OtherModel"))
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new("info:fedora/afmodel:SampleModel"))
 
-      @test_ds.should_receive(:model).and_return(stub("model", :relationships=>graph, :relationships_are_dirty= => true))
+      @test_ds.should_receive(:model).and_return(double("model", :relationships=>graph, :relationships_are_dirty= => true))
       EquivalentXml.equivalent?(@test_ds.to_rels_ext(), @sample_rels_ext_xml).should be_true
     end
     
@@ -96,7 +96,7 @@ describe ActiveFedora::RelsExtDatastream do
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new("info:fedora/afmodel:OtherModel"))
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new("info:fedora/afmodel:SampleModel"))
 
-      @test_ds.stub(:model).and_return(stub("model", :relationships=>graph, :relationships_are_dirty= => true))
+      @test_ds.stub(:model).and_return(double("model", :relationships=>graph, :relationships_are_dirty= => true))
       rels = @test_ds.to_rels_ext()
       EquivalentXml.equivalent?(rels, @sample_rels_ext_xml).should be_true
       rels.should_not =~ /fedora:isMemberOf/
