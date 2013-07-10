@@ -339,7 +339,7 @@ describe ActiveFedora::Base do
 
       it "should update an existing record" do
         @test_object.stub(:new_record? => false)
-        @test_object.should_receive(:update)
+        @test_object.should_receive(:update_record)
         @test_object.should_receive(:update_index)
         @test_object.save     
       end
@@ -519,7 +519,6 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
     end
     
     describe "update_attributes" do
-
       it "should set the attributes and save" do
         m = FooHistory.new
         att= {"fubar"=> '1234', "baz" =>'stuff'}
@@ -528,6 +527,18 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
         m.should_receive(:baz=).with('stuff')
         m.should_receive(:save)
         m.update_attributes(att)
+      end
+    end
+
+    describe "update" do
+      it "should set the attributes and save" do
+        m = FooHistory.new
+        att= {"fubar"=> '1234', "baz" =>'stuff'}
+        
+        m.should_receive(:fubar=).with('1234')
+        m.should_receive(:baz=).with('stuff')
+        m.should_receive(:save)
+        m.update(att)
       end
     end
     
