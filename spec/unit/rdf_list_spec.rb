@@ -39,7 +39,7 @@ describe ActiveFedora::RdfList do
   end
 
   describe "a new list" do
-    let (:ds) { DemoList.new(stub('inner object', :pid=>'foo', :new? =>true), 'descMetadata')}
+    let (:ds) { DemoList.new(double('inner object', :pid=>'foo', :new? =>true), 'descMetadata')}
     subject { ds.elementList.build}
 
     it "should insert at the end" do
@@ -102,7 +102,7 @@ END
 
   describe "a list with content" do
     subject do
-      subject = DemoList.new(stub('inner object', :pid=>'foo', :new? =>true), 'descMetadata')
+      subject = DemoList.new(double('inner object', :pid=>'foo', :new? =>true), 'descMetadata')
       subject.content =<<END
   <rdf:RDF
       xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:mads="http://www.loc.gov/mads/rdf/v1#">
