@@ -21,7 +21,7 @@ describe ActiveFedora::OmDatastream do
   before(:each) do
     @mock_inner = mock('inner object')
     @mock_repo = mock('repository')
-    @mock_repo.stub(:datastream_dissemination=>'My Content', :config=>{})
+    @mock_repo.stub(:datastream_dissemination=>'My Content', :config=>{}, :datastream=>'')
     @mock_inner.stub(:repository).and_return(@mock_repo)
     @mock_inner.stub(:pid)
     @mock_inner.stub(:new? => false)

@@ -38,7 +38,7 @@ describe ActiveFedora::OmDatastream do
     end
     describe "#changed?" do
       it "should not be changed if the new xml matches the old xml" do
-        @obj.descMetadata.ng_xml = @obj.descMetadata.ng_xml
+        @obj.descMetadata.content = @obj.descMetadata.content
         @obj.descMetadata.should_not be_changed
       end
 
@@ -80,7 +80,7 @@ describe ActiveFedora::OmDatastream do
 
     describe "#changed?" do
       it "should not be changed if the new xml matches the old xml" do
-        @obj.descMetadata.ng_xml = @obj.descMetadata.ng_xml
+        @obj.descMetadata.content = @obj.descMetadata.content
         @obj.descMetadata.should_not be_changed
       end
 

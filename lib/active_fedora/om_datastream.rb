@@ -108,9 +108,20 @@ module ActiveFedora
     end
     
     def content=(new_content)
-      ng_xml_will_change! unless EquivalentXml.equivalent?(datastream_content, new_content)
-      @ng_xml = Nokogiri::XML::Document.parse(new_content)
-      super(@ng_xml.to_s)
+      if inline?
+        # inline datastreams may be transformed by fedora 3, so we test for equivalence instead of equality
+        if !EquivalentXml.equivalent?(datastream_content, new_content)
+          ng_xml_will_change! 
+          @ng_xml = Nokogiri::XML::Document.parse(new_content)
+          super(@ng_xml.to_s)
+        end
+      else
+        if datastream_content != new_content
+          ng_xml_will_change! 
+          @ng_xml = Nokogiri::XML::Document.parse(new_content)
+          super(@ng_xml.to_s)
+        end
+      end
     end
 
     def content_changed?
