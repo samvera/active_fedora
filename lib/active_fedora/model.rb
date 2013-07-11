@@ -37,15 +37,15 @@ module ActiveFedora
     # Returns a suitable uri object for :has_model
     # Should reverse Model#from_class_uri
     def to_class_uri(attrs = {})
-      unless self.respond_to? :pid_suffix
-        pid_suffix = attrs.has_key?(:pid_suffix) ? attrs[:pid_suffix] : ContentModel::CMODEL_PID_SUFFIX
-      else
+      if self.respond_to? :pid_suffix
         pid_suffix = self.pid_suffix
-      end
-      unless self.respond_to? :pid_namespace
-        namespace = attrs.has_key?(:namespace) ? attrs[:namespace] : ContentModel::CMODEL_NAMESPACE   
       else
+        pid_suffix = attrs.fetch(:pid_suffix, ContentModel::CMODEL_PID_SUFFIX)
+      end
+      if self.respond_to? :pid_namespace
         namespace = self.pid_namespace
+      else
+        namespace = attrs.fetch(:namespace, ContentModel::CMODEL_NAMESPACE)
       end
       "info:fedora/#{namespace}:#{ContentModel.sanitized_class_name(self)}#{pid_suffix}" 
     end
