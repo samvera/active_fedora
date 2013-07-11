@@ -10,6 +10,7 @@ describe ActiveFedora::Model do
         def self.pid_namespace
           "foo"
         end
+        has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream, :autocreate => true 
       end
       class Basic < Base
       end
@@ -38,28 +39,28 @@ describe ActiveFedora::Model do
       end
     end
     describe "#find with a valid pid with cast" do
-      subject { ActiveFedora::Base.find('test:fixture_mods_article1', :cast=>true) }
-      it { should be_instance_of ModsArticle}
+      subject { ActiveFedora::Base.find(@test_instance.pid, :cast=>true) }
+      it { should be_instance_of ModelIntegrationSpec::Basic}
     end
     describe "#find with a valid pid without cast" do
-      subject { ActiveFedora::Base.find('test:fixture_mods_article1') }
+      subject { ActiveFedora::Base.find(@test_instance.pid) }
       it { should be_instance_of ActiveFedora::Base}
     end
   end
 
   describe "#load_instance_from_solr" do
     describe "with a valid pid" do
-      subject { ActiveFedora::Base.load_instance_from_solr('test:fixture_mods_article1') }
-      it { should be_instance_of ModsArticle}
+      subject { ActiveFedora::Base.load_instance_from_solr(@test_instance.pid) }
+      it { should be_instance_of ModelIntegrationSpec::Basic}
     end
     describe "with metadata datastream spec" do
-      subject { ActiveFedora::Base.load_instance_from_solr('test:fixture_mods_article1') }
+      subject { ActiveFedora::Base.load_instance_from_solr(@test_instance.pid) }
       it "should create an xml datastream" do
         subject.datastreams['properties'].should be_kind_of ActiveFedora::SimpleDatastream
       end
 
       it "should know the datastreams properties" do
-        subject.properties.dsSize.should == 19
+        subject.properties.dsSize.should == 9
       end
     end
   end

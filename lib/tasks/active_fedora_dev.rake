@@ -36,21 +36,6 @@ require 'rspec/core/rake_task'
     spec.rcov = true
   end
 
-  desc "Loads or refreshes the fixtures needed to run the tests"
-  task :fixtures => :environment do
-    ENV["pid"] = "test:fixture_mods_article1"
-    Rake::Task["repo:refresh"].invoke
-    ENV["pid"] = nil
-
-    Rake::Task["repo:delete"].reenable
-    Rake::Task["repo:load"].reenable
-    Rake::Task["repo:refresh"].reenable
-
-    ENV["pid"] = "test:fixture_mods_article2"
-    Rake::Task["repo:refresh"].invoke
-    ENV["pid"] = nil
-  end
-
   desc "Copies the default SOLR config for the bundled Testing Server"
   task :configure_jetty do
     FileList['lib/generators/active_fedora/config/solr/templates/solr_conf/conf/*'].each do |f|  
@@ -79,9 +64,8 @@ task :coverage do
   ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
   ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
 
-  Rake::Task["active_fedora:fixtures"].invoke
+ # Rake::Task["active_fedora:fixtures"].invoke
   Rake::Task["active_fedora:rspec"].invoke
 end
 
 end
-

@@ -9,9 +9,6 @@ describe ActiveFedora::SolrService do
         def self.pid_namespace
           "foo"
         end
-        has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream do |m|
-          m.field "holding_id", :string
-        end
   
         has_metadata :name => "descMetadata", :type => ActiveFedora::QualifiedDublinCoreDatastream
       end
@@ -19,8 +16,7 @@ describe ActiveFedora::SolrService do
       @test_object.label = 'test_object'
       @foo_object = FooObject.new
       @foo_object.label = 'foo_object'
-      attributes = {"holding_id"=>{0=>"Holding 1"},
-                    "language"=>{0=>"Italian"},
+      attributes = {"language"=>{0=>"Italian"},
                     "creator"=>{0=>"Linguist, A."},
                     "geography"=>{0=>"Italy"},
                     "title"=>{0=>"Italian and Spanish: A Comparison of Common Phrases"}}
@@ -30,7 +26,6 @@ describe ActiveFedora::SolrService do
       @profiles = {
         'test' => @test_object.inner_object.profile,
         'foo' => @foo_object.inner_object.profile,
-        'foo_properties' => @foo_object.datastreams['properties'].profile,
         'foo_descMetadata' => @foo_object.datastreams['descMetadata'].profile
       }
       @foo_content = @foo_object.datastreams['descMetadata'].content
@@ -61,14 +56,13 @@ describe ActiveFedora::SolrService do
         ['test_object','foo_object'].should include(r.label)
         @test_object.inner_object.profile.should == @profiles['test']
         @foo_object.inner_object.profile.should == @profiles['foo']
-        @foo_object.datastreams['properties'].profile.should == @profiles['foo_properties']
         @foo_object.datastreams['descMetadata'].profile.should == @profiles['foo_descMetadata']
         @foo_object.datastreams['descMetadata'].content.should be_equivalent_to(@foo_content)
       end
     end
     
     it 'should instantiate all datastreams in the solr doc, even ones undeclared by the class' do
-      obj = ActiveFedora::Base.load_instance_from_solr "test:fixture_mods_article1"
+      obj = ActiveFedora::Base.load_instance_from_solr @foo_object.pid 
       obj.datastreams.keys.should include('descMetadata')
     end
     
