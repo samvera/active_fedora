@@ -68,13 +68,14 @@ module ActiveFedora
     end
 
 
-    # Returns true if the pid exists in the repository 
-    # @param[String] pid 
-    # @return[boolean] 
+    # Returns true if the pid exists in the repository
+    # @param[String] pid
+    # @return[boolean]
     def exists?(pid)
       return false if pid.nil? || pid.empty?
-      inner = DigitalObject.find_or_initialize(self, pid)
-      !inner.new?
+      !!DigitalObject.find(self, pid)
+    rescue ActiveFedora::ObjectNotFoundError
+      false
     end
 
     # Returns a solr result matching the supplied conditions
