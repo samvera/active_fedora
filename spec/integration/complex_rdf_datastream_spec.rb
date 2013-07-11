@@ -23,7 +23,7 @@ describe "Nested Rdf Objects" do
     end
 
     let (:ds) do
-      mock_obj = stub(:mock_obj, :pid=>'test:124', :new? => true)
+      mock_obj = double(:mock_obj, :pid=>'test:124', :new? => true)
       ds = SpecDatastream.new(mock_obj)
     end
 
@@ -140,7 +140,7 @@ END
       end
 
       let (:ds) do
-        mock_obj = stub(:mock_obj, :pid=>'test:124', :new? => true)
+        mock_obj = double(:mock_obj, :pid=>'test:124', :new? => true)
         ds = SpecDatastream.new(mock_obj)
       end
 
@@ -209,7 +209,7 @@ END
       end
 
       let (:ds) do
-        mock_obj = stub(:mock_obj, :pid=>'test:124', :new? => true)
+        mock_obj = double(:mock_obj, :pid=>'test:124', :new? => true)
         ds = SpecDatastream.new(mock_obj)
       end
 

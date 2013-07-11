@@ -14,7 +14,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
           map.related_url(:to => "seeAlso", :in => RDF::RDFS)
         end
       end
-      @subject = MyDatastream.new(stub('inner object', :pid=>'test:1', :new? =>true), 'descMetadata')
+      @subject = MyDatastream.new(double('inner object', :pid=>'test:1', :new? =>true), 'descMetadata')
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
     after do
@@ -208,7 +208,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
           delegate :rights, :to => :descMetadata
         end
         @obj = MyDatastream.new(@inner_object, 'solr_rdf')
-        repository = mock()
+        repository = double()
           @obj.stub(:repository => repository, :pid => 'test:1')
           repository.stub(:modify_datastream)
           repository.stub(:add_datastream)

@@ -19,8 +19,8 @@ describe ActiveFedora::OmDatastream do
   end
   
   before(:each) do
-    @mock_inner = mock('inner object')
-    @mock_repo = mock('repository')
+    @mock_inner = double('inner object')
+    @mock_repo = double('repository')
     @mock_repo.stub(:datastream_dissemination=>'My Content', :config=>{}, :datastream=>'')
     @mock_inner.stub(:repository).and_return(@mock_repo)
     @mock_inner.stub(:pid)
@@ -262,9 +262,9 @@ describe ActiveFedora::OmDatastream do
     end
  
     it "should return correct values from solr_doc given different term pointers" do
-      mock_term = mock("OM::XML::Term")
+      mock_term = double("OM::XML::Term")
       mock_term.stub(:type).and_return(:text)
-      mock_terminology = mock("OM::XML::Terminology")
+      mock_terminology = double("OM::XML::Terminology")
       mock_terminology.stub(:retrieve_term).and_return(mock_term)
       ActiveFedora::OmDatastream.stub(:terminology).and_return(mock_terminology)
       @mods_ds.from_solr(@solr_doc)
