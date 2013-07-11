@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.homepage    = %q{https://github.com/projecthydra/active_fedora}
   s.summary     = %q{A convenience libary for manipulating documents in the Fedora Repository.}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
-
+  s.license = "APACHE2"
   s.required_ruby_version     = '>= 1.9.3'
 
   s.add_dependency('rsolr')
