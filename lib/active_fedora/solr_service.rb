@@ -32,18 +32,23 @@ module ActiveFedora
       raise SolrNotInitialized unless Thread.current[:solr_service]
       Thread.current[:solr_service]
     end
-    
-    def self.reify_solr_results(solr_result,opts={})
-      results = []
-      solr_result.each do |hit|
-        classname = class_from_solr_document(hit)
-        if opts[:load_from_solr]
-          results << classname.load_instance_from_solr(hit[SOLR_DOCUMENT_ID])
-        else
-          results << classname.find(hit[SOLR_DOCUMENT_ID])
+
+    def self.lazy_reify_solr_results(solr_results, opts = {})
+      Enumerator.new do |yielder|
+        solr_results.each do |hit|
+          yielder.yield(reify_solr_result(hit, opts))
         end
       end
-      return results
+    end
+    
+    def self.reify_solr_results(solr_results, opts = {})
+      solr_results.collect {|hit| reify_solr_result(hit, opts)}
+    end
+
+    def self.reify_solr_result(hit, opts = {})
+      classname = class_from_solr_document(hit)
+      method = opts[:load_from_solr] ? :load_instance_from_solr : :find
+      classname.send(method, hit[SOLR_DOCUMENT_ID])
     end
   
     def self.class_from_solr_document(hit)
