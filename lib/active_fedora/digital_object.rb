@@ -31,6 +31,7 @@ module ActiveFedora
     include DatastreamBootstrap
 
     def self.find(original_class, pid)
+      raise ActiveFedora::ObjectNotFoundError.new("Unable to find #{pid.inspect} in fedora. ") unless pid.present?
       conn = original_class.connection_for_pid(pid)
       obj = begin
         super(pid, conn)
