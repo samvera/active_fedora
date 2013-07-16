@@ -157,20 +157,16 @@ module ActiveFedora #:nodoc:
   # @example Search within ActiveFedora::RdfNode for a class called "TermProxy"
   #   ActiveFedora.class_from_string("TermProxy", ActiveFedora::RdfNode)
   #   => ActiveFedora::RdfNode::TermProxy  
-  def self.class_from_string(class_name, container_class=nil)
-    if class_name.include?("::")
-      # result = eval(class_name)
-      class_name.split('::').inject(Object) do |mod, class_name|
+  def self.class_from_string(class_name, container_class=Kernel)
+    container_class = container_class.name if container_class.is_a? Module
+    container_parts = container_class.split('::')
+    (container_parts + class_name.split('::')).flatten.inject(Kernel) do |mod, class_name|
+      if mod.const_defined? class_name.to_sym
         mod.const_get(class_name)
+      else
+        container_parts.pop
+        class_from_string(class_name, container_parts.join('::'))
       end
-    elsif !container_class.nil?
-      begin
-        container_class.const_get(class_name.to_sym)
-      rescue NameError
-        Kernel.const_get(class_name)
-      end
-    else
-      Kernel.const_get(class_name)
     end
   end
 

@@ -104,11 +104,22 @@ describe ActiveFedora do
   end
   
   describe "#class_from_string" do
+    before do
+      module ParentClass
+        class SiblingClass
+        end
+        class OtherSiblingClass
+        end
+      end
+    end
     it "should return class constants based on strings" do
       ActiveFedora.class_from_string("Om").should == Om
       ActiveFedora.class_from_string("ActiveFedora::RdfNode::TermProxy").should == ActiveFedora::RdfNode::TermProxy
       ActiveFedora.class_from_string("TermProxy", ActiveFedora::RdfNode).should == ActiveFedora::RdfNode::TermProxy
-      
+    end
+
+    it "should find sibling classes" do
+      ActiveFedora.class_from_string("SiblingClass", ParentClass::OtherSiblingClass).should == ParentClass::SiblingClass
     end
   end
 end
