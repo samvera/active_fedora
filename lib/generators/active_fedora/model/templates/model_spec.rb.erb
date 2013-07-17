@@ -7,13 +7,12 @@ describe <%= class_name %> do
   include ActiveFedora::TestSupport
   subject { <%= class_name %>.new }
 
-  it 'should persist to Fedora' do
-    subject.save!
-    expect {
-      subject.reload
-    }.to_not raise_error(ActiveFedora::ObjectNotFoundError)
-
-    subject.destroy
+  describe "when persisted to fedora" do
+    before { subject.save! }
+    after { subject.destroy }
+    it 'should exist' do
+      <%= class_name %>.exists?(subject.pid).should be_true
+    end
   end
 
   it 'should have a descMetadata datastream' do
