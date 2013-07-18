@@ -92,6 +92,18 @@ describe ActiveFedora::Base do
        ActiveFedora::Base.should_receive(:find).with('ZZZ', :cast=>true).and_return(mock_update)
        ActiveFedora::Base.reindex_everything
     end
+
+    it "should accept a query param for the search" do
+       query_string = "pid~*"
+       Rubydora::Repository.any_instance.should_receive(:search).with(query_string).
+            and_yield(double(pid:'XXX')).and_yield(double(pid:'YYY')).and_yield(double(pid:'ZZZ'))
+       mock_update = double(:mock_obj)
+       mock_update.should_receive(:update_index).exactly(3).times
+       ActiveFedora::Base.should_receive(:find).with('XXX', :cast=>true).and_return(mock_update)
+       ActiveFedora::Base.should_receive(:find).with('YYY', :cast=>true).and_return(mock_update)
+       ActiveFedora::Base.should_receive(:find).with('ZZZ', :cast=>true).and_return(mock_update)
+       ActiveFedora::Base.reindex_everything(query_string)
+    end
   end
 
   describe "With a test class" do

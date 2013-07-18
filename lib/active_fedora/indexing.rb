@@ -87,9 +87,11 @@ module ActiveFedora
       end
 
       # Using the fedora search (not solr), get every object and reindex it.
-      def reindex_everything
+      # @param [String] a query string that conforms to the query param format
+      #   of the underlying search's API
+      def reindex_everything(query = nil)
         connections.each do |conn|
-          conn.search(nil) do |object|
+          conn.search(query) do |object|
             ActiveFedora::Base.find(object.pid, :cast=>true).update_index
           end
         end
