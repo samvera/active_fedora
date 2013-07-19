@@ -1,3 +1,4 @@
+require File.expand_path('../../../spec/support/an_active_model', __FILE__)
 module ActiveFedora
   module TestSupport
 

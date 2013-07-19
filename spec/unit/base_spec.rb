@@ -2,6 +2,8 @@ require 'spec_helper'
 @@last_pid = 0  
 
 describe ActiveFedora::Base do
+  it_behaves_like "An ActiveModel"
+
   describe 'descendants' do
     it "should record the decendants" do
       ActiveFedora::Base.descendants.should include(ModsArticle, SpecialThing)
