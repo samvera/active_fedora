@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-
   describe "active model methods" do 
     class BarStream < ActiveFedora::OmDatastream 
       set_terminology do |t|

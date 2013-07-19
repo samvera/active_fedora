@@ -4,6 +4,7 @@ require 'spec_helper'
 require 'active_fedora/test_support'
 
 describe <%= class_name %> do
+  it_behaves_like 'An ActiveModel'
   include ActiveFedora::TestSupport
   subject { <%= class_name %>.new }
 

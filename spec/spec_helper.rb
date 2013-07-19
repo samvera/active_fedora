@@ -17,7 +17,7 @@ require 'active-fedora'
 require 'rspec'
 require 'equivalent-xml/rspec_matchers'
 
-require 'support/mock_fedora'
+Dir[File.expand_path("../support/**/*.rb", __FILE__)].each {|f| require f }
 require 'samples/samples'
 
 
