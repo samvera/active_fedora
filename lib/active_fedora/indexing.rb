@@ -92,6 +92,7 @@ module ActiveFedora
       def reindex_everything(query = nil)
         connections.each do |conn|
           conn.search(query) do |object|
+            next if object.pid.start_with?('fedora-system:')
             ActiveFedora::Base.find(object.pid, :cast=>true).update_index
           end
         end

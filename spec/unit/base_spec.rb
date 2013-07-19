@@ -84,9 +84,13 @@ describe ActiveFedora::Base do
   end
 
   describe "reindex_everything" do
-    it "should call update_index on every object" do
+    it "should call update_index on every object except for the fedora-system objects" do
        Rubydora::Repository.any_instance.should_receive(:search).
-            and_yield(double(pid:'XXX')).and_yield(double(pid:'YYY')).and_yield(double(pid:'ZZZ'))
+            and_yield(double(pid:'XXX')).and_yield(double(pid:'YYY')).and_yield(double(pid:'ZZZ')).
+            and_yield(double(pid:'fedora-system:ServiceDeployment-3.0')).
+            and_yield(double(pid:'fedora-system:ServiceDefinition-3.0')).
+            and_yield(double(pid:'fedora-system:FedoraObject-3.0'))
+
        mock_update = double(:mock_obj)
        mock_update.should_receive(:update_index).exactly(3).times
        ActiveFedora::Base.should_receive(:find).with('XXX', :cast=>true).and_return(mock_update)
