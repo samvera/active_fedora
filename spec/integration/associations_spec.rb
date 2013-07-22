@@ -605,4 +605,61 @@ describe ActiveFedora::Base do
       end
     end
   end
+
+  describe "casting when the class name is ActiveFedora::Base" do
+    describe "for habtm" do
+      before :all do
+        class Novel < ActiveFedora::Base
+          has_and_belongs_to_many :contents, property: :is_part_of, class_name: 'ActiveFedora::Base'
+        end
+        class TextBook < ActiveFedora::Base
+          has_and_belongs_to_many :contents, property: :is_part_of, class_name: 'ActiveFedora::Base'
+        end
+        class Text < ActiveFedora::Base
+          has_many :books, property: :is_part_of, class_name: 'ActiveFedora::Base'
+        end
+        class Image < ActiveFedora::Base
+          has_many :books, property: :is_part_of, class_name: 'ActiveFedora::Base'
+        end
+          
+      end
+      after :all do
+        Object.send(:remove_const, :Novel)
+        Object.send(:remove_const, :TextBook)
+        Object.send(:remove_const, :Text)
+        Object.send(:remove_const, :Image)
+      end
+
+      describe "saving between the before and after hooks" do
+        let(:text1) { Text.create}
+        let(:image1) { Image.create}
+        let(:text2) { Text.create}
+        let(:image2) { Image.create}
+        let(:book1) { TextBook.create}
+        let(:book2) { Novel.create}
+
+        it "should work when added via the has_and_belongs_to_many" do
+          book1.contents = [text1, image1]
+          book1.save!
+          book2.contents = [text2, image2]
+          book2.save!
+
+          book1.reload.contents.should include(text1, image1)
+          text1.reload.books.should == [book1]
+          image1.reload.books.should == [book1]
+
+          book2.reload.contents.should include(text2, image2)
+          text2.reload.books.should == [book2]
+          image2.reload.books.should == [book2]
+        end
+
+        it "should work when added via the has_many" do
+          text2.books << book2
+          book2.save
+          book2.reload.contents.should == [text2]
+          text2.reload.books.should == [book2]
+        end
+      end
+    end
+  end
 end
