@@ -78,6 +78,9 @@ describe ActiveFedora::RdfList do
       topic.elementList.first[0].elementValue.should == ["Baseball"]
       topic.elementList.first[1].should be_kind_of(TopicElement)
       topic.elementList.first[1].elementValue.should == ["Football"]
+
+      # only one rdf:rest rdf:nil
+      topic.graph.query([nil, RDF.rest, RDF.nil]).size.should == 1 
     end
     it "should insert new nodes of varying types into RdfLists (rather than calling .build)" do
       # It's Not clear what the syntax should be when an RDF list contains multiple types of sub-nodes.  

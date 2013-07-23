@@ -9,8 +9,9 @@ module ActiveFedora
       @graph = graph
       @subject = subject
       first = graph.query([subject, RDF.first, nil]).first
+      last = graph.query([subject, RDF.rest, nil]).first
       graph.insert([subject, RDF.first, RDF.nil]) unless first
-      graph.insert([subject, RDF.rest, RDF.nil])
+      graph.insert([subject, RDF.rest, RDF.nil]) unless last
     end
     
     # Override assign_nested_attributes
