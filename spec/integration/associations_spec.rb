@@ -186,6 +186,17 @@ describe ActiveFedora::Base do
           @book.topics.should == []
           @topic1.books.should == []
         end
+        it "Should allow for more than 10 items" do
+
+          (0..11).each do
+            @book.topics << Topic.create
+          end
+          @book.save
+          @book.topics.count.should == 12
+          book2 = Book.find(@book.pid)
+          book2.topics.count.should == 12
+        end
+
         after do
           @topic1.delete
           @topic2.delete
