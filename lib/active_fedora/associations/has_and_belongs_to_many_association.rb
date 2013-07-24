@@ -10,7 +10,7 @@ module ActiveFedora
           pids = @owner.ids_for_outbound(@reflection.options[:property])
           return [] if pids.empty?
           query = ActiveFedora::SolrService.construct_query_for_pids(pids)
-          solr_result = SolrService.query(query)
+          solr_result = SolrService.query(query, :rows => 1000)
           return ActiveFedora::SolrService.reify_solr_results(solr_result)
       end
 
