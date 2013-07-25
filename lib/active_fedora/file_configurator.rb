@@ -48,7 +48,7 @@ module ActiveFedora
     #
 
     attr_accessor :config_env
-    attr_reader :config_options, :fedora_config_path, :solr_config_path
+    attr_reader :config_options, :fedora_config_path, :solr_config_path, :predicate_mappings_config_path
 
     # The configuration hash that gets used by RSolr.connect
     def initialize
@@ -208,22 +208,18 @@ module ActiveFedora
     end
 
     def predicate_config
-      @predicate_config_path ||= build_predicate_config_path(File.dirname(self.path))
+      @predicate_config_path ||= build_predicate_config_path
       YAMLAdaptor.load(File.open(@predicate_config_path)) if File.exist?(@predicate_config_path)
     end
 
     protected
 
-    def build_predicate_config_path(config_path=nil)
-      pred_config_paths = [File.join(ActiveFedora.root,"config")]
-      pred_config_paths.unshift config_path if config_path
-      pred_config_paths.each do |path|
-        testfile = File.expand_path(File.join(path,"predicate_mappings.yml"))
-        if File.exist?(testfile) && valid_predicate_mapping?(testfile)
-          return testfile
-        end
+    def build_predicate_config_path
+      testfile = File.expand_path(get_config_path(:predicate_mappings))
+      if File.exist?(testfile) && valid_predicate_mapping?(testfile)
+        return testfile
       end
-      raise PredicateMappingsNotFoundError #"Could not find predicate_mappings.yml in these locations: #{pred_config_paths.join("; ")}." unless @predicate_config_path
+      raise PredicateMappingsNotFoundError
     end
 
     def valid_predicate_mapping?(testfile)
