@@ -93,6 +93,38 @@ describe ActiveFedora::FileConfigurator do
       end
     end
 
+    describe "get_config_path(:predicate_mappings)" do
+      it "should use the config_options[:config_path] if it exists" do
+        subject.should_receive(:config_options).and_return({:predicate_mappings_config_path => "/path/to/predicate_mappings.yml"})
+        File.should_receive(:file?).with("/path/to/predicate_mappings.yml").and_return(true)
+        subject.get_config_path(:predicate_mappings).should eql("/path/to/predicate_mappings.yml")
+      end
+
+      it "should look in Rails.root/config/predicate_mappings.yml if it exists and no predicate_mappings_config_path passed in" do
+        subject.should_receive(:config_options).and_return({})
+        stub_rails(:root => "/rails/root")
+        File.should_receive(:file?).with("/rails/root/config/predicate_mappings.yml").and_return(true)
+        subject.get_config_path(:predicate_mappings).should eql("/rails/root/config/predicate_mappings.yml")
+        unstub_rails
+      end
+
+      it "should look in ./config/predicate_mappings.yml if neither rails.root nor :predicate_mappings_config_path are set" do
+        subject.should_receive(:config_options).and_return({})
+        Dir.stub(:getwd => "/current/working/directory")
+        File.should_receive(:file?).with("/current/working/directory/config/predicate_mappings.yml").and_return(true)
+        subject.get_config_path(:predicate_mappings).should eql("/current/working/directory/config/predicate_mappings.yml")
+      end
+
+      it "should return default predicate_mappings.yml that ships with active-fedora if none of the above" do
+        subject.should_receive(:config_options).and_return({})
+        Dir.should_receive(:getwd).and_return("/current/working/directory")
+        File.should_receive(:file?).with("/current/working/directory/config/predicate_mappings.yml").and_return(false)
+        File.should_receive(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"),'config','predicate_mappings.yml'))).and_return(true)
+        logger.should_receive(:warn).with("Using the default predicate_mappings.yml that comes with active-fedora.  If you want to override this, pass the path to predicate_mappings.yml to ActiveFedora - ie. ActiveFedora.init(:predicate_mappings_config_path => '/path/to/predicate_mappings.yml') - or set Rails.root and put predicate_mappings.yml into \#{Rails.root}/config.")
+        subject.get_config_path(:predicate_mappings).should eql(File.expand_path(File.join(File.dirname("__FILE__"),'config','predicate_mappings.yml')))
+      end
+    end
+
     describe "get_config_path(:solr)" do
       it "should return the solr_config_path if set in config_options hash" do
         subject.stub(:config_options => {:solr_config_path => "/path/to/solr.yml"})
@@ -302,20 +334,8 @@ describe ActiveFedora::FileConfigurator do
   
   describe ".build_predicate_config_path" do
     it "should return the path to the default config/predicate_mappings.yml if no valid path is given" do
-      subject.send(:build_predicate_config_path, nil).should == default_predicate_mapping_file
+      subject.send(:build_predicate_config_path).should == default_predicate_mapping_file
     end
-
-    it "should return the path to the default config/predicate_mappings.yml if specified config file not found" do
-      File.should_receive(:exist?).with("/path/to/predicate_mappings.yml").and_return(false)
-      File.should_receive(:exist?).with(default_predicate_mapping_file).and_return(true)
-      subject.send(:build_predicate_config_path,"/path/to").should == default_predicate_mapping_file
-    end
-
-    it "should return the path to the specified config_path if it exists" do
-      File.should_receive(:exist?).with("/path/to/predicate_mappings.yml").and_return(true)
-      subject.should_receive(:valid_predicate_mapping?).and_return(true)
-      subject.send(:build_predicate_config_path,"/path/to").should == "/path/to/predicate_mappings.yml"
-    end    
   end
 
   describe ".predicate_config" do
