@@ -10,11 +10,15 @@ describe ActiveFedora::Base do
       class Book < ActiveFedora::Base 
         belongs_to :library, :property=>:has_constituent
         belongs_to :author, :property=>:has_member, :class_name=>'Person'
+        belongs_to :publisher, :property=>:has_member
         has_and_belongs_to_many :topics, :property=>:has_topic, :inverse_of=>:is_topic_of
         has_and_belongs_to_many :collections, :property=>:is_member_of_collection
       end
 
       class Person < ActiveFedora::Base
+      end
+
+      class Publisher < ActiveFedora::Base
       end
 
       class Collection < ActiveFedora::Base
@@ -216,6 +220,8 @@ describe ActiveFedora::Base do
           @book.save
           @person = Person.new
           @person.save
+          @publisher = Publisher.new
+          @publisher.save
         end
         it "should have many books once it has been saved" do
           @library.books << @book
@@ -247,6 +253,18 @@ describe ActiveFedora::Base do
           Book.find(@book.id).author.send(:find_target).should be_kind_of Person
         end
 
+        it "should respect multiple associations that share the same :property and respect associated class" do
+          @book.author = @person
+          @book.publisher = @publisher
+          @book.save
+          
+          Book.find(@book.id).publisher_id.should == @publisher.pid
+          Book.find(@book.id).publisher.send(:find_target).should be_kind_of Publisher
+
+          Book.find(@book.id).author_id.should == @person.pid
+          Book.find(@book.id).author.send(:find_target).should be_kind_of Person
+        end
+
         describe "when changing the belonger" do
           before do
             @book.library = @library
@@ -267,6 +285,8 @@ describe ActiveFedora::Base do
         after do
           @library.delete
           @book.delete
+          @person.delete
+          @publisher.delete
         end
       end
       describe "of has_many_and_belongs_to" do
@@ -332,6 +352,10 @@ describe ActiveFedora::Base do
         @library = Library.new()
         @library.save()
         @book = Book.new
+        @author = Person.new
+        @author.save
+        @publisher = Publisher.new
+        @publisher.save
       end
       it "should set the association" do
         @book.library = @library
@@ -362,6 +386,33 @@ describe ActiveFedora::Base do
 
       end
 
+      it "should only replace the matching class association" do
+        @publisher2 = Publisher.new
+        @publisher2.save
+
+        @book.publisher = @publisher
+        @book.author = @author      
+        @book.save 
+
+        @book.publisher = @publisher2
+        @book.save
+
+        Book.find(@book.pid).publisher.pid.should == @publisher2.pid
+        Book.find(@book.pid).author.pid.should == @author.pid
+      end
+
+      it "should only clear the matching class association" do
+        @book.publisher = @publisher
+        @book.author = @author
+        @book.save
+
+        @book.author = nil
+        @book.save
+
+        Book.find(@book.pid).author.should be_nil
+        Book.find(@book.pid).publisher.pid.should == @publisher.pid
+      end
+
       it "should be able to be set by id" do
         @book.library_id = @library.pid
         @book.library_id.should == @library.pid
@@ -373,7 +424,10 @@ describe ActiveFedora::Base do
       after do
         @library.delete
         @book.delete
+        @author.delete
+        @publisher.delete
         @library2.delete if @library2
+        @publisher2.delete if @publisher2
       end
     end
   end
