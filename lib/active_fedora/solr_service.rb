@@ -50,12 +50,34 @@ module ActiveFedora
       method = opts[:load_from_solr] ? :load_instance_from_solr : :find
       classname.send(method, hit[SOLR_DOCUMENT_ID])
     end
-  
-    def self.class_from_solr_document(hit)
-        model_value = nil
-        hit[solr_name("has_model", :symbol)].each {|value| model_value ||= Model.from_class_uri(value)}
-        logger.warn "Could not find a model for #{hit["id"]}, defaulting to ActiveFedora::Base" unless model_value
-        model_value || ActiveFedora::Base
+
+    def self.class_from_solr_document(hit,opts = {})
+      best_model_match = nil
+
+      # If limited to a specific class
+      if opts[:class]
+        best_model_match ||= Model.from_class_uri(opts[:class])
+      # Else use the first model (unless there is an extended version of the first model in the tree)
+      else
+        hit[solr_name("has_model", :symbol)].each {|value|
+
+          model_value = Model.from_class_uri(value)
+
+          if(model_value)
+            # Use only the first match for initial consideration.
+            best_model_match ||= model_value
+
+            # If there is an inheritance structure, use the most specific case.
+            if best_model_match > model_value
+              best_model_match = model_value
+            end
+          end
+        }
+
+      end
+
+      logger.warn "Could not find a model for #{hit["id"]}, defaulting to ActiveFedora::Base" unless best_model_match
+      best_model_match || ActiveFedora::Base
     end
     
     # Construct a solr query for a list of pids
