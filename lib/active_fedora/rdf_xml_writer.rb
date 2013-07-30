@@ -21,6 +21,30 @@ module ActiveFedora
       parent_node.add_child(node) if node
     end
 
+    # Overriding function from RDF::RDFXML::Writer
+    #
+    # Notable changes:
+    #
+    # Remove sorting on the property value within specific rels-ext relationships.
+    # Instead, leave it as the order the system entered it in.
+    #
+    def order_properties(properties)
+      # Make sorted list of properties
+      prop_list = []
+
+      predicate_order.each do |prop|
+        next unless properties[prop]
+        prop_list << prop.to_s
+      end
+
+      properties.keys.sort.each do |prop|
+        next if prop_list.include?(prop.to_s)
+        prop_list << prop.to_s
+      end
+
+      prop_list
+    end
+
     private
 
     def force_about(subject, parent_node)

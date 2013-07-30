@@ -288,8 +288,20 @@ module ActiveFedora
 
     # Examine the :has_model assertions in the RELS-EXT.  Adapt this class to the first first known model
     def adapt_to_cmodel
-      the_model = ActiveFedora::ContentModel.known_models_for( self ).first
-      self.class != the_model ? self.adapt_to(the_model) : self
+      best_model_match = self.class unless self.class == ActiveFedora::Base
+
+      ActiveFedora::ContentModel.known_models_for( self ).each {|model_value|
+
+        # Use only the first match for initial consideration.
+        best_model_match ||= model_value
+
+        # If there is an inheritance structure, use the most specific case.
+        if best_model_match > model_value
+          best_model_match = model_value
+        end
+      }
+
+      self.class != best_model_match ? self.adapt_to(best_model_match) : self
     end
     
     # ** EXPERIMENTAL **

@@ -131,11 +131,16 @@ describe ActiveFedora::Base do
       class FooAdaptation < ActiveFedora::Base
         has_metadata :type=>ActiveFedora::OmDatastream, :name=>'someData'
       end
+
+      class FooInherited < FooHistory
+        has_metadata :type=>ActiveFedora::OmDatastream, :name=>'someData'
+      end
     end
 
     after :all do
       Object.send(:remove_const, :FooHistory)
       Object.send(:remove_const, :FooAdaptation)
+      Object.send(:remove_const, :FooInherited)
     end
     
     def increment_pid
@@ -409,10 +414,15 @@ describe ActiveFedora::Base do
     end
 
     describe ".adapt_to_cmodel" do
-      subject { FooHistory.new } 
-      it "should cast when a cmodel is found" do
+      subject { FooHistory.new }
+
+      it "should not cast to a random first cmodel" do
         ActiveFedora::ContentModel.should_receive(:known_models_for).with( subject).and_return([FooAdaptation])
-        subject.adapt_to_cmodel.should be_kind_of FooAdaptation
+        subject.adapt_to_cmodel.should be_kind_of FooHistory
+      end
+      it "should cast to an inherited model over a random one" do
+        ActiveFedora::ContentModel.should_receive(:known_models_for).with( subject).and_return([FooAdaptation, FooInherited])
+        subject.adapt_to_cmodel.should be_kind_of FooInherited
       end
       it "should not cast when a cmodel is same as the class" do
         ActiveFedora::ContentModel.should_receive(:known_models_for).with( subject).and_return([FooHistory])

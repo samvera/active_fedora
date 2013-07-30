@@ -1,3 +1,7 @@
+6.5.0 (2013-07-30)
+
+Initial support for extended (inherited) Active Fedora models. [Steven Anderson]
+
 6.4.0 (2013-07-01)
 
 Removing experimental designation, tidying-up the code [Adam Wead]

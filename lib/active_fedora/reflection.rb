@@ -91,6 +91,14 @@ module ActiveFedora
           @class_name ||= options[:class_name] || derive_class_name
         end
 
+        # Returns is the association is set to be casted
+        #
+        # <tt>:cast => true</tt> returns <tt>'true'</tt>
+        # <tt>Missing :cast variable returns false.</tt>
+        def cast
+          @cast ||= options[:cast]
+        end
+
         # Returns whether or not this association reflection is for a collection
         # association. Returns +true+ if the +macro+ is either +has_many+ or
         # +has_and_belongs_to_many+, +false+ otherwise.
