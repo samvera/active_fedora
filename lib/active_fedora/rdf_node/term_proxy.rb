@@ -17,7 +17,7 @@ module ActiveFedora
       end
 
 
-      def build(attributes=nil)
+      def build(attributes={})
         node = mint_node(attributes)
         parent.graph.insert([subject, predicate, node.rdf_subject])
         reset!
@@ -30,8 +30,10 @@ module ActiveFedora
         @target = nil
       end
       
-      def mint_node(attributes=nil)
-        new_subject = RDF::Node.new
+      # @param [Hash] attributes
+      # @option attributes id the rdf subject to use for the node, if omitted the new node will be a b-node
+      def mint_node(attributes)
+        new_subject = attributes.key?('id') ? RDF::URI.new(attributes.delete('id')) : RDF::Node.new
         return parent.target_class(predicate).new(parent.graph, new_subject).tap do |node|
           node.attributes = attributes if attributes
         end
@@ -91,7 +93,7 @@ module ActiveFedora
       # Two classes may be valid for the same predicate (e.g. hasMember)
       # If no RDF.type assertion is found, fall back to using target_class
       def class_from_rdf_type(subject)
-        unless subject.kind_of?(RDF::Node)
+        unless subject.kind_of?(RDF::Node) || subject.kind_of?(RDF::URI)
           raise ArgumentError, "Expected the value of #{predicate} to be an RDF object but it is a #{subject.class} #{subject.inspect}"
         end
         q = RDF::Query.new do
