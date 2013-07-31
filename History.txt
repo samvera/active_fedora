@@ -1,3 +1,100 @@
+v6.4.4 (2013-07-29)
+
+Bumping to version 6.4.4 [Jeremy Friesen]
+
+Use get_config_path to get the path for the predicate_mappings.yml
+[Justin Coyne]
+
+has_and_belongs_to_many can have more than 10 results. [Justin
+Coyne]
+
+Filters belongs_to associations by :class_name if specified [Simon
+Lamb]
+
+Don't reindex fedora-system objects in reindex_everything [Justin
+Coyne]
+
+Adding "An ActiveModel" shared behavior [Jeremy Friesen]
+
+Allow query parameter AF.reindex_everything [Jeremy Friesen]
+
+Updating CONTRIBUTING.md as per Hydra v6.0.0 [Jeremy Friesen]
+
+The example test should look for Base.exists?() rather than checking
+to see that an ObjectNotFound error is raised. [Justin Coyne]
+
+
+v6.4.3 (2013-07-16)
+
+class_from_string should find sibiling classes [Justin Coyne]
+
+Ensuring that AF::Base.find("") raises exception [Jeremy Friesen]
+
+Added ActiveFedora::SolrService.lazy_reify_solr_results to provide
+lazy (Ruby 1.9-compatible) reification alternative to .reify_solr_results.
+ActiveFedora::SolrService.reify_solr_results refactored, extracting single
+reification to .reify_solr_result. Supplied missing test for :load_from_solr
+option to .reify_solr_results [David Chandek-Stark]
+
+Adding mailmap for improving changelog generation [Jeremy Friesen]
+
+Tidying up how ActiveFedora::Base.exists? behaves [Jeremy Friesen]
+
+Tidying up hash key access of AF::Model [Jeremy Friesen]
+
+Fixed test for equality within OmDatastream.changed? [Justin Coyne]
+
+mock() and stub() are deprecated. Switched to double() [Justin
+Coyne]
+
+Remove all serialized foxml in favor of programmatic creation of
+fixtures in preperation for Fedora 4; One broken test revealed dealing with
+managed om datastreams [Chris Colvard]
+
+
+v6.4.2 (2013-07-10)
+
+Bumping version to 6.4.2 [Jeremy Friesen]
+
+In activerecord 4.0 the update() method accepts arguments. Conform
+to that interface. [Justin Coyne]
+
+
+v6.4.1 (2013-07-10)
+
+Change generator template to not use named argument 'name' [Justin
+Coyne]
+
+Infer the property on has_many. Fixes #142 [Justin Coyne]
+
+Added new_record? method to Rdf nodes [Justin Coyne]
+
+Test the behavior when the node can't be found [Justin Coyne]
+
+Rdf nested attributes should accept hashes [Justin Coyne]
+
+Added :type to ActiveFedora::QualifiedDublinCoreDatastream::DCTERMS.
+Presumably this field was excluded due to Object#type from Ruby 1.8. Since AF
+currently requires >= Ruby 1.9.3, it appears safe to add this DC 1.1 element.
+[David Chandek-Stark]
+
+Removed outdated comment that OmDatastream is just an alias for
+NokogiriDatastream [David Chandek-Stark]
+
+Added :path option to
+ActiveFedora::QualifiedDublinCoreDatastream#field in order to support, for
+example, mapping the term :dc_type to <dcterms:type> (:type is excluded from
+ActiveFedora::QualifiedDublinCoreDatastream::DCTERMS). Implementation simply
+adds :path (even if nil) to OM::XML::Term.new since initializer falls back to
+field name anyway. [David Chandek-Stark]
+
+Generate a datastream in addition to the model [Justin Coyne]
+
+Autoload classes in app/models/datastreams [Justin Coyne]
+
+Remove unnecessary require of 'active_fedora/base' in model template [Justin Coyne]
+
+
 6.4.0 (2013-07-01)
 
 Removing experimental designation, tidying-up the code [Adam Wead]
