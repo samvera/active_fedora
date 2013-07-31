@@ -10,7 +10,7 @@ module ActiveFedora
 
       private
 
-      UNASSIGNABLE_KEYS = %w( id _destroy )
+      UNASSIGNABLE_KEYS = %w(_destroy )
 
       # @params [Symbol] association_name
       # @params [Hash, Array] attributes_collection
@@ -48,15 +48,13 @@ module ActiveFedora
         attributes_collection.each do |attributes|
           attributes = attributes.with_indifferent_access
           
-          if attributes['id'].blank?
-            attributes = attributes.with_indifferent_access
-            association.build(attributes.except(*UNASSIGNABLE_KEYS))
-          elsif existing_record = association.detect { |record| record.rdf_subject.to_s == attributes['id'].to_s }
+          if attributes['id'] && existing_record = association.detect { |record| record.rdf_subject.to_s == attributes['id'].to_s }
             if !call_reject_if(association_name, attributes)
               assign_to_or_mark_for_destruction(existing_record, attributes, options[:allow_destroy])
             end
           else
-            raise_nested_attributes_record_not_found(association_name, attributes['id'].to_s)
+            attributes = attributes.with_indifferent_access
+            association.build(attributes.except(*UNASSIGNABLE_KEYS))
           end
         end
       end
@@ -66,10 +64,6 @@ module ActiveFedora
       def assign_to_or_mark_for_destruction(record, attributes, allow_destroy)
         record.attributes = attributes.except(*UNASSIGNABLE_KEYS)
         record.mark_for_destruction if has_destroy_flag?(attributes) && allow_destroy
-      end
-
-      def raise_nested_attributes_record_not_found(association_name, record_id)
-        raise RecordNotFound, "Couldn't find #{association_name} with ID=#{record_id} for #{self.class.name} with ID=#{rdf_subject.to_s}"
       end
 
       def call_reject_if(association_name, attributes)
