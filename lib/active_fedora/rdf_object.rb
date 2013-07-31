@@ -20,11 +20,6 @@ module ActiveFedora
       insert_type_assertion
     end
 
-    def get_values(subject, predicate)
-      predicate = find_predicate(predicate) unless predicate.kind_of? RDF::URI
-      return TermProxy.new(@graph, @subject, predicate)
-    end
-
     private
     
     def insert_type_assertion
