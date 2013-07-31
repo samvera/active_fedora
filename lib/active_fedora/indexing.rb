@@ -87,7 +87,7 @@ module ActiveFedora
       end
 
       # Using the fedora search (not solr), get every object and reindex it.
-      # @param [String] a query string that conforms to the query param format
+      # @param [String] query a string that conforms to the query param format
       #   of the underlying search's API
       def reindex_everything(query = nil)
         connections.each do |conn|

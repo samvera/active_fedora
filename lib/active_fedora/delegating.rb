@@ -103,8 +103,8 @@ module ActiveFedora
       end
 
       # Reveal if the delegated field is unique or not
-      # @params [Symbol] field the field to query
-      # @returns [Boolean]
+      # @param [Symbol] field the field to query
+      # @return [Boolean]
       def unique?(field)
         delegates[field][:unique]
       end
