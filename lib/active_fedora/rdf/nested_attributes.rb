@@ -12,8 +12,8 @@ module ActiveFedora
 
       UNASSIGNABLE_KEYS = %w( id _destroy )
 
-      # @params [Symbol] association_name
-      # @params [Hash, Array] attributes_collection
+      # @param [Symbol] association_name
+      # @param [Hash, Array] attributes_collection
       # @example
       #
       #   assign_nested_attributes_for_collection_association(:people, {
