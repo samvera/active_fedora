@@ -49,14 +49,22 @@ describe "Nesting attribute behavior of RDFDatastream" do
             accepts_nested_attributes_for :elementList, :extraProperty
           end
           class ElementList
-            include ActiveFedora::RdfObject
+            include ActiveFedora::RdfList
             rdf_type DummyMADS.elementList
             map_predicates do |map|
-              map.topicElement(in: DummyMADS, to: "TopicElement")
+              map.topicElement(in: DummyMADS, to: "TopicElement", :class_name => "MadsTopicElement")
               map.temporalElement(in: DummyMADS, to: "TemporalElement")
               map.fullNameElement(in: DummyMADS, to: "FullNameElement")
               map.dateNameElement(in: DummyMADS, to: "DateNameElement")
               map.nameElement(in: DummyMADS, to: "NameElement")
+              map.elementValue(in: DummyMADS)
+            end
+            accepts_nested_attributes_for :topicElement
+          end
+          class MadsTopicElement
+            include ActiveFedora::RdfObject
+            rdf_type DummyMADS.TopicElement
+            map_predicates do |map|
               map.elementValue(in: DummyMADS)
             end
           end
@@ -74,13 +82,13 @@ describe "Nesting attribute behavior of RDFDatastream" do
               '0' =>
               {
                 elementList_attributes: [{
-                  topicElement:"Cosmology"
+                  topicElement_attributes: [{elementValue:"Cosmology"}]
                   }]
               },
               '1' =>
               {
                 elementList_attributes: [{
-                  topicElement:"Quantum Behavior"
+                  topicElement_attributes: {'0' => {elementValue:"Quantum Behavior"}}
                 }]
               }
             },
@@ -97,6 +105,21 @@ describe "Nesting attribute behavior of RDFDatastream" do
         }
       end
 
+      describe "on lists" do
+        subject { ComplexRDFDatastream::PersonalName.new(RDF::Graph.new) } 
+        it "should accept a hash" do
+          subject.elementList_attributes =  [{ topicElement_attributes: {'0' => { elementValue:"Quantum Behavior" }, '1' => { elementValue:"Wave Function" }}}]
+          subject.elementList.first[0].elementValue.should == ["Quantum Behavior"]
+          subject.elementList.first[1].elementValue.should == ["Wave Function"]
+
+        end
+        it "should accept an array" do
+          subject.elementList_attributes =  [{ topicElement_attributes: [{ elementValue:"Quantum Behavior" }, { elementValue:"Wave Function" }]}]
+          subject.elementList.first[0].elementValue.should == ["Quantum Behavior"]
+          subject.elementList.first[1].elementValue.should == ["Wave Function"]
+        end
+      end
+
       it "should create nested objects" do
           # Replace the graph's contents with the Hash
           subject.attributes = params[:myResource]
@@ -110,8 +133,8 @@ describe "Nesting attribute behavior of RDFDatastream" do
           # elem_list = topic.elementList.build
           # elem_list.fullNameElement = 'Cosmology'
 
-          subject.topic.first.elementList.first.topicElement.should == ["Cosmology"]
-          subject.topic[1].elementList.first.topicElement.should == ["Quantum Behavior"]
+          subject.topic[0].elementList.first[0].elementValue.should == ["Cosmology"]
+          subject.topic[1].elementList.first[0].elementValue.should == ["Quantum Behavior"]
           subject.personalName.first.elementList.first.fullNameElement.should == ["Jefferson, Thomas"]
           subject.personalName.first.elementList.first.dateNameElement.should == ["1743-1826"]
       end
