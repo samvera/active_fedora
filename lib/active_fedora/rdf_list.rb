@@ -5,12 +5,18 @@ module ActiveFedora
     
     attr_reader :graph, :subject
     
+    # RdfList is a node of a linked list structure.
+    # The RDF.first predicate points to the contained object
+    # The RDF.rest predicate points to the next node in the list or 
+    #   RDF.nil if this is the final node.
+    # @see http://www.w3.org/TR/rdf-schema/#ch_list
     def initialize(graph, subject)
       @graph = graph
       @subject = subject
       first = graph.query([subject, RDF.first, nil]).first
+      last = graph.query([subject, RDF.rest, nil]).first
       graph.insert([subject, RDF.first, RDF.nil]) unless first
-      graph.insert([subject, RDF.rest, RDF.nil])
+      graph.insert([subject, RDF.rest, RDF.nil]) unless last
     end
     
     # Override assign_nested_attributes
