@@ -121,5 +121,11 @@ describe ActiveFedora do
     it "should find sibling classes" do
       ActiveFedora.class_from_string("SiblingClass", ParentClass::OtherSiblingClass).should == ParentClass::SiblingClass
     end
+
+    it "should raise a NameError if the class isn't found" do
+      expect {
+        ActiveFedora.class_from_string("FooClass", ParentClass::OtherSiblingClass)
+      }.to raise_error NameError, "uninitialized constant FooClass"
+    end
   end
 end
