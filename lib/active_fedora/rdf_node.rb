@@ -317,6 +317,7 @@ module ActiveFedora
           uri = uri_or_string.kind_of?(RDF::URI) ? uri_or_string : RDF::URI.new(uri_or_string) 
           self.config[:type] = {predicate: RDF.type}
           @rdf_type = uri
+          logger.warn "Duplicate RDF Class. Trying to register #{self} for #{uri} but it is already registered for #{ActiveFedora::RdfNode.rdf_registry[uri]}" if ActiveFedora::RdfNode.rdf_registry.key? uri
           ActiveFedora::RdfNode.rdf_registry[uri] = self
         end
         @rdf_type
