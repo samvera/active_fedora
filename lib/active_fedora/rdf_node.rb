@@ -160,6 +160,11 @@ module ActiveFedora
       graph.insert([subject, predicate, args])
     end
 
+    def insert_child(predicate, node)
+      graph.insert([rdf_subject, predicate, node.rdf_subject])
+    end
+
+
     def config_for_term_or_uri(term)
       case term
       when RDF::URI

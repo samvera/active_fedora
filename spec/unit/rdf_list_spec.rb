@@ -16,6 +16,11 @@ describe ActiveFedora::RdfList do
       end 
       class List 
         include ActiveFedora::RdfList
+        map_predicates do |map|
+          map.topicElement(:in=> MADS, :to =>"TopicElement", :class_name => "TopicElement")
+          map.temporalElement(:in=> MADS, :to =>"TemporalElement", :class_name => "TemporalElement")
+        end
+          
         class TopicElement
           include ActiveFedora::RdfObject
           rdf_type MADS.TopicElement
@@ -100,6 +105,24 @@ END
 
   end
 
+  describe "an empty list" do
+    subject { DemoList.new(double('inner object', :pid=>'foo', :new? =>true)).elementList.build } 
+    it "should have to_ary" do
+      subject.to_ary.should == []
+    end
+  end
+
+  describe "a list that has a constructed element" do
+    let(:ds) { DemoList.new(double('inner object', :pid=>'foo', :new? =>true)) }
+    let(:list) { ds.elementList.build } 
+    let!(:topic) { list.topicElement.build }
+    
+    it "should have to_ary" do
+      list.to_ary.size.should == 1
+      list.to_ary.first.class.should == DemoList::List::TopicElement
+    end
+  end
+
   describe "a list with content" do
     subject do
       subject = DemoList.new(double('inner object', :pid=>'foo', :new? =>true), 'descMetadata')
@@ -143,6 +166,12 @@ END
       foo = []
       list.each { |n| foo << n.class }
       foo.should == [RDF::URI, DemoList::List::TopicElement, RDF::URI, DemoList::List::TemporalElement]
+    end
+
+    it "should have to_ary" do
+      ary = list.to_ary
+      ary.size.should == 4
+      ary[1].elementValue.should == ['Relations with Mexican Americans']
     end
 
     it "should have size" do
