@@ -27,6 +27,18 @@ module ActiveFedora
         new_node
       end
 
+      # Remove all matching nodes from the graph
+      def clear
+        parent.query(subject, predicate).each do |solution|
+          # TODO - Recursive delete
+          # Delete everythign we're pointing at.
+          parent.graph.delete([solution.value, nil, nil]) if solution.value.uri?
+        end
+        # Delete all the assertions about this object
+        parent.graph.delete([subject, nil, nil])
+        reset!
+      end
+
       def reset!
         @target = nil
       end

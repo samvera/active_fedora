@@ -121,6 +121,15 @@ END
       list.to_ary.size.should == 1
       list.to_ary.first.class.should == DemoList::List::TopicElement
     end
+
+    it "should be able to be cleared" do
+      list.topicElement.build
+      list.topicElement.build
+      list.topicElement.build
+      list.size.should == 4
+      list.clear
+      list.size.should == 0
+    end
   end
 
   describe "a list with content" do
