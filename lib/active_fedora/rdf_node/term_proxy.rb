@@ -19,9 +19,10 @@ module ActiveFedora
 
       def build(attributes={})
         node = mint_node(attributes)
-        parent.graph.insert([subject, predicate, node.rdf_subject])
+        parent.insert_child(predicate, node)
         reset!
         new_node = target.find { |n| n.rdf_subject == node.rdf_subject}
+        new_node = node unless new_node #if it's a list, the find doesn't work, just use the new node
         new_node.new_record = true
         new_node
       end
@@ -57,6 +58,7 @@ module ActiveFedora
         @target ||= load_values
       end
 
+      # Get the values off of the rdf nodes this proxy targets
       def load_values
         values = []
 

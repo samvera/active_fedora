@@ -20,7 +20,7 @@ module ActiveFedora
     end
 
     UNASSIGNABLE_KEYS = %w(_destroy )
-    
+
     # Override assign_nested_attributes
     def assign_nested_attributes_for_collection_association(association_name, attributes_collection)
       options = self.nested_attributes_options[association_name]
@@ -40,6 +40,12 @@ module ActiveFedora
         minted_node = association.mint_node(attributes.except(*UNASSIGNABLE_KEYS))
         self[original_length_of_list+index] = minted_node
       end
+    end
+
+
+    # Override the method from RdfNode, enabling us to insert into the list.
+    def insert_child(predicate, node)
+      self[size] = node
     end
 
     def rdf_subject
@@ -63,11 +69,25 @@ module ActiveFedora
       tail.each(&block) if tail
     end
 
+    def to_ary
+      if empty?
+        []
+      elsif tail
+        [head.value] + tail.to_ary
+      else
+        [head.value]
+      end
+    end
+
+    def empty?
+      !tail && graph.query([subject, RDF.first, RDF.nil]).first
+    end 
+
     def size
-      if tail
-        tail.size + 1
-      elsif graph.query([subject, RDF.first, RDF.nil]).first
+      if empty?
         0
+      elsif tail
+        tail.size + 1
       else
         1
       end
@@ -79,7 +99,9 @@ module ActiveFedora
 
     def value
       v = graph.query([subject, RDF.first, nil]).first
-      return v.object if v.object.uri?
+      if v.object.uri?
+        return v.object == RDF.nil ? nil : v.object
+      end
       if v.object.resource?
         type = graph.query([v.object, RDF.type, nil]).first
         return ActiveFedora::RdfNode.rdf_registry[type.object].new(graph, v.object)
