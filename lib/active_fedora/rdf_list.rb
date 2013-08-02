@@ -98,24 +98,22 @@ module ActiveFedora
     end
 
     def tail
+      return @tail if @tail
       rest = graph.query([subject, RDF.rest, nil]).first
       return if rest.object == RDF.nil
-      self.class.new(graph, rest.object)
+      @tail = self.class.new(graph, rest.object)
     end
 
     def tail_or_create(idx)
-      rest = graph.query([subject, RDF.rest, nil]).first
-      obj = if rest.object != RDF.nil 
-        self.class.new(graph, rest.object)
-      else
+      unless tail
         #add a tail
         graph.delete([subject, RDF.rest, RDF.nil])
-        tail = RDF::Node.new
-        graph.insert([subject, RDF.rest, tail])
-        self.class.new(graph, tail)
+        tail_node = RDF::Node.new
+        graph.insert([subject, RDF.rest, tail_node])
+        @tail = self.class.new(graph, tail_node)
       end
 
-      idx == 0 ? obj : obj.tail_or_create(idx-1)
+      idx == 0 ? @tail : @tail.tail_or_create(idx-1)
     end
   end
 end
