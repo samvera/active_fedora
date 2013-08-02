@@ -39,7 +39,7 @@ module ActiveFedora
         # TODO
         #check_record_limit!(options[:limit], attributes_collection)
 
-        if attributes_collection.is_a?(Hash)# || attributes_collection.is_a?(String)
+        if attributes_collection.is_a?(Hash)
           attributes_collection = attributes_collection.values
         end
 
