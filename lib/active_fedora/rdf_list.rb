@@ -64,6 +64,24 @@ module ActiveFedora
       idx == 0 ?  head.value=value : tail_or_create(idx-1).value=value
     end
 
+    def clear(first_element=true)
+      # Remove the pointed at element
+      v = graph.query([subject, RDF.first, nil]).first
+      # TODO - Recursive delete
+      graph.delete([v.object, nil, nil])
+      
+      # Remove the tail
+      tail.clear(false) if tail
+      # clear the cache
+      @tail = nil
+      graph.delete([subject, nil, nil])
+      if first_element
+        # Re-add first/rest predicates if its the first node
+        graph.insert([subject, RDF.first, RDF.nil])
+        graph.insert([subject, RDF.rest, RDF.nil])
+      end
+    end
+
     def each &block
       yield(head.value)
       tail.each(&block) if tail
