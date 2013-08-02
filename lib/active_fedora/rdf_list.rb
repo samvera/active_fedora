@@ -60,6 +60,11 @@ module ActiveFedora
       idx == 0 ?  head.value=value : tail_or_create(idx-1).value=value
     end
 
+    def each &block
+      yield(head.value)
+      tail.each(&block) if tail
+    end
+
     def size
       if tail
         tail.size + 1
