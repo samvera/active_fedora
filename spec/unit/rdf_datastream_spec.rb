@@ -43,6 +43,12 @@ describe ActiveFedora::RDFDatastream do
       end
     end
 
+    it "should clear stuff" do
+      subject.title = ['one', 'two', 'three']
+      subject.title.clear
+      subject.graph.query([subject.rdf_subject,  RDF::DC.title, nil]).first.should be_nil
+    end
+
     it "should have a list of fields" do
       MyDatastream.fields.should == [:title, :description]
     end
