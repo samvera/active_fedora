@@ -18,6 +18,8 @@ module ActiveFedora
       graph.insert([subject, RDF.first, RDF.nil]) unless first
       graph.insert([subject, RDF.rest, RDF.nil]) unless last
     end
+
+    UNASSIGNABLE_KEYS = %w(_destroy )
     
     # Override assign_nested_attributes
     def assign_nested_attributes_for_collection_association(association_name, attributes_collection)
@@ -26,7 +28,7 @@ module ActiveFedora
       # TODO
       #check_record_limit!(options[:limit], attributes_collection)
     
-      if attributes_collection.is_a?(Hash)# || attributes_collection.is_a?(String)
+      if attributes_collection.is_a?(Hash)
         attributes_collection = attributes_collection.values
       end
     
@@ -34,12 +36,8 @@ module ActiveFedora
       
       original_length_of_list = self.size
       attributes_collection.each_with_index do |attributes, index|
-        if attributes.instance_of? Hash
-          attributes = attributes.with_indifferent_access
-          minted_node = association.mint_node(attributes.except(*UNASSIGNABLE_KEYS))
-        else
-          minted_node = association.mint_node(attributes)            
-        end
+        attributes = attributes.with_indifferent_access
+        minted_node = association.mint_node(attributes.except(*UNASSIGNABLE_KEYS))
         self[original_length_of_list+index] = minted_node
       end
     end
