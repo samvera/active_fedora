@@ -44,14 +44,14 @@ module ActiveFedora
     # @param [Symbol] term the term to get the values for
     def get_values(subject, term)
       options = config_for_term_or_uri(term)
-      predicate = options[:predicate]
+      predicate = options.predicate
       @target ||= {}
       @target[term.to_s] ||= TermProxy.new(self, subject, predicate, options)
     end
 
     def target_class(predicate)
       _, conf = self.class.config_for_predicate(predicate)
-      class_name = conf[:class_name]
+      class_name = conf.class_name
       return nil unless class_name
       ActiveFedora.class_from_string(class_name, self.class)
     end
@@ -78,7 +78,7 @@ module ActiveFedora
     # @param [Array,#to_s] values  the value/values to insert into the graph
     def set_value(subject, term, values)
       options = config_for_term_or_uri(term)
-      predicate = options[:predicate]
+      predicate = options.predicate
       values = Array(values)
 
       remove_existing_values(subject, predicate, values)
@@ -163,7 +163,7 @@ module ActiveFedora
     def config_for_term_or_uri(term)
       case term
       when RDF::URI
-        self.class.config.each { |k, v| return v if v[:predicate] == term}
+        self.class.config.each { |k, v| return v if v.predicate == term}
       else
         self.class.config[term.to_sym]
       end
@@ -172,7 +172,7 @@ module ActiveFedora
     # @param [Symbol, RDF::URI] term predicate  the predicate to insert into the graph
     def find_predicate(term)
       conf = config_for_term_or_uri(term)
-      conf ? conf[:predicate] : nil
+      conf ? conf.predicate : nil
     end
 
     def query subject, predicate, &block
@@ -248,45 +248,14 @@ module ActiveFedora
       def method_missing(name, *args, &block)
         args = args.first if args.respond_to? :first
         raise "mapping must specify RDF vocabulary as :in argument" unless args.has_key? :in
-        vocab = args[:in]
-        field = args.fetch(:to, name).to_sym
-        class_name = args[:class_name]
+        vocab = args.delete(:in)
+        field = args.delete(:to) {name}.to_sym
         raise "Vocabulary '#{vocab.inspect}' does not define property '#{field.inspect}'" unless vocab.respond_to? field
-        indexing = false
-        if block_given?
-          # needed for solrizer integration
-          indexing = true
-          iobj = IndexObject.new
-          yield iobj
-          data_type = iobj.data_type
-          behaviors = iobj.behaviors
+        @parent.config[name] = Rdf::NodeConfig.new(vocab.send(field), args).tap do |config|
+          config.with_index(&block) if block_given?
         end
-        @parent.config[name] = {:predicate => vocab.send(field) } 
-        # stuff data_type and behaviors in there for to_solr support
-        if indexing
-          @parent.config[name][:type] = data_type
-          @parent.config[name][:behaviors] = behaviors
-        end
-        @parent.config[name][:class_name] = class_name if class_name
       end
 
-      # this enables a cleaner API for solr integration
-      class IndexObject
-        attr_accessor :data_type, :behaviors
-        def initialize
-          @behaviors = []
-          @data_type = :string
-        end
-        def as(*args)
-          @behaviors = args
-        end
-        def type(sym)
-          @data_type = sym
-        end
-        def defaults
-          :noop
-        end
-      end
     end
 
     module ClassMethods
@@ -315,7 +284,7 @@ module ActiveFedora
       def rdf_type(uri_or_string=nil)
         if uri_or_string
           uri = uri_or_string.kind_of?(RDF::URI) ? uri_or_string : RDF::URI.new(uri_or_string) 
-          self.config[:type] = {predicate: RDF.type}
+          self.config[:type] = Rdf::NodeConfig.new(RDF.type)
           @rdf_type = uri
           logger.warn "Duplicate RDF Class. Trying to register #{self} for #{uri} but it is already registered for #{ActiveFedora::RdfNode.rdf_registry[uri]}" if ActiveFedora::RdfNode.rdf_registry.key? uri
           ActiveFedora::RdfNode.rdf_registry[uri] = self
@@ -325,7 +294,7 @@ module ActiveFedora
 
       def config_for_predicate(predicate)
         config.each do |term, value|
-          return term, value if value[:predicate] == predicate
+          return term, value if value.predicate == predicate
         end
         return nil
       end
