@@ -63,24 +63,24 @@ module ActiveFedora
         parent.query(subject, predicate).each do |solution|
           v = solution.value
           v = v.to_s if v.is_a? RDF::Literal
-          if options[:type] == :date
+          if options.type == :date
             v = Date.parse(v)
           end
           # If the user provided options[:class_name], we should query to make sure this 
           # potential solution is of the right RDF.type
-          if options[:class_name]
+          if options.class_name
             klass =  class_from_rdf_type(v)
-            values << v if klass == ActiveFedora.class_from_string(options[:class_name], parent.class)
+            values << v if klass == ActiveFedora.class_from_string(options.class_name, parent.class)
           else
             values << v
           end
         end
 
-        if options[:class_name]
+        if options.class_name
           values = values.map{ |found_subject| class_from_rdf_type(found_subject).new(parent.graph, found_subject)}
         end
         
-        values
+        options.multivalue ? values : values.first
       end
       
       private 
