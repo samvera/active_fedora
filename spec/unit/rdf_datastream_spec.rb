@@ -9,7 +9,8 @@ describe ActiveFedora::RDFDatastream do
     before do 
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         map_predicates do |map|
-          map.title(:in => RDF::DC)
+          map.title(in: RDF::DC)
+          map.description(in: RDF::DC, multivalue: false)
         end
       end
       class MyObj < ActiveFedora::Base
@@ -31,12 +32,19 @@ describe ActiveFedora::RDFDatastream do
     end
 
     it "should allow asserting an empty string" do
-      @obj.descMetadata.title = ['']
-      @obj.descMetadata.title.should == ['']
+      subject.title = ['']
+      subject.title.should == ['']
+    end
+
+    describe "when multivalue: false" do
+      it "should return single values" do
+        subject.description = 'my description'
+        subject.description.should == 'my description'
+      end
     end
 
     it "should have a list of fields" do
-      MyDatastream.fields.should == [:title]
+      MyDatastream.fields.should == [:title, :description]
     end
   end
 end

@@ -141,8 +141,8 @@ module ActiveFedora
         
         name, config = self.class.config_for_predicate(predicate)
         next unless config
-        type = config[:type]
-        behaviors = config[:behaviors]
+        type = config.type
+        behaviors = config.behaviors
         next unless type and behaviors 
         field_map[name] ||= {:values => [], :type => type, :behaviors => behaviors}
         field_map[name][:values] << value.to_s
