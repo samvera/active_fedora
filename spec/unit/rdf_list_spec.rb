@@ -124,11 +124,13 @@ END
 
       subject
     end
-   it "should have a subject" do
+    it "should have a subject" do
       subject.rdf_subject.to_s.should == "info:fedora/foo"
     end
+
+    let (:list) { subject.elementList.first }
+
     it "should have fields" do
-      list = subject.elementList.first
       list.first.should == "http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"
       list[1].should be_kind_of DemoList::List::TopicElement
       list[1].elementValue.should == ["Relations with Mexican Americans"]
@@ -137,13 +139,17 @@ END
       list[3].elementValue.should == ["20th century"]
     end
 
+    it "should have each" do
+      foo = []
+      list.each { |n| foo << n.class }
+      foo.should == [RDF::URI, DemoList::List::TopicElement, RDF::URI, DemoList::List::TemporalElement]
+    end
+
     it "should have size" do
-      list = subject.elementList.first
       list.size.should == 4
     end
 
     it "should update fields" do
-      list = subject.elementList.first
       list[3].elementValue = ["1900s"]
       expected_xml =<<END
   <rdf:RDF
