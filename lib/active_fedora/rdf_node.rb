@@ -44,16 +44,12 @@ module ActiveFedora
     # @param [Symbol] term the term to get the values for
     def get_values(subject, term)
       options = config_for_term_or_uri(term)
-      predicate = options.predicate
       @target ||= {}
-      @target[term.to_s] ||= TermProxy.new(self, subject, predicate, options)
+      @target[term.to_s] ||= TermProxy.new(self, subject, options)
     end
 
-    def target_class(predicate)
-      _, conf = self.class.config_for_predicate(predicate)
-      class_name = conf.class_name
-      return nil unless class_name
-      ActiveFedora.class_from_string(class_name, self.class)
+    def target_class(conf)
+      ActiveFedora.class_from_string(conf.class_name, self.class) if conf.class_name
     end
 
     def mark_for_destruction
@@ -94,7 +90,7 @@ module ActiveFedora
 
       @target ||= {}
       proxy = @target[term.to_s]
-      proxy ||= TermProxy.new(self, subject, predicate, options)
+      proxy ||= TermProxy.new(self, subject, options)
       proxy.reset!
       proxy
 
@@ -256,7 +252,7 @@ module ActiveFedora
         vocab = args.delete(:in)
         field = args.delete(:to) {name}.to_sym
         raise "Vocabulary '#{vocab.inspect}' does not define property '#{field.inspect}'" unless vocab.respond_to? field
-        @parent.config[name] = Rdf::NodeConfig.new(vocab.send(field), args).tap do |config|
+        @parent.config[name] = Rdf::NodeConfig.new(name, vocab.send(field), args).tap do |config|
           config.with_index(&block) if block_given?
         end
       end
@@ -289,7 +285,7 @@ module ActiveFedora
       def rdf_type(uri_or_string=nil)
         if uri_or_string
           uri = uri_or_string.kind_of?(RDF::URI) ? uri_or_string : RDF::URI.new(uri_or_string) 
-          self.config[:type] = Rdf::NodeConfig.new(RDF.type)
+          self.config[:type] = Rdf::NodeConfig.new(:type, RDF.type)
           @rdf_type = uri
           logger.warn "Duplicate RDF Class. Trying to register #{self} for #{uri} but it is already registered for #{ActiveFedora::RdfNode.rdf_registry[uri]}" if ActiveFedora::RdfNode.rdf_registry.key? uri
           ActiveFedora::RdfNode.rdf_registry[uri] = self

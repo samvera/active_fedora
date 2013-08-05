@@ -1,9 +1,10 @@
 module ActiveFedora
   module Rdf
     class NodeConfig
-      attr_accessor :predicate, :class_name, :type, :behaviors, :multivalue
+      attr_accessor :predicate, :term, :class_name, :type, :behaviors, :multivalue
 
-      def initialize(predicate, args={})
+      def initialize(term, predicate, args={})
+        self.term = term
         self.predicate = predicate
         self.class_name = args.delete(:class_name)
         self.multivalue = args.delete(:multivalue) { true } 
