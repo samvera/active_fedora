@@ -229,6 +229,10 @@ END
         ds.series.first.type.first.to_s.should == 'http://www.ebu.ch/metadata/ontologies/ebucore#Series' 
       end
 
+      it "should create an object of the correct type" do
+        ds.program.build.should be_kind_of SpecDatastream::Program
+        ds.series.build.should be_kind_of SpecDatastream::Series
+      end
     end
   end
 end
