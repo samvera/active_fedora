@@ -33,6 +33,20 @@ module ActiveFedora
       end
     end
 
+    # Returns the last record sorted by id.  ID was chosen because this mimics
+    # how ActiveRecord would achieve the same behavior.
+    #
+    # @example
+    #  Person.where(name_t: 'Jones').last
+    #    => #<Person @id="foo:123" @name='Jones' ... >
+    def last
+      if loaded?
+        @records.last
+      else
+        @last ||= order('id desc').limit(1).to_a[0]
+      end
+    end
+
     # Limits the number of returned records to the value specified
     #
     # @option [Integer] value the number of records to return
