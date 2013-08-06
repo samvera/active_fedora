@@ -188,6 +188,48 @@ describe ActiveFedora::Base do
       ActiveFedora::Base.count(:conditions=>'foo:bar').should == 7 
     end
   end
+
+  describe '#last' do
+    describe 'with multiple objects' do
+      before(:all) do
+        (@a, @b, @c) = 3.times {SpecModel::Basic.create!}
+      end
+      it 'should return one object' do
+        SpecModel::Basic.class == SpecModel::Basic
+      end
+      it 'should return the last object sorted by pid' do
+        SpecModel::Basic.last == @c
+        SpecModel::Basic.last != @a 
+      end
+    end
+    describe 'with one object' do 
+      it 'should equal the first object when there is only one' do
+        a = SpecModel::Basic.create!
+        SpecModel::Basic.first == SpecModel::Basic.last
+      end
+    end
+  end
+
+  describe '#first' do
+    describe 'with multiple objects' do
+      before(:all) do
+        (@a, @b, @c) = 3.times {SpecModel::Basic.create!}
+      end
+      it 'should return one object' do
+        SpecModel::Basic.class == SpecModel::Basic
+      end
+      it 'should return the last object sorted by pid' do
+        SpecModel::Basic.first == @a
+        SpecModel::Basic.first != @c 
+      end
+    end
+    describe 'with one object' do 
+      it 'should equal the first object when there is only one' do
+        a = SpecModel::Basic.create!
+        SpecModel::Basic.first == SpecModel::Basic.last
+      end
+    end
+  end
   
   describe '#find_with_conditions' do
     it "should make a query to solr and return the results" do
