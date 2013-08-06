@@ -26,6 +26,10 @@ module ActiveFedora
         new_node
       end
 
+      def first_or_create(attributes={})
+        first || build(attributes)
+      end
+
       # Remove all matching nodes from the graph
       def clear
         parent.query(subject, options.predicate).each do |solution|
