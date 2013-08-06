@@ -186,18 +186,6 @@ module ActiveFedora
       q.execute(graph, &block)
     end
 
-    def method_missing(name, *args)
-      if md = /^([^=]+)=$/.match(name.to_s)
-          set_value(rdf_subject, md[1], *args)  
-      elsif find_predicate(name)
-          get_values(rdf_subject, name)
-      else 
-        super
-      end
-    rescue ActiveFedora::UnregisteredPredicateError
-      super
-    end
-
     private
 
     def remove_existing_values(subject, predicate, values)
@@ -240,6 +228,7 @@ module ActiveFedora
     class Builder
       def initialize(parent)
         @parent = parent
+        @parent.create_node_accessor(:type)
       end
 
       def build(&block)
@@ -248,18 +237,32 @@ module ActiveFedora
 
       def method_missing(name, *args, &block)
         args = args.first if args.respond_to? :first
-        raise "mapping must specify RDF vocabulary as :in argument" unless args.has_key? :in
+        raise "mapping for '#{name}' must specify RDF vocabulary as :in argument" unless args.kind_of?(Hash) && args.has_key?(:in)
         vocab = args.delete(:in)
         field = args.delete(:to) {name}.to_sym
         raise "Vocabulary '#{vocab.inspect}' does not define property '#{field.inspect}'" unless vocab.respond_to? field
         @parent.config[name] = Rdf::NodeConfig.new(name, vocab.send(field), args).tap do |config|
           config.with_index(&block) if block_given?
         end
+
+        @parent.create_node_accessor(name)
       end
 
     end
 
     module ClassMethods
+
+      def create_node_accessor(name)
+        class_eval <<-eoruby, __FILE__, __LINE__ + 1
+            def #{name}=(*args)
+              set_value(rdf_subject, :#{name}, *args)
+            end
+            def #{name}
+              get_values(rdf_subject, :#{name})
+            end
+        eoruby
+      end
+
       def config
         @config ||= {}.with_indifferent_access
       end
