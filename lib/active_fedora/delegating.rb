@@ -19,6 +19,7 @@ module ActiveFedora
 
     private
     def array_reader(field, *args)
+      raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.delegates.key?(field)
       if args.present?
         instance_exec(*args, &self.class.delegates[field][:reader])
       else
@@ -27,6 +28,7 @@ module ActiveFedora
     end
 
     def array_setter(field, args)
+      raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.delegates.key?(field)
       instance_exec(args, &self.class.delegates[field][:setter])
     end
 
