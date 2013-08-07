@@ -107,12 +107,33 @@ END
       ds.parts.first.label.should == ['Wheel bearing']
     end
 
+    it "should not create a child node when hitting the accessor" do
+      ds.parts
+      ds.parts.first.should be_nil
+      ds.serialize.should == ''
+    end
+
     it "should build complex objects when a parent node exists" do
-      ds.parts  #this creates a parts node, but it shouldn't
       part = ds.parts.build
       part.should be_kind_of SpecDatastream::Component
       part.label = "Wheel bearing"
       ds.parts.first.label.should == ['Wheel bearing']
+    end
+
+    describe "#first_or_create" do
+      it "should return a result if the predicate exists" do
+        part1 = ds.parts.build
+        part2 = ds.parts.build
+        ds.parts.first_or_create.should == part1
+      end
+
+      it "should create a new result if the predicate doesn't exist" do
+        ds.parts.should == []
+        part = ds.parts.first_or_create(label: 'Front control arm bushing')
+        part.label.should == ['Front control arm bushing']
+        ds.parts.should == [part]
+      end
+
     end
   end
 
