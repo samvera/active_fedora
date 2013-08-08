@@ -264,7 +264,11 @@ module ActiveFedora
       end
 
       def config
-        @config ||= {}.with_indifferent_access
+        @config ||= if superclass.respond_to? :config
+          superclass.config.dup
+        else
+          {}.with_indifferent_access
+        end
       end
 
       # List of symbols representing the fields for this terminology.
