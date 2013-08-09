@@ -72,6 +72,7 @@ module ActiveFedora
         if ds_specs.has_key? to.to_s 
           create_delegate_reader(fields.first, options)
           create_delegate_setter(fields.first, options)
+          create_delegate_changed?(fields.first, options)
         else
           super(*methods)
         end
@@ -101,6 +102,7 @@ module ActiveFedora
           args.merge!({:to=>datastream})
           create_delegate_reader(f, args)
           create_delegate_setter(f, args)
+          create_delegate_changed?(f, args)
         end
       end
 
@@ -141,18 +143,30 @@ module ActiveFedora
         self.delegates[field] ||= {}
         self.delegates[field][:setter] = lambda do |v|
           ds = self.send(args[:to])
+          original_value = self[field]
           if ds.kind_of?(ActiveFedora::RDFDatastream)
             ds.send("#{field}=", v)
           else
             terminology = args[:at] || [field]
             ds.send(:update_indexed_attributes, {terminology => v})
           end
+          ds.changed_attributes["#{field}"] = nil if v != original_value
         end
         define_method "#{field}=".to_sym do |v|
           self[field]=v
         end
       end
 
+      def create_delegate_changed?(field, args)
+        self.delegates[field] ||= {}
+        self.delegates[field][:changed] = lambda do
+          ds = self.send(args[:to])
+          ds.changed_attributes.has_key? "#{field}"
+        end
+        define_method "#{field}_changed?".to_sym do
+          instance_exec &self.class.delegates[field][:changed]
+        end
+      end
     end
   end
 end
