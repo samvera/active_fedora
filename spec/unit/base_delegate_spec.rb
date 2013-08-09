@@ -91,6 +91,12 @@ describe ActiveFedora::Base do
       subject.duck.should == ["Quack", "Peep"]
     end
 
+    it "should be able to track change status" do
+      subject.fubar_changed?.should be_false
+      subject.fubar = "Meow"
+      subject.fubar_changed?.should be_true
+    end
+
     describe "array getters and setters" do
       it "should accept symbol keys" do
         subject[:duck]= ["Cluck", "Gobble"]
@@ -133,6 +139,12 @@ describe ActiveFedora::Base do
     it "should be able to delegate deeply into the terminology" do
       subject.donkey=["Bray", "Hee-haw"]
       subject.donkey.should == ["Bray", "Hee-haw"]
+    end
+
+    it "should be able to track change status" do
+      subject.cow_changed?.should be_false
+      subject.cow = ["Moo"]
+      subject.cow_changed?.should be_true
     end
   end
 end
