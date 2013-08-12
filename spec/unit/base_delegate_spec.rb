@@ -91,6 +91,12 @@ describe ActiveFedora::Base do
       subject.duck.should == ["Quack", "Peep"]
     end
 
+    it "should be able to track change status" do
+      subject.fubar_changed?.should be_false
+      subject.fubar = "Meow"
+      subject.fubar_changed?.should be_true
+    end
+
     describe "array getters and setters" do
       it "should accept symbol keys" do
         subject[:duck]= ["Cluck", "Gobble"]
@@ -134,7 +140,50 @@ describe ActiveFedora::Base do
       subject.donkey=["Bray", "Hee-haw"]
       subject.donkey.should == ["Bray", "Hee-haw"]
     end
+
+    it "should be able to track change status" do
+      subject.cow_changed?.should be_false
+      subject.cow = ["Moo"]
+      subject.cow_changed?.should be_true
+    end 
   end
+
+  describe "with a RDF datastream" do
+    before :all do
+      class BarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
+        map_predicates do |map|
+          map.title(in: RDF::DC)
+          map.description(in: RDF::DC, multivalue: false)
+        end
+      end
+      class BarHistory4 < ActiveFedora::Base
+        has_metadata 'rdfish', :type=>BarRdfDatastream
+        delegate_to 'rdfish', [:title, :description]
+      end
+    end
+
+    after :all do
+      Object.send(:remove_const, :BarHistory4)
+      Object.send(:remove_const, :BarRdfDatastream)
+    end
+
+    subject { BarHistory4.new }
+
+    describe "with a multivalued field" do
+      it "should be able to track change status" do
+        subject.title_changed?.should be_false
+        subject.title = ["Title1", "Title2"]
+        subject.title_changed?.should be_true
+      end
+    end
+    describe "with a single-valued field" do
+      it "should be able to track change status" do
+        subject.description_changed?.should be_false
+        subject.description = "A brief description"
+        subject.description_changed?.should be_true
+      end
+    end
+  end 
 end
 
 
