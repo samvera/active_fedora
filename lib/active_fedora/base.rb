@@ -342,6 +342,7 @@ module ActiveFedora
     include Associations
     include NestedAttributes
     include Reflection
+    include ActiveModel::Dirty
   end
 
 end

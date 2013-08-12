@@ -2,6 +2,14 @@ module ActiveFedora
   module Delegating
     extend ActiveSupport::Concern
 
+    included do
+      after_save :clear_changed_attributes
+      def clear_changed_attributes
+        @previously_changed = changes
+        @changed_attributes.clear
+      end
+    end
+
     # Calling inspect may trigger a bunch of loads, but it's mainly for debugging, so no worries.
     def inspect
       values = self.class.delegates.keys.map {|r| "#{r}:#{send(r).inspect}"}
@@ -70,6 +78,7 @@ module ActiveFedora
           raise ArgumentError, "Target is required"
         end
         if ds_specs.has_key? to.to_s 
+          define_attribute_method fields.first
           create_delegate_reader(fields.first, options)
           create_delegate_setter(fields.first, options)
         else
@@ -97,6 +106,7 @@ module ActiveFedora
       #   foo.field3                 # => NoMethodError: undefined method `field3' for #<Foo:0x1af30c>
 
       def delegate_to(datastream,fields,args={})
+        define_attribute_methods fields
         fields.each do |f|
           args.merge!({:to=>datastream})
           create_delegate_reader(f, args)
@@ -141,6 +151,7 @@ module ActiveFedora
         self.delegates[field] ||= {}
         self.delegates[field][:setter] = lambda do |v|
           ds = self.send(args[:to])
+          self.send("#{field}_will_change!") unless v == array_reader(field)
           if ds.kind_of?(ActiveFedora::RDFDatastream)
             ds.send("#{field}=", v)
           else

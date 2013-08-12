@@ -63,6 +63,12 @@ describe ActiveFedora::Base do
       @n.duck.should == ["Quack", "Peep"]
     end
 
+    it "should be able to track change status" do
+      @n.chicken_changed?.should be_false
+      @n.chicken = ["Cheep"]
+      @n.chicken_changed?.should be_true
+    end 
+
   end
 end
 
