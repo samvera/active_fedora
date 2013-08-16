@@ -138,6 +138,8 @@ module ActiveFedora
         end
         if value.is_a? Array
           value.map { |val| "#{key}:#{quote_for_solr(val)}" }
+        elsif value.is_a? String and value.empty?
+          "-#{key}:['' TO *]"
         else
           key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
           escaped_value = quote_for_solr(value)
