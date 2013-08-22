@@ -203,7 +203,7 @@ module ActiveFedora
         end
 
         def find_class_for_relation(klass, inverse_relation=@owner.class.to_s.underscore.to_sym)
-          raise "Unable to find #{klass}." if inverse_relation == :'active_fedora/base'
+          raise "Unable to lookup the :property attribute for #{@reflection.macro} #{@reflection.name.inspect} on #{@owner.class} because #{klass} specifies \"class_name: 'ActiveFedora::Base'\".  Either specify a specific class_name in #{klass} or set :property in the #{@reflection.macro} declaration on #{@owner.class}" if inverse_relation == :'active_fedora/base'
           if klass.reflections.key?(inverse_relation)
             # Try it singular
             return klass.reflections[inverse_relation].options[:property]
