@@ -1,6 +1,8 @@
 module ActiveFedora
   class Relation
 
+    delegate :map, :each, :collect, :all?, :include?, :to => :to_a
+
     attr_reader :loaded
     alias :loaded? :loaded
 
