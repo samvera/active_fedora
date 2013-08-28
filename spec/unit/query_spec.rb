@@ -82,6 +82,10 @@ describe ActiveFedora::Base do
         SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}).should == ["Fake Object1", "Fake Object2"]
       end
 
+      it "should correctly query for empty strings" do
+        SpecModel::Basic.find( :active_fedora_model_ssi => '').count.should == 0
+      end
+
       it "should add options" do
         SpecModel::Basic.should_receive(:find_one).with("changeme:30", nil).and_return("Fake Object1")
         SpecModel::Basic.should_receive(:find_one).with("changeme:22", nil).and_return("Fake Object2")
