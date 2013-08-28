@@ -1,3 +1,32 @@
+v6.5.0 (2013-08-28)
+
+An empty query value that is a string should not return all
+[Adam Hallett]
+
+Delegate relation methods to the array [Justin Coyne]
+
+Use an error message that gives a thourough explanation and a
+for a fix [Justin Coyne]
+
+Include ActiveModel::Dirty on Base, call field_will_change! on
+methods, and track changes on save [Chris Colvard]
+
+Rdf terminologies should be inheritable [Justin Coyne]
+
+Raise an error when trying to assign to a delegated attribute that
+been delegated [Justin Coyne]
+
+Added RdfNode::TermProxy.first_or_create [Justin Coyne]
+
+replace method_missing technique in rdf_node with an accessor
+[Justin Coyne]
+
+Add ActiveFedora::Relation#last.  Resolves #184 [Andrew Curley]
+
+RdfNode::TermProxy.build should use the correct class [Justin
+Coyne]
+
+
 v6.4.5 (2013-08-05)
 
 Clear rdf lists and proxies [Justin Coyne]
