@@ -83,7 +83,24 @@ describe ActiveFedora::Predicates do
     it 'should ensure that the configuration has the correct keys' do
       lambda { ActiveFedora::Predicates.predicate_config = { :foo => 'invalid!' } }.should raise_error TypeError
     end
-    
+
+    it "should allow adding predicates without wiping out existing predicates" do
+      ActiveFedora::Predicates.set_predicates({
+                                                  "http://projecthydra.org/ns/relations#"=>{has_profile:"hasProfile"},
+                                                  "info:fedora/fedora-system:def/relations-external#"=>{
+                                                      references:"references",
+                                                      has_derivation: "cameFrom"
+                                                  },
+                                              })
+      # New & Modified Predicates
+      ActiveFedora::Predicates.find_predicate(:has_profile).should == ["hasProfile", "http://projecthydra.org/ns/relations#"]
+      ActiveFedora::Predicates.find_predicate(:references).should == ["references", "info:fedora/fedora-system:def/relations-external#"]
+      ActiveFedora::Predicates.find_predicate(:has_derivation).should == ["cameFrom", "info:fedora/fedora-system:def/relations-external#"]
+      # Pre-Existing predicates should be unharmed
+      ActiveFedora::Predicates.find_predicate(:is_part_of).should == ["isPartOf", "info:fedora/fedora-system:def/relations-external#"]
+      ActiveFedora::Predicates.find_predicate(:is_governed_by).should == ["isGovernedBy", "http://projecthydra.org/ns/relations#"]
+    end
+
   end
   
 end
