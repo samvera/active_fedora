@@ -9,3 +9,6 @@ tmp
 Gemfile.lock
 jetty
 bin
+.idea
+.ruby-version
+.ruby-gemset

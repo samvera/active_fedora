@@ -82,6 +82,27 @@ module ActiveFedora
       raise ActiveFedora::UnregisteredPredicateError, "Unregistered predicate: #{predicate.inspect}"
     end
 
+    # Add/Modify predicates without destroying the other predicate configs
+    #
+    # @example
+    #  ActiveFedora::Predicates.set_predicates({
+    #                                              "http://projecthydra.org/ns/relations#"=>{has_profile:"hasProfile"},
+    #                                              "info:fedora/fedora-system:def/relations-external#"=>{
+    #                                                  references:"references",
+    #                                                  has_derivation: "cameFrom"
+    #                                              },
+    #                                          })
+    def self.set_predicates(new_predicates)
+      predicate_config = ActiveFedora::Predicates.predicate_config
+      new_predicates.each_pair do |ns, predicate_confs|
+        predicate_config[:predicate_mapping][ns] ||= {}
+        predicate_confs.each_pair do |property, value|
+          predicate_config[:predicate_mapping][ns][property] = value
+        end
+      end
+      predicate_config
+    end
+
   end
 
 end
