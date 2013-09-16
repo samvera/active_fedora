@@ -8,8 +8,8 @@ describe "NestedAttribute behavior" do
         m.field "uno", :string
         m.field "dos", :string
       end
-      delegate :uno, :to=>'someData', :unique=>true
-      delegate :dos, :to=>'someData', :unique=>true
+      delegate :uno, to: 'someData', multiple: false
+      delegate :dos, to: 'someData', multiple: false
     end
 
     # base Car class, used in test for association updates and :allow_destroy flag

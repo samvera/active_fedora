@@ -7,8 +7,8 @@ describe ActiveFedora::Base do
         m.field "fubar", :string
         m.field "swank", :text
       end
-      delegate :fubar, :to=>'someData'
-      delegate :swank, :to=>'someData', unique: true
+      delegate :fubar, :to=>'someData', multiple: true
+      delegate :swank, :to=>'someData', multiple: false
 
       validates_presence_of :fubar
       validates_length_of :swank, :minimum=>5
