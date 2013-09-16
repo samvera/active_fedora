@@ -1,6 +1,7 @@
 module ActiveFedora
   module Delegating
     extend ActiveSupport::Concern
+    extend Deprecation
 
     included do
       after_save :clear_changed_attributes
@@ -53,16 +54,16 @@ module ActiveFedora
       end
       # Provides a delegate class method to expose methods in metadata streams
       # as member of the base object. Pass the target datastream via the
-      # <tt>:to</tt> argument. If you want to return a unique result, (e.g. string
-      # instead of an array) set the <tt>:unique</tt> argument to true.
+      # <tt>:to</tt> argument. If you want to return a multivalue result, (e.g. array
+      # instead of a string) set the <tt>:multiple</tt> argument to true.
       #
       # The optional <tt>:at</tt> argument provides a terminology that the delegate will point to.
       #
       #   class Foo < ActiveFedora::Base
       #     has_metadata :name => "descMetadata", :type => MyDatastream
       #
-      #     delegate :field1, :to=>"descMetadata", :unique=>true
-      #     delegate :field2, :to=>"descMetadata", :at=>[:term1, :term2]
+      #     delegate :field1, :to=>"descMetadata", multiple: false
+      #     delegate :field2, :to=>"descMetadata", :at=>[:term1, :term2], multiple: true
       #   end
       #
       #   foo = Foo.new
@@ -118,7 +119,14 @@ module ActiveFedora
       # @param [Symbol] field the field to query
       # @return [Boolean]
       def unique?(field)
-        delegates[field][:unique]
+        !multiple?(field)
+      end
+
+      # Reveal if the delegated field is multivalued or not
+      # @param [Symbol] field the field to query
+      # @return [Boolean]
+      def multiple?(field)
+        delegates[field][:multiple]
       end
 
       private
@@ -138,11 +146,33 @@ module ActiveFedora
           end
         end
 
-        self.delegates[field][:unique] = args[:unique]
+        if !args[:multiple].nil?
+          self.delegates[field][:multiple] = args[:multiple]
+        elsif !args[:unique].nil?
+          i = 0 
+          begin 
+            match = /in `(delegate.*)'/.match(caller[i])
+            i+=1
+          end while match.nil?
+
+          prev_method = match.captures.first
+          Deprecation.warn Delegating, "The :unique option for `#{prev_method}' is deprecated. Use :multiple instead. :unique will be removed in ActiveFedora 7", caller(i+1)
+          self.delegates[field][:multiple] = !args[:unique]
+        else 
+          i = 0 
+          begin 
+            match = /in `(delegate.*)'/.match(caller[i])
+            i+=1
+          end while match.nil?
+
+          prev_method = match.captures.first
+          Deprecation.warn Delegating, "You have not explicitly set the :multiple option on `#{prev_method}'. The default value will switch from true to false in ActiveFedora 7, so if you want to future-proof this application set `multiple: true'", caller(i+ 1)
+          self.delegates[field][:multiple] = true # this should be false for ActiveFedora 7
+        end
 
         define_method field do |*opts|
           val = array_reader(field, *opts)
-          self.class.unique?(field) ? val.first : val
+          self.class.multiple?(field) ? val : val.first
         end
       end
 

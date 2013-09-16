@@ -37,7 +37,7 @@ describe ActiveFedora::Base do
 
     class Barnyard < ActiveFedora::Base
       has_metadata :type=>BarnyardDocument, :name=>"xmlish"
-      delegate_to :xmlish, [:cow, :chicken, :pig, :duck]
+      delegate_to :xmlish, [:cow, :chicken, :pig, :duck], multiple: true
       delegate_to :xmlish, [:donkey, :horse], :unique=>true
       #delegate :donkey, :to=>'xmlish', :unique=>true
     end

@@ -11,7 +11,7 @@ describe ActiveFedora::Model do
           m.field "baz", :string
         end
 
-        delegate_to :properties, [:foo, :bar, :baz]
+        delegate_to :properties, [:foo, :bar, :baz], multiple: true
 
         def to_solr(doc = {})
           doc = super
