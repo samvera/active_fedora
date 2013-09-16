@@ -118,7 +118,7 @@ module ActiveFedora
         ## Replace existing unchanged datastreams with the definitions found in this class if they have a different type.
         ## Any datastream that is deleted here will cause a reload from fedora, so avoid it whenever possible
         ds_specs.keys.each do |key|
-          if !@inner_object.datastreams[key].content_changed? && @inner_object.datastreams[key].class != self.class.ds_specs[key][:type]
+          if @inner_object.datastreams[key] != nil && !@inner_object.datastreams[key].content_changed? && @inner_object.datastreams[key].class != self.class.ds_specs[key][:type]
             @inner_object.datastreams.delete(key)
           end
         end
@@ -286,10 +286,34 @@ module ActiveFedora
       klass.allocate.init_with(inner_object)
     end
 
-    # Examine the :has_model assertions in the RELS-EXT.  Adapt this class to the first first known model
+    # Examines the :has_model assertions in the RELS-EXT.
+    #
+    # If the object is of type ActiveFedora::Base, then use the first :has_model
+    # in the RELS-EXT for this object. Due to how the RDF writer works, this is
+    # currently just the first alphabetical model.
+    #
+    # If the object was instantiated with any other class, then use that class
+    # as the base of the type the user wants rather than casting to the first
+    # :has_model found on the object.
+    #
+    # In either case, if an extended model of that initial base model of the two
+    # cases above exists in the :has_model, then instantiate as that extended
+    # model type instead.
     def adapt_to_cmodel
-      the_model = ActiveFedora::ContentModel.known_models_for( self ).first
-      self.class != the_model ? self.adapt_to(the_model) : self
+      best_model_match = self.class unless self.class == ActiveFedora::Base
+
+      ActiveFedora::ContentModel.known_models_for( self ).each {|model_value|
+
+        # If this is of type ActiveFedora::Base, then set to the first found :has_model..
+        best_model_match ||= model_value
+
+        # If there is an inheritance structure, use the most specific case.
+        if best_model_match > model_value
+          best_model_match = model_value
+        end
+      }
+
+      self.class != best_model_match ? self.adapt_to(best_model_match) : self
     end
     
     # ** EXPERIMENTAL **
