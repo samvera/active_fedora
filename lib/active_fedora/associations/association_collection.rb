@@ -138,7 +138,7 @@ module ActiveFedora
               end
             end
           rescue ObjectNotFoundError => e
-            logger.error "Solr and Fedora may be out of sync:\n" + e.message
+            ActiveFedora::Base.logger.error "Solr and Fedora may be out of sync:\n" + e.message
             reset
           end
         end
