@@ -1,6 +1,6 @@
 module ActiveFedora
   class Relation
-
+    extend Deprecation
     delegate :map, :each, :collect, :all?, :include?, :to => :to_a
 
     attr_reader :loaded
@@ -116,6 +116,7 @@ module ActiveFedora
       else
         case args.first
         when :first, :last, :all
+          Deprecation.warn Relation, "ActiveFedora::Base.find(#{args.first.inspect}) is deprecated.  Use ActiveFedora::Base.#{args.first} instead. These options will be remove in ActiveFedora 7", caller
           send(args.first)
         else
           find_with_ids(args, cast)
