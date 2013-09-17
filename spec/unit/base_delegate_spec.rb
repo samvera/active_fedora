@@ -12,6 +12,8 @@ describe ActiveFedora::Base do
           end
           t.donkey()
           t.cow()
+          t.pig()
+          t.horse()
         end
 
         def self.xml_template
@@ -49,8 +51,10 @@ describe ActiveFedora::Base do
         has_metadata :type=>BarStream2, :name=>"xmlish"
         delegate :fubar, :to=>'withText', :unique=>true
         delegate :donkey, :to=>'xmlish', :unique=>true
-        delegate :cow, :to=>'xmlish'
-        delegate :duck, :to=>'xmlish', :at=>[:waterfowl, :ducks]
+        delegate :cow, :to=>'xmlish'  # for testing the default value of multiple
+        delegate :pig, :to=>'xmlish', multiple: false
+        delegate :horse, :to=>'xmlish', multiple: true
+        delegate :duck, :to=>'xmlish', :at=>[:waterfowl, :ducks], multiple: true
       end
     end
 
@@ -72,6 +76,9 @@ describe ActiveFedora::Base do
       subject.donkey="Bray"
       subject.donkey.should == "Bray"
       subject.xmlish.term_values(:donkey).first.should == 'Bray'
+
+      subject.pig="Oink"
+      subject.pig.should == "Oink"
     end
 
     it "should allow passing parameters to the delegate accessor" do
@@ -84,6 +91,9 @@ describe ActiveFedora::Base do
       ### Metadata datastream does not appear to support multiple value setting
       subject.cow=["one", "two"]
       subject.cow.should == ["one", "two"]
+
+      subject.horse=["neigh", "whinny"]
+      subject.horse.should == ["neigh", "whinny"]
     end
 
     it "should be able to delegate deeply into the terminology" do
@@ -123,7 +133,7 @@ describe ActiveFedora::Base do
     before :all do
       class BarHistory2 < ActiveFedora::Base
         has_metadata 'xmlish', :type=>BarStream2
-        delegate_to 'xmlish', [:donkey, :cow]
+        delegate_to 'xmlish', [:donkey, :cow], multiple: true
       end
       class BarHistory3 < BarHistory2
       end
@@ -158,7 +168,7 @@ describe ActiveFedora::Base do
       end
       class BarHistory4 < ActiveFedora::Base
         has_metadata 'rdfish', :type=>BarRdfDatastream
-        delegate_to 'rdfish', [:title, :description]
+        delegate_to 'rdfish', [:title, :description], multiple: true
       end
     end
 
