@@ -1,29 +1,20 @@
 module ActiveFedora
   module Associations
-    class BelongsToAssociation < AssociationProxy #:nodoc:
-
-      def create(attributes = {})
-        replace(@reflection.create_association(attributes))
-      end
-
-      def build(attributes = {})
-        replace(@reflection.build_association(attributes))
-      end
+    class BelongsToAssociation < SingularAssociation #:nodoc:
 
       def replace(record)
-        if record.nil?
-          remove_matching_property_relationship
-        else
+        remove_matching_property_relationship
+        unless record.nil?
           raise_on_type_mismatch(record)
 
-          remove_matching_property_relationship
-
-          @target = (AssociationProxy === record ? record.target : record)
           @owner.add_relationship(@reflection.options[:property], record) unless record.new_record?
           @updated = true
-        end
 
-        loaded
+          #= (AssociationProxy === record ? record.target : record)
+        end
+        self.target = record
+
+        loaded!
         record
       end
 
@@ -61,7 +52,7 @@ module ActiveFedora
           end
         end
 
-        def foreign_key_present
+        def foreign_key_present?
           !@owner.send(@reflection.primary_key_name).nil?
         end
 

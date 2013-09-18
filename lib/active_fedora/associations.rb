@@ -9,9 +9,10 @@ module ActiveFedora
     autoload :BelongsToAssociation, 'active_fedora/associations/belongs_to_association'
     autoload :HasAndBelongsToManyAssociation, 'active_fedora/associations/has_and_belongs_to_many_association'
 
-
-    autoload :AssociationCollection, 'active_fedora/associations/association_collection'
-    autoload :AssociationProxy, 'active_fedora/associations/association_proxy'
+    autoload :Association,           'active_fedora/associations/association'
+    autoload :SingularAssociation,   'active_fedora/associations/singular_association'
+    autoload :CollectionAssociation, 'active_fedora/associations/collection_association'
+    autoload :CollectionProxy, 'active_fedora/associations/collection_proxy'
 
     # Clears out the association cache.
     def clear_association_cache #:nodoc:
@@ -20,6 +21,21 @@ module ActiveFedora
 
     # :nodoc:
     attr_reader :association_cache
+
+
+    # Returns the association instance for the given name, instantiating it if it doesn't already exist
+    def association(name) #:nodoc:
+      association = association_instance_get(name)
+
+      if association.nil?
+        reflection  = self.class.reflect_on_association(name)
+        association = reflection.association_class.new(self, reflection)
+        association_instance_set(name, association)
+      end
+
+      association
+    end
+    
     
     private 
 
@@ -38,7 +54,7 @@ module ActiveFedora
       def has_many(association_id, options={})
         reflection = create_has_many_reflection(association_id, options)
         add_association_callbacks(reflection.name, reflection.options)
-        collection_accessor_methods(reflection, HasManyAssociation)
+        collection_accessor_methods(reflection)
       end
 
   
@@ -79,9 +95,8 @@ module ActiveFedora
         raise "You must specify a property name for #{name}" if !options[:property]
         reflection = create_belongs_to_reflection(association_id, options)
 
-        association_accessor_methods(reflection, BelongsToAssociation)
-        association_constructor_method(:build,  reflection, BelongsToAssociation)
-        association_constructor_method(:create, reflection, BelongsToAssociation)
+        association_accessor_methods(reflection)
+        association_constructor_methods(reflection)
         #configure_dependency_for_belongs_to(reflection)
       end
 
@@ -150,7 +165,7 @@ module ActiveFedora
       #   has_and_belongs_to_many :topics, :property=>:has_topic, :inverse_of=>:is_topic_of
       def has_and_belongs_to_many(association_id, options = {}, &extension)
         reflection = create_has_and_belongs_to_many_reflection(association_id, options, &extension)
-        collection_accessor_methods(reflection, HasAndBelongsToManyAssociation)
+        collection_accessor_methods(reflection)
         #configure_after_destroy_method_for_has_and_belongs_to_many(reflection)
         add_association_callbacks(reflection.name, options)
       end
@@ -160,7 +175,7 @@ module ActiveFedora
 
         def create_has_many_reflection(association_id, options)
           create_reflection(:has_many, association_id, options, self)
-          #collection_accessor_methods(reflection, HasManyAssociation)
+          #collection_accessor_methods(reflection)
         end
 
         def create_belongs_to_reflection(association_id, options)
@@ -185,45 +200,22 @@ module ActiveFedora
           end
         end
 
-        def association_accessor_methods(reflection, association_proxy_class)
+        def association_accessor_methods(reflection)
           redefine_method(reflection.name) do |*params|
             force_reload = params.first unless params.empty?
-            association = association_instance_get(reflection.name)
+            association = association(reflection.name)
 
-            if association.nil? || force_reload
-              association = association_proxy_class.new(self, reflection)
-              retval = force_reload ? reflection.klass.uncached { association.reload } : association.reload
-              if retval.nil? and association_proxy_class == BelongsToAssociation
-                association_instance_set(reflection.name, nil)
-                return nil
-              end
-              association_instance_set(reflection.name, association)
+            if force_reload
+              reflection.klass.uncached { association.reload }
+            elsif !association.loaded? || association.stale_target?
+              association.reload
             end
 
-            association.target.nil? ? nil : association
-          end
-
-          redefine_method("loaded_#{reflection.name}?") do
-            association = association_instance_get(reflection.name)
-            association && association.loaded?
+            association.target
           end
 
           redefine_method("#{reflection.name}=") do |new_value|
-            association = association_instance_get(reflection.name)
-
-            if association.nil? || association.target != new_value
-              association = association_proxy_class.new(self, reflection)
-            end
-
-            association.replace(new_value)
-            association_instance_set(reflection.name, new_value.nil? ? nil : association)
-          end
-
-          redefine_method("set_#{reflection.name}_target") do |target|
-            return if target.nil? and association_proxy_class == BelongsToAssociation
-            association = association_proxy_class.new(self, reflection)
-            association.target = target
-            association_instance_set(reflection.name, association)
+            association(reflection.name).replace(new_value)
           end
 
           redefine_method("#{reflection.name}_id=") do |new_value|
@@ -237,7 +229,7 @@ module ActiveFedora
         end
 
 
-        def collection_reader_method(reflection, association_proxy_class)
+        def collection_reader_method(reflection)#, association_proxy_class)
           redefine_method(reflection.name) do |*params|
             
             if (params.first.is_a?(Hash) && params.first[:response_format] == :solr)
@@ -246,16 +238,12 @@ module ActiveFedora
             else 
               force_reload = params.first unless params.empty?
             end
-            association = association_instance_get(reflection.name)
-            unless association
-              association = association_proxy_class.new(self, reflection)
-              association_instance_set(reflection.name, association)
-            end
+            association = association(reflection.name)
+            association.reload if force_reload || association.stale_target?
 
-            association.reload if force_reload
             return association.load_from_solr if load_from_solr
 
-            association
+            association.proxy
           end
 
           redefine_method("#{reflection.name.to_s.singularize}_ids") do
@@ -265,15 +253,12 @@ module ActiveFedora
         end
 
 
-        def collection_accessor_methods(reflection, association_proxy_class, writer = true)
-          collection_reader_method(reflection, association_proxy_class)
+        def collection_accessor_methods(reflection, writer = true)
+          collection_reader_method(reflection)
 
           if writer
             redefine_method("#{reflection.name}=") do |new_value|
-              # Loads proxy class instance (defined in collection_reader_method) if not already loaded
-              association = send(reflection.name)
-              association.replace(new_value)
-              association
+              association(reflection.name).replace(new_value)
             end
 
             redefine_method("#{reflection.name.to_s.singularize}_ids=") do |new_value|
@@ -285,22 +270,18 @@ module ActiveFedora
           end
         end
 
-        def association_constructor_method(constructor, reflection, association_proxy_class)
-          redefine_method("#{constructor}_#{reflection.name}") do |*params|
-            attributees      = params.first unless params.empty?
-            replace_existing = params[1].nil? ? true : params[1]
-            association      = association_instance_get(reflection.name)
+        def association_constructor_methods(reflection)
+          constructors = {
+            "build_#{reflection.name}"   => "build",
+            "create_#{reflection.name}"  => "create",
+            "create_#{reflection.name}!" => "create!"
+          }
 
-            unless association
-              association = association_proxy_class.new(self, reflection)
-              association_instance_set(reflection.name, association)
+          constructors.each do |name, proxy_name|
+            redefine_method(name) do |*params|
+              attributes = params.first unless params.empty?
+              association(reflection.name).send(proxy_name, attributes)
             end
-
-            # if association_proxy_class == HasOneAssociation
-            #   association.send(constructor, attributees, replace_existing)
-            # else
-            association.send(constructor, attributees)
-            #end
           end
         end
     end
