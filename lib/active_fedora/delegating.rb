@@ -1,7 +1,6 @@
 module ActiveFedora
   module Delegating
     extend ActiveSupport::Concern
-    extend Deprecation
 
     included do
       after_save :clear_changed_attributes
@@ -146,29 +145,7 @@ module ActiveFedora
           end
         end
 
-        if !args[:multiple].nil?
-          self.delegates[field][:multiple] = args[:multiple]
-        elsif !args[:unique].nil?
-          i = 0 
-          begin 
-            match = /in `(delegate.*)'/.match(caller[i])
-            i+=1
-          end while match.nil?
-
-          prev_method = match.captures.first
-          Deprecation.warn Delegating, "The :unique option for `#{prev_method}' is deprecated. Use :multiple instead. :unique will be removed in ActiveFedora 7", caller(i+1)
-          self.delegates[field][:multiple] = !args[:unique]
-        else 
-          i = 0 
-          begin 
-            match = /in `(delegate.*)'/.match(caller[i])
-            i+=1
-          end while match.nil?
-
-          prev_method = match.captures.first
-          Deprecation.warn Delegating, "You have not explicitly set the :multiple option on `#{prev_method}'. The default value will switch from true to false in ActiveFedora 7, so if you want to future-proof this application set `multiple: true'", caller(i+ 1)
-          self.delegates[field][:multiple] = true # this should be false for ActiveFedora 7
-        end
+        self.delegates[field][:multiple] = args[:multiple].nil? ? false : args[:multiple]
 
         define_method field do |*opts|
           val = array_reader(field, *opts)
