@@ -14,31 +14,32 @@ describe ActiveFedora::Base do
   after(:all) do
     Object.send(:remove_const, :SpecModel)
   end
+
+  describe ":all" do
+    describe "called on a concrete class" do
+      it "should query solr for all objects with :has_model_s of self.class" do
+        SpecModel::Basic.should_receive(:find_one).with("changeme:30", nil).and_return("Fake Object1")
+        SpecModel::Basic.should_receive(:find_one).with("changeme:22", nil).and_return("Fake Object2")
+        mock_docs = [{"id" => "changeme:30"}, {"id" => "changeme:22"}]
+        mock_docs.should_receive(:has_next?).and_return(false)
+        ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
+        SpecModel::Basic.all.should == ["Fake Object1", "Fake Object2"]
+      end
+    end
+    describe "called without a specific class" do
+      it "should specify a q parameter" do
+        ActiveFedora::Base.should_receive(:find_one).with("changeme:30", nil).and_return("Fake Object1")
+        ActiveFedora::Base.should_receive(:find_one).with("changeme:22", nil).and_return("Fake Object2")
+        mock_docs = [{"id" => "changeme:30"},{"id" => "changeme:22"}]
+        mock_docs.should_receive(:has_next?).and_return(false)
+        ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>'*:*', :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
+        ActiveFedora::Base.all.should == ["Fake Object1", "Fake Object2"]
+      end
+    end
+  end
   
   describe '#find' do
     describe "without :cast" do
-      describe ":all" do
-        describe "called on a concrete class" do
-          it "should query solr for all objects with :has_model_s of self.class" do
-            SpecModel::Basic.should_receive(:find_one).with("changeme:30", nil).and_return("Fake Object1")
-            SpecModel::Basic.should_receive(:find_one).with("changeme:22", nil).and_return("Fake Object2")
-            mock_docs = [{"id" => "changeme:30"}, {"id" => "changeme:22"}]
-            mock_docs.should_receive(:has_next?).and_return(false)
-            ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
-            SpecModel::Basic.find(:all).should == ["Fake Object1", "Fake Object2"]
-          end
-        end
-        describe "called without a specific class" do
-          it "should specify a q parameter" do
-            ActiveFedora::Base.should_receive(:find_one).with("changeme:30", nil).and_return("Fake Object1")
-            ActiveFedora::Base.should_receive(:find_one).with("changeme:22", nil).and_return("Fake Object2")
-            mock_docs = [{"id" => "changeme:30"},{"id" => "changeme:22"}]
-            mock_docs.should_receive(:has_next?).and_return(false)
-            ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>'*:*', :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
-            ActiveFedora::Base.find(:all).should == ["Fake Object1", "Fake Object2"]
-          end
-        end
-      end
       describe "and a pid is specified" do
         it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
           SpecModel::Basic.any_instance.should_receive(:init_with).and_return(SpecModel::Basic.new)
