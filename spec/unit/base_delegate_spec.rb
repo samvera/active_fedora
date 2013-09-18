@@ -23,7 +23,6 @@ describe ActiveFedora::Base do
                     <duck/>
                   </ducks>
                 </waterfowl>
-                <donkey></donkey>
                 <cow></cow>
               </animals>'
         end
@@ -49,9 +48,8 @@ describe ActiveFedora::Base do
         end 
 
         has_metadata :type=>BarStream2, :name=>"xmlish"
-        delegate :fubar, :to=>'withText', :unique=>true
-        delegate :donkey, :to=>'xmlish', :unique=>true
-        delegate :cow, :to=>'xmlish'  # for testing the default value of multiple
+        delegate :cow, :to=>'xmlish'                      # for testing the default value of multiple
+        delegate :fubar, :to=>'withText', multiple: true  # test alternate datastream
         delegate :pig, :to=>'xmlish', multiple: false
         delegate :horse, :to=>'xmlish', multiple: true
         delegate :duck, :to=>'xmlish', :at=>[:waterfowl, :ducks], multiple: true
@@ -65,17 +63,18 @@ describe ActiveFedora::Base do
     subject { BarHistory2.new() }
 
     it "should reveal the unique properties" do
-      BarHistory2.unique?(:fubar).should be_true
-      BarHistory2.unique?(:cow).should be_false
+      BarHistory2.unique?(:horse).should be_false
+      BarHistory2.unique?(:pig).should be_true
+      BarHistory2.unique?(:cow).should be_true
     end
 
     it "should save a delegated property uniquely" do
       subject.fubar="Quack"
-      subject.fubar.should == "Quack"
+      subject.fubar.should == ["Quack"]
       subject.withText.get_values(:fubar).first.should == 'Quack'
-      subject.donkey="Bray"
-      subject.donkey.should == "Bray"
-      subject.xmlish.term_values(:donkey).first.should == 'Bray'
+      subject.cow="Low"
+      subject.cow.should == "Low"
+      subject.xmlish.term_values(:cow).first.should == 'Low'
 
       subject.pig="Oink"
       subject.pig.should == "Oink"
@@ -83,15 +82,15 @@ describe ActiveFedora::Base do
 
     it "should allow passing parameters to the delegate accessor" do
       subject.cow=["one", "two"]
-      subject.cow(1).should == ['two']
+      subject.cow(1).should == 'two'
     end
 
-
-    it "should return an array if not marked as unique" do
-      ### Metadata datastream does not appear to support multiple value setting
+    it "should return a single value if not marked as multiple" do
       subject.cow=["one", "two"]
-      subject.cow.should == ["one", "two"]
+      subject.cow.should == "one"
+    end
 
+    it "should return an array if marked as multiple" do
       subject.horse=["neigh", "whinny"]
       subject.horse.should == ["neigh", "whinny"]
     end
