@@ -1,3 +1,8 @@
+v7.0.0 Unreleased
+
+Removed update_indexed_attributes, update_datastream_attributes, get_values_from_datastream
+
+
 v6.5.1 (2013-09-10)
 
 ActiveFedora::Predicates.set_predicates allows you to set predicates
