@@ -499,43 +499,6 @@ describe ActiveFedora::Base do
       end
     end
     
-    
-    describe "get_values_from_datastream" do
-      it "should look up the named datastream and call get_values with the given pointer/field_name" do
-        mock_ds = double("Datastream", :get_values=>["value1", "value2"])
-        @test_object.stub(:datastreams).and_return({"ds1"=>mock_ds})
-        @test_object.get_values_from_datastream("ds1", "--my xpath--").should == ["value1", "value2"]
-      end
-    end
-    
-    describe "update_datastream_attributes" do
-      it "should look up any datastreams specified as keys in the given hash and call update_attributes on the datastream" do
-        mock_desc_metadata = double("descMetadata")
-        mock_properties = double("properties")
-        mock_ds_hash = {'descMetadata'=>mock_desc_metadata, 'properties'=>mock_properties}
-        
-        ds_values_hash = {
-          "descMetadata"=>{ [{:person=>0}, :role]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"} },
-          "properties"=>{ "notes"=>"foo" }
-        }
-        m = FooHistory.new
-        m.stub(:datastreams).and_return(mock_ds_hash)
-        mock_desc_metadata.should_receive(:update_indexed_attributes).with( ds_values_hash['descMetadata'] )
-        mock_properties.should_receive(:update_indexed_attributes).with( ds_values_hash['properties'] )
-        m.update_datastream_attributes( ds_values_hash )
-      end
-      it "should not do anything and should return an empty hash if the specified datastream does not exist" do
-pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
-        ds_values_hash = {
-          "nonexistentDatastream"=>{ "notes"=>"foo" }
-        }
-        m = FooHistory.new
-        untouched_xml = m.to_xml
-        m.update_datastream_attributes( ds_values_hash ).should == {}
-        m.to_xml.should == untouched_xml
-      end
-    end
-    
     describe "update_attributes" do
       it "should set the attributes and save" do
         m = FooHistory.new
@@ -560,48 +523,6 @@ pending "This is broken, and deprecated.  I don't want to fix it - jcoyne"
       end
     end
     
-    describe "update_indexed_attributes" do
-      before do
-        Deprecation.should_receive(:warn).at_least(1).times
-      end
-      it "should call .update_indexed_attributes on all metadata datastreams & nokogiri datastreams" do
-        m = FooHistory.new
-        att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
-        
-        m.datastreams['someData'].should_receive(:update_indexed_attributes)
-        m.datastreams["withText"].should_receive(:update_indexed_attributes)
-        m.datastreams['withText2'].should_receive(:update_indexed_attributes)
-        m.update_indexed_attributes(att)
-      end
-      it "should take a :datastreams argument" do 
-        att= {"fubar"=>{"-1"=>"mork", "0"=>"york", "1"=>"mangle"}}
-        stub_get(@this_pid)
-        stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
-        m = FooHistory.new()
-        m.update_indexed_attributes(att, :datastreams=>"withText")
-        m.should_not be_nil
-        m.datastreams['someData'].fubar.should == []
-        m.datastreams["withText"].fubar.should == ['mork', 'york', 'mangle']
-        m.datastreams['withText2'].fubar.should == []
-        
-        att= {"fubar"=>{"-1"=>"tork", "0"=>"work", "1"=>"bork"}}
-        m.update_indexed_attributes(att, :datastreams=>["someData", "withText2"])
-        m.should_not be_nil
-        m.datastreams['someData'].fubar.should == ['tork', 'work', 'bork']
-        m.datastreams['withText2'].fubar.should == ['tork', 'work', 'bork']
-      end
-    end
-
-    describe '#relationships_by_name' do
-      before do
-        class MockNamedRelationships < ActiveFedora::Base
-          # has_relationship "testing", :has_part, :type=>ActiveFedora::Base
-          # has_relationship "testing2", :has_member, :type=>ActiveFedora::Base
-          # has_relationship "testing_inbound", :has_part, :type=>ActiveFedora::Base, :inbound=>true
-        end
-      end
-    end
-
     describe ".solrize_relationships" do
       it "should serialize the relationships into a Hash" do
         graph = RDF::Graph.new
