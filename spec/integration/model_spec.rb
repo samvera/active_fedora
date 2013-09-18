@@ -26,18 +26,19 @@ describe ActiveFedora::Model do
     Object.send(:remove_const, :ModelIntegrationSpec)
   end
   
-  describe '#find' do
-    describe "with :all" do
-      it "should return an array of instances of the calling Class" do
-        result = ModelIntegrationSpec::Basic.find(:all)
-        result.should be_instance_of(Array)
-        # this test is meaningless if the array length is zero
-        result.length.should > 0
-        result.each do |obj|
-          obj.class.should == ModelIntegrationSpec::Basic
-        end
+  describe "#all" do
+    it "should return an array of instances of the calling Class" do
+      result = ModelIntegrationSpec::Basic.all
+      result.should be_instance_of(Array)
+      # this test is meaningless if the array length is zero
+      result.length.should > 0
+      result.each do |obj|
+        obj.class.should == ModelIntegrationSpec::Basic
       end
     end
+  end
+
+  describe '#find' do
     describe "#find with a valid pid with cast" do
       subject { ActiveFedora::Base.find(@test_instance.pid, :cast=>true) }
       it { should be_instance_of ModelIntegrationSpec::Basic}

@@ -1,6 +1,5 @@
 module ActiveFedora
   class Relation
-    extend Deprecation
     delegate :map, :each, :collect, :all?, :include?, :to => :to_a
 
     attr_reader :loaded
@@ -94,7 +93,7 @@ module ActiveFedora
     # Returns an Array of objects of the Class that +find+ is being 
     # called on
     #
-    # @param[String,Symbol,Hash] args either a pid or :all or a hash of conditions
+    # @param[String,Hash] args either a pid or a hash of conditions
     # @option args [Integer] :rows when :all is passed, the maximum number of rows to load from solr
     # @option args [Boolean] :cast when true, examine the model and cast it to the first known cModel
     def find(*args)
@@ -114,13 +113,8 @@ module ActiveFedora
         options = {conditions: options}
         apply_finder_options(options).all
       else
-        case args.first
-        when :first, :last, :all
-          Deprecation.warn Relation, "ActiveFedora::Base.find(#{args.first.inspect}) is deprecated.  Use ActiveFedora::Base.#{args.first} instead. These options will be remove in ActiveFedora 7", caller
-          send(args.first)
-        else
-          find_with_ids(args, cast)
-        end
+        raise ArgumentError, "#{self}.find() expects a pid. You provided `#{args.inspect}'" unless args.is_a? Array
+        find_with_ids(args, cast)
       end
     end
 
