@@ -102,7 +102,7 @@ module ActiveFedora
       return datastream.dsid
     end
 
-    #return all datastreams of type ActiveFedora::RDFDatastream or ActiveFedora::NokogiriDatastream
+    # @return [Array] all datastreams that return true for `metadata?` and are not Rels-ext
     def metadata_streams
       datastreams.select { |k, ds| ds.metadata? }.reject { |k, ds| ds.kind_of?(ActiveFedora::RelsExtDatastream) }.values
     end
