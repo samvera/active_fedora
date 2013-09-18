@@ -41,7 +41,6 @@ module ActiveFedora #:nodoc:
     autoload :Indexing
     autoload :Model
     autoload :NestedAttributes
-    autoload :NokogiriDatastream
     autoload :NomDatastream
     autoload :NtriplesRDFDatastream
     autoload :OmDatastream

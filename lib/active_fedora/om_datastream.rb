@@ -24,7 +24,7 @@ module ActiveFedora
 
     # Create an instance of this class based on xml content
     # @param [String, File, Nokogiri::XML::Node] xml the xml content to build from
-    # @param [ActiveFedora::NokogiriDatastream] tmpl the Datastream object that you are building @default a new instance of this class
+    # @param [ActiveFedora::OmDatastream] tmpl the Datastream object that you are building @default a new instance of this class
     # Careful! If you call this from a constructor, be sure to provide something 'ie. self' as the @tmpl. Otherwise, you will get an infinite loop!
     def self.from_xml(xml, tmpl=nil)
       tmpl = self.new if tmpl.nil?  ## This path is used only for unit testing (e.g. MarpaDCDatastream.from_xml(fixture("data.xml")) )
@@ -70,7 +70,7 @@ module ActiveFedora
       when String 
         self.content=new_xml
       else
-        raise TypeError, "You passed a #{new_xml.class} into the ng_xml of the #{self.dsid} datastream. NokogiriDatastream.ng_xml= only accepts Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node, or raw XML (String) as inputs."
+        raise TypeError, "You passed a #{new_xml.class} into the ng_xml of the #{self.dsid} datastream. OmDatastream.ng_xml= only accepts Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node, or raw XML (String) as inputs."
       end
     end
     
@@ -356,7 +356,7 @@ module ActiveFedora
     #   </mods>
     def update_indexed_attributes(params={}, opts={})    
       if self.class.terminology.nil?
-        raise "No terminology is set for this NokogiriDatastream class.  Cannot perform update_indexed_attributes"
+        raise "No terminology is set for this OmDatastream class.  Cannot perform update_indexed_attributes"
       end
       # remove any fields from params that this datastream doesn't recognize    
       # make sure to make a copy of params so not to modify hash that might be passed to other methods
