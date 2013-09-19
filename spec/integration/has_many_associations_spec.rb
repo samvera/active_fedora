@@ -1,5 +1,35 @@
 require 'spec_helper'
 
+describe "Looking up collection members" do
+  before :all do
+    class Library < ActiveFedora::Base 
+      has_many :books, :property=>:has_constituent
+    end
+
+    class Book < ActiveFedora::Base 
+      belongs_to :library, :property=>:has_constituent
+    end
+  end
+  after :all do
+    Object.send(:remove_const, :Book)
+    Object.send(:remove_const, :Library)
+  end
+  describe "of has_many" do
+    let(:book) { Book.create }
+    let(:library) { Library.create() }
+    before do
+      library.books = [book]
+      library.save!
+    end
+    it "should read book_ids from solr" do
+      library.reload.book_ids.should ==[book.pid]
+    end
+    it "should read books from solr" do
+      library.reload.books.should ==[book]
+    end
+  end
+end
+
 describe "When two or more relationships share the same property" do 
   before do
     class Book < ActiveFedora::Base 
@@ -62,3 +92,4 @@ describe "When relationship is restricted to AF::Base" do
     @book.attachments.should == [@image, @pdf]
   end
 end
+
