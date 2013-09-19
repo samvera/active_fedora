@@ -6,6 +6,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     predicate = double(:klass => double.class, :options=>{:property=>'predicate'}, :class_name=> nil)
     ActiveFedora::SolrService.stub(:query).and_return([])
     ac = ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, predicate)
+    ac.should_receive(:callback).twice
     object = double("object", :new_record? => false, :pid => 'object:b', :save => nil)
   
     subject.should_receive(:add_relationship).with('predicate', object)
@@ -19,6 +20,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     predicate = double(:klass => double.class, :options=>{:property=>'predicate', :inverse_of => 'inverse_predicate'}, :class_name=> nil)
     ActiveFedora::SolrService.stub(:query).and_return([])
     ac = ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, predicate)
+    ac.should_receive(:callback).twice
     object = double("object", :new_record? => false, :pid => 'object:b', :save => nil)
   
     subject.should_receive(:add_relationship).with('predicate', object)

@@ -232,7 +232,7 @@ module ActiveFedora
 
 
       def add_record_to_target_with_callbacks(record)
-      #  callback(:before_add, record)
+        callback(:before_add, record)
         yield(record) if block_given?
         @target ||= [] unless loaded?
         if index = @target.index(record)
@@ -240,7 +240,7 @@ module ActiveFedora
         else
            @target << record
         end
-      #  callback(:after_add, record)
+        callback(:after_add, record)
       #  set_inverse_instance(record, @owner)
         record
       end

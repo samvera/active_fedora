@@ -6,6 +6,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
     predicate = double(:klass => double.class, :options=>{:property=>'predicate'}, :class_name=> nil)
     ActiveFedora::SolrService.stub(:query).and_return([])
     ac = ActiveFedora::Associations::HasManyAssociation.new(subject, predicate)
+    ac.should_receive(:callback).twice
     object = double("object", :new_record? => false, :pid => 'object:b', :save => nil)
   
     object.should_receive(:add_relationship).with('predicate', subject)
