@@ -111,7 +111,7 @@ module ActiveFedora
         return object_relations.to_graph(internal_uri)
       end
       rels = object_relations[args.first] || []
-      rels.map {|o| o.respond_to?(:internal_uri) ? o.internal_uri : o }   #TODO, could just return the object
+      rels.map {|o| o.respond_to?(:internal_uri) ? o.internal_uri : o }.compact   #TODO, could just return the object
     end
 
     def load_relationships
