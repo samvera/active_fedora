@@ -93,3 +93,38 @@ describe "When relationship is restricted to AF::Base" do
   end
 end
 
+describe "Deleting a dependent relationship" do
+  before do
+    class Item < ActiveFedora::Base
+      has_many :components, :property => :is_part_of
+    end
+    class Component < ActiveFedora::Base
+      belongs_to :item, :property => :is_part_of
+    end
+  end
+
+  after do
+      Object.send(:remove_const, :Item)
+      Object.send(:remove_const, :Component)
+  end
+
+  let(:item) { Item.create }
+  let(:component) { Component.create }
+
+  it "should remove the relationships that point at that object" do
+    component.item = item
+    component.save!
+    item.delete
+    component.reload
+    component.relationships(:is_part_of).should == []
+  end
+
+  it "should only try to delete objects that exist in the datastore (not cached objects)" do
+    item.components << component
+    item.save!
+    component.delete
+    item.delete
+  end
+
+end
+
