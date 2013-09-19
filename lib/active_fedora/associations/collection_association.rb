@@ -142,10 +142,17 @@ module ActiveFedora
       # are actually removed from the database, that depends precisely on
       # +delete_records+. They are in any case removed from the collection.
       def delete(*records)
-        remove_records(records) do |_records, old_records|
-          delete_records(old_records) if old_records.any?
-          _records.each { |record| @target.delete(record) }
-        end
+        delete_or_destroy(records, options[:dependent])
+      end
+
+      # Destroy +records+ and remove them from this association calling
+      # +before_remove+ and +after_remove+ callbacks.
+      #
+      # Note that this method will _always_ remove records from the database
+      # ignoring the +:dependent+ option.
+      def destroy(*records)
+        records = find(records) if records.any? { |record| record.kind_of?(Fixnum) || record.kind_of?(String) }
+        delete_or_destroy(records, :destroy)
       end
 
       def create(attrs = {})
@@ -320,13 +327,16 @@ module ActiveFedora
           end
         end
 
-        def remove_records(*records)
+        def delete_or_destroy(records, method)
           records = records.flatten
           records.each { |record| raise_on_type_mismatch(record) }
+          existing_records = records.reject { |r| r.new_record? }
 
           records.each { |record| callback(:before_remove, record) }
-          old_records = records.reject { |r| r.new_record? }
-          yield(records, old_records)
+
+          delete_records(existing_records) if existing_records.any?
+          records.each { |record| target.delete(record) }
+
           records.each { |record| callback(:after_remove, record) }
         end
 
