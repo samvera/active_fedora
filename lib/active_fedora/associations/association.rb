@@ -72,27 +72,6 @@ module ActiveFedora
           inverse.target = owner
         end
       end
-      
-
-      # # This class of the target. belongs_to polymorphic overrides this to look at the
-      # # polymorphic_type field on the owner.
-      # def target_klass
-      #   @reflection.klass
-      # end
-
-      # # Can be overridden (i.e. in ThroughAssociation) to merge in other scopes (i.e. the
-      # # through association's scope)
-      # def target_scope
-      #   target_klass.scoped
-      # end
-
-      # Assigns the ID of the owner to the corresponding foreign key in +record+.
-      # If the association is polymorphic the type of the owner is also set.
-      def set_belongs_to_association_for(record)
-        unless @owner.new_record?
-          record.add_relationship(@reflection.options[:property], @owner)
-        end
-      end
 
       def load_target
           @target = find_target if (@stale_state && stale_target?) || find_target?

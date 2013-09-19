@@ -278,6 +278,14 @@ module ActiveFedora
 
       private 
 
+        # Assigns the ID of the owner to the corresponding foreign key in +record+.
+        # If the association is polymorphic the type of the owner is also set.
+        def set_belongs_to_association_for(record)
+          unless @owner.new_record?
+            record.add_relationship(find_predicate, @owner)
+          end
+        end
+
         def find_predicate
           if @reflection.options[:property]
             @reflection.options[:property]
