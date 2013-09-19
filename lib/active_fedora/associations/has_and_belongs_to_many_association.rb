@@ -1,7 +1,7 @@
 module ActiveFedora
   # = Active Fedora Has And Belongs To Many Association
   module Associations
-    class HasAndBelongsToManyAssociation < AssociationCollection #:nodoc:
+    class HasAndBelongsToManyAssociation < CollectionAssociation #:nodoc:
       def initialize(owner, reflection)
         super
       end
@@ -12,6 +12,15 @@ module ActiveFedora
           query = ActiveFedora::SolrService.construct_query_for_pids(pids)
           solr_result = SolrService.query(query, rows: 1000)
           return ActiveFedora::SolrService.reify_solr_results(solr_result)
+      end
+
+      # In a HABTM, just look in the rels-ext, no need to run a count query from solr.
+      def count
+        @owner.ids_for_outbound(@reflection.options[:property]).size
+      end
+
+      def first
+        load_target.first
       end
 
       protected
@@ -52,7 +61,7 @@ module ActiveFedora
               # which is what we should have done. Now we need a way to look up the
               # reflection by predicate
               name = r.class.reflection_name_for_predicate(@reflection.options[:inverse_of])
-              r.send(name).reset
+              r.association(name).reset
               r.save
             end
           end

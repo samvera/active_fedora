@@ -51,7 +51,7 @@ describe ActiveFedora::Base do
           new_book = @library.books.build({})
           new_book.should be_new_record
           new_book.should be_kind_of Book
-          new_book.library.should be_nil
+          new_book.library.should be_kind_of Library
           @library.books.should == [new_book]
           #TODO save the associated children too, requires something like ActiveRecord::AutosaveAssociation (ver 3.0.12) 
           #@library.save
@@ -250,7 +250,7 @@ describe ActiveFedora::Base do
           @book.author = @person
           @book.save
           Book.find(@book.id).author_id.should == @person.pid
-          Book.find(@book.id).author.send(:find_target).should be_kind_of Person
+          Book.find(@book.id).author.should be_kind_of Person
         end
 
         it "should respect multiple associations that share the same :property and respect associated class" do
@@ -259,10 +259,10 @@ describe ActiveFedora::Base do
           @book.save
           
           Book.find(@book.id).publisher_id.should == @publisher.pid
-          Book.find(@book.id).publisher.send(:find_target).should be_kind_of Publisher
+          Book.find(@book.id).publisher.should be_kind_of Publisher
 
           Book.find(@book.id).author_id.should == @person.pid
-          Book.find(@book.id).author.send(:find_target).should be_kind_of Person
+          Book.find(@book.id).author.should be_kind_of Person
         end
 
         describe "when changing the belonger" do
@@ -610,7 +610,7 @@ describe ActiveFedora::Base do
       end
 
       it "it should find the predicate" do
-        MediaObject.new.baubles.send(:find_predicate).should == :is_part_of
+        MediaObject.new.association(:baubles).send(:find_predicate).should == :is_part_of
       end
     end
 
@@ -629,7 +629,7 @@ describe ActiveFedora::Base do
       end
 
       it "it should find the predicate" do
-        MediaObject.new.parts.send(:find_predicate).should == :is_part_of
+        MediaObject.new.association(:parts).send(:find_predicate).should == :is_part_of
       end
     end
 
@@ -648,7 +648,7 @@ describe ActiveFedora::Base do
       end
 
       it "it should find the predicate" do
-        MediaObject.new.baubles.send(:find_predicate).should == :has_baubles
+        MediaObject.new.association(:baubles).send(:find_predicate).should == :has_baubles
       end
     end
     describe "an object doesn't have a property" do

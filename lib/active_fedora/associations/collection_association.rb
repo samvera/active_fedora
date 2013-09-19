@@ -1,9 +1,21 @@
 module ActiveFedora
   module Associations
-    class AssociationCollection < AssociationProxy #:nodoc:
+    class CollectionAssociation < Association #:nodoc:
+      attr_reader :proxy
+
       def initialize(owner, reflection)
         super
+
         construct_query
+        @proxy = CollectionProxy.new(self)
+      end
+
+      def first(*args)
+        first_or_last(:first, *args)
+      end
+
+      def last(*args)
+        first_or_last(:last, *args)
       end
 
       # Returns the size of the collection 
@@ -40,12 +52,7 @@ module ActiveFedora
       
 
       def to_ary
-        load_target
-        if @target.is_a?(Array)
-          @target.to_ary
-        else
-          Array.wrap(@target)
-        end
+        load_target.dup
       end
       alias_method :to_a, :to_ary
 
@@ -60,6 +67,7 @@ module ActiveFedora
         else
           build_record(attributes) do |record|
             block.call(record) if block_given?
+            add_to_target(record)
             set_belongs_to_association_for(record)
           end
         end
@@ -71,7 +79,7 @@ module ActiveFedora
         result = true
         load_target unless loaded?
 
-        flatten_deeper(records).each do |record|
+        records.flatten.each do |record|
           raise_on_type_mismatch(record)
           add_record_to_target_with_callbacks(record) do |r|
             result &&= insert_record(record)
@@ -115,43 +123,58 @@ module ActiveFedora
           record.save!
         end
       end
-      
 
+      # Count all records using solr. If the +:counter_sql+ or +:finder_sql+ option is set for the
+      # association, it will be used for the query. Otherwise, construct options and pass them with
+      # scope to the target class's +count+.
+      def count(options = {})
+        @reflection.klass.count(:conditions => @counter_query)
+      end
+      
       def load_target
-        if !@owner.new_record?
+        if find_target?
+          targets = []
+
           begin
-            if !loaded?
-              if @target.is_a?(Array) && @target.any?
-                @target = find_target.map do |f|
-                  i = @target.index(f)
-                  if i
-                    @target.delete_at(i).tap do |t|
-                      keys = ["id"] + t.changes.keys + (f.attribute_names - t.attribute_names)
-                      t.attributes = f.attributes.except(*keys)
-                    end
-                  else
-                    f
-                  end
-                end + @target
-              else
-                @target = find_target
-              end
-            end
+            targets = find_target
           rescue ObjectNotFoundError => e
             ActiveFedora::Base.logger.error "Solr and Fedora may be out of sync:\n" + e.message
             reset
           end
+
+          @target = merge_target_lists(targets, @target)
         end
 
-        loaded if target
+        loaded!
         target
       end
 
       def find_target
         return [] if @finder_query.empty?
         solr_result = SolrService.query(@finder_query, :rows=>1000)
-#TODO, don't reify, just store the solr results and lazily reify.
+        #TODO, don't reify, just store the solr results and lazily reify.
         return ActiveFedora::SolrService.reify_solr_results(solr_result)
+      end
+
+      def merge_target_lists(loaded, existing)
+        return loaded if existing.empty?
+        return existing if loaded.empty?
+
+        loaded.map do |f|
+          i = existing.index(f)
+          if i
+            existing.delete_at(i).tap do |t|
+              keys = ["id"] + t.changes.keys + (f.attribute_names - t.attribute_names)
+              # FIXME: this call to attributes causes many NoMethodErrors
+              attributes = f.attributes
+              (attributes.keys - keys).each do |k|
+                t.send("#{k}=", attributes[k])
+              end
+            end
+          else
+            f
+          end
+        end + existing
       end
 
       def load_from_solr
@@ -171,6 +194,24 @@ module ActiveFedora
         end
       #  callback(:after_add, record)
       #  set_inverse_instance(record, @owner)
+        record
+      end
+
+      def add_to_target(record)
+      #  transaction do
+          callback(:before_add, record)
+          yield(record) if block_given?
+
+          if @reflection.options[:uniq] && index = @target.index(record)
+            @target[index] = record
+          else
+            @target << record
+          end
+
+          callback(:after_add, record)
+          set_inverse_instance(record)
+       # end
+
         record
       end
 
@@ -239,7 +280,7 @@ module ActiveFedora
         end
 
         def remove_records(*records)
-          records = flatten_deeper(records)
+          records = records.flatten
           records.each { |record| raise_on_type_mismatch(record) }
 
           records.each { |record| callback(:before_remove, record) }
@@ -270,6 +311,15 @@ module ActiveFedora
           if @owner.new_record?
             raise ActiveFedora::RecordNotSaved, "You cannot call create unless the parent is saved"
           end
+        end
+
+        # Fetches the first/last using solr if possible, otherwise from the target array.
+        def first_or_last(type, *args)
+          args.shift if args.first.is_a?(Hash) && args.first.empty?
+
+          #collection = fetch_first_or_last_using_find?(args) ? scoped : load_target
+          collection = load_target
+          collection.send(type, *args)
         end
       
     end
