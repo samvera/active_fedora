@@ -45,6 +45,22 @@ module ActiveFedora
       end
 
       class MacroReflection
+        # Returns the name of the macro.
+        #
+        # <tt>has_many :clients</tt> returns <tt>:clients</tt>
+        attr_reader :name
+
+        # Returns the macro type.
+        #
+        # <tt>has_many :clients</tt> returns <tt>:has_many</tt>
+        attr_reader :macro
+
+        # Returns the hash of options used for the macro.
+        #
+        # <tt>has_many :clients</tt> returns +{}+
+        attr_reader :options
+
+        attr_reader :active_fedora
 
         # Returns the target association's class.
         #
@@ -64,6 +80,7 @@ module ActiveFedora
 
         def initialize(macro, name, options, active_fedora)
           @macro, @name, @options, @active_fedora = macro, name, options, active_fedora
+          @automatic_inverse_of = nil
         end
 
         # Returns a new, unsaved instance of the associated class. +options+ will
@@ -72,17 +89,6 @@ module ActiveFedora
           klass.new(*options)
         end
 
-        # Returns the name of the macro.
-        #
-        # <tt>has_many :clients</tt> returns <tt>:clients</tt>
-        attr_reader :name
-
-        # Returns the hash of options used for the macro.
-        #
-        # <tt>has_many :clients</tt> returns +{}+
-        attr_reader :options
-
-        attr_reader :macro
 
         # Returns the class name for the macro.
         #
@@ -111,23 +117,113 @@ module ActiveFedora
       # Active Record class.
       class AssociationReflection < MacroReflection #:nodoc:
 
-        def initialize(macro, name, options, active_record)
+        def initialize(macro, name, options, active_fedora)
           super
           @collection = [:has_many, :has_and_belongs_to_many].include?(macro)
         end
 
-        def primary_key_name
-          @primary_key_name ||= options[:foreign_key] || derive_primary_key_name
+
+        # Returns a new, unsaved instance of the associated class. +options+ will
+        # be passed to the class's constructor.
+        def build_association(*options)
+          klass.new(*options)
         end
-        
+
         # Creates a new instance of the associated class, and immediately saves it
-        # with ActiveRecord::Base#save. +options+ will be passed to the class's
+        # with ActiveFedora::Base#save. +options+ will be passed to the class's
         # creation method. Returns the newly created object.
         def create_association(*options)
           klass.create(*options)
         end
 
+        def primary_key_name
+          @primary_key_name ||= options[:foreign_key] || derive_primary_key_name
+        end
+
+        def inverse_of
+          return unless inverse_name
+
+          @inverse_of ||= klass.reflect_on_association inverse_name
+        end
+
+        def association_class
+          case macro
+          when :belongs_to
+            Associations::BelongsToAssociation
+          when :has_and_belongs_to_many
+            Associations::HasAndBelongsToManyAssociation
+          when :has_many
+            Associations::HasManyAssociation
+          end
+        end
+
+        VALID_AUTOMATIC_INVERSE_MACROS = [:has_many, :has_one, :belongs_to]
+        INVALID_AUTOMATIC_INVERSE_OPTIONS = [:conditions, :through, :polymorphic, :foreign_key]
+        
+
         private
+
+        def inverse_name
+          options.fetch(:inverse_of) do
+            if @automatic_inverse_of == false
+              nil
+            else
+              @automatic_inverse_of ||= automatic_inverse_of
+            end
+          end
+        end
+
+        # Checks if the inverse reflection that is returned from the
+        # +automatic_inverse_of+ method is a valid reflection. We must
+        # make sure that the reflection's active_record name matches up
+        # with the current reflection's klass name.
+        #
+        # Note: klass will always be valid because when there's a NameError
+        # from calling +klass+, +reflection+ will already be set to false.
+        def valid_inverse_reflection?(reflection)
+          reflection &&
+            klass.name == reflection.active_fedora.name &&
+            can_find_inverse_of_automatically?(reflection)
+        end
+        
+
+        # returns either nil or the inverse association name that it finds.
+        def automatic_inverse_of
+          if can_find_inverse_of_automatically?(self)
+            inverse_name = ActiveSupport::Inflector.underscore(active_fedora.name).to_sym
+
+            begin
+              reflection = klass.reflect_on_association(inverse_name)
+            rescue NameError
+              # Give up: we couldn't compute the klass type so we won't be able
+              # to find any associations either.
+              reflection = false
+            end
+
+            if valid_inverse_reflection?(reflection)
+              return inverse_name
+            end
+          end
+
+          false
+        end
+
+        # Checks to see if the reflection doesn't have any options that prevent
+        # us from being able to guess the inverse automatically. First, the
+        # <tt>inverse_of</tt> option cannot be set to false. Second, we must
+        # have <tt>has_many</tt>, <tt>has_one</tt>, <tt>belongs_to</tt> associations.
+        # Third, we must not have options such as <tt>:polymorphic</tt> or
+        # <tt>:foreign_key</tt> which prevent us from correctly guessing the
+        # inverse association.
+        #
+        # Anything with a scope can additionally ruin our attempt at finding an
+        # inverse, so we exclude reflections with scopes.
+        def can_find_inverse_of_automatically?(reflection)
+          reflection.options[:inverse_of] != false &&
+            VALID_AUTOMATIC_INVERSE_MACROS.include?(reflection.macro) &&
+            !INVALID_AUTOMATIC_INVERSE_OPTIONS.any? { |opt| reflection.options[opt] } 
+            #&& !reflection.scope
+        end
 
         def derive_primary_key_name
           'pid'
