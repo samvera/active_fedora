@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "Looking up collection members" do
   before :all do
     class Library < ActiveFedora::Base 
-      has_many :books, :property=>:has_constituent
+      has_many :books
     end
 
     class Book < ActiveFedora::Base 

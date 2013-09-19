@@ -2,7 +2,7 @@ module ActiveFedora
   module SemanticNode 
     extend ActiveSupport::Concern
     included do
-      class_attribute  :class_relationships_desc
+      class_attribute :class_relationships_desc
     end
     attr_accessor :relationships_loaded, :load_from_solr, :subject
 
@@ -23,9 +23,10 @@ module ActiveFedora
     end
 
     # Add a relationship to the Object.
-    # @param predicate
-    # @param target Either a string URI or an object that is a kind of ActiveFedora::Base 
+    # @param [Symbol, String] predicate
+    # @param [URI, ActiveFedora::Base] target Either a string URI or an object that is a kind of ActiveFedora::Base 
     def add_relationship(predicate, target, literal=false)
+      raise ArgumentError, "predicate must be a symbol. You provided `#{predicate.inspect}'" unless predicate.class.in?([Symbol, String])
       object_relations.add(predicate, target, literal)
       rels_ext.content_will_change! if object_relations.dirty
     end
