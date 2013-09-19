@@ -6,6 +6,7 @@ module ActiveFedora
   class RelsExtDatastream < Datastream
     
     attr_accessor :model
+    delegate :relationships, to: :model
 
     def self.default_attributes
       super.merge(:controlGroup => 'X', :mimeType => 'application/rdf+xml')
@@ -34,10 +35,6 @@ module ActiveFedora
 
     def relationships_are_not_dirty!
       model.relationships_are_dirty = false
-    end
-
-    def relationships
-      model.relationships
     end
 
     # Populate a RelsExtDatastream object based on the "datastream" content 

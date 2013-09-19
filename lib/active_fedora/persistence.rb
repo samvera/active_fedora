@@ -46,7 +46,7 @@ module ActiveFedora
       results = {}
       reflections.each_pair do |name, reflection|
         if reflection.macro == :has_many
-          results[reflection.options[:property]] = send(name)
+          results[reflection.options[:property]] = association(name).ids_reader
         end
       end
       results.merge (inbound_relationships(:object) )

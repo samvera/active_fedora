@@ -225,7 +225,7 @@ module ActiveFedora
 
     #return the internal fedora URI
     def internal_uri
-      "info:fedora/#{pid}"
+      "info:fedora/#{pid}" if pid
     end
 
     #return the owner id
