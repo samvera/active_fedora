@@ -10,6 +10,48 @@ module ActiveFedora
         @proxy = CollectionProxy.new(self)
       end
 
+
+      # Implements the reader method, e.g. foo.items for Foo.has_many :items
+      # @param opts [Boolean, Hash] if true, force a reload
+      # @option opts [Symbol] :response_format can be ':solr' to return a solr result.
+      def reader(opts = false)
+        if opts.kind_of?(Hash)
+          return load_from_solr if opts[:response_format] == :solr
+          raise ArgumentError, "unknown parameters `#{opts.inspect}'"
+        else
+          force_reload = opts
+        end
+        reload if force_reload || stale_target?
+        proxy
+      end
+
+      # Implements the writer method, e.g. foo.items= for Foo.has_many :items
+      def writer(records)
+        replace(records)
+      end
+
+      # Implements the ids reader method, e.g. foo.item_ids for Foo.has_many :items
+      def ids_reader
+        if loaded?
+          load_target.map do |record|
+            record.pid
+          end
+        else
+          load_from_solr.map do |solr_record|
+            solr_record['id']
+          end
+        end
+      end
+
+      # Implements the ids writer method, e.g. foo.item_ids= for Foo.has_many :items
+      def ids_writer(ids)
+        ids = Array.wrap(ids).reject { |id| id.blank? }
+        replace(klass.find(ids))#.index_by { |r| r.id }.values_at(*ids))
+        #TODO, like this when find() can return multiple records
+        #send("#{reflection.name}=", reflection.klass.find(ids))
+        #send("#{reflection.name}=", ids.collect { |id| reflection.klass.find(id)})
+      end
+
       def first(*args)
         first_or_last(:first, *args)
       end
@@ -124,8 +166,7 @@ module ActiveFedora
         end
       end
 
-      # Count all records using solr. If the +:counter_sql+ or +:finder_sql+ option is set for the
-      # association, it will be used for the query. Otherwise, construct options and pass them with
+      # Count all records using solr. Construct options and pass them with
       # scope to the target class's +count+.
       def count(options = {})
         @reflection.klass.count(:conditions => @counter_query)
