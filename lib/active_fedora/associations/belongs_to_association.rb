@@ -2,6 +2,18 @@ module ActiveFedora
   module Associations
     class BelongsToAssociation < SingularAssociation #:nodoc:
 
+      #TODO just set it in the RELS-EXT
+      def id_writer(id)
+        obj =  id.blank? ? nil : reflection.klass.find(id)
+        @owner.send("#{reflection.name}=", obj)
+      end
+
+      #TODO just read from RELS-EXT
+      def id_reader
+        obj = @owner.send("#{reflection.name}")
+        obj.pid if obj
+      end
+
       def replace(record)
         remove_matching_property_relationship
         unless record.nil?
