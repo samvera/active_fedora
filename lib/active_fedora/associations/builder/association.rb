@@ -6,7 +6,7 @@ module ActiveFedora::Associations::Builder
     # Set by subclasses
     class_attribute :macro
 
-    attr_reader :model, :name, :options, :reflection
+    attr_reader :model, :name, :options, :reflection, :mixin
 
     def self.build(model, name, options)
       new(model, name, options).build
@@ -14,6 +14,8 @@ module ActiveFedora::Associations::Builder
 
     def initialize(model, name, options)
       @model, @name, @options = model, name, options
+      @mixin = Module.new
+      @model.__send__(:include, @mixin)
     end
 
     def build
@@ -37,7 +39,7 @@ module ActiveFedora::Associations::Builder
       def define_readers
         name = self.name
 
-        model.redefine_method(name) do |*params|
+        mixin.send(:define_method, name) do |*params|
           association(name).reader(*params)
         end
       end
@@ -45,7 +47,7 @@ module ActiveFedora::Associations::Builder
       def define_writers
         name = self.name
 
-        model.redefine_method("#{name}=") do |value|
+        mixin.send(:define_method, "#{name}=") do |value|
           association(name).writer(value)
         end
       end

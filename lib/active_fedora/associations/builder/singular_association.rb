@@ -16,15 +16,15 @@ module ActiveFedora::Associations::Builder
       def define_constructors
         name = self.name
 
-        model.redefine_method("build_#{name}") do |*params|
+        mixin.redefine_method("build_#{name}") do |*params|
           association(name).build(*params)
         end
 
-        model.redefine_method("create_#{name}") do |*params|
+        mixin.redefine_method("create_#{name}") do |*params|
           association(name).create(*params)
         end
 
-        model.redefine_method("create_#{name}!") do |*params|
+        mixin.redefine_method("create_#{name}!") do |*params|
           association(name).create!(*params)
         end
       end
