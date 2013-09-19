@@ -345,6 +345,20 @@ describe ActiveFedora::Base do
           end
         end
       end
+      describe "of has_many" do
+        let(:book) { Book.create }
+        let(:library) { Library.create() }
+        before do
+          library.books = [book]
+          library.save!
+        end
+        it "should read book_ids from solr" do
+          library.reload.book_ids.should ==[book.pid]
+        end
+        it "should read books from solr" do
+          library.reload.books.should ==[book]
+        end
+      end
     end
 
     describe "setting belongs_to" do
