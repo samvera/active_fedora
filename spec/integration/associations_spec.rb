@@ -15,6 +15,9 @@ describe ActiveFedora::Base do
         has_and_belongs_to_many :collections, :property=>:is_member_of_collection
       end
 
+      class SpecialInheritedBook < Book
+      end
+
       class Person < ActiveFedora::Base
       end
 
@@ -35,6 +38,7 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :Person)
       Object.send(:remove_const, :Collection)
       Object.send(:remove_const, :Topic)
+      Object.send(:remove_const, :SpecialInheritedBook)
     end
 
     describe "an unsaved instance" do
@@ -178,6 +182,7 @@ describe ActiveFedora::Base do
           @topic1 = Topic.create
           @topic2 = Topic.create
           @book = Book.create
+          @special_book = SpecialInheritedBook.create
         end
         it "habtm should set and remove relationships bidirectionally" do
           @book.topics << @topic1
@@ -201,9 +206,23 @@ describe ActiveFedora::Base do
           book2.topics.count.should == 12
         end
 
+        it "Should find inherited objects along with base objects" do
+          @book.topics << @topic1
+          @special_book.topics << @topic1
+          @topic1.books.should == [@book, @special_book]
+          @topic1.reload.books.should == [@book, @special_book]
+        end
+
+        it "Should cast found books to the correct cmodel" do
+          @topic1.books[0].class == Book
+          @topic1.books[1].class == SpecialInheritedBook
+        end
+
         after do
           @topic1.delete
           @topic2.delete
+          @book.delete
+          @special_book.delete
         end
       end
     end
@@ -279,6 +298,28 @@ describe ActiveFedora::Base do
           end
           after do
             @library2.delete
+          end
+        end
+
+        describe "when dealing with inherited objects" do
+          before do
+            @library2 = Library.create
+            @special_book = SpecialInheritedBook.create
+
+            @book.library = @library2
+            @book.save
+            @special_book.library = @library2
+            @special_book.save
+          end
+
+          it "should cast to the most specific class for the association" do
+            @library2.books[0].class == Book
+            @library2.books[1].class == SpecialInheritedBook
+          end
+
+          after do
+            @library2.delete
+            @special_book.delete
           end
         end
 
@@ -723,6 +764,98 @@ describe ActiveFedora::Base do
           book2.save
           book2.reload.contents.should == [text2]
           text2.reload.books.should == [book2]
+        end
+      end
+    end
+  end
+
+  describe "casting inheritance additional test cases" do
+    describe "for habtm" do
+      before :all do
+        class SimpleObject < ActiveFedora::Base
+          belongs_to :simple_collection, property: :is_part_of, class_name: 'SimpleCollection'
+          belongs_to :complex_collection, property: :is_part_of, class_name: 'ComplexCollection'
+        end
+
+        class ComplexObject < SimpleObject
+        end
+
+        class SimpleCollection < ActiveFedora::Base
+          has_many :objects, property: :is_part_of, class_name: 'SimpleObject'
+          has_many :complex_objects, property: :is_part_of, class_name: 'ComplexObject'
+        end
+
+        class ComplexCollection < SimpleCollection
+        end
+
+      end
+      after :all do
+        Object.send(:remove_const, :SimpleObject)
+        Object.send(:remove_const, :ComplexObject)
+        Object.send(:remove_const, :SimpleCollection)
+        Object.send(:remove_const, :ComplexCollection)
+      end
+
+      describe "saving between the before and after hooks" do
+        before do
+          @simple_collection = SimpleCollection.create
+          @complex_collection = ComplexCollection.create
+
+          #Need to add the simpler cmodel here as currently inheritance support is read-only.
+          #See ActiveFedora pull request 207 on how to do this programmatically.
+          @complex_collection.add_relationship(:has_model, @complex_object.class.superclass.to_class_uri)
+
+          @simple_object = SimpleObject.create
+          @simple_object_second = SimpleObject.create
+          @complex_object = ComplexObject.create
+
+          #Need to add the simpler cmodel here as currently inheritance support is read-only.
+          #See ActiveFedora pull request 207 on how to do this programmatically.
+          @complex_object.add_relationship(:has_model, @complex_object.class.superclass.to_class_uri)
+
+          @simple_collection.objects = [@simple_object, @simple_object_second, @complex_object]
+          @simple_collection.save!
+          @complex_collection.objects = [@simple_object, @complex_object]
+          @complex_collection.save!
+          @complex_object.save!
+          @simple_object.save!
+          @simple_object_second.save!
+        end
+
+
+        it "casted association methods should work and return the most complex class" do
+          @complex_object.simple_collection.should be_instance_of SimpleCollection
+          @complex_object.complex_collection.should be_instance_of ComplexCollection
+
+          @simple_object.simple_collection.should be_instance_of SimpleCollection
+          @simple_object.complex_collection.should be_instance_of ComplexCollection
+          @simple_object_second.simple_collection.should be_instance_of SimpleCollection
+          @simple_object_second.complex_collection.should be_nil
+
+          @complex_collection.objects[0].should be_instance_of SimpleObject
+          @complex_collection.objects[1].should be_instance_of ComplexObject
+
+          @simple_collection.objects[0].should be_instance_of SimpleObject
+          @simple_collection.objects[1].should be_instance_of SimpleObject
+          @simple_collection.objects[2].should be_instance_of ComplexObject
+
+        end
+
+        it "specified ending relationships should ignore classes not specified" do
+          @complex_collection.complex_objects.length.should == 1
+          @complex_collection.complex_objects[0].should be_instance_of ComplexObject
+          @complex_collection.complex_objects[1].should be_nil
+
+          @simple_collection.complex_objects.length.should == 1
+          @simple_collection.complex_objects[0].should be_instance_of ComplexObject
+          @simple_collection.complex_objects[1].should be_nil
+
+        end
+
+        after do
+          @simple_object.delete
+          @simple_object_second.delete
+          @complex_object.delete
         end
       end
     end
