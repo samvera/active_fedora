@@ -128,3 +128,46 @@ describe "Deleting a dependent relationship" do
 
 end
 
+describe "Autosave" do
+  before do
+    class Item < ActiveFedora::Base
+      has_many :components
+      has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
+        m.field "title", :string
+      end
+      delegate :title, to: 'foo'
+    end
+    class Component < ActiveFedora::Base
+      belongs_to :item, :property => :is_part_of
+      has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
+        m.field "description", :string
+      end
+      delegate :description, to: 'foo'
+    end
+  end
+
+  after do
+      Object.send(:remove_const, :Item)
+      Object.send(:remove_const, :Component)
+  end
+
+  describe "From the belongs_to side" do
+    let(:component) { Component.create(item: Item.new(title: 'my title')) }
+
+    it "should save dependent records" do
+      component.reload
+      component.item.title.should == 'my title'
+    end
+  end
+  describe "From the has_many side" do
+    let(:item) { Item.create(components: [Component.new(description: 'my description')]) }
+
+    it "should save dependent records" do
+      item.reload
+      item.components.first.description.should == 'my description'
+    end
+  end
+
+end
+
+

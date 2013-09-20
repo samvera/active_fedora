@@ -45,24 +45,6 @@ module ActiveFedora
       end
     end
 
-    def new?
-      new_object?
-    end
-
-    # Has this object been saved?
-    def new_object?
-      inner_object.new?
-    end
-    
-    ## Required by associations
-    def new_record?
-      self.new_object?
-    end
-
-    def persisted?
-      !new_object?
-    end
-
     def mark_for_destruction
       @marked_for_destruction = true
     end
@@ -340,6 +322,7 @@ module ActiveFedora
     include Delegating
     extend Querying
     include Associations
+    include AutosaveAssociation
     include NestedAttributes
     include Reflection
     include ActiveModel::Dirty

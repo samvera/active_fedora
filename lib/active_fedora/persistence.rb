@@ -2,6 +2,33 @@ module ActiveFedora
   # = Active Fedora Persistence
   module Persistence
     extend ActiveSupport::Concern
+    extend Deprecation
+
+    def new?
+      new_record?
+    end
+    deprecation_deprecate :new?
+
+    # Has this object been saved?
+    def new_object?
+      new_record?
+    end
+    deprecation_deprecate :new_object?
+    
+
+    ## Required by associations
+    def new_record?
+      inner_object.new?
+    end
+
+    def persisted?
+      !(new_record? || destroyed?)
+    end
+
+    # Returns true if this object has been destroyed, otherwise returns false.
+    def destroyed?
+      @destroyed
+    end
 
     #Saves a Base object, and any dirty datastreams, then updates 
     #the Solr index for this object.
@@ -77,6 +104,7 @@ module ActiveFedora
         solr.delete_by_id(pid) 
         solr.commit
       end
+      @destroyed = true
     end
 
     def destroy
