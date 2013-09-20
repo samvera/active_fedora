@@ -134,6 +134,16 @@ module ActiveFedora
       alias_method :push, :<<
       alias_method :concat, :<<
 
+      # Remove all records from this association
+      #
+      # See delete for more info.
+      def delete_all
+        delete(load_target).tap do
+          reset
+          loaded!
+        end
+      end
+
       # Removes +records+ from this association calling +before_remove+ and
       # +after_remove+ callbacks.
       #
@@ -342,7 +352,7 @@ module ActiveFedora
 
           records.each { |record| callback(:before_remove, record) }
 
-          delete_records(existing_records) if existing_records.any?
+          delete_records(existing_records, method) if existing_records.any?
           records.each { |record| target.delete(record) }
 
           records.each { |record| callback(:after_remove, record) }

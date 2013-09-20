@@ -38,9 +38,42 @@ module ActiveFedora
       protected
 
         # Deletes the records according to the <tt>:dependent</tt> option.
-        def delete_records(records)
-          records.each do |r| 
-            r.remove_relationship(find_predicate, @owner)
+        def delete_records(records, method)
+          # records.each do |r| 
+          #   r.remove_relationship(find_predicate, @owner)
+          # end
+          #
+          if method == :destroy
+            records.each { |r| r.destroy }
+            update_counter(-records.length) unless inverse_updates_counter_cache?
+          else
+            # Find all the records that point to this and nullify them
+            # keys  = records.map { |r| r[reflection.association_primary_key] }
+            # scope = scoped.where(reflection.association_primary_key => keys)
+
+            if method == :delete_all
+              raise "Not Implemented"
+              #update_counter(-scope.delete_all)
+            else
+
+              inverse = reflection.inverse_of.name
+              records.each do |record|
+                if record.persisted?
+                  record.reload
+                  assoc = record.association(inverse)
+                  if assoc.reflection.collection?
+                    # Remove from a has_and_belongs_to_many
+                    record.association(inverse).delete(@owner)
+                  else
+                    # Remove from a belongs_to
+                    record.association(inverse).id_writer(nil)
+                  end
+                  record.save!
+                end
+              end
+
+              #update_counter(-scope.update_all(reflection.foreign_key => nil))
+            end
           end
         end
 

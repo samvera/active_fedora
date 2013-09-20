@@ -52,7 +52,7 @@ module ActiveFedora
           load_target.size
         end
 
-        def delete_records(records)
+        def delete_records(records, method)
           records.each do |r| 
             @owner.remove_relationship(@reflection.options[:property], r)
             

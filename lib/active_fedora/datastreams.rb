@@ -16,7 +16,7 @@ module ActiveFedora
       end
 
       before_save :add_disseminator_location_to_datastreams
-      before_save :serialize_datastreams
+      #before_save :serialize_datastreams
     end
 
     def ds_specs
