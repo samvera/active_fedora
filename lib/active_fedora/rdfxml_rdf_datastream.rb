@@ -7,7 +7,7 @@ module ActiveFedora
     end
 
     def self.default_attributes
-      super.merge(:mimeType => 'text/xml', :controlGroup => 'X')
+      super.merge(:mimeType => 'text/xml')
     end
   end
 end
