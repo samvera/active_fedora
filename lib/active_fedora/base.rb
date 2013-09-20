@@ -32,19 +32,6 @@ module ActiveFedora
 
     delegate :state=,:label=, to: :inner_object
 
-    def method_missing(name, *args)
-      dsid = corresponding_datastream_name(name)
-      if dsid
-        ### Create and invoke a proxy method 
-        self.class.send :define_method, name do
-            datastreams[dsid]
-        end
-        self.send(name)
-      else 
-        super
-      end
-    end
-
     def mark_for_destruction
       @marked_for_destruction = true
     end
