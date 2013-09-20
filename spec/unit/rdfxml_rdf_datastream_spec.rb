@@ -110,7 +110,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
         subject.rdf_subject.to_s.should == "http://library.ucsd.edu/ark:/20775/"
       end
       it "should have controlGroup" do
-        subject.controlGroup.should == 'X'
+        subject.controlGroup.should == 'M'
       end
       it "should have mimeType" do
         subject.mimeType.should == 'text/xml'
