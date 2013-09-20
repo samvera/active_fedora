@@ -1,5 +1,8 @@
 require "active-fedora"
 require "active_support" # This is just to load ActiveSupport::CoreExtensions::String::Inflections
+
+ZIP_FILE = 'https://github.com/projecthydra/hydra-jetty/archive/v5.2.0.zip'
+
 namespace :repo do
   
   desc "Delete and re-import the object identified by pid" 
