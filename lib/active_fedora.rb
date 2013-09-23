@@ -28,6 +28,7 @@ module ActiveFedora #:nodoc:
     autoload :Associations
     autoload :Attributes
     autoload :Auditable
+    autoload :AutosaveAssociation
     autoload :Base
     autoload :ContentModel
     autoload :Callbacks

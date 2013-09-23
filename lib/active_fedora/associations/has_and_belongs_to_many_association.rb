@@ -6,6 +6,29 @@ module ActiveFedora
         super
       end
 
+      def insert_record(record, force = true, validate = true)
+        if record.new_record?
+          if force
+            record.save!
+          else
+            return false unless record.save(:validate => validate)
+          end
+        end
+
+        ### TODO save relationship
+        @owner.add_relationship(@reflection.options[:property], record)
+
+        if @owner.new_record? and @reflection.options[:inverse_of]
+          logger.warn("has_and_belongs_to_many #{@reflection.inspect} is cowardly refusing to insert the inverse relationship into #{record}, because #{@owner} is not persisted yet.")
+        elsif @reflection.options[:inverse_of]
+          record.add_relationship(@reflection.options[:inverse_of], @owner)
+          record.save
+        end
+
+        return true
+      end
+
+
       def find_target
           pids = @owner.ids_for_outbound(@reflection.options[:property])
           return [] if pids.empty?
@@ -27,28 +50,6 @@ module ActiveFedora
 
         def count_records
           load_target.size
-        end
-
-        def insert_record(record, force = true, validate = true)
-          if record.new_record?
-            if force
-              record.save!
-            else
-              return false unless record.save(:validate => validate)
-            end
-          end
-
-          ### TODO save relationship
-          @owner.add_relationship(@reflection.options[:property], record)
-
-          if @owner.new_record? and @reflection.options[:inverse_of]
-            logger.warn("has_and_belongs_to_many #{@reflection.inspect} is cowardly refusing to insert the inverse relationship into #{record}, because #{@owner} is not persisted yet.")
-          elsif @reflection.options[:inverse_of]
-            record.add_relationship(@reflection.options[:inverse_of], @owner)
-            record.save
-          end
-
-          return true
         end
 
         def delete_records(records)

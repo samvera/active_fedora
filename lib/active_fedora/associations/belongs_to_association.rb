@@ -30,6 +30,15 @@ module ActiveFedora
         record
       end
 
+      def reset
+        super
+        @updated = false
+      end
+
+      def updated?
+        @updated
+      end
+
       private
         def find_target
           pid = @owner.ids_for_outbound(@reflection.options[:property])
