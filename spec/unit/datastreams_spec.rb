@@ -53,31 +53,31 @@ describe ActiveFedora::Datastreams do
   describe "#add_disseminator_location_to_datastreams" do
     it "should infer dsLocations for E datastreams without hitting Fedora" do
       
-      mock_specs = {:e => { :disseminator => 'xyz' }}
+      mock_specs = {'e' => { :disseminator => 'xyz' }}
       mock_ds = double(:controlGroup => 'E')
       ActiveFedora::Base.stub(:ds_specs => mock_specs)
       ActiveFedora.stub(:config_for_environment => { :url => 'http://localhost'})
-      subject.stub(:pid => 'test:1', :datastreams => {:e => mock_ds})
+      subject.stub(:pid => 'test:1', :datastreams => {'e' => mock_ds})
       mock_ds.should_receive(:dsLocation=).with("http://localhost/objects/test:1/methods/xyz")
       subject.add_disseminator_location_to_datastreams
     end
   end
 
-  describe "#corresponding_datastream_name" do
-    before(:each) do
-      subject.stub(:datastreams => { 'abc' => double(), 'a_b_c' => double(), 'a-b' => double()})
+  describe ".name_for_dsid" do
+    it "should use the name" do
+      ActiveFedora::Base.send(:name_for_dsid, 'abc').should == 'abc'
     end
 
-    it "should use the name, if it exists" do
-      subject.corresponding_datastream_name('abc').should == 'abc'
+    it "should use the name" do
+      ActiveFedora::Base.send(:name_for_dsid, 'ARCHIVAL_XML').should == 'ARCHIVAL_XML'
+    end
+
+    it "should use the name" do
+      ActiveFedora::Base.send(:name_for_dsid, 'descMetadata').should == 'descMetadata'
     end
 
     it "should hash-erize underscores" do
-      subject.corresponding_datastream_name('a_b').should == 'a-b'
-    end
-
-    it "should return nil if nothing matches" do
-      subject.corresponding_datastream_name('xyz').should be_nil
+      ActiveFedora::Base.send(:name_for_dsid, 'a-b').should == 'a_b'
     end
   end
  

@@ -115,7 +115,6 @@ describe ActiveFedora::Base do
   it "should create proxies to all the datastreams" do
     properties_ds = @test_history.datastreams["properties"]
     dublin_core_ds = @test_history.datastreams["dublin_core"]
-    @test_history.should_not respond_to(:properties)
     @test_history.properties.should be properties_ds    
     @test_history.should respond_to(:properties)
     OralHistory.new.should respond_to(:properties)
