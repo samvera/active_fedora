@@ -38,16 +38,6 @@ module ActiveFedora
       true
     end
 
-    ## Given a method name, return the best-guess dsid
-    def corresponding_datastream_name(method_name)
-      dsid = method_name.to_s
-      return dsid if datastreams.has_key? dsid
-      unescaped_name = method_name.to_s.gsub('_', '-')
-      return unescaped_name if datastreams.has_key? unescaped_name
-      nil
-    end
-
-    
     #
     # Datastream Management
     #
@@ -99,6 +89,7 @@ module ActiveFedora
         datastream.instance_variable_set :@dsid, generate_dsid(prefix)
       end
       datastreams[datastream.dsid] = datastream
+      self.class.build_datastream_accessor(datastream.dsid) unless respond_to? datastream.dsid
       return datastream.dsid
     end
 
@@ -218,7 +209,9 @@ module ActiveFedora
         
         spec = {:autocreate => args.fetch(:autocreate, false), :type => args[:type], :label =>  args.fetch(:label,""), :control_group => args[:control_group], :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
         spec[:versionable] = args[:versionable] if args.has_key? :versionable
-        ds_specs[args[:name]]= spec
+        name = args[:name]
+        build_datastream_accessor(name)
+        ds_specs[name]= spec
       end
 
       
@@ -251,8 +244,26 @@ module ActiveFedora
         spec = {:autocreate => args.fetch(:autocreate, false), :type => args.fetch(:type,ActiveFedora::Datastream),
                 :label =>  args.fetch(:label,"File Datastream"), :control_group => args.fetch(:control_group,"M")}
         spec[:versionable] = args[:versionable] if args.has_key? :versionable
-        ds_specs[args.fetch(:name, "content")]= spec
+        name = args.fetch(:name, "content")
+        build_datastream_accessor(name)
+        ds_specs[name]= spec
       end
+
+      def build_datastream_accessor(dsid)
+        name = name_for_dsid(dsid)
+        define_method name do
+          datastreams[dsid]
+        end
+        end
+
+
+      private
+
+        ## Given a dsid return a standard name
+        def name_for_dsid(dsid)
+          dsid.gsub('-', '_')
+        end
+
     end
 
   end
