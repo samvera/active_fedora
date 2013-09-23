@@ -2,24 +2,34 @@ module ActiveFedora
   module Associations
     class BelongsToAssociation < SingularAssociation #:nodoc:
 
-      #TODO just set it in the RELS-EXT
       def id_writer(id)
-        obj =  id.blank? ? nil : reflection.klass.find(id)
-        @owner.send("#{reflection.name}=", obj)
+        remove_matching_property_relationship
+        return if id.blank? or id == ActiveFedora::UnsavedDigitalObject::PLACEHOLDER
+        @owner.add_relationship(@reflection.options[:property], ActiveFedora::Base.internal_uri(id))
       end
 
-      #TODO just read from RELS-EXT
       def id_reader
-        obj = @owner.send("#{reflection.name}")
-        obj.pid if obj
+        # need to find the id with the correct class
+        ids = @owner.ids_for_outbound(@reflection.options[:property])
+
+        return if ids.empty? 
+        # This incurs a lot of overhead, but it's necessary if the users use one property for more than one association.
+        # e.g.
+        #   belongs_to :author, :property=>:has_member, :class_name=>'Person'
+        #   belongs_to :publisher, :property=>:has_member
+        results = SolrService.query(ActiveFedora::SolrService.construct_query_for_pids(ids))
+        results.each do |result|
+          return result['id'] if SolrService.class_from_solr_document(result) == klass
+        end
+        return nil
       end
 
       def replace(record)
-        remove_matching_property_relationship
-        unless record.nil?
+        if record.nil?
+          id_writer(nil)
+        else
           raise_on_type_mismatch(record)
-
-          @owner.add_relationship(@reflection.options[:property], record) unless record.new_record?
+          id_writer(record.id)
           @updated = true
 
           #= (AssociationProxy === record ? record.target : record)
@@ -41,33 +51,30 @@ module ActiveFedora
 
       private
         def find_target
-          pid = @owner.ids_for_outbound(@reflection.options[:property])
-          return if pid.empty?          
-          class_name = @reflection.options[:class_name] ? @reflection.options[:class_name] : @reflection.class_name
-          query = construct_query(pid, class_name)    
-          solr_result = SolrService.query(query) 
+          pid = id_reader
+          return unless pid
+          solr_result = SolrService.query(construct_query(pid)) 
           return ActiveFedora::SolrService.reify_solr_results(solr_result).first
         end
 
-        def construct_query pid, class_name
-          if class_name && class_name != "ActiveFedora::Base"
+        def construct_query pid
+          if klass != ActiveFedora::Base
             clauses = {}  
-            clauses[:has_model] = class_name.constantize.to_class_uri
-            query = ActiveFedora::SolrService.construct_query_for_rel(clauses) + " AND (" + ActiveFedora::SolrService.construct_query_for_pids(pid) + ")"
+            clauses[:has_model] = klass.to_class_uri
+            query = ActiveFedora::SolrService.construct_query_for_rel(clauses) + " AND (" + ActiveFedora::SolrService.construct_query_for_pids([pid]) + ")"
           else
             query = ActiveFedora::SolrService.construct_query_for_pids(pid)
           end
         end
 
         def remove_matching_property_relationship
-          class_name = @reflection.options[:class_name] ? @reflection.options[:class_name] : @reflection.class_name
           ids = @owner.ids_for_outbound(@reflection.options[:property])
           return if ids.empty? 
           ids.each do |id|
             result = SolrService.query(ActiveFedora::SolrService.construct_query_for_pids([id]))
             hit = ActiveFedora::SolrService.reify_solr_results(result).first
             # We remove_relationship on subjects that match the same class, or if the subject is nil 
-            if hit.class.to_s == class_name || hit.nil?
+            if hit.class == klass || hit.nil?
               @owner.remove_relationship(@reflection.options[:property], hit)
             end
           end

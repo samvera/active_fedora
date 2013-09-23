@@ -21,45 +21,6 @@ module ActiveFedora
   # Note that <tt>:autosave => false</tt> is not same as not declaring <tt>:autosave</tt>.
   # When the <tt>:autosave</tt> option is not present new associations are saved.
   #
-  # === One-to-one Example
-  #
-  #   class Post
-  #     has_one :author, :autosave => true
-  #   end
-  #
-  # Saving changes to the parent and its associated model can now be performed
-  # automatically _and_ atomically:
-  #
-  #   post = Post.find(1)
-  #   post.title       # => "The current global position of migrating ducks"
-  #   post.author.name # => "alloy"
-  #
-  #   post.title = "On the migration of ducks"
-  #   post.author.name = "Eloy Duran"
-  #
-  #   post.save
-  #   post.reload
-  #   post.title       # => "On the migration of ducks"
-  #   post.author.name # => "Eloy Duran"
-  #
-  # Destroying an associated model, as part of the parent's save action, is as
-  # simple as marking it for destruction:
-  #
-  #   post.author.mark_for_destruction
-  #   post.author.marked_for_destruction? # => true
-  #
-  # Note that the model is _not_ yet removed from the database:
-  #
-  #   id = post.author.id
-  #   Author.find_by_id(id).nil? # => false
-  #
-  #   post.save
-  #   post.reload.author # => nil
-  #
-  # Now it _is_ removed from the database:
-  #
-  #   Author.find_by_id(id).nil? # => true
-  #
   # === One-to-many Example
   #
   # When <tt>:autosave</tt> is not declared new children are saved when their parent is saved:
@@ -181,22 +142,8 @@ module ActiveFedora
             after_create save_method
             after_update save_method
           else
-            if reflection.macro == :has_one
-              define_method(save_method) { save_has_one_association(reflection) }
-              # Configures two callbacks instead of a single after_save so that
-              # the model may rely on their execution order relative to its
-              # own callbacks.
-              #
-              # For example, given that after_creates run before after_saves, if
-              # we configured instead an after_save there would be no way to fire
-              # a custom after_create callback after the child association gets
-              # created.
-              after_create save_method
-              after_update save_method
-            else
-              define_non_cyclic_method(save_method, reflection) { save_belongs_to_association(reflection) }
-              before_save save_method
-            end
+            define_non_cyclic_method(save_method, reflection) { save_belongs_to_association(reflection) }
+            before_save save_method
           end
         end
 
@@ -360,7 +307,9 @@ module ActiveFedora
           saved = record.save(:validate => !autosave) if record.new_record? || (autosave && record.changed_for_autosave?)
 
           if association.updated?
-            association.writer(record)
+            # self[reflection.foreign_key] = association_id
+            self.send(reflection.name.to_s + "_id=", record.id)
+
             association.loaded!
           end
 

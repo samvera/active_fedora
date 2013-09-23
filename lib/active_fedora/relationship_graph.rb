@@ -3,7 +3,6 @@ module ActiveFedora
 
     attr_accessor :relationships, :dirty
 
-
     def initialize 
       self.dirty = false
       self.relationships = Hash.new { |h, k| h[k] = [] }
@@ -91,6 +90,5 @@ module ActiveFedora
       RDF::Statement.new(subject, predicate, object)
     
     end
-
   end
 end

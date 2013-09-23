@@ -111,6 +111,17 @@ describe "Deleting a dependent relationship" do
   let(:item) { Item.create }
   let(:component) { Component.create }
 
+  it "should remove relationships" do
+    component.item = item
+    component.save!
+    item.components.should == [component]
+    item.components.delete(component)
+    item.reload
+    component.reload
+    component.relationships(:is_part_of).should == []
+    item.components.should == []
+  end
+
   it "should remove the relationships that point at that object" do
     component.item = item
     component.save!

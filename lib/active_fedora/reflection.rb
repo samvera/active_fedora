@@ -41,7 +41,13 @@ module ActiveFedora
       #   Invoice.reflect_on_association(:line_items).macro  # returns :has_many
       #
       def reflect_on_association(association)
-        reflections[association].is_a?(AssociationReflection) ? reflections[association] : nil
+        val = reflections[association].is_a?(AssociationReflection) ? reflections[association] : nil
+        unless val
+          # When a has_many is paired with a has_and_belongs_to_many the assocation will have a plural name 
+          association = association.to_s.pluralize.to_sym
+          val = reflections[association].is_a?(AssociationReflection) ? reflections[association] : nil
+        end
+        val 
       end
 
       class MacroReflection
@@ -171,7 +177,7 @@ module ActiveFedora
           end
         end
 
-        VALID_AUTOMATIC_INVERSE_MACROS = [:has_many, :has_one, :belongs_to]
+        VALID_AUTOMATIC_INVERSE_MACROS = [:has_many, :has_and_belongs_to_many, :belongs_to]
         INVALID_AUTOMATIC_INVERSE_OPTIONS = [:conditions, :through, :polymorphic, :foreign_key]
         
 
