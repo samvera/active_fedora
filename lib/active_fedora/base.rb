@@ -79,6 +79,7 @@ module ActiveFedora
     # Reloads the object from Fedora.
     def reload
       clear_association_cache
+      clear_relationships
       init_with(self.class.find(self.pid).inner_object)
     end
 
@@ -207,6 +208,10 @@ module ActiveFedora
 
     #return the internal fedora URI
     def internal_uri
+      self.class.internal_uri(pid)
+    end
+
+    def self.internal_uri(pid)
       "info:fedora/#{pid}" if pid
     end
 

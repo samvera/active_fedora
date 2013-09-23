@@ -4,10 +4,16 @@ module ActiveFedora
     included do
       class_attribute :class_relationships_desc
     end
-    attr_accessor :relationships_loaded, :load_from_solr, :subject
+    attr_accessor :relationships_loaded
+    attr_accessor :load_from_solr, :subject
 
     def assert_kind_of(n, o,t)
       raise "Assertion failure: #{n}: #{o} is not of type #{t}" unless o.kind_of?(t)
+    end
+
+    def clear_relationships
+      @relationships_loaded = false
+      @object_relations = nil
     end
 
     def object_relations
@@ -25,6 +31,7 @@ module ActiveFedora
     # Add a relationship to the Object.
     # @param [Symbol, String] predicate
     # @param [URI, ActiveFedora::Base] target Either a string URI or an object that is a kind of ActiveFedora::Base 
+    # TODO is target ever a AF::Base anymore?
     def add_relationship(predicate, target, literal=false)
       raise ArgumentError, "predicate must be a symbol. You provided `#{predicate.inspect}'" unless predicate.class.in?([Symbol, String])
       object_relations.add(predicate, target, literal)
@@ -116,7 +123,7 @@ module ActiveFedora
     end
 
     def load_relationships
-      self.relationships_loaded = true
+      @relationships_loaded = true
       content = rels_ext.content
       return unless content.present?
       RelsExtDatastream.from_xml content, rels_ext
