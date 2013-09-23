@@ -73,6 +73,16 @@ module ActiveFedora
         end
       end
 
+      # Loads the \target if needed and returns it.
+      #
+      # This method is abstract in the sense that it relies on +find_target+,
+      # which is expected to be provided by descendants.
+      #
+      # If the \target is already \loaded it is just returned. Thus, you can call
+      # +load_target+ unconditionally to get the \target.
+      #
+      # ActiveFedora::ObjectNotFoundError is rescued within the method, and it is
+      # not reraised. The proxy is \reset and +nil+ is the return value.
       def load_target
           @target = find_target if (@stale_state && stale_target?) || find_target?
           loaded! unless loaded?
@@ -84,22 +94,6 @@ module ActiveFedora
         
         def find_target?
           !loaded? && (!owner.new_record? || foreign_key_present?) && klass
-        end
-
-        # Loads the \target if needed and returns it.
-        #
-        # This method is abstract in the sense that it relies on +find_target+,
-        # which is expected to be provided by descendants.
-        #
-        # If the \target is already \loaded it is just returned. Thus, you can call
-        # +load_target+ unconditionally to get the \target.
-        #
-        # ActiveFedora::ObjectNotFoundError is rescued within the method, and it is
-        # not reraised. The proxy is \reset and +nil+ is the return value.
-        def load_target
-          @target = find_target if (@stale_state && stale_target?) || find_target?
-          loaded! unless loaded?
-          target
         end
 
         # Returns true if there is a foreign key present on the owner which

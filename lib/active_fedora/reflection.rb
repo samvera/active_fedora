@@ -146,6 +146,20 @@ module ActiveFedora
           @inverse_of ||= klass.reflect_on_association inverse_name
         end
 
+        
+        # Returns whether or not the association should be validated as part of
+        # the parent's validation.
+        #
+        # Unless you explicitly disable validation with
+        # <tt>:validate => false</tt>, validation will take place when:
+        #
+        # * you explicitly enable validation; <tt>:validate => true</tt>
+        # * you use autosave; <tt>:autosave => true</tt>
+        # * the association is a +has_many+ association
+        def validate?
+          !options[:validate].nil? ? options[:validate] : (options[:autosave] == true || macro == :has_many)
+        end
+
         def association_class
           case macro
           when :belongs_to
