@@ -27,6 +27,11 @@ module ActiveFedora
 
     private
     def array_reader(field, *args)
+      if md = /^(.+)_id$/.match(field)
+        # a belongs_to association reader
+        association = association(md[1].to_sym)
+        return association.id_reader if association
+      end
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.delegates.key?(field)
       if args.present?
         instance_exec(*args, &self.class.delegates[field][:reader])
@@ -36,6 +41,11 @@ module ActiveFedora
     end
 
     def array_setter(field, args)
+      if md = /^(.+)_id$/.match(field)
+        # a belongs_to association writer
+        association = association(md[1].to_sym)
+        return association.id_writer(args) if association
+      end
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.delegates.key?(field)
       instance_exec(args, &self.class.delegates[field][:setter])
     end
