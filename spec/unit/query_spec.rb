@@ -39,12 +39,12 @@ describe ActiveFedora::Base do
   end
   
   describe '#find' do
-    describe "without :cast" do
+    describe "with :cast false" do
       describe "and a pid is specified" do
         it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
-          SpecModel::Basic.any_instance.should_receive(:init_with).and_return(SpecModel::Basic.new)
+          SpecModel::Basic.any_instance.should_receive(:init_with).and_return(SpecModel::Basic.new )
           ActiveFedora::DigitalObject.should_receive(:find).and_return(double("inner obj", :'new?'=>false))
-          SpecModel::Basic.find("_PID_").should be_a SpecModel::Basic
+          SpecModel::Basic.find("_PID_", cast: false).should be_a SpecModel::Basic
         end
         it "should raise an exception if it is not found" do
           Rubydora::Repository.any_instance.should_receive(:object).and_raise(RestClient::ResourceNotFound)
@@ -53,11 +53,11 @@ describe ActiveFedora::Base do
         end
       end
     end
-    describe "with :cast" do
+    describe "with default :cast of true" do
       it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
         SpecModel::Basic.any_instance.should_receive(:init_with).and_return(double("Model", :adapt_to_cmodel=>SpecModel::Basic.new ))
         ActiveFedora::DigitalObject.should_receive(:find).and_return(double("inner obj", :'new?'=>false))
-        SpecModel::Basic.find("_PID_", :cast=>true)
+        SpecModel::Basic.find("_PID_")
       end
     end
 

@@ -11,7 +11,7 @@ describe ActiveFedora::SolrInstanceLoader do
   let(:context) { ActiveFedora::Base }
   let(:pid) { nil }
   let(:solr_doc) { nil }
-  let(:active_fedora_object) { ActiveFedora::Base.find(pid, :cast => true) }
+  let(:active_fedora_object) { ActiveFedora::Base.find(pid) }
   subject { ActiveFedora::SolrInstanceLoader.new(context, pid, solr_doc) }
 
   describe 'existing pid' do

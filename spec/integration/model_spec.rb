@@ -39,12 +39,12 @@ describe ActiveFedora::Model do
   end
 
   describe '#find' do
-    describe "#find with a valid pid with cast" do
-      subject { ActiveFedora::Base.find(@test_instance.pid, :cast=>true) }
-      it { should be_instance_of ModelIntegrationSpec::Basic}
-    end
     describe "#find with a valid pid without cast" do
       subject { ActiveFedora::Base.find(@test_instance.pid) }
+      it { should be_instance_of ModelIntegrationSpec::Basic}
+    end
+    describe "#find with a valid pid with cast of false" do
+      subject { ActiveFedora::Base.find(@test_instance.pid, cast: false) }
       it { should be_instance_of ActiveFedora::Base}
     end
   end
