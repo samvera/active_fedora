@@ -89,7 +89,10 @@ module ActiveFedora
       relation.order_values += args.flatten
       relation
     end
-    
+
+    extend Deprecation
+    self.deprecation_horizon = 'active-fedora 7.0.0'
+
     # Returns an Array of objects of the Class that +find+ is being 
     # called on
     #
@@ -101,6 +104,9 @@ module ActiveFedora
       options = args.extract_options!
 
       # TODO is there any reason not to cast?
+      if !options.has_key?(:cast)
+        Deprecation.warn(Relation, "find's cast option will default to true", caller)
+      end
       cast = options.delete(:cast)
       if options[:sort]
         # Deprecate sort sometime?

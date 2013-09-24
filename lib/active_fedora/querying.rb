@@ -98,6 +98,10 @@ module ActiveFedora
       '"' + value.gsub(/(:)/, '\\:').gsub(/(\/)/, '\\/').gsub(/"/, '\\"') + '"'
     end
 
+
+    extend Deprecation
+    self.deprecation_horizon = 'active-fedora 7.0.0'
+
     # Retrieve the Fedora object with the given pid, explore the returned object, determine its model 
     # using #{ActiveFedora::ContentModel.known_models_for} and cast to that class.
     # Raises a ObjectNotFoundError if the object is not found.
@@ -106,7 +110,11 @@ module ActiveFedora
     #
     # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel info:fedora/afmodel:Dataset), return a Dataset object (not a Book).
     #   Book.find_one("hydra:dataset1") 
-    def find_one(pid, cast=false)
+    def find_one(pid, cast=nil)
+      if cast.nil?
+        cast = false
+        Deprecation.warn(Querying, "find_one's cast parameter will default to true", caller)
+      end
       inner = DigitalObject.find(self, pid)
       af_base = self.allocate.init_with(inner)
       cast ? af_base.adapt_to_cmodel : af_base
