@@ -15,6 +15,15 @@ describe ActiveFedora::Base do
     Object.send(:remove_const, :SpecModel)
   end
   
+  describe '#find_one' do
+    it 'should notify of deprecation if no cast parameter is passed' do
+      Deprecation.should_receive(:warn).at_least(1).times
+      expect {
+        ActiveFedora::Base.find_one('_PID_')
+      }.to raise_error(ActiveFedora::ObjectNotFoundError)
+    end
+  end
+
   describe '#find' do
     describe "without :cast" do
       describe ":all" do
