@@ -45,6 +45,9 @@ describe ActiveFedora::Model do
     end
     describe "#find with a valid pid without cast" do
       subject { ActiveFedora::Base.find(@test_instance.pid) }
+      before(:each) do
+        Deprecation.should_receive(:warn).at_least(1).times
+      end
       it { should be_instance_of ActiveFedora::Base}
     end
   end
