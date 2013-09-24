@@ -93,7 +93,7 @@ module ActiveFedora
         connections.each do |conn|
           conn.search(query) do |object|
             next if object.pid.start_with?('fedora-system:')
-            ActiveFedora::Base.find(object.pid, :cast=>true).update_index
+            ActiveFedora::Base.find(object.pid).update_index
           end
         end
       end

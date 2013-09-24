@@ -106,7 +106,7 @@ module ActiveFedora
     #
     # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel info:fedora/afmodel:Dataset), return a Dataset object (not a Book).
     #   Book.find_one("hydra:dataset1") 
-    def find_one(pid, cast=false)
+    def find_one(pid, cast=true)
       inner = DigitalObject.find(self, pid)
       af_base = self.allocate.init_with(inner)
       cast ? af_base.adapt_to_cmodel : af_base

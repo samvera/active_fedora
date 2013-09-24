@@ -101,7 +101,7 @@ module ActiveFedora
       options = args.extract_options!
 
       # TODO is there any reason not to cast?
-      cast = options.delete(:cast)
+      cast = options.has_key?(:cast) ? options.delete(:cast) : true
       if options[:sort]
         # Deprecate sort sometime?
         sort = options.delete(:sort) 
@@ -149,7 +149,7 @@ module ActiveFedora
 
     def to_a
       return @records if loaded?
-      args = {} #:cast=>true}
+      args = {}
       args[:rows] = @limit_value if @limit_value
       args[:sort] = @order_values if @order_values
       

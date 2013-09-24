@@ -26,7 +26,7 @@ module ActiveFedora
               solr.delete_by_id(options[:pid])
               solr.commit
             else
-              ActiveFedora::Base.find(options[:pid], :cast=>true).update_index
+              ActiveFedora::Base.find(options[:pid]).update_index
           end
         rescue
           # no-op

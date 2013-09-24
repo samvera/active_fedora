@@ -35,7 +35,7 @@ module ActiveFedora
     end
 
     def self.index(pid)
-        ActiveFedora::Base.find(pid, :cast=>true).update_index
+        ActiveFedora::Base.find(pid).update_index
     end
 
     def self.import_to_fedora(filename, pid='0')
