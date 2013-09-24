@@ -17,7 +17,7 @@ describe "A base object with metadata" do
       @obj.save
     end
     it "should save the datastream." do
-      obj = ActiveFedora::Base.find(@obj.pid, :cast=>true)
+      obj = ActiveFedora::Base.find(@obj.pid)
       obj.foo.should_not be_new
       obj.foo.person.should == ['bob']
       person_field = ActiveFedora::SolrService.solr_name('person', type: :string)
