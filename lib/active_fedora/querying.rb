@@ -111,9 +111,9 @@ module ActiveFedora
     # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel info:fedora/afmodel:Dataset), return a Dataset object (not a Book).
     #   Book.find_one("hydra:dataset1") 
     def find_one(pid, cast=nil)
-      if cast.nil?
+      if self == ActiveFedora::Base && cast.nil?
         cast = false
-        Deprecation.warn(Querying, "find_one's cast parameter will default to true", caller)
+        Deprecation.warn(Querying, "find_one's cast parameter will default to true in ActiveFedora 7.0.0. If you want to maintain your existing behavior set `false' as the second parameter.", caller)
       end
       inner = DigitalObject.find(self, pid)
       af_base = self.allocate.init_with(inner)
