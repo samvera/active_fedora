@@ -12,7 +12,7 @@ module ActiveFedora
 
     def self.delete(pid)
       begin
-        ActiveFedora::Base.find(pid).delete
+        ActiveFedora::Base.find(pid, cast: true).delete
         1
       rescue ActiveFedora::ObjectNotFoundError
         logger.debug "The object #{pid} has already been deleted (or was never created)."
@@ -35,7 +35,7 @@ module ActiveFedora
     end
 
     def self.index(pid)
-        ActiveFedora::Base.find(pid, :cast=>true).update_index
+        ActiveFedora::Base.find(pid, :cast: true).update_index
     end
 
     def self.import_to_fedora(filename, pid='0')
