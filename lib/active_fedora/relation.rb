@@ -104,11 +104,12 @@ module ActiveFedora
       return to_a.find { |*block_args| yield(*block_args) } if block_given?
       options = args.extract_options!
 
-      # TODO is there any reason not to cast?
-      if !options.has_key?(:cast)
-        Deprecation.warn(Relation, "find's cast option will default to true", caller)
+      cast = if self == ActiveFedora::Base && !options.has_key?(:cast)
+        Deprecation.warn(Relation, "find's cast option will default to true in ActiveFedora 7.0.0.  To preserve existing behavior send parameter: `:cast=> false`", caller)
+        false
+      else 
+        options.delete(:cast)
       end
-      cast = options.delete(:cast)
       if options[:sort]
         # Deprecate sort sometime?
         sort = options.delete(:sort) 
