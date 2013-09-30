@@ -30,10 +30,15 @@ module ActiveFedora
 
 
       def find_target
+          page_size = @reflection.options[:solr_page_size]
+          page_size ||= 200
           pids = @owner.ids_for_outbound(@reflection.options[:property])
           return [] if pids.empty?
-          query = ActiveFedora::SolrService.construct_query_for_pids(pids)
-          solr_result = SolrService.query(query, rows: 1000)
+          solr_result = []
+          0.step(pids.size,page_size) do |startIdx|
+            query = ActiveFedora::SolrService.construct_query_for_pids(pids.slice(startIdx,page_size))
+            solr_result += ActiveFedora::SolrService.query(query, rows: page_size)
+          end
           return ActiveFedora::SolrService.reify_solr_results(solr_result)
       end
 
