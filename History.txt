@@ -1,4 +1,9 @@
+v6.6.0 (rc2)
+2013-10-02: Cast relationship results if class is ActiveFedora::Base [Justin
+Coyne]
+
 v6.5.1 (2013-09-10)
+
 
 ActiveFedora::Predicates.set_predicates allows you to set predicates
 without wiping out existing configs [Matt Zumwalt]
