@@ -162,7 +162,7 @@ module ActiveFedora
 
     def to_a
       return @records if loaded?
-      args = {} #:cast=>true}
+      args = @klass == ActiveFedora::Base ? {:cast=>true} : {}
       args[:rows] = @limit_value if @limit_value
       args[:sort] = @order_values if @order_values
       
