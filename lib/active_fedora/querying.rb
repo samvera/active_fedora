@@ -60,9 +60,10 @@ module ActiveFedora
     # @param [Hash] opts 
     # @option opts [Boolean] :cast when true, examine the model and cast it to the first known cModel
     def find_each( conditions={}, opts={})
+      cast = opts.delete(:cast)
       find_in_batches(conditions, opts.merge({:fl=>SOLR_DOCUMENT_ID})) do |group|
         group.each do |hit|
-          yield(find_one(hit[SOLR_DOCUMENT_ID], opts[:cast]))
+          yield(find_one(hit[SOLR_DOCUMENT_ID], cast))
         end
       end
     end
