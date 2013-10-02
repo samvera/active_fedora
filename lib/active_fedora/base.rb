@@ -97,7 +97,7 @@ module ActiveFedora
     # Reloads the object from Fedora.
     def reload
       clear_association_cache
-      init_with(self.class.find(self.pid).inner_object)
+      init_with(self.class.find(self.pid, cast: false).inner_object)
     end
 
     # Initialize an empty model object and set the +inner_obj+
