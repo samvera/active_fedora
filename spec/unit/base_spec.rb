@@ -112,6 +112,35 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe '#reindex' do
+    describe 'reindexing' do
+      it 'should remove a record in Solr that is not in Fedora' do
+        ActiveFedora::SolrService.stub(:query).and_return([{'id' => 'namespace:1'}])
+        ActiveFedora::Base.stub(:find).and_raise ActiveFedora::ObjectNotFoundError
+        ActiveFedora::SolrService.instance.conn.should_receive(:delete_by_id).with('namespace:1')
+        ActiveFedora::SolrService.instance.conn.should_receive(:commit)
+        ActiveFedora::Base.reindex('namespace')
+      end
+    end
+
+    describe 'reindexing by namespace' do
+      it 'should reindex' do
+        mock_object = double()
+        mock_object.should_receive(:update_index).once
+        ActiveFedora::SolrService.stub(:query).and_return([{'id' => 'namespace:1'}])
+        ActiveFedora::Base.stub(:find).and_return(mock_object)
+        ActiveFedora::Base.reindex('namespace')
+      end 
+      it 'should skip reindexing' do
+        mock_object = double()
+        mock_object.should_not_receive(:update_index)
+        ActiveFedora::SolrService.stub(:query).and_return([{'id' => 'different_namespace:1'}])
+        ActiveFedora::Base.stub(:find).and_return(mock_object)
+        ActiveFedora::Base.reindex('namespace')
+      end
+    end
+  end
+
   describe "With a test class" do
     before :all do
       class FooHistory < ActiveFedora::Base
