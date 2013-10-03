@@ -46,9 +46,12 @@ module ActiveFedora
     end
 
     def self.reify_solr_result(hit, opts = {})
-      classname = class_from_solr_document(hit)
-      method = opts[:load_from_solr] ? :load_instance_from_solr : :find
-      classname.send(method, hit[SOLR_DOCUMENT_ID])
+      klass = class_from_solr_document(hit)
+      if opts[:load_from_solr]
+        klass.load_instance_from_solr(hit[SOLR_DOCUMENT_ID])
+      else
+        klass.find(hit[SOLR_DOCUMENT_ID], cast: true)
+      end
     end
   
     def self.class_from_solr_document(hit, opts = {})

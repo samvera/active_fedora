@@ -51,9 +51,9 @@ describe ActiveFedora::SolrService do
     end
     describe ".reify_solr_results" do
       it "should use AudioRecord.find to instantiate objects" do
-        AudioRecord.should_receive(:find).with("my:_PID1_")
-        AudioRecord.should_receive(:find).with("my:_PID2_")
-        AudioRecord.should_receive(:find).with("my:_PID3_")
+        AudioRecord.should_receive(:find).with("my:_PID1_", cast: true)
+        AudioRecord.should_receive(:find).with("my:_PID2_", cast: true)
+        AudioRecord.should_receive(:find).with("my:_PID3_", cast: true)
         ActiveFedora::SolrService.reify_solr_results(@sample_solr_hits)
       end
       it "should use AudioRecord.load_instance_from_solr when called with :load_from_solr option" do
@@ -65,9 +65,9 @@ describe ActiveFedora::SolrService do
     end
     describe ".lazy_reify_solr_results" do
       it "should lazily reify solr results" do
-        AudioRecord.should_receive(:find).with("my:_PID1_")
-        AudioRecord.should_receive(:find).with("my:_PID2_")
-        AudioRecord.should_receive(:find).with("my:_PID3_")
+        AudioRecord.should_receive(:find).with("my:_PID1_", cast: true)
+        AudioRecord.should_receive(:find).with("my:_PID2_", cast: true)
+        AudioRecord.should_receive(:find).with("my:_PID3_", cast: true)
         ActiveFedora::SolrService.lazy_reify_solr_results(@sample_solr_hits).each {|r| r}
       end
       it "should use AudioRecord.load_instance_from_solr when called with :load_from_solr option" do
