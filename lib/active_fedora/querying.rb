@@ -63,7 +63,11 @@ module ActiveFedora
       cast = opts.delete(:cast)
       find_in_batches(conditions, opts.merge({:fl=>SOLR_DOCUMENT_ID})) do |group|
         group.each do |hit|
-          yield(find_one(hit[SOLR_DOCUMENT_ID], cast))
+          begin 
+            yield(find_one(hit[SOLR_DOCUMENT_ID], cast))
+          rescue ActiveFedora::ObjectNotFoundError
+            logger.error "When trying to find_each #{hit[SOLR_DOCUMENT_ID]}, encountered an ObjectNotFoundError. Solr may be out of sync with Fedora"
+          end
         end
       end
     end
