@@ -1,7 +1,7 @@
-v6.6.0 (rc3)
+v6.6.0 (rc4)
+Fix deprecation warning when loading a has_many association [Justin Coyne]
 Explicitly set cast to false on reload to avoid deprecation warnings [Justin Coyne]
-Cast relationship results if class is ActiveFedora::Base [Justin
-Coyne]
+Cast relationship results if class is ActiveFedora::Base [Justin Coyne]
 * Need to put changes for rc1 here* 
 
 v6.5.1 (2013-09-10)
