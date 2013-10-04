@@ -150,11 +150,6 @@ module ActiveFedora
       def find_target
         return [] if @finder_query.empty?
         solr_result = SolrService.query(@finder_query, :rows=>1000)
-
-        # Set the default classname to base inheritance on.
-        opts = {}
-        opts[:class] = @reflection.class_name.constantize.to_class_uri unless @reflection.class_name.nil?
-
 #TODO, don't reify, just store the solr results and lazily reify.
         return ActiveFedora::SolrService.reify_solr_results(solr_result, opts)
       end
