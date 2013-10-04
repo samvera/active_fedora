@@ -7,7 +7,7 @@ RubyFedora and ActiveFedora provide a set of Ruby gems for creating and managing
 
 h2. Getting Help
 
-* Community Discussions & Mailing List are located at "http://groups.google.com/group/active-fedora":http://groups.google.com/group/active-fedora
+* Community Discussions & Mailing List are located at "http://groups.google.com/group/hydra-tech":http://groups.google.com/group/hydra-tech
 * Developers hang out on IRC in #projecthydra on freenet.
 
 h2. Installation
