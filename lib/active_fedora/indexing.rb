@@ -98,6 +98,23 @@ module ActiveFedora
         end
       end
 
+      # Reindexes Fedora objects in Solr and removes Solr objects that do not exist in Fedora
+      def reindex(namespace)
+        pids = connections.map{ |connection| connection.search(nil).map(&:pid) }.flatten 
+        pids |= SolrService.query('*:*', rows: 10000000).map{|item| item['id'] }
+        pids.each do |pid|
+          next unless pid.start_with?(namespace)
+          begin
+            ActiveFedora::Base.find(pid, :cast=>true).update_index
+          rescue ActiveFedora::ObjectNotFoundError
+            ActiveFedora::SolrService.instance.conn.delete_by_id( pid )
+            ActiveFedora::SolrService.instance.conn.commit
+          rescue Exception => e
+            logger.warn "Caught exception #{e} reindexing object: #{pid}"
+          end
+        end
+      end
+
       private
 
       def connections
