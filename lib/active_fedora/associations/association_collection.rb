@@ -156,7 +156,7 @@ module ActiveFedora
         opts[:class] = @reflection.class_name.constantize.to_class_uri unless @reflection.class_name.nil?
 
 #TODO, don't reify, just store the solr results and lazily reify.
-        return ActiveFedora::SolrService.reify_solr_results(solr_result, opts)
+        return ActiveFedora::SolrService.reify_solr_results(solr_result)
       end
 
       def load_from_solr
