@@ -103,8 +103,9 @@ module ActiveFedora
     def find(*args)
       return to_a.find { |*block_args| yield(*block_args) } if block_given?
       options = args.extract_options!
+      options = options.dup
 
-      cast = if self == ActiveFedora::Base && !options.has_key?(:cast)
+      cast = if @klass == ActiveFedora::Base && !options.has_key?(:cast)
         Deprecation.warn(Relation, "find's cast option will default to true in ActiveFedora 7.0.0.  To preserve existing behavior send parameter: `:cast=> false`", caller)
         false
       else 
