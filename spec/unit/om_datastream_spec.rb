@@ -21,7 +21,7 @@ describe ActiveFedora::OmDatastream do
   before(:each) do
     @mock_inner = mock('inner object')
     @mock_repo = mock('repository')
-    @mock_repo.stub(:datastream_dissemination=>'My Content', :config=>{})
+    @mock_repo.stub(:datastream_dissemination=>'My Content', :config=>{}, :datastream=>'')
     @mock_inner.stub(:repository).and_return(@mock_repo)
     @mock_inner.stub(:pid)
     @mock_inner.stub(:new? => false)
@@ -173,6 +173,7 @@ describe ActiveFedora::OmDatastream do
     it "should persist the product of .to_xml in fedora" do
       @mock_repo.stub(:datastream).and_return('')
       @test_ds.stub(:new? => true)
+      @test_ds.stub(:ng_xml_changed? => true)
       @test_ds.stub(:to_xml => "fake xml")
       @mock_repo.should_receive(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'X', :dsState => 'A', :mimeType=>'text/xml')
 
