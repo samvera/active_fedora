@@ -2,9 +2,6 @@ ENV["environment"] ||= 'test'
 require "bundler/setup"
 
 require 'simplecov'
-require 'simplecov-rcov'
-
-SimpleCov.formatter = SimpleCov::Formatter::RcovFormatter
 SimpleCov.start
 
 require 'active-fedora'
