@@ -1,7 +1,32 @@
 require 'spec_helper'
 
-
 describe ActiveFedora::Predicates do
+  describe "#short_predicate" do
+    it 'should parse strings' do
+      ActiveFedora::Predicates.short_predicate('http://www.openarchives.org/OAI/2.0/itemID').should == :oai_item_id
+    end
+    it 'should parse uris' do
+      ActiveFedora::Predicates.short_predicate(RDF::DC.creator).should == 'dc_terms_creator'
+      ActiveFedora::Predicates.short_predicate(RDF::SKOS.hasTopConcept).should == '2004_02_skos_core_has_top_concept'
+    end
+    before(:all) do
+      @original_mapping = ActiveFedora::Predicates.predicate_config[:predicate_mapping]
+    end
+    after(:all) do
+      ActiveFedora::Predicates.predicate_config[:predicate_mapping] = @original_mapping
+    end
+    it "should find predicates regardless of order loaded or shared namespace prefixes" do
+      ActiveFedora::Predicates.predicate_config[:predicate_mapping] = {
+        "http://example.org/"=>{:ceo => 'Manager'},
+        "http://example.org/zoo/wolves/"=>{:alpha => 'Manager'},
+        "http://example.org/zoo/"=>{:keeper => 'Manager'}
+        }
+      ActiveFedora::Predicates.short_predicate("http://example.org/zoo/Manager").should == :keeper
+      ActiveFedora::Predicates.short_predicate("http://example.org/zoo/wolves/Manager").should == :alpha
+      ActiveFedora::Predicates.short_predicate("http://example.org/Manager").should == :ceo
+    end
+  end
+  
   it 'should provide .default_predicate_namespace' do
     ActiveFedora::Predicates.default_predicate_namespace.should == 'info:fedora/fedora-system:def/relations-external#'
   end

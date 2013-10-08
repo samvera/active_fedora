@@ -1,12 +1,6 @@
 require 'spec_helper'
 
 describe ActiveFedora::RelsExtDatastream do
-  describe "short_predicate" do
-    it 'should parse' do
-      ActiveFedora::RelsExtDatastream.short_predicate('http://www.openarchives.org/OAI/2.0/itemID').should == :oai_item_id
-    end
-  end
-  
   before(:all) do
     @pid = "test:sample_pid"
   
@@ -172,22 +166,4 @@ describe ActiveFedora::RelsExtDatastream do
     end
   end
   
-  describe "#short_predicate" do
-    before(:all) do
-      @original_mapping = ActiveFedora::Predicates.predicate_config[:predicate_mapping]
-    end
-    after(:all) do
-      ActiveFedora::Predicates.predicate_config[:predicate_mapping] = @original_mapping
-    end
-    it "should find predicates regardless of order loaded or shared namespace prefixes" do
-      ActiveFedora::Predicates.predicate_config[:predicate_mapping] = {
-        "http://example.org/"=>{:ceo => 'Manager'},
-        "http://example.org/zoo/wolves/"=>{:alpha => 'Manager'},
-        "http://example.org/zoo/"=>{:keeper => 'Manager'}
-        }
-      ActiveFedora::RelsExtDatastream.short_predicate("http://example.org/zoo/Manager").should == :keeper
-      ActiveFedora::RelsExtDatastream.short_predicate("http://example.org/zoo/wolves/Manager").should == :alpha
-      ActiveFedora::RelsExtDatastream.short_predicate("http://example.org/Manager").should == :ceo
-    end
-  end
 end

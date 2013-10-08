@@ -1,5 +1,18 @@
 module ActiveFedora
   module Predicates
+    def self.short_predicate(predicate)
+      # for this regex to short-circuit correctly, namespaces must be sorted into descending order by length
+      if match = /^(#{Predicates.predicate_mappings.keys.sort.reverse.join('|')})(.+)$/.match(predicate.to_str)
+        namespace = match[1]
+        predicate = match[2]
+        Predicates.predicate_mappings[namespace].invert[predicate]
+      elsif predicate.kind_of? RDF::URI
+        predicate.to_s.split('/', 4).last.gsub(/(\/|#)/, '_').underscore
+      else
+        raise "Unable to parse predicate: #{predicate}"
+      end
+    end
+    
     def self.find_graph_predicate(predicate)
       #TODO, these could be cached
       case predicate
