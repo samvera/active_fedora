@@ -112,6 +112,10 @@ module ActiveFedora
       @datastream_content ||= Nokogiri::XML(super).to_xml  {|config| config.no_declaration}.strip
     end
     
+    def content
+      to_xml
+    end
+
     def content=(new_content)
       if inline?
         # inline datastreams may be transformed by fedora 3, so we test for equivalence instead of equality
@@ -427,6 +431,13 @@ module ActiveFedora
     
     def xml_loaded
       instance_variable_defined? :@ng_xml
+    end
+
+    def reset_profile_attributes
+      super
+      if xml_loaded
+        @datastream_content = Nokogiri::XML(to_xml).to_xml  {|config| config.no_declaration}.strip
+      end
     end
     
   end
