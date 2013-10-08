@@ -13,8 +13,8 @@ describe ActiveFedora::RelationshipGraph do
     end
 
     it "should initialize new relation keys" do
-      @graph[:fictional_key].should be_empty
-      @graph[:fictional_key].should respond_to(:<<)
+      @graph[:has_description].should be_empty
+      @graph[:has_description].should respond_to(:<<)
     end
 
   end
@@ -22,11 +22,11 @@ describe ActiveFedora::RelationshipGraph do
   it "should add relationships" do
     @n2 = ActiveFedora::Base.new
     @graph.add(:has_part, @n1)
-    @graph.relationships[:has_part].should == [@n1]
+    @graph[:has_part].should == [@n1]
     @graph.add(:has_part, @n2)
-    @graph.relationships[:has_part].should == [@n1, @n2]
+    @graph[:has_part].should == [@n1, @n2]
     @graph.add(:has_part, @n2)
-    @graph.relationships[:has_part].should == [@n1, @n2]
+    @graph[:has_part].should == [@n1, @n2]
     @graph.dirty.should be_true
   end
 
