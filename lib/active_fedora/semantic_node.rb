@@ -23,7 +23,7 @@ module ActiveFedora
     end
 
     # Add a relationship to the Object.
-    # @param predicate
+    # @param predicate [Symbol]  The short version of the predicate
     # @param target Either a string URI or an object that is a kind of ActiveFedora::Base 
     def add_relationship(predicate, target, literal=false)
       object_relations.add(predicate, target, literal)

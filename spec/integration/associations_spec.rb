@@ -1,6 +1,30 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
+  describe "use a URI as the property" do
+    before do
+      class Book < ActiveFedora::Base 
+        belongs_to :author, :property=>RDF::DC.creator, :class_name=>'Person'
+      end
+
+      class Person < ActiveFedora::Base
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :Book)
+      Object.send(:remove_const, :Person)
+    end
+
+    let(:person) { Person.create}
+    let(:book) { Book.new(author: person) }
+
+    it "should go" do
+      book.save
+    end
+
+  end
+
   describe "complex example" do
     before do
       class Library < ActiveFedora::Base 
@@ -826,10 +850,6 @@ describe ActiveFedora::Base do
         before do
           @simple_collection = SimpleCollection.create
           @complex_collection = ComplexCollection.create
-
-          #Need to add the simpler cmodel here as currently inheritance support is read-only.
-          #See ActiveFedora pull request 207 on how to do this programmatically.
-          @complex_collection.add_relationship(:has_model, @complex_object.class.superclass.to_class_uri)
 
           @simple_object = SimpleObject.create
           @simple_object_second = SimpleObject.create
