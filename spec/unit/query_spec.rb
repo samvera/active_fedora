@@ -20,7 +20,7 @@ describe ActiveFedora::Base do
       it 'should notify of deprecation if no cast parameter is passed' do
         Deprecation.should_receive(:warn).at_least(1).times
         expect {
-          ActiveFedora::Base.find_one('_PID_')
+          ActiveFedora::Base.find_one('mypid:99999')
         }.to raise_error(ActiveFedora::ObjectNotFoundError)
       end
     end
@@ -28,7 +28,7 @@ describe ActiveFedora::Base do
       it 'should not have a deprecation warning when no cast parameter is passed' do
         Deprecation.should_not_receive(:warn)
         expect {
-          SpecModel::Basic.find_one('_PID_')
+          SpecModel::Basic.find_one('mypid:99999')
         }.to raise_error(ActiveFedora::ObjectNotFoundError)
       end
     end
