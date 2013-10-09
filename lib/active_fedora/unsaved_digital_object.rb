@@ -4,7 +4,7 @@ module ActiveFedora
     include DigitalObject::DatastreamBootstrap
     attr_accessor :original_class, :ownerId, :state, :datastreams, :label, :namespace
 
-    PLACEHOLDER = '__DO_NOT_USE__'
+    PLACEHOLDER = nil
     
     def initialize(original_class, namespace, pid=nil)
       @pid = pid

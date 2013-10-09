@@ -60,7 +60,7 @@ describe ActiveFedora::Base do
     it "should delete object from repository and index" do
       @test_object.inner_object.stub(:delete)
       mock_conn = double("SolrConnection")
-      mock_conn.should_receive(:delete_by_id).with("__DO_NOT_USE__") 
+      mock_conn.should_receive(:delete_by_id).with(nil) 
       mock_conn.should_receive(:commit)
       mock_ss = double("SolrService")
       mock_ss.stub(:conn).and_return(mock_conn)

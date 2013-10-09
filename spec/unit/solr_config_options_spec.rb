@@ -27,8 +27,9 @@ describe ActiveFedora do
       SOLR_DOCUMENT_ID = "id"
     end
     it "should be used by ActiveFedora::Base.to_solr" do
+      @test_object.stub(pid: 'changeme:123')
       SOLR_DOCUMENT_ID = "MY_SAMPLE_ID"
-      @test_object.to_solr[SOLR_DOCUMENT_ID.to_sym].should_not be_nil
+      @test_object.to_solr[SOLR_DOCUMENT_ID.to_sym].should == 'changeme:123'
       @test_object.to_solr[:id].should be_nil
     end
 
