@@ -202,10 +202,9 @@ describe ActiveFedora::Base do
 
     ### Methods for ActiveModel::Conversions
     it "should have to_param once it's saved" do
-
       @test_object.to_param.should be_nil
-      @test_object.inner_object.stub(:new? => false)
-      @test_object.to_param.should == @test_object.pid
+      @test_object.inner_object.stub(:new? => false, :pid => 'foo:123')
+      @test_object.to_param.should == 'foo:123'
     end
 
     it "should have to_key once it's saved" do
@@ -448,12 +447,13 @@ describe ActiveFedora::Base do
       it "should add pid, system_create_date, system_modified_date and object_state from object attributes" do
         @test_object.should_receive(:create_date).and_return("2012-03-04T03:12:02Z")
         @test_object.should_receive(:modified_date).and_return("2012-03-07T03:12:02Z")
+        @test_object.stub(pid: 'changeme:123')
         @test_object.state = "D"
         solr_doc = @test_object.to_solr
         solr_doc[ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)].should eql("2012-03-04T03:12:02Z")
         solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :stored_sortable, type: :date)].should eql("2012-03-07T03:12:02Z")
         solr_doc[ActiveFedora::SolrService.solr_name("object_state", :stored_sortable)].should eql("D")
-        solr_doc[:id].should eql("#{@test_object.pid}")
+        solr_doc[:id].should eql("changeme:123")
       end
 
       it "should omit base metadata and RELS-EXT if :model_only==true" do

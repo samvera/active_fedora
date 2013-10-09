@@ -90,7 +90,7 @@ describe ActiveFedora::SemanticNode do
       it "should not be written into the graph until it is saved" do
         @n1 = ActiveFedora::Base.new
         @node.add_relationship(:has_part, @n1)
-        @node.relationships.statements.to_a.first.object.to_s.should == 'info:fedora/__DO_NOT_USE__' 
+        @node.relationships.statements.to_a.first.object.to_s.should == 'info:fedora/' 
         @n1.save
         @node.relationships.statements.to_a.first.object.to_s.should == @n1.internal_uri
       end
