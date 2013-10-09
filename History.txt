@@ -1,4 +1,8 @@
-v6.6.0 (rc5)
+v6.6.0
+Add _destroy method for building nested forms [Justin Coyne]
+Removed the pid placeholder `__DO_NOT_USE__` [Justin Coyne]
+Allow relationships to accept instances of RDF::URI as their predicates [Justin Coyne]
+Remove internal deprecation [Justin Coyne]
 Gracefully handle an ObjectNotFound in find_all [Justin Coyne]
 Revert "Removed unused code that breaks certain use cases (Fixes #234)." [Jeremy Friesen]
 Removed unset opts parameter from call to reify_solr_results, introduced in PR #236. [David Chandek-Stark]
@@ -7,7 +11,18 @@ Fix deprecation warning when using the ids setter of a has_many collection relat
 Fix deprecation warning when loading a has_many association [Justin Coyne]
 Explicitly set cast to false on reload to avoid deprecation warnings [Justin Coyne]
 Cast relationship results if class is ActiveFedora::Base [Justin Coyne]
-* Need to put changes for rc1 here* 
+Adding a loop for getting more than solr_page_size (default 200) results in an has and belongs to many association [Carolyn Cole]
+Fixed syntax error on hash [Justin Coyne]
+Set cast parameter to avoid a deprecation warning [Justin Coyne]
+Only deprecate the cast parameter to find when on ActiveFedora::Base [Justin Coyne]
+Deprecate .find's cast default option [Jeremy Friesen]
+Remove outdated fixture loading line from README. [Steven Anderson]
+Support for extended cmodels (read-only) [Steven Anderson]
+Fix tense on deprecation warning [Steven Anderson]
+Fix tense on deprecation warning [Justin Coyne]
+delegate and delegate_to should use 'multiple' rather than 'unique'.  Ref #147 [Justin Coyne]
+Deprecated find(:all), find(:first), find(:last) [Justin Coyne]
+Prevent infinite loop when Fedora and Solr are out of sync (fixes #199) [Michael B. Klein]
 
 v6.5.1 (2013-09-10)
 
@@ -73,7 +88,6 @@ Clean up YARD doc warnings [Justin Coyne]
 An rdf node should be able to set rdf:about [Justin Coyne]
 
 Remove RdfObject#get_values, it's inherited [Justin Coyne]
-
 
 v6.4.4 (2013-07-29)
 
