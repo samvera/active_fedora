@@ -49,9 +49,6 @@ describe ActiveFedora::Model do
     end
     describe "#find with a valid pid without cast on a model extending Base" do
       subject { ModelIntegrationSpec::Basic.find(@test_instance.pid) }
-      before(:each) do
-        Deprecation.should_not_receive(:warn)
-      end
       it { should be_instance_of ModelIntegrationSpec::Basic}
     end
   end

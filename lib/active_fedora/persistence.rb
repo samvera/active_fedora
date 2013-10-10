@@ -3,6 +3,8 @@ module ActiveFedora
   module Persistence
     extend ActiveSupport::Concern
     extend Deprecation
+    self.deprecation_horizon = 'active-fedora version 8.0.0'
+    
 
     def new?
       new_record?

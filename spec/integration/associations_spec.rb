@@ -346,37 +346,11 @@ describe ActiveFedora::Base do
       after do
         @library.delete
         @book.delete
-        # @author.delete
-        # @publisher.delete
-        # @library2.delete if @library2
-        # @publisher2.delete if @publisher2
+        @author.delete
+        @publisher.delete
+        @library2.delete if @library2
+        @publisher2.delete if @publisher2
       end
-    end
-  end
-
-  describe "belongs_to when class_name is ActiveFedora::Base" do
-    before :all do
-      class Textbook < ActiveFedora::Base
-        belongs_to :container, :property=>:is_part_of, :class_name=>'ActiveFedora::Base'
-      end
-      class Shelf < ActiveFedora::Base; end
-    end
-
-    after :all do
-      Object.send(:remove_const, :Textbook)
-      Object.send(:remove_const, :Shelf)
-    end
-
-    after do
-      shelf.destroy
-    end
-
-    let(:shelf) { Shelf.create}
-    subject { Textbook.new }
-
-    it "Should not raise a deprecation message" do
-      Deprecation.should_not_receive(:warn) # a deprecation in 6.6.0 that's going away in 7.0.0
-      subject.container_id =  shelf.id
     end
   end
 

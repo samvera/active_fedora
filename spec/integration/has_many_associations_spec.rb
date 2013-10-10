@@ -108,7 +108,6 @@ describe "When relationship is restricted to AF::Base" do
     end
 
     it "Should not restrict relationships " do
-      Deprecation.should_not_receive(:warn) # a deprecation in 6.6.0 that's going away in 7.0.0
       email.attachment_ids = [image.id, pdf.id]
       email.reload
       email.attachments.should == [image, pdf]

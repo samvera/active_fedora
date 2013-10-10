@@ -103,10 +103,6 @@ module ActiveFedora
       '"' + value.gsub(/(:)/, '\\:').gsub(/(\/)/, '\\/').gsub(/"/, '\\"') + '"'
     end
 
-
-    extend Deprecation
-    self.deprecation_horizon = 'active-fedora 7.0.0'
-
     # Retrieve the Fedora object with the given pid, explore the returned object, determine its model 
     # using #{ActiveFedora::ContentModel.known_models_for} and cast to that class.
     # Raises a ObjectNotFoundError if the object is not found.

@@ -111,13 +111,6 @@ module ActiveFedora
       sprintf("%s%i", prefix,suffix)
     end    
 
-    # Return the Dublin Core (DC) Datastream. You can also get at this via 
-    # the +datastreams["DC"]+.
-    def dc
-      Deprecation.warn(Datastreams, 'dc is deprecated. Consider using Base#datastreams["DC"] instead.', caller)
-      return datastreams["DC"] 
-    end
-
     # Returns the RELS-EXT Datastream
     # Tries to grab from in-memory datastreams first
     # Failing that, attempts to load from Fedora and addst to in-memory datastreams

@@ -90,9 +90,6 @@ module ActiveFedora
       relation
     end
 
-    extend Deprecation
-    self.deprecation_horizon = 'active-fedora 7.0.0'
-
     # Returns an Array of objects of the Class that +find+ is being 
     # called on
     #
