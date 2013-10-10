@@ -60,9 +60,14 @@ module ActiveFedora
     # @param [Hash] opts 
     # @option opts [Boolean] :cast when true, examine the model and cast it to the first known cModel
     def find_each( conditions={}, opts={})
+      cast = opts.delete(:cast)
       find_in_batches(conditions, opts.merge({:fl=>SOLR_DOCUMENT_ID})) do |group|
         group.each do |hit|
-          yield(find_one(hit[SOLR_DOCUMENT_ID], opts[:cast]))
+          begin 
+            yield(find_one(hit[SOLR_DOCUMENT_ID], cast))
+          rescue ActiveFedora::ObjectNotFoundError
+            logger.error "When trying to find_each #{hit[SOLR_DOCUMENT_ID]}, encountered an ObjectNotFoundError. Solr may be out of sync with Fedora"
+          end
         end
       end
     end
@@ -98,6 +103,10 @@ module ActiveFedora
       '"' + value.gsub(/(:)/, '\\:').gsub(/(\/)/, '\\/').gsub(/"/, '\\"') + '"'
     end
 
+
+    extend Deprecation
+    self.deprecation_horizon = 'active-fedora 7.0.0'
+
     # Retrieve the Fedora object with the given pid, explore the returned object, determine its model 
     # using #{ActiveFedora::ContentModel.known_models_for} and cast to that class.
     # Raises a ObjectNotFoundError if the object is not found.
@@ -106,7 +115,8 @@ module ActiveFedora
     #
     # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel info:fedora/afmodel:Dataset), return a Dataset object (not a Book).
     #   Book.find_one("hydra:dataset1") 
-    def find_one(pid, cast=true)
+    def find_one(pid, cast=nil)
+      cast = true if self == ActiveFedora::Base && cast.nil?
       inner = DigitalObject.find(self, pid)
       af_base = self.allocate.init_with(inner)
       cast ? af_base.adapt_to_cmodel : af_base

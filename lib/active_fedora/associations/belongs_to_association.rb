@@ -81,7 +81,7 @@ module ActiveFedora
         end
 
         def foreign_key_present?
-          !@owner.send(@reflection.primary_key_name).nil?
+          owner[reflection.foreign_key]
         end
 
     end

@@ -147,8 +147,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
 
     it "should write rdf with proper subjects" do
-      @subject.rdf.type = "Frog"
       @subject.inner_object.pid = 'test:99'
+      @subject.rdf.type = "Frog"
       @subject.save!
       @subject.reload
       @subject.rdf.graph.dump(:ntriples).should == "<http://oregondigital.org/ns/99> <http://purl.org/dc/terms/type> \"Frog\" .\n"

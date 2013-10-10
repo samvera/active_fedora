@@ -90,7 +90,7 @@ describe ActiveFedora::SemanticNode do
       it "should not be written into the graph until it is saved" do
         @n1 = ActiveFedora::Base.new
         @node.add_relationship(:has_part, @n1)
-        @node.relationships.statements.to_a.first.object.to_s.should == 'info:fedora/__DO_NOT_USE__' 
+        @node.relationships.statements.to_a.first.object.to_s.should == 'info:fedora/' 
         @n1.save
         @node.relationships.statements.to_a.first.object.to_s.should == @n1.internal_uri
       end
@@ -117,12 +117,12 @@ describe ActiveFedora::SemanticNode do
       before do
         @node.add_relationship(:is_member_of, 'demo:9')
         @node.add_relationship(:is_member_of, 'demo:7')
-        @node.add_relationship(:is_brother_of, 'demo:9')
+        @node.add_relationship(:has_description, 'demo:9')
       end
       it "should clear the specified relationship" do
         @node.clear_relationship(:is_member_of)
         @node.relationships(:is_member_of).should == []
-        @node.relationships(:is_brother_of).should == ['demo:9']
+        @node.relationships(:has_description).should == ['demo:9']
       end
       
     end

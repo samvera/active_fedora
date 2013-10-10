@@ -56,19 +56,22 @@ module ActiveFedora
               #update_counter(-scope.delete_all)
             else
 
-              inverse = reflection.inverse_of.name
-              records.each do |record|
-                if record.persisted?
-                  record.reload
-                  assoc = record.association(inverse)
-                  if assoc.reflection.collection?
-                    # Remove from a has_and_belongs_to_many
-                    record.association(inverse).delete(@owner)
-                  else
-                    # Remove from a belongs_to
-                    record.association(inverse).id_writer(nil)
+                
+              if reflection.inverse_of # Can't get an inverse when class_name: 'ActiveFedora::Base' is supplied
+                inverse = reflection.inverse_of.name
+                records.each do |record|
+                  if record.persisted?
+                    record.reload
+                    assoc = record.association(inverse)
+                    if assoc.reflection.collection?
+                      # Remove from a has_and_belongs_to_many
+                      record.association(inverse).delete(@owner)
+                    else
+                      # Remove from a belongs_to
+                      record.association(inverse).id_writer(nil)
+                    end
+                    record.save!
                   end
-                  record.save!
                 end
               end
 

@@ -9,7 +9,6 @@ module ActiveFedora
         elsif !loaded? || stale_target?
           reload
         end
-
         target
       end
 

@@ -8,6 +8,10 @@ describe ActiveFedora::Base do
         has_and_belongs_to_many :collections, :property=>:is_member_of_collection
       end
 
+      class SpecialInheritedBook < Book
+      end
+
+
       class Collection < ActiveFedora::Base
       end
 
@@ -17,6 +21,7 @@ describe ActiveFedora::Base do
     end
 
     after do
+      Object.send(:remove_const, :SpecialInheritedBook)
       Object.send(:remove_const, :Book)
       Object.send(:remove_const, :Collection)
       Object.send(:remove_const, :Topic)
@@ -27,6 +32,7 @@ describe ActiveFedora::Base do
         @topic1 = Topic.create
         @topic2 = Topic.create
         @book = Book.create
+        @special_book = SpecialInheritedBook.create #TODO this isnt' needed in every test.
       end
       it "habtm should set and remove relationships bidirectionally" do
         @book.topics << @topic1
@@ -50,8 +56,23 @@ describe ActiveFedora::Base do
         book2.topics.count.should == 12
       end
 
+      it "Should find inherited objects along with base objects" do
+        @book.topics << @topic1
+        @special_book.topics << @topic1
+        @topic1.books.should == [@book, @special_book]
+        @topic1.reload.books.should == [@book, @special_book]
+      end
+
+      it "Should cast found books to the correct cmodel" do
+        @topic1.books[0].class == Book
+        @topic1.books[1].class == SpecialInheritedBook
+      end
+
       after do
-        Topic.delete_all
+        @topic1.delete
+        @topic2.delete
+        @book.delete
+        @special_book.delete
       end
     end
     describe "a saved instance" do

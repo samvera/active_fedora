@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ActiveFedora::Model do
+describe "scoped queries" do
   
   before(:each) do 
     module ModelIntegrationSpec
@@ -30,15 +30,11 @@ describe ActiveFedora::Model do
 
 
   describe "When there is one object in the store" do
-    before do
-      @test_instance = ModelIntegrationSpec::Basic.new
-      @test_instance.save
-    end
+    let!(:test_instance) { ModelIntegrationSpec::Basic.create!()}
 
     after do
-      @test_instance.delete
+      test_instance.delete
     end
-
     
     describe ".all" do
       it "should return an array of instances of the calling Class" do
@@ -54,39 +50,48 @@ describe ActiveFedora::Model do
 
     describe ".first" do
       it "should return one instance of the calling class" do
-        ModelIntegrationSpec::Basic.first.should == @test_instance
+        ModelIntegrationSpec::Basic.first.should == test_instance
       end
     end
   end
 
   describe "with multiple objects" do
-    before do
-      @test_instance1 = ModelIntegrationSpec::Basic.create!(:foo=>'Beta', :bar=>'Chips')
-      @test_instance2 = ModelIntegrationSpec::Basic.create!(:foo=>'Alpha', :bar=>'Peanuts')
-      @test_instance3 = ModelIntegrationSpec::Basic.create!(:foo=>'Sigma', :bar=>'Peanuts')
-    end
+    let!(:test_instance1) { ModelIntegrationSpec::Basic.create!(:foo=>'Beta', :bar=>'Chips')}
+    let!(:test_instance2) { ModelIntegrationSpec::Basic.create!(:foo=>'Alpha', :bar=>'Peanuts')}
+    let!(:test_instance3) { ModelIntegrationSpec::Basic.create!(:foo=>'Sigma', :bar=>'Peanuts')}
+
     after do
-      @test_instance1.delete
-      @test_instance2.delete
-      @test_instance3.delete
+      test_instance1.delete
+      test_instance2.delete
+      test_instance3.delete
     end
     it "should query" do
-      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('foo', type: :string)=> 'Beta').should == [@test_instance1]
-      ModelIntegrationSpec::Basic.where('foo' => 'Beta').should == [@test_instance1]
+      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('foo', type: :string)=> 'Beta').should == [test_instance1]
+      ModelIntegrationSpec::Basic.where('foo' => 'Beta').should == [test_instance1]
     end
     it "should order" do
-      ModelIntegrationSpec::Basic.order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').should == [@test_instance2, @test_instance1, @test_instance3]
+      ModelIntegrationSpec::Basic.order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').should == [test_instance2, test_instance1, test_instance3]
     end
     it "should limit" do
-      ModelIntegrationSpec::Basic.limit(1).should == [@test_instance1]
+      ModelIntegrationSpec::Basic.limit(1).should == [test_instance1]
     end
 
     it "should chain queries" do
-      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').limit(1).should == [@test_instance2]
+      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').limit(1).should == [test_instance2]
     end
 
     it "should chain count" do
       ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').count.should == 2 
+    end
+
+    describe "when one of the objects in solr isn't in fedora" do
+      it "should log an error" do
+        ModelIntegrationSpec::Basic.should_receive(:find_one).with(test_instance1.pid, nil).and_call_original
+        ModelIntegrationSpec::Basic.should_receive(:find_one).with(test_instance2.pid, nil).and_raise(ActiveFedora::ObjectNotFoundError)
+        ModelIntegrationSpec::Basic.should_receive(:find_one).with(test_instance3.pid, nil).and_call_original
+        ActiveFedora::Relation.logger.should_receive(:error).with("When trying to find_each #{test_instance2.pid}, encountered an ObjectNotFoundError. Solr may be out of sync with Fedora")
+        ModelIntegrationSpec::Basic.all.should == [test_instance1, test_instance3]
+      end
     end
   end
 end

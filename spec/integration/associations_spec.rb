@@ -1,6 +1,30 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
+  describe "use a URI as the property" do
+    before do
+      class Book < ActiveFedora::Base 
+        belongs_to :author, :property=>RDF::DC.creator, :class_name=>'Person'
+      end
+
+      class Person < ActiveFedora::Base
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :Book)
+      Object.send(:remove_const, :Person)
+    end
+
+    let(:person) { Person.create}
+    let(:book) { Book.new(author: person) }
+
+    it "should go" do
+      book.save
+    end
+
+  end
+
   describe "complex example" do
     before do
       class Library < ActiveFedora::Base 
@@ -24,6 +48,7 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :Library)
       Object.send(:remove_const, :Book)
       Object.send(:remove_const, :Person)
+      Object.send(:remove_const, :Publisher)
     end
 
     describe "an unsaved instance" do
@@ -234,6 +259,7 @@ describe ActiveFedora::Base do
           end
         end
 
+
         after do
           @library.delete
           @book.delete
@@ -320,11 +346,37 @@ describe ActiveFedora::Base do
       after do
         @library.delete
         @book.delete
-        @author.delete
-        @publisher.delete
-        @library2.delete if @library2
-        @publisher2.delete if @publisher2
+        # @author.delete
+        # @publisher.delete
+        # @library2.delete if @library2
+        # @publisher2.delete if @publisher2
       end
+    end
+  end
+
+  describe "belongs_to when class_name is ActiveFedora::Base" do
+    before :all do
+      class Textbook < ActiveFedora::Base
+        belongs_to :container, :property=>:is_part_of, :class_name=>'ActiveFedora::Base'
+      end
+      class Shelf < ActiveFedora::Base; end
+    end
+
+    after :all do
+      Object.send(:remove_const, :Textbook)
+      Object.send(:remove_const, :Shelf)
+    end
+
+    after do
+      shelf.destroy
+    end
+
+    let(:shelf) { Shelf.create}
+    subject { Textbook.new }
+
+    it "Should not raise a deprecation message" do
+      Deprecation.should_not_receive(:warn) # a deprecation in 6.6.0 that's going away in 7.0.0
+      subject.container_id =  shelf.id
     end
   end
 

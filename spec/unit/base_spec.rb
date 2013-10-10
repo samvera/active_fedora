@@ -28,7 +28,7 @@ describe ActiveFedora::Base do
       end
       describe "assign_pid" do
         it "should use fedora to generate pids" do
-          # TODO: This juggling of Fedora credentials & establishing connections should be handled by an establish_fedora_connection method, 
+          # TODO: This juggling of Fedora credentials & establishing connections should be handled by an establish_fedora_connection method,
           # possibly wrap it all into a fedora_connection method - MZ 06-05-2012
           stubfedora = double("Fedora")
           stubfedora.should_receive(:connection).and_return(double("Connection", :mint =>"sample:newpid"))
@@ -131,15 +131,20 @@ describe ActiveFedora::Base do
       class FooAdaptation < ActiveFedora::Base
         has_metadata :type=>ActiveFedora::OmDatastream, :name=>'someData'
       end
+
+      class FooInherited < FooHistory
+
+      end
     end
 
     after :all do
       Object.send(:remove_const, :FooHistory)
       Object.send(:remove_const, :FooAdaptation)
+      Object.send(:remove_const, :FooInherited)
     end
-    
+
     def increment_pid
-      @@last_pid += 1    
+      @@last_pid += 1
     end
 
     before(:each) do
@@ -161,11 +166,11 @@ describe ActiveFedora::Base do
 
 
     describe '#new' do
-      it "should create an inner object" do  
+      it "should create an inner object" do
         # for doing AFObject.new(params[:foo]) when nothing is in params[:foo]
         Rubydora::DigitalObject.any_instance.should_receive(:save).never
-        result = ActiveFedora::Base.new(nil)  
-        result.inner_object.should be_kind_of(ActiveFedora::UnsavedDigitalObject)    
+        result = ActiveFedora::Base.new(nil)
+        result.inner_object.should be_kind_of(ActiveFedora::UnsavedDigitalObject)
       end
 
       it "should not save or get an pid on init" do
@@ -197,13 +202,12 @@ describe ActiveFedora::Base do
 
     ### Methods for ActiveModel::Conversions
     it "should have to_param once it's saved" do
-
       @test_object.to_param.should be_nil
-      @test_object.inner_object.stub(:new? => false)
-      @test_object.to_param.should == @test_object.pid
+      @test_object.inner_object.stub(:new? => false, :pid => 'foo:123')
+      @test_object.to_param.should == 'foo:123'
     end
 
-    it "should have to_key once it's saved" do 
+    it "should have to_key once it's saved" do
       @test_object.to_key.should be_nil
       @test_object.inner_object.stub(:new? => false)
       @test_object.to_key.should == [@test_object.pid]
@@ -219,8 +223,8 @@ describe ActiveFedora::Base do
       FooHistory.model_name.should == 'FooHistory'
       FooHistory.model_name.human.should == 'Foo history'
     end
-    ### End ActiveModel::Naming 
-    
+    ### End ActiveModel::Naming
+
 
     describe ".datastreams" do
       before do
@@ -272,7 +276,7 @@ describe ActiveFedora::Base do
     describe '#add_relationship' do
       it 'should call #add_relationship on the rels_ext datastream' do
         @test_object.add_relationship("predicate", "info:fedora/object")
-        pred = ActiveFedora::Predicates.vocabularies["info:fedora/fedora-system:def/relations-external#"]["predicate"] 
+        pred = ActiveFedora::Predicates.vocabularies["info:fedora/fedora-system:def/relations-external#"]["predicate"]
         @test_object.relationships.should have_statement(RDF::Statement.new(RDF::URI.new(@test_object.internal_uri), pred, RDF::URI.new("info:fedora/object")))
       end
 
@@ -283,7 +287,7 @@ describe ActiveFedora::Base do
         @test_object.add_relationship(:is_member_of, "info:fedora/demo:5")
         @test_object.add_relationship(:is_member_of, "info:fedora/demo:10")
       end
-      
+
       it 'should add a relationship to an object only if it does not exist already' do
         next_pid = increment_pid.to_s
         ActiveFedora::Base.stub(:assign_pid).and_return(next_pid)
@@ -302,11 +306,11 @@ describe ActiveFedora::Base do
         @test_object.ids_for_outbound(:conforms_to).should == ["AnInterface"]
       end
     end
-    
+
     it 'should provide #remove_relationship' do
       @test_object.should respond_to(:remove_relationship)
     end
-    
+
     describe '#remove_relationship' do
       it 'should remove a relationship from the relationships hash' do
         @test_object3 = ActiveFedora::Base.new()
@@ -333,7 +337,7 @@ describe ActiveFedora::Base do
     describe '#relationships' do
       it 'should return a graph' do
         @test_object.relationships.kind_of?(RDF::Graph).should be_true
-        @test_object.relationships.size.should == 0 
+        @test_object.relationships.size.should == 0
       end
     end
 
@@ -343,7 +347,7 @@ describe ActiveFedora::Base do
         stub_add_ds(@this_pid, ['RELS-EXT'])
         @test_object.assert_content_model
         @test_object.relationships(:has_model).should == ["info:fedora/afmodel:ActiveFedora_Base"]
-        
+
       end
     end
 
@@ -352,14 +356,14 @@ describe ActiveFedora::Base do
         @test_object.stub(:new_record? => true)
         @test_object.should_receive(:create)
         @test_object.should_receive(:update_index)
-        @test_object.save     
+        @test_object.save
       end
 
       it "should update an existing record" do
         @test_object.stub(:new_record? => false)
         @test_object.should_receive(:update_record)
         @test_object.should_receive(:update_index)
-        @test_object.save     
+        @test_object.save
       end
     end
 
@@ -370,7 +374,7 @@ describe ActiveFedora::Base do
         FooHistory.should_receive(:new).and_return(obj)
         @hist = FooHistory.create(:fubar=>'ta', :swank=>'da')
       end
-      
+
     end
 
     describe ".adapt_to" do
@@ -408,17 +412,32 @@ describe ActiveFedora::Base do
       end
     end
 
-    describe ".adapt_to_cmodel" do
-      subject { FooHistory.new } 
-      it "should cast when a cmodel is found" do
-        ActiveFedora::ContentModel.should_receive(:known_models_for).with( subject).and_return([FooAdaptation])
-        subject.adapt_to_cmodel.should be_kind_of FooAdaptation
+    describe ".adapt_to_cmodel with implemented (non-ActiveFedora::Base) cmodel" do
+      subject { FooHistory.new }
+
+      it "should not cast to a random first cmodel if it has a specific cmodel already" do
+        ActiveFedora::ContentModel.should_receive(:known_models_for).with(subject).and_return([FooAdaptation])
+        subject.adapt_to_cmodel.should be_kind_of FooHistory
+      end
+      it "should cast to an inherited model over a random one" do
+        ActiveFedora::ContentModel.should_receive(:known_models_for).with(subject).and_return([FooAdaptation, FooInherited])
+        subject.adapt_to_cmodel.should be_kind_of FooInherited
       end
       it "should not cast when a cmodel is same as the class" do
-        ActiveFedora::ContentModel.should_receive(:known_models_for).with( subject).and_return([FooHistory])
+        ActiveFedora::ContentModel.should_receive(:known_models_for).with(subject).and_return([FooHistory])
         subject.adapt_to_cmodel.should === subject
       end
     end
+
+    describe ".adapt_to_cmodel with ActiveFedora::Base" do
+      subject { ActiveFedora::Base.new }
+
+      it "should cast to the first cmodel if ActiveFedora::Base (or no specified cmodel)" do
+        ActiveFedora::ContentModel.should_receive(:known_models_for).with(subject).and_return([FooAdaptation, FooHistory])
+        subject.adapt_to_cmodel.should be_kind_of FooAdaptation
+      end
+    end
+
 
     describe ".to_solr" do
       it "should provide .to_solr" do
@@ -428,12 +447,13 @@ describe ActiveFedora::Base do
       it "should add pid, system_create_date, system_modified_date and object_state from object attributes" do
         @test_object.should_receive(:create_date).and_return("2012-03-04T03:12:02Z")
         @test_object.should_receive(:modified_date).and_return("2012-03-07T03:12:02Z")
+        @test_object.stub(pid: 'changeme:123')
         @test_object.state = "D"
         solr_doc = @test_object.to_solr
         solr_doc[ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)].should eql("2012-03-04T03:12:02Z")
         solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :stored_sortable, type: :date)].should eql("2012-03-07T03:12:02Z")
         solr_doc[ActiveFedora::SolrService.solr_name("object_state", :stored_sortable)].should eql("D")
-        solr_doc[:id].should eql("#{@test_object.pid}")
+        solr_doc[:id].should eql("changeme:123")
       end
 
       it "should omit base metadata and RELS-EXT if :model_only==true" do
@@ -444,7 +464,7 @@ describe ActiveFedora::Base do
         solr_doc["id"].should be_nil
         solr_doc[ActiveFedora::SolrService.solr_name("has_part", :symbol)].should be_nil
       end
-      
+
       it "should add self.class as the :active_fedora_model" do
         stub_get(@this_pid)
         stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
@@ -460,7 +480,7 @@ describe ActiveFedora::Base do
         ngds.should_receive(:solrize_profile)
         mock1.should_receive(:solrize_profile)
         mock2.should_receive(:solrize_profile)
-        
+
         @test_object.should_receive(:datastreams).twice.and_return({:ds1 => mock1, :ds2 => mock2, :ngds => ngds})
         @test_object.should_receive(:solrize_relationships)
         @test_object.to_solr
@@ -468,7 +488,7 @@ describe ActiveFedora::Base do
       it "should call .to_solr on all RDFDatastreams, passing the resulting document to solr" do
         mock = double("ds1", :to_solr => {})
         mock.should_receive(:solrize_profile)
-        
+
         @test_object.should_receive(:datastreams).twice.and_return({:ds1 => mock})
         @test_object.should_receive(:solrize_relationships)
         @test_object.to_solr
@@ -481,16 +501,16 @@ describe ActiveFedora::Base do
         @test_object.should_receive(:solrize_relationships)
         @test_object.to_solr
       end
-      
+
     end
 
     describe ".label" do
-      it "should return the label of the inner object" do 
+      it "should return the label of the inner object" do
         @test_object.inner_object.should_receive(:label).and_return("foo label")
         @test_object.label.should == "foo label"
       end
     end
-    
+
     describe ".label=" do
       it "should set the label of the inner object" do
         @test_object.label.should_not == "foo label"
@@ -498,12 +518,11 @@ describe ActiveFedora::Base do
         @test_object.label.should == "foo label"
       end
     end
-    
     describe "update_attributes" do
       it "should set the attributes and save" do
         m = FooHistory.new
         att= {"fubar"=> '1234', "baz" =>'stuff'}
-        
+
         m.should_receive(:fubar=).with('1234')
         m.should_receive(:baz=).with('stuff')
         m.should_receive(:save)
@@ -515,14 +534,14 @@ describe ActiveFedora::Base do
       it "should set the attributes and save" do
         m = FooHistory.new
         att= {"fubar"=> '1234', "baz" =>'stuff'}
-        
+
         m.should_receive(:fubar=).with('1234')
         m.should_receive(:baz=).with('stuff')
         m.should_receive(:save)
         m.update(att)
       end
     end
-    
+
     describe ".solrize_relationships" do
       it "should serialize the relationships into a Hash" do
         graph = RDF::Graph.new

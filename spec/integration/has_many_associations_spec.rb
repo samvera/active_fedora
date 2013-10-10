@@ -75,11 +75,8 @@ describe "When relationship is restricted to AF::Base" do
     class PDF < ActiveFedora::Base
       belongs_to :email, :property=>:is_part_of
     end
-
-    @book = Email.create!
-    @image = Image.create!(:email=>@book)
-    @pdf = PDF.create!(:email=>@book)
   end
+
   after do
       Object.send(:remove_const, :Image)
       Object.send(:remove_const, :PDF)
@@ -87,9 +84,35 @@ describe "When relationship is restricted to AF::Base" do
   end
 
 
-  it "Should not restrict relationships " do
-    @book.reload
-    @book.attachments.should == [@image, @pdf]
+  describe "creating new objects with object relationships" do
+    before do
+      @book = Email.create!
+      @image = Image.create!(:email=>@book)
+      @pdf = PDF.create!(:email=>@book)
+    end
+    it "Should not restrict relationships " do
+      @book.reload
+      @book.attachments.should == [@image, @pdf]
+    end
+  end
+
+  describe "creating new objects with id setter" do
+    let!(:image) { Image.create }
+    let!(:email) { Email.create }
+    let!(:pdf) { PDF.create }
+
+    after do
+      email.destroy
+      pdf.destroy
+      image.destroy
+    end
+
+    it "Should not restrict relationships " do
+      Deprecation.should_not_receive(:warn) # a deprecation in 6.6.0 that's going away in 7.0.0
+      email.attachment_ids = [image.id, pdf.id]
+      email.reload
+      email.attachments.should == [image, pdf]
+    end
   end
 end
 

@@ -61,12 +61,6 @@ You need to have a copy of hydra-jetty running.  To do this, download a working 
 java -jar start.jar
 </pre>
 
-Then open a new terminal, go to your ActiveFedora source directory, and import fedora's demo objects.
-
-<pre>
-  rake active_fedora:fixtures environment=test
-</pre>
-
 Now you're ready to run the tests.  In the directory where active_fedora is installed, run
 
 <pre>

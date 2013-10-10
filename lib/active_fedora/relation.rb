@@ -89,7 +89,10 @@ module ActiveFedora
       relation.order_values += args.flatten
       relation
     end
-    
+
+    extend Deprecation
+    self.deprecation_horizon = 'active-fedora 7.0.0'
+
     # Returns an Array of objects of the Class that +find+ is being 
     # called on
     #
@@ -99,9 +102,13 @@ module ActiveFedora
     def find(*args)
       return to_a.find { |*block_args| yield(*block_args) } if block_given?
       options = args.extract_options!
+      options = options.dup
 
-      # TODO is there any reason not to cast?
-      cast = options.has_key?(:cast) ? options.delete(:cast) : true
+      cast = if @klass == ActiveFedora::Base && !options.has_key?(:cast)
+        true
+      else 
+        options.delete(:cast)
+      end
       if options[:sort]
         # Deprecate sort sometime?
         sort = options.delete(:sort) 
@@ -149,7 +156,7 @@ module ActiveFedora
 
     def to_a
       return @records if loaded?
-      args = {}
+      args = @klass == ActiveFedora::Base ? {:cast=>true} : {}
       args[:rows] = @limit_value if @limit_value
       args[:sort] = @order_values if @order_values
       
@@ -217,7 +224,13 @@ module ActiveFedora
       if conditions
         where(conditions).destroy_all
       else
-        to_a.each {|object| object.destroy }.tap { reset }.size
+        to_a.each {|object| 
+          begin
+            object.destroy
+          rescue ActiveFedora::ObjectNotFoundError
+            logger.error "When trying to destroy #{object.pid}, encountered an ObjectNotFoundError. Solr may be out of sync with Fedora"
+          end
+        }.tap { reset }.size
       end
     end
 

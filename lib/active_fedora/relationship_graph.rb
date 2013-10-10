@@ -9,44 +9,47 @@ module ActiveFedora
     end
 
     def has_predicate?(predicate)
-      relationships.has_key? predicate
+      relationships.has_key? uri_predicate(predicate)
     end
     
     def add(predicate, object, literal=false)
-      unless relationships.has_key? predicate
-        relationships[predicate] = []
+      uri = uri_predicate(predicate)
+      unless has_predicate? uri
+        relationships[uri] = []
       end
       object = RDF::Literal.new(object) if literal
-      unless relationships[predicate].include?(object)
+      unless relationships[uri].include?(object)
         @dirty = true
-        relationships[predicate] << object
+        relationships[uri] << object
       end
     end
 
     # Remove the statement matching the predicate and object
-    # [predicate] the predicate to delete
-    # [object] the object to delete, if nil, all statements with this predicate are deleted.
+    # @param predicate [Symbol, URI] the predicate to delete
+    # @param object the object to delete, if nil, all statements with this predicate are deleted.
     def delete(predicate, object = nil)
-      return unless relationships.has_key? predicate
+      uri = uri_predicate(predicate)
+      return unless has_predicate? uri 
       if object.nil?
         @dirty = true
-        relationships.delete(predicate)
+        relationships.delete(uri)
         return
       end
-      if relationships[predicate].include?(object)
+      if relationships[uri].include?(object)
         @dirty = true
-        relationships[predicate].delete(object)
+        relationships[uri].delete(object)
       end
-      if object.respond_to?(:internal_uri) && relationships[predicate].include?(object.internal_uri)
+      if object.respond_to?(:internal_uri) && relationships[uri].include?(object.internal_uri)
         @dirty = true
-        relationships[predicate].delete(object.internal_uri)
+        relationships[uri].delete(object.internal_uri)
       elsif object.is_a? String 
-        relationships[predicate].delete_if{|obj| obj.respond_to?(:internal_uri) && obj.internal_uri == object}
+        relationships[uri].delete_if{|obj| obj.respond_to?(:internal_uri) && obj.internal_uri == object}
       end
     end
 
     def [](predicate)
-      relationships[predicate]
+      uri = uri_predicate(predicate)
+      relationships[uri]
     end
     
     def to_graph(subject_uri)
@@ -64,7 +67,7 @@ module ActiveFedora
 
     # Create an RDF statement
     # @param uri a string represending the subject
-    # @param predicate a predicate symbol
+    # @param predicate [Symbol, URI] a predicate
     # @param target an object to store
     def build_statement(uri, predicate, target)
       raise "Not allowed anymore" if uri == :self
@@ -86,9 +89,13 @@ module ActiveFedora
         end
         object = RDF::URI.new(target)
       end
-      predicate = ActiveFedora::Predicates.find_graph_predicate(predicate) unless predicate.kind_of? RDF::URI
-      RDF::Statement.new(subject, predicate, object)
+      RDF::Statement.new(subject, uri_predicate(predicate), object)
     
+    end
+
+    def uri_predicate(predicate)
+      return predicate if predicate.kind_of? RDF::URI
+      ActiveFedora::Predicates.find_graph_predicate(predicate)
     end
   end
 end

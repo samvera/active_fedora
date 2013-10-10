@@ -33,7 +33,7 @@ module ActiveFedora
     # @param [URI, ActiveFedora::Base] target Either a string URI or an object that is a kind of ActiveFedora::Base 
     # TODO is target ever a AF::Base anymore?
     def add_relationship(predicate, target, literal=false)
-      raise ArgumentError, "predicate must be a symbol. You provided `#{predicate.inspect}'" unless predicate.class.in?([Symbol, String])
+      #raise ArgumentError, "predicate must be a symbol. You provided `#{predicate.inspect}'" unless predicate.class.in?([Symbol, String])
       object_relations.add(predicate, target, literal)
       rels_ext.content_will_change! if object_relations.dirty
     end

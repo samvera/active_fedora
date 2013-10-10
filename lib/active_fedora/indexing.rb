@@ -49,7 +49,7 @@ module ActiveFedora
     # @param [Hash] solr_doc @deafult an empty Hash
     def solrize_relationships(solr_doc = Hash.new)
       relationships.each_statement do |statement|
-        predicate = RelsExtDatastream.short_predicate(statement.predicate)
+        predicate = Predicates.short_predicate(statement.predicate)
         literal = statement.object.kind_of?(RDF::Literal)
         val = literal ? statement.object.value : statement.object.to_str
         ::Solrizer::Extractor.insert_solr_field_value(solr_doc, solr_name(predicate, :symbol), val )

@@ -16,8 +16,8 @@ describe ActiveFedora::UnsavedDigitalObject do
       @obj.ownerId.should == 'D'
     end
 
-    it "should have a default pid" do
-      @obj.pid.should == "__DO_NOT_USE__"
+    it "should not have a default pid" do
+      @obj.pid.should be_nil
     end
     it "should be able to set the pid" do
       @obj.pid = "my:new_object"

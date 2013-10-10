@@ -92,6 +92,15 @@ module ActiveFedora
       end
     end
 
+    # Returns ActiveFedora::Base#marked_for_destruction? It's
+    # used in conjunction with fields_for to build a form element for the
+    # destruction of this association.
+    #
+    # See ActionView::Helpers::FormHelper::fields_for for more info.
+    def _destroy
+      marked_for_destruction?
+    end
+
     private 
 
     # Attribute hash keys that should not be assigned as normal attributes.

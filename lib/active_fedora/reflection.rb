@@ -110,6 +110,11 @@ module ActiveFedora
           @collection
         end
 
+        # Returns +true+ if +self+ is a +belongs_to+ reflection.
+        def belongs_to?
+          macro == :belongs_to
+        end
+
         private
           def derive_class_name
             class_name = name.to_s.camelize
@@ -117,6 +122,15 @@ module ActiveFedora
             class_name
           end
 
+          def derive_foreign_key
+            if belongs_to?
+              "#{name}_id"
+            elsif options[:as]
+              "#{options[:as]}_id"
+            else
+              active_fedora.name.foreign_key
+            end
+          end
       end
 
       # Holds all the meta-data about an association as it was specified in the
@@ -142,9 +156,13 @@ module ActiveFedora
           klass.create(*options)
         end
 
-        def primary_key_name
-          @primary_key_name ||= options[:foreign_key] || derive_primary_key_name
+        def foreign_key
+          @foreign_key ||= options[:foreign_key] || derive_foreign_key
         end
+
+        # def primary_key_name
+        #   @primary_key_name ||= options[:foreign_key] || derive_primary_key_name
+        # end
 
         def inverse_of
           return unless inverse_name
@@ -245,9 +263,9 @@ module ActiveFedora
             #&& !reflection.scope
         end
 
-        def derive_primary_key_name
-          'pid'
-        end        
+        # def derive_primary_key_name
+        #   'pid'
+        # end        
 
       end
     end

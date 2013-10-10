@@ -28,8 +28,8 @@ describe ActiveFedora::Base do
     end
     describe "called without a specific class" do
       it "should specify a q parameter" do
-        ActiveFedora::Base.should_receive(:find_one).with("changeme:30", nil).and_return("Fake Object1")
-        ActiveFedora::Base.should_receive(:find_one).with("changeme:22", nil).and_return("Fake Object2")
+        ActiveFedora::Base.should_receive(:find_one).with("changeme:30", true).and_return("Fake Object1")
+        ActiveFedora::Base.should_receive(:find_one).with("changeme:22", true).and_return("Fake Object2")
         mock_docs = [{"id" => "changeme:30"},{"id" => "changeme:22"}]
         mock_docs.should_receive(:has_next?).and_return(false)
         ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>'*:*', :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})

@@ -40,11 +40,6 @@ module ActiveFedora
       @marked_for_destruction
     end
 
-    def reload(options = nil)
-      @marked_for_destruction = false
-      super
-    end
-
     # Constructor.  You may supply a custom +:pid+, or we call the Fedora Rest API for the
     # next available Fedora pid, and mark as new object.
     # Also, if +attrs+ does not contain +:pid+ but does contain +:namespace+ it will pass the
@@ -65,6 +60,7 @@ module ActiveFedora
 
     # Reloads the object from Fedora.
     def reload
+      raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved" unless persisted?
       clear_association_cache
       clear_relationships
       init_with(self.class.find(self.pid).inner_object)
@@ -88,7 +84,7 @@ module ActiveFedora
         ## Replace existing unchanged datastreams with the definitions found in this class if they have a different type.
         ## Any datastream that is deleted here will cause a reload from fedora, so avoid it whenever possible
         ds_specs.keys.each do |key|
-          if !@inner_object.datastreams[key].content_changed? && @inner_object.datastreams[key].class != self.class.ds_specs[key][:type]
+          if @inner_object.datastreams[key] != nil && !@inner_object.datastreams[key].content_changed? && @inner_object.datastreams[key].class != self.class.ds_specs[key][:type]
             @inner_object.datastreams.delete(key)
           end
         end
@@ -199,7 +195,7 @@ module ActiveFedora
     end
 
     def self.internal_uri(pid)
-      "info:fedora/#{pid}" if pid
+      "info:fedora/#{pid}"
     end
 
     #return the owner id
@@ -260,10 +256,33 @@ module ActiveFedora
       klass.allocate.init_with(inner_object)
     end
 
-    # Examine the :has_model assertions in the RELS-EXT.  Adapt this class to the first first known model
+    # Examines the :has_model assertions in the RELS-EXT.
+    #
+    # If the object is of type ActiveFedora::Base, then use the first :has_model
+    # in the RELS-EXT for this object. Due to how the RDF writer works, this is
+    # currently just the first alphabetical model.
+    #
+    # If the object was instantiated with any other class, then use that class
+    # as the base of the type the user wants rather than casting to the first
+    # :has_model found on the object.
+    #
+    # In either case, if an extended model of that initial base model of the two
+    # cases above exists in the :has_model, then instantiate as that extended
+    # model type instead.
     def adapt_to_cmodel
-      the_model = ActiveFedora::ContentModel.known_models_for( self ).first
-      self.class != the_model ? self.adapt_to(the_model) : self
+      best_model_match = self.class unless self.instance_of? ActiveFedora::Base
+
+      ActiveFedora::ContentModel.known_models_for( self ).each do |model_value|
+        # If this is of type ActiveFedora::Base, then set to the first found :has_model.
+        best_model_match ||= model_value
+
+        # If there is an inheritance structure, use the most specific case.
+        if best_model_match > model_value
+          best_model_match = model_value
+        end
+      end
+
+      self.instance_of?(best_model_match) ? self : self.adapt_to(best_model_match)
     end
     
     # ** EXPERIMENTAL **

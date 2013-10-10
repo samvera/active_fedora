@@ -43,6 +43,10 @@ describe "NestedAttribute behavior" do
     end
   end
 
+  it "should have _destroy" do
+    Bar.new._destroy.should be_false
+  end
+
   it "should update the child objects" do
     @car, @bar1, @bar2 = create_car_with_bars
 
