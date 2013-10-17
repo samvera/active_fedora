@@ -50,6 +50,11 @@ module ActiveFedora
         val 
       end
 
+      def reflect_on_all_autosave_associations
+        reflections.values.select { |reflection| reflection.options[:autosave] }
+      end
+
+
       class MacroReflection
         # Returns the name of the macro.
         #
