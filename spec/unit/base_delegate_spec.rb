@@ -48,11 +48,11 @@ describe ActiveFedora::Base do
         end 
 
         has_metadata :type=>BarStream2, :name=>"xmlish"
-        delegate :cow, :to=>'xmlish'                      # for testing the default value of multiple
-        delegate :fubar, :to=>'withText', multiple: true  # test alternate datastream
-        delegate :pig, :to=>'xmlish', multiple: false
-        delegate :horse, :to=>'xmlish', multiple: true
-        delegate :duck, :to=>'xmlish', :at=>[:waterfowl, :ducks], multiple: true
+        has_attributes :cow, datastream: 'xmlish'                      # for testing the default value of multiple
+        has_attributes :fubar, datastream: 'withText', multiple: true  # test alternate datastream
+        has_attributes :pig, datastream: 'xmlish', multiple: false
+        has_attributes :horse, datastream: 'xmlish', multiple: true
+        has_attributes :duck, datastream: 'xmlish', :at=>[:waterfowl, :ducks], multiple: true
       end
     end
 
@@ -132,7 +132,7 @@ describe ActiveFedora::Base do
     before :all do
       class BarHistory2 < ActiveFedora::Base
         has_metadata 'xmlish', :type=>BarStream2
-        delegate_to 'xmlish', [:donkey, :cow], multiple: true
+        has_attributes :donkey, :cow, datastream: 'xmlish', multiple: true
       end
       class BarHistory3 < BarHistory2
       end
@@ -167,7 +167,7 @@ describe ActiveFedora::Base do
       end
       class BarHistory4 < ActiveFedora::Base
         has_metadata 'rdfish', :type=>BarRdfDatastream
-        delegate_to 'rdfish', [:title, :description], multiple: true
+        has_attributes :title, :description, datastream: 'rdfish', multiple: true
       end
     end
 

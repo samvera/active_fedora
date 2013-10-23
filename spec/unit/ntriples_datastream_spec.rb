@@ -200,12 +200,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       before(:each) do
         class Foo < ActiveFedora::Base
           has_metadata :name => "descMetadata", :type => MyDatastream
-          delegate :created, :to => :descMetadata, multiple: true
-          delegate :title, :to => :descMetadata, multiple: true
-          delegate :publisher, :to => :descMetadata, multiple: true
-          delegate :based_near, :to => :descMetadata, multiple: true
-          delegate :related_url, :to => :descMetadata, multiple: true
-          delegate :rights, :to => :descMetadata, multiple: true
+          has_attributes :created, :title, :publisher, :based_near, :related_url, :rights, datastream: :descMetadata, multiple: true
         end
         @obj = MyDatastream.new(@inner_object, 'solr_rdf')
         repository = double()

@@ -5,13 +5,13 @@ describe "scoped queries" do
   before(:each) do 
     module ModelIntegrationSpec
       class Basic < ActiveFedora::Base
-        has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream do |m|
+        has_metadata "properties", type: ActiveFedora::SimpleDatastream do |m|
           m.field "foo", :string
           m.field "bar", :string
           m.field "baz", :string
         end
 
-        delegate_to :properties, [:foo, :bar, :baz], multiple: true
+        has_attributes :foo, :bar, :baz, datastream: 'properties', multiple: true
 
         def to_solr(doc = {})
           doc = super

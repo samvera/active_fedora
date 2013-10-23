@@ -11,14 +11,13 @@ describe ActiveFedora::Model do
           m.field "baz", :string
         end
 
-        delegate_to :properties, [:foo, :bar, :baz], multiple: true
+        has_attributes :foo, :bar, :baz, datastream: 'properties', multiple: true
 
         def to_solr(doc = {})
           doc = super
           doc[ActiveFedora::SolrService.solr_name('foo', :sortable)] = doc[ActiveFedora::SolrService.solr_name('foo', type: :string)]
           doc
         end
-      
       end
     end
 

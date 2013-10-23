@@ -7,7 +7,7 @@ describe "delegating properties" do
         has_metadata 'foo', type: ActiveFedora::SimpleDatastream do |m|
           m.field "title", :string
         end
-        delegate :title, to: 'foo', multiple: false
+        has_attributes :title, datastream: 'foo', multiple: false
       end
     end
     after :all do
@@ -35,13 +35,14 @@ describe "delegating properties" do
   describe "that only have a writer" do
     before :all do
       class TestDatastream < ActiveFedora::NtriplesRDFDatastream
+        # TODO this is no longer a coorect use of has_attributes, should use delegate instead (as of AF 7.0.0)
         # accepts_nested_attributes_for :title, would generate a method like this:
         def title_attributes=(attributes)
         end
       end
       class TitledObject < ActiveFedora::Base
         has_metadata 'foo', type: TestDatastream
-        delegate :title_attributes, to: 'foo', multiple: false
+        has_attributes :title_attributes, datastream: 'foo', multiple: false
       end
     end
     after :all do

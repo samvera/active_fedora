@@ -7,8 +7,7 @@ describe ActiveFedora::Base do
         m.field "fubar", :string
         m.field "swank", :text
       end
-      delegate :fubar, :to=>'someData', multiple: true
-      delegate :swank, :to=>'someData', multiple: true
+      has_attributes :fubar, :swank, datastream: 'someData', multiple: true
 
       after_initialize :a_init
       before_save :b_save

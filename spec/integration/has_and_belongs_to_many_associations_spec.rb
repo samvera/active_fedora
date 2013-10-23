@@ -304,14 +304,14 @@ describe "Autosave" do
       has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
         m.field "title", :string
       end
-      delegate :title, to: 'foo'
+      has_attributes :title, datastream: 'foo'
     end
     class Component < ActiveFedora::Base
       has_and_belongs_to_many :items, :property => :is_part_of
       has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
         m.field "description", :string
       end
-      delegate :description, to: 'foo'
+      has_attributes :description, datastream: 'foo'
     end
   end
 

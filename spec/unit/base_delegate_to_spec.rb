@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+#TODO merge this with spec/unit/base_delegate_spec.rb
 describe ActiveFedora::Base do
 
   describe "deletgating multiple terms to one datastream" do
@@ -37,9 +38,8 @@ describe ActiveFedora::Base do
 
     class Barnyard < ActiveFedora::Base
       has_metadata :type=>BarnyardDocument, :name=>"xmlish"
-      delegate_to :xmlish, [:cow, :chicken, :pig, :duck], multiple: true
-      delegate_to :xmlish, [:donkey, :horse], :unique=>true
-      #delegate :donkey, :to=>'xmlish', :unique=>true
+      has_attributes :cow, :chicken, :pig, :duck, datastream: 'xmlish', multiple: true
+      has_attributes :donkey, :horse, datastream: 'xmlish', multiple: false
     end
     before :each do
       @n = Barnyard.new()

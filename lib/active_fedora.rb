@@ -36,7 +36,6 @@ module ActiveFedora #:nodoc:
     autoload :Datastream
     autoload :DatastreamHash
     autoload :Datastreams
-    autoload :Delegating
     autoload :DigitalObject
     autoload :FileConfigurator
     autoload :Indexing

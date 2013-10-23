@@ -125,8 +125,8 @@ describe ActiveFedora::Base do
         has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel", :autocreate => true do |m|
           m.field "fubar", :text
         end 
-        delegate :fubar, :to=>'withText', multiple: true
-        delegate :swank, :to=>'someData', multiple: true
+        has_attributes :fubar, datastream: 'withText', multiple: true
+        has_attributes :swank, datastream: 'someData', multiple: true
       end
       class FooAdaptation < ActiveFedora::Base
         has_metadata :type=>ActiveFedora::OmDatastream, :name=>'someData'

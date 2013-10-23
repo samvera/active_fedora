@@ -6,7 +6,7 @@ describe "persisting objects" do
       has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"foo" do |m|
         m.field "name", :string
       end
-      delegate :name, to: 'foo', multiple: false
+      has_attributes :name, datastream: 'foo', multiple: false
       validates :name, presence: true
     end
   end
