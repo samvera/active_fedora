@@ -345,7 +345,6 @@ module ActiveFedora
   end
 
   Base.class_eval do
-    include Attributes
     include ActiveFedora::Persistence
     extend ActiveSupport::DescendantsTracker
     extend Model
@@ -354,6 +353,7 @@ module ActiveFedora
     include ActiveModel::Conversion
     include Validations
     include Callbacks
+    include Attributes
     include Datastreams
     extend ActiveModel::Naming
     include Delegating

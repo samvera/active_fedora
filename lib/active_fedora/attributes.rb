@@ -10,6 +10,11 @@ module ActiveFedora
 
     included do
       include Serializers
+      after_save :clear_changed_attributes
+      def clear_changed_attributes
+        @previously_changed = changes
+        @changed_attributes.clear
+      end
     end
 
     def attributes=(properties)
@@ -17,7 +22,160 @@ module ActiveFedora
         respond_to?(:"#{k}=") ? send(:"#{k}=", v) : raise(UnknownAttributeError, "unknown attribute: #{k}")
       end
     end
+
+    # Calling inspect may trigger a bunch of loads, but it's mainly for debugging, so no worries.
+    def inspect
+      values = self.class.defined_attributes.keys.map {|r| "#{r}:#{send(r).inspect}"}
+      "#<#{self.class} pid:\"#{pretty_pid}\", #{values.join(', ')}>"
+    end
+
+    def [](key)
+      array_reader(key)
+    end
+
+    def []=(key, value)
+      array_setter(key, value)
+    end
+
+
+    private
+    def array_reader(field, *args)
+      raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
+      if args.present?
+        instance_exec(*args, &self.class.defined_attributes[field][:reader])
+      else
+        instance_exec &self.class.defined_attributes[field][:reader]
+      end
+    end
+
+    def array_setter(field, args)
+      raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
+      instance_exec(args, &self.class.defined_attributes[field][:setter])
+    end
+
+    # @return [Boolean] true if there is an reader method and it returns a
+    # value different from the new_value.
+    def value_has_changed?(field, new_value)
+      begin
+        new_value != array_reader(field)
+      rescue NoMethodError
+        false
+      end
+    end
+
+    def mark_as_changed(field)
+      self.send("#{field}_will_change!")
+    end
+
+
+
+    module ClassMethods
+      def defined_attributes
+        @defined_attributes ||= {}.with_indifferent_access
+        return @defined_attributes unless superclass.respond_to?(:defined_attributes) and value = superclass.defined_attributes
+        @defined_attributes = value.dup if @defined_attributes.empty?
+        @defined_attributes
+      end
+
+      def defined_attributes= val
+        @defined_attributes = val
+      end
+
+      def has_attributes(*fields)
+        options = fields.pop
+        datastream = options.delete(:datastream)
+        define_attribute_methods fields
+        fields.each do |f|
+          create_attribute_reader(f, datastream, options)
+          create_attribute_setter(f, datastream, options)
+        end
+      end
+
+      # Reveal if the attribute has been declared unique
+      # @param [Symbol] field the field to query
+      # @return [Boolean]
+      def unique?(field)
+        !multiple?(field)
+      end
+
+      # Reveal if the attribute is multivalued
+      # @param [Symbol] field the field to query
+      # @return [Boolean]
+      def multiple?(field)
+        defined_attributes[field][:multiple]
+      end
+
+
+
+      private
+      def create_attribute_reader(field, dsid, args)
+        self.defined_attributes[field] ||= {}
+        self.defined_attributes[field][:reader] = lambda do |*opts|
+          ds = self.send(dsid)
+          if ds.kind_of?(ActiveFedora::RDFDatastream)
+            ds.send(field)
+          else
+            terminology = args[:at] || [field]
+            if terminology.length == 1 && opts.present?
+              ds.send(terminology.first, *opts)
+            else
+              ds.send(:term_values, *terminology)
+            end
+          end
+        end
+
+        if !args[:multiple].nil?
+          self.defined_attributes[field][:multiple] = args[:multiple]
+        elsif !args[:unique].nil?
+          i = 0 
+          begin 
+            match = /in `(delegate.*)'/.match(caller[i])
+            i+=1
+          end while match.nil?
+
+          prev_method = match.captures.first
+          Deprecation.warn Attributes, "The :unique option for `#{prev_method}' is deprecated. Use :multiple instead. :unique will be removed in ActiveFedora 7", caller(i+1)
+          self.defined_attributes[field][:multiple] = !args[:unique]
+        else 
+          i = 0 
+          begin 
+            match = /in `(delegate.*)'/.match(caller[i])
+            i+=1
+          end while match.nil?
+
+          prev_method = match.captures.first
+          Deprecation.warn Attributes, "You have not explicitly set the :multiple option on `#{prev_method}'. The default value will switch from true to false in ActiveFedora 7, so if you want to future-proof this application set `multiple: true'", caller(i+ 1)
+          self.defined_attributes[field][:multiple] = true # this should be false for ActiveFedora 7
+        end
+
+        define_method field do |*opts|
+          val = array_reader(field, *opts)
+          self.class.multiple?(field) ? val : val.first
+        end
+      end
+
+
+      def create_attribute_setter(field, dsid, args)
+        self.defined_attributes[field] ||= {}
+        self.defined_attributes[field][:setter] = lambda do |v|
+          ds = self.send(dsid)
+          mark_as_changed(field) if value_has_changed?(field, v)
+          if ds.kind_of?(ActiveFedora::RDFDatastream)
+            ds.send("#{field}=", v)
+          else
+            terminology = args[:at] || [field]
+            ds.send(:update_indexed_attributes, {terminology => v})
+          end
+        end
+        define_method "#{field}=".to_sym do |v|
+          self[field]=v
+        end
+      end
+
+    end
     
+
+    public
 
     # A convenience method  for updating indexed attributes.  The passed in hash
     # must look like this : 
