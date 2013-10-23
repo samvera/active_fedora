@@ -41,6 +41,21 @@ module ActiveFedora
       instance_exec(args, &self.class.delegates[field][:setter])
     end
 
+    # @return [Boolean] true if there is an reader method and it returns a
+    # value different from the new_value.
+    def value_has_changed?(field, new_value)
+      begin
+        new_value != array_reader(field)
+      rescue NoMethodError
+        false
+      end
+    end
+
+    def mark_as_changed(field)
+      self.send("#{field}_will_change!")
+    end
+
+
     module ClassMethods
       def delegates
         @local_delegates ||= {}.with_indifferent_access
@@ -181,7 +196,7 @@ module ActiveFedora
         self.delegates[field] ||= {}
         self.delegates[field][:setter] = lambda do |v|
           ds = self.send(args[:to])
-          self.send("#{field}_will_change!") unless v == array_reader(field)
+          mark_as_changed(field) if value_has_changed?(field, v)
           if ds.kind_of?(ActiveFedora::RDFDatastream)
             ds.send("#{field}=", v)
           else
