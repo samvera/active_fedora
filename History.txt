@@ -1,3 +1,6 @@
+v6.6.1
+Don't try to track changes on delegates that are not attributes
+
 v6.6.0
 Add _destroy method for building nested forms [Justin Coyne]
 Removed the pid placeholder `__DO_NOT_USE__` [Justin Coyne]
