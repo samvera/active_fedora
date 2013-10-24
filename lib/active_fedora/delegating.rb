@@ -2,71 +2,7 @@ module ActiveFedora
   module Delegating
     extend ActiveSupport::Concern
     extend Deprecation
-
-    included do
-      after_save :clear_changed_attributes
-      def clear_changed_attributes
-        @previously_changed = changes
-        @changed_attributes.clear
-      end
-    end
-
-    # Calling inspect may trigger a bunch of loads, but it's mainly for debugging, so no worries.
-    def inspect
-      values = self.class.delegates.keys.map {|r| "#{r}:#{send(r).inspect}"}
-      "#<#{self.class} pid:\"#{pretty_pid}\", #{values.join(', ')}>"
-    end
-
-    def [](key)
-      array_reader(key)
-    end
-
-    def []=(key, value)
-      array_setter(key, value)
-    end
-
-
-    private
-    def array_reader(field, *args)
-      raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.delegates.key?(field)
-      if args.present?
-        instance_exec(*args, &self.class.delegates[field][:reader])
-      else
-        instance_exec &self.class.delegates[field][:reader]
-      end
-    end
-
-    def array_setter(field, args)
-      raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.delegates.key?(field)
-      instance_exec(args, &self.class.delegates[field][:setter])
-    end
-
-    # @return [Boolean] true if there is an reader method and it returns a
-    # value different from the new_value.
-    def value_has_changed?(field, new_value)
-      begin
-        new_value != array_reader(field)
-      rescue NoMethodError
-        false
-      end
-    end
-
-    def mark_as_changed(field)
-      self.send("#{field}_will_change!")
-    end
-
-
     module ClassMethods
-      def delegates
-        @local_delegates ||= {}.with_indifferent_access
-        return @local_delegates unless superclass.respond_to?(:delegates) and value = superclass.delegates
-        @local_delegates = value.dup if @local_delegates.empty?
-        @local_delegates
-      end
-
-      def delegates= val
-        @local_delegates = val
-      end
       # Provides a delegate class method to expose methods in metadata streams
       # as member of the base object. Pass the target datastream via the
       # <tt>:to</tt> argument. If you want to return a multivalue result, (e.g. array
@@ -86,6 +22,11 @@ module ActiveFedora
       #   foo.field1                 # => "My Value"
       #   foo.field2                 # => [""]
       #   foo.field3                 # => NoMethodError: undefined method `field3' for #<Foo:0x1af30c>
+      #
+      #   The optional <tt>:default</tt> forces this method to have the behavior defined by ActiveSupport
+      #   until this method has a chance to be removed
+      #
+      #     delegate :method1, to: 'descMetadata', default: true
 
       def delegate(*methods)
         fields = methods.dup
@@ -93,10 +34,10 @@ module ActiveFedora
         unless options.is_a?(Hash) && to = options[:to]
           raise ArgumentError, "Target is required"
         end
-        if ds_specs.has_key? to.to_s 
-          define_attribute_method fields.first
-          create_delegate_reader(fields.first, options)
-          create_delegate_setter(fields.first, options)
+        if ds_specs.has_key?(to.to_s) && !options[:default]
+          Deprecation.warn(Delegating, "delegate is deprecated and will be removed in ActiveFedora 7.0. use has_attributes instead", caller(1))
+          datastream = options.delete(:to)
+          has_attributes fields.first, options.merge!({:datastream=>datastream})
         else
           super(*methods)
         end
@@ -122,91 +63,8 @@ module ActiveFedora
       #   foo.field3                 # => NoMethodError: undefined method `field3' for #<Foo:0x1af30c>
 
       def delegate_to(datastream,fields,args={})
-        define_attribute_methods fields
-        fields.each do |f|
-          args.merge!({:to=>datastream})
-          create_delegate_reader(f, args)
-          create_delegate_setter(f, args)
-        end
-      end
-
-      # Reveal if the delegated field is unique or not
-      # @param [Symbol] field the field to query
-      # @return [Boolean]
-      def unique?(field)
-        !multiple?(field)
-      end
-
-      # Reveal if the delegated field is multivalued or not
-      # @param [Symbol] field the field to query
-      # @return [Boolean]
-      def multiple?(field)
-        delegates[field][:multiple]
-      end
-
-      private
-      def create_delegate_reader(field, args)
-        self.delegates[field] ||= {}
-        self.delegates[field][:reader] = lambda do |*opts|
-          ds = self.send(args[:to])
-          if ds.kind_of?(ActiveFedora::RDFDatastream)
-            ds.send(field)
-          else
-            terminology = args[:at] || [field]
-            if terminology.length == 1 && opts.present?
-              ds.send(terminology.first, *opts)
-            else
-              ds.send(:term_values, *terminology)
-            end
-          end
-        end
-
-        if !args[:multiple].nil?
-          self.delegates[field][:multiple] = args[:multiple]
-        elsif !args[:unique].nil?
-          i = 0 
-          begin 
-            match = /in `(delegate.*)'/.match(caller[i])
-            i+=1
-          end while match.nil?
-
-          prev_method = match.captures.first
-          Deprecation.warn Delegating, "The :unique option for `#{prev_method}' is deprecated. Use :multiple instead. :unique will be removed in ActiveFedora 7", caller(i+1)
-          self.delegates[field][:multiple] = !args[:unique]
-        else 
-          i = 0 
-          begin 
-            match = /in `(delegate.*)'/.match(caller[i])
-            i+=1
-          end while match.nil?
-
-          prev_method = match.captures.first
-          Deprecation.warn Delegating, "You have not explicitly set the :multiple option on `#{prev_method}'. The default value will switch from true to false in ActiveFedora 7, so if you want to future-proof this application set `multiple: true'", caller(i+ 1)
-          self.delegates[field][:multiple] = true # this should be false for ActiveFedora 7
-        end
-
-        define_method field do |*opts|
-          val = array_reader(field, *opts)
-          self.class.multiple?(field) ? val : val.first
-        end
-      end
-
-
-      def create_delegate_setter(field, args)
-        self.delegates[field] ||= {}
-        self.delegates[field][:setter] = lambda do |v|
-          ds = self.send(args[:to])
-          mark_as_changed(field) if value_has_changed?(field, v)
-          if ds.kind_of?(ActiveFedora::RDFDatastream)
-            ds.send("#{field}=", v)
-          else
-            terminology = args[:at] || [field]
-            ds.send(:update_indexed_attributes, {terminology => v})
-          end
-        end
-        define_method "#{field}=".to_sym do |v|
-          self[field]=v
-        end
+        Deprecation.warn(Delegating, "delegate_to is deprecated and will be removed in ActiveFedora 7.0. use has_attributes instead", caller(1))
+        has_attributes *fields, args.merge!({:datastream=>datastream})
       end
 
     end
