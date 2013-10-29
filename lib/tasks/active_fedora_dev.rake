@@ -30,6 +30,7 @@ require 'rspec/core/rake_task'
   RSpec::Core::RakeTask.new(:rspec) do |spec|
     spec.pattern = FileList['spec/**/*_spec.rb']
     spec.pattern += FileList['spec/*_spec.rb']
+    spec.rspec_opts = ['--backtrace']
   end
 
   RSpec::Core::RakeTask.new(:rcov) do |spec|
