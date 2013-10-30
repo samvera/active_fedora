@@ -205,8 +205,31 @@ describe ActiveFedora::Base do
     end
 
     subject { BarHistory4}
+
     it "should raise an error" do
       expect {subject.has_attributes :title, :description, multiple: true}.to raise_error
+    end
+  end
+
+  describe "when an unknown datastream is specified" do
+    before :all do
+      class BarHistory4 < ActiveFedora::Base
+        has_attributes :description, datastream: 'rdfish', multiple: true
+      end
+    end
+
+    after :all do
+      Object.send(:remove_const, :BarHistory4)
+    end
+
+    subject { BarHistory4.new }
+
+    it "should raise an error on get" do
+      expect {subject.description}.to raise_error(ArgumentError, "Undefined datastream id: `rdfish' in has_attributes")
+    end
+
+    it "should raise an error on set" do
+      expect {subject.description = 'Neat'}.to raise_error(ArgumentError, "Undefined datastream id: `rdfish' in has_attributes")
     end
   end
 end
