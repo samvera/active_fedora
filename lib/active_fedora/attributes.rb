@@ -63,12 +63,7 @@ module ActiveFedora
     # @return [Boolean] true if there is an reader method and it returns a
     # value different from the new_value.
     def value_has_changed?(field, new_value)
-      begin
-        new_value != array_reader(field)
-      rescue NoMethodError
-        # TODO I don't think this ever happens in AF 7.0.0
-        false
-      end
+      new_value != array_reader(field)
     end
 
     def mark_as_changed(field)
