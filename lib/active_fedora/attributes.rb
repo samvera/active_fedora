@@ -84,10 +84,10 @@ module ActiveFedora
         @defined_attributes = val
       end
 
-      # TODO check that the datastream attribute is set
       def has_attributes(*fields)
         options = fields.pop
         datastream = options.delete(:datastream)
+        raise ArgumentError, "You must provide a datastream to has_attributes" unless datastream
         define_attribute_methods fields
         fields.each do |f|
           create_attribute_reader(f, datastream, options)
