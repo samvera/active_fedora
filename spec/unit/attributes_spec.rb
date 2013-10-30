@@ -193,6 +193,22 @@ describe ActiveFedora::Base do
       end
     end
   end 
+
+  describe "without a datastream" do
+    before :all do
+      class BarHistory4 < ActiveFedora::Base
+      end
+    end
+
+    after :all do
+      Object.send(:remove_const, :BarHistory4)
+    end
+
+    subject { BarHistory4}
+    it "should raise an error" do
+      expect {subject.has_attributes :title, :description, multiple: true}.to raise_error
+    end
+  end
 end
 
 
