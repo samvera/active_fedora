@@ -31,30 +31,4 @@ describe "delegating properties" do
       end
     end
   end
-
-  describe "that only have a writer" do
-    before :all do
-      class TestDatastream < ActiveFedora::NtriplesRDFDatastream
-        # TODO this is no longer a coorect use of has_attributes, should use delegate instead (as of AF 7.0.0)
-        # accepts_nested_attributes_for :title, would generate a method like this:
-        def title_attributes=(attributes)
-        end
-      end
-      class TitledObject < ActiveFedora::Base
-        has_metadata 'foo', type: TestDatastream
-        has_attributes :title_attributes, datastream: 'foo', multiple: false
-      end
-    end
-    after :all do
-      Object.send(:remove_const, :TitledObject)
-      Object.send(:remove_const, :TestDatastream)
-    end
-
-    subject { TitledObject.new }
-
-    it "Should delegate the method" do
-      subject.title_attributes = {'0' => {'title' => 'Hello'}}
-    end
-
-  end
 end
