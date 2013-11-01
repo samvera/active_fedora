@@ -70,7 +70,9 @@ module ActiveFedora
       self.send("#{field}_will_change!")
     end
 
-
+    def datastream_for_attribute(dsid)
+      datastreams[dsid] || raise(ArgumentError, "Undefined datastream id: `#{dsid}' in has_attributes")
+    end
 
     module ClassMethods
       def defined_attributes
@@ -112,11 +114,10 @@ module ActiveFedora
 
 
       private
-      # TODO check for an invalid dsid.
       def create_attribute_reader(field, dsid, args)
         self.defined_attributes[field] ||= {}
         self.defined_attributes[field][:reader] = lambda do |*opts|
-          ds = self.send(dsid)
+          ds = datastream_for_attribute(dsid)
           if ds.kind_of?(ActiveFedora::RDFDatastream)
             ds.send(field)
           else
@@ -141,7 +142,7 @@ module ActiveFedora
       def create_attribute_setter(field, dsid, args)
         self.defined_attributes[field] ||= {}
         self.defined_attributes[field][:setter] = lambda do |v|
-          ds = self.send(dsid)
+          ds = datastream_for_attribute(dsid)
           mark_as_changed(field) if value_has_changed?(field, v)
           if ds.kind_of?(ActiveFedora::RDFDatastream)
             ds.send("#{field}=", v)
@@ -154,7 +155,6 @@ module ActiveFedora
           self[field]=v
         end
       end
-
     end
   end
 end
