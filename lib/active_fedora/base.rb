@@ -270,17 +270,7 @@ module ActiveFedora
     # cases above exists in the :has_model, then instantiate as that extended
     # model type instead.
     def adapt_to_cmodel
-      best_model_match = self.class unless self.instance_of? ActiveFedora::Base
-
-      ActiveFedora::ContentModel.known_models_for( self ).each do |model_value|
-        # If this is of type ActiveFedora::Base, then set to the first found :has_model.
-        best_model_match ||= model_value
-
-        # If there is an inheritance structure, use the most specific case.
-        if best_model_match > model_value
-          best_model_match = model_value
-        end
-      end
+      best_model_match = ActiveFedora::ContentModel.best_model_for(self)
 
       self.instance_of?(best_model_match) ? self : self.adapt_to(best_model_match)
     end

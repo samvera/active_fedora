@@ -50,6 +50,25 @@ describe ActiveFedora::ContentModel do
     @test_cmodel.should respond_to(:pid_suffix=)
   end
   
+  describe '.best_model_for' do
+    it 'should be the input model if no relationships' do
+      mock_object = BaseModel.new
+      mock_object.should_receive(:relationships).with(:has_model).and_return([])
+      expect(ActiveFedora::ContentModel.best_model_for(mock_object)).to eq BaseModel
+    end
+
+    it 'should be based on inheritance hierarchy' do
+      mock_object = ActiveFedora::Base.new
+      mock_object.should_receive(:relationships).with(:has_model).and_return(["info:fedora/fedora-system:ServiceDefinition-3.0", 'info:fedora/afmodel:SampleModel', 'info:fedora/afmodel:BaseModel'])
+      expect(ActiveFedora::ContentModel.best_model_for(mock_object)).to eq SampleModel
+    end
+
+    it 'should find the deepest descendant of the on inheritance hierarchy' do
+      mock_object = BaseModel.new
+      mock_object.should_receive(:relationships).with(:has_model).and_return(["info:fedora/fedora-system:ServiceDefinition-3.0", 'info:fedora/afmodel:SampleModel', 'info:fedora/afmodel:BaseModel'])
+      expect(ActiveFedora::ContentModel.best_model_for(mock_object)).to eq SampleModel
+    end
+  end
   
   describe "models_asserted_by" do
     it "should return an array of all of the content models asserted by the given object" do

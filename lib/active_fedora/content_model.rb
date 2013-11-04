@@ -21,6 +21,22 @@ module ActiveFedora
       obj.relationships(:has_model)
     end
     
+    def self.best_model_for(obj)
+      best_model_match = obj.class unless obj.instance_of? ActiveFedora::Base
+
+      known_models_for(obj).each do |model_value|
+        # If this is of type ActiveFedora::Base, then set to the first found :has_model.
+        best_model_match ||= model_value
+
+        # If there is an inheritance structure, use the most specific case.
+        if best_model_match > model_value
+          best_model_match = model_value
+        end
+      end
+
+      best_model_match
+    end
+
     # returns an array of the model classes that are defined in the current 
     # application that the given object asserts (ie. if the object asserts 
     # a StreamingVideo model but the application doesn't define a 
