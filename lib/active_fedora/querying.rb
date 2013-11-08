@@ -142,10 +142,11 @@ module ActiveFedora
           # TODO Check to see if `key' is a possible solr field for this class, if it isn't try :searchable instead
           key = ActiveFedora::SolrService.solr_name(key, :stored_searchable, type: :string)
         end
-        if value.is_a? Array
-          value.map { |val| "#{key}:#{quote_for_solr(val)}" }
-        elsif value.is_a? String and value.empty?
+
+        if value.empty?
           "-#{key}:['' TO *]"
+        elsif value.is_a? Array
+          value.map { |val| "#{key}:#{quote_for_solr(val)}" }
         else
           key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
           escaped_value = quote_for_solr(value)
