@@ -27,10 +27,6 @@ module ActiveFedora
     include SemanticNode
     extend Deprecation
 
-    def self.datastream_class_for_name(dsid)
-      ds_specs[dsid] ? ds_specs[dsid].fetch(:type, ActiveFedora::Datastream) : ActiveFedora::Datastream
-    end
-
     #return the internal fedora URI
     def internal_uri
       self.class.internal_uri(pid)

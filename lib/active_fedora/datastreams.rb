@@ -173,6 +173,12 @@ module ActiveFedora
     end
 
     module ClassMethods
+      # @param [String] dsid the datastream id
+      # @returns [Class] the class of the datastream
+      def datastream_class_for_name(dsid)
+        ds_specs[dsid] ? ds_specs[dsid].fetch(:type, ActiveFedora::Datastream) : ActiveFedora::Datastream
+      end
+
       #This method is used to specify the details of a datastream. 
       # You can pass the name as the first argument and a hash of options as the second argument
       # or you can pass the :name as a value in the args hash. Either way, name is required.
