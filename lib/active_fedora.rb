@@ -60,6 +60,7 @@ module ActiveFedora #:nodoc:
     autoload :RelsExtDatastream
     autoload :ServiceDefinitions
     autoload :SemanticNode
+    autoload :Sharding
     autoload :SimpleDatastream
     autoload :SolrDigitalObject
     autoload :SolrService

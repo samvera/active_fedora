@@ -2,6 +2,11 @@ module ActiveFedora
   module Indexing
     extend ActiveSupport::Concern
 
+    included do
+      class_attribute :profile_solr_name
+      self.profile_solr_name = ActiveFedora::SolrService.solr_name("object_profile", :displayable)
+    end
+
     # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.
     # @param [Hash] solr_doc (optional) Hash to insert the fields into
     # @param [Hash] opts (optional)
