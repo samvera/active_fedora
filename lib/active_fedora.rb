@@ -33,10 +33,12 @@ module ActiveFedora #:nodoc:
     autoload :ContentModel
     autoload :Callbacks
     autoload :Config
+    autoload :Core
     autoload :Datastream
     autoload :DatastreamHash
     autoload :Datastreams
     autoload :DigitalObject
+    autoload :FedoraAttributes
     autoload :FileConfigurator
     autoload :Indexing
     autoload :Model
@@ -60,6 +62,7 @@ module ActiveFedora #:nodoc:
     autoload :RelsExtDatastream
     autoload :ServiceDefinitions
     autoload :SemanticNode
+    autoload :Sharding
     autoload :SimpleDatastream
     autoload :SolrDigitalObject
     autoload :SolrService

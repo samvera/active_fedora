@@ -1,6 +1,8 @@
 module ActiveFedora
   module SemanticNode 
     extend ActiveSupport::Concern
+    extend Deprecation
+
     included do
       class_attribute :class_relationships_desc
     end
@@ -175,8 +177,43 @@ module ActiveFedora
       relationship_predicates.has_key?(:inbound) ? relationship_predicates[:inbound] : {}
     end
 
+    # @returns [String] the internal fedora URI
+    def internal_uri
+      self.class.internal_uri(pid)
+    end
 
     module ClassMethods
+      # @param [String,Array] uris a single uri (as a string) or a list of uris to convert to pids
+      # @returns [String] the pid component of the URI
+      def pids_from_uris(uris) 
+        Deprecation.warn(SemanticNode, "pids_from_uris has been deprecated and will be removed in active-fedora 8.0.0", caller)
+        if uris.kind_of? String
+          pid_from_uri(uris)
+        else
+          Array(uris).map {|uri| pid_from_uri(uri)}
+        end
+      end
+
+      # Returns a suitable uri object for :has_model
+      # Should reverse Model#from_class_uri
+      def to_class_uri(attrs = {})
+        if self.respond_to? :pid_suffix
+          pid_suffix = self.pid_suffix
+        else
+          pid_suffix = attrs.fetch(:pid_suffix, ContentModel::CMODEL_PID_SUFFIX)
+        end
+        if self.respond_to? :pid_namespace
+          namespace = self.pid_namespace
+        else
+          namespace = attrs.fetch(:namespace, ContentModel::CMODEL_NAMESPACE)
+        end
+        "info:fedora/#{namespace}:#{ContentModel.sanitized_class_name(self)}#{pid_suffix}" 
+      end
+      # @param [String] pid the fedora object identifier
+      # @returns [String] a URI represented as a string
+      def internal_uri(pid)
+        "info:fedora/#{pid}"
+      end
 
       # @param [String] uri a uri (as a string)
       # @returns [String] the pid component of the URI
