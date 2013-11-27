@@ -132,7 +132,7 @@ module ActiveFedora
     def ids_for_outbound(predicate)
       (object_relations[predicate] || []).map do |o|
         o = o.to_s if o.kind_of? RDF::Literal
-        o.kind_of?(String) ? o.gsub("info:fedora/", "") : o.pid
+        o.kind_of?(String) ? self.class.pid_from_uri(o) : o.pid
       end
     end
 
@@ -177,6 +177,13 @@ module ActiveFedora
 
 
     module ClassMethods
+
+      # @param [String] uri a uri (as a string)
+      # @returns [String] the pid component of the URI
+      def pid_from_uri(uri)
+        uri.gsub("info:fedora/", "")
+      end
+
       # Return hash that persists relationship metadata defined by has_relationship calls.  If you implement a child class of ActiveFedora::Base it will inherit
       # the relationship descriptions defined there by merging in the class
       # instance variable values.  It will also do this for any level of 

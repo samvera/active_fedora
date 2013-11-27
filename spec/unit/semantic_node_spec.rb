@@ -1,21 +1,8 @@
 require 'spec_helper'
 
-require 'xmlsimple'
-
 @@last_pid = 0
-
-class SpecNode2
-  include ActiveFedora::SemanticNode
-  
-  attr_accessor :pid
-  def internal_uri
-    'info:fedora/' + pid.to_s
-  end
-end
-
 describe ActiveFedora::SemanticNode do
 
-  
   describe "with a bunch of objects" do
     def increment_pid
       @@last_pid += 1    
@@ -33,54 +20,21 @@ describe ActiveFedora::SemanticNode do
           'info:fedora/' + pid.to_s
         end
       end
-    
-      class AudioRecord
-        attr_accessor :pid
-        def initialize (params={}) 
-          self.pid = params[:pid]
-        end
-        def internal_uri
-          'info:fedora/' + pid.to_s
-        end
-      end
-      
+
       @node = SpecNode.new
       @node.stub(:rels_ext).and_return(double("rels_ext", :content_will_change! => true, :content=>''))
       @node.pid = increment_pid
-      @test_object = SpecNode2.new
-      @test_object.pid = increment_pid    
-      @test_object.stub(:rels_ext).and_return(double("rels_ext", :content_will_change! => true, :content=>''))
     end
     
     after(:each) do
       Object.send(:remove_const, :SpecNode)
-      begin
-      @test_object.delete
-      rescue
-      end
-      begin
-      @test_object2.delete
-      rescue
-      end
-      begin
-      @test_object3.delete
-      rescue
-      end
-      begin
-      @test_object4.delete
-      rescue
-      end
-      begin
-      @test_object5.delete
-      rescue
-      end
     end
-   
 
-    it 'should provide .internal_uri' do
-      @node.should  respond_to(:internal_uri)
+    describe "pid_from_uri" do
+      it "should strip the info:fedora/ out of a given string" do 
+        SpecNode.pid_from_uri("info:fedora/FOO:BAR").should == "FOO:BAR"
+      end
     end
-    
     
     describe ".add_relationship" do
       it "should add relationship to the relationships graph" do
@@ -124,47 +78,38 @@ describe ActiveFedora::SemanticNode do
         @node.relationships(:is_member_of).should == []
         @node.relationships(:has_description).should == ['demo:9']
       end
-      
     end
-    
     
     it "should provide .outbound_relationships" do 
       @node.should respond_to(:outbound_relationships)
     end
-    
       
     describe '#remove_relationship' do
       it 'should remove a relationship from the relationships hash' do
-        @test_object.stub(:rels_ext).and_return(double("rels_ext", :content_will_change! => true, :content=>''))
-        @test_object.add_relationship(:has_part, "info:fedora/3")
-        @test_object.add_relationship(:has_part, "info:fedora/4")
+        @node.stub(:rels_ext).and_return(double("rels_ext", :content_will_change! => true, :content=>''))
+        @node.add_relationship(:has_part, "info:fedora/3")
+        @node.add_relationship(:has_part, "info:fedora/4")
         #check both are there
-        @test_object.ids_for_outbound(:has_part).should include "3", "4"
-        @test_object.remove_relationship(:has_part, "info:fedora/3")
+        @node.ids_for_outbound(:has_part).should include "3", "4"
+        @node.remove_relationship(:has_part, "info:fedora/3")
         #check returns false if relationship does not exist and does nothing with different predicate
-        @test_object.remove_relationship(:has_member,"info:fedora/4")
+        @node.remove_relationship(:has_member,"info:fedora/4")
         #check only one item removed
-        @test_object.ids_for_outbound(:has_part).should == ['4']
-        @test_object.remove_relationship(:has_part,"info:fedora/4")
+        @node.ids_for_outbound(:has_part).should == ['4']
+        @node.remove_relationship(:has_part,"info:fedora/4")
         #check last item removed and predicate removed since now emtpy
-        @test_object.ids_for_outbound(:has_part).should == []
+        @node.ids_for_outbound(:has_part).should == []
 
-        @test_object.relationships_are_dirty.should == true
+        @node.relationships_are_dirty.should == true
         
       end
     end
 
     describe '#assert_kind_of' do
       it 'should raise an exception if object supplied is not the correct type' do
-        had_exception = false
-        begin
-          @test_object.assert_kind_of 'SpecNode2', @test_object, ActiveFedora::Base
-        rescue
-          had_exception = true
-        end
-        raise "Failed to throw exception with kind of mismatch" unless had_exception
+        expect {@node.assert_kind_of 'SpecNode', @node, ActiveFedora::Base}.to raise_error
         #now should not throw any exception
-        @test_object.assert_kind_of 'SpecNode2', @test_object, SpecNode2
+        @node.assert_kind_of 'SpecNode', @node, SpecNode
       end
     end
   end
