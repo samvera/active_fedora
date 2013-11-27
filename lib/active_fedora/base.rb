@@ -25,6 +25,7 @@ module ActiveFedora
   #
   class Base
     include SemanticNode
+    extend Deprecation
 
     class_attribute :fedora_connection, :profile_solr_name
     self.fedora_connection = {}
@@ -295,15 +296,14 @@ module ActiveFedora
       self.init_with DigitalObject.find(self.class,self.pid)
     end
     
+    # @param [String,Array] uris a single uri (as a string) or a list of uris to convert to pids
+    # @returns [String] the pid component of the URI
     def self.pids_from_uris(uris) 
-      if uris.class == String
-        return uris.gsub("info:fedora/", "")
-      elsif uris.class == Array
-        arr = []
-        uris.each do |uri|
-          arr << uri.gsub("info:fedora/", "")
-        end
-        return arr
+      Deprecation.warn(Base, "pids_from_uris has been deprecated and will be removed in active-fedora 8.0.0", caller)
+      if uris.kind_of? String
+        pid_from_uri(uris)
+      else
+        Array(uris).map {|uri| pid_from_uri(uri)}
       end
     end
 
