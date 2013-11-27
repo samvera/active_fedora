@@ -29,14 +29,6 @@ module ActiveFedora
 
     delegate :state=,:label=, to: :inner_object
 
-    def mark_for_destruction
-      @marked_for_destruction = true
-    end
-
-    def marked_for_destruction?
-      @marked_for_destruction
-    end
-
     def self.datastream_class_for_name(dsid)
       ds_specs[dsid] ? ds_specs[dsid].fetch(:type, ActiveFedora::Datastream) : ActiveFedora::Datastream
     end
