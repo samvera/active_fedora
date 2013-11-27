@@ -209,8 +209,8 @@ describe ActiveFedora::Base do
 
     it "should have to_key once it's saved" do
       @test_object.to_key.should be_nil
-      @test_object.inner_object.stub(:new? => false)
-      @test_object.to_key.should == [@test_object.pid]
+      @test_object.inner_object.stub(new?: false, pid: 'foo:123')
+      @test_object.to_key.should == ['foo:123']
     end
 
     it "should have to_model when it's saved" do

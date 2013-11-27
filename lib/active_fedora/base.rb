@@ -130,14 +130,6 @@ module ActiveFedora
       self.pid
     end
     
-    def to_param
-      persisted? ? to_key.join('-') : nil
-    end
-
-    def to_key
-      persisted? ? [pid] : nil
-    end
-
     #return the internal fedora URI
     def internal_uri
       self.class.internal_uri(pid)
