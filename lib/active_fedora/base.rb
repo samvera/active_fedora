@@ -24,13 +24,11 @@ module ActiveFedora
   # Datastreams defined with +has_metadata+ are accessed via the +datastreams+ member hash.
   #
   class Base
+    extend ActiveModel::Naming
+    extend ActiveSupport::DescendantsTracker
     include SemanticNode
-  end
-
-  Base.class_eval do
     include Sharding
     include ActiveFedora::Persistence
-    extend ActiveSupport::DescendantsTracker
     include Loggable
     include Indexing
     include ActiveModel::Conversion
@@ -38,7 +36,6 @@ module ActiveFedora
     include Callbacks
     include Attributes
     include Datastreams
-    extend ActiveModel::Naming
     extend Querying
     include Associations
     include AutosaveAssociation
