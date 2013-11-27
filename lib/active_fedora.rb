@@ -33,6 +33,7 @@ module ActiveFedora #:nodoc:
     autoload :ContentModel
     autoload :Callbacks
     autoload :Config
+    autoload :Core
     autoload :Datastream
     autoload :DatastreamHash
     autoload :Datastreams
