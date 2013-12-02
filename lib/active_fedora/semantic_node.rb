@@ -3,9 +3,6 @@ module ActiveFedora
     extend ActiveSupport::Concern
     extend Deprecation
 
-    included do
-      class_attribute :class_relationships_desc
-    end
     attr_accessor :relationships_loaded
     attr_accessor :load_from_solr, :subject
 
@@ -87,34 +84,10 @@ module ActiveFedora
       rels_ext.content_will_change!
     end
 
-    def inbound_relationships(response_format=:uri)
-      rel_values = {}
-      inbound_relationship_predicates.each_pair do |name,predicate|
-        objects = self.send("#{name}",{:response_format=>response_format})
-        items = []
-        objects.each do |object|
-          if (response_format == :uri)    
-            #inbound relationships are always object properties
-            items.push(object.internal_uri)
-          else
-            items.push(object)
-          end
-        end
-        unless items.empty?
-          rel_values.merge!({predicate=>items})
-        end
-      end
-      return rel_values  
-    end
-    
-    def outbound_relationships()
-      relationships.statements
-    end
-    
     # If no arguments are supplied, return the whole RDF::Graph.
     # if a predicate is supplied as a parameter, then it returns the result of quering the graph with that predicate
     def relationships(*args)
-      load_relationships if !relationships_loaded
+      load_relationships unless relationships_loaded
 
       if args.empty?
         raise "Must have internal_uri" unless internal_uri
@@ -136,45 +109,6 @@ module ActiveFedora
         o = o.to_s if o.kind_of? RDF::Literal
         o.kind_of?(String) ? self.class.pid_from_uri(o) : o.pid
       end
-    end
-
-    # Return hash that persists relationship metadata defined by has_relationship calls
-    # @return [Hash] Hash of relationship subject (:self or :inbound) mapped to nested hashs of each relationship name mapped to another hash relationship options 
-    # @example For the following relationship
-    #
-    #  has_relationship "audio_records", :has_part, :type=>AudioRecord
-    #  
-    #  Results in the following returned by relationships_desc
-    #  {:self=>{"audio_records"=>{:type=>AudioRecord, :singular=>nil, :predicate=>:has_part, :inbound=>false}}}
-    def relationships_desc
-      @relationships_desc ||= self.class.relationships_desc
-    end
-
-    # Return hash of relationship names and predicate pairs (inbound and outbound).
-    # It retrieves this information via the relationships_desc hash in the class.
-    # @return [Hash] A hash of relationship names (inbound and outbound) mapped to predicates used
-    def relationship_predicates
-      return @relationship_predicates if @relationship_predicates
-      @relationship_predicates = {}
-      relationships_desc.each_pair do |subj, names|
-        @relationship_predicates[subj] = {}
-        names.each_pair do |name, args|
-          @relationship_predicates[subj][name] = args[:predicate]
-        end
-      end
-      @relationship_predicates
-    end
-
-    # Return hash of outbound relationship names and predicate pairs
-    # @return [Hash] A hash of outbound relationship names mapped to predicates used
-    def outbound_relationship_predicates
-      relationship_predicates.has_key?(:self) ? relationship_predicates[:self] : {}
-    end
-
-    # Return hash of inbound relationship names and predicate pairs
-    # @return [Hash] A hash of inbound relationship names mapped to predicates used
-    def inbound_relationship_predicates
-      relationship_predicates.has_key?(:inbound) ? relationship_predicates[:inbound] : {}
     end
 
     # @returns [String] the internal fedora URI
@@ -209,6 +143,7 @@ module ActiveFedora
         end
         "info:fedora/#{namespace}:#{ContentModel.sanitized_class_name(self)}#{pid_suffix}" 
       end
+
       # @param [String] pid the fedora object identifier
       # @returns [String] a URI represented as a string
       def internal_uri(pid)
@@ -221,45 +156,6 @@ module ActiveFedora
         uri.gsub("info:fedora/", "")
       end
 
-      # Return hash that persists relationship metadata defined by has_relationship calls.  If you implement a child class of ActiveFedora::Base it will inherit
-      # the relationship descriptions defined there by merging in the class
-      # instance variable values.  It will also do this for any level of 
-      # ancestors.
-      # @return [Hash] Hash of relationship subject (:self or :inbound) mapped to nested hashs of each relationship name mapped to another hash relationship options
-      # @example
-      #  For the following relationship
-      #
-      #  has_relationship "audio_records", :has_part, :type=>AudioRecord
-      #  
-      #  Results in the following returned by relationships_desc
-      #  {:self=>{"audio_records"=>{:type=>AudioRecord, :singular=>nil, :predicate=>:has_part, :inbound=>false}}}
-      def relationships_desc
-        #get any relationship descriptions from superclasses
-        if @class_relationships_desc.nil?
-          @class_relationships_desc ||= Hash[:self => {}]
-
-          #get super classes
-          super_klasses = []
-          #insert in reverse order so the child overwrites anything in parent
-          super_klass = self.superclass
-          while !super_klass.nil?
-            super_klasses.insert(0,super_klass)
-            super_klass = super_klass.superclass
-          end
-        
-          super_klasses.each do |super_klass|
-            if super_klass.respond_to?(:relationships_desc)
-              super_rels = super_klass.relationships_desc
-              super_rels.each_pair do |subject,rels|
-                @class_relationships_desc[subject] = {} unless @class_relationships_desc.has_key?(subject)
-                @class_relationships_desc[subject].merge!(rels)
-              end
-            end
-          end
-        end
-        @class_relationships_desc
-      end
-    
     end
   end
 end

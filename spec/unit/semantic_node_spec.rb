@@ -80,10 +80,6 @@ describe ActiveFedora::SemanticNode do
       end
     end
     
-    it "should provide .outbound_relationships" do 
-      @node.should respond_to(:outbound_relationships)
-    end
-      
     describe '#remove_relationship' do
       it 'should remove a relationship from the relationships hash' do
         @node.stub(:rels_ext).and_return(double("rels_ext", :content_will_change! => true, :content=>''))
