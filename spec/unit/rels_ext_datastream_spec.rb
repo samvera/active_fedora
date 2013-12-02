@@ -161,7 +161,7 @@ describe ActiveFedora::RelsExtDatastream do
       new_ds.model = model
       ActiveFedora::RelsExtDatastream.from_xml(xml, new_ds)
       new_ext = new_ds.to_rels_ext()
-      new_ext.should match "<ns0:itemID>oai:hull.ac.uk:hull:2708</ns0:itemID>"
+      new_ext.should match "<ns2:itemID>oai:hull.ac.uk:hull:2708</ns2:itemID>"
       
     end
   end
