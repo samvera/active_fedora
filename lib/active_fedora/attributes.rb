@@ -16,7 +16,7 @@ module ActiveFedora
 
     def attributes=(properties)
       properties.each do |k, v|
-        respond_to?(:"#{k}=") ? send(:"#{k}=", v) : raise(UnknownAttributeError, "unknown attribute: #{k}")
+        respond_to?(:"#{k}=") ? send(:"#{k}=", v) : raise(UnknownAttributeError, "#{self.class} does not have an attribute `#{k}'")
       end
     end
 

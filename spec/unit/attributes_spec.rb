@@ -126,6 +126,12 @@ describe ActiveFedora::Base do
       end
     end
 
+    describe "attributes=" do
+      it "should raise an error on an invalid attribute" do
+        expect {subject.attributes = {'goose'=>"honk" }}.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `goose'"
+      end
+    end
+
   end
 
   describe "with a superclass" do
