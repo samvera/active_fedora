@@ -31,9 +31,7 @@ module ActiveFedora
     end
 
     def prefix(name)
-      name = name.to_s unless name.is_a? String
-      pre = dsid.underscore
-      return "#{pre}__#{name}".to_sym
+      "#{dsid.underscore}__#{name}".to_sym
     end
 
     # Overriding so that one can call ds.content on an unsaved datastream and they will see the serialized format
