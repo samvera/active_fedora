@@ -80,25 +80,14 @@ describe ActiveFedora::RdfList do
         subject[2] = RDF::URI.new "http://library.ucsd.edu/ark:/20775/bbXXXXXXX4"
         subject[3] = DemoList::List::TemporalElement.new(ds.graph)
         subject[3].elementValue = "20th century"
-        expected_xml =<<END
-  <rdf:RDF
-      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:mads="http://www.loc.gov/mads/rdf/v1#">
-      
-        <rdf:Description rdf:about="info:fedora/foo">
-          <mads:elementList rdf:parseType="Collection">
-            <rdf:Description rdf:about="http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"/>
-            <mads:TopicElement>
-              <mads:elementValue>Relations with Mexican Americans</mads:elementValue>
-            </mads:TopicElement>
-            <rdf:Description rdf:about="http://library.ucsd.edu/ark:/20775/bbXXXXXXX4"/>
-            <mads:TemporalElement>
-              <mads:elementValue>20th century</mads:elementValue>
-            </mads:TemporalElement>
-          </mads:elementList>
-        </rdf:Description>
-      </rdf:RDF>
-END
-        ds.content.should be_equivalent_to expected_xml
+        doc = Nokogiri::XML(ds.content)
+        ns = {rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#", mads: "http://www.loc.gov/mads/rdf/v1#"}
+        expect(doc.xpath('/rdf:RDF/rdf:Description/@rdf:about', ns).map(&:value)).to eq ["info:fedora/foo"]
+        expect(doc.xpath('//rdf:Description/mads:elementList/@rdf:parseType', ns).map(&:value)).to eq ["Collection"]
+        expect(doc.xpath('//rdf:Description/mads:elementList/*[position() = 1]/@rdf:about', ns).map(&:value)).to eq ["http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"]
+        expect(doc.xpath('//rdf:Description/mads:elementList/*[position() = 2]/mads:elementValue', ns).map(&:text)).to eq ["Relations with Mexican Americans"]
+        expect(doc.xpath('//rdf:Description/mads:elementList/*[position() = 3]/@rdf:about', ns).map(&:value)).to eq ["http://library.ucsd.edu/ark:/20775/bbXXXXXXX4"]
+        expect(doc.xpath('//rdf:Description/mads:elementList/*[position() = 4]/mads:elementValue', ns).map(&:text)).to eq ["20th century"]
       end
     end
 
@@ -189,26 +178,14 @@ END
 
     it "should update fields" do
       list[3].elementValue = ["1900s"]
-      expected_xml =<<END
-  <rdf:RDF
-      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:mads="http://www.loc.gov/mads/rdf/v1#">
-      
-        <mads:ComplexSubject rdf:about="info:fedora/foo">
-          <mads:elementList rdf:parseType="Collection">
-            <rdf:Description rdf:about="http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"/>
-            <mads:TopicElement>
-              <mads:elementValue>Relations with Mexican Americans</mads:elementValue>
-            </mads:TopicElement>
-            <rdf:Description rdf:about="http://library.ucsd.edu/ark:/20775/bbXXXXXXX4"/>
-            <mads:TemporalElement>
-              <mads:elementValue>1900s</mads:elementValue>
-            </mads:TemporalElement>
-          </mads:elementList>
-        </mads:ComplexSubject>
-      </rdf:RDF>
-
-END
-      subject.content.should be_equivalent_to expected_xml
+      doc = Nokogiri::XML(subject.content)
+      ns = {rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#", mads: "http://www.loc.gov/mads/rdf/v1#"}
+      expect(doc.xpath('/rdf:RDF/mads:ComplexSubject/@rdf:about', ns).map(&:value)).to eq ["info:fedora/foo"]
+      expect(doc.xpath('//mads:ComplexSubject/mads:elementList/@rdf:parseType', ns).map(&:value)).to eq ["Collection"]
+      expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 1]/@rdf:about', ns).map(&:value)).to eq ["http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"]
+      expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 2]/mads:elementValue', ns).map(&:text)).to eq ["Relations with Mexican Americans"]
+      expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 3]/@rdf:about', ns).map(&:value)).to eq ["http://library.ucsd.edu/ark:/20775/bbXXXXXXX4"]
+      expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 4]/mads:elementValue', ns).map(&:text)).to eq ["1900s"]
     end
   end
 end
