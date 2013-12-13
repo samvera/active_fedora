@@ -94,6 +94,7 @@ module ActiveFedora
         solr.commit
       end
       @destroyed = true
+      self
     end
 
     def destroy

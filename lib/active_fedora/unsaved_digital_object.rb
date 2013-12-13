@@ -48,8 +48,9 @@ module ActiveFedora
         self.original_class.assign_pid(self)
     end
 
-
-
+    def delete
+      #nop
+    end
   end
 end
 
