@@ -32,4 +32,16 @@ describe ActiveFedora::Persistence do
       expect(subject.delete).to eq subject
     end
   end
+
+  describe "a saved object" do
+    subject { ActiveFedora::Base.create! }
+    describe "that is deleted" do
+      before do
+        subject.delete
+      end
+      it "should be frozen" do
+        expect(subject).to be_frozen
+      end
+    end
+  end
 end
