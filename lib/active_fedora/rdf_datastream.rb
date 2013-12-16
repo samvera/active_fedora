@@ -73,7 +73,7 @@ module ActiveFedora
       return repository if new? and data.nil?
 
       data ||= datastream_content
-
+      data.force_encoding('utf-8')
       RDF::Reader.for(serialization_format).new(data) do |reader|
         reader.each_statement do |statement|
           repository << statement
