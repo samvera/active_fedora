@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 require 'spec_helper'
 
 describe ActiveFedora::RDFDatastream do
@@ -51,6 +52,17 @@ describe ActiveFedora::RDFDatastream do
 
     it "should have a list of fields" do
       MyDatastream.fields.should == [:title, :description]
+    end
+  end
+
+  describe "deserialize" do
+    it "should be able to handle non-utf-8 characters" do
+      # see https://github.com/ruby-rdf/rdf/issues/142
+      ds = ActiveFedora::NtriplesRDFDatastream.new
+      data = "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT')
+      
+      result = ds.deserialize(data)
+      result.dump(:ntriples).should == "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
     end
   end
 end
