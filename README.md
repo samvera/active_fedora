@@ -1,9 +1,9 @@
 Description
 -----------
 
-![](https://travis-ci.org/projecthydra/active_fedora.png?branch=master):https://travis-ci.org/projecthydra/active\_fedora
-![](https://badge.fury.io/rb/active-fedora.png):http://badge.fury.io/rb/active-fedora
-![](https://gemnasium.com/projecthydra/active_fedora.png):https://gemnasium.com/projecthydra/active\_fedora
+[![Build Status](https://travis-ci.org/projecthydra/active_fedora.png?branch=master)](https://travis-ci.org/projecthydra/active\_fedora)
+[![Version](https://badge.fury.io/rb/active-fedora.png)](http://badge.fury.io/rb/active-fedora)
+[![Dependencies](https://gemnasium.com/projecthydra/active_fedora.png)](https://gemnasium.com/projecthydra/active\_fedora)
 
 RubyFedora and ActiveFedora provide a set of Ruby gems for creating and
 managing objects in the Fedora Repository Architecture
