@@ -12,3 +12,4 @@ bin
 .idea
 .ruby-version
 .ruby-gemset
+gemfiles/*.gemfile.lock

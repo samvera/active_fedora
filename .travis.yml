@@ -5,8 +5,8 @@ rvm:
   - 1.9.3
 
 gemfile:
-  - gemfiles/gemfile.rails3
-  - gemfiles/gemfile.rails4
+  - gemfiles/rails3.gemfile
+  - gemfiles/rails4.gemfile
 
 notifications:
   irc: "irc.freenode.org#projecthydra"
