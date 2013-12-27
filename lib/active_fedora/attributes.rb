@@ -44,9 +44,9 @@ module ActiveFedora
       end
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
       if args.present?
-        instance_exec(*args, &self.class.defined_attributes[field][:reader])
+        instance_exec(*args, &self.class.defined_attributes[field].reader)
       else
-        instance_exec &self.class.defined_attributes[field][:reader]
+        instance_exec &self.class.defined_attributes[field].reader
       end
     end
 
@@ -57,7 +57,7 @@ module ActiveFedora
         return association.id_writer(args) if association
       end
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
-      instance_exec(args, &self.class.defined_attributes[field][:setter])
+      instance_exec(args, &self.class.defined_attributes[field].writer)
     end
 
     # @return [Boolean] true if there is an reader method and it returns a
@@ -108,29 +108,18 @@ module ActiveFedora
       # @param [Symbol] field the field to query
       # @return [Boolean]
       def multiple?(field)
-        defined_attributes[field][:multiple]
+        defined_attributes[field].multiple
+      end
+
+      private
+
+      def find_or_create_defined_attribute(field, dsid, args)  
+        self.defined_attributes[field] ||= DatastreamAttribute.new(field, dsid, datastream_class_for_name(dsid), args)
       end
 
 
-
-      private
       def create_attribute_reader(field, dsid, args)
-        self.defined_attributes[field] ||= {}
-        self.defined_attributes[field][:reader] = lambda do |*opts|
-          ds = datastream_for_attribute(dsid)
-          if ds.kind_of?(ActiveFedora::RDFDatastream)
-            ds.send(field)
-          else
-            terminology = args[:at] || [field]
-            if terminology.length == 1 && opts.present?
-              ds.send(terminology.first, *opts)
-            else
-              ds.send(:term_values, *terminology)
-            end
-          end
-        end
-
-        self.defined_attributes[field][:multiple] = args[:multiple].nil? ? false : args[:multiple]
+        find_or_create_defined_attribute(field, dsid, args)
 
         define_method field do |*opts|
           val = array_reader(field, *opts)
@@ -138,19 +127,8 @@ module ActiveFedora
         end
       end
 
-
       def create_attribute_setter(field, dsid, args)
-        self.defined_attributes[field] ||= {}
-        self.defined_attributes[field][:setter] = lambda do |v|
-          ds = datastream_for_attribute(dsid)
-          mark_as_changed(field) if value_has_changed?(field, v)
-          if ds.kind_of?(ActiveFedora::RDFDatastream)
-            ds.send("#{field}=", v)
-          else
-            terminology = args[:at] || [field]
-            ds.send(:update_indexed_attributes, {terminology => v})
-          end
-        end
+        find_or_create_defined_attribute(field, dsid, args)
         define_method "#{field}=".to_sym do |v|
           self[field]=v
         end
