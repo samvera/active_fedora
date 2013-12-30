@@ -75,32 +75,41 @@ module ActiveFedora
 
       # Get the values off of the rdf nodes this proxy targets
       def load_values
-        values = []
+        values = parent.query(subject, options.predicate)
+        .map {|solution| coerce_to_primitive_type(solution.value)}
+        .select { |v| correct_rdf_type_for_term?(v)}
+        .map {|v| coerce_to_rdf_type(v) }
 
-        parent.query(subject, options.predicate).each do |solution|
-          v = solution.value
-          v = v.to_s if v.is_a? RDF::Literal
-          if options.type == :date
-            v = Date.parse(v)
-          end
-          # If the user provided options[:class_name], we should query to make sure this 
-          # potential solution is of the right RDF.type
-          if options.class_name
-            klass =  class_from_rdf_type(v)
-            values << v if klass == ActiveFedora.class_from_string(options.class_name, parent.class)
-          else
-            values << v
-          end
-        end
-
-        if options.class_name
-          values = values.map{ |found_subject| class_from_rdf_type(found_subject).new(parent.graph, found_subject)}
-        end
-        
         options.multivalue ? values : values.first
       end
       
       private 
+
+      def coerce_to_rdf_type(v)
+        if options.class_name
+          class_from_rdf_type(v).new(parent.graph, v)
+        else
+          v
+        end
+      end
+
+      # If the user provided options[:class_name], we should query to make sure this 
+      # potential solution is of the right RDF.type
+      def correct_rdf_type_for_term?(v)
+        !options.class_name || (options.class_name && class_from_rdf_type(v) == ActiveFedora.class_from_string(options.class_name, parent.class))
+      end
+
+      def coerce_to_primitive_type(v)
+        v = v.to_s if v.is_a? RDF::Literal
+        case options.type
+        when :date
+          Date.parse(v)
+        when :integer
+          v.to_i
+        else
+          v
+        end
+      end
 
       def target_class
         parent.target_class(options)
