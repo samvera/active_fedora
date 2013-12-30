@@ -2,24 +2,33 @@ require 'spec_helper'
 
 describe ActiveFedora::NtriplesRDFDatastream do
   before do
+    
+    class FileVocabulary < RDF::Vocabulary("http://downlode.org/Code/RDF/File_Properties/schema#")
+      property :size
+    end
+
     class MyDatastream < ActiveFedora::NtriplesRDFDatastream
       map_predicates do |map|
-        map.title(:in => RDF::DC) do |index|
+        map.title(in: RDF::DC) do |index|
           index.as :stored_searchable, :facetable
         end
-        map.date_uploaded(:to => "dateSubmitted", :in => RDF::DC) do |index|
+        map.date_uploaded(to: "dateSubmitted", in: RDF::DC) do |index|
           index.type :date
           index.as :stored_searchable, :sortable
         end
-        map.part(:to => "hasPart", :in => RDF::DC)
-        map.based_near(:in => RDF::FOAF)
-        map.related_url(:to => "seeAlso", :in => RDF::RDFS)
+        map.size(in: FileVocabulary) do |index|
+          index.type :integer
+          index.as :stored_sortable
+        end
+        map.part(to: "hasPart", in: RDF::DC)
+        map.based_near(in: RDF::FOAF)
+        map.related_url(to: "seeAlso", in: RDF::RDFS)
       end
     end
     class RdfTest < ActiveFedora::Base 
       has_metadata :name=>'rdf', :type=>MyDatastream
       has_attributes :based_near, :related_url, :part, :date_uploaded, datastream: 'rdf', multiple: true
-      has_attributes :title, datastream: 'rdf', multiple: false
+      has_attributes :title, :size, datastream: 'rdf', multiple: false
     end
     @subject = RdfTest.new
   end
@@ -31,6 +40,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
   after do
     Object.send(:remove_const, :RdfTest)
     Object.send(:remove_const, :MyDatastream)
+    Object.send(:remove_const, :FileVocabulary)
   end
 
   it "should not try to send an empty datastream" do
@@ -64,11 +74,19 @@ describe ActiveFedora::NtriplesRDFDatastream do
     foo.save  
   end
 
-  it "should serialize dates" do
-    subject.date_uploaded = Date.parse('2012-11-02')
-    subject.date_uploaded.first.should be_kind_of Date
-    solr_document = subject.to_solr
-    solr_document[ActiveFedora::SolrService.solr_name('rdf__date_uploaded', type: :date)].should == ['2012-11-02T00:00:00Z']
+  describe "serializing" do
+    it "should handle dates" do
+      subject.date_uploaded = Date.parse('2012-11-02')
+      subject.date_uploaded.first.should be_kind_of Date
+      solr_document = subject.to_solr
+      solr_document[ActiveFedora::SolrService.solr_name('rdf__date_uploaded', type: :date)].should == ['2012-11-02T00:00:00Z']
+    end
+    it "should handle integers" do
+      subject.size = 12345 
+      subject.size.should be_kind_of Fixnum
+      solr_document = subject.to_solr
+      solr_document[ActiveFedora::SolrService.solr_name('rdf__size', :stored_sortable, type: :integer)].should == '12345'
+    end
   end
 
   it "should produce a solr document" do

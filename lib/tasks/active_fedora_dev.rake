@@ -5,8 +5,6 @@ JETTY_ZIP_BASENAME = 'master'
 Jettywrapper.url = "https://github.com/projecthydra/hydra-jetty/archive/#{JETTY_ZIP_BASENAME}.zip"
 
 namespace :active_fedora do
-  require 'active-fedora'
-
   # Use yard to build docs
   begin
     require 'yard'
@@ -26,11 +24,11 @@ namespace :active_fedora do
     end
   end
 
-require 'rspec/core/rake_task'
+  require 'rspec/core/rake_task'
   RSpec::Core::RakeTask.new(:rspec) do |spec|
     spec.pattern = FileList['spec/**/*_spec.rb']
     spec.pattern += FileList['spec/*_spec.rb']
-    spec.rspec_opts = ['--backtrace']
+    spec.rspec_opts = ['--backtrace'] if ENV['CI']
   end
 
   RSpec::Core::RakeTask.new(:rcov) do |spec|
