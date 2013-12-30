@@ -161,13 +161,9 @@ module ActiveFedora
     end
 
 
-    def config_for_term_or_uri(term)
-      case term
-      when RDF::URI
-        self.class.config.each { |k, v| return v if v.predicate == term}
-      else
-        self.class.config[term.to_sym]
-      end
+    # In Rails 4 you can do "delegate :config_for_term_or_uri, :class", but in rails 3 it breaks.
+    def config_for_term_or_uri(val)
+      self.class.config_for_term_or_uri(val)
     end
 
     # @param [Symbol, RDF::URI] term predicate  the predicate to insert into the graph
@@ -298,6 +294,15 @@ module ActiveFedora
           ActiveFedora::RdfNode.rdf_registry[uri] = self
         end
         @rdf_type
+      end
+
+      def config_for_term_or_uri(term)
+        case term
+        when RDF::URI
+          config.each { |k, v| return v if v.predicate == term}
+        else
+          config[term.to_sym]
+        end
       end
 
       def config_for_predicate(predicate)

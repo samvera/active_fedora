@@ -178,6 +178,12 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.should respond_to(:to_solr)
       @subject.to_solr.should be_kind_of(Hash)
     end
+
+    it "should have a solr_name method" do
+      expect(MyDatastream.primary_solr_name('descMetadata', :based_near)).to eq 'desc_metadata__based_near_sim'
+      expect(MyDatastream.primary_solr_name('props', :title)).to eq 'props__title_tesim'
+    end
+
     it "should optionally allow you to provide the Solr::Document to add fields to and return that document when done" do
       doc = Hash.new
       @subject.to_solr(doc).should == doc

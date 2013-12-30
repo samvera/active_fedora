@@ -1,8 +1,6 @@
 module ActiveFedora
   class RDFDatastream < Datastream
 
-    include Solrizer::Common
-
     before_save do
       if content.blank?
         logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}"
@@ -31,7 +29,16 @@ module ActiveFedora
     end
 
     def prefix(name)
+      self.class.prefix(dsid, name)
+    end
+
+    def self.prefix(dsid, name)
       "#{dsid.underscore}__#{name}".to_sym
+    end
+
+    # Gives the primary solr name for a column. If there is more than one indexer on the field definition, it gives the first 
+    def self.primary_solr_name(dsid, field)
+      ActiveFedora::SolrService.solr_name(prefix(dsid, field), config_for_term_or_uri(field).behaviors.first)
     end
 
     # Overriding so that one can call ds.content on an unsaved datastream and they will see the serialized format
@@ -54,11 +61,9 @@ module ActiveFedora
     def to_solr(solr_doc = Hash.new) # :nodoc:
       fields.each do |field_key, field_info|
         values = get_values(rdf_subject, field_key)
-        if values
-          Array(values).each do |val|    
-            val = val.to_s if val.kind_of? RDF::URI
-            self.class.create_and_insert_terms(prefix(field_key), val, field_info[:behaviors], solr_doc)
-          end
+        Array(values).each do |val|    
+          val = val.to_s if val.kind_of? RDF::URI
+          Solrizer.insert_field(solr_doc, prefix(field_key), val, *field_info[:behaviors])
         end
       end
       solr_doc

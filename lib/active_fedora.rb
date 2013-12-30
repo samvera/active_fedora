@@ -22,6 +22,7 @@ module ActiveFedora #:nodoc:
   class AssociationTypeMismatch < RuntimeError; end # :nodoc:
   class UnregisteredPredicateError < RuntimeError; end # :nodoc:
   class RecordNotSaved < RuntimeError; end # :nodoc:
+  class IllegalOperation < RuntimeError; end # :nodoc:
 
 
   eager_autoload do
@@ -35,6 +36,7 @@ module ActiveFedora #:nodoc:
     autoload :Config
     autoload :Core
     autoload :Datastream
+    autoload :DatastreamAttribute
     autoload :DatastreamHash
     autoload :Datastreams
     autoload :DigitalObject
