@@ -221,6 +221,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
         @obj.rights = "Totally open, y'all"
         @obj.save
       end
+      after do
+        Object.send(:remove_const, :Foo)
+      end
+
 
       describe ".fields()" do
         it "should return the right fields" do

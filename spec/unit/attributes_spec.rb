@@ -132,6 +132,14 @@ describe ActiveFedora::Base do
       end
     end
 
+    describe "attributes" do
+      let(:vals) { {'cow'=>["moo"], 'pig' => ['oink'], 'horse' =>['neigh'], "fubar"=>[], 'duck'=>['quack'] } }
+      before { subject.attributes = vals }
+      it "should return a hash" do
+        expect(subject.attributes).to eq(vals.merge('id' => nil))
+      end
+    end
+
   end
 
   describe "with a superclass" do

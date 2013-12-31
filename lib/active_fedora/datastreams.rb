@@ -89,8 +89,7 @@ module ActiveFedora
         datastream.instance_variable_set :@dsid, generate_dsid(prefix)
       end
       datastreams[datastream.dsid] = datastream
-      self.class.build_datastream_accessor(datastream.dsid) unless respond_to? datastream.dsid
-      return datastream.dsid
+      datastream.dsid
     end
 
     # @return [Array] all datastreams that return true for `metadata?` and are not Rels-ext
@@ -145,7 +144,9 @@ module ActiveFedora
       attrs[:checksumType] = opts[:checksumType] if opts[:checksumType]
       attrs[:versionable] = opts[:versionable] unless opts[:versionable].nil?
       ds = create_datastream(self.class.datastream_class_for_name(opts[:dsid]), opts[:dsid], attrs)
-      add_datastream(ds)
+      add_datastream(ds).tap do |dsid|
+        self.class.build_datastream_accessor(dsid) unless respond_to? dsid
+      end
     end
     
     

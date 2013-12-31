@@ -62,8 +62,9 @@ module ActiveFedora #:nodoc:
     autoload :Relation
     autoload :RelationshipGraph
     autoload :RelsExtDatastream
-    autoload :ServiceDefinitions
     autoload :SemanticNode
+    autoload :ServiceDefinitions
+    autoload :Serialization
     autoload :Sharding
     autoload :SimpleDatastream
     autoload :SolrDigitalObject
