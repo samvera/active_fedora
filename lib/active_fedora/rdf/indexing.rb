@@ -26,7 +26,15 @@ module ActiveFedora
 
         # Gives the primary solr name for a column. If there is more than one indexer on the field definition, it gives the first 
         def primary_solr_name(dsid, field)
-          ActiveFedora::SolrService.solr_name(prefix(dsid, field), config_for_term_or_uri(field).behaviors.first)
+          config = config_for_term_or_uri(field)
+          if behaviors = config.behaviors
+            ActiveFedora::SolrService.solr_name(prefix(dsid, field), behaviors.first, type: config.type)
+          end
+        end
+
+        # Gives the datatype for a column.
+        def type(field)
+          config_for_term_or_uri(field).type
         end
       end
 
