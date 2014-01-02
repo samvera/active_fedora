@@ -1,5 +1,3 @@
-require 'active_support/core_ext/array/wrap'
-
 module ActiveFedora
   # = Active Fedora Callbacks, adapted from ActiveRecord
   #

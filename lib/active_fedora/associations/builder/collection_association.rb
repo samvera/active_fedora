@@ -32,7 +32,7 @@ module ActiveFedora::Associations::Builder
 
         # TODO : why do i need method_defined? I think its because of the inheritance chain
         model.class_attribute full_callback_name.to_sym unless model.method_defined?(full_callback_name)
-        model.send("#{full_callback_name}=", Array.wrap(options[callback_name.to_sym]))
+        model.send("#{full_callback_name}=", Array(options[callback_name.to_sym]))
       end
 
       def define_readers
