@@ -2,6 +2,7 @@ module ActiveFedora
   module Attributes
     extend ActiveSupport::Concern
     extend ActiveSupport::Autoload
+    include ActiveModel::Dirty
     
     autoload :Serializers
 
@@ -38,6 +39,14 @@ module ActiveFedora
       array_setter(key, value)
     end
 
+    protected
+
+    # override activemodel so it doesn't trigger a load of all the attributes.
+    # the callback methods seem to trigger this, which means just initing an object (after_init)
+    # causes a load of all the datastreams.
+    def attribute_method?(attr_name) #:nodoc:
+      respond_to_without_attributes?(:attributes) && self.class.defined_attributes.include?(attr_name)
+    end
 
     private
     def array_reader(field, *args)

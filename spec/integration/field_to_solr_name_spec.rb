@@ -9,10 +9,14 @@ describe "An object with RDF backed attributes" do
           map.title(in: RDF::DC) do |index|
             index.as :stored_searchable
           end
+          map.date_uploaded(to: "dateSubmitted", in: RDF::DC) do |index|
+            index.type :date
+            index.as :stored_searchable, :sortable
+          end
         end
       end
       has_metadata 'descMetadata', type: MyMetadata
-      has_attributes :title, datastream: 'descMetadata'
+      has_attributes :title, :date_uploaded, datastream: 'descMetadata'
     end
   end
 
@@ -22,5 +26,9 @@ describe "An object with RDF backed attributes" do
 
   it "should be able to grab the solr name" do
     expect(TestOne.defined_attributes[:title].primary_solr_name).to eq 'desc_metadata__title_tesim'
+  end
+
+  it "should be able to grab the solr name for a date" do
+    expect(TestOne.defined_attributes[:date_uploaded].primary_solr_name).to eq 'desc_metadata__date_uploaded_dtsim'
   end
 end

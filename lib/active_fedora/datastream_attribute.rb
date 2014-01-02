@@ -24,6 +24,14 @@ module ActiveFedora
       end
     end
 
+    def type
+      if klass.respond_to?(:type)
+        klass.type(field)
+      else
+        raise IllegalOperation, "the class '#{klass}' doesn't respond to 'type'"
+      end
+    end
+
     private
 
     def initialize_writer!
@@ -43,15 +51,22 @@ module ActiveFedora
     def initialize_reader!
       this = self
       self.reader = lambda do |*opts|
-        ds = datastream_for_attribute(this.dsid)
-        if ds.kind_of?(ActiveFedora::RDFDatastream)
-          ds.send(this.field)
+        if inner_object.is_a? SolrDigitalObject
+          # Look in the cache
+          # TODO catch a non-cached error and try fedora.
+          inner_object.fetch(this.field)
         else
-          terminology = this.at || [this.field]
-          if terminology.length == 1 && opts.present?
-            ds.send(terminology.first, *opts)
+          # Load from fedora
+          ds = datastream_for_attribute(this.dsid)
+          if ds.kind_of?(ActiveFedora::RDFDatastream)
+            ds.send(this.field)
           else
-            ds.send(:term_values, *terminology)
+            terminology = this.at || [this.field]
+            if terminology.length == 1 && opts.present?
+              ds.send(terminology.first, *opts)
+            else
+              ds.send(:term_values, *terminology)
+            end
           end
         end
       end

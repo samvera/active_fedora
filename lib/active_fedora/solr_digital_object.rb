@@ -14,7 +14,7 @@ module ActiveFedora
       @datastreams = {}
       
       dsids = profile_hash['datastreams'].keys
-      original_class = klass
+      self.original_class = klass
       missing = dsids - klass.ds_specs.keys
       missing.each do |dsid|
         #Initialize the datastreams that are in the solr document, but not found in the classes spec.
@@ -39,6 +39,20 @@ module ActiveFedora
         end
       end
       self
+    end
+
+    def fetch(field)
+      attribute = original_class.defined_attributes[field]
+      field_name = attribute.primary_solr_name
+      if field_name
+       val = solr_doc.fetch field_name
+       case attribute.type
+       when :date
+         val.is_a?(Array) ? val.map{|v| Date.parse v} : Date.parse(val)
+       else
+         val
+       end
+      end
     end
     
     def new?

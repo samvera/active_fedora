@@ -34,14 +34,13 @@ module ActiveFedora
     include ActiveModel::Conversion
     include Validations
     include Callbacks
-    include Attributes
     include Datastreams
     extend Querying
     include Associations
     include AutosaveAssociation
     include NestedAttributes
     include Reflection
-    include ActiveModel::Dirty
+    include Attributes
     include Serialization
     include Core
     include FedoraAttributes
