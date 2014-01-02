@@ -45,7 +45,7 @@ module ActiveFedora
 
       # Implements the ids writer method, e.g. foo.item_ids= for Foo.has_many :items
       def ids_writer(ids)
-        ids = Array.wrap(ids).reject { |id| id.blank? }
+        ids = Array(ids).reject { |id| id.blank? }
         replace(klass.find(ids))#.index_by { |r| r.id }.values_at(*ids))
         #TODO, like this when find() can return multiple records
         #send("#{reflection.name}=", reflection.klass.find(ids))

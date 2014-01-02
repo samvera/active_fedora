@@ -1,5 +1,3 @@
-require 'active_support/core_ext/array/wrap'
-
 module ActiveFedora
   # = Active Fedora Autosave Association
   #
@@ -203,7 +201,7 @@ module ActiveFedora
     def nested_records_changed_for_autosave?
       self.class.reflect_on_all_autosave_associations.any? do |reflection|
         association = association_instance_get(reflection.name)
-        association && Array.wrap(association.target).any? { |a| a.changed_for_autosave? }
+        association && Array(association.target).any? { |a| a.changed_for_autosave? }
       end
     end
 

@@ -36,6 +36,7 @@ module ActiveFedora
     class CollectionProxy # :nodoc:
       alias :proxy_extend :extend
 
+      #TODO remove using: https://github.com/rails/rails/commit/c86a32d7451c5d901620ac58630460915292f88b#diff-bee622c17de67f292adf310f75288e25
       instance_methods.each { |m| undef_method m unless m.to_s =~ /^(?:nil\?|send|object_id|to_a)$|^__|^respond_to|proxy_/ }
 
       delegate :group, :order, :limit, :joins, :where, :preload, :eager_load, :includes, :from,
@@ -53,7 +54,7 @@ module ActiveFedora
 
       def initialize(association)
         @association = association
-        Array.wrap(association.options[:extend]).each { |ext| proxy_extend(ext) }
+        Array(association.options[:extend]).each { |ext| proxy_extend(ext) }
       end
 
       def respond_to?(*args)
