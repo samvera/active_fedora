@@ -42,6 +42,7 @@ module ActiveFedora
     include NestedAttributes
     include Reflection
     include ActiveModel::Dirty
+    include Serialization
     include Core
     include FedoraAttributes
   end

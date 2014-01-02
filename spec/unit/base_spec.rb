@@ -227,21 +227,27 @@ describe ActiveFedora::Base do
 
 
     describe ".datastreams" do
-      before do
-        @test_history = FooHistory.new
+      let(:test_history) { FooHistory.new }
+      it "should create accessors for datastreams declared with has_metadata" do
+        test_history.withText.should == test_history.datastreams['withText']
       end
-      it "should create dynamic accessors" do
-        @test_history.withText.should == @test_history.datastreams['withText']
-      end
-      it "dynamic accessors should convert dashes to underscores" do
-        ds = double('datastream', :dsid=>'eac-cpf')
-        @test_history.add_datastream(ds)
-        @test_history.eac_cpf.should == ds
-      end
-      it "dynamic accessors should not convert datastreams named with underscore" do
-        ds = double('datastream', :dsid=>'foo_bar')
-        @test_history.add_datastream(ds)
-        @test_history.foo_bar.should == ds
+      describe "dynamic accessors" do
+        before do
+          test_history.add_datastream(ds)
+          test_history.class.build_datastream_accessor(ds.dsid)
+        end
+        describe "when the datastream is named with dash" do
+          let(:ds) {double('datastream', :dsid=>'eac-cpf')}
+          it "should convert dashes to underscores" do
+            test_history.eac_cpf.should == ds
+          end
+        end
+        describe "when the datastream is named with underscore" do
+          let (:ds) { double('datastream', :dsid=>'foo_bar') }
+          it "should preserve the underscore" do
+            test_history.foo_bar.should == ds
+          end
+        end
       end
     end
 

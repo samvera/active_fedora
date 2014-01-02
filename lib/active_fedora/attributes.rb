@@ -20,6 +20,10 @@ module ActiveFedora
       end
     end
 
+    def attributes
+      self.class.defined_attributes.keys.each_with_object({"id" => id}) {|key, hash| hash[key] = self[key]}
+    end
+
     # Calling inspect may trigger a bunch of loads, but it's mainly for debugging, so no worries.
     def inspect
       values = self.class.defined_attributes.keys.map {|r| "#{r}:#{send(r).inspect}"}
