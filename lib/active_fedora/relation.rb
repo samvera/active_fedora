@@ -1,17 +1,39 @@
 module ActiveFedora
   class Relation
-    delegate :map, :each, :collect, :all?, :include?, :to => :to_a
+
+    include Delegation, SpawnMethods, QueryMethods, FinderMethods
 
     attr_reader :loaded
+    attr_accessor :default_scoped
     alias :loaded? :loaded
-
-    attr_accessor :limit_value, :where_values, :order_values
     
-    def initialize(klass)
+    attr_accessor :values, :klass
+    
+    def initialize(klass, values = {})
       @klass = klass
       @loaded = false
-      self.where_values = []
-      self.order_values = []
+      @values = {}
+    end
+
+    # Tries to create a new record with the same scoped attributes
+    # defined in the relation. Returns the initialized object if validation fails.
+    #
+    # Expects arguments in the same format as +Base.create+.
+    #
+    # ==== Examples
+    #   users = User.where(name: 'Oscar')
+    #   users.create # #<User id: 3, name: "oscar", ...>
+    #
+    #   users.create(name: 'fxn')
+    #   users.create # #<User id: 4, name: "fxn", ...>
+    #
+    #   users.create { |user| user.name = 'tenderlove' }
+    #   # #<User id: 5, name: "tenderlove", ...>
+    #
+    #   users.create(name: nil) # validation on name
+    #   # #<User id: nil, name: nil, ...>
+    def create(*args, &block)
+      scoping { @klass.create(*args, &block) }
     end
 
     def reset
@@ -115,7 +137,7 @@ module ActiveFedora
       if options.present?
         options = args.first unless args.empty?
         options = {conditions: options}
-        apply_finder_options(options).all
+        apply_finder_options(options)
       else
         raise ArgumentError, "#{self}.find() expects a pid. You provided `#{args.inspect}'" unless args.is_a? Array
         find_with_ids(args, cast)
@@ -143,22 +165,13 @@ module ActiveFedora
       ids.map{|id| @klass.find_one(id, cast)}
     end
 
-    # A convenience wrapper for <tt>find(:all, *args)</tt>. You can pass in all the
-    # same arguments to this method as you can to <tt>find(:all)</tt>.
-    def all(*args)
-      args.any? ? apply_finder_options(args.first).to_a : to_a
-    end
-
-
-
     def to_a
       return @records if loaded?
       args = @klass == ActiveFedora::Base ? {:cast=>true} : {}
-      args[:rows] = @limit_value if @limit_value
-      args[:sort] = @order_values if @order_values
+      args[:rows] = limit_value if limit_value
+      args[:sort] = order_values if order_values
       
-      query = @where_values.present? ? @where_values : {}
-      @records = @klass.to_enum(:find_each, query, args).to_a
+      @records = @klass.to_enum(:find_each, where_values, args).to_a
 
       @records
     end
@@ -168,11 +181,10 @@ module ActiveFedora
     def count(*args)
       return apply_finder_options(args.first).count  if args.any?
       opts = {}
-      opts[:rows] = @limit_value if @limit_value
-      opts[:sort] = @order_values if @order_values
+      opts[:rows] = limit_value if limit_value
+      opts[:sort] = order_values if order_values
       
-      query = @where_values.present? ? @where_values : {}
-      @klass.calculate :count, query, opts
+      @klass.calculate :count, where_values, opts
 
     end
 

@@ -61,9 +61,21 @@ module ActiveFedora
         loaded!
       end
 
-      # def scoped
-      #   target_scope.merge(@association_scope)
-      # end
+      def scope
+        target_scope.merge(association_scope)
+      end
+
+      # The scope for this association.
+      #
+      # Note that the association_scope is merged into the target_scope only when the
+      # scope method is called. This is because at that point the call may be surrounded
+      # by scope.scoping { ... } or with_scope { ... } etc, which affects the scope which
+      # actually gets built.
+      def association_scope
+        if klass
+          @association_scope ||= AssociationScope.new(self).scope
+        end
+      end
       
       # Set the inverse association, if possible
       def set_inverse_instance(record)
@@ -71,6 +83,13 @@ module ActiveFedora
           inverse = record.association(inverse_reflection_for(record).name)
           inverse.target = owner
         end
+      end
+
+      
+      # Can be overridden (i.e. in ThroughAssociation) to merge in other scopes (i.e. the
+      # through association's scope)
+      def target_scope
+        klass.all
       end
 
       # Loads the \target if needed and returns it.

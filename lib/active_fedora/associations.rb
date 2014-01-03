@@ -6,6 +6,7 @@ module ActiveFedora
     extend ActiveSupport::Concern
 
     autoload :Association,           'active_fedora/associations/association'
+    autoload :AssociationScope,      'active_fedora/associations/association_scope'
     autoload :SingularAssociation,   'active_fedora/associations/singular_association'
     autoload :CollectionAssociation, 'active_fedora/associations/collection_association'
     autoload :CollectionProxy,       'active_fedora/associations/collection_proxy'

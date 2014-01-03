@@ -165,9 +165,11 @@ module ActiveFedora
           @foreign_key ||= options[:foreign_key] || derive_foreign_key
         end
 
-        # def primary_key_name
-        #   @primary_key_name ||= options[:foreign_key] || derive_primary_key_name
-        # end
+        # A chain of reflections from this one back to the owner. For more see the explanation in
+        # ThroughReflection.
+        def chain
+          [self]
+        end
 
         def inverse_of
           return unless inverse_name

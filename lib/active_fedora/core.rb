@@ -1,5 +1,7 @@
 module ActiveFedora
   module Core
+    extend ActiveSupport::Concern
+    
     attr_reader :inner_object
 
     # Constructor.  You may supply a custom +:pid+, or we call the Fedora Rest API for the
@@ -139,5 +141,11 @@ module ActiveFedora
       self.init_with DigitalObject.find(self.class,self.pid)
     end
     
+    module ClassMethods
+      private
+      def relation
+        Relation.new(self)
+      end
+    end
   end
 end

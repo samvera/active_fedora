@@ -33,12 +33,7 @@ module ActiveFedora
     #
     # is computed directly through SQL and does not trigger by itself the
     # instantiation of the actual post records.
-    class CollectionProxy # :nodoc:
-      alias :proxy_extend :extend
-
-      #TODO remove using: https://github.com/rails/rails/commit/c86a32d7451c5d901620ac58630460915292f88b#diff-bee622c17de67f292adf310f75288e25
-      instance_methods.each { |m| undef_method m unless m.to_s =~ /^(?:nil\?|send|object_id|to_a)$|^__|^respond_to|proxy_/ }
-
+    class CollectionProxy < Relation # :nodoc:
       delegate :group, :order, :limit, :joins, :where, :preload, :eager_load, :includes, :from,
                :lock, :readonly, :having, :to => :scoped
 
@@ -54,7 +49,8 @@ module ActiveFedora
 
       def initialize(association)
         @association = association
-        Array(association.options[:extend]).each { |ext| proxy_extend(ext) }
+        super association.klass
+        merge! association.scope
       end
 
       def respond_to?(*args)

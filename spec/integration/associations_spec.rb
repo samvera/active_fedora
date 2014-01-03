@@ -215,10 +215,6 @@ describe ActiveFedora::Base do
           @library.books << @book << Book.create 
           @library.save
 
-          # @book.library.pid.should == @library.pid
-          # @library.books.reload
-          # @library.books.should == [@book]
-
           @library2 = Library.find(@library.pid)
           @library2.books.size.should == 2
         end

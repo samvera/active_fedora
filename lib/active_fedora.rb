@@ -26,6 +26,7 @@ module ActiveFedora #:nodoc:
 
 
   eager_autoload do
+    autoload :AssociationRelation
     autoload :Associations
     autoload :Attributes
     autoload :Auditable
@@ -47,6 +48,7 @@ module ActiveFedora #:nodoc:
     autoload :NestedAttributes
     autoload :NomDatastream
     autoload :NtriplesRDFDatastream
+    autoload :NullRelation
     autoload :OmDatastream
     autoload :Property
     autoload :Persistence
@@ -60,8 +62,17 @@ module ActiveFedora #:nodoc:
     autoload :RdfxmlRDFDatastream
     autoload :Reflection
     autoload :Relation
+
+    autoload_under 'relation' do
+      autoload :Delegation
+      autoload :SpawnMethods
+      autoload :QueryMethods
+      autoload :FinderMethods
+    end
+
     autoload :RelationshipGraph
     autoload :RelsExtDatastream
+    autoload :Scoping
     autoload :SemanticNode
     autoload :ServiceDefinitions
     autoload :Serialization
@@ -77,7 +88,17 @@ module ActiveFedora #:nodoc:
     autoload :Validations
     autoload :SolrInstanceLoader
   end
-  
+
+  module Scoping
+    extend ActiveSupport::Autoload
+
+    eager_autoload do
+      autoload :Default
+      autoload :Named
+    end
+  end
+
+
   
   include Loggable
   
