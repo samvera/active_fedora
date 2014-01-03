@@ -67,9 +67,14 @@ describe ActiveFedora::Base do
           new_book.should be_kind_of Book
           new_book.library.should be_kind_of Library
           @library.books.should == [new_book]
-          #TODO save the associated children too, requires something like ActiveRecord::AutosaveAssociation (ver 3.0.12) 
-          #@library.save
-          #new_book.library.should == @library
+        end
+
+        it "should make a new child" do
+          new_book = @library.books.new
+          new_book.should be_new_record
+          new_book.should be_kind_of Book
+          new_book.library.should be_kind_of Library
+          @library.books.should == [new_book]
         end
 
         it "should not create children if the parent isn't saved" do
