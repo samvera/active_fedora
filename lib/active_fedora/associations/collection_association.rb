@@ -16,8 +16,10 @@ module ActiveFedora
       # @option opts [Symbol] :response_format can be ':solr' to return a solr result.
       def reader(opts = false)
         if opts.kind_of?(Hash)
-          return load_from_solr if opts[:response_format] == :solr
-          raise ArgumentError, "unknown parameters `#{opts.inspect}'"
+          if opts.delete(:response_format) == :solr
+            return load_from_solr(opts) 
+          end
+          raise ArgumentError, "Hash parameter must include :response_format=>:solr (#{opts.inspect})"
         else
           force_reload = opts
         end
@@ -208,10 +210,9 @@ module ActiveFedora
       end
 
       def find_target
-        return [] if @finder_query.empty?
-        solr_result = SolrService.query(@finder_query, :rows=>1000)
-        #TODO, don't reify, just store the solr results and lazily reify.
-        return ActiveFedora::SolrService.reify_solr_results(solr_result)
+        # TODO: don't reify, just store the solr results and lazily reify.
+        # For now, we set a hard limit of 1000 results.
+        return ActiveFedora::SolrService.reify_solr_results(load_from_solr(rows: 1000))
       end
 
       def merge_target_lists(loaded, existing)
@@ -235,11 +236,12 @@ module ActiveFedora
         end + existing
       end
 
-      def load_from_solr
+      # @param opts [Hash] Options that will be passed through to ActiveFedora::SolrService.query.
+      def load_from_solr(opts = Hash.new)
         return [] if @finder_query.empty?
-        SolrService.query(@finder_query, :rows=>1000)
+        solr_opts = {rows: opts.delete(:rows) || count}
+        SolrService.query(@finder_query, solr_opts.merge(opts))
       end
-
 
       def add_record_to_target_with_callbacks(record)
         callback(:before_add, record)
