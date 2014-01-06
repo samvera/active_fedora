@@ -94,6 +94,17 @@ module ActiveFedora
         concat(other_array.select { |v| !current.include?(v) })
       end
       
+      def include?(record)
+        if record.is_a?(reflection.klass)
+          if record.new_record?
+            target.include?(record)
+          else
+            loaded? ? target.include?(record) : scope.exists?(record)
+          end
+        else
+          false
+        end
+      end
 
       def to_ary
         load_target.dup
@@ -275,6 +286,15 @@ module ActiveFedora
         record
       end
 
+      def scope(opts = {})
+        scope = super()
+        scope.none! if opts.fetch(:nullify, true) && null_scope?
+        scope
+      end
+
+      def null_scope?
+        owner.new_record? && !foreign_key_present?
+      end
       protected
         def reset_target!
           @target = Array.new

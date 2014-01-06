@@ -29,6 +29,7 @@ module ActiveFedora
     include SemanticNode
     include Sharding
     include ActiveFedora::Persistence
+    include Scoping
     include Loggable
     include Indexing
     include ActiveModel::Conversion

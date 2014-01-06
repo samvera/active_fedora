@@ -38,7 +38,7 @@ describe "scoped queries" do
     
     describe ".all" do
       it "should return an array of instances of the calling Class" do
-        result = ModelIntegrationSpec::Basic.all
+        result = ModelIntegrationSpec::Basic.all.to_a
         result.should be_instance_of(Array)
         # this test is meaningless if the array length is zero
         result.length.should > 0

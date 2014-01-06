@@ -1,13 +1,27 @@
 require 'spec_helper'
 
 describe ActiveFedora::Associations::HasManyAssociation do
+  before do 
+    class Book < ActiveFedora::Base
+    end
+    class Page < ActiveFedora::Base
+    end
+  end
+
+  after do
+    Object.send(:remove_const, :Book)
+    Object.send(:remove_const, :Page)
+  end
+
   it "should call add_relationship" do
-    subject = double("subject", :new_record? => false, :pid => 'subject:a', :internal_uri => 'info:fedora/subject:a')
-    predicate = double(:klass => double.class, :options=>{:property=>'predicate'}, :class_name=> nil)
+    subject = Book.new(pid: 'subject:a')
+    subject.stub(:new_record? => false, save: true)
+    predicate = Book.create_reflection(:has_many, 'pages', {:property=>'predicate'}, nil)
     ActiveFedora::SolrService.stub(:query).and_return([])
     ac = ActiveFedora::Associations::HasManyAssociation.new(subject, predicate)
     ac.should_receive(:callback).twice
-    object = double("object", :new_record? => false, :pid => 'object:b', :save => nil)
+    object = Page.new(:pid => 'object:b')
+    object.stub(:new_record? => false, save: true)
   
     object.should_receive(:add_relationship).with('predicate', subject)
  

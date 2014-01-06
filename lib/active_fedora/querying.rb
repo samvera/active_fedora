@@ -1,15 +1,10 @@
 module ActiveFedora
   module Querying
-    delegate :find, :first, :where, :limit, :order, :all, :delete_all, :destroy_all, :count, :last, :to=>:relation
+    delegate :find, :first, :exists?, :where, :limit, :order, :delete_all, :destroy_all, :count, :last, :to=>:all
 
     def self.extended(base)
       base.class_attribute  :solr_query_handler
       base.solr_query_handler = 'standard'
-    end
-    
-
-    def relation
-      Relation.new(self)
     end
 
     # Yields each batch of solr records that was found by the find +options+ as
@@ -72,16 +67,6 @@ module ActiveFedora
       end
     end
 
-
-    # Returns true if the pid exists in the repository
-    # @param[String] pid
-    # @return[boolean]
-    def exists?(pid)
-      return false if pid.nil? || pid.empty?
-      !!DigitalObject.find(self, pid)
-    rescue ActiveFedora::ObjectNotFoundError
-      false
-    end
 
     # Returns a solr result matching the supplied conditions
     # @param[Hash,String] conditions can either be specified as a string, or 
