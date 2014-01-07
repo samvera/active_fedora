@@ -43,7 +43,7 @@ module ActiveFedora
       end
 
       # In a HABTM, just look in the rels-ext, no need to run a count query from solr.
-      def count
+      def count(options = {})
         @owner.ids_for_outbound(@reflection.options[:property]).size
       end
 
