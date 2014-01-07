@@ -54,6 +54,11 @@ module ActiveFedora
         #send("#{reflection.name}=", ids.collect { |id| reflection.klass.find(id)})
       end
 
+      def reset
+        reset_target!
+        @loaded = false
+      end
+
       def first(*args)
         first_or_last(:first, *args)
       end
@@ -110,11 +115,6 @@ module ActiveFedora
         load_target.dup
       end
       alias_method :to_a, :to_ary
-
-      def reset
-        reset_target!
-        @loaded = false
-      end
 
       def build(attributes = {}, &block)
         if attributes.is_a?(Array)

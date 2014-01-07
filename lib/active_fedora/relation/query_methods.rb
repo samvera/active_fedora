@@ -50,5 +50,9 @@ module ActiveFedora
 
       self
     end
+
+    def select
+      to_a.select { |*block_args| yield(*block_args) }
+    end
   end
 end
