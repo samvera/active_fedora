@@ -34,11 +34,7 @@ module ActiveFedora
     # is computed directly through SQL and does not trigger by itself the
     # instantiation of the actual post records.
     class CollectionProxy < Relation # :nodoc:
-      delegate :group, :order, :limit, :joins, :where, :preload, :eager_load, :includes, :from,
-               :lock, :readonly, :having, :to => :scoped
-
-      delegate :target, :load_target, :loaded?, :scoped,
-               :to => :@association
+      delegate :target, :load_target, :loaded?, :to => :@association
 
       delegate :select, :find, :first, :last,
                :build, :create, :create!, :count,
@@ -55,34 +51,8 @@ module ActiveFedora
 
       alias_method :new, :build
 
-      def respond_to?(*args)
-        super ||
-        (load_target && target.respond_to?(*args)) ||
-        @association.klass.respond_to?(*args)
-      end
-
-      def method_missing(method, *args, &block)
-        if target.respond_to?(method) || (!@association.klass.respond_to?(method) && Class.respond_to?(method))
-          if load_target
-            if target.respond_to?(method)
-              target.send(method, *args, &block)
-            else
-              begin
-                super
-              rescue NoMethodError => e
-                raise e, e.message.sub(/ for #<.*$/, " via proxy for #{target}")
-              end
-            end
-          end
-        else 
-          raise NoMethodError, "Couldn't find method `#{method}' via proxy for #{target}"
-        end
-      end
-      
-      # Forwards <tt>===</tt> explicitly to the \target because the instance method
-      # removal above doesn't catch it. Loads the \target if needed.
-      def ===(other)
-        other === load_target
+      def proxy_association
+        @association
       end
 
       def to_ary
@@ -91,7 +61,7 @@ module ActiveFedora
       alias_method :to_a, :to_ary
 
       def <<(*records)
-        @association.concat(records) && self
+        proxy_association.concat(records) && self
       end
       alias_method :push, :<<
 
@@ -101,7 +71,7 @@ module ActiveFedora
       end
 
       def reload
-        @association.reload
+        proxy_association.reload
         self
       end
 

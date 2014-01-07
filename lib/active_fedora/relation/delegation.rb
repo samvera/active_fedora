@@ -8,5 +8,15 @@ module ActiveFedora
     # for each different klass, and the delegations are compiled into that subclass only.
     
     delegate :length, :collect, :map, :each, :all?, :include?, :to_ary, :to => :to_a
+
+
+    def method_missing(method, *args, &block)
+      if Array.method_defined?(method)
+        self.class.delegate method, :to => :to_a
+        to_a.send(method, *args, &block)
+      else
+        super
+      end
+    end
   end
 end
