@@ -3,9 +3,11 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   before do
     class Library < ActiveFedora::Base 
-      has_many :books, property: :has_member
+      has_many :books
     end
-    class Book < ActiveFedora::Base; end
+    class Book < ActiveFedora::Base
+      belongs_to :library, property: :has_member
+    end
   end
   after do
     Object.send(:remove_const, :Library)
@@ -15,7 +17,6 @@ describe ActiveFedora::Base do
     before do
       @library = Library.create
       3.times { @library.books << Book.create }
-      @books = double(@library.books)
     end
     after do
       @library.books.each { |b| b.delete }
@@ -26,6 +27,32 @@ describe ActiveFedora::Base do
     end
     it "should limit rows returned if option passed" do
       @library.books(response_format: :solr, rows: 1).size.should == 1
+    end
+  end
+
+  describe "#delete_all" do
+    before do
+      @library = Library.create!
+      @book1 = Book.create!(library: @library)
+      @book2 = Book.create!(library: @library)
+    end
+    it "should delete em" do
+      expect {
+        @library.books.delete_all
+      }.to change { @library.books.count}.by(-2)
+    end
+  end
+
+  describe "#destroy_all" do
+    before do
+      @library = Library.create!
+      @book1 = Book.create!(library: @library)
+      @book2 = Book.create!(library: @library)
+    end
+    it "should delete em" do
+      expect {
+        @library.books.destroy_all
+      }.to change { @library.books.count}.by(-2)
     end
   end
 end

@@ -18,8 +18,6 @@ module ActiveFedora
           @target.size
         else
           @reflection.klass.count(:conditions => @counter_query)
-          # load_target
-          # @target.size
         end
 
         # If there's nothing in the database and @target has no new records
@@ -39,13 +37,9 @@ module ActiveFedora
 
         # Deletes the records according to the <tt>:dependent</tt> option.
         def delete_records(records, method)
-          # records.each do |r| 
-          #   r.remove_relationship(find_predicate, @owner)
-          # end
-          #
           if method == :destroy
             records.each { |r| r.destroy }
-            update_counter(-records.length) unless inverse_updates_counter_cache?
+            #update_counter(-records.length) unless inverse_updates_counter_cache?
           else
             # Find all the records that point to this and nullify them
             # keys  = records.map { |r| r[reflection.association_primary_key] }

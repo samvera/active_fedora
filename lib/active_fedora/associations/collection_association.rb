@@ -157,6 +157,16 @@ module ActiveFedora
         end
       end
 
+      # Remove all records from this association
+      #
+      # See delete for more info.
+      def destroy_all
+        destroy(load_target).tap do
+          reset
+          loaded!
+        end
+      end
+
       # Removes +records+ from this association calling +before_remove+ and
       # +after_remove+ callbacks.
       #
