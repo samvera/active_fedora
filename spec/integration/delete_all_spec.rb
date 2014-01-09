@@ -37,13 +37,16 @@ describe ActiveFedora::Base do
 
     describe "when a model is missing" do
       let(:model3) { SpecModel::Basic.create! }
-      after { model3.delete }
+      let!(:pid) { model3.pid }
+      before { model3.inner_object.delete }
+      after do
+        ActiveFedora::SolrService.instance.conn.tap do |conn|
+          conn.delete_by_query "id:\"#{pid}\""
+          conn.commit
+        end
+      end
       it "should be able to skip a missing model" do 
-        model1.should_receive(:destroy).and_call_original
-        model2.should_receive(:destroy).and_call_original
-        model3.should_receive(:destroy).and_raise(ActiveFedora::ObjectNotFoundError)
-        ActiveFedora::Relation.any_instance.should_receive(:to_a).and_return([model1, model3, model2])
-        ActiveFedora::Relation.logger.should_receive(:error).with("When trying to destroy #{model3.pid}, encountered an ObjectNotFoundError. Solr may be out of sync with Fedora")
+        ActiveFedora::Relation.logger.should_receive(:error).with("Although #{pid} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
         SpecModel::Basic.destroy_all
         SpecModel::Basic.count.should == 1 
       end

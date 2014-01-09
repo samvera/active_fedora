@@ -98,7 +98,7 @@ describe "scoped queries" do
         test_instance3.delete
       end
       it "should log an error" do
-        ActiveFedora::Relation.logger.should_receive(:error).with("When trying to find_each #{pid}, encountered an ObjectNotFoundError. Solr may be out of sync with Fedora")
+        ActiveFedora::Relation.logger.should_receive(:error).with("Although #{pid} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
         ModelIntegrationSpec::Basic.all.should == [test_instance1, test_instance3]
       end
     end
