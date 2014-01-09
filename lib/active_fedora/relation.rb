@@ -85,7 +85,6 @@ module ActiveFedora
       relation
     end
 
-    # TODO this is not right for library.books.find
     def to_a
       return @records if loaded?
       args = @klass == ActiveFedora::Base ? {:cast=>true} : {}

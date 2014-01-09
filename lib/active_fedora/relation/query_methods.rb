@@ -11,7 +11,7 @@ module ActiveFedora
     end
 
     def where_values
-      @values[:where] || {}
+      @values[:where] ||= {}
     end
 
     def where_values=(values)

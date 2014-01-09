@@ -97,7 +97,7 @@ module ActiveFedora
       find_in_batches(conditions, opts.merge({:fl=>SOLR_DOCUMENT_ID})) do |group|
         group.each do |hit|
           begin 
-            yield(find_one(hit[SOLR_DOCUMENT_ID], cast))
+            yield(load_from_fedora(hit[SOLR_DOCUMENT_ID], cast))
           rescue ActiveFedora::ObjectNotFoundError
             logger.error "Although #{hit[SOLR_DOCUMENT_ID]} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch."
           end
@@ -148,13 +148,24 @@ module ActiveFedora
     # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel info:fedora/afmodel:Dataset), return a Dataset object (not a Book).
     #   Book.find_one("hydra:dataset1") 
     def find_one(pid, cast=nil)
+      if where_values.empty?
+        load_from_fedora(pid, cast)
+      else
+        query = ActiveFedora::SolrService.construct_query_for_rel(where_values)
+        query += " AND _query_:\"{!raw f=id}#{pid}\""
+        to_enum(:find_each, query, {}).to_a.first
+      end
+    end
+    
+    protected
+
+    def load_from_fedora(pid, cast)
       cast = true if self == ActiveFedora::Base && cast.nil?
       inner = DigitalObject.find(@klass, pid)
       af_base = @klass.allocate.init_with(inner)
       cast ? af_base.adapt_to_cmodel : af_base
+
     end
-    
-    protected
 
 
     def find_with_ids(ids, cast)

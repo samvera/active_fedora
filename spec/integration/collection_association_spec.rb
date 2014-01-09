@@ -42,4 +42,17 @@ describe ActiveFedora::Base do
       }.to change { library.books.count }.by(-2)
     end
   end
+
+  describe "#find" do
+    it "should find the record that matches" do
+      expected = library.books.find(book1.id)
+      expect(expected).to eq book1
+    end
+    describe "with some records that aren't part of the collection" do
+      let!(:book3) { Book.create }
+      it "should find no records" do
+        expect(library.books.find(book3.id)).to be_nil
+      end
+    end
+  end
 end

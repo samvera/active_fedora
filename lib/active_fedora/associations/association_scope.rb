@@ -20,9 +20,15 @@ module ActiveFedora
       private
       def add_constraints(scope)
         chain.each_with_index do |reflection, i|
+          if reflection.source_macro == :belongs_to
+          elsif reflection.source_macro == :has_and_belongs_to_many
+          else
+            scope = scope.where( association.send(:find_predicate) => owner.internal_uri)
+          end
+
+          
           is_first_chain = i == 0
           klass = is_first_chain ? self.klass : reflection.klass
-          scope.where_values[options[:property]] = owner.id
         end
 
         scope
