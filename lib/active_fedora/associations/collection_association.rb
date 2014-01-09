@@ -59,6 +59,11 @@ module ActiveFedora
         @loaded = false
       end
 
+      def find(*args)
+        puts "Scope is #{scope}"
+        scope.find(*args)
+      end
+
       def first(*args)
         first_or_last(:first, *args)
       end

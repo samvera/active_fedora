@@ -60,36 +60,45 @@ describe "scoped queries" do
     let!(:test_instance2) { ModelIntegrationSpec::Basic.create!(:foo=>'Alpha', :bar=>'Peanuts')}
     let!(:test_instance3) { ModelIntegrationSpec::Basic.create!(:foo=>'Sigma', :bar=>'Peanuts')}
 
-    after do
-      test_instance1.delete
-      test_instance2.delete
-      test_instance3.delete
-    end
-    it "should query" do
-      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('foo', type: :string)=> 'Beta').should == [test_instance1]
-      ModelIntegrationSpec::Basic.where('foo' => 'Beta').should == [test_instance1]
-    end
-    it "should order" do
-      ModelIntegrationSpec::Basic.order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').should == [test_instance2, test_instance1, test_instance3]
-    end
-    it "should limit" do
-      ModelIntegrationSpec::Basic.limit(1).should == [test_instance1]
-    end
+    describe "when the objects are in fedora" do
+      after do
+        test_instance1.delete
+        test_instance2.delete
+        test_instance3.delete
+      end
+      it "should query" do
+        ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('foo', type: :string)=> 'Beta').should == [test_instance1]
+        ModelIntegrationSpec::Basic.where('foo' => 'Beta').should == [test_instance1]
+      end
+      it "should order" do
+        ModelIntegrationSpec::Basic.order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').should == [test_instance2, test_instance1, test_instance3]
+      end
+      it "should limit" do
+        ModelIntegrationSpec::Basic.limit(1).should == [test_instance1]
+      end
 
-    it "should chain queries" do
-      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').limit(1).should == [test_instance2]
-    end
+      it "should chain queries" do
+        ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').limit(1).should == [test_instance2]
+      end
 
-    it "should chain count" do
-      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').count.should == 2 
+      it "should chain count" do
+        ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').count.should == 2 
+      end
     end
 
     describe "when one of the objects in solr isn't in fedora" do
+      let!(:pid) { test_instance2.pid }
+      before { test_instance2.inner_object.delete }
+      after do
+        ActiveFedora::SolrService.instance.conn.tap do |conn|
+          conn.delete_by_query "id:\"#{pid}\""
+          conn.commit
+        end
+        test_instance1.delete
+        test_instance3.delete
+      end
       it "should log an error" do
-        ModelIntegrationSpec::Basic.should_receive(:find_one).with(test_instance1.pid, nil).and_call_original
-        ModelIntegrationSpec::Basic.should_receive(:find_one).with(test_instance2.pid, nil).and_raise(ActiveFedora::ObjectNotFoundError)
-        ModelIntegrationSpec::Basic.should_receive(:find_one).with(test_instance3.pid, nil).and_call_original
-        ActiveFedora::Relation.logger.should_receive(:error).with("When trying to find_each #{test_instance2.pid}, encountered an ObjectNotFoundError. Solr may be out of sync with Fedora")
+        ActiveFedora::Relation.logger.should_receive(:error).with("When trying to find_each #{pid}, encountered an ObjectNotFoundError. Solr may be out of sync with Fedora")
         ModelIntegrationSpec::Basic.all.should == [test_instance1, test_instance3]
       end
     end

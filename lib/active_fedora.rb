@@ -64,6 +64,7 @@ module ActiveFedora #:nodoc:
     autoload :Relation
 
     autoload_under 'relation' do
+      autoload :Calculations
       autoload :Delegation
       autoload :SpawnMethods
       autoload :QueryMethods

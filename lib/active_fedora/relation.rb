@@ -1,7 +1,8 @@
 module ActiveFedora
   class Relation
 
-    include Delegation, SpawnMethods, QueryMethods, FinderMethods
+    include FinderMethods, Calculations, SpawnMethods, QueryMethods, Delegation
+    
 
     attr_reader :loaded
     attr_accessor :default_scoped
@@ -40,34 +41,6 @@ module ActiveFedora
       @first = @loaded = nil
       @records = []
       self
-    end
-
-
-    # Returns the first records that was found.
-    #
-    # @example
-    #  Person.where(name_t: 'Jones').first
-    #    => #<Person @id="foo:123" @name='Jones' ... >
-    def first
-      if loaded?
-        @records.first
-      else
-        @first ||= limit(1).to_a[0]
-      end
-    end
-
-    # Returns the last record sorted by id.  ID was chosen because this mimics
-    # how ActiveRecord would achieve the same behavior.
-    #
-    # @example
-    #  Person.where(name_t: 'Jones').last
-    #    => #<Person @id="foo:123" @name='Jones' ... >
-    def last
-      if loaded?
-        @records.last
-      else
-        @last ||= order('id desc').limit(1).to_a[0]
-      end
     end
 
     # Limits the number of returned records to the value specified
@@ -112,82 +85,17 @@ module ActiveFedora
       relation
     end
 
-    # Returns an Array of objects of the Class that +find+ is being 
-    # called on
-    #
-    # @param[String,Hash] args either a pid or a hash of conditions
-    # @option args [Integer] :rows when :all is passed, the maximum number of rows to load from solr
-    # @option args [Boolean] :cast when true, examine the model and cast it to the first known cModel
-    def find(*args)
-      return to_a.find { |*block_args| yield(*block_args) } if block_given?
-      options = args.extract_options!
-      options = options.dup
-
-      cast = if @klass == ActiveFedora::Base && !options.has_key?(:cast)
-        true
-      else 
-        options.delete(:cast)
-      end
-      if options[:sort]
-        # Deprecate sort sometime?
-        sort = options.delete(:sort) 
-        options[:order] ||= sort if sort.present?
-      end
-
-      if options.present?
-        options = args.first unless args.empty?
-        options = {conditions: options}
-        apply_finder_options(options)
-      else
-        raise ArgumentError, "#{self}.find() expects a pid. You provided `#{args.inspect}'" unless args.is_a? Array
-        find_with_ids(args, cast)
-      end
-    end
-
-    def find_with_ids(ids, cast)
-      expects_array = ids.first.kind_of?(Array)
-      return ids.first if expects_array && ids.first.empty?
-
-      ids = ids.flatten.compact.uniq
-
-      case ids.size
-      when 0
-        raise ArgumentError, "Couldn't find #{@klass.name} without an ID"
-      when 1
-        result = @klass.find_one(ids.first, cast)
-        expects_array ? [ result ] : result
-      else
-        find_some(ids, cast)
-      end
-    end
-
-    def find_some(ids, cast)
-      ids.map{|id| @klass.find_one(id, cast)}
-    end
-
+    # TODO this is not right for library.books.find
     def to_a
       return @records if loaded?
       args = @klass == ActiveFedora::Base ? {:cast=>true} : {}
       args[:rows] = limit_value if limit_value
       args[:sort] = order_values if order_values
       
-      @records = @klass.to_enum(:find_each, where_values, args).to_a
+      @records = to_enum(:find_each, where_values, args).to_a
 
       @records
     end
-
-    # Get a count of the number of objects from solr
-    # Takes :conditions as an argument
-    def count(*args)
-      return apply_finder_options(args.first).count  if args.any?
-      opts = {}
-      opts[:rows] = limit_value if limit_value
-      opts[:sort] = order_values if order_values
-      
-      @klass.calculate :count, where_values, opts
-
-    end
-
 
 
     def ==(other)
