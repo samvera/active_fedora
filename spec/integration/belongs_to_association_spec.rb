@@ -22,19 +22,31 @@ describe ActiveFedora::Base do
   let(:library) { Library.create }
   let(:book) { Book.new }
 
-  it "should allow setting the id property" do
-    book.library_id = library.id
-    book.library_id.should == library.id
+  describe "setting the id property" do
+    it "should store it" do
+      book.library_id = library.id
+      book.library_id.should == library.id
+    end
+
+    describe "when a new object is built in the assocation" do
+      before { book.library = Library.new }
+      it "should overwrite the new object" do
+        book.library_id = library.id
+        book.library.should == library
+      end
+    end
+
+    it "should be settable via []=" do
+      book[:library_id] = library.id
+      book.library_id.should == library.id
+    end
   end
 
-  it "should allow setting the id property via []=" do
-    book[:library_id] = library.id
-    book.library_id.should == library.id
-  end
-
-  it "should get the property id via []" do
-    book[:library_id] = library.id
-    book[:library_id].should == library.id
+  describe "getting the id property" do
+    it "should be accessable via []" do
+      book[:library_id] = library.id
+      book[:library_id].should == library.id
+    end
   end
 
   describe "when dealing with inherited objects" do
