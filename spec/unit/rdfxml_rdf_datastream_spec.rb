@@ -93,7 +93,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
     end
 
     describe "a new instance" do
-      subject { MyDatastream.new(double('inner object', :pid=>'test:1', :new? =>true), 'descMetadata', about:"http://library.ucsd.edu/ark:/20775/") }
+      subject { MyDatastream.new(double('inner object', :pid=>'test:1', :new_record? =>true), 'descMetadata', about:"http://library.ucsd.edu/ark:/20775/") }
       it "should have a subject" do
         subject.rdf_subject.to_s.should == "http://library.ucsd.edu/ark:/20775/"
       end
@@ -102,7 +102,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
 
     describe "an instance with content" do
       subject do
-        subject = MyDatastream.new(double('inner object', :pid=>'test:1', :new? =>true), 'descMetadata')
+        subject = MyDatastream.new(double('inner object', :pid=>'test:1', :new_record? =>true), 'descMetadata')
         subject.content = File.new('spec/fixtures/damsObjectModel.xml').read
         subject
       end

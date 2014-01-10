@@ -74,7 +74,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
         Object.send(:remove_const, :ComplexRDFDatastream)
         Object.send(:remove_const, :DummyMADS)
       end
-      subject { ComplexRDFDatastream.new(double('inner object', :pid=>'foo', :new? =>true), 'descMetadata') }
+      subject { ComplexRDFDatastream.new(double('inner object', :pid=>'foo', :new_record? =>true), 'descMetadata') }
       let(:params) do 
         { myResource: 
           {
@@ -161,7 +161,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
       after(:each) do
         Object.send(:remove_const, :SpecDatastream)
       end
-      subject { SpecDatastream.new(double('inner object', :pid=>'foo', :new? =>true), 'descMetadata') }
+      subject { SpecDatastream.new(double('inner object', :pid=>'foo', :new_record? =>true), 'descMetadata') }
       before do
         subject.attributes = { parts_attributes: [
                                   {label: 'Alternator'},
