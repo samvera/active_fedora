@@ -6,7 +6,7 @@ describe ActiveFedora::Datastreams do
   describe '.has_metadata' do
     before do
       class FooHistory < ActiveFedora::Base
-         has_metadata :name => 'dsid'
+         has_metadata :name => 'dsid', type: ActiveFedora::SimpleDatastream
          has_metadata 'complex_ds', :versionable => true, :autocreate => true, :type => 'Z', :label => 'My Label', :control_group => 'Z'
       end
     end
@@ -21,6 +21,16 @@ describe ActiveFedora::Datastreams do
 
     it "should let you override defaults" do
       FooHistory.ds_specs['complex_ds'].should include(:versionable => true, :autocreate => true, :type => 'Z', :label => 'My Label', :control_group => 'Z')
+    end
+
+    it "should raise an error if you don't give a type" do
+      expect{ FooHistory.has_metadata "bob" }.to raise_error ArgumentError,
+        "You must provide a :type property for the metadata datastream 'bob'"
+    end
+
+    it "should raise an error if you don't give a dsid" do
+      expect{ FooHistory.has_metadata type: ActiveFedora::SimpleDatastream }.to raise_error ArgumentError,
+        "You must provide a name (dsid) for the metadata datastream"
     end
   end
 
@@ -128,12 +138,6 @@ describe ActiveFedora::Datastreams do
     it "should fetch the rubydora datastream" do
       subject.inner_object.should_receive(:datastream_object_for).with('dsid', {})
       subject.datastream_from_spec({}, 'dsid')
-    end
-  end
-
-  describe "#load_datastreams" do
-    it "should load and configure persisted datastreams and should add any datastreams left over in the ds specs" do
-      pending
     end
   end
 
