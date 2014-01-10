@@ -180,10 +180,10 @@ module ActiveFedora
         ds_specs[dsid] ? ds_specs[dsid].fetch(:type, ActiveFedora::Datastream) : ActiveFedora::Datastream
       end
 
-      #This method is used to specify the details of a datastream. 
+      # This method is used to specify the details of a datastream. 
       # You can pass the name as the first argument and a hash of options as the second argument
       # or you can pass the :name as a value in the args hash. Either way, name is required.
-      # Note that this method doesn't actually execute the block, but stores it , to be executed
+      # Note that this method doesn't actually execute the block, but stores it, to be executed
       # by any the implementation of the datastream(specified as :type)
       #
       # @param [Hash] args 
@@ -208,8 +208,10 @@ module ActiveFedora
         
         
         spec = {:autocreate => args.fetch(:autocreate, false), :type => args[:type], :label =>  args.fetch(:label,""), :control_group => args[:control_group], :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
-        spec[:versionable] = args[:versionable] if args.has_key? :versionable
         name = args[:name]
+        raise ArgumentError, "You must provide a name (dsid) for the metadata datastream" unless name
+        raise ArgumentError, "You must provide a :type property for the metadata datastream '#{name}'" unless spec[:type]
+        spec[:versionable] = args[:versionable] if args.has_key? :versionable
         build_datastream_accessor(name)
         ds_specs[name]= spec
       end
