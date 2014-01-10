@@ -171,6 +171,8 @@ module ActiveFedora
           [self]
         end
 
+        alias :source_macro :macro
+
         def inverse_of
           return unless inverse_name
 

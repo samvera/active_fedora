@@ -20,8 +20,8 @@ describe ActiveFedora::Base do
     describe "called on a concrete class" do
       let(:relation) { ActiveFedora::Relation.new(SpecModel::Basic) }
       it "should query solr for all objects with :has_model_s of self.class" do
-        relation.should_receive(:find_one).with("changeme:30", nil).and_return("Fake Object1")
-        relation.should_receive(:find_one).with("changeme:22", nil).and_return("Fake Object2")
+        relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return("Fake Object1")
+        relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return("Fake Object2")
         mock_docs = [{"id" => "changeme:30"}, {"id" => "changeme:22"}]
         mock_docs.should_receive(:has_next?).and_return(false)
         ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
@@ -31,8 +31,8 @@ describe ActiveFedora::Base do
     describe "called without a specific class" do
       let(:relation) { ActiveFedora::Relation.new(ActiveFedora::Base) }
       it "should specify a q parameter" do
-        relation.should_receive(:find_one).with("changeme:30", true).and_return("Fake Object1")
-        relation.should_receive(:find_one).with("changeme:22", true).and_return("Fake Object2")
+        relation.should_receive(:load_from_fedora).with("changeme:30", true).and_return("Fake Object1")
+        relation.should_receive(:load_from_fedora).with("changeme:22", true).and_return("Fake Object2")
         mock_docs = [{"id" => "changeme:30"},{"id" => "changeme:22"}]
         mock_docs.should_receive(:has_next?).and_return(false)
         ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>'*:*', :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
@@ -71,8 +71,8 @@ describe ActiveFedora::Base do
       end
       let(:relation) { ActiveFedora::Relation.new(SpecModel::Basic) }
       it "should filter by the provided fields" do
-        relation.should_receive(:find_one).with("changeme:30", nil).and_return("Fake Object1")
-        relation.should_receive(:find_one).with("changeme:22", nil).and_return("Fake Object2")
+        relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return("Fake Object1")
+        relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return("Fake Object2")
 
         mock_docs = [{"id" => "changeme:30"},{"id" => "changeme:22"}]
         mock_docs.should_receive(:has_next?).and_return(false)
@@ -100,8 +100,8 @@ describe ActiveFedora::Base do
       end
 
       it "should add options" do
-        relation.should_receive(:find_one).with("changeme:30", nil).and_return("Fake Object1")
-        relation.should_receive(:find_one).with("changeme:22", nil).and_return("Fake Object2")
+        relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return("Fake Object1")
+        relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return("Fake Object2")
 
         mock_docs = [{"id" => "changeme:30"},{"id" => "changeme:22"}]
         mock_docs.should_receive(:has_next?).and_return(false)
@@ -132,16 +132,16 @@ describe ActiveFedora::Base do
       mock_docs.should_receive(:has_next?).and_return(false)
       ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
       
-      relation.should_receive(:find_one).with("changeme:30", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:30'))
-      relation.should_receive(:find_one).with("changeme:22", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:22'))
+      relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:30'))
+      relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:22'))
       yielded = double("yielded method")
       yielded.should_receive(:run).with { |obj| obj.class == SpecModel::Basic}.twice
       SpecModel::Basic.find_each(){|obj| yielded.run(obj) }
     end
     describe "with conditions" do
       it "should filter by the provided fields" do
-        relation.should_receive(:find_one).with("changeme:30", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:30'))
-        relation.should_receive(:find_one).with("changeme:22", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:22'))
+        relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:30'))
+        relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:22'))
 
         mock_docs = [{"id" => "changeme:30"},{"id" => "changeme:22"}]
         mock_docs.should_receive(:has_next?).and_return(false)

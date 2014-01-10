@@ -13,12 +13,15 @@ describe ActiveFedora::Associations::HasManyAssociation do
     Object.send(:remove_const, :Page)
   end
 
-  it "should call add_relationship" do
-    subject = Book.new(pid: 'subject:a')
+  subject { Book.new(pid: 'subject:a') }
+  before {
     subject.stub(:new_record? => false, save: true)
-    predicate = Book.create_reflection(:has_many, 'pages', {:property=>'predicate'}, nil)
+  }
+
+  it "should call add_relationship" do
+    reflection = Book.create_reflection(:has_many, 'pages', {:property=>'predicate'}, Book)
     ActiveFedora::SolrService.stub(:query).and_return([])
-    ac = ActiveFedora::Associations::HasManyAssociation.new(subject, predicate)
+    ac = ActiveFedora::Associations::HasManyAssociation.new(subject, reflection)
     ac.should_receive(:callback).twice
     object = Page.new(:pid => 'object:b')
     object.stub(:new_record? => false, save: true)

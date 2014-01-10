@@ -60,7 +60,6 @@ module ActiveFedora
       end
 
       def find(*args)
-        puts "Scope is #{scope}"
         scope.find(*args)
       end
 
