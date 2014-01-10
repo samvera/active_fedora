@@ -246,6 +246,32 @@ describe ActiveFedora::Base do
       expect {subject.description = 'Neat'}.to raise_error(ArgumentError, "Undefined datastream id: `rdfish' in has_attributes")
     end
   end
+
+  describe "when a datastream is specified as a symbol" do
+    before :all do
+      class BarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
+        map_predicates do |map|
+          map.title(in: RDF::DC)
+          map.description(in: RDF::DC)
+        end
+      end
+      class BarHistory4 < ActiveFedora::Base
+        has_metadata 'rdfish', :type=>BarRdfDatastream
+        has_attributes :description, datastream: :rdfish
+      end
+    end
+
+    after :all do
+      Object.send(:remove_const, :BarHistory4)
+      Object.send(:remove_const, :BarRdfDatastream)
+    end
+
+    subject { BarHistory4.new(description: 'test1') }
+
+    it "should be able to access the attributes" do
+      expect(subject.description).to eq 'test1'
+    end
+  end
 end
 
 
