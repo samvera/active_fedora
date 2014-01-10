@@ -99,7 +99,7 @@ module ActiveFedora
           begin 
             yield(find_one(hit[SOLR_DOCUMENT_ID], cast))
           rescue ActiveFedora::ObjectNotFoundError
-            logger.error "When trying to find_each #{hit[SOLR_DOCUMENT_ID]}, encountered an ObjectNotFoundError. Solr may be out of sync with Fedora"
+            logger.error "Although #{hit[SOLR_DOCUMENT_ID]} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch."
           end
         end
       end

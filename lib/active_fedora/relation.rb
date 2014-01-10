@@ -141,13 +141,7 @@ module ActiveFedora
       if conditions
         where(conditions).destroy_all
       else
-        to_a.each {|object| 
-          begin
-            object.destroy
-          rescue ActiveFedora::ObjectNotFoundError
-            logger.error "When trying to destroy #{object.pid}, encountered an ObjectNotFoundError. Solr may be out of sync with Fedora"
-          end
-        }.tap { reset }.size
+        to_a.each {|object| object.destroy }.tap { reset }.size
       end
     end
 
