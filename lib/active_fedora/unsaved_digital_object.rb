@@ -26,9 +26,11 @@ module ActiveFedora
       @pid = pid
     end
 
-    def new?
+    def new_record?
       true
     end
+
+    alias :new? :new_record?
 
     ### Change this into a real digital object
     def save

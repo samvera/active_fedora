@@ -3,25 +3,26 @@ require 'spec_helper'
 describe ActiveFedora::UnsavedDigitalObject do
   
   describe "an unsaved instance" do
-    before do
-      @obj = ActiveFedora::UnsavedDigitalObject.new(ActiveFedora::Base, 'bar') 
-    end
+    subject { ActiveFedora::UnsavedDigitalObject.new(ActiveFedora::Base, 'bar') }
+
+    it { should be_new_record}
+
     it "should have ownerId property" do
-      @obj.ownerId = 'fooo'
-      @obj.ownerId.should == 'fooo'
+      subject.ownerId = 'fooo'
+      subject.ownerId.should == 'fooo'
     end
 
     it "should have state" do
-      @obj.ownerId = 'D'
-      @obj.ownerId.should == 'D'
+      subject.ownerId = 'D'
+      subject.ownerId.should == 'D'
     end
 
     it "should not have a default pid" do
-      @obj.pid.should be_nil
+      subject.pid.should be_nil
     end
     it "should be able to set the pid" do
-      @obj.pid = "my:new_object"
-      @obj.pid.should == "my:new_object"
+      subject.pid = "my:new_object"
+      subject.pid.should == "my:new_object"
     end
   end
 
