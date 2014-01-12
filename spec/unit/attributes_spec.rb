@@ -52,7 +52,7 @@ describe ActiveFedora::Base do
         has_attributes :fubar, datastream: 'withText', multiple: true  # test alternate datastream
         has_attributes :pig, datastream: 'xmlish', multiple: false
         has_attributes :horse, datastream: 'xmlish', multiple: true
-        has_attributes :duck, datastream: 'xmlish', :at=>[:waterfowl, :ducks], multiple: true
+        has_attributes :duck, datastream: 'xmlish', :at=>[:waterfowl, :ducks, :duck], multiple: true
       end
     end
 
@@ -60,7 +60,44 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :BarHistory2)
     end
 
-    subject { BarHistory2.new() }
+    subject { BarHistory2.new }
+
+    describe "inspect" do
+      it "should show the attributes" do
+        expect(subject.inspect).to eq "#<BarHistory2 pid: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"]>"
+      end
+      describe "with a pid" do
+        before { subject.stub(pid: 'test:123') }
+        it "should show a pid" do
+          expect(subject.inspect).to eq "#<BarHistory2 pid: \"test:123\", cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"]>"
+        end
+      end
+      describe "with no attributes" do
+        subject { ActiveFedora::Base.new }
+        it "should show a pid" do
+          expect(subject.inspect).to eq "#<ActiveFedora::Base pid: nil>"
+        end
+      end
+
+      describe "with relationships" do
+        before do
+          class BarHistory3 < BarHistory2
+            belongs_to :library, property: :has_constituent, class_name: 'BarHistory2'
+          end
+          subject.library = library
+        end
+        let (:library) { BarHistory2.create }
+        subject {BarHistory3.new}
+        after do 
+          Object.send(:remove_const, :BarHistory3)
+        end
+        it "should show the library_id" do
+          expect(subject.inspect).to eq "#<BarHistory3 pid: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], library_id: \"#{library.pid}\">"
+        end
+      end
+    end
+
+
 
     it "should reveal the unique properties" do
       BarHistory2.unique?(:horse).should be_false
