@@ -27,8 +27,9 @@ module ActiveFedora
 
     # Calling inspect may trigger a bunch of loads, but it's mainly for debugging, so no worries.
     def inspect
-      values = self.class.defined_attributes.keys.map {|r| "#{r}:#{send(r).inspect}"}
-      "#<#{self.class} pid:\"#{pretty_pid}\", #{values.join(', ')}>"
+      values = ["pid: #{pretty_pid.inspect}"]
+      values << self.class.defined_attributes.keys.map {|r| "#{r}: #{send(r).inspect}"}
+      "#<#{self.class} #{values.flatten.join(', ')}>"
     end
 
     def [](key)
@@ -124,12 +125,11 @@ module ActiveFedora
         defined_attributes[field].multiple
       end
 
-      private
-
       def find_or_create_defined_attribute(field, dsid, args)  
         self.defined_attributes[field] ||= DatastreamAttribute.new(field, dsid, datastream_class_for_name(dsid), args)
       end
 
+      private
 
       def create_attribute_reader(field, dsid, args)
         find_or_create_defined_attribute(field, dsid, args)

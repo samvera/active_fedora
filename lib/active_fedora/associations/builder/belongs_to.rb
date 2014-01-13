@@ -79,18 +79,20 @@ module ActiveFedora::Associations::Builder
 
       def define_readers
         super
-
         name = self.name
-        mixin.redefine_method("#{name}_id") do
+        accessor_name = "#{name}_id"
+        model.find_or_create_defined_attribute(accessor_name, 'RELS-EXT', {})
+        mixin.redefine_method(accessor_name) do
           association(name).id_reader
         end
       end
 
       def define_writers
         super
-
         name = self.name
-        mixin.redefine_method("#{name}_id=") do |id|
+        writer_name = "#{name}_id"
+        model.find_or_create_defined_attribute(writer_name, 'RELS-EXT', {})
+        mixin.redefine_method("#{writer_name}=") do |id|
           association(name).id_writer(id)
         end
       end
