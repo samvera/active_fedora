@@ -36,14 +36,7 @@ module ActiveFedora
     #the Solr index for this object.
     def save(*)
       # If it's a new object, set the conformsTo relationship for Fedora CMA
-      if new_record?
-        result = create
-        update_index if create_needs_index?
-      else
-        result = update_record
-        update_index if update_needs_index?
-      end
-      return result
+      new_record? ? create : update_record
     end
 
     def save!(*)
@@ -156,11 +149,11 @@ module ActiveFedora
     def create
       assign_pid
       assert_content_model
-      persist
+      persist(create_needs_index?)
     end
 
     def update_record
-      persist
+      persist(update_needs_index?)
     end
 
     # replace the unsaved digital object with a saved digital object
@@ -168,7 +161,7 @@ module ActiveFedora
       @inner_object = @inner_object.save 
     end
     
-    def persist
+    def persist(should_update_index)
       serialize_datastreams
       result = @inner_object.save
       ### Rubydora re-inits the datastreams after a save, so ensure our copy stays in synch
@@ -177,6 +170,7 @@ module ActiveFedora
         ds.model = self if ds.kind_of? RelsExtDatastream
       end 
       refresh
+      update_index if should_update_index
       return !!result
     end
   end

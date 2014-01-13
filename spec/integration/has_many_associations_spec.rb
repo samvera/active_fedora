@@ -30,6 +30,35 @@ describe "Looking up collection members" do
   end
 end
 
+describe "After save callbacks" do
+  before :all do
+    class Library < ActiveFedora::Base 
+      has_many :books
+    end
+
+    class Book < ActiveFedora::Base 
+      belongs_to :library, :property=>:has_constituent
+      after_save :find_self
+      attr_accessor :library_books
+
+      def find_self
+        # It's important we have the to_a so that it fetches the relationship immediately instead of lazy loading
+        self.library_books = library.books.to_a
+      end
+    end
+  end
+  after :all do
+    Object.send(:remove_const, :Book)
+    Object.send(:remove_const, :Library)
+  end
+  let(:library) { Library.create() }
+  let(:book) { Book.new(library: library) }
+  it "should have the relationship available in after_save" do
+    book.save!
+    book.library_books.should include book
+  end
+end
+
 describe "When two or more relationships share the same property" do 
   before do
     class Book < ActiveFedora::Base 

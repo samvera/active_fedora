@@ -232,7 +232,7 @@ module ActiveFedora
 
   private
 
-    def persist #:nodoc:
+    def persist(should_update_index) #:nodoc:
       run_callbacks(:save) { super }
     end
 
