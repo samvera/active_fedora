@@ -1,7 +1,7 @@
 module ActiveFedora
   module FedoraAttributes
 
-    delegate :state=,:label=, to: :inner_object
+    delegate :state=, :label=, to: :inner_object
 
     #return the pid of the Fedora Object
     # if there is no fedora object (loaded from solr) get the instance var
@@ -33,18 +33,12 @@ module ActiveFedora
 
     #return the create_date of the inner object (unless it's a new object)
     def create_date
-      if @inner_object.new?
-        Time.now
-      elsif @inner_object.respond_to? :createdDate
-        Array(@inner_object.createdDate).first
-      else
-        @inner_object.profile['objCreateDate']
-      end
+      @inner_object.new_record? ?  Time.now : Array(@inner_object.createdDate).first
     end
 
     #return the modification date of the inner object (unless it's a new object)
     def modified_date
-      @inner_object.new? ? Time.now : Array(@inner_object.lastModifiedDate).first
+      @inner_object.new_record? ? Time.now : Array(@inner_object.lastModifiedDate).first
     end
 
   end
