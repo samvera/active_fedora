@@ -30,15 +30,6 @@ module ActiveFedora
         new_record(:build, attributes)
       end
 
-      # def create(attributes = {})
-      #   replace(@reflection.create_association(attributes))
-      # end
-
-      # def build(attributes = {})
-      #   replace(@reflection.build_association(attributes))
-      # end
-
-
       private
 
         def find_target

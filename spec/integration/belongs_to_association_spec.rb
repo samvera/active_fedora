@@ -28,11 +28,16 @@ describe ActiveFedora::Base do
       book.library_id.should == library.id
     end
 
-    describe "when a new object is built in the assocation" do
-      before { book.library = Library.new }
-      it "should overwrite the new object" do
+    describe "reassigning the parent_id" do
+      let(:library2) { Library.create}
+      before { book.library = library2 }
+      it "should update the object" do
+        expect(book.library).to eq library2 # cause the association to set @loaded
+        library_proxy = book.send(:association_instance_get, :library)
+        expect(library_proxy).to_not be_stale_target
         book.library_id = library.id
-        book.library.should == library
+        expect(library_proxy).to be_stale_target
+        expect(book.library).to eq library
       end
     end
 
