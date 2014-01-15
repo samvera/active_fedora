@@ -20,7 +20,7 @@ module ActiveFedora
 
     ## Required by associations
     def new_record?
-      inner_object.new?
+      inner_object.new_record?
     end
 
     def persisted?
