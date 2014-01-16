@@ -218,10 +218,10 @@ module ActiveFedora
         if value.empty?
           "-#{key}:['' TO *]"
         elsif value.is_a? Array
-          value.map { |val| "#{key}:#{@klass.quote_for_solr(val)}" }
+          value.map { |val| "#{key}:#{RSolr.escape(val)}" }
         else
           key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
-          escaped_value = @klass.quote_for_solr(value)
+          escaped_value = RSolr.escape(value)
           key.to_s.eql?(SOLR_DOCUMENT_ID) ? "#{key}:#{escaped_value}" : "#{key}:#{escaped_value}"
         end
       end

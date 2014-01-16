@@ -84,9 +84,9 @@ describe ActiveFedora::Base do
             hash[:params][:sort] == [@sort_query] &&
             hash[:params][:fl] == 'id' && 
             hash[:params][:q].split(" AND ").include?(@model_query) &&
-            hash[:params][:q].split(" AND ").include?("foo:\"bar\"") &&
-            hash[:params][:q].split(" AND ").include?("baz:\"quix\"") &&
-            hash[:params][:q].split(" AND ").include?("baz:\"quack\"")
+            hash[:params][:q].split(" AND ").include?("foo:bar") &&
+            hash[:params][:q].split(" AND ").include?("baz:quix") &&
+            hash[:params][:q].split(" AND ").include?("baz:quack")
         }.and_return('response'=>{'docs'=>mock_docs})
         SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}).should == ["Fake Object1", "Fake Object2"]
       end
@@ -113,9 +113,9 @@ describe ActiveFedora::Base do
             hash[:params][:fl] == 'id' && 
             hash[:params][:sort] == [@sort_query] &&
             hash[:params][:q].split(" AND ").include?(@model_query) &&
-            hash[:params][:q].split(" AND ").include?("foo:\"bar\"") &&
-            hash[:params][:q].split(" AND ").include?("baz:\"quix\"") &&
-            hash[:params][:q].split(" AND ").include?("baz:\"quack\"")
+            hash[:params][:q].split(" AND ").include?("foo:bar") &&
+            hash[:params][:q].split(" AND ").include?("baz:quix") &&
+            hash[:params][:q].split(" AND ").include?("baz:quack")
         }.and_return('response'=>{'docs'=>mock_docs})
         SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}, :sort=>'title_t desc').should == ["Fake Object1", "Fake Object2"]
       end
@@ -153,9 +153,9 @@ describe ActiveFedora::Base do
             hash[:params][:sort] == [@sort_query] && 
             hash[:params][:fl] == 'id' && 
             hash[:params][:q].split(" AND ").include?(@model_query) &&
-            hash[:params][:q].split(" AND ").include?("foo:\"bar\"") &&
-            hash[:params][:q].split(" AND ").include?("baz:\"quix\"") &&
-            hash[:params][:q].split(" AND ").include?("baz:\"quack\"")
+            hash[:params][:q].split(" AND ").include?("foo:bar") &&
+            hash[:params][:q].split(" AND ").include?("baz:quix") &&
+            hash[:params][:q].split(" AND ").include?("baz:quack")
         }.and_return('response'=>{'docs'=>mock_docs})
         yielded = double("yielded method")
         yielded.should_receive(:run).with { |obj| obj.class == SpecModel::Basic}.twice
@@ -177,9 +177,9 @@ describe ActiveFedora::Base do
             hash[:params][:sort] == [@sort_query] && 
             hash[:params][:fl] == 'id' && 
             hash[:params][:q].split(" AND ").include?(@model_query) &&
-            hash[:params][:q].split(" AND ").include?("foo:\"bar\"") &&
-            hash[:params][:q].split(" AND ").include?("baz:\"quix\"") &&
-            hash[:params][:q].split(" AND ").include?("baz:\"quack\"")
+            hash[:params][:q].split(" AND ").include?("foo:bar") &&
+            hash[:params][:q].split(" AND ").include?("baz:quix") &&
+            hash[:params][:q].split(" AND ").include?("baz:quack")
         }.and_return('response'=>{'docs'=>mock_docs})
         yielded = double("yielded method")
         yielded.should_receive(:run).with(mock_docs)
@@ -257,9 +257,9 @@ describe ActiveFedora::Base do
             q = args.first if args.is_a? Array
             q ||= args
             q.split(" AND ").include?(@model_query) &&
-            q.split(" AND ").include?("foo:\"bar\"") &&
-            q.split(" AND ").include?("baz:\"quix\"") &&
-            q.split(" AND ").include?("baz:\"quack\"")
+            q.split(" AND ").include?("foo:bar") &&
+            q.split(" AND ").include?("baz:quix") &&
+            q.split(" AND ").include?("baz:quack")
         }.and_return(mock_result)
       SpecModel::Basic.find_with_conditions(:foo=>'bar', :baz=>['quix','quack']).should == mock_result
     end
@@ -271,16 +271,16 @@ describe ActiveFedora::Base do
             q ||= args
             q.split(" AND ").include?(@model_query) &&
             q.split(" AND ").include?(@model_query) &&
-            q.split(" AND ").include?('foo:"9\\" Nails"') &&
-            q.split(" AND ").include?('baz:"7\\" version"') &&
-            q.split(" AND ").include?('baz:"quack"')
+            q.split(" AND ").include?('foo:9\\"\\ Nails') &&
+            q.split(" AND ").include?('baz:7\\"\\ version') &&
+            q.split(" AND ").include?('baz:quack')
         }.and_return(mock_result)
       SpecModel::Basic.find_with_conditions(:foo=>'9" Nails', :baz=>['7" version','quack']).should == mock_result
     end
 
     it "shouldn't use the class if it's called on AF:Base " do
       mock_result = double('Result')
-      ActiveFedora::SolrService.should_receive(:query).with('baz:"quack"', {:sort => [@sort_query]}).and_return(mock_result)
+      ActiveFedora::SolrService.should_receive(:query).with('baz:quack', {:sort => [@sort_query]}).and_return(mock_result)
       ActiveFedora::Base.find_with_conditions(:baz=>'quack').should == mock_result
     end
     it "should use the query string if it's provided" do

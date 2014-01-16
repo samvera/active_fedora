@@ -1,5 +1,8 @@
 module ActiveFedora
   module Querying
+    extend Deprecation
+    self.deprecation_horizon = 'active-fedora version 8.0.0'
+
     delegate :find, :first, :exists?, :where, :limit, :order, :delete_all, 
       :destroy_all, :count, :last, :find_with_conditions, :find_in_batches, :find_each, :to=>:all
 
@@ -13,7 +16,8 @@ module ActiveFedora
     end
 
     def quote_for_solr(value)
-      '"' + value.gsub(/(:)/, '\\:').gsub(/(\/)/, '\\/').gsub(/"/, '\\"') + '"'
+      RSolr.escape(value)
     end
+    deprecation_deprecate :quote_for_solr
   end
 end
