@@ -138,7 +138,7 @@ describe ActiveFedora::SolrService do
     it "should call solr" do 
       mock_conn = double("Connection")
       doc = {'id' => '1234'}
-      mock_conn.should_receive(:add).with(doc)
+      mock_conn.should_receive(:add).with(doc, {:params=>{}})
       ActiveFedora::SolrService.stub(:instance =>double("instance", :conn=>mock_conn))
       ActiveFedora::SolrService.add(doc)
     end
