@@ -4,11 +4,6 @@ rvm:
   - 2.0.0
   - 1.9.3
 
-matrix:
-  allow_failures:
-    - rvm: 2.1.0
-
-
 gemfile:
   - gemfiles/rails3.gemfile
   - gemfiles/rails4.gemfile
@@ -16,8 +11,6 @@ gemfile:
 notifications:
   irc: "irc.freenode.org#projecthydra"
 
-before_install:
-  - gem install bundler
 env:
   global:
     - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
