@@ -9,8 +9,9 @@ describe ActiveFedora::Base do
   describe ".update_index" do
     before do
       mock_conn = double("SolrConnection")
-      mock_conn.should_receive(:add)
-      mock_conn.should_receive(:commit)
+      mock_conn.should_receive(:add) do |_, opts|
+        opts.should == {:params=>{:softCommit=>true}}
+      end
       mock_ss = double("SolrService")
       mock_ss.stub(:conn).and_return(mock_conn)
       ActiveFedora::SolrService.stub(:instance).and_return(mock_ss)
@@ -60,8 +61,7 @@ describe ActiveFedora::Base do
     it "should delete object from repository and index" do
       @test_object.inner_object.stub(:delete)
       mock_conn = double("SolrConnection")
-      mock_conn.should_receive(:delete_by_id).with(nil) 
-      mock_conn.should_receive(:commit)
+      mock_conn.should_receive(:delete_by_id).with(nil, {:params=>{"softCommit"=>true}}) 
       mock_ss = double("SolrService")
       mock_ss.stub(:conn).and_return(mock_conn)
       ActiveFedora::SolrService.stub(:instance).and_return(mock_ss)

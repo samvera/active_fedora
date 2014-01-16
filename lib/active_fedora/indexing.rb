@@ -69,8 +69,7 @@ module ActiveFedora
         solrizer = Solrizer::Fedora::Solrizer.new
         solrizer.solrize( self )
       else
-        SolrService.add(self.to_solr)
-        SolrService.commit
+        SolrService.add(self.to_solr, softCommit: true)
       end
     end
 

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe "scoped queries" do
-  
+
   before(:each) do 
     module ModelIntegrationSpec
       class Basic < ActiveFedora::Base

@@ -73,8 +73,6 @@ module ActiveFedora
         end
       end
 
-      
-      #Fedora::Repository.instance.delete(@inner_object)
       pid = self.pid ## cache so it's still available after delete
       begin
         @inner_object.delete
@@ -83,8 +81,7 @@ module ActiveFedora
       end
       if ENABLE_SOLR_UPDATES
         solr = ActiveFedora::SolrService.instance.conn
-        solr.delete_by_id(pid) 
-        solr.commit
+        solr.delete_by_id(pid, params: {'softCommit' => true}) 
       end
       @destroyed = true
       freeze
