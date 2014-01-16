@@ -93,6 +93,7 @@ module ActiveFedora::Associations::Builder
         writer_name = "#{name}_id"
         model.find_or_create_defined_attribute(writer_name, 'RELS-EXT', {})
         mixin.redefine_method("#{writer_name}=") do |id|
+          raise "can't modify frozen #{self.class}" if self.frozen?
           association(name).id_writer(id)
         end
       end

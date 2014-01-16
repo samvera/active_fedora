@@ -85,6 +85,15 @@ module ActiveFedora
       new_object if new_object.save
     end
 
+    def freeze
+      datastreams.freeze
+      self
+    end
+
+    def frozen?
+      datastreams.frozen?
+    end
+
     def pretty_pid
       if self.pid == UnsavedDigitalObject::PLACEHOLDER
         nil

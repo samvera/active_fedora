@@ -394,6 +394,7 @@ module ActiveFedora
     #   ds.update_values( {[{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}, [{:person=>1}, :family_name]=>"Andronicus", [{"person"=>"1"},:given_name]=>["Titus"],[{:person=>1},:role,:text]=>["otherrole1","otherrole2"] } )
     #   => {"person_0_role_text"=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}, "person_1_role_text"=>{"0"=>"otherrole1", "1"=>"otherrole2"}} 
     def update_values(params={})
+      raise "can't modify frozen #{self.class}" if frozen?
       if @internal_solr_doc
         raise "No update performed, this object was initialized via Solr instead of Fedora and is therefore read-only.  Please utilize ActiveFedora::Base.find to first load object via Fedora instead."
       else

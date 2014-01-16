@@ -13,7 +13,7 @@ module ActiveFedora
     end
     
     def changed?
-      relationships_are_dirty? or super
+      model.relationships_are_dirty? or super
     end
 
     def metadata?
@@ -21,22 +21,10 @@ module ActiveFedora
     end
 
     def serialize!
-      self.content = to_rels_ext() if relationships_are_dirty?
-      model.relationships_are_dirty = false
+      self.content = to_rels_ext() if model.relationships_are_dirty?
+      model.relationships_are_not_dirty!
     end
     
-    def relationships_are_dirty?
-      model.relationships_are_dirty if model
-    end
-
-    def relationships_are_dirty!
-      model.relationships_are_dirty = true
-    end
-
-    def relationships_are_not_dirty!
-      model.relationships_are_dirty = false
-    end
-
     # Populate a RelsExtDatastream object based on the "datastream" content 
     # Assumes that the datastream contains RDF XML from a Fedora RELS-EXT datastream 
     # @param [String] xml the "rdf" node 
@@ -46,15 +34,7 @@ module ActiveFedora
         ### maybe put the template here?
       else
         ensure_predicates_exist!(xml)
-        RDF::RDFXML::Reader.new(xml) do |reader|
-          reader.each_statement do |statement|
-            literal = statement.object.kind_of?(RDF::Literal)
-            object = literal ? statement.object.value : statement.object.to_str
-            tmpl.model.add_relationship(statement.predicate, object, literal)
-          end
-        end
-        tmpl.relationships_are_not_dirty!
-        tmpl.changed_attributes.clear
+        tmpl.model.relationships = xml
         tmpl
       end
     end

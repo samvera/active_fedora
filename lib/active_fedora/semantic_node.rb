@@ -19,12 +19,27 @@ module ActiveFedora
       load_relationships if !relationships_loaded
       @object_relations ||= RelationshipGraph.new
     end
-    
-    def relationships_are_dirty
+
+    def relationships_are_dirty?
       object_relations.dirty
     end
-    def relationships_are_dirty=(val)
-      object_relations.dirty = val
+    alias relationships_are_dirty relationships_are_dirty?
+
+    def relationships_are_not_dirty!
+      object_relations.dirty = false
+    end
+
+    def relationships=(xml)
+      RDF::RDFXML::Reader.new(xml) do |reader|
+        reader.each_statement do |statement|
+          literal = statement.object.kind_of?(RDF::Literal)
+          object = literal ? statement.object.value : statement.object.to_str
+          object_relations.add(statement.predicate, object, literal)
+        end
+      end
+      # Adding the relationships to the graph causes the graph to be marked as dirty,
+      # so now we assert that the graph is in sync
+      relationships_are_not_dirty!
     end
 
     # Add a relationship to the Object.
@@ -80,7 +95,7 @@ module ActiveFedora
     # @param obj Either a string URI or an object that responds to .pid 
     def remove_relationship(predicate, obj, literal=false)
       object_relations.delete(predicate, obj)
-      self.relationships_are_dirty = true
+      object_relations.dirty = true
       rels_ext.content_will_change!
     end
 
