@@ -111,14 +111,14 @@ module ActiveFedora
       end
     end
 
-    # @returns [String] the internal fedora URI
+    # @return [String] the internal fedora URI
     def internal_uri
       self.class.internal_uri(pid)
     end
 
     module ClassMethods
       # @param [String,Array] uris a single uri (as a string) or a list of uris to convert to pids
-      # @returns [String] the pid component of the URI
+      # @return [String] the pid component of the URI
       def pids_from_uris(uris) 
         Deprecation.warn(SemanticNode, "pids_from_uris has been deprecated and will be removed in active-fedora 8.0.0", caller)
         if uris.kind_of? String
@@ -145,13 +145,13 @@ module ActiveFedora
       end
 
       # @param [String] pid the fedora object identifier
-      # @returns [String] a URI represented as a string
+      # @return [String] a URI represented as a string
       def internal_uri(pid)
         "info:fedora/#{pid}"
       end
 
       # @param [String] uri a uri (as a string)
-      # @returns [String] the pid component of the URI
+      # @return [String] the pid component of the URI
       def pid_from_uri(uri)
         uri.gsub("info:fedora/", "")
       end

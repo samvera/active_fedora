@@ -175,7 +175,7 @@ module ActiveFedora
 
     module ClassMethods
       # @param [String] dsid the datastream id
-      # @returns [Class] the class of the datastream
+      # @return [Class] the class of the datastream
       def datastream_class_for_name(dsid)
         ds_specs[dsid] ? ds_specs[dsid].fetch(:type, ActiveFedora::Datastream) : ActiveFedora::Datastream
       end
