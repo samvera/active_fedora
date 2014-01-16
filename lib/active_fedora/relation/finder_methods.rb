@@ -221,8 +221,7 @@ module ActiveFedora
           value.map { |val| "#{key}:#{RSolr.escape(val)}" }
         else
           key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
-          escaped_value = RSolr.escape(value)
-          key.to_s.eql?(SOLR_DOCUMENT_ID) ? "#{key}:#{escaped_value}" : "#{key}:#{escaped_value}"
+          "#{key}:#{RSolr.escape(value)}"
         end
       end
     end
