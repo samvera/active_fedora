@@ -82,8 +82,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @two = ActiveFedora::RDFDatastream.new('fakepid', 'myQuix')
     end
     it "should generate predictable prexies" do
-      @one .prefix("baz").should == :my_foobar__baz
-      @two.prefix("baz").should == :my_quix__baz
+      @one.apply_prefix("baz").should == 'my_foobar__baz'
+      @two.apply_prefix("baz").should == 'my_quix__baz'
     end
   end
 
@@ -180,8 +180,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
 
     it "should have a solr_name method" do
-      expect(MyDatastream.primary_solr_name('descMetadata', :based_near)).to eq 'desc_metadata__based_near_sim'
-      expect(MyDatastream.primary_solr_name('props', :title)).to eq 'props__title_tesim'
+      expect(MyDatastream.new(nil, 'descMetadata').primary_solr_name(:based_near)).to eq 'desc_metadata__based_near_sim'
+      expect(MyDatastream.new(nil, 'props').primary_solr_name(:title)).to eq 'props__title_tesim'
     end
 
     it "should optionally allow you to provide the Solr::Document to add fields to and return that document when done" do

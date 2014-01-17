@@ -17,7 +17,7 @@ module ActiveFedora
     alias_method(:om_update_values, :update_values) unless method_defined?(:om_update_values)
     
     attr_accessor :internal_solr_doc
-    
+
     def self.default_attributes
       super.merge(:controlGroup => 'M', :mimeType => 'text/xml')
     end
@@ -166,6 +166,13 @@ module ActiveFedora
     def from_solr(solr_doc)
       #just initialize internal_solr_doc since any value retrieval will be done via lazy loading on this doc on-demand
       @internal_solr_doc = solr_doc
+    end
+
+    # Return a hash suitable for indexing in solr. Every field name is prefixed with the
+    # value returned by the +prefix+ method.
+    def to_solr(solr_doc = {})
+      prefix = self.prefix
+      super.each_with_object({}) { |(key, value), new| new[[prefix,key].join] = value }
     end
 
 

@@ -2,12 +2,12 @@ module ActiveFedora
   # Represents the mapping between a model attribute and a field in a datastream
   class DatastreamAttribute
     
-    attr_accessor :dsid, :field, :klass, :at, :reader, :writer, :multiple
+    attr_accessor :dsid, :field, :datastream_class, :at, :reader, :writer, :multiple
 
-    def initialize(field, dsid, klass, args={})
+    def initialize(field, dsid, datastream_class, args={})
       self.field = field
       self.dsid = dsid
-      self.klass = klass
+      self.datastream_class = datastream_class
       self.multiple = args[:multiple].nil? ? false : args[:multiple]
       self.at = args[:at]
 
@@ -17,18 +17,19 @@ module ActiveFedora
 
     # Gives the primary solr name for a column. If there is more than one indexer on the field definition, it gives the first 
     def primary_solr_name
-      if klass.respond_to?(:primary_solr_name)
-        klass.primary_solr_name(dsid, field)
+      @datastream ||= datastream_class.new(nil, dsid)
+      if @datastream.respond_to?(:primary_solr_name)
+        @datastream.primary_solr_name(field)
       else
-        raise IllegalOperation, "the class '#{klass}' doesn't respond to 'primary_solr_name'"
+        raise IllegalOperation, "the datastream '#{datastream_class}' doesn't respond to 'primary_solr_name'"
       end
     end
 
     def type
-      if klass.respond_to?(:type)
-        klass.type(field)
+      if datastream_class.respond_to?(:type)
+        datastream_class.type(field)
       else
-        raise IllegalOperation, "the class '#{klass}' doesn't respond to 'type'"
+        raise IllegalOperation, "the datastream '#{datastream_class}' doesn't respond to 'type'"
       end
     end
 
