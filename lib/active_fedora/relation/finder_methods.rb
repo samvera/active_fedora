@@ -151,8 +151,9 @@ module ActiveFedora
       if where_values.empty?
         load_from_fedora(pid, cast)
       else
-        query = ActiveFedora::SolrService.construct_query_for_rel(where_values)
-        query += " AND _query_:\"{!raw f=id}#{pid}\""
+        query = [ActiveFedora::SolrService.construct_query_for_rel(where_values),
+                 ActiveFedora::SolrService.raw_query(SOLR_DOCUMENT_ID, pid)].
+                join(" AND ".freeze)
         to_enum(:find_each, query, {}).to_a.first
       end
     end

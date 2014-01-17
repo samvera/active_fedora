@@ -66,13 +66,7 @@ module ActiveFedora
     end
 
     def active_fedora_class
-      @active_fedora_class ||= begin
-        if solr_doc[ActiveFedora::SolrService.solr_name('has_model', :symbol)]
-          ActiveFedora::SolrService.class_from_solr_document(solr_doc)
-        else
-          ActiveFedora::Base
-        end
-      end
+      @active_fedora_class ||= ActiveFedora::SolrService.class_from_solr_document(solr_doc)
     end
 
     def profile_json
