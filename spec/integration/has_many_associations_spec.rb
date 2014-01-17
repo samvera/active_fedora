@@ -188,6 +188,13 @@ describe "Deleting a dependent relationship" do
     item.delete
   end
 
+  it "should not save deleted objects" do
+    item.components << component
+    item.save!
+    c2 = Component.find(component.id)
+    c2.delete
+    item.delete
+  end
 end
 
 describe "Autosave" do
