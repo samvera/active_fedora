@@ -29,6 +29,7 @@ module ActiveFedora
     def new?
       true
     end
+    alias new_record? new?
 
     ### Change this into a real digital object
     def save

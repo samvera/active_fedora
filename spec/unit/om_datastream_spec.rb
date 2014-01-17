@@ -21,7 +21,7 @@ describe ActiveFedora::OmDatastream do
   before(:each) do
     @mock_inner = double('inner object')
     @mock_repo = double('repository')
-    @mock_repo.stub(:datastream_dissemination=>'My Content', :config=>{}, :datastream=>'')
+    @mock_repo.stub(:datastream_dissemination=>'My Content', :config=>{}, :datastream_profile=> {}, :datastream=>'')
     @mock_inner.stub(:repository).and_return(@mock_repo)
     @mock_inner.stub(:pid)
     @mock_inner.stub(:new? => false)
@@ -189,7 +189,7 @@ describe ActiveFedora::OmDatastream do
   
   describe 'ng_xml=' do
     before do
-      @mock_inner.stub(:new? => true)
+      @mock_inner.stub(:new_record? => true)
       @test_ds2 = ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata")
     end
     it "should parse raw xml for you" do
