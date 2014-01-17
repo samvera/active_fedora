@@ -55,6 +55,13 @@ describe ActiveFedora::OmDatastream do
       n.ng_xml.should be_equivalent_to("<fake template/>")
     end
   end
+
+  describe "#prefix" do
+    subject { ActiveFedora::OmDatastream.new(nil, 'descMetadata') }
+    it "should be an empty string (until active-fedora 8. Then it should be \"\#{dsid.underscore}__\"" do
+      subject.send(:prefix).should == ""
+    end
+  end
   
   describe '#xml_template' do
     it "should return an empty xml document" do
@@ -62,10 +69,39 @@ describe ActiveFedora::OmDatastream do
     end
   end
 
-  describe "an instance" do
-    subject { ActiveFedora::OmDatastream.new }
-    it{ should.respond_to? :to_solr }
-    its(:to_solr) {should == { }}
+  describe "to_solr" do
+    describe "with a dsid" do
+      subject { ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata") }
+      its(:to_solr) {should == { }}
+    end
+    describe "without a dsid" do
+      subject { ActiveFedora::OmDatastream.new }
+      it "should raise an error" do
+        expect{subject.to_solr}.to raise_error RuntimeError, "to_solr requires the dsid to be set"
+      end
+    end
+
+    describe "when prefix is set" do
+      before do 
+        class MyDatastream < ActiveFedora::OmDatastream
+          set_terminology do |t|
+            t.root(:path=>"mods")
+            t.title(:index_as=>[:stored_searchable])
+          end
+          def prefix
+            "foo__"
+          end
+        end
+      end
+      after do
+        Object.send(:remove_const, :MyDatastream)
+      end
+      subject { MyDatastream.new }
+      it "should use the prefix" do
+        subject.title = 'Science'
+        expect(subject.to_solr).to have_key('foo__title_tesim')
+      end
+    end
   end
   
   describe ".update_indexed_attributes" do
