@@ -55,7 +55,6 @@ module ActiveFedora
                 inverse = reflection.inverse_of.name
                 records.each do |record|
                   if record.persisted?
-                    record.reload
                     assoc = record.association(inverse)
                     if assoc.reflection.collection?
                       # Remove from a has_and_belongs_to_many
@@ -64,7 +63,9 @@ module ActiveFedora
                       # Remove from a belongs_to
                       record.association(inverse).id_writer(nil)
                     end
-                    record.save!
+                    # Check to see if the object still exists (may be already deleted).
+                    # In Rails, they do this with an update_all to avoid callbacks and validations, we may need the same.
+                    record.save! if record.class.exists?(record.pid)
                   end
                 end
               end
