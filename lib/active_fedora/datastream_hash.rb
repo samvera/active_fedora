@@ -18,5 +18,12 @@ module ActiveFedora
       @obj.inner_object.datastreams[key]=val# unless @obj.inner_object.new?
       super
     end 
+
+    def freeze
+      each do |k, v|
+        v.freeze
+      end
+      super
+    end
   end
 end
