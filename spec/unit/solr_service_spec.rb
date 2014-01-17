@@ -91,6 +91,12 @@ describe ActiveFedora::SolrService do
       end
     end
   end
+
+  describe "raw_query" do
+    it "should generate a raw query clause" do
+      expect(ActiveFedora::SolrService.raw_query('id', "my:_PID1_")).to eq '_query_:"{!raw f=id}my:_PID1_"'
+    end
+  end
   
   describe '#construct_query_for_pids' do
     it "should generate a useable solr query from an array of Fedora pids" do

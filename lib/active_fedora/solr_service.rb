@@ -59,8 +59,7 @@ module ActiveFedora
       def class_from_solr_document(hit, opts = {})
         #Set the default starting point to the class specified, if available.
         best_model_match = Model.from_class_uri(opts[:class]) unless opts[:class].nil?
-
-        hit[solr_name("has_model", :symbol)].each do |value|
+        hit[HAS_MODEL_SOLR_FIELD].each do |value|
 
           model_value = Model.from_class_uri(value)
 
@@ -85,14 +84,16 @@ module ActiveFedora
       # If the pid_array is empty, defaults to a query of "id:NEVER_USE_THIS_ID", which will return an empty solr response
       # @param [Array] pid_array the pids that you want included in the query
       def construct_query_for_pids(pid_array)
+        q = pid_array.reject { |x| x.empty? }.map { |pid| raw_query(SOLR_DOCUMENT_ID, pid) }
 
-        q = pid_array.reject { |x| x.empty? }.map do |pid|
-          "_query_:\"{!raw f=#{SOLR_DOCUMENT_ID}}#{pid.gsub('"', '\"')}\""
-        end
+        q.empty? ? "id:NEVER_USE_THIS_ID" : q.join(" OR ".freeze)
+      end
 
-        return "id:NEVER_USE_THIS_ID" if q.empty?
-
-        return q.join(" OR ")
+      # Create a raw query clause suitable for sending to solr as an fq element
+      # @param [String] key
+      # @param [String] value
+      def raw_query(key, value)
+        "_query_:\"{!raw f=#{key}}#{value.gsub('"', '\"')}\""
       end
 
       def solr_name(*args)
@@ -107,10 +108,8 @@ module ActiveFedora
       # Create a query with a clause for each key, value
       # @param [Hash] args key is the predicate, value is the target_uri
       def construct_query_for_rel(args)
-        clauses = args.map do |predicate, target_uri|
-          "_query_:\"{!raw f=#{solr_name(predicate, :symbol)}}#{target_uri.gsub('"', '\"')}\""
-        end
-        clauses.join(" AND ")
+        clauses = args.map { |predicate, target_uri| raw_query(solr_name(predicate, :symbol), target_uri) }
+        clauses.join(" AND ".freeze)
       end
 
       def query(query, args={})
@@ -142,6 +141,9 @@ module ActiveFedora
         SolrService.instance.conn.commit
       end
     end
+
+    HAS_MODEL_SOLR_FIELD = solr_name("has_model", :symbol).freeze
+
   end #SolrService
   class SolrNotInitialized < StandardError;end
 end #ActiveFedora
