@@ -14,7 +14,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
           map.related_url(:to => "seeAlso", :in => RDF::RDFS)
         end
       end
-      @subject = MyDatastream.new(double('inner object', :pid=>'test:1', :new? =>true), 'descMetadata')
+      @subject = MyDatastream.new(double('inner object', :pid=>'test:1', :new_record? =>true), 'descMetadata')
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
     after do
@@ -101,7 +101,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       end
       @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
       @subject.stub(:pid => 'test:1')
-      @subject.stub(:new? => false)
+      @subject.stub(:new_record? => false)
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
 
