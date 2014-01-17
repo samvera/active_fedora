@@ -18,6 +18,47 @@ describe ActiveFedora::SolrDigitalObject do
     end
   end
 
+  describe "fetch" do
+    before do
+      class MyDatastream
+        def initialize(_, _)
+        end
+
+        def primary_solr_name(field)
+          return if field == :publisher
+          "#{field}_tesim"
+        end
+        def self.type(field)
+          :string
+        end
+      end
+      class MyModel < ActiveFedora::Base
+        has_metadata 'descMetadata', type: MyDatastream
+        has_attributes :title, :author, :publisher, datastream: 'descMetadata'
+      end
+
+    end
+    after do
+      Object.send(:remove_const, :MyModel)
+      Object.send(:remove_const, :MyDatastream)
+    end
+    subject { ActiveFedora::SolrDigitalObject.new({'title_tesim' => 'foo'},{'datastreams'=>{}}, MyModel) }
+    it "the default should be nil" do
+      expect(subject.fetch('author')).to be_empty
+    end
+    it "should grab values" do
+      expect(subject.fetch('title')).to eq 'foo'
+    end
+    it "should grab values" do
+      expect(subject.fetch('title')).to eq 'foo'
+    end
+
+    it "should raise an error if the field isn't indexed" do
+      expect{subject.fetch('publisher')}.to raise_error KeyError, "Tried to fetch `publisher' from solr, but it isn't indexed."
+    end
+
+  end
+
   describe "initializing" do
     describe "without a datastream in the ds spec and an xml mime type in the solr doc" do
       before do
