@@ -43,6 +43,6 @@ describe "Loading from solr" do
     expect(obj.title).to eq "PLAN 9 FROM OUTER SPACE"
     expect(obj.date_uploaded).to eq [Date.parse('1959-01-01')]
     expect(obj.identifier).to eq 12345
-    expect(obj.part).to be_nil # since it wasn't indexed 
+    expect{obj.part}.to raise_error KeyError, "Tried to fetch `part' from solr, but it isn't indexed."
   end
 end

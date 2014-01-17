@@ -43,17 +43,16 @@ module ActiveFedora
       self
     end
 
-    def fetch(field)
+    def fetch(field, default=[])
       attribute = original_class.defined_attributes[field]
       field_name = attribute.primary_solr_name
-      if field_name
-       val = solr_doc.fetch field_name
-       case attribute.type
-       when :date
-         val.is_a?(Array) ? val.map{|v| Date.parse v} : Date.parse(val)
-       else
-         val
-       end
+      raise KeyError, "Tried to fetch `#{field}' from solr, but it isn't indexed." unless field_name
+      val = solr_doc.fetch field_name, default
+      case attribute.type
+      when :date
+        val.is_a?(Array) ? val.map{|v| Date.parse v} : Date.parse(val)
+      else
+        val
       end
     end
     
