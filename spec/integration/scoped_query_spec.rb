@@ -84,6 +84,12 @@ describe "scoped queries" do
       it "should chain count" do
         ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').count.should == 2 
       end
+
+      it "calling first should not affect the relation's ability to get all results later" do
+        relation = ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts')
+        expect {relation.first}.not_to change {relation.to_a.size}
+      end
+
     end
 
     describe "when one of the objects in solr isn't in fedora" do

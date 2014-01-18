@@ -37,6 +37,22 @@ module ActiveFedora
       @values[:limit] = value
     end   
 
+    # Limits the number of returned records to the value specified
+    #
+    # @option [Integer] value the number of records to return
+    #
+    # @example
+    #  Person.where(name_t: 'Jones').limit(10)
+    #    => [#<Person @id="foo:123" @name='Jones'>, #<Person @id="foo:125" @name='Jones'>, ...]
+    def limit(value)
+      spawn.limit!(value)
+    end
+
+    def limit!(value)
+      self.limit_value = value
+      self
+    end
+
     def none! # :nodoc:
       extending!(NullRelation)
     end
