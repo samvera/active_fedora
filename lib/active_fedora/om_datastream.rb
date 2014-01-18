@@ -413,6 +413,7 @@ module ActiveFedora
 
     #override OM::XML::term_values so can lazy load from solr if this datastream initialized using +from_solr+
     def term_values(*term_pointer)
+      # TODO if we can add primary_solr_name onto OmDatastream, we may be able to do away with get_values_from_solr.
       if @internal_solr_doc
         #lazy load values from solr on demand
         get_values_from_solr(*term_pointer)

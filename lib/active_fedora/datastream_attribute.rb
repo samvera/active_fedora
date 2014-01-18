@@ -21,7 +21,7 @@ module ActiveFedora
       if @datastream.respond_to?(:primary_solr_name)
         @datastream.primary_solr_name(field)
       else
-        raise IllegalOperation, "the datastream '#{datastream_class}' doesn't respond to 'primary_solr_name'"
+        raise NoMethodError, "the datastream '#{datastream_class}' doesn't respond to 'primary_solr_name'"
       end
     end
 
@@ -29,7 +29,7 @@ module ActiveFedora
       if datastream_class.respond_to?(:type)
         datastream_class.type(field)
       else
-        raise IllegalOperation, "the datastream '#{datastream_class}' doesn't respond to 'type'"
+        raise NoMethodError, "the datastream '#{datastream_class}' doesn't respond to 'type'"
       end
     end
 
@@ -53,21 +53,24 @@ module ActiveFedora
       this = self
       self.reader = lambda do |*opts|
         if inner_object.is_a? SolrDigitalObject
-          # Look in the cache
-          # TODO catch a non-cached error and try fedora.
-          inner_object.fetch(this.field)
+          begin
+            # Look in the cache
+            return inner_object.fetch(this.field)
+          rescue NoMethodError => e
+            # couldn't get it from solr, so try from fedora.
+            logger.info "Couldn't get #{this.field} out of solr, because #{e.message}. Trying another way."
+          end
+        end
+        # Load from fedora
+        ds = datastream_for_attribute(this.dsid)
+        if ds.kind_of?(ActiveFedora::RDFDatastream)
+          ds.send(this.field)
         else
-          # Load from fedora
-          ds = datastream_for_attribute(this.dsid)
-          if ds.kind_of?(ActiveFedora::RDFDatastream)
-            ds.send(this.field)
+          terminology = this.at || [this.field]
+          if terminology.length == 1 && opts.present?
+            ds.send(terminology.first, *opts)
           else
-            terminology = this.at || [this.field]
-            if terminology.length == 1 && opts.present?
-              ds.send(terminology.first, *opts)
-            else
-              ds.send(:term_values, *terminology)
-            end
+            ds.send(:term_values, *terminology)
           end
         end
       end
