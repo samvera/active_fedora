@@ -16,6 +16,13 @@ module ActiveFedora
       @values = {}
     end
 
+    # This method gets called on clone
+    def initialize_copy(other)
+      # Dup the values
+      @values = Hash[@values]
+      reset
+    end
+
     # Tries to create a new record with the same scoped attributes
     # defined in the relation. Returns the initialized object if validation fails.
     #
@@ -41,19 +48,6 @@ module ActiveFedora
       @first = @loaded = nil
       @records = []
       self
-    end
-
-    # Limits the number of returned records to the value specified
-    #
-    # @option [Integer] value the number of records to return
-    #
-    # @example
-    #  Person.where(name_t: 'Jones').limit(10)
-    #    => [#<Person @id="foo:123" @name='Jones'>, #<Person @id="foo:125" @name='Jones'>, ...]
-    def limit(value)
-      relation = clone
-      relation.limit_value = value
-      relation
     end
 
     # Limits the returned records to those that match the provided search conditions
