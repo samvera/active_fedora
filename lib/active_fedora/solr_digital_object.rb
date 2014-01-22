@@ -1,8 +1,11 @@
 module ActiveFedora
   class SolrDigitalObject
+
     include DigitalObject::DatastreamBootstrap
+
     attr_reader :pid, :label, :state, :ownerId, :profile, :datastreams, :solr_doc
     attr_accessor :original_class
+
     def initialize(solr_doc, profile_hash, klass=ActiveFedora::Base)
       @solr_doc = solr_doc
       @pid = solr_doc[SOLR_DOCUMENT_ID]
@@ -44,6 +47,7 @@ module ActiveFedora
     def new?
       false
     end
+    alias_method :new_record?, :new?
 
     def uri
       "solr:#{pid}"

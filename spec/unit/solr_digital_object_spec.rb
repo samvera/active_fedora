@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::SolrDigitalObject do
+
   describe "repository" do
     subject { ActiveFedora::SolrDigitalObject.new({},{'datastreams'=>{}}) }
     describe "when not finished" do
@@ -50,5 +51,12 @@ describe ActiveFedora::SolrDigitalObject do
     end
   end
 
+
+  describe "new_record?" do
+    subject { ActiveFedora::SolrDigitalObject.new({},{'datastreams'=>{}}) }
+    it "should respond to :new_record? and return false" do
+      subject.new_record?.should be_false
+    end
+  end
 
 end
