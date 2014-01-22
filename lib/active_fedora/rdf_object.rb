@@ -7,13 +7,7 @@ module ActiveFedora
       attr_reader :rdf_subject, :graph
     end
 
-    def graph
-      @graph ||= RDF::Graph.new
-      @graph 
-    end
-
-
-    def initialize(graph, subject=nil)
+    def initialize(graph = RDF::Graph.new, subject=nil)
       subject ||= RDF::Node.new
       @graph = graph
       @rdf_subject = subject
