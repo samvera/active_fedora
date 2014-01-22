@@ -1,5 +1,31 @@
+v6.7.6
+Patch ActiveFedora::SolrDigitalObject for Rubydora 1.7.0 compatibility. [David Chandek-Stark]
+
+v6.7.5
+Support for rubydora 1.7.0 [Justin Coyne]
+
+v6.7.4
+Restrict rdf to ~> 1.1.1.1 because rdf 1.1.2 breaks ActiveFedora [Justin Coyne]
+
+v6.7.3
+Force overwrite the blacklight configuration [Justin Coyne]
+
+v6.7.2
+ConfigGenerator should use a unique method name, not `generate` so that it doesn't cause an infinite loop [Justin Coyne]
+
+v6.7.1
+Force RDF data to be UTF-8 The RDF reader chokes on certain character combinations if the raw data is not encoded UTF-8.  See https://github.com/ruby-rdf/rdf/issues/142 Fedora does not store character encoding, so by default they come back as ASCII-8BIT. [Justin Coyne]
+Renaming invoke -> generate [Jeremy Friesen]
+
+v6.7.0
+Remove loading of rake tasks because they are already loaded in the railtie [Chris Colvard]
+Added has_attributes to replace delegate_to [Justin Coyne]
+
 v6.6.1
-Don't try to track changes on delegates that are not attributes
+
+Don't try to track changes on delegates that are not attributes [Justin Coyne]
+Alter test so that it's compatible with the solr document produced by om 3.0.4 [Justin Coyne]
+Fix test for Fedora 3.7 [Justin Coyne]
 
 v6.6.0
 Add _destroy method for building nested forms [Justin Coyne]
