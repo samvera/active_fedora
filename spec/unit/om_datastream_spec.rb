@@ -92,14 +92,17 @@ describe ActiveFedora::OmDatastream do
             "foo__"
           end
         end
+        subject.title = 'Science'
       end
       after do
         Object.send(:remove_const, :MyDatastream)
       end
       subject { MyDatastream.new }
       it "should use the prefix" do
-        subject.title = 'Science'
         expect(subject.to_solr).to have_key('foo__title_tesim')
+      end
+      it "should not prefix fields that aren't defined by this datastream" do
+        expect(subject.to_solr('id' => 'test:123')).to have_key('id')
       end
     end
   end
