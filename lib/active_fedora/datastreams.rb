@@ -2,6 +2,8 @@ module ActiveFedora
   module Datastreams
     extend ActiveSupport::Concern
 
+    autoload :NokogiriDatastreams,           'active_fedora/datastreams/nokogiri_datastreams'
+
     included do
       class_attribute :ds_specs
       self.ds_specs = {'RELS-EXT'=> {:type=> ActiveFedora::RelsExtDatastream, :label=>"Fedora Object-to-Object Relationship Metadata", :block=>nil}}

@@ -2,6 +2,9 @@ require  "nom"
 
 module ActiveFedora
   class NomDatastream < Datastream
+
+      include Datastreams::NokogiriDatastreams
+
       def self.set_terminology(options = {}, &block)
         @terminology_options = options || {}
         @terminology = block
@@ -29,33 +32,14 @@ module ActiveFedora
       ds
     end
 
-    def ng_xml
-      @ng_xml ||= begin
-         xml = Nokogiri::XML content
-         xml.set_terminology self.class.terminology_options, &self.class.terminology
-         xml.nom!
-         xml
-      end
+    def self.decorate_ng_xml(xml)
+      xml.set_terminology terminology_options, &terminology
+      xml.nom!
+      xml
     end
     
-    def ng_xml= ng_xml
-      @ng_xml = ng_xml
-      @ng_xml.set_terminology self.class.terminology_options, &self.class.terminology
-      content_will_change!
-      @ng_xml
-    end
-
     def serialize!
        self.content = @ng_xml.to_s if @ng_xml
-    end
-
-    def content
-      @content || super
-    end
-
-    def content=(content)
-      super
-      @ng_xml = nil
     end
 
     def to_solr
