@@ -1,5 +1,27 @@
 module ActiveFedora
-  class RDFDatastream < Datastream
+  class RDFDatastream < ActiveFedora::Datastream
+    include Solrizer::Common
+    include ActiveFedora::Rdf::NestedAttributes
+    include Rdf::Indexing
+    extend Rdf::Properties
+
+    delegate :rdf_subject, :set_value, :get_values, :attributes=, :to => :resource
+
+    class << self
+      def rdf_subject &block
+        if block_given?
+          return @subject_block = block
+        end
+
+        @subject_block ||= lambda { |ds| ds.pid }
+      end
+
+      # Utility method which can be overridden to determine the object
+      # resource that is created.
+      def resource_class
+        Rdf::ObjectResource
+      end
+    end
 
     before_save do
       if content.blank?
@@ -7,107 +29,85 @@ module ActiveFedora
         false
       end
     end
-    include RdfNode
-    include Rdf::Indexing
-    
-    class << self 
-      ##
-      # Register a ruby block that evaluates to the subject of the graph
-      # By default, the block returns the current object's pid
-      # @yield [ds] 'ds' is the datastream instance
-      # This should override the method in RdfObject, which just creates a b-node by default
-      def rdf_subject &block
-        if block_given?
-           return @subject_block = block
-        end
-
-        @subject_block ||= lambda { |ds| RDF::URI.new("info:fedora/#{ds.pid}") }
-      end
-    end
-
-    def freeze
-      @graph.freeze
-    end
 
     def metadata?
       true
     end
-
-    # Overriding so that one can call ds.content on an unsaved datastream and they will see the serialized format
+    
     def content
       serialize
     end
 
     def content=(content)
-      reset_child_cache!
-      @graph = deserialize(content)
+      resource.clear!
+      resource << RDF::Reader.for(serialization_format).new(content)
+      content
     end
 
     def content_changed?
-      # we haven't touched the graph, so it isn't changed (avoid a force load)
-      return false unless instance_variable_defined? :@graph
+      return false unless instance_variable_defined? :@resource
       @content = serialize
       super
     end
-    # Populate a RDFDatastream object based on the "datastream" content 
-    # Assumes that the datastream contains RDF content
-    # @param [String] data the "rdf" node 
-    def deserialize(data = nil)
-      repository = RDF::Repository.new
-      return repository if new? and data.nil?
 
-      data ||= datastream_content
-      data.force_encoding('utf-8')
-      RDF::Reader.for(serialization_format).new(data) do |reader|
-        reader.each_statement do |statement|
-          repository << statement
-        end
-      end
-
-      repository
+    def freeze
+      @resource.freeze
     end
 
-    def graph
-      @graph ||= begin
-        deserialize
-      end      
+    ##
+    # The resource is the RdfResource object that stores the graph for
+    # the datastream and is the central point for its relationship to
+    # other nodes.
+    #
+    # set_value, get_value, and property accessors are delegated to this object.
+    def resource
+      @resource ||= begin
+                      r = self.class.resource_class.new(digital_object ? self.class.rdf_subject.call(self) : nil)
+                      r.singleton_class.properties = self.class.properties
+                      r.singleton_class.properties.keys.each do |property|
+                        r.singleton_class.send(:register_property, property)
+                      end
+                      r.datastream = self
+                      r.singleton_class.accepts_nested_attributes_for(*nested_attributes_options.keys) unless nested_attributes_options.blank?
+                      r << RDF::Reader.for(serialization_format).new(datastream_content) if datastream_content
+                      r
+                    end
+    end
+
+    alias_method :graph, :resource
+
+    ##
+    # This method allows for delegation.
+    # This patches the fact that there's no consistent API for allowing delegation - we're matching the
+    # OMDatastream implementation as our "consistency" point.
+    # @TODO: We may need to enable deep RDF delegation at one point.
+    def term_values(*values)
+      self.send(values.first)
+    end
+
+    def update_indexed_attributes(hash)
+      hash.each do |fields, value|
+        fields.each do |field|
+          self.send("#{field}=", value)
+        end
+      end
+    end
+
+    def serialize
+      resource.set_subject!(pid) if (digital_object or pid) and rdf_subject.node?
+      resource.dump serialization_format
+    end
+
+    def deserialize(data=nil)
+      return RDF::Graph.new if new? && data.nil?
+      data ||= datastream_content
+      data.force_encoding('utf-8')
+      RDF::Graph.new << RDF::Reader.for(serialization_format).new(data)
     end
 
     def serialization_format
       raise "you must override the `serialization_format' method in a subclass"
     end
 
-    # Creates a RDF datastream for insertion into a Fedora Object
-    # Note: This method is implemented on SemanticNode instead of RelsExtDatastream because SemanticNode contains the relationships array
-    def serialize
-      update_subjects_to_use_a_real_pid!
-
-      RDF::Writer.for(serialization_format).dump(graph)
-    end
-
-    
-    private 
-
-    def update_subjects_to_use_a_real_pid!
-      return unless new?
-
-      bad_subject = rdf_subject
-      reset_rdf_subject!
-      reset_child_cache!
-      new_subject = rdf_subject
-
-      new_repository = RDF::Repository.new
-
-      graph.each_statement do |statement|
-          subject = statement.subject
-
-          subject &&= new_subject if subject == bad_subject
-          new_repository << [subject, statement.predicate, statement.object]
-      end
-
-      @graph = new_repository
-    end
-
   end
 end
-

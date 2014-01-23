@@ -3,9 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   before do
     class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-      map_predicates do |map|
-        map.publisher(:in => RDF::DC)
-      end
+      property :publisher, :predicate => RDF::DC.publisher
     end
     class Library < ActiveFedora::Base
     end
@@ -58,7 +56,7 @@ describe ActiveFedora::Base do
     it "should make the RDF properties immutable" do
       expect {
         subject.publisher = "HEY"
-      }.to raise_error RuntimeError, "can't modify frozen MyDatastream"
+      }.to raise_error TypeError
       expect(subject.publisher).to eq "Random House"
     end
 

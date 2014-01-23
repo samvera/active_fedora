@@ -211,10 +211,8 @@ describe ActiveFedora::Base do
   describe "with a RDF datastream" do
     before :all do
       class BarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
-        map_predicates do |map|
-          map.title(in: RDF::DC)
-          map.description(in: RDF::DC, multivalue: false)
-        end
+        property :title, :predicate => RDF::DC.title
+        property :description, :predicate => RDF::DC.description, :multivalue => false
       end
       class BarHistory4 < ActiveFedora::Base
         has_metadata 'rdfish', :type=>BarRdfDatastream
@@ -287,10 +285,8 @@ describe ActiveFedora::Base do
   describe "when a datastream is specified as a symbol" do
     before :all do
       class BarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
-        map_predicates do |map|
-          map.title(in: RDF::DC)
-          map.description(in: RDF::DC)
-        end
+        property :title, :predicate => RDF::DC.title
+        property :description, :predicate => RDF::DC.description
       end
       class BarHistory4 < ActiveFedora::Base
         has_metadata 'rdfish', :type=>BarRdfDatastream

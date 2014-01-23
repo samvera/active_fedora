@@ -3,22 +3,20 @@ require 'spec_helper'
 describe "Loading from solr" do
   before do
     class MyRdfDatastream < ActiveFedora::NtriplesRDFDatastream
-      map_predicates do |map|
-        map.title(in: RDF::DC) do |index|
-          index.as :stored_searchable, :facetable
-        end
-        map.date_uploaded(to: "dateSubmitted", in: RDF::DC) do |index|
-          index.type :date
-          index.as :stored_searchable, :sortable
-        end
-        map.identifier(in: RDF::DC) do |index|
-          index.type :integer
-          index.as :stored_searchable, :sortable
-        end
-        map.part(to: "hasPart", in: RDF::DC)
-        map.based_near(in: RDF::FOAF)
-        map.related_url(to: "seeAlso", in: RDF::RDFS)
+      property :title, predicate: RDF::DC.title do |index|
+        index.as :stored_searchable, :facetable
       end
+      property :date_uploaded, predicate: RDF::DC.dateSubmitted do |index|
+        index.type :date
+        index.as :stored_searchable, :sortable
+      end
+      property :identifier, predicate: RDF::DC.identifier do |index|
+        index.type :integer
+        index.as :stored_searchable, :sortable
+      end
+      property :part, predicate: RDF::DC.hasPart
+      property :based_near, predicate: RDF::FOAF.based_near
+      property :related_url, predicate: RDF::RDFS.seeAlso
     end
     class MyOmDatastream < ActiveFedora::OmDatastream
       set_terminology do |t|

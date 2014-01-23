@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ActiveFedora::RdfList do
+describe ActiveFedora::Rdf::List do
   before :each do
     class MADS < RDF::Vocabulary("http://www.loc.gov/mads/rdf/v1#")
       property :complexSubject
@@ -11,29 +11,18 @@ describe ActiveFedora::RdfList do
       property :TemporalElement
     end
     class DemoList < ActiveFedora::RdfxmlRDFDatastream
-      map_predicates do |map|
-        map.elementList(:in => MADS, :to => 'elementList', :class_name=>'List')
-      end 
-      class List 
-        include ActiveFedora::RdfList
-        map_predicates do |map|
-          map.topicElement(:in=> MADS, :to =>"TopicElement", :class_name => "TopicElement")
-          map.temporalElement(:in=> MADS, :to =>"TemporalElement", :class_name => "TemporalElement")
+      property :elementList, :predicate => MADS.elementList, :class_name => 'DemoList::List'
+      class List < ActiveFedora::Rdf::List
+        property :topicElement, :predicate => MADS.TopicElement, :class_name => 'DemoList::List::TopicElement'
+        property :temporalElement, :predicate => MADS.TemporalElement, :class_name => 'DemoList::List::TemporalElement'
+
+        class TopicElement < ActiveFedora::Rdf::Resource
+          configure :type => MADS.TopicElement
+          property :elementValue, :predicate => MADS.elementValue
         end
-          
-        class TopicElement
-          include ActiveFedora::RdfObject
-          rdf_type MADS.TopicElement
-          map_predicates do |map|   
-            map.elementValue(:in=> MADS)
-          end
-        end
-        class TemporalElement
-          include ActiveFedora::RdfObject
-          rdf_type MADS.TemporalElement
-          map_predicates do |map|   
-            map.elementValue(:in=> MADS)
-          end
+        class TemporalElement < ActiveFedora::Rdf::Resource
+          configure :type => MADS.TemporalElement
+          property :elementValue, :predicate => MADS.elementValue
         end
       end
     end
@@ -50,24 +39,24 @@ describe ActiveFedora::RdfList do
     it "should insert at the end" do
       subject.should be_kind_of DemoList::List
       subject.size.should == 0
-      subject[1] = DemoList::List::TopicElement.new(subject.graph)
+      subject[1] = DemoList::List::TopicElement.new
       subject.size.should == 2
     end
 
     it "should insert at the head" do
       subject.should be_kind_of DemoList::List
       subject.size.should == 0
-      subject[0] = DemoList::List::TopicElement.new(subject.graph)
+      subject[0] = DemoList::List::TopicElement.new
       subject.size.should == 1
     end
 
     describe "that has 4 elements" do
       before do
-        subject[3] = DemoList::List::TopicElement.new(subject.graph)
+        subject[3] = DemoList::List::TopicElement.new
         subject.size.should == 4
       end
       it "should insert in the middle" do
-        subject[1] = DemoList::List::TopicElement.new(subject.graph)
+        subject[1] = DemoList::List::TopicElement.new
         subject.size.should == 4
       end
     end
@@ -75,11 +64,12 @@ describe ActiveFedora::RdfList do
     describe "return updated xml" do
       it "should be built" do
         subject[0] = RDF::URI.new "http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"
-        subject[1] = DemoList::List::TopicElement.new(ds.graph)
+        subject[1] = DemoList::List::TopicElement.new
         subject[1].elementValue = "Relations with Mexican Americans"
         subject[2] = RDF::URI.new "http://library.ucsd.edu/ark:/20775/bbXXXXXXX4"
-        subject[3] = DemoList::List::TemporalElement.new(ds.graph)
+        subject[3] = DemoList::List::TemporalElement.new
         subject[3].elementValue = "20th century"
+        ds.elementList = subject
         doc = Nokogiri::XML(ds.content)
         ns = {rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#", mads: "http://www.loc.gov/mads/rdf/v1#"}
         expect(doc.xpath('/rdf:RDF/rdf:Description/@rdf:about', ns).map(&:value)).to eq ["info:fedora/foo"]
@@ -90,8 +80,6 @@ describe ActiveFedora::RdfList do
         expect(doc.xpath('//rdf:Description/mads:elementList/*[position() = 4]/mads:elementValue', ns).map(&:text)).to eq ["20th century"]
       end
     end
-
-
   end
 
   describe "an empty list" do
@@ -105,7 +93,7 @@ describe ActiveFedora::RdfList do
     let(:ds) { DemoList.new(double('inner object', :pid=>'foo', :new_record? =>true), 'descMd') }
     let(:list) { ds.elementList.build } 
     let!(:topic) { list.topicElement.build }
-    
+
     it "should have to_ary" do
       list.to_ary.size.should == 1
       list.to_ary.first.class.should == DemoList::List::TopicElement
@@ -127,7 +115,7 @@ describe ActiveFedora::RdfList do
       subject.content =<<END
   <rdf:RDF
       xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:mads="http://www.loc.gov/mads/rdf/v1#">
-      
+
         <mads:ComplexSubject rdf:about="info:fedora/foo">
           <mads:elementList rdf:parseType="Collection">
             <rdf:Description rdf:about="http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"/>
@@ -152,10 +140,10 @@ END
     let (:list) { subject.elementList.first }
 
     it "should have fields" do
-      list.first.should == "http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"
+      list.first.rdf_subject.should == "http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"
       list[1].should be_kind_of DemoList::List::TopicElement
       list[1].elementValue.should == ["Relations with Mexican Americans"]
-      list[2].should == "http://library.ucsd.edu/ark:/20775/bbXXXXXXX4"
+      list[2].rdf_subject.should == "http://library.ucsd.edu/ark:/20775/bbXXXXXXX4"
       list[3].should be_kind_of DemoList::List::TemporalElement
       list[3].elementValue.should == ["20th century"]
     end
@@ -163,7 +151,7 @@ END
     it "should have each" do
       foo = []
       list.each { |n| foo << n.class }
-      foo.should == [RDF::URI, DemoList::List::TopicElement, RDF::URI, DemoList::List::TemporalElement]
+      foo.should == [ActiveFedora::Rdf::Resource, DemoList::List::TopicElement, ActiveFedora::Rdf::Resource, DemoList::List::TemporalElement]
     end
 
     it "should have to_ary" do

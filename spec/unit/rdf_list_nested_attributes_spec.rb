@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ActiveFedora::RdfList do
+describe ActiveFedora::Rdf::List do
   before :each do
     class MADS < RDF::Vocabulary("http://www.loc.gov/mads/rdf/v1#")
       property :MADSScheme
@@ -14,39 +14,27 @@ describe ActiveFedora::RdfList do
       property :hasExactExternalAuthority
     end
 
-    class TopicElement
-      include ActiveFedora::RdfObject
-      rdf_type MADS.TopicElement
-      map_predicates do |map|
-        map.elementValue(:in=> MADS)
-      end
+    class TopicElement < ActiveFedora::Rdf::Resource
+      configure :type => MADS.TopicElement
+      property :elementValue, :predicate => MADS.elementValue
     end
-    class TemporalElement
-      include ActiveFedora::RdfObject
-      rdf_type MADS.TemporalElement
-      map_predicates do |map|
-        map.elementValue(:in=> MADS)
-      end
+    class TemporalElement < ActiveFedora::Rdf::Resource
+      configure :type => MADS.TemporalElement
+      property :elementValue, :predicate => MADS.elementValue
     end
-    class ElementList
-      include ActiveFedora::RdfList
-      
-      map_predicates do |map|
-        map.topicElement(:in=> MADS, :to =>"TopicElement", :class_name => "TopicElement")
-        map.temporalElement(:in=> MADS, :to =>"TemporalElement", :class_name => "TemporalElement")
-      end
+    class ElementList < ActiveFedora::Rdf::List
+      property :topicElement, :predicate => MADS.TopicElement, :class_name => 'TopicElement'
+      property :temporalElement, :predicate => MADS.TemporalElement, :class_name => 'TemporalElement'
       accepts_nested_attributes_for :topicElement, :temporalElement
     end
 
-    class Topic
-      include ActiveFedora::RdfObject
-      rdf_type MADS.Topic
-      rdf_subject { |ds| RDF::URI.new(Rails.configuration.id_namespace + ds.pid)}
-      map_predicates do |map|
-        map.name(:in => MADS, :to => 'authoritativeLabel')
-        map.elementList(:in => MADS, :class_name=>'ElementList')
-        map.externalAuthority(:in => MADS, :to => 'hasExactExternalAuthority')
-      end
+    class Topic < ActiveFedora::Rdf::Resource
+      configure :type => MADS.Topic
+      configure :base_uri => "http://example.org/id_namespace#"
+      property :name, :predicate => MADS.authoritativeLabel
+      property :elementList, :predicate => MADS.elementList, :class_name => 'ElementList'
+      property :externalAuthority, :predicate => MADS.hasExactExternalAuthority
+
       accepts_nested_attributes_for :elementList
     end
   end
@@ -57,7 +45,7 @@ describe ActiveFedora::RdfList do
     Object.send(:remove_const, :TemporalElement)
     Object.send(:remove_const, :MADS)
   end
-  
+
   describe "nested_attributes" do
     it "should insert new nodes into RdfLists (rather than calling .build)" do
       params = {
@@ -70,9 +58,8 @@ describe ActiveFedora::RdfList do
         }
       }
 
-      topic = Topic.new(RDF::Graph.new)
+      topic = Topic.new
       topic.attributes = params[:topic]
-      # puts topic.graph.dump(:ntriples)
       topic.elementList.first.size.should == 2
       topic.elementList.first[0].should be_kind_of(TopicElement)
       topic.elementList.first[0].elementValue.should == ["Baseball"]
@@ -80,10 +67,10 @@ describe ActiveFedora::RdfList do
       topic.elementList.first[1].elementValue.should == ["Football"]
 
       # only one rdf:rest rdf:nil
-      topic.graph.query([nil, RDF.rest, RDF.nil]).size.should == 1 
+      topic.query([nil, RDF.rest, RDF.nil]).size.should == 1
     end
     it "should insert new nodes of varying types into RdfLists (rather than calling .build)" do
-      # It's Not clear what the syntax should be when an RDF list contains multiple types of sub-nodes.  
+      # It's Not clear what the syntax should be when an RDF list contains multiple types of sub-nodes.
       # This is a guess, which currently works.
       params = {
         topic: {
@@ -96,9 +83,8 @@ describe ActiveFedora::RdfList do
         }
       }
 
-      topic = Topic.new(RDF::Graph.new)
+      topic = Topic.new
       topic.attributes = params[:topic]
-      # puts topic.graph.dump(:ntriples)
       topic.elementList.first.size.should == 4
       topic.elementList.first[0].should be_kind_of(TopicElement)
       topic.elementList.first[0].elementValue.should == ["Baseball"]

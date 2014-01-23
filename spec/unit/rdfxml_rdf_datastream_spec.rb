@@ -4,9 +4,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
   describe "a new instance" do
     before(:each) do
       class MyRdfxmlDatastream < ActiveFedora::RdfxmlRDFDatastream
-        map_predicates do |map|
-          map.publisher(:in => RDF::DC)
-        end
+        property :publisher, :predicate => RDF::DC.publisher
       end
       @subject = MyRdfxmlDatastream.new(@inner_object, 'mixed_rdf')
       @subject.stub(:pid => 'test:1')
@@ -21,7 +19,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
   end
 
   describe "a complex data model" do
-    before do 
+    before do
       class DAMS < RDF::Vocabulary("http://library.ucsd.edu/ontology/dams#")
         property :title
         property :relatedTitle
@@ -46,16 +44,14 @@ describe ActiveFedora::RdfxmlRDFDatastream do
 
       module RDF
         # This enables RDF to respond_to? :value
-        def self.value 
+        def self.value
           self[:value]
         end
       end
 
       class MyDatastream < ActiveFedora::RdfxmlRDFDatastream
-        map_predicates do |map|
-          map.resource_type(:in => DAMS, :to => 'typeOfResource')
-          map.title(:in => DAMS, :class_name => 'Description')
-        end
+        property :resource_type, :predicate => DAMS.typeOfResource
+        property :title, :predicate => DAMS.title, :class_name => 'Description'
 
         rdf_subject { |ds| RDF::URI.new(ds.about) }
 
@@ -66,22 +62,10 @@ describe ActiveFedora::RdfxmlRDFDatastream do
           super
         end
 
-        after_initialize :type_resource
-        def type_resource
-          graph.insert([RDF::URI.new(about), RDF.type, DAMS.Object])
-        end
-
-        def content=(content)
-          super
-          @about = graph.statements.first.subject
-        end
-        class Description
-          include ActiveFedora::RdfObject
-          map_predicates do |map|
-            rdf_type DAMS.Description
-            map.value(:in=> RDF) do |index|
+        class Description < ActiveFedora::Rdf::Resource
+          configure :type => DAMS.Description
+          property :value, :predicate => RDF.value do |index|
               index.as :searchable
-            end
           end
         end
       end
@@ -97,12 +81,12 @@ describe ActiveFedora::RdfxmlRDFDatastream do
       it "should have a subject" do
         subject.rdf_subject.to_s.should == "http://library.ucsd.edu/ark:/20775/"
       end
-      
+
     end
 
     describe "an instance with content" do
       subject do
-        subject = MyDatastream.new(double('inner object', :pid=>'test:1', :new_record? =>true), 'descMetadata')
+        subject = MyDatastream.new(double('inner object', :pid=>'test:1', :new_record? =>true), 'descMetadata', about:"http://library.ucsd.edu/ark:/20775/")
         subject.content = File.new('spec/fixtures/damsObjectModel.xml').read
         subject
       end

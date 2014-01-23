@@ -23,4 +23,5 @@ Contributors to this project:
 *  Thomas Johnson
 *  mpc3c
 *  Steven Anderson
+*  Trey Terrell
 

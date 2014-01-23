@@ -5,14 +5,12 @@ describe "An object with RDF backed attributes" do
   before do
     class TestOne < ActiveFedora::Base
       class MyMetadata < ActiveFedora::NtriplesRDFDatastream
-        map_predicates do |map|
-          map.title(in: RDF::DC) do |index|
-            index.as :stored_searchable
-          end
-          map.date_uploaded(to: "dateSubmitted", in: RDF::DC) do |index|
-            index.type :date
-            index.as :stored_searchable, :sortable
-          end
+        property :title, predicate: RDF::DC.title do |index|
+          index.as :stored_searchable
+        end
+        property :date_uploaded, predicate: RDF::DC.dateSubmitted do |index|
+          index.type :date
+          index.as :stored_searchable, :sortable
         end
       end
       has_metadata 'descMetadata', type: MyMetadata

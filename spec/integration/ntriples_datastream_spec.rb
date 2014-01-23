@@ -8,25 +8,23 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
 
     class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-      map_predicates do |map|
-        map.title(in: RDF::DC) do |index|
-          index.as :stored_searchable, :facetable
-        end
-        map.date_uploaded(to: "dateSubmitted", in: RDF::DC) do |index|
-          index.type :date
-          index.as :stored_searchable, :sortable
-        end
-        map.size(in: FileVocabulary) do |index|
-          index.type :integer
-          index.as :stored_sortable
-        end
-        map.part(to: "hasPart", in: RDF::DC)
-        map.based_near(in: RDF::FOAF)
-        map.related_url(to: "seeAlso", in: RDF::RDFS)
+      property :title, predicate: RDF::DC.title do |index|
+        index.as :stored_searchable, :facetable
       end
+      property :date_uploaded, predicate: RDF::DC.dateSubmitted do |index|
+        index.type :date
+        index.as :stored_searchable, :sortable
+      end
+      property :size, predicate: FileVocabulary.size do |index|
+        index.type :integer
+        index.as :stored_sortable
+      end
+      property :part, predicate: RDF::DC.hasPart
+      property :based_near, predicate: RDF::FOAF.based_near
+      property :related_url, predicate: RDF::RDFS.seeAlso
     end
     class RdfTest < ActiveFedora::Base 
-      has_metadata :name=>'rdf', :type=>MyDatastream
+      has_metadata 'rdf', type: MyDatastream
       has_attributes :based_near, :related_url, :part, :date_uploaded, datastream: 'rdf', multiple: true
       has_attributes :title, :size, datastream: 'rdf', multiple: false
     end
@@ -48,7 +46,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
   end
 
   it "should save content properly upon save" do
-    foo = RdfTest.new(:pid=>'test:1') #Pid needs to match the subject in the loaded file
+    foo = RdfTest.new(pid: 'test:1') #Pid needs to match the subject in the loaded file
     foo.title = 'Hamlet'
     foo.save
     foo.title.should == 'Hamlet'
@@ -154,10 +152,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
       # reopening existing class
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         rdf_subject { |ds| RDF::URI.new("http://oregondigital.org/ns/#{ds.pid.split(':')[1]}") }
-        map_predicates do |map|
-          map.type(:in => RDF::DC)
-          map.spatial(:in => RDF::DC)
-        end
+        property :type, predicate: RDF::DC.type
+        property :spatial, predicate: RDF::DC.spatial
       end
     end
     after do
@@ -212,10 +208,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "term proxy methods" do
     before(:each) do
       class TitleDatastream < ActiveFedora::NtriplesRDFDatastream
-        map_predicates { |map| map.title(:in => RDF::DC) }
+        property :title, predicate: RDF::DC.title
       end
       class Foobar < ActiveFedora::Base 
-        has_metadata :name=>'rdf', :type=>TitleDatastream
+        has_metadata 'rdf', type: TitleDatastream
         has_attributes :title, datastream: 'rdf', multiple: true
       end
       @subject = Foobar.new
