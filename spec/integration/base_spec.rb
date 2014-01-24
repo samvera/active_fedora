@@ -21,7 +21,8 @@ describe "A base object with metadata" do
       obj.foo.should_not be_new
       obj.foo.person.should == ['bob']
       person_field = ActiveFedora::SolrService.solr_name('person', type: :string)
-      ActiveFedora::SolrService.query("{!raw f=id}#{@obj.pid}", :fl=>"id #{person_field}").first.should == {"id"=>@obj.pid, person_field =>['bob']}
+      solr_result = ActiveFedora::SolrService.query("{!raw f=id}#{@obj.pid}", :fl=>"id #{person_field}").first
+      expect(solr_result).to eq("id"=>@obj.pid, person_field =>['bob'])
     end
   end
 

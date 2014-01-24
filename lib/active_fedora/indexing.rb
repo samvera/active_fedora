@@ -25,7 +25,7 @@ module ActiveFedora
         solrize_profile(solr_doc)
       end
       datastreams.each_value do |ds|
-        solr_doc = ds.to_solr(solr_doc)
+        solr_doc.merge! ds.to_solr()
       end
       solr_doc = solrize_relationships(solr_doc) unless opts[:model_only]
       solr_doc

@@ -506,7 +506,7 @@ module Hydra
       end
 
     def to_solr(solr_doc=Hash.new)
-      super(solr_doc)
+      solr_doc = super(solr_doc)
             
       ::Solrizer::Extractor.insert_solr_field_value(solr_doc, Solrizer.default_field_mapper.solr_name('object_type', :facetable), "Article")
       ::Solrizer::Extractor.insert_solr_field_value(solr_doc, Solrizer.default_field_mapper.solr_name('mods_journal_title_info', :facetable), "Unknown") if solr_doc["mods_journal_title_info_facet"].nil? 

@@ -172,7 +172,7 @@ module ActiveFedora
     # value returned by the +prefix+ method.
     def to_solr(solr_doc = {})
       prefix = self.prefix
-      super.each_with_object({}) { |(key, value), new| new[[prefix,key].join] = value }
+      solr_doc.merge super({}).each_with_object({}) { |(key, value), new| new[[prefix,key].join] = value }
     end
 
 
