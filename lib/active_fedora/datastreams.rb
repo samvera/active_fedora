@@ -199,23 +199,16 @@ module ActiveFedora
       # @option args [Boolean] :versionable Should versioned datastreams be stored
       # @yield block executed by some kinds of datastreams
       def has_metadata(*args, &block)
-
-        if args.first.is_a? String 
-          name = args.first
-          args = args[1] || {}
-          args[:name] = name
-        else
-          args = args.first
-        end
-        
-        
-        spec = {:autocreate => args.fetch(:autocreate, false), :type => args[:type], :label =>  args.fetch(:label,""), :control_group => args[:control_group], :disseminator => args.fetch(:disseminator,""), :url => args.fetch(:url,""),:block => block}
-        name = args[:name]
-        raise ArgumentError, "You must provide a name (dsid) for the metadata datastream" unless name
-        raise ArgumentError, "You must provide a :type property for the metadata datastream '#{name}'" unless spec[:type]
-        spec[:versionable] = args[:versionable] if args.has_key? :versionable
-        build_datastream_accessor(name)
-        ds_specs[name]= spec
+        @metadata_ds_defaults ||= {
+          :autocreate => false,
+          :type=>nil,
+          :label=>"",
+          :control_group=>nil,
+          :disseminator=>"",
+          :url=>"",
+          :name=>nil
+        }
+        spec_datastream(args, @metadata_ds_defaults, "metadata", &block)
       end
 
       
@@ -238,6 +231,17 @@ module ActiveFedora
       #     @option args [Boolean] :autocreate Always create this datastream on new objects
       #     @option args [Boolean] :versionable Should versioned datastreams be stored
       def has_file_datastream(*args)
+        @file_ds_defaults ||= {
+          :autocreate => false,
+          :type=>ActiveFedora::Datastream,
+          :label=>"File Datastream",
+          :control_group=>"M",
+          :name=>"content"
+        }
+        spec_datastream(args, @file_ds_defaults, "file")
+      end
+
+      def spec_datastream(args, defaults, ds_type, &block)
         if args.first.is_a? String 
           name = args.first
           args = args[1] || {}
@@ -245,10 +249,12 @@ module ActiveFedora
         else
           args = args.first || {}
         end
-        spec = {:autocreate => args.fetch(:autocreate, false), :type => args.fetch(:type,ActiveFedora::Datastream),
-                :label =>  args.fetch(:label,"File Datastream"), :control_group => args.fetch(:control_group,"M")}
+        spec = defaults.merge(args.select {|key, value| defaults.has_key? key})
+        name = spec.delete(:name)
+        raise ArgumentError, "You must provide a name (dsid) for the #{ds_type} datastream" unless name
+        raise ArgumentError, "You must provide a :type property for the #{ds_type} datastream '#{name}'" unless spec[:type]
         spec[:versionable] = args[:versionable] if args.has_key? :versionable
-        name = args.fetch(:name, "content")
+        spec[:block] = block if block
         build_datastream_accessor(name)
         ds_specs[name]= spec
       end
