@@ -37,6 +37,42 @@ module ActiveFedora
       @values[:limit] = value
     end   
 
+    # Limits the returned records to those that match the provided search conditions
+    #
+    # @option [Hash] opts a hash of solr conditions
+    #
+    # @example
+    #  Person.where(name_t: 'Mario', occupation_s: 'Plumber')
+    #    => [#<Person @id="foo:123" @name='Mario'>, #<Person @id="foo:125" @name='Mario'>, ...]
+    def where(values)
+      spawn.where!(values)
+    end
+
+    def where!(values)
+      if values.is_a?(String)
+        self.where_values = values
+      else
+        self.where_values = self.where_values.merge(values)
+      end
+      self
+    end
+
+    # Order the returned records by the field and direction provided
+    #
+    # @option [Array<String>] args a list of fields and directions to sort by 
+    #
+    # @example
+    #  Person.where(occupation_s: 'Plumber').order('name_t desc', 'color_t asc')
+    #    => [#<Person @id="foo:123" @name='Luigi'>, #<Person @id="foo:125" @name='Mario'>, ...]
+    def order(*args)
+      spawn.order!(args)
+    end
+
+    def order!(*args)
+      self.order_values += args.flatten
+      self
+    end
+
     # Limits the number of returned records to the value specified
     #
     # @option [Integer] value the number of records to return
