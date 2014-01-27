@@ -50,35 +50,6 @@ module ActiveFedora
       self
     end
 
-    # Limits the returned records to those that match the provided search conditions
-    #
-    # @option [Hash] opts a hash of solr conditions
-    #
-    # @example
-    #  Person.where(name_t: 'Mario', occupation_s: 'Plumber')
-    #    => [#<Person @id="foo:123" @name='Mario'>, #<Person @id="foo:125" @name='Mario'>, ...]
-    def where(opts)
-      return self if opts.blank?
-      relation = clone
-      relation.where_values = opts
-      relation
-    end
-
-    # Order the returned records by the field and direction provided
-    #
-    # @option [Array<String>] args a list of fields and directions to sort by 
-    #
-    # @example
-    #  Person.where(occupation_s: 'Plumber').order('name_t desc', 'color_t asc')
-    #    => [#<Person @id="foo:123" @name='Luigi'>, #<Person @id="foo:125" @name='Mario'>, ...]
-    def order(*args)
-      return self if args.blank?
-
-      relation = clone
-      relation.order_values += args.flatten
-      relation
-    end
-
     def to_a
       return @records if loaded?
       args = @klass == ActiveFedora::Base ? {:cast=>true} : {}

@@ -81,6 +81,10 @@ describe "scoped queries" do
         ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').limit(1).should == [test_instance2]
       end
 
+      it "should chain where queries" do
+        ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').where(ActiveFedora::SolrService.solr_name('foo', type: :string) => 'bar').where_values.should == {ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts', ActiveFedora::SolrService.solr_name('foo', type: :string) => 'bar'}
+      end
+
       it "should chain count" do
         ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').count.should == 2 
       end
@@ -90,6 +94,15 @@ describe "scoped queries" do
         expect {relation.first}.not_to change {relation.to_a.size}
       end
 
+      it "calling where should not affect the relation's ability to get all results later" do
+        relation = ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts')
+        expect {relation.where(ActiveFedora::SolrService.solr_name('foo', type: :string) => 'bar')}.not_to change {relation.to_a.size}
+      end
+
+      it "calling order should not affect the original order of the relation later" do
+        relation = ModelIntegrationSpec::Basic.order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc')
+        expect {relation.order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' desc')}.not_to change {relation.to_a}
+      end
     end
 
     describe "when one of the objects in solr isn't in fedora" do
