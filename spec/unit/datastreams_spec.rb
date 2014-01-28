@@ -25,12 +25,12 @@ describe ActiveFedora::Datastreams do
 
     it "should raise an error if you don't give a type" do
       expect{ FooHistory.has_metadata "bob" }.to raise_error ArgumentError,
-        "You must provide a :type property for the metadata datastream 'bob'"
+        "You must provide a :type property for the datastream 'bob'"
     end
 
     it "should raise an error if you don't give a dsid" do
       expect{ FooHistory.has_metadata type: ActiveFedora::SimpleDatastream }.to raise_error ArgumentError,
-        "You must provide a name (dsid) for the metadata datastream"
+        "You must provide a name (dsid) for the datastream"
     end
   end
 
