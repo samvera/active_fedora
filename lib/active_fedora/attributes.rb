@@ -40,6 +40,18 @@ module ActiveFedora
       array_setter(key, value)
     end
 
+    # @return [Boolean] true if there is an reader method and it returns a
+    # value different from the new_value.
+    def value_has_changed?(field, new_value)
+      new_value != array_reader(field)
+    end
+
+    def mark_as_changed(field)
+      self.send("#{field}_will_change!")
+    end
+
+
+
     protected
 
     # override activemodel so it doesn't trigger a load of all the attributes.
@@ -57,11 +69,8 @@ module ActiveFedora
         return association.id_reader if association
       end
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
-      if args.present?
-        instance_exec(*args, &self.class.defined_attributes[field].reader)
-      else
-        instance_exec &self.class.defined_attributes[field].reader
-      end
+
+      self.class.defined_attributes[field].reader(self, *args)
     end
 
     def array_setter(field, args)
@@ -71,21 +80,7 @@ module ActiveFedora
         return association.id_writer(args) if association
       end
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
-      instance_exec(args, &self.class.defined_attributes[field].writer)
-    end
-
-    # @return [Boolean] true if there is an reader method and it returns a
-    # value different from the new_value.
-    def value_has_changed?(field, new_value)
-      new_value != array_reader(field)
-    end
-
-    def mark_as_changed(field)
-      self.send("#{field}_will_change!")
-    end
-
-    def datastream_for_attribute(dsid)
-      datastreams[dsid] || raise(ArgumentError, "Undefined datastream id: `#{dsid}' in has_attributes")
+      self.class.defined_attributes[field].writer(self, args)
     end
 
     module ClassMethods
