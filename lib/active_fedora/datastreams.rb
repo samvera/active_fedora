@@ -64,7 +64,7 @@ module ActiveFedora
     end
 
     def datastream_from_spec(ds_spec, name)
-      inner_object.datastream_object_for name, ds_spec
+      inner_object.datastream_object_for name, {}, ds_spec
     end
 
     def load_datastreams

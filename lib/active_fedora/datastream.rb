@@ -35,10 +35,6 @@ module ActiveFedora
       false
     end
 
-    def validate_content_present
-      has_content?
-    end
-    
     def save
       super
       self
@@ -47,6 +43,15 @@ module ActiveFedora
     def create
       super
       self
+    end
+
+    # Freeze datastreams such that they can be loaded from Fedora, but can't be changed
+    def freeze
+      @frozen = true
+    end
+
+    def frozen?
+      !!@frozen
     end
 
     # serializes any changed data into the content field

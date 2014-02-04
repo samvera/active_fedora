@@ -136,7 +136,7 @@ describe ActiveFedora::Datastreams do
 
   describe "#datastream_from_spec" do
     it "should fetch the rubydora datastream" do
-      subject.inner_object.should_receive(:datastream_object_for).with('dsid', {})
+      subject.inner_object.should_receive(:datastream_object_for).with('dsid', {}, {})
       subject.datastream_from_spec({}, 'dsid')
     end
   end
