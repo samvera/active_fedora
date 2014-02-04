@@ -35,10 +35,6 @@ module ActiveFedora
       false
     end
 
-    def validate_content_present
-      has_content?
-    end
-    
     def save
       super
       self
