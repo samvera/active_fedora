@@ -45,6 +45,15 @@ module ActiveFedora
       self
     end
 
+    # Freeze datastreams such that they can be loaded from Fedora, but can't be changed
+    def freeze
+      @frozen = true
+    end
+
+    def frozen?
+      !!@frozen
+    end
+
     # serializes any changed data into the content field
     def serialize!
     end

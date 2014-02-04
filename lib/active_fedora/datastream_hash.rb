@@ -20,8 +20,8 @@ module ActiveFedora
     end 
 
     def freeze
-      each do |k, v|
-        v.freeze
+      each_value do |datastream|
+        datastream.freeze
       end
       super
     end

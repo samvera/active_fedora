@@ -77,6 +77,7 @@ module ActiveFedora
       predicate = options.predicate
       values = Array(values)
 
+      raise "can't modify frozen #{self.class}" if graph.frozen?
       remove_existing_values(subject, predicate, values)
 
       values.each do |arg|

@@ -63,6 +63,7 @@ module ActiveFedora
     end
     
     def update_indexed_attributes(params={}, opts={})
+      raise "can't modify frozen #{self.class}" if frozen?
       # if the params are just keys, not an array, make then into an array.
       new_params = {}
       params.each do |key, val|

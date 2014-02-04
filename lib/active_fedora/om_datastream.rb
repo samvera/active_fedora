@@ -28,7 +28,7 @@ module ActiveFedora
     def metadata?
       true
     end
-    
+
     # ** Experimental **
     #
     # This method is called by ActiveFedora::Base.load_instance_from_solr
