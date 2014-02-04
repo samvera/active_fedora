@@ -7,7 +7,7 @@ describe ActiveFedora::OmDatastream do
     before(:all) do 
       class ModsArticle3 < ActiveFedora::Base
         # Uses the Hydra MODS Article profile for tracking most of the descriptive metadata
-        has_metadata :name => "descMetadata", :type => Hydra::ModsArticleDatastream, :control_group => 'X', :autocreate => true
+        has_metadata "descMetadata", type: Hydra::ModsArticleDatastream, control_group: 'X', autocreate: true
       end
     end
 
@@ -56,7 +56,7 @@ describe ActiveFedora::OmDatastream do
     before(:all) do
       class ModsArticle2 < ActiveFedora::Base
         # Uses the Hydra MODS Article profile for tracking most of the descriptive metadata
-        has_metadata :name => "descMetadata", :type => Hydra::ModsArticleDatastream, :autocreate => true
+        has_metadata "descMetadata", type: Hydra::ModsArticleDatastream, autocreate: true
       end
     end
 
