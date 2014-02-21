@@ -248,6 +248,24 @@ describe ActiveFedora::Base do
       inner_object.pid.should == @test_object2.pid
       inner_object.should respond_to(:lastModifiedDate)
     end
+
+    it 'when the object is updated, it also updates modification time field in solr' do
+      @test_object2.save
+
+      # Make sure the modification time changes by at least 1 second
+      sleep 1
+
+      @test_object2.state = 'I' 
+      @test_object2.save
+      @test_object2.reload
+
+      pid = @test_object2.pid.sub(':', '\:')
+      solr_doc = ActiveFedora::SolrService.query("id:#{pid}")
+
+      new_time_fedora = Time.parse(@test_object2.modified_date).to_i
+      new_time_solr = Time.parse(solr_doc.first['system_modified_dtsi']).to_i
+      new_time_solr.should == new_time_fedora
+    end
   end
   
   describe ".datastreams" do
