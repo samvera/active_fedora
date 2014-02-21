@@ -22,7 +22,7 @@ describe ActiveFedora::Auditable do
     record.action.should == "addDatastream"
     record.component_id.should == "RELS-EXT"
     record.responsibility.should == "fedoraAdmin"
-    record.date.should == @test_object.modified_date
+    expect(DateTime.parse(record.date)).to eq DateTime.parse(@test_object.modified_date)
     record.justification.should == ""
   end
   
