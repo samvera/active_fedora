@@ -4,10 +4,10 @@ module ActiveFedora
     attr_accessor :original_class
     
     module DatastreamBootstrap
-      def datastream_object_for dsid, ds_spec=nil
+      def datastream_object_for dsid, options={}, ds_spec=nil
         # ds_spec is nil when called from Rubydora for existing datastreams, so it should not be autocreated
         ds_spec ||= (original_class.ds_specs[dsid] || {}).merge(:autocreate=>false)
-        ds = ds_spec.fetch(:type, ActiveFedora::Datastream).new(self, dsid)
+        ds = ds_spec.fetch(:type, ActiveFedora::Datastream).new(self, dsid, options)
         attributes = {}
         attributes[:asOfDateTime] ||= asOfDateTime if self.respond_to? :asOfDateTime
         attributes[:dsLabel] = ds_spec[:label] if ds_spec[:label].present?
