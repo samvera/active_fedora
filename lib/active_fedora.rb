@@ -71,6 +71,7 @@ module ActiveFedora #:nodoc:
     autoload :Predicates
     autoload :Validations
     autoload :SolrInstanceLoader
+    autoload :ReloadOnSave
   end
   
   
