@@ -362,6 +362,7 @@ module ActiveFedora
     include NestedAttributes
     include Reflection
     include ActiveModel::Dirty
+    include ReloadOnSave
   end
 
 end
