@@ -48,13 +48,13 @@ describe "Loading from solr" do
   end
 
   it "should be able to get indexed properties without loading from fedora" do
-    expect(RdfTest.connection_for_pid('1')).to receive(:datastream_dissemination).never
+    RdfTest.connection_for_pid('1').should_not_receive(:datastream_dissemination)
     obj = RdfTest.load_instance_from_solr original.pid
     expect(obj.title).to eq "PLAN 9 FROM OUTER SPACE"
     expect(obj.date_uploaded).to eq [Date.parse('1959-01-01')]
     expect(obj.identifier).to eq 12345
     expect{obj.part}.to raise_error KeyError, "Tried to fetch `part' from solr, but it isn't indexed."
-    expect(ActiveFedora::DatastreamAttribute.logger).to receive(:info).with "Couldn't get duck out of solr, because the datastream 'MyOmDatastream' doesn't respond to 'primary_solr_name'. Trying another way."
+    ActiveFedora::DatastreamAttribute.logger.should_receive(:info).with "Couldn't get duck out of solr, because the datastream 'MyOmDatastream' doesn't respond to 'primary_solr_name'. Trying another way."
     expect(obj.duck).to eq 'quack'
   end
 
