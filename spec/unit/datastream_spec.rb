@@ -36,13 +36,19 @@ describe ActiveFedora::Datastream do
       @test_datastream.validate_content_present.should be_true
     end
 
-    it "should expect content on a Managed (M) datastream" do
-      @test_datastream.controlGroup = 'M'
-      @test_datastream.dsLocation = "http://example.com/test/content/abcd"
-      @test_datastream.validate_content_present.should be_false
-      @test_datastream.content = "<foo><xmlelement/></foo>"
-      @test_datastream.validate_content_present.should be_true
-      @test_datastream.should_not be_external
+    context "on a Managed (M) datastream" do
+      before { @test_datastream.controlGroup = 'M' }
+      it "should be false when neither dsLocation nor content is present" do
+        @test_datastream.validate_content_present.should be_false
+      end
+      it "should be true when dsLocation is present" do
+        @test_datastream.dsLocation = "http://example.com/test/content/abcd"
+        @test_datastream.validate_content_present.should be_true
+      end
+      it "should be true when content is present" do
+        @test_datastream.content = "<foo><xmlelement/></foo>"
+        @test_datastream.validate_content_present.should be_true
+      end
     end
 
     it "should expect a dsLocation on an External (E) datastream" do
