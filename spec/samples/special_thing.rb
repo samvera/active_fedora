@@ -21,15 +21,15 @@ class SpecialThing < ActiveFedora::Base
   # This declares a datastream with Datastream ID (dsid) of "descMetadata"
   # The descMetadata datastream is bound to the Hydra::ModsArticleDatastream class that's defined in lib/active_fedora/samples
   # Any time you load a Fedora object using an instance of SampleModel, the instance will assume its descMetadata datastream conforms to the assumptions in Hydra::ModsArticleDatastream class
-  has_metadata :name => "descMetadata", :type=> Hydra::ModsArticleDatastream
+  has_metadata "descMetadata", type: Hydra::ModsArticleDatastream
   
   # This declares a datastream with Datastream ID (dsid) of "rightsMetadata"
   # Like the descMetadata datastream, any time you load a Fedora object using an instance of SampleModel, the instance will assume its descMetadata datastream conforms to the assumptions in Hydra::RightsMetadataDatastream class
-  has_metadata :name => "rightsMetadata", :type => Hydra::RightsMetadataDatastream
+  has_metadata "rightsMetadata", type: Hydra::RightsMetadataDatastream
   
   # This is not part of the Hydra conventions
   # Adding an extra datastream called "extraMetadataForFun" that is bound to the Marpa::DcDatastream class
-  has_metadata :name => "extraMetadataForFun", :type => Marpa::DcDatastream
+  has_metadata "extraMetadataForFun", type: Marpa::DcDatastream
   
   #
   # RELATIONSHIPS
