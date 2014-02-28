@@ -56,7 +56,7 @@ describe ActiveFedora::SolrService do
       end
       it "should use .load_instance_from_solr when called with :load_from_solr option" do
         AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID1_", @sample_solr_hits.first)
-        ActiveFedora::SolrService.should_not receive(:query)
+        ActiveFedora::SolrService.should_not_receive(:query)
         ActiveFedora::SolrService.reify_solr_result(@sample_solr_hits.first, load_from_solr: true)
       end
     end
@@ -71,7 +71,7 @@ describe ActiveFedora::SolrService do
         AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID1_", @sample_solr_hits[0])
         AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID2_", @sample_solr_hits[1])
         AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID3_", @sample_solr_hits[2])
-        ActiveFedora::SolrService.should_not receive(:query)
+        ActiveFedora::SolrService.should_not_receive(:query)
         ActiveFedora::SolrService.reify_solr_results(@sample_solr_hits, load_from_solr: true)
       end
     end
@@ -86,7 +86,7 @@ describe ActiveFedora::SolrService do
         AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID1_", @sample_solr_hits[0])
         AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID2_", @sample_solr_hits[1])
         AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID3_", @sample_solr_hits[2])
-        ActiveFedora::SolrService.should_not receive(:query)
+        ActiveFedora::SolrService.should_not_receive(:query)
         ActiveFedora::SolrService.lazy_reify_solr_results(@sample_solr_hits, load_from_solr: true).each {|r| r}
       end
     end

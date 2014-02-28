@@ -47,7 +47,7 @@ describe ActiveFedora::OmDatastream do
     it 'should load xml from blob if provided' do
       test_ds1 = ActiveFedora::OmDatastream.new(nil, 'ds1')
       test_ds1.content="<xml><foo/></xml>"
-      test_ds1.ng_xml.to_xml.should == "<?xml version=\"1.0\"?>\n<xml>\n  <foo/>\n</xml>\n"
+      test_ds1.ng_xml.to_xml.should be_equivalent_to("<?xml version=\"1.0\"?>\n<xml>\n  <foo/>\n</xml>\n")
     end
     it "should initialize from #xml_template if no xml is provided" do
       ActiveFedora::OmDatastream.should_receive(:xml_template).and_return("<fake template/>")
@@ -65,7 +65,7 @@ describe ActiveFedora::OmDatastream do
   
   describe '#xml_template' do
     it "should return an empty xml document" do
-      ActiveFedora::OmDatastream.xml_template.to_xml.should == "<?xml version=\"1.0\"?>\n<xml/>\n"
+      ActiveFedora::OmDatastream.xml_template.to_xml.should be_equivalent_to("<?xml version=\"1.0\"?>\n<xml/>\n")
     end
   end
 
