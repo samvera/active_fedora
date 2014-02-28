@@ -6,8 +6,16 @@ module ActiveFedora
     attr_writer :digital_object
     attr_accessor :last_modified
 
+    # @param digital_object [DigitalObject] the digital object that this object belongs to
+    # @param dsid [String] the datastream id
+    # @param options [Hash]
+    # @option options [String,IO] :content the content for the datastream
+    # @option options [String] :dsLabel label for the datastream
+    # @option options [String] :dsLocation location for an external or redirect datastream
+    # @option options [String] :controlGroup a controlGroup for the datastream
+    # @option options [String] :mimeType the mime-type of the content
+    # @option options [Boolean] :versionable is the datastream versionable
     def initialize(digital_object=nil, dsid=nil, options={})
-      ## When you use the versions feature of rubydora (0.5.x), you need to have a 3 argument constructor
       super
     end
 
