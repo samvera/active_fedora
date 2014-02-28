@@ -92,6 +92,11 @@ module Marpa
       end
       return builder.doc
     end
+
+    def prefix
+      "#{dsid.underscore}__"
+    end
+
   
   end
 end

@@ -153,6 +153,10 @@ module Hydra
       end
       return builder.doc
     end
+
+    def prefix
+      "#{dsid.underscore}__"
+    end
     
     # Generates a new Person node
     def self.person_template

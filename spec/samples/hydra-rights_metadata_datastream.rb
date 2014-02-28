@@ -79,6 +79,11 @@ module Hydra
       end
       return builder.doc
     end
+
+    def prefix
+      "#{dsid.underscore}__"
+    end
+
     
     # Returns the permissions for the selected person/group
     # If new_access_level is provided, updates the selected person/group access_level to the one specified 
