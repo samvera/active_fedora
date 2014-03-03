@@ -45,6 +45,7 @@ module ActiveFedora
     include Serialization
     include Core
     include FedoraAttributes
+    include ReloadOnSave
   end
 
 end

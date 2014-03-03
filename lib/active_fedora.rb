@@ -62,6 +62,7 @@ module ActiveFedora #:nodoc:
     autoload :RdfxmlRDFDatastream
     autoload :Reflection
     autoload :Relation
+    autoload :ReloadOnSave
 
     autoload_under 'relation' do
       autoload :Calculations
