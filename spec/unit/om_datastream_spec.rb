@@ -292,7 +292,7 @@ describe ActiveFedora::OmDatastream do
 
   describe '.get_values_from_solr' do
     before(:each) do
-      @mods_ds = ActiveFedora::OmDatastream.new
+      @mods_ds = ActiveFedora::OmDatastream.new(nil, 'test_ds')
       @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
     end
 
