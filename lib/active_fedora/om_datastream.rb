@@ -186,7 +186,7 @@ module ActiveFedora
     end
 
     def generate_solr_symbol(base, data_type)
-      ActiveFedora::SolrService.solr_name(base.to_sym, type: data_type)
+      ActiveFedora::SolrService.solr_name([prefix,base].join, type: data_type)
     end
 
     # ** Experimental **

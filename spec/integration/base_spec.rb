@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "A base object with metadata" do
   before :all do
     class MockAFBaseRelationship < ActiveFedora::Base
-      has_metadata :name=>'foo', :type=>Hydra::ModsArticleDatastream 
+      has_metadata 'foo', type: Hydra::ModsArticleDatastream 
     end
   end
   after :all do
@@ -20,7 +20,7 @@ describe "A base object with metadata" do
       obj = ActiveFedora::Base.find(@obj.pid)
       obj.foo.should_not be_new
       obj.foo.person.should == ['bob']
-      person_field = ActiveFedora::SolrService.solr_name('person', type: :string)
+      person_field = ActiveFedora::SolrService.solr_name('foo__person', type: :string)
       solr_result = ActiveFedora::SolrService.query("{!raw f=id}#{@obj.pid}", :fl=>"id #{person_field}").first
       expect(solr_result).to eq("id"=>@obj.pid, person_field =>['bob'])
     end
@@ -51,7 +51,7 @@ describe "A base object with metadata" do
       end
       it "should save the datastream." do
         MockAFBaseRelationship.find(@release.pid).foo.person.should == ['frank']
-        person_field = ActiveFedora::SolrService.solr_name('person', type: :string)
+        person_field = ActiveFedora::SolrService.solr_name('foo__person', type: :string)
         ActiveFedora::SolrService.query("id:#{@release.pid.gsub(":", "\\:")}", :fl=>"id #{person_field}").first.should == {"id"=>@release.pid, person_field =>['frank']}
       end
     end
