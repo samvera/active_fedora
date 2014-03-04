@@ -149,7 +149,7 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should mint a dsid" do
-      ds = ActiveFedora::Datastream.new
+      ds = ActiveFedora::Datastream.new(subject.inner_object)
       subject.add_datastream(ds).should == 'DS1'
     end
   end
@@ -165,17 +165,6 @@ describe ActiveFedora::Datastreams do
       subject.metadata_streams.should include(ds1, ds2, ds3)
       subject.metadata_streams.should_not include(relsextds)
       subject.metadata_streams.should_not include(file_ds)
-    end
-  end
-
-  describe "#generate_dsid" do
-    it "should create an autoincrementing dsid" do
-      subject.generate_dsid('FOO').should == 'FOO1'
-    end
-
-    it "should start from the highest existin dsid" do
-      subject.stub(:datastreams => {'FOO56' => double()})
-      subject.generate_dsid('FOO').should == 'FOO57'
     end
   end
 

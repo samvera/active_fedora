@@ -15,7 +15,7 @@ module ActiveFedora
     end 
 
     def []= (key, val)
-      @obj.inner_object.datastreams[key]=val# unless @obj.inner_object.new?
+      @obj.inner_object.datastreams[key]=val
       super
     end 
 

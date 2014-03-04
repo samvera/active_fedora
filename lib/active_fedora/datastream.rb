@@ -7,16 +7,20 @@ module ActiveFedora
     attr_accessor :last_modified
 
     # @param digital_object [DigitalObject] the digital object that this object belongs to
-    # @param dsid [String] the datastream id
+    # @param dsid [String] the datastream id, if this is nil, a datastream id will be generated.
     # @param options [Hash]
     # @option options [String,IO] :content the content for the datastream
     # @option options [String] :dsLabel label for the datastream
     # @option options [String] :dsLocation location for an external or redirect datastream
     # @option options [String] :controlGroup a controlGroup for the datastream
     # @option options [String] :mimeType the mime-type of the content
+    # @option options [String] :prefix the prefix for the auto-generated DSID (not to be confused with the solr prefix)
     # @option options [Boolean] :versionable is the datastream versionable
     def initialize(digital_object=nil, dsid=nil, options={})
-      super
+      prefix = options.delete(:prefix)
+      dsid = nil if dsid == ''
+      dsid ||= generate_dsid(digital_object, prefix || "DS")
+      super(digital_object, dsid, options)
     end
 
     alias_method :realLabel, :label
@@ -89,6 +93,21 @@ module ActiveFedora
     end
 
     protected
+
+    # return a valid dsid that is not currently in use.  Uses a prefix (default "DS") and an auto-incrementing integer
+    # Example: if there are already datastreams with IDs DS1 and DS2, this method will return DS3.  If you specify FOO as the prefix, it will return FOO1.
+    def generate_dsid(digital_object, prefix)
+      return unless digital_object
+      matches = digital_object.datastreams.keys.map {|d| data = /^#{prefix}(\d+)$/.match(d); data && data[1].to_i}.compact
+      val = matches.empty? ? 1 : matches.max + 1
+      format_dsid(prefix, val)
+    end
+    
+    ### Provided so that an application can override how generated pids are formatted (e.g DS01 instead of DS1)
+    def format_dsid(prefix, suffix)
+      sprintf("%s%i", prefix,suffix)
+    end    
+
     # The string to prefix all solr fields with. Override this method if you want
     # a prefix other than the default
     def prefix

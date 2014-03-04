@@ -2,7 +2,7 @@ module ActiveFedora
   module Datastreams
     extend ActiveSupport::Concern
 
-    autoload :NokogiriDatastreams,           'active_fedora/datastreams/nokogiri_datastreams'
+    autoload :NokogiriDatastreams, 'active_fedora/datastreams/nokogiri_datastreams'
 
     included do
       class_attribute :ds_specs
@@ -81,15 +81,9 @@ module ActiveFedora
       end
     end      
 
-    # Adds datastream to the object.  Saves the datastream to fedora upon adding.
-    # If datastream does not have a DSID, a unique DSID is generated
-    # :prefix option will set the prefix on auto-generated DSID
+    # Adds datastream to the object.
     # @return [String] dsid of the added datastream
     def add_datastream(datastream, opts={})
-      if datastream.dsid == nil || datastream.dsid.empty?
-        prefix = opts.has_key?(:prefix) ? opts[:prefix] : "DS"
-        datastream.instance_variable_set :@dsid, generate_dsid(prefix)
-      end
       datastreams[datastream.dsid] = datastream
       datastream.dsid
     end
@@ -99,18 +93,6 @@ module ActiveFedora
       datastreams.select { |k, ds| ds.metadata? }.reject { |k, ds| ds.kind_of?(ActiveFedora::RelsExtDatastream) }.values
     end
     
-    # return a valid dsid that is not currently in use.  Uses a prefix (default "DS") and an auto-incrementing integer
-    # Example: if there are already datastreams with IDs DS1 and DS2, this method will return DS3.  If you specify FOO as the prefix, it will return FOO1.
-    def generate_dsid(prefix="DS")
-      matches = datastreams.keys.map {|d| data = /^#{prefix}(\d+)$/.match(d); data && data[1].to_i}.compact
-      val = matches.empty? ? 1 : matches.max + 1
-      format_dsid(prefix, val)
-    end
-    
-    ### Provided so that an application can override how generated pids are formatted (e.g DS01 instead of DS1)
-    def format_dsid(prefix, suffix)
-      sprintf("%s%i", prefix,suffix)
-    end    
 
     # Returns the RELS-EXT Datastream
     # Tries to grab from in-memory datastreams first
@@ -153,10 +135,9 @@ module ActiveFedora
     
     
     def create_datastream(type, dsid, opts={})
-      dsid ||= generate_dsid(opts[:prefix] || "DS")
       klass = type.kind_of?(Class) ? type : type.constantize
-      raise ArgumentError, "Argument dsid must be of type string" unless dsid.kind_of?(String)
-      ds = klass.new(inner_object, dsid)
+      raise ArgumentError, "Argument dsid must be of type string" if dsid && !dsid.kind_of?(String)
+      ds = klass.new(inner_object, dsid, prefix: opts[:prefix])
       [:mimeType, :controlGroup, :dsLabel, :dsLocation, :checksumType, :versionable].each do |key|
         ds.send("#{key}=".to_sym, opts[key]) unless opts[key].nil?
       end
