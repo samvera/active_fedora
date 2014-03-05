@@ -28,6 +28,21 @@ describe ActiveFedora::Datastream do
     ds2.mimeType.should == "text/bar"
   end
 
+  describe "#generate_dsid" do
+    subject {ActiveFedora::Datastream.new(@test_object.inner_object) }
+    let(:digital_object) { double(datastreams: {})}
+    it "should create an autoincrementing dsid" do
+      subject.send(:generate_dsid, digital_object, 'FOO').should == 'FOO1'
+    end
+
+    describe "when some datastreams exist" do
+      let(:digital_object) { double(datastreams: {'FOO56' => double})}
+      it "should start from the highest existing dsid" do
+        subject.send(:generate_dsid, digital_object, 'FOO').should == 'FOO57'
+      end
+    end
+  end
+
   describe ".size" do
     it "should lazily load the datastream size attribute from the fedora repository" do
       ds_profile = <<-EOS

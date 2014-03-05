@@ -215,8 +215,8 @@ module ActiveFedora
         assert_kind_of 'datastream',  ds, ActiveFedora::Datastream
         #make sure dsid is nil so that it uses the prefix for mapping purposes
         #check dsid works for the prefix if it is set
-        if !ds.dsid.nil? && opts.has_key?(:prefix)
-          raise "dsid supplied does not conform to pattern #{opts[:prefix]}[number]" unless ds.dsid =~ /#{opts[:prefix]}[0-9]/
+        if ds.dsid && opts.has_key?(:prefix)
+          raise "dsid supplied (#{ds.dsid}) does not conform to pattern #{opts[:prefix]}[number]" unless ds.dsid =~ /#{opts[:prefix]}[0-9]/
         end
         
         add_datastream(ds,opts)
