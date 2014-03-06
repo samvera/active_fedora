@@ -21,6 +21,7 @@ describe ActiveFedora::Base do
         ActiveFedora.config.stub(:sharded?).and_return(false)
         ActiveFedora::Base.fedora_connection = {}
         ActiveFedora.config.stub(:credentials).and_return(:url=>'myfedora')
+        Rubydora::Fc3Service.any_instance.stub(:repository_profile)
       end
       it { should be_kind_of Rubydora::Repository}
       it "should be the standard connection" do
@@ -66,6 +67,9 @@ describe ActiveFedora::Base do
         end
       end
       describe "the repository" do
+        before do
+          Rubydora::Fc3Service.any_instance.stub(:repository_profile)
+        end
         describe "for test:bar" do
           subject {ActiveFedora::Base.connection_for_pid('test:bar')}
           it "should be shard1" do
