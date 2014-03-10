@@ -119,7 +119,6 @@ describe ActiveFedora::Base do
         }.and_return('response'=>{'docs'=>mock_docs})
         SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}, :sort=>'title_t desc').should == ["Fake Object1", "Fake Object2"]
       end
-
     end
   end
 
@@ -197,13 +196,13 @@ describe ActiveFedora::Base do
     end
     it "should allow conditions" do
       mock_result = {'response'=>{'numFound'=>7}}
-      ActiveFedora::SolrService.should_receive(:query).with("#{@model_query} AND foo:bar", :rows=>0, :raw=>true).and_return(mock_result)
+      ActiveFedora::SolrService.should_receive(:query).with("#{@model_query} AND (foo:bar)", :rows=>0, :raw=>true).and_return(mock_result)
       SpecModel::Basic.count(:conditions=>'foo:bar').should == 7
     end
 
     it "should count without a class specified" do
       mock_result = {'response'=>{'numFound'=>7}}
-      ActiveFedora::SolrService.should_receive(:query).with("foo:bar", :rows=>0, :raw=>true).and_return(mock_result)
+      ActiveFedora::SolrService.should_receive(:query).with("(foo:bar)", :rows=>0, :raw=>true).and_return(mock_result)
       ActiveFedora::Base.count(:conditions=>'foo:bar').should == 7 
     end
   end
@@ -283,9 +282,9 @@ describe ActiveFedora::Base do
       ActiveFedora::SolrService.should_receive(:query).with('baz:quack', {:sort => [@sort_query]}).and_return(mock_result)
       ActiveFedora::Base.find_with_conditions(:baz=>'quack').should == mock_result
     end
-    it "should use the query string if it's provided" do
+    it "should use the query string if it's provided and wrap it in parentheses" do
       mock_result = double('Result')
-      ActiveFedora::SolrService.should_receive(:query).with('chunky:monkey', {:sort => [@sort_query]}).and_return(mock_result)
+      ActiveFedora::SolrService.should_receive(:query).with('(chunky:monkey)', {:sort => [@sort_query]}).and_return(mock_result)
       ActiveFedora::Base.find_with_conditions('chunky:monkey').should == mock_result
     end
   end

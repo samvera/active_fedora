@@ -58,6 +58,8 @@ module ActiveFedora
       case values
       when Hash
         [create_query_from_hash(values)]
+      when String
+        ["(#{values})"]
       else
         [values]
       end

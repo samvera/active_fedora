@@ -199,7 +199,7 @@ module ActiveFedora
         when Hash
           build_query([create_query_from_hash(conditions)])
         when String
-          build_query([conditions])
+          build_query(["(#{conditions})"])
         else
           build_query(conditions)
         end
