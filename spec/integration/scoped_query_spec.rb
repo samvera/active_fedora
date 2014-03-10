@@ -82,7 +82,7 @@ describe "scoped queries" do
       end
 
       it "should chain where queries" do
-        ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').where(ActiveFedora::SolrService.solr_name('foo', type: :string) => 'bar').where_values.should == {ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts', ActiveFedora::SolrService.solr_name('foo', type: :string) => 'bar'}
+        ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').where("#{ActiveFedora::SolrService.solr_name('foo', type: :string)}:bar").where_values.should == ["#{ActiveFedora::SolrService.solr_name('bar', type: :string)}:Peanuts", "#{ActiveFedora::SolrService.solr_name('foo', type: :string)}:bar"]
       end
 
       it "should chain count" do

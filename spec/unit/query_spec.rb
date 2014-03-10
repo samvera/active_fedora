@@ -197,7 +197,7 @@ describe ActiveFedora::Base do
     end
     it "should allow conditions" do
       mock_result = {'response'=>{'numFound'=>7}}
-      ActiveFedora::SolrService.should_receive(:query).with("#{@model_query} AND (foo:bar)", :rows=>0, :raw=>true).and_return(mock_result)
+      ActiveFedora::SolrService.should_receive(:query).with("#{@model_query} AND foo:bar", :rows=>0, :raw=>true).and_return(mock_result)
       SpecModel::Basic.count(:conditions=>'foo:bar').should == 7
     end
 

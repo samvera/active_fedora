@@ -14,7 +14,7 @@ module ActiveFedora
 
       def merge
         # TODO merge order
-        relation.where_values = relation.where_values.merge(other.where_values)
+        relation.where_values += other.where_values
         relation
       end
     end

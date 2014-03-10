@@ -11,7 +11,7 @@ module ActiveFedora
     end
 
     def where_values
-      @values[:where] ||= {}
+      @values[:where] ||= []
     end
 
     def where_values=(values)
@@ -49,12 +49,18 @@ module ActiveFedora
     end
 
     def where!(values)
-      if values.is_a?(String)
-        self.where_values = values
-      else
-        self.where_values = self.where_values.merge(values)
-      end
+      self.where_values += build_where(values)
       self
+    end
+
+    def build_where(values)
+      return [] if values.blank?
+      case values
+      when Hash
+        [create_query_from_hash(values)]
+      else
+        [values]
+      end
     end
 
     # Order the returned records by the field and direction provided

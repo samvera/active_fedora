@@ -151,9 +151,8 @@ module ActiveFedora
       if where_values.empty?
         load_from_fedora(pid, cast)
       else
-        query = [ActiveFedora::SolrService.construct_query_for_rel(where_values),
-                 ActiveFedora::SolrService.raw_query(SOLR_DOCUMENT_ID, pid)].
-                join(" AND ".freeze)
+        conditions = where_values + [ActiveFedora::SolrService.raw_query(SOLR_DOCUMENT_ID, pid)]
+        query = conditions.join(" AND ".freeze)
         to_enum(:find_each, query, {}).to_a.first
       end
     end
@@ -196,16 +195,25 @@ module ActiveFedora
     # Returns a solr query for the supplied conditions
     # @param[Hash] conditions solr conditions to match
     def create_query(conditions)
-      conditions.kind_of?(Hash) ? create_query_from_hash(conditions) : create_query_from_string(conditions)
+        case conditions
+        when Hash
+          build_query([create_query_from_hash(conditions)])
+        when String
+          build_query([conditions])
+        else
+          build_query(conditions)
+        end
+    end
+
+    def build_query(conditions)
+      clauses = search_model_clause ?  [search_model_clause] : []
+      clauses += conditions.reject{|c| c.blank?}
+      return "*:*" if clauses.empty?
+      clauses.compact.join(" AND ")
     end
 
     def create_query_from_hash(conditions)
-      clauses = search_model_clause ?  [search_model_clause] : []
-      conditions.each_pair do |key,value|
-        clauses << condition_to_clauses(key, value)
-      end
-      return "*:*" if clauses.empty?
-      clauses.compact.join(" AND ")
+      conditions.map {|key,value| condition_to_clauses(key, value)}.compact.join(" AND ")
     end
 
     def condition_to_clauses(key, value)
@@ -224,15 +232,6 @@ module ActiveFedora
           key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
           "#{key}:#{RSolr.escape(value)}"
         end
-      end
-    end
-
-    def create_query_from_string(conditions)
-      model_clause = search_model_clause
-      if model_clause 
-        conditions ? "#{model_clause} AND (#{conditions})" : model_clause
-      else
-        conditions
       end
     end
 
