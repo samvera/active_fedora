@@ -57,6 +57,7 @@ module ActiveFedora
       args[:sort] = order_values if order_values
       
       @records = to_enum(:find_each, where_values, args).to_a
+      @loaded = true
 
       @records
     end
