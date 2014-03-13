@@ -8,7 +8,7 @@ module ActiveFedora
     end
 
     module ClassMethods
-      # Uses {shard_index} to find or create the rubydora connection for this pid
+      # Uses {#shard_index} to find or create the rubydora connection for this pid
       # @param [String] pid the identifier of the object to get the connection for
       # @return [Rubydora::Repository] The repository that the identifier exists in.
       def connection_for_pid(pid)
