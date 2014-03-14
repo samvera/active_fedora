@@ -1,17 +1,10 @@
 shared_examples_for "An ActiveModel" do
-  begin
-    require 'minitest/unit'
-    include Minitest::Assertions
-  rescue NameError
-    puts "Unable to load minitest, here's hoping these methods are adequate"
+  def assert(test, *args)
+    expect(test).to eq(true)
+  end
 
-    def assert(test, *args)
-      expect(test).to eq(true)
-    end
-
-    def assert_kind_of(klass, inspected_object)
-      expect(inspected_object).to be_kind_of(klass)
-    end
+  def assert_kind_of(klass, inspected_object)
+    expect(inspected_object).to be_kind_of(klass)
   end
   include ActiveModel::Lint::Tests
 

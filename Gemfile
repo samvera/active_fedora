@@ -4,9 +4,8 @@ source "https://rubygems.org"
 
 gemspec
 
-group :development, :test do
-  gem 'simplecov', :platforms => [:mri_19]#, :mri_20]
-  gem 'simplecov-rcov', :platforms => [:mri_19]#, :mri_20]
+group :test do
+  gem 'simplecov', require: false
 end
 
 gem 'jruby-openssl', :platform=> :jruby
