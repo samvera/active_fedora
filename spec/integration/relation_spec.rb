@@ -13,29 +13,42 @@ describe ActiveFedora::Base do
     Object.send(:remove_const, :Book)
   end
 
-  subject {Library.all} 
+  subject { Library.all } 
   its(:class) {should eq ActiveFedora::Relation }
 
-  describe "#find" do
+  before :all do
+    Library.create
+    @library = Library.create
+  end
+
+  let(:library1) { @library }
+
+  describe "is cached" do
     before do
-      Library.create
-      @library = Library.create
+      subject.to_a # trigger initial load
     end
+
+    it "should be loaded" do
+      expect(subject).to be_loaded
+    end
+    it "shouldn't reload" do
+      ActiveFedora::Relation.any_instance.should_not_receive :find_each
+      subject[0]
+    end
+  end
+
+  describe "#find" do
     it "should find one of them" do
-      expect(subject.find(@library.id)).to eq @library
+      expect(subject.find(library1.id)).to eq library1
     end
     it "should find with a block" do
-      expect(subject.find { |l| l.id == @library.id}).to eq @library
+      expect(subject.find { |l| l.id == library1.id}).to eq library1
     end
   end
 
   describe "#select" do
-    before do
-      Library.create
-      @library = Library.create
-    end
     it "should find with a block" do
-      expect(subject.select { |l| l.id == @library.id}).to eq [@library]
+      expect(subject.select { |l| l.id == library1.id}).to eq [library1]
     end
   end
 end

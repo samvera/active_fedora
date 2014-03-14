@@ -7,7 +7,7 @@ describe "Looking up collection members" do
     end
 
     class Book < ActiveFedora::Base 
-      belongs_to :library, :property=>:has_constituent
+      belongs_to :library, property: :has_constituent
     end
   end
   after :all do
@@ -20,12 +20,19 @@ describe "Looking up collection members" do
     before do
       library.books = [book]
       library.save!
+      library.reload
     end
     it "should read book_ids from solr" do
-      library.reload.book_ids.should ==[book.pid]
+      expect(library.book_ids).to eq [book.pid]
     end
     it "should read books from solr" do
-      library.reload.books.should ==[book]
+      expect(library.books).to eq [book]
+    end
+
+    it "should cache the results" do
+      expect(library.books.loaded?).to be_false
+      expect(library.books).to eq [book]
+      expect(library.books.loaded?).to be_true
     end
   end
 end
