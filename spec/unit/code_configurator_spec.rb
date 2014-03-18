@@ -38,7 +38,7 @@ describe ActiveFedora::FileConfigurator do
   end
 
   it "should initialize from code" do
-    YAMLAdaptor.should_receive(:load).never
+    Psych.should_receive(:load).never
     File.should_receive(:exists?).never
     File.should_receive(:read).never
     File.should_receive(:open).never
