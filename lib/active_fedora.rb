@@ -47,7 +47,6 @@ module ActiveFedora #:nodoc:
     autoload :Model
     autoload :NestedAttributes
     autoload :NomDatastream
-    autoload :NtriplesRDFDatastream
     autoload :NullRelation
     autoload :OmDatastream
     autoload :Property
@@ -55,11 +54,11 @@ module ActiveFedora #:nodoc:
     autoload :QualifiedDublinCoreDatastream
     autoload :Querying
     autoload :Rdf
-    autoload :RDFDatastream
-    autoload :RdfList
-    autoload :RdfNode
-    autoload :RdfObject
-    autoload :RdfxmlRDFDatastream
+    autoload_under 'rdf' do
+      autoload :RDFDatastream
+      autoload :RdfxmlRDFDatastream
+      autoload :NtriplesRDFDatastream
+    end
     autoload :Reflection
     autoload :Relation
     autoload :ReloadOnSave
