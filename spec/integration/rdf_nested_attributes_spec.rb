@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "Nesting attribute behavior of RDFDatastream" do
   describe ".attributes=" do
     describe "complex properties" do
-      before do 
+      before do
         class DummyMADS < RDF::Vocabulary("http://www.loc.gov/mads/rdf/v1#")
           # componentList and Types of components
           property :componentList
@@ -12,8 +12,8 @@ describe "Nesting attribute behavior of RDFDatastream" do
           property :PersonalName
           property :CorporateName
           property :ComplexSubject
-          
-          
+
+
           # elementList and elementList values
           property :elementList
           property :elementValue
@@ -25,48 +25,35 @@ describe "Nesting attribute behavior of RDFDatastream" do
         end
 
         class ComplexRDFDatastream < ActiveFedora::NtriplesRDFDatastream
-          map_predicates do |map|
-            map.topic(in: DummyMADS, to: "Topic", class_name:"Topic")
-            map.personalName(in: DummyMADS, to: "PersonalName", class_name:"PersonalName")
-            map.title(in: RDF::DC)
-          end
+          property :topic, predicate: DummyMADS.Topic, class_name: "Topic"
+          property :personalName, predicate: DummyMADS.PersonalName, class_name: "PersonalName"
+          property :title, predicate: RDF::DC.title
+
 
           accepts_nested_attributes_for :topic, :personalName
 
-          class Topic
-            include ActiveFedora::RdfObject
-            map_predicates do |map|
-              map.elementList(in: DummyMADS, class_name:"ComplexRDFDatastream::ElementList")
-            end
+          class Topic < ActiveFedora::Rdf::Resource
+            property :elementList, predicate: DummyMADS.elementList, class_name: "ComplexRDFDatastream::ElementList"
             accepts_nested_attributes_for :elementList
           end
-          class PersonalName
-            include ActiveFedora::RdfObject
-            map_predicates do |map|
-              map.elementList(in: DummyMADS, to: "elementList", class_name:"ComplexRDFDatastream::ElementList")
-              map.extraProperty(in: DummyMADS, to: "elementValue", class_name:"ComplexRDFDatastream::Topic")
-            end
+          class PersonalName < ActiveFedora::Rdf::Resource
+            property :elementList, predicate: DummyMADS.elementList, class_name: "ComplexRDFDatastream::ElementList"
+            property :extraProperty, predicate: DummyMADS.elementValue, class_name: "ComplexRDFDatastream::Topic"
             accepts_nested_attributes_for :elementList, :extraProperty
           end
-          class ElementList
-            include ActiveFedora::RdfList
-            rdf_type DummyMADS.elementList
-            map_predicates do |map|
-              map.topicElement(in: DummyMADS, to: "TopicElement", :class_name => "MadsTopicElement")
-              map.temporalElement(in: DummyMADS, to: "TemporalElement")
-              map.fullNameElement(in: DummyMADS, to: "FullNameElement")
-              map.dateNameElement(in: DummyMADS, to: "DateNameElement")
-              map.nameElement(in: DummyMADS, to: "NameElement")
-              map.elementValue(in: DummyMADS)
-            end
+          class ElementList < ActiveFedora::Rdf::List
+            configure type: DummyMADS.elementList
+            property :topicElement, predicate: DummyMADS.TopicElement, class_name: "ComplexRDFDatastream::MadsTopicElement"
+            property :temporalElement, predicate: DummyMADS.TemporalElement
+            property :fullNameElement, predicate: DummyMADS.FullNameElement
+            property :dateNameElement, predicate: DummyMADS.DateNameElement
+            property :nameElement, predicate: DummyMADS.NameElement
+            property :elementValue, predicate: DummyMADS.elementValue
             accepts_nested_attributes_for :topicElement
           end
-          class MadsTopicElement
-            include ActiveFedora::RdfObject
-            rdf_type DummyMADS.TopicElement
-            map_predicates do |map|
-              map.elementValue(in: DummyMADS)
-            end
+          class MadsTopicElement < ActiveFedora::Rdf::Resource
+            configure :type => DummyMADS.TopicElement
+            property :elementValue, predicate: DummyMADS.elementValue
           end
         end
       end
@@ -75,8 +62,8 @@ describe "Nesting attribute behavior of RDFDatastream" do
         Object.send(:remove_const, :DummyMADS)
       end
       subject { ComplexRDFDatastream.new(double('inner object', :pid=>'foo', :new_record? =>true), 'descMetadata') }
-      let(:params) do 
-        { myResource: 
+      let(:params) do
+        { myResource:
           {
             topic_attributes: {
               '0' =>
@@ -93,12 +80,12 @@ describe "Nesting attribute behavior of RDFDatastream" do
               }
             },
             personalName_attributes: [
-              { 
+              {
                 elementList_attributes: [{
                   fullNameElement: "Jefferson, Thomas",
-                  dateNameElement: "1743-1826"                  
+                  dateNameElement: "1743-1826"
                 }]
-              } 
+              }
               #, "Hemings, Sally"
             ],
           }
@@ -106,7 +93,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
       end
 
       describe "on lists" do
-        subject { ComplexRDFDatastream::PersonalName.new(RDF::Graph.new) } 
+        subject { ComplexRDFDatastream::PersonalName.new(RDF::Graph.new) }
         it "should accept a hash" do
           subject.elementList_attributes =  [{ topicElement_attributes: {'0' => { elementValue:"Quantum Behavior" }, '1' => { elementValue:"Wave Function" }}}]
           subject.elementList.first[0].elementValue.should == ["Quantum Behavior"]
@@ -121,43 +108,37 @@ describe "Nesting attribute behavior of RDFDatastream" do
       end
 
       it "should create nested objects" do
-          # Replace the graph's contents with the Hash
-          subject.attributes = params[:myResource]
+        # Replace the graph's contents with the Hash
+        subject.attributes = params[:myResource]
 
-          # Here's how this would happen if we didn't have attributes=
-          # personal_name = subject.personalName.build 
-          # elem_list = personal_name.elementList.build
-          # elem_list.fullNameElement = "Jefferson, Thomas"
-          # elem_list.dateNameElement = "1743-1826"
-          # topic = subject.topic.build
-          # elem_list = topic.elementList.build
-          # elem_list.fullNameElement = 'Cosmology'
-
-          subject.topic[0].elementList.first[0].elementValue.should == ["Cosmology"]
-          subject.topic[1].elementList.first[0].elementValue.should == ["Quantum Behavior"]
-          subject.personalName.first.elementList.first.fullNameElement.should == ["Jefferson, Thomas"]
-          subject.personalName.first.elementList.first.dateNameElement.should == ["1743-1826"]
+        # Here's how this would happen if we didn't have attributes=
+        # personal_name = subject.personalName.build
+        # elem_list = personal_name.elementList.build
+        # elem_list.fullNameElement = "Jefferson, Thomas"
+        # elem_list.dateNameElement = "1743-1826"
+        # topic = subject.topic.build
+        # elem_list = topic.elementList.build
+        # elem_list.fullNameElement = 'Cosmology'
+        subject.topic[0].elementList.first[0].elementValue.should == ["Cosmology"]
+        subject.topic[1].elementList.first[0].elementValue.should == ["Quantum Behavior"]
+        subject.personalName.first.elementList.first.fullNameElement.should == ["Jefferson, Thomas"]
+        subject.personalName.first.elementList.first.dateNameElement.should == ["1743-1826"]
       end
     end
 
     describe "with an existing object" do
-      before(:each) do 
+      before(:each) do
         class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
-          map_predicates do |map|
-            map.parts(:in=> RDF::DC, :to=>'hasPart', :class_name=>'Component')
-          end
+          property :parts, predicate: RDF::DC.hasPart, :class_name=>'Component'
           accepts_nested_attributes_for :parts, allow_destroy: true
 
-          class Component
-            include ActiveFedora::RdfObject
-            map_predicates do |map|
-              map.label(:in=> RDF::DC, :to=>'title')
-            end
+          class Component < ActiveFedora::Rdf::ObjectResource
+            property :label, predicate: RDF::DC.title
           end
         end
 
       end
-      
+
       after(:each) do
         Object.send(:remove_const, :SpecDatastream)
       end
@@ -180,8 +161,8 @@ describe "Nesting attribute behavior of RDFDatastream" do
       end
       it "create a new object when the id is provided" do
        subject.parts_attributes= [{id: 'http://example.com/part#1', label: "Universal Joint"}]
-       subject.parts.last.rdf_subject.should == 'http://example.com/part#1'
+       expect(subject.parts.last.rdf_subject).to eq RDF::URI('http://example.com/part#1')
       end
-    end    
+    end
   end
 end

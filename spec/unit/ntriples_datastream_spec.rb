@@ -2,19 +2,17 @@ require 'spec_helper'
 
 describe ActiveFedora::NtriplesRDFDatastream do
   describe "an instance with content" do
-    before do 
+    before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        map_predicates do |map|
-          map.created(:in => RDF::DC)
-          map.title(:in => RDF::DC)
-          map.publisher(:in => RDF::DC)
-          map.creator(:in => RDF::DC)
-          map.educationLevel(:in => RDF::DC)
-          map.based_near(:in => RDF::FOAF)
-          map.related_url(:to => "seeAlso", :in => RDF::RDFS)
-        end
+        property :created, predicate: RDF::DC.created
+        property :title, predicate: RDF::DC.title
+        property :publisher, predicate: RDF::DC.publisher
+        property :creator, predicate: RDF::DC.creator
+        property :educationLevel, predicate: RDF::DC.educationLevel
+        property :based_near, predicate: RDF::FOAF.based_near
+        property :related_url, predicate: RDF::RDFS.seeAlso
       end
-      @subject = MyDatastream.new(double('inner object', :pid=>'test:1', :new_record? =>true), 'descMetadata')
+      @subject = MyDatastream.new(double('inner object', pid: 'test:1', :new_record? => true), 'descMetadata')
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
     after do
@@ -33,18 +31,19 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.dsid.should == 'descMetadata'
     end
     it "should have fields" do
-      @subject.created.should == ["2010-12-31"]
+      @subject.created.should == [Date.parse('2010-12-31')]
       @subject.title.should == ["Title of work"]
       @subject.publisher.should == ["Penn State"]
       @subject.based_near.should == ["New York, NY, US"]
-      @subject.related_url.should == ["http://google.com/"]
+      @subject.related_url.length.should == 1
+      @subject.related_url.first.rdf_subject.should == "http://google.com/"
     end
 
     it "should be able to call enumerable methods on the fields" do
       @subject.title.join(', ').should == "Title of work"
-      @subject.title.count.should == 1 
-      @subject.title.size.should == 1 
-      @subject.title[0].should == "Title of work" 
+      @subject.title.count.should == 1
+      @subject.title.size.should == 1
+      @subject.title[0].should == "Title of work"
       @subject.title.to_a.should == ["Title of work"]
       val = []
       @subject.title.each_with_index {|v, i| val << "#{i}. #{v}"}
@@ -88,19 +87,18 @@ describe ActiveFedora::NtriplesRDFDatastream do
   end
 
   describe "an instance with a custom subject" do
-    before do 
+    before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         rdf_subject { |ds| "info:fedora/#{ds.pid}/content" }
-        map_predicates do |map|
-          map.created(:in => RDF::DC)
-          map.title(:in => RDF::DC)
-          map.publisher(:in => RDF::DC)
-          map.based_near(:in => RDF::FOAF)
-          map.related_url(:to => "seeAlso", :in => RDF::RDFS)
-        end
+        property :created, predicate: RDF::DC.created
+        property :title, predicate: RDF::DC.title
+        property :publisher, predicate: RDF::DC.publisher
+        property :based_near, predicate: RDF::FOAF.based_near
+        property :related_url, predicate: RDF::RDFS.seeAlso
       end
+      @inner_object = double('inner object', pid: 'test:1', :new_record? => true)
       @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
-      @subject.stub(:pid => 'test:1')
+      @subject.stub(pid: 'test:1')
       @subject.stub(:new_record? => false)
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
@@ -121,12 +119,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "a new instance" do
     before(:each) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        map_predicates do |map|
-          map.publisher(:in => RDF::DC)
-        end
+        property :publisher, predicate: RDF::DC.publisher
       end
       @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
-      @subject.stub(:pid => 'test:1', :repository => ActiveFedora::Base.connection_for_pid(0))
+      @subject.stub(pid: 'test:1', repository: ActiveFedora::Base.connection_for_pid(0))
     end
     after(:each) do
       Object.send(:remove_const, :MyDatastream)
@@ -143,27 +139,25 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "solr integration" do
     before(:all) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        map_predicates do |map|
-          map.created(:in => RDF::DC) do |index| 
-            index.as :sortable, :displayable
-            index.type :date
-          end
-          map.title(:in => RDF::DC) do |index|
-            index.as :stored_searchable, :sortable
-            index.type :text 
-          end
-          map.publisher(:in => RDF::DC) do |index| 
-            index.as :facetable, :sortable, :stored_searchable
-          end
-          map.based_near(:in => RDF::FOAF) do |index|
-            index.as :facetable, :stored_searchable 
-            index.type :text
-          end
-          map.related_url(:to => "seeAlso", :in => RDF::RDFS) do |index|
-            index.as :stored_searchable
-          end
-          map.rights(:in => RDF::DC)
+        property :created, predicate: RDF::DC.created do |index|
+          index.as :sortable, :displayable
+          index.type :date
         end
+        property :title, predicate: RDF::DC.title do |index|
+          index.as :stored_searchable, :sortable
+          index.type :text
+        end
+        property :publisher, predicate: RDF::DC.publisher do |index|
+          index.as :facetable, :sortable, :stored_searchable
+        end
+        property :based_near, predicate: RDF::FOAF.based_near do |index|
+          index.as :facetable, :stored_searchable
+          index.type :text
+        end
+        property :related_url, predicate: RDF::RDFS.seeAlso do |index|
+          index.as :stored_searchable
+        end
+        property :rights, predicate: RDF::DC.rights
       end
       @subject = MyDatastream.new(@inner_object, 'solr_rdf')
       @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
@@ -171,8 +165,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
     after(:all) do
       Object.send(:remove_const, :MyDatastream)
     end
-    before(:each) do  
-      @subject.stub(:pid => 'test:1')
+    before(:each) do
+      @subject.stub(pid: 'test:1')
+      @subject.serialize
     end
     it "should provide .to_solr and return a SolrDocument" do
       @subject.should respond_to(:to_solr)
@@ -180,7 +175,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
 
     it "should have a solr_name method" do
-      expect(MyDatastream.new(nil, 'descMetadata').primary_solr_name(:based_near)).to eq 'desc_metadata__based_near_sim'
+      expect(MyDatastream.new(nil, 'descMetadata').primary_solr_name(:based_near)).to eq 'desc_metadata__based_near_tesim'
       expect(MyDatastream.new(nil, 'props').primary_solr_name(:title)).to eq 'props__title_tesim'
     end
 
@@ -205,15 +200,15 @@ describe ActiveFedora::NtriplesRDFDatastream do
     describe "with an actual object" do
       before(:each) do
         class Foo < ActiveFedora::Base
-          has_metadata :name => "descMetadata", :type => MyDatastream
+          has_metadata "descMetadata", type: MyDatastream
           has_attributes :created, :title, :publisher, :based_near, :related_url, :rights, datastream: :descMetadata, multiple: true
         end
         @obj = MyDatastream.new(@inner_object, 'solr_rdf')
         repository = double()
-          @obj.stub(:repository => repository, :pid => 'test:1')
+          @obj.stub(repository: repository, pid: 'test:1')
           repository.stub(:modify_datastream)
           repository.stub(:add_datastream)
-        @obj.created = "2012-03-04"
+        @obj.created = Date.parse("2012-03-04")
         @obj.title = "Of Mice and Men, The Sequel"
         @obj.publisher = "Bob's Blogtastic Publishing"
         @obj.based_near = ["Tacoma, WA", "Renton, WA"]
@@ -245,9 +240,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
           @obj.to_solr.keys.should include(ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string),
                 ActiveFedora::SolrService.solr_name("solr_rdf__publisher", type: :string),
                 ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :sortable),
-                ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :facetable), 
+                ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :facetable),
                 ActiveFedora::SolrService.solr_name("solr_rdf__created", :sortable, type: :date),
-                ActiveFedora::SolrService.solr_name("solr_rdf__created", :displayable), 
+                ActiveFedora::SolrService.solr_name("solr_rdf__created", :displayable),
                 ActiveFedora::SolrService.solr_name("solr_rdf__title", type: :string),
                 ActiveFedora::SolrService.solr_name("solr_rdf__title", :sortable),
                 ActiveFedora::SolrService.solr_name("solr_rdf__based_near", type: :string),

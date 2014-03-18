@@ -46,6 +46,7 @@ module ActiveFedora
     include Core
     include FedoraAttributes
     include ReloadOnSave
+    include Rdf::Identifiable
   end
 
 end

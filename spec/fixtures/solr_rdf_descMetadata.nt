@@ -1,4 +1,4 @@
-<info:fedora/test:1> <http://purl.org/dc/terms/created> "2009-10-10" .
+<info:fedora/test:1> <http://purl.org/dc/terms/created> "2009-10-10"^^<http://www.w3.org/2001/XMLSchema#date> .
 <info:fedora/test:1> <http://purl.org/dc/terms/title> "fake-title" .
 <info:fedora/test:1> <http://purl.org/dc/terms/publisher> "publisher1" .
 <info:fedora/test:1> <http://xmlns.com/foaf/0.1/based_near> "coverage1" .
