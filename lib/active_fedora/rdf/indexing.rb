@@ -1,17 +1,10 @@
 module ActiveFedora
   module Rdf
     module Indexing
-      extend Deprecation
       extend ActiveSupport::Concern
 
-      # In active_fedora 8, we can get the prefix part from Datastream.prefix
       def apply_prefix(name)
-        "#{dsid.underscore}__#{name}"
-      end
-
-      def prefix(name)
-        Deprecation.warn Indexing, "prefix is deprecated. Use apply_prefix instead. In active-fedora 8, the prefix method will just return the prefix to be applied, and will not do the applying.  This will enable conformity between OmDatastream and RdfDatastream"
-        apply_prefix(name)
+        prefix + name.to_s
       end
 
       def to_solr(solr_doc = Hash.new) # :nodoc:
@@ -43,11 +36,6 @@ module ActiveFedora
       end
 
       module ClassMethods
-        def prefix(dsid, name)
-          Deprecation.warn Indexing, "prefix is deprecated and will be removed in active-fedora 8.0.0.", caller
-          "#{dsid.underscore}__#{name}".to_sym
-        end
-
         # Gives the datatype for a column.
         def type(field)
           config_for_term_or_uri(field).type
