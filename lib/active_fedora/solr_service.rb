@@ -2,7 +2,6 @@ require 'rsolr'
 
 module ActiveFedora
   class SolrService 
-    extend Deprecation
     
     attr_reader :conn
 
@@ -97,11 +96,6 @@ module ActiveFedora
 
       def solr_name(*args)
         Solrizer.default_field_mapper.solr_name(*args)
-      end
-      
-      def escape_uri_for_query(uri)
-        Deprecation.warn SolrService, "escape_uri_for_query is deprecated and will be removed in active-fedora 8.0.0. Use RSolr.escape instead."
-        RSolr.escape(uri)
       end
       
       # Create a query with a clause for each key, value
