@@ -109,12 +109,6 @@ describe ActiveFedora::SolrService do
     end
   end
   
-  describe '#escape_uri_for_query' do
-    it "should escape : with a backslash" do
-      ActiveFedora::SolrService.escape_uri_for_query("my:pid").should == 'my\:pid'
-    end
-  end
-
   describe ".query" do
     it "should call solr" do 
       mock_conn = double("Connection")
