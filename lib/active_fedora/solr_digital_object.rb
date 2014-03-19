@@ -1,8 +1,7 @@
 module ActiveFedora
   class SolrDigitalObject
     include DigitalObject::DatastreamBootstrap
-    extend Deprecation
-    self.deprecation_horizon = 'active-fedora version 8.0.0'
+
     attr_reader :pid, :label, :state, :ownerId, :profile, :datastreams, :solr_doc
     attr_accessor :original_class
     def initialize(solr_doc, profile_hash, klass=ActiveFedora::Base)
@@ -59,8 +58,6 @@ module ActiveFedora
     def new_record?
       false
     end
-    alias new? new_record?
-    deprecation_deprecate :new?
 
     def uri
       "solr:#{pid}"
