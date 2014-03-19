@@ -70,15 +70,6 @@ describe ActiveFedora::Base do
 
   end
   
-  describe '#pids_from_uris' do 
-    it "should strip the info:fedora/ out of a given string" do 
-      ActiveFedora::Base.pids_from_uris("info:fedora/FOOBAR").should == "FOOBAR"
-    end
-    it "should accept an array of strings"do 
-      ActiveFedora::Base.pids_from_uris(["info:fedora/FOOBAR", "info:fedora/BAZFOO"]).should == ["FOOBAR", "BAZFOO"]
-    end
-  end
-
   describe "to_class_uri" do
     before :all do
       module SpecModel
