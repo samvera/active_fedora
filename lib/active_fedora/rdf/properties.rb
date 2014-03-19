@@ -8,15 +8,8 @@ module ActiveFedora::Rdf
   #
   #    property :title, predicate: RDF::DC.title, class_name: ResourceClass
   #
-  # or with the 'old' style:
-  #
-  #    map_predicates do |map|
-  #      map.title(in: RDF::DC)
-  #    end
-  #
-  # You can pass a block to either to set index behavior.
+  # You can pass a block to set index behavior.
   module Properties
-    extend Deprecation
     attr_accessor :config
 
     ##
@@ -83,11 +76,6 @@ module ActiveFedora::Rdf
         predicate = vocab.send(to)
         parent.property(name, properties.merge(predicate: predicate), &block)
       end
-    end
-    def map_predicates
-      Deprecation.warn Properties, "map_predicates is deprecated and will be removed in active-fedora 8.0.0. Use property :name, predicate: predicate instead.", caller
-      mapper = Mapper.new(self)
-      yield(mapper)
     end
 
   end
