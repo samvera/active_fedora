@@ -9,7 +9,6 @@ module ActiveFedora::Rdf
   #    configure base_uri: "http://oregondigital.org/resource/", repository: :parent
   # Available properties are base_uri, rdf_label, type, and repository
   module Configurable
-    extend Deprecation
 
     def base_uri
       nil
@@ -21,11 +20,6 @@ module ActiveFedora::Rdf
 
     def type
       nil
-    end
-
-    def rdf_type(value)
-      Deprecation.warn Configurable, "rdf_type is deprecated and will be removed in active-fedora 8.0.0. Use configure type: instead.", caller
-      configure type: value
     end
 
     def repository
