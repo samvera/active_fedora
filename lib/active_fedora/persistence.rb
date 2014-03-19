@@ -2,21 +2,6 @@ module ActiveFedora
   # = Active Fedora Persistence
   module Persistence
     extend ActiveSupport::Concern
-    extend Deprecation
-    self.deprecation_horizon = 'active-fedora version 8.0.0'
-    
-
-    def new?
-      new_record?
-    end
-    deprecation_deprecate :new?
-
-    # Has this object been saved?
-    def new_object?
-      new_record?
-    end
-    deprecation_deprecate :new_object?
-    
 
     ## Required by associations
     def new_record?
