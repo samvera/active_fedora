@@ -9,7 +9,7 @@
 #   subject.descMetadata.set.title # => 'test'
 module ActiveFedora::Rdf::Identifiable
   extend ActiveSupport::Concern
-  delegate :parent, :dump, :query, :rdf_type, :to => :resource
+  delegate :parent, :dump, :query, :to => :resource
 
   ##
   # Defines which resource defines this ActiveFedora object.
