@@ -26,12 +26,4 @@ describe ActiveFedora::Rdf::Configurable do
       expect(DummyConfigurable.type).to eq RDF.Class
     end
   end
-
-  describe '#rdf_type' do
-    it "should set the type the old way" do
-      DummyConfigurable.should_receive(:configure).with(:type => RDF.Class).and_call_original
-      DummyConfigurable.rdf_type(RDF.Class)
-      expect(DummyConfigurable.type).to eq RDF.Class
-    end
-  end
 end
