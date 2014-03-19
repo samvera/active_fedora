@@ -10,12 +10,12 @@ describe ActiveFedora::OmDatastream do
                       } 
     @sample_raw_xml = "<foo><xmlelement/></foo>"
     @solr_doc = {"id"=>"mods_article1",
-      ActiveFedora::SolrService.solr_name("name_role_roleTerm", type: :string) =>["creator","submitter","teacher"],
-      ActiveFedora::SolrService.solr_name("name_0_role", type: :string)=>"\r\ncreator\r\nsubmitter\r\n",
-      ActiveFedora::SolrService.solr_name("name_1_role", type: :string)=>"\r\n teacher \r\n",
-      ActiveFedora::SolrService.solr_name("name_0_role_0_roleTerm", type: :string)=>"creator",
-      ActiveFedora::SolrService.solr_name("name_0_role_1_roleTerm", type: :string)=>"submitter",
-      ActiveFedora::SolrService.solr_name("name_1_role_0_roleTerm", type: :string)=>["teacher"]}
+      ActiveFedora::SolrService.solr_name("desc_metadata__name_role_roleTerm", type: :string) =>["creator","submitter","teacher"],
+      ActiveFedora::SolrService.solr_name("desc_metadata__name_0_role", type: :string)=>"\r\ncreator\r\nsubmitter\r\n",
+      ActiveFedora::SolrService.solr_name("desc_metadata__name_1_role", type: :string)=>"\r\n teacher \r\n",
+      ActiveFedora::SolrService.solr_name("desc_metadata__name_0_role_0_roleTerm", type: :string)=>"creator",
+      ActiveFedora::SolrService.solr_name("desc_metadata__name_0_role_1_roleTerm", type: :string)=>"submitter",
+      ActiveFedora::SolrService.solr_name("desc_metadata__name_1_role_0_roleTerm", type: :string)=>["teacher"]}
   end
   
   before(:each) do
@@ -58,8 +58,8 @@ describe ActiveFedora::OmDatastream do
 
   describe "#prefix" do
     subject { ActiveFedora::OmDatastream.new(nil, 'descMetadata') }
-    it "should be an empty string (until active-fedora 8. Then it should be \"\#{dsid.underscore}__\"" do
-      subject.send(:prefix).should == ""
+    it "should reflect the dsid" do
+      subject.send(:prefix).should == "desc_metadata__"
     end
   end
   
@@ -292,7 +292,7 @@ describe ActiveFedora::OmDatastream do
 
   describe '.get_values_from_solr' do
     before(:each) do
-      @mods_ds = ActiveFedora::OmDatastream.new(nil, 'test_ds')
+      @mods_ds = ActiveFedora::OmDatastream.new(nil, 'descMetadata')
       @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
     end
 
@@ -329,11 +329,11 @@ describe ActiveFedora::OmDatastream do
 
   describe '.has_solr_name?' do
     it "should return true if the given key exists in the solr document passed in" do
-      @test_ds.has_solr_name?(ActiveFedora::SolrService.solr_name("name_0_role_0_roleTerm", type: :string),@solr_doc).should == true
-      @test_ds.has_solr_name?(ActiveFedora::SolrService.solr_name("name_0_role_0_roleTerm", type: :string).to_sym,@solr_doc).should == true
-      @test_ds.has_solr_name?(ActiveFedora::SolrService.solr_name("name_1_role_1_roleTerm", type: :string),@solr_doc).should == false
+      @test_ds.has_solr_name?(ActiveFedora::SolrService.solr_name("desc_metadata__name_0_role_0_roleTerm", type: :string),@solr_doc).should == true
+      @test_ds.has_solr_name?(ActiveFedora::SolrService.solr_name("desc_metadata__name_0_role_0_roleTerm", type: :string).to_sym,@solr_doc).should == true
+      @test_ds.has_solr_name?(ActiveFedora::SolrService.solr_name("desc_metadata__name_1_role_1_roleTerm", type: :string),@solr_doc).should == false
       #if not doc passed in should be new empty solr doc and always return false
-      @test_ds.has_solr_name?(ActiveFedora::SolrService.solr_name("name_0_role_0_roleTerm", type: :string)).should == false
+      @test_ds.has_solr_name?(ActiveFedora::SolrService.solr_name("desc_metadata__name_0_role_0_roleTerm", type: :string)).should == false
     end
   end
 
