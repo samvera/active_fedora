@@ -2,7 +2,6 @@ module ActiveFedora
 
   #This class represents a Fedora datastream
   class Datastream < Rubydora::Datastream
-    extend Deprecation
     attr_writer :digital_object
     attr_accessor :last_modified
 
@@ -112,10 +111,7 @@ module ActiveFedora
     # a prefix other than the default
     def prefix
       raise RuntimeError, "to_solr requires the dsid to be set" unless dsid
-      Deprecation.warn ActiveFedora::Datastream, "In active-fedora 8 the solr fields created by #{self.class} will be prefixed with \"#{dsid.underscore}__\".  If you want to maintain the existing behavior, you must override #{self.class}.#prefix to return an empty string"
-      # In ActiveFedora 8 return this:
-      #"#{dsid.underscore}__"
-      ""
+      "#{dsid.underscore}__"
     end
 
   end
