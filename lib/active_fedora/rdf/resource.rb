@@ -19,7 +19,6 @@ module ActiveFedora::Rdf
     @@type_registry
     extend Configurable
     extend Properties
-    extend Deprecation
     include ActiveFedora::Rdf::NestedAttributes
     attr_accessor :parent
 
@@ -58,11 +57,6 @@ module ActiveFedora::Rdf
       reload
       # Append type to graph if necessary.
       self.get_values(:type) << self.class.type if self.class.type.kind_of?(RDF::URI) && type.empty?
-    end
-
-    def graph
-      Deprecation.warn Resource, "graph is redundant & deprecated. It will be removed in active-fedora 8.0.0.", caller
-      self
     end
 
     def final_parent
