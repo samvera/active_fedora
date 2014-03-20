@@ -1,6 +1,5 @@
 module ActiveFedora
-  # Helps Rubydora create datastreams of the type defined by the ActiveFedora::Base#datastream_class_for_name
-  class DigitalObject < Rubydora::DigitalObject
+  class DigitalObject# < Rubydora::DigitalObject
     attr_accessor :original_class
     
     module DatastreamBootstrap
@@ -35,7 +34,7 @@ module ActiveFedora
       conn = original_class.connection_for_pid(pid)
       obj = begin
         super(pid, conn)
-      rescue Rubydora::RecordNotFound
+      rescue #Rubydora::RecordNotFound
         raise ActiveFedora::ObjectNotFoundError, "Unable to find '#{pid}' in fedora. See logger for details."
       end
       obj.original_class = original_class

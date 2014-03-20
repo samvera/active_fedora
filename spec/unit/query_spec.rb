@@ -50,7 +50,7 @@ describe ActiveFedora::Base do
           SpecModel::Basic.find("_PID_", cast: false).should be_a SpecModel::Basic
         end
         it "should raise an exception if it is not found" do
-          Rubydora::Fc3Service.any_instance.should_receive(:object).and_raise(RestClient::ResourceNotFound)
+          FedoraLens.should_receive(:find).and_raise(Ldp::NotFound)
           SpecModel::Basic.should_receive(:connection_for_pid).with("_PID_")
           lambda {SpecModel::Basic.find("_PID_")}.should raise_error ActiveFedora::ObjectNotFoundError
         end

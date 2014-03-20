@@ -1,8 +1,8 @@
 require "loggable"
 require 'active_support'
 require "solrizer"
+require 'fedora_lens'
 require 'active_fedora/file_configurator'
-require 'active_fedora/rubydora_connection'
 require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/object'
 require 'active_support/core_ext/hash/indifferent_access'
@@ -73,18 +73,12 @@ module ActiveFedora #:nodoc:
     end
 
     autoload :RelationshipGraph
-    autoload :RelsExtDatastream
     autoload :Scoping
     autoload :SemanticNode
-    autoload :ServiceDefinitions
     autoload :Serialization
-    autoload :Sharding
     autoload :SimpleDatastream
     autoload :SolrDigitalObject
     autoload :SolrService
-    autoload :UnsavedDigitalObject
-    autoload :FixtureLoader
-    autoload :FixtureExporter
     autoload :DatastreamCollections
     autoload :Predicates
     autoload :Validations

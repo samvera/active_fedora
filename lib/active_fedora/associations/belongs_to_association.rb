@@ -5,7 +5,7 @@ module ActiveFedora
       def id_writer(id)
         @full_result = nil
         remove_matching_property_relationship
-        return if id.blank? or id == ActiveFedora::UnsavedDigitalObject::PLACEHOLDER
+        return if id.blank?
         @owner.add_relationship(@reflection.options[:property], ActiveFedora::Base.internal_uri(id))
       end
 
