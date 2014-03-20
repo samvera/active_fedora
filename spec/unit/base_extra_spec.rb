@@ -17,16 +17,14 @@ describe ActiveFedora::Base do
       ActiveFedora::SolrService.stub(:instance).and_return(mock_ss)
     end
     
-    it "should call .to_solr on all SimpleDatastreams AND RelsExtDatastreams and pass the resulting document to solr" do
+    it "should call .to_solr on all SimpleDatastreams and pass the resulting document to solr" do
       # Actually uses self.to_solr internally to gather solr info from all metadata datastreams
       mock1 = double("ds1", :to_solr => {})
       mock2 = double("ds2", :to_solr => {})
-      mock3 = double("RELS-EXT", :to_solr => {})
       
-      mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
+      mock_datastreams = {:ds1 => mock1, :ds2 => mock2}
       mock1.should_receive(:solrize_profile).and_return({})
       mock2.should_receive(:solrize_profile).and_return({})
-      mock3.should_receive(:solrize_profile).and_return({})
       @test_object.should_receive(:datastreams).twice.and_return(mock_datastreams)
       @test_object.should_receive(:solrize_relationships)
       @test_object.update_index
@@ -36,12 +34,10 @@ describe ActiveFedora::Base do
       # Actually uses self.to_solr internally to gather solr info from all metadata datastreams
       mock1 = double("ds1", :to_solr => {})
       mock2 = double("ds2", :to_solr => {})
-      mock3 = double("RELS-EXT", :to_solr => {})
       
-      mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
+      mock_datastreams = {:ds1 => mock1, :ds2 => mock2}
       mock1.should_receive(:solrize_profile).and_return({})
       mock2.should_receive(:solrize_profile).and_return({})
-      mock3.should_receive(:solrize_profile).and_return({})
       @test_object.should_receive(:datastreams).twice.and_return(mock_datastreams)
       @test_object.should_receive(:solrize_relationships)
       @test_object.update_index

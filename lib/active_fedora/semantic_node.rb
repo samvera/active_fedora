@@ -14,32 +14,6 @@ module ActiveFedora
       @object_relations = nil
     end
 
-    def object_relations
-      load_relationships if !relationships_loaded
-      @object_relations ||= RelationshipGraph.new
-    end
-
-    def relationships_are_dirty?
-      object_relations.dirty
-    end
-    alias relationships_are_dirty relationships_are_dirty?
-
-    def relationships_are_not_dirty!
-      object_relations.dirty = false
-    end
-
-    def relationships=(xml)
-      RDF::RDFXML::Reader.new(xml) do |reader|
-        reader.each_statement do |statement|
-          literal = statement.object.kind_of?(RDF::Literal)
-          object = literal ? statement.object.value : statement.object.to_str
-          object_relations.add(statement.predicate, object, literal)
-        end
-      end
-      # Adding the relationships to the graph causes the graph to be marked as dirty,
-      # so now we assert that the graph is in sync
-      relationships_are_not_dirty!
-    end
 
     # Add a relationship to the Object.
     # @param [Symbol, String] predicate
@@ -48,7 +22,6 @@ module ActiveFedora
     def add_relationship(predicate, target, literal=false)
       #raise ArgumentError, "predicate must be a symbol. You provided `#{predicate.inspect}'" unless predicate.class.in?([Symbol, String])
       object_relations.add(predicate, target, literal)
-      rels_ext.content_will_change! if object_relations.dirty
     end
 
     # Clears all relationships with the specified predicate
@@ -57,7 +30,6 @@ module ActiveFedora
       relationships(predicate).each do |target|
         object_relations.delete(predicate, target) 
       end
-      rels_ext.content_will_change! if object_relations.dirty
     end
 
     # Checks that this object is matches the model class passed in.
@@ -89,13 +61,12 @@ module ActiveFedora
     end
 
     #
-    # Remove a Rels-Ext relationship from the Object.
+    # Remove a relationship from the Object.
     # @param predicate
     # @param obj Either a string URI or an object that responds to .pid 
     def remove_relationship(predicate, obj, literal=false)
       object_relations.delete(predicate, obj)
       object_relations.dirty = true
-      rels_ext.content_will_change!
     end
 
     # If no arguments are supplied, return the whole RDF::Graph.
@@ -113,9 +84,7 @@ module ActiveFedora
 
     def load_relationships
       @relationships_loaded = true
-      content = rels_ext.content
-      return unless content.present?
-      RelsExtDatastream.from_xml content, rels_ext
+      raise "Not implemented: load_relationships"
     end
 
     def ids_for_outbound(predicate)

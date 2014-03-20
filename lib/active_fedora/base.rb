@@ -1,6 +1,5 @@
 SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
-require "digest"
 require 'active_support/descendants_tracker'
 
 module ActiveFedora
@@ -24,10 +23,11 @@ module ActiveFedora
   # Datastreams defined with +has_metadata+ are accessed via the +datastreams+ member hash.
   #
   class Base
+    include FedoraLens
+    include FedoraLens::Lenses
     extend ActiveModel::Naming
     extend ActiveSupport::DescendantsTracker
     include SemanticNode
-    include Sharding
     include ActiveFedora::Persistence
     include Scoping
     include Loggable
@@ -46,7 +46,7 @@ module ActiveFedora
     include Core
     include FedoraAttributes
     include ReloadOnSave
-    include Rdf::Identifiable
-  end
+#    include Rdf::Identifiable
 
+  end
 end

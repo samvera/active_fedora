@@ -15,19 +15,20 @@ module ActiveFedora
       end
     end
 
-    def attributes=(properties)
-      properties.each do |k, v|
-        respond_to?(:"#{k}=") ? send(:"#{k}=", v) : raise(UnknownAttributeError, "#{self.class} does not have an attribute `#{k}'")
-      end
-    end
+    # def attributes=(properties)
+    #   properties.each do |k, v|
+    #     respond_to?(:"#{k}=") ? send(:"#{k}=", v) : raise(UnknownAttributeError, "#{self.class} does not have an attribute `#{k}'")
+    #   end
+    # end
 
-    def attributes
-      self.class.defined_attributes.keys.each_with_object({"id" => id}) {|key, hash| hash[key] = self[key]}
-    end
+
+    # def attributes
+    #   self.class.defined_attributes.keys.each_with_object({"id" => id}) {|key, hash| hash[key] = self[key]}
+    # end
 
     # Calling inspect may trigger a bunch of loads, but it's mainly for debugging, so no worries.
     def inspect
-      values = ["pid: #{pretty_pid.inspect}"]
+      values = ["pid: #{pid.inspect}"]
       values << self.class.defined_attributes.keys.map {|r| "#{r}: #{send(r).inspect}"}
       "#<#{self.class} #{values.flatten.join(', ')}>"
     end

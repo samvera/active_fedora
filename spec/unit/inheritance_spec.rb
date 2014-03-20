@@ -20,7 +20,6 @@ describe ActiveFedora::Base do
     f.datastreams.size.should == 3
     streams = f.datastreams.values.map{|x| x.class.to_s}.sort
     streams.pop.should == "ActiveFedora::SimpleDatastream"
-    streams.pop.should == "ActiveFedora::RelsExtDatastream"
     streams.pop.should == "ActiveFedora::QualifiedDublinCoreDatastream"
   end
 

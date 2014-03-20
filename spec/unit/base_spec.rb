@@ -170,13 +170,6 @@ describe ActiveFedora::Base do
 
 
     describe '#new' do
-      it "should create an inner object" do
-        # for doing AFObject.new(params[:foo]) when nothing is in params[:foo]
-        Rubydora::DigitalObject.any_instance.should_receive(:save).never
-        result = ActiveFedora::Base.new(nil)
-        result.inner_object.should be_kind_of(ActiveFedora::UnsavedDigitalObject)
-      end
-
       it "should not save or get an pid on init" do
         Rubydora::DigitalObject.any_instance.should_receive(:save).never
         ActiveFedora::Base.should_receive(:assign_pid).never
@@ -267,35 +260,15 @@ describe ActiveFedora::Base do
       @test_object.should respond_to(:modified_date)
     end
 
-    it 'should respond to .rels_ext' do
-      @test_object.should respond_to(:rels_ext)
-    end
-
-    describe '.rels_ext' do
-
-      it 'should return the RelsExtDatastream object from the datastreams array' do
-        @test_object.stub(:datastreams => {"RELS-EXT" => "foo"})
-        @test_object.rels_ext.should == "foo"
-      end
-    end
-
     it 'should provide #add_relationship' do
       @test_object.should respond_to(:add_relationship)
     end
 
     describe '#add_relationship' do
-      it 'should call #add_relationship on the rels_ext datastream' do
+      it 'should add the assertion to the graph' do
         @test_object.add_relationship("predicate", "info:fedora/object")
         pred = ActiveFedora::Predicates.vocabularies["info:fedora/fedora-system:def/relations-external#"]["predicate"]
         @test_object.relationships.should have_statement(RDF::Statement.new(RDF::URI.new(@test_object.internal_uri), pred, RDF::URI.new("info:fedora/object")))
-      end
-
-      it "should update the RELS-EXT datastream and set the datastream as dirty when relationships are added" do
-        mock_ds = double("Rels-Ext")
-        mock_ds.stub(:content_will_change!)
-        @test_object.datastreams["RELS-EXT"] = mock_ds
-        @test_object.add_relationship(:is_member_of, "info:fedora/demo:5")
-        @test_object.add_relationship(:is_member_of, "info:fedora/demo:10")
       end
 
       it 'should add a relationship to an object only if it does not exist already' do
@@ -354,7 +327,6 @@ describe ActiveFedora::Base do
     describe '.assert_content_model' do
       it "should default to the name of the class" do
         stub_get(@this_pid)
-        stub_add_ds(@this_pid, ['RELS-EXT'])
         @test_object.assert_content_model
         @test_object.relationships(:has_model).should == ["info:fedora/afmodel:ActiveFedora_Base"]
 
@@ -507,10 +479,8 @@ describe ActiveFedora::Base do
         @test_object.to_solr
       end
 
-      it "should call .to_solr on the relationships rels-ext is dirty" do
+      it "should call .to_solr when relationships are changed" do
         @test_object.add_relationship(:has_collection_member, "info:fedora/test:member")
-        rels_ext = @test_object.rels_ext
-        rels_ext.should be_changed
         @test_object.should_receive(:solrize_relationships)
         @test_object.to_solr
       end
