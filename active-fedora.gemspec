@@ -18,10 +18,12 @@ Gem::Specification.new do |s|
   s.add_dependency 'om', '~> 3.1'
   s.add_dependency 'nom-xml', '>= 0.5.1'
   s.add_dependency "activesupport", '>= 3.0.0'
-  s.add_dependency "rubydora", '~> 1.8'
   s.add_dependency "active-triples", '~> 0.2.2'
   s.add_dependency "rdf-rdfxml", '~> 1.1.0'
+  s.add_dependency "fedora_lens"
+  s.add_dependency "linkeddata"
   s.add_dependency "deprecation"
+
   s.add_development_dependency "rdoc"
   s.add_development_dependency "yard"
   s.add_development_dependency "rake"

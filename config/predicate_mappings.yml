@@ -1,4 +1,4 @@
-# The default namespace maps to the default namespace for generating rels_ext from solr
+# The default namespace maps to the default namespace for generating relationships from solr
 :default_namespace: info:fedora/fedora-system:def/relations-external#
 
 # namespace mappings--- 
@@ -6,7 +6,7 @@
 #   namespace_uri:
 #     :relationship_symbol: relationship_identifier
 # 
-# For example, if you have the following element in your rels_ext:
+# For example, if you have the following element in your relationships:
 #  
 #  <oai:itemID>oai:example.edu:changeme:500</oai:itemID>
 # 

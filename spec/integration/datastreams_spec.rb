@@ -107,7 +107,6 @@ describe ActiveFedora::Datastreams do
       @has_file.file_ds.versionable.should be_false
       test_obj = HasFile.find(@has_file.pid)
       test_obj.file_ds.versionable.should be_false
-      test_obj.rels_ext.changed?.should be_false
       test_obj.file_ds.changed?.should be_false
       test_obj.file_ds2.changed?.should be_false
       test_obj.file_ds2.new?.should be_true

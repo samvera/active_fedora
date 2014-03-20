@@ -6,7 +6,7 @@ module ActiveFedora
 
     included do
       class_attribute :ds_specs
-      self.ds_specs = {'RELS-EXT'=> {:type=> ActiveFedora::RelsExtDatastream, :label=>"Fedora Object-to-Object Relationship Metadata", :block=>nil}}
+      self.ds_specs = {}
       class << self
         def inherited_with_datastreams(kls) #:nodoc:
           ## Do some inheritance logic that doesn't override Base.inherited
@@ -55,7 +55,6 @@ module ActiveFedora
     def configure_datastream(ds, ds_spec=nil)
       ds_spec ||= self.ds_specs[ds.dsid]
       if ds_spec
-        ds.model = self if ds_spec[:type] == RelsExtDatastream
         # If you called has_metadata with a block, pass the block into the Datastream class
         if ds_spec[:block].class == Proc
           ds_spec[:block].call(ds)
@@ -90,23 +89,9 @@ module ActiveFedora
 
     # @return [Array] all datastreams that return true for `metadata?` and are not Rels-ext
     def metadata_streams
-      datastreams.select { |k, ds| ds.metadata? }.reject { |k, ds| ds.kind_of?(ActiveFedora::RelsExtDatastream) }.values
+      datastreams.select { |k, ds| ds.metadata? }.values
     end
     
-
-    # Returns the RELS-EXT Datastream
-    # Tries to grab from in-memory datastreams first
-    # Failing that, attempts to load from Fedora and addst to in-memory datastreams
-    # Failing that, creates a new RelsExtDatastream and adds it to the object
-    def rels_ext
-      if !datastreams.has_key?("RELS-EXT") 
-        ds = ActiveFedora::RelsExtDatastream.new(@inner_object,'RELS-EXT')
-        ds.model = self
-        add_datastream(ds)
-      end
-      return datastreams["RELS-EXT"]
-    end
-
     #
     # File Management
     #

@@ -115,16 +115,6 @@ describe ActiveFedora::Datastreams do
       subject.configure_datastream(double(:dsid => 'abc'))
     end
 
-    it "should configure RelsExtDatastream" do
-      mock_dsspec = { :type => ActiveFedora::RelsExtDatastream }
-      subject.stub(:ds_specs => {'abc' => mock_dsspec})
-
-      ds = double(:dsid => 'abc')
-      ds.should_receive(:model=).with(subject)
-
-      subject.configure_datastream(ds)
-    end
-
     it "should run a Proc" do
       ds = double(:dsid => 'abc')
       @count = 0
@@ -163,32 +153,12 @@ describe ActiveFedora::Datastreams do
       ds1 = double(:metadata? => true)
       ds2 = double(:metadata? => true)
       ds3 = double(:metadata? => true)
-      relsextds = ActiveFedora::RelsExtDatastream.new
       file_ds = double(:metadata? => false)
-      subject.stub(:datastreams => {:a => ds1, :b => ds2, :c => ds3, :d => relsextds, :e => file_ds})
+      subject.stub(:datastreams => {:a => ds1, :b => ds2, :c => ds3, :e => file_ds})
       subject.metadata_streams.should include(ds1, ds2, ds3)
-      subject.metadata_streams.should_not include(relsextds)
       subject.metadata_streams.should_not include(file_ds)
     end
   end
-
-  describe "#relsext" do
-    it "should be the RELS-EXT datastream" do
-      m = double
-      subject.stub(:datastreams => { 'RELS-EXT' => m})
-      subject.rels_ext.should == m
-    end
-
-    it "should make one up otherwise" do
-      subject.stub(:datastreams => {})
-
-      subject.rels_ext.should be_a_kind_of(ActiveFedora::RelsExtDatastream)
-    end
-  end
-
-  describe "#add_file_datastream" do
-    # tested elsewhere :/
-  end 
 
   describe "#create_datastream" do
     it "should mint a DSID" do

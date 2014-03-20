@@ -19,7 +19,6 @@ module ActiveFedora
     def object
       return @object if @object
       @object = allocate_object
-      @object.rels_ext
       load_object_datastreams(@object)
       @object.inner_object.freeze
       @object

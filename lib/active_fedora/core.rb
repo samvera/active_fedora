@@ -2,7 +2,6 @@ module ActiveFedora
   module Core
     extend ActiveSupport::Concern
     
-    attr_reader :inner_object
     included do
       ##
       # :singleton-method:
@@ -10,6 +9,11 @@ module ActiveFedora
       # Accepts a logger conforming to the interface of Log4r which can be
       # retrieved on both a class and instance level by calling +logger+.
       mattr_accessor :logger, instance_writer: false
+
+      attribute :has_model, [ RDF::URI.new("info:fedora/fedora-system:def/relations-external#hasModel")]
+      # TODO is it possible to put defaults here?
+      attribute :create_date, [ RDF::URI.new("http://fedora.info/definitions/v4/repository#created")]
+      attribute :modified_date, [ RDF::URI.new("http://fedora.info/definitions/v4/repository#lastModified")]
     end
 
     # Constructor.  You may supply a custom +:pid+, or we call the Fedora Rest API for the
@@ -18,15 +22,10 @@ module ActiveFedora
     # +:namespace+ value to Fedora::Repository.nextid to generate the next pid available within
     # the given namespace.
     def initialize(attrs = nil)
-      attrs = {} if attrs.nil?
+      super
       @association_cache = {}
-      attributes = attrs.dup
-      @inner_object = UnsavedDigitalObject.new(self.class, attributes.delete(:namespace), attributes.delete(:pid))
       self.relationships_loaded = true
       load_datastreams
-
-      [:new_object,:create_date, :modified_date].each { |k| attributes.delete(k)}
-      self.attributes=attributes
       run_callbacks :initialize
     end
 
@@ -82,12 +81,8 @@ module ActiveFedora
     # Clone the datastreams from this object into the provided object, while preserving the pid of the provided object
     # @param [Base] new_object clone into this object
     def clone_into(new_object)
-      rels = Nokogiri::XML( rels_ext.content)
-      rels.xpath("//rdf:Description/@rdf:about").first.value = new_object.internal_uri
-      new_object.rels_ext.content = rels.to_xml
-
+      raise "need to rewrite the local graph"
       datastreams.each do |k, v|
-        next if k == 'RELS-EXT'
         new_object.datastreams[k].content = v.content
       end
       new_object if new_object.save
@@ -100,14 +95,6 @@ module ActiveFedora
 
     def frozen?
       datastreams.frozen?
-    end
-
-    def pretty_pid
-      if self.pid == UnsavedDigitalObject::PLACEHOLDER
-        nil
-      else
-        self.pid
-      end
     end
 
     # This method adapts the inner_object to a new ActiveFedora::Base implementation
