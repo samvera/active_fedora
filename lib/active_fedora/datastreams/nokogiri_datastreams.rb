@@ -49,7 +49,8 @@ module ActiveFedora
       
       def ng_xml=(new_xml)
         # before we set ng_xml, we load the datastream so we know if the new value differs.
-        local_or_remote_content(true)
+        # TODO reinstate this
+        #local_or_remote_content(true)
 
         case new_xml 
         when Nokogiri::XML::Document
@@ -83,19 +84,10 @@ module ActiveFedora
       end
       
       def content=(new_content)
-        if inline?
-          # inline datastreams may be transformed by fedora 3, so we test for equivalence instead of equality
-          if !EquivalentXml.equivalent?(datastream_content, new_content)
-            ng_xml_will_change! 
-            @ng_xml = Nokogiri::XML::Document.parse(new_content)
-            super(@ng_xml.to_s)
-          end
-        else
-          if datastream_content != new_content
-            ng_xml_will_change! 
-            @ng_xml = Nokogiri::XML::Document.parse(new_content)
-            super(@ng_xml.to_s)
-          end
+        if datastream_content != new_content
+          ng_xml_will_change! 
+          @ng_xml = Nokogiri::XML::Document.parse(new_content)
+          super(@ng_xml.to_s)
         end
         self.class.decorate_ng_xml @ng_xml
       end

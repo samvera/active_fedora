@@ -1,7 +1,11 @@
 module ActiveFedora
 
   #This class represents a Fedora datastream
-  class Datastream < Rubydora::Datastream
+  class Datastream
+    extend ActiveModel::Callbacks
+    define_model_callbacks :save, :create, :destroy
+    define_model_callbacks :initialize, :only => :after    
+
     attr_writer :digital_object
     attr_accessor :last_modified
 
@@ -19,15 +23,29 @@ module ActiveFedora
       prefix = options.delete(:prefix)
       dsid = nil if dsid == ''
       dsid ||= generate_dsid(digital_object, prefix || "DS")
-      super(digital_object, dsid, options)
     end
 
-    alias_method :realLabel, :label
-
-    def label
-      Array(realLabel).first
+    class << self
+      def default_attributes
+        {}
+      end
     end
-    alias_method :dsLabel, :label
+
+    def default_attributes
+      @default_attributes ||= self.class.default_attributes
+    end
+
+    def default_attributes= attributes
+      @default_attributes = default_attributes.merge attributes
+    end
+    
+
+    # alias_method :realLabel, :label
+
+    # def label
+    #   Array(realLabel).first
+    # end
+    # alias_method :dsLabel, :label
 
     def inspect
       "#<#{self.class} @pid=\"#{digital_object ? pid : nil}\" @dsid=\"#{dsid}\" @controlGroup=\"#{controlGroup}\" changed=\"#{changed?}\" @mimeType=\"#{mimeType}\" >"
@@ -46,15 +64,15 @@ module ActiveFedora
       false
     end
 
-    def save
-      super
-      self
-    end
+    # def save
+    #   super
+    #   self
+    # end
 
-    def create
-      super
-      self
-    end
+    # def create
+    #   super
+    #   self
+    # end
 
     # Freeze datastreams such that they can be loaded from Fedora, but can't be changed
     def freeze

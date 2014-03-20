@@ -5,7 +5,7 @@ module ActiveFedora
 
     ## Required by associations
     def new_record?
-      inner_object.new_record?
+      id.nil?
     end
 
     def persisted?
@@ -21,7 +21,7 @@ module ActiveFedora
     #the Solr index for this object.
     def save(*)
       # If it's a new object, set the conformsTo relationship for Fedora CMA
-      new_record? ? create : update_record
+      new_record? ? create_record : update_record
     end
 
     def save!(*)
@@ -31,7 +31,7 @@ module ActiveFedora
     # This can be overriden to assert a different model
     # It's normally called once in the lifecycle, by #create#
     def assert_content_model
-      add_relationship(:has_model, self.class.to_class_uri)
+      self.has_model = self.class.to_class_uri
     end
 
     # Pushes the object and all of its new or dirty datastreams into Fedora
@@ -60,8 +60,8 @@ module ActiveFedora
 
       pid = self.pid ## cache so it's still available after delete
       begin
-        @inner_object.delete
-      rescue RestClient::ResourceNotFound =>e
+        super
+      rescue Ldp::NotFound
         raise ObjectNotFoundError, "Unable to find #{pid} in the repository"
       end
       if ENABLE_SOLR_UPDATES
@@ -128,32 +128,33 @@ module ActiveFedora
   private
     
     # Deals with preparing new object to be saved to Fedora, then pushes it and its datastreams into Fedora. 
-    def create
+    def create_record
       assign_pid
       assert_content_model
+      serialize_datastreams
+      result = super
       persist(create_needs_index?)
+      return !!result
     end
 
     def update_record
+      serialize_datastreams
+      result = super
       persist(update_needs_index?)
+      return !!result
     end
 
-    # replace the unsaved digital object with a saved digital object
     def assign_pid
-      @inner_object = @inner_object.save 
+      # TODO maybe need save here?
     end
     
     def persist(should_update_index)
-      serialize_datastreams
-      result = @inner_object.save
       ### Rubydora re-inits the datastreams after a save, so ensure our copy stays in synch
-      @inner_object.datastreams.each do |dsid, ds|
-        datastreams[dsid] = ds
-        ds.model = self if ds.kind_of? RelsExtDatastream
-      end 
+      # @inner_object.datastreams.each do |dsid, ds|
+      #   datastreams[dsid] = ds
+      # end 
       refresh
       update_index if should_update_index
-      return !!result
     end
   end
 end
