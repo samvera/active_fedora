@@ -2,9 +2,12 @@ require 'spec_helper'
 
 describe ActiveFedora::SimpleDatastream do
 
+  let(:digital_object) { double(new_record?: false, uri: 'http://example.com/rest/foo123') }
+  let(:sample_xml) { "<fields><coverage>coverage1</coverage><coverage>coverage2</coverage><creation_date>2012-01-15</creation_date><mydate>fake-date</mydate><publisher>publisher1</publisher></fields>" }
+
   before do
-    @sample_xml =  "<fields><coverage>coverage1</coverage><coverage>coverage2</coverage><creation_date>2012-01-15</creation_date><mydate>fake-date</mydate><publisher>publisher1</publisher></fields>"
-    @test_ds = ActiveFedora::SimpleDatastream.from_xml(@sample_xml )
+    @test_ds = ActiveFedora::SimpleDatastream.new(digital_object, 'test_ds')
+    @test_ds.content = sample_xml
     @test_ds.field :coverage
     @test_ds.field :creation_date, :date
     @test_ds.field :mydate
@@ -12,7 +15,7 @@ describe ActiveFedora::SimpleDatastream do
 
   end
   it "from_xml should parse everything correctly" do
-    @test_ds.ng_xml.should be_equivalent_to @sample_xml
+    @test_ds.ng_xml.should be_equivalent_to sample_xml
   end
 
   

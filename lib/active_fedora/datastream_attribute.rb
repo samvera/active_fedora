@@ -42,10 +42,10 @@ module ActiveFedora
     end
 
     def reader(obj, *opts)
-      if obj.inner_object.is_a? SolrDigitalObject
+      if obj.is_a? SolrDigitalObject
         begin
           # Look in the cache
-          return obj.inner_object.fetch(field)
+          return obj.fetch(field)
         rescue NoMethodError => e
           # couldn't get it from solr, so try from fedora.
           ActiveFedora::Base.logger.info "Couldn't get #{field} out of solr, because #{e.message}. Trying another way." if ActiveFedora::Base.logger

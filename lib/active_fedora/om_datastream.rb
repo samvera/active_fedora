@@ -3,12 +3,12 @@ require  "om"
 module ActiveFedora
   class OmDatastream < Datastream
 
-    before_save do
-      if content.blank?
-        ActiveFedora::Base.logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}" if ActiveFedora::Base.logger
-        false
-      end
-    end
+    # before_save do
+    #   if content.blank?
+    #     ActiveFedora::Base.logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}"
+    #     false
+    #   end
+    # end
 
     include OM::XML::Document
     include OM::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
@@ -19,8 +19,8 @@ module ActiveFedora
     
     attr_accessor :internal_solr_doc
 
-    def self.default_attributes
-      super.merge(:controlGroup => 'M', :mimeType => 'text/xml')
+    def default_mime_type
+      'text/xml'
     end
 
     # Indicates that this datastream has metadata content. 

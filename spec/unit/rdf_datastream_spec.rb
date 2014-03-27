@@ -3,6 +3,7 @@ require 'spec_helper'
 
 describe ActiveFedora::RDFDatastream do
   describe "a new instance" do
+    subject { ActiveFedora::RDFDatastream.new(double(new_record?: true, uri: '/test:1') , 'descMetadata') }
     its(:metadata?) { should be_true}
     its(:content_changed?) { should be_false}
   end
@@ -24,9 +25,11 @@ describe ActiveFedora::RDFDatastream do
       Object.send(:remove_const, :MyDatastream)
       Object.send(:remove_const, :MyObj)
     end
+
     subject { @obj.reload.descMetadata }
+
     it "should not load the descMetadata datastream when calling content_changed?" do
-      @obj.inner_object.repository.should_not_receive(:datastream_dissemination).with(hash_including(:dsid=>'descMetadata'))
+      subject.should_not_receive(:retrieve_content)
       subject.should_not be_content_changed
     end
 
@@ -54,12 +57,12 @@ describe ActiveFedora::RDFDatastream do
   end
 
   describe "deserialize" do
+    subject { ActiveFedora::NtriplesRDFDatastream.new(double(new_record?: true, uri: '/test:1') , 'descMetadata') }
     it "should be able to handle non-utf-8 characters" do
       # see https://github.com/ruby-rdf/rdf/issues/142
-      ds = ActiveFedora::NtriplesRDFDatastream.new
       data = "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT')
 
-      result = ds.deserialize(data)
+      result = subject.deserialize(data)
       result.dump(:ntriples).should == "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
     end
   end

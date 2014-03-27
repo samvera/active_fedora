@@ -9,11 +9,17 @@ module ActiveFedora::Associations::Builder
       reflection = super
       add_counter_cache_callbacks(reflection) if options[:counter_cache]
       add_touch_callbacks(reflection)         if options[:touch]
+      model.attribute :"#{name}_id", [ predicate, FedoraLens::Lenses.single ]
       configure_dependency
       reflection
     end
 
     private
+      def predicate
+        predicate = options[:property]
+        return predicate if predicate.kind_of? RDF::URI
+        ActiveFedora::Predicates.find_graph_predicate(predicate)
+      end
 
       def add_counter_cache_callbacks(reflection)
         cache_column = reflection.counter_cache_column
@@ -82,6 +88,7 @@ module ActiveFedora::Associations::Builder
         name = self.name
         accessor_name = "#{name}_id"
         model.find_or_create_defined_attribute(accessor_name, 'RELS-EXT', {})
+
         mixin.redefine_method(accessor_name) do
           association(name).id_reader
         end

@@ -27,7 +27,7 @@ module ActiveFedora
     include FedoraLens::Lenses
     extend ActiveModel::Naming
     extend ActiveSupport::DescendantsTracker
-    include SemanticNode
+    # include SemanticNode
     include ActiveFedora::Persistence
     include Scoping
     include Indexing
@@ -45,7 +45,7 @@ module ActiveFedora
     include Core
     include FedoraAttributes
     include ReloadOnSave
-#    include Rdf::Identifiable
+    include Rdf::Identifiable
   end
 
   ActiveSupport.run_load_hooks(:active_fedora, Base)
