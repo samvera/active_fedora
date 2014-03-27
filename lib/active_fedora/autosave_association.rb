@@ -154,7 +154,7 @@ module ActiveFedora
     end
 
     # Reloads the attributes of the object as usual and clears <tt>marked_for_destruction</tt> flag.
-    def reload(options = nil)
+    def reload
       @marked_for_destruction = false
       super
     end

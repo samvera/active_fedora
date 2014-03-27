@@ -23,7 +23,7 @@ module ActiveFedora
           if reflection.source_macro == :belongs_to
           elsif reflection.source_macro == :has_and_belongs_to_many
           else
-            scope = scope.where( ActiveFedora::SolrService.construct_query_for_rel(association.send(:find_predicate) => owner.internal_uri))
+            scope = scope.where( ActiveFedora::SolrService.construct_query_for_rel(association.send(:find_predicate) => owner.uri))
           end
 
           

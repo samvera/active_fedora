@@ -60,19 +60,6 @@ describe ActiveFedora::Datastreams do
     end
   end
 
-  describe "#add_disseminator_location_to_datastreams" do
-    it "should infer dsLocations for E datastreams without hitting Fedora" do
-      
-      mock_specs = {'e' => { :disseminator => 'xyz' }}
-      mock_ds = double(:controlGroup => 'E')
-      ActiveFedora::Base.stub(:ds_specs => mock_specs)
-      ActiveFedora.stub(:config_for_environment => { :url => 'http://localhost'})
-      subject.stub(:pid => 'test:1', :datastreams => {'e' => mock_ds})
-      mock_ds.should_receive(:dsLocation=).with("http://localhost/objects/test:1/methods/xyz")
-      subject.add_disseminator_location_to_datastreams
-    end
-  end
-
   describe ".name_for_dsid" do
     it "should use the name" do
       ActiveFedora::Base.send(:name_for_dsid, 'abc').should == 'abc'

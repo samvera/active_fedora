@@ -17,7 +17,6 @@ module ActiveFedora
         alias_method_chain :inherited, :datastreams
       end
 
-      before_save :add_disseminator_location_to_datastreams
       #before_save :serialize_datastreams
     end
 
@@ -29,17 +28,6 @@ module ActiveFedora
       datastreams.each {|k, ds| ds.serialize! }
     end
 
-    # Adds the disseminator location to the datastream after the pid has been established
-    def add_disseminator_location_to_datastreams
-      self.ds_specs.each do |name,ds_config|
-        ds = datastreams[name]
-        if ds && ds.controlGroup == 'E' && ds_config[:disseminator].present?
-          ds.dsLocation= "#{ActiveFedora.config_for_environment[:url]}/objects/#{pid}/methods/#{ds_config[:disseminator]}"
-        end
-      end
-      true
-    end
-
     #
     # Datastream Management
     #
@@ -49,7 +37,11 @@ module ActiveFedora
     # Datastreams that have been modified in memory are given preference over 
     # the copy in Fedora.
     def datastreams
-      @datastreams ||= DatastreamHash.new(self)
+      @datastreams ||= DatastreamHash.new
+    end
+
+    def clear_datastreams
+      @datastreams = nil
     end
   
     def configure_datastream(ds, ds_spec=nil)
@@ -62,17 +54,19 @@ module ActiveFedora
       end
     end
 
+    include DigitalObject::DatastreamBootstrap
     def datastream_from_spec(ds_spec, name)
-      inner_object.datastream_object_for name, {}, ds_spec
+      datastream_object_for name, {}, ds_spec
     end
 
     def load_datastreams
       local_ds_specs = self.ds_specs.dup
-      inner_object.datastreams.each do |dsid, ds|
-        self.add_datastream(ds)
-        configure_datastream(datastreams[dsid])
-        local_ds_specs.delete(dsid)
-      end
+      # TODO load remote datastreams
+      # datastreams.each do |dsid, ds|
+      #   self.add_datastream(ds)
+      #   configure_datastream(datastreams[dsid])
+      #   local_ds_specs.delete(dsid)
+      # end
       local_ds_specs.each do |name,ds_spec|
         ds = datastream_from_spec(ds_spec, name)
         self.add_datastream(ds)
@@ -102,7 +96,7 @@ module ActiveFedora
     # @param [Hash] opts options: :dsid, :label, :mimeType, :prefix, :checksumType
     def add_file_datastream(file, opts={})
       label = opts.has_key?(:label) ? opts[:label] : ""
-      attrs = {:dsLabel => label, :controlGroup => 'M', :blob => file, :prefix=>opts[:prefix]}
+      attrs = {:blob => file, :prefix=>opts[:prefix]}
       if opts.has_key?(:mime_type)
         attrs.merge!({:mimeType=>opts[:mime_type]})
       elsif opts.has_key?(:mimeType)
@@ -122,8 +116,8 @@ module ActiveFedora
     def create_datastream(type, dsid, opts={})
       klass = type.kind_of?(Class) ? type : type.constantize
       raise ArgumentError, "Argument dsid must be of type string" if dsid && !dsid.kind_of?(String)
-      ds = klass.new(inner_object, dsid, prefix: opts[:prefix])
-      [:mimeType, :controlGroup, :dsLabel, :dsLocation, :checksumType, :versionable].each do |key|
+      ds = klass.new(self, dsid, prefix: opts[:prefix])
+      [:mimeType, :dsLocation, :checksumType, :versionable].each do |key|
         ds.send("#{key}=".to_sym, opts[key]) unless opts[key].nil?
       end
       blob = opts[:blob] 
@@ -131,9 +125,6 @@ module ActiveFedora
         if !ds.mimeType.present? 
           ##TODO, this is all done by rubydora -- remove
           ds.mimeType = blob.respond_to?(:content_type) ? blob.content_type : "application/octet-stream"
-        end
-        if !ds.dsLabel.present? && blob.respond_to?(:path)
-          ds.dsLabel = File.basename(blob.path)
         end
       end
 
@@ -158,8 +149,6 @@ module ActiveFedora
       # @option args [Class] :type The class that will represent this datastream, should extend ``Datastream''
       # @option args [String] :name the handle to refer to this datastream as
       # @option args [String] :label sets the fedora label
-      # @option args [String] :control_group must be one of 'E', 'X', 'M', 'R'
-      # @option args [String] :disseminator Sets the disseminator location see {#add_disseminator_location_to_datastreams}
       # @option args [String] :url 
       # @option args [Boolean] :autocreate Always create this datastream on new objects
       # @option args [Boolean] :versionable Should versioned datastreams be stored
@@ -169,7 +158,6 @@ module ActiveFedora
           :autocreate => false,
           :type=>nil,
           :label=>"",
-          :control_group=>nil,
           :disseminator=>"",
           :url=>"",
           :name=>nil
@@ -183,8 +171,6 @@ module ActiveFedora
       #   @param [String] name 
       #   @param [Hash] args 
       #     @option args :type (ActiveFedora::Datastream) The class the datastream should have
-      #     @option args :label ("File Datastream") The default value to put in the dsLabel field
-      #     @option args :control_group ("M") The type of controlGroup to store the datastream as. Defaults to M
       #     @option args [Boolean] :autocreate Always create this datastream on new objects
       #     @option args [Boolean] :versionable Should versioned datastreams be stored
       # @overload has_file_datastream(args)
@@ -192,16 +178,12 @@ module ActiveFedora
       #   @param [Hash] args 
       #     @option args :name ("content") The dsid of the datastream
       #     @option args :type (ActiveFedora::Datastream) The class the datastream should have
-      #     @option args :label ("File Datastream") The default value to put in the dsLabel field
-      #     @option args :control_group ("M") The type of controlGroup to store the datastream as. Defaults to M
       #     @option args [Boolean] :autocreate Always create this datastream on new objects
       #     @option args [Boolean] :versionable Should versioned datastreams be stored
       def has_file_datastream(*args)
         @file_ds_defaults ||= {
           :autocreate => false,
           :type=>ActiveFedora::Datastream,
-          :label=>"File Datastream",
-          :control_group=>"M",
           :name=>"content"
         }
         spec_datastream(args, @file_ds_defaults)

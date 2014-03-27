@@ -20,20 +20,16 @@ describe ActiveFedora::OmDatastream do
   
   before(:each) do
     @mock_inner = double('inner object')
-    @mock_repo = double('repository')
-    @mock_repo.stub(:datastream_dissemination=>'My Content', :config=>{}, :datastream_profile=>{})
-    @mock_inner.stub(:repository).and_return(@mock_repo)
-    @mock_inner.stub(:pid)
+    @mock_inner.stub(:uri)
     @mock_inner.stub(:new_record? => false)
     @test_ds = ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata")
-    @test_ds.stub(:new? => false, :profile => {}, :datastream_content => '<test_xml/>')
+    @test_ds.stub(:new_record? => false, :profile => {}, :datastream_content => '<test_xml/>')
     @test_ds.content="<test_xml/>"
-    @test_ds.stub(:new? => false)
   end
+
+  subject { ActiveFedora::OmDatastream.new @mock_inner, 'descMetadata' }
   
   its(:metadata?) { should be_true}
-
-  its(:controlGroup) { should == "M"}
 
   it "should include the Solrizer::XML::TerminologyBasedSolrizer for .to_solr support" do
     ActiveFedora::OmDatastream.included_modules.should include(OM::XML::TerminologyBasedSolrizer)
@@ -45,19 +41,19 @@ describe ActiveFedora::OmDatastream do
       @test_ds.ng_xml.should be_instance_of(Nokogiri::XML::Document)
     end
     it 'should load xml from blob if provided' do
-      test_ds1 = ActiveFedora::OmDatastream.new(nil, 'ds1')
+      test_ds1 = ActiveFedora::OmDatastream.new(@mock_inner, 'ds1')
       test_ds1.content="<xml><foo/></xml>"
       test_ds1.ng_xml.to_xml.should be_equivalent_to("<?xml version=\"1.0\"?>\n<xml>\n  <foo/>\n</xml>\n")
     end
     it "should initialize from #xml_template if no xml is provided" do
       ActiveFedora::OmDatastream.should_receive(:xml_template).and_return("<fake template/>")
-      n = ActiveFedora::OmDatastream.new
+      n = ActiveFedora::OmDatastream.new(@mock_inner, 'ds1')
       n.ng_xml.should be_equivalent_to("<fake template/>")
     end
   end
 
   describe "#prefix" do
-    subject { ActiveFedora::OmDatastream.new(nil, 'descMetadata') }
+    subject { ActiveFedora::OmDatastream.new(@mock_inner, 'descMetadata') }
     it "should reflect the dsid" do
       subject.send(:prefix).should == "desc_metadata__"
     end
@@ -75,7 +71,10 @@ describe ActiveFedora::OmDatastream do
       its(:to_solr) {should == { }}
     end
     describe "without a dsid" do
-      subject { ActiveFedora::OmDatastream.new }
+      before do
+        @mock_inner.stub(datastreams: {})
+      end
+      subject { ActiveFedora::OmDatastream.new(@mock_inner) }
       it "should raise an error" do
         expect{subject.to_solr}.to raise_error RuntimeError, "to_solr requires the dsid to be set"
       end
@@ -97,7 +96,7 @@ describe ActiveFedora::OmDatastream do
       after do
         Object.send(:remove_const, :MyDatastream)
       end
-      subject { MyDatastream.new }
+      subject { MyDatastream.new(@mock_inner, 'descMetadata') }
       it "should use the prefix" do
         expect(subject.to_solr).to have_key('foo__title_tesim')
       end
@@ -110,7 +109,7 @@ describe ActiveFedora::OmDatastream do
   describe ".update_indexed_attributes" do
     
     before(:each) do
-      @mods_ds = Hydra::ModsArticleDatastream.new(nil, 'descMetadata')
+      @mods_ds = Hydra::ModsArticleDatastream.new(@mock_inner, 'descMetadata')
       @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
     end
     
@@ -172,7 +171,7 @@ describe ActiveFedora::OmDatastream do
   describe ".get_values" do
     
     before(:each) do
-      @mods_ds = Hydra::ModsArticleDatastream.new(nil, 'modsDs')
+      @mods_ds = Hydra::ModsArticleDatastream.new(@mock_inner, 'modsDs')
       @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
     end
     
@@ -192,15 +191,20 @@ describe ActiveFedora::OmDatastream do
       @test_ds.should respond_to(:save)
     end
     it "should persist the product of .to_xml in fedora" do
-      @mock_repo.stub(:datastream).and_return('')
-      @test_ds.stub(:new? => true)
+      @test_ds.stub(new_record?: true)
+      resp = double("response", status: 201)
+      client = double("client")
+      client.should_receive(:post).with("/fcr:content", 'fake xml', {"Content-Type"=>"text/xml"}).and_return(resp)
+      resource = double("mock resource", client: client)
+      orm = double("orm", resource: resource)
+      @test_ds.stub(orm: orm)
       @test_ds.stub(:ng_xml_changed? => true)
+      @test_ds.stub(:xml_loaded => true)
       @test_ds.stub(:to_xml => "fake xml")
-      @mock_repo.should_receive(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'M', :dsState => 'A', :mimeType=>'text/xml')
 
       @test_ds.serialize!
       @test_ds.save
-      @test_ds.mimeType.should == 'text/xml'
+      @test_ds.mime_type.should == 'text/xml'
     end
   end
   
@@ -213,7 +217,7 @@ describe ActiveFedora::OmDatastream do
     end
 
     it "should mark the object as changed" do
-      subject.stub(:new? => false, :controlGroup => 'M')
+      subject.stub(:new? => false)
       subject.content = "<a />"
       subject.should be_changed
     end
@@ -243,7 +247,7 @@ describe ActiveFedora::OmDatastream do
       @test_ds2.ng_xml.to_xml.should be_equivalent_to("<xmlelement/>")
     end
     it "should mark the datastream as changed" do
-      @test_ds2.stub(:new? => false, :controlGroup => 'M')
+      @test_ds2.stub(:new? => false)
       @test_ds2.should_not be_changed 
       @test_ds2.ng_xml = @sample_raw_xml
       @test_ds2.should be_changed
@@ -292,7 +296,7 @@ describe ActiveFedora::OmDatastream do
 
   describe '.get_values_from_solr' do
     before(:each) do
-      @mods_ds = ActiveFedora::OmDatastream.new(nil, 'descMetadata')
+      @mods_ds = ActiveFedora::OmDatastream.new(@mock_inner, 'descMetadata')
       @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
     end
 
@@ -348,7 +352,7 @@ describe ActiveFedora::OmDatastream do
 
   describe '.update_values' do
     before(:each) do
-      @mods_ds = ActiveFedora::OmDatastream.new
+      @mods_ds = ActiveFedora::OmDatastream.new(@mock_inner, 'descMetadata')
       @mods_ds.content= fixture(File.join("mods_articles","mods_article1.xml")).read
     end
 
@@ -370,7 +374,7 @@ describe ActiveFedora::OmDatastream do
     end
 
     it "should set changed to true" do
-      mods_ds = Hydra::ModsArticleDatastream.new
+      mods_ds = Hydra::ModsArticleDatastream.new(@mock_inner, 'descMetadata')
       mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
       mods_ds.update_values([{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"})
       mods_ds.should be_changed
@@ -380,7 +384,7 @@ describe ActiveFedora::OmDatastream do
   describe '.term_values' do
 
     before(:each) do
-      @mods_ds = ActiveFedora::OmDatastream.new
+      @mods_ds = ActiveFedora::OmDatastream.new(@mock_inner, 'descMetadata')
       @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
     end
 
@@ -414,7 +418,7 @@ describe ActiveFedora::OmDatastream do
     end
     subject { @obj.reload.descMetadata } 
     it "should not load the descMetadata datastream when calling content_changed?" do
-      @obj.inner_object.repository.should_not_receive(:datastream_dissemination).with(hash_including(:dsid=>'descMetadata'))
+      @obj.should_not_receive(:content)
       subject.should_not be_content_changed
     end
   end

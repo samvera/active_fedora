@@ -75,11 +75,11 @@ module ActiveFedora
       load_relationships unless relationships_loaded
 
       if args.empty?
-        raise "Must have internal_uri" unless internal_uri
-        return object_relations.to_graph(internal_uri)
+        raise "Must have uri" unless uri
+        return object_relations.to_graph(uri)
       end
       rels = object_relations[args.first] || []
-      rels.map {|o| o.respond_to?(:internal_uri) ? o.internal_uri : o }.compact   #TODO, could just return the object
+      rels.map {|o| o.respond_to?(:uri) ? o.uri : o }.compact   #TODO, could just return the object
     end
 
     def load_relationships
@@ -94,40 +94,5 @@ module ActiveFedora
       end
     end
 
-    # @return [String] the internal fedora URI
-    def internal_uri
-      self.class.internal_uri(pid)
-    end
-
-    module ClassMethods
-      # Returns a suitable uri object for :has_model
-      # Should reverse Model#from_class_uri
-      def to_class_uri(attrs = {})
-        if self.respond_to? :pid_suffix
-          pid_suffix = self.pid_suffix
-        else
-          pid_suffix = attrs.fetch(:pid_suffix, ContentModel::CMODEL_PID_SUFFIX)
-        end
-        if self.respond_to? :pid_namespace
-          namespace = self.pid_namespace
-        else
-          namespace = attrs.fetch(:namespace, ContentModel::CMODEL_NAMESPACE)
-        end
-        "info:fedora/#{namespace}:#{ContentModel.sanitized_class_name(self)}#{pid_suffix}" 
-      end
-
-      # @param [String] pid the fedora object identifier
-      # @return [String] a URI represented as a string
-      def internal_uri(pid)
-        "info:fedora/#{pid}"
-      end
-
-      # @param [String] uri a uri (as a string)
-      # @return [String] the pid component of the URI
-      def pid_from_uri(uri)
-        uri.gsub("info:fedora/", "")
-      end
-
-    end
   end
 end

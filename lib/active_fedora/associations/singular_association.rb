@@ -33,7 +33,7 @@ module ActiveFedora
       private
 
         def find_target
-          scoped.first.tap { |record| set_inverse_instance(record) }
+          scope.take.tap { |record| set_inverse_instance(record) }
         end
 
         # Implemented by subclasses

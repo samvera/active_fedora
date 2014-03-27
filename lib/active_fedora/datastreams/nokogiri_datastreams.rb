@@ -37,7 +37,7 @@ module ActiveFedora
 
       def ng_xml 
         @ng_xml ||= begin
-          if new?
+          if new_record?
             ## Load up the template
             xml = self.class.xml_template
           else
@@ -93,8 +93,8 @@ module ActiveFedora
       end
 
       def content_changed?
-        return false if !xml_loaded
-        super
+        return false unless xml_loaded
+        ng_xml_changed?
       end
 
       def to_xml(xml = nil)
@@ -120,7 +120,7 @@ module ActiveFedora
         return xml.to_xml {|config| config.no_declaration}.strip
       end
 
-      def local_or_remote_content(ensure_fetch = true)
+      def content
         @content = to_xml if ng_xml_changed? || autocreate?
         super
       end

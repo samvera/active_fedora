@@ -28,9 +28,18 @@ module ActiveFedora
         return count
       end
 
-      def insert_record(record, force = false, validate = true)
-        set_belongs_to_association_for(record)
-        record.save
+      def set_owner_attributes(record)
+        record[reflection.foreign_key] = owner.uri
+      end
+
+      def insert_record(record, validate = true, raise = false)
+        set_owner_attributes(record)
+
+        if raise
+          record.save!(:validate => validate)
+        else
+          record.save(:validate => validate)
+        end
       end
 
       protected

@@ -60,6 +60,25 @@ module ActiveFedora
       end
     end
 
+    # Gives a record (or N records if a parameter is supplied) without any implied
+    # order. The order will depend on the database implementation.
+    # If an order is supplied it will be respected.
+    #
+    #   Person.take # returns an object fetched by SELECT * FROM people LIMIT 1
+    #   Person.take(5) # returns 5 objects fetched by SELECT * FROM people LIMIT 5
+    #   Person.where(["name LIKE '%?'", name]).take
+    def take(limit = nil)
+      limit ? limit(limit).to_a : find_take
+    end
+
+    def find_take
+      if loaded?
+        @records.first
+      else
+        @take ||= limit(1).to_a.first
+      end
+    end
+
     # Returns true if object having the pid or matching the conditions exists in the repository
     # Returns false if param is false (or nil) 
     # @param[ActiveFedora::Base, String, Hash] object, pid or hash of conditions
@@ -71,11 +90,11 @@ module ActiveFedora
       when Hash
         find_with_conditions(conditions, {rows: 1}).present?
       when String
-        !!DigitalObject.find(self.klass, conditions) 
+        !!find(conditions)
       else
         raise ArgumentError, "`conditions' argument must be ActiveFedora::Base, String, or Hash: #{conditions.inspect}"
       end
-    rescue ActiveFedora::ObjectNotFoundError 
+    rescue ActiveFedora::ObjectNotFoundError
       false
     end
 
@@ -167,11 +186,24 @@ module ActiveFedora
     
     protected
 
+<<<<<<< HEAD
     def load_from_fedora(pid, cast)
       cast = true if klass == ActiveFedora::Base && cast.nil?
       inner = DigitalObject.find(klass, pid)
       af_base = klass.allocate.init_with(inner)
       cast ? af_base.adapt_to_cmodel : af_base
+=======
+    def load_from_fedora(id, cast)
+      cast = true if self == ActiveFedora::Base && cast.nil?
+      # inner = @klass.find(id)
+      resource = Ldp::Resource.new(FedoraLens.connection, @klass.id_to_uri(id))
+      inner = @klass.new(resource)
+    rescue Ldp::NotFound
+      raise ActiveFedora::ObjectNotFoundError
+      # af_base = @klass.allocate.init_with(inner)
+      # cast ? af_base.adapt_to_cmodel : af_base
+
+>>>>>>> WIP checkpoint
     end
 
     def find_with_ids(ids, cast)

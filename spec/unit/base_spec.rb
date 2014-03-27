@@ -10,90 +10,14 @@ describe ActiveFedora::Base do
     end
   end
 
-  describe "sharding" do
-    it "should have a shard_index" do
-      ActiveFedora::Base.shard_index(@this_pid).should == 0
-    end
-
-    context "When the repository is NOT sharded" do
-      subject {ActiveFedora::Base.connection_for_pid('test:bar')}
-      before(:each) do
-        ActiveFedora.config.stub(:sharded?).and_return(false)
-        ActiveFedora::Base.fedora_connection = {}
-        ActiveFedora.config.stub(:credentials).and_return(:url=>'myfedora')
-        Rubydora::Fc3Service.any_instance.stub(:repository_profile)
-      end
-      it { should be_kind_of Rubydora::Repository}
-      it "should be the standard connection" do
-        subject.client.url.should == 'myfedora'
-      end
-      describe "assign_pid" do
-        it "should use fedora to generate pids" do
-          # TODO: This juggling of Fedora credentials & establishing connections should be handled by an establish_fedora_connection method,
-          # possibly wrap it all into a fedora_connection method - MZ 06-05-2012
-          stubfedora = double("Fedora")
-          stubfedora.should_receive(:connection).and_return(double("Connection", :mint =>"sample:newpid"))
-          # Should use ActiveFedora.config.credentials as a single hash rather than an array of shards
-          ActiveFedora::RubydoraConnection.should_receive(:new).with(ActiveFedora.config.credentials).and_return(stubfedora)
-          ActiveFedora::Base.assign_pid(ActiveFedora::Base.new.inner_object)
-        end
-      end
-      describe "shard_index" do
-        it "should always return zero (the first and only connection)" do
-          ActiveFedora::Base.shard_index('test:bar').should == 0
-        end
-      end
-    end
-    context "When the repository is sharded" do
-      before :each do
-        ActiveFedora.config.stub(:sharded?).and_return(true)
-        ActiveFedora::Base.fedora_connection = {}
-        ActiveFedora.config.stub(:credentials).and_return([{:url=>'shard1'}, {:url=>'shard2'} ])
-      end
-      describe "assign_pid" do
-        it "should always use the first shard to generate pids" do
-          stubhard1 = double("Shard")
-          stubhard2 = double("Shard")
-          stubhard1.should_receive(:connection).and_return(double("Connection", :mint =>"sample:newpid"))
-          stubhard2.should_receive(:connection).never
-          ActiveFedora::Base.fedora_connection = {0 => stubhard1, 1 => stubhard2}
-          ActiveFedora::Base.assign_pid(ActiveFedora::Base.new.inner_object)
-        end
-      end
-      describe "shard_index" do
-        it "should use modulo of md5 of the pid to distribute objects across shards" do
-          ActiveFedora::Base.shard_index('test:bar').should == 0
-          ActiveFedora::Base.shard_index('test:nanana').should == 1
-        end
-      end
-      describe "the repository" do
-        before do
-          Rubydora::Fc3Service.any_instance.stub(:repository_profile)
-        end
-        describe "for test:bar" do
-          subject {ActiveFedora::Base.connection_for_pid('test:bar')}
-          it "should be shard1" do
-            subject.client.url.should == 'shard1'
-          end
-        end
-        describe "for test:baz" do
-          subject {ActiveFedora::Base.connection_for_pid('test:nanana')}
-          it "should be shard1" do
-            subject.client.url.should == 'shard2'
-          end
-        end
-      end
-    end
-
-  end
-
   describe "reindex_everything" do
     it "should call update_index on every object except for the fedora-system objects" do
-       Rubydora::Repository.any_instance.should_receive(:search).
-            and_yield(double(pid:'XXX')).and_yield(double(pid:'YYY')).and_yield(double(pid:'ZZZ')).
-            and_yield(double(pid:'fedora-system:ServiceDeployment-3.0')).
-            and_yield(double(pid:'fedora-system:ServiceDefinition-3.0')).
-            and_yield(double(pid:'fedora-system:FedoraObject-3.0'))
+       # TODO redo these expectations when we reimplement reindex_everything
+       # Rubydora::Repository.any_instance.should_receive(:search).
+       #      and_yield(double(pid:'XXX')).and_yield(double(pid:'YYY')).and_yield(double(pid:'ZZZ')).
+       #      and_yield(double(pid:'fedora-system:ServiceDeployment-3.0')).
+       #      and_yield(double(pid:'fedora-system:ServiceDefinition-3.0')).
+       #      and_yield(double(pid:'fedora-system:FedoraObject-3.0'))
 
        mock_update = double(:mock_obj)
        mock_update.should_receive(:update_index).exactly(3).times
@@ -105,8 +29,9 @@ describe ActiveFedora::Base do
 
     it "should accept a query param for the search" do
        query_string = "pid~*"
-       Rubydora::Repository.any_instance.should_receive(:search).with(query_string).
-            and_yield(double(pid:'XXX')).and_yield(double(pid:'YYY')).and_yield(double(pid:'ZZZ'))
+       # TODO redo these expectations when we reimplement reindex_everything
+       # Rubydora::Repository.any_instance.should_receive(:search).with(query_string).
+            # and_yield(double(pid:'XXX')).and_yield(double(pid:'YYY')).and_yield(double(pid:'ZZZ'))
        mock_update = double(:mock_obj)
        mock_update.should_receive(:update_index).exactly(3).times
        ActiveFedora::Base.should_receive(:find).with('XXX').and_return(mock_update)
@@ -154,26 +79,16 @@ describe ActiveFedora::Base do
     before(:each) do
       @this_pid = increment_pid.to_s
       stub_get(@this_pid)
-      Rubydora::Repository.any_instance.stub(:client).and_return(@mock_client)
       ActiveFedora::Base.stub(:assign_pid).and_return(@this_pid)
 
       @test_object = ActiveFedora::Base.new
     end
 
-    after(:each) do
-      begin
-      ActiveFedora::SolrService.stub(:instance)
-      #@test_object.delete
-      rescue
-      end
-    end
-
 
     describe '#new' do
-      it "should not save or get an pid on init" do
-        Rubydora::DigitalObject.any_instance.should_receive(:save).never
+      it "should not get a pid on init" do
         ActiveFedora::Base.should_receive(:assign_pid).never
-        f = FooHistory.new
+        FooHistory.new
       end
 
       it "should be able to create with a custom pid" do
@@ -200,13 +115,13 @@ describe ActiveFedora::Base do
     ### Methods for ActiveModel::Conversions
     it "should have to_param once it's saved" do
       @test_object.to_param.should be_nil
-      @test_object.inner_object.stub(new_record?: false, pid: 'foo:123')
+      @test_object.stub(new_record?: false, pid: 'foo:123')
       @test_object.to_param.should == 'foo:123'
     end
 
     it "should have to_key once it's saved" do
       @test_object.to_key.should be_nil
-      @test_object.inner_object.stub(new_record?: false, pid: 'foo:123')
+      @test_object.stub(new_record?: false, pid: 'foo:123')
       @test_object.to_key.should == ['foo:123']
     end
 
@@ -338,7 +253,7 @@ describe ActiveFedora::Base do
         @test_object.stub(:new_record? => true)
         @test_object.should_receive(:assign_pid)
         @test_object.should_receive(:serialize_datastreams)
-        @test_object.inner_object.should_receive(:save)
+        @test_object.should_receive(:create_record)
         @test_object.should_receive(:update_index)
         @test_object.save
       end
@@ -346,7 +261,7 @@ describe ActiveFedora::Base do
       it "should update an existing record" do
         @test_object.stub(:new_record? => false)
         @test_object.should_receive(:serialize_datastreams)
-        @test_object.inner_object.should_receive(:save)
+        @test_object..should_receive(:update_record)
         @test_object.should_receive(:update_index)
         @test_object.save
       end

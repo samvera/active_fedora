@@ -13,7 +13,7 @@ module ActiveFedora
           return @subject_block = block
         end
 
-        @subject_block ||= lambda { |ds| ds.pid }
+        @subject_block ||= lambda { |ds| ds.digital_object.id }
       end
 
       # Utility method which can be overridden to determine the object
@@ -38,9 +38,9 @@ module ActiveFedora
       serialize
     end
 
-    def content=(content)
+    def content=(new_content)
       resource.clear!
-      resource << deserialize(content)
+      resource << deserialize(new_content)
       content
     end
 
@@ -94,12 +94,12 @@ module ActiveFedora
     end
 
     def serialize
-      resource.set_subject!(pid) if (digital_object or pid) and rdf_subject.node?
+      resource.set_subject!(id) if id and rdf_subject.node?
       resource.dump serialization_format
     end
 
     def deserialize(data=nil)
-      return RDF::Graph.new if new? && data.nil?
+      return RDF::Graph.new if new_record? && data.nil?
       data ||= datastream_content
 
       # Because datastream_content can return nil, we should check that here.

@@ -1,12 +1,13 @@
 require 'spec_helper'
 
 describe ActiveFedora::RdfxmlRDFDatastream do
+  let(:inner_object) { ActiveFedora::Base.new('/test:1') }
   describe "a new instance" do
     before(:each) do
       class MyRdfxmlDatastream < ActiveFedora::RdfxmlRDFDatastream
         property :publisher, :predicate => RDF::DC.publisher
       end
-      @subject = MyRdfxmlDatastream.new(@inner_object, 'mixed_rdf')
+      @subject = MyRdfxmlDatastream.new(inner_object, 'mixed_rdf')
       @subject.stub(:pid => 'test:1')
     end
     after(:each) do
@@ -77,7 +78,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
     end
 
     describe "a new instance" do
-      subject { MyDatastream.new(double('inner object', :pid=>'test:1', :new_record? =>true), 'descMetadata', about:"http://library.ucsd.edu/ark:/20775/") }
+      subject { MyDatastream.new(double('parent object', :uri=>'http://localhost/foo', :new_record? =>true), 'descMetadata', about:"http://library.ucsd.edu/ark:/20775/") }
       it "should have a subject" do
         subject.rdf_subject.to_s.should == "http://library.ucsd.edu/ark:/20775/"
       end
@@ -86,18 +87,15 @@ describe ActiveFedora::RdfxmlRDFDatastream do
 
     describe "an instance with content" do
       subject do
-        subject = MyDatastream.new(double('inner object', :pid=>'test:1', :new_record? =>true), 'descMetadata', about:"http://library.ucsd.edu/ark:/20775/")
+        subject = MyDatastream.new(double('parent object', :uri=>'http://localhost/foo', :new_record? =>true), 'descMetadata', about:"http://library.ucsd.edu/ark:/20775/")
         subject.content = File.new('spec/fixtures/damsObjectModel.xml').read
         subject
       end
       it "should have a subject" do
         subject.rdf_subject.to_s.should == "http://library.ucsd.edu/ark:/20775/"
       end
-      it "should have controlGroup" do
-        subject.controlGroup.should == 'M'
-      end
       it "should have mimeType" do
-        subject.mimeType.should == 'text/xml'
+        subject.mime_type.should == 'text/xml'
       end
       it "should have dsid" do
         subject.dsid.should == 'descMetadata'

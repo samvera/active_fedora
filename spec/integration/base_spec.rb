@@ -26,16 +26,6 @@ describe "A base object with metadata" do
     end
   end
 
-  describe "setting object state" do
-    it "should store it" do
-      obj = MockAFBaseRelationship.create
-      obj.state='D'
-      obj.save!
-      obj.reload
-      obj.state.should == 'D'
-    end
-  end
-
   describe "that already exists in the repo" do
     before do
       @release = MockAFBaseRelationship.create()
@@ -114,7 +104,7 @@ describe "A base object with metadata" do
     it 'should raise an error if not persisted' do
       @object = MockAFBaseRelationship.new
       # You will want this stub or else it will be really chatty in your STDERR
-      @object.inner_object.logger.stub(:error)
+      # @object.logger.stub(:error)
       expect {
         @object.reload
       }.to raise_error(ActiveFedora::ObjectNotFoundError)
@@ -134,8 +124,7 @@ describe "Datastreams synched together" do
     end
   end
   it "Should update datastream" do
-    @nc = DSTest.new
-    @nc.save
+    @nc = DSTest.create
     @nc.test_ds.content.should == 'XXX'
     ds  = @nc.datastreams['test_ds']
     ds.content = "Foobar"
@@ -233,12 +222,6 @@ describe ActiveFedora::Base do
       @test_object2.save
       pending "@test_object2 should have assertion hasModel is 'info:fedora/afmodel:ActiveFedora_Base'"
     end
-    it "should merge attributes from fedora into attributes hash" do
-      @test_object2.save
-      inner_object = @test_object2.inner_object
-      inner_object.pid.should == @test_object2.pid
-      inner_object.should respond_to(:lastModifiedDate)
-    end
 
     it 'when the object is updated, it also updates modification time field in solr' do
       @test_object2.save
@@ -280,9 +263,9 @@ describe ActiveFedora::Base do
   
   describe ".metadata_streams" do
     it "should return all of the datastreams from the object that are kinds of OmDatastream " do
-      mds1 = ActiveFedora::SimpleDatastream.new(@test_object.inner_object, "md1")
-      mds2 = ActiveFedora::QualifiedDublinCoreDatastream.new(@test_object.inner_object, "qdc")
-      fds = ActiveFedora::Datastream.new(@test_object.inner_object, "fds")
+      mds1 = ActiveFedora::SimpleDatastream.new(@test_object, "md1")
+      mds2 = ActiveFedora::QualifiedDublinCoreDatastream.new(@test_object, "qdc")
+      fds = ActiveFedora::Datastream.new(@test_object, "fds")
       @test_object.add_datastream(mds1)
       @test_object.add_datastream(mds2)
       @test_object.add_datastream(fds)      
@@ -307,43 +290,43 @@ describe ActiveFedora::Base do
 
   describe '.add_file_datastream' do
 
-   it "should set the correct mimeType if :mime_type, :mimeType, or :content_type passed in and path does not contain correct extension" do
+   it "should set the correct mime_type if :mime_type, :mimeType, or :content_type passed in and path does not contain correct extension" do
      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
      @test_object.add_file_datastream(f)
      @test_object.save
      test_obj = ActiveFedora::Base.find(@test_object.pid)
      #check case where nothing passed in does not have correct mime type
-     test_obj.datastreams["DS1"].mimeType.should == "application/octet-stream"
+     test_obj.datastreams["DS1"].mime_type.should == "application/octet-stream"
      @test_object2 = ActiveFedora::Base.new
      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
      @test_object2.add_file_datastream(f,{:mimeType=>"image/jpeg"})
      @test_object2.save
      test_obj = ActiveFedora::Base.find(@test_object2.pid)
-     test_obj.datastreams["DS1"].mimeType.should == "image/jpeg"
+     test_obj.datastreams["DS1"].mime_type.should == "image/jpeg"
      @test_object3 = ActiveFedora::Base.new
      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
      @test_object3.add_file_datastream(f,{:mime_type=>"image/jpeg"})
      @test_object3.save
      test_obj = ActiveFedora::Base.find(@test_object3.pid)
-     test_obj.datastreams["DS1"].mimeType.should == "image/jpeg"
+     test_obj.datastreams["DS1"].mime_type.should == "image/jpeg"
      @test_object4 = ActiveFedora::Base.new
      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
      @test_object4.add_file_datastream(f,{:content_type=>"image/jpeg"})
      @test_object4.save
      test_obj = ActiveFedora::Base.find(@test_object4.pid)
-     test_obj.datastreams["DS1"].mimeType.should == "image/jpeg"
+     test_obj.datastreams["DS1"].mime_type.should == "image/jpeg"
    end
   end
   
   describe '.add_datastream' do
   
     it "should be able to add datastreams" do
-      ds = ActiveFedora::Datastream.new(@test_object.inner_object, 'DS1')
+      ds = ActiveFedora::Datastream.new(@test_object, 'DS1')
       @test_object.add_datastream(ds).should be_true
     end
       
     it "adding and saving should add the datastream to the datastreams array" do
-      ds = ActiveFedora::Datastream.new(@test_object.inner_object, 'DS1') 
+      ds = ActiveFedora::Datastream.new(@test_object, 'DS1') 
       ds.content = fixture('dino.jpg').read
       @test_object.datastreams.should_not have_key("DS1")
       @test_object.add_datastream(ds)
@@ -354,7 +337,7 @@ describe ActiveFedora::Base do
   end
   
   it "should retrieve blobs that match the saved blobs" do
-    ds = ActiveFedora::Datastream.new(@test_object.inner_object, 'DS1')
+    ds = ActiveFedora::Datastream.new(@test_object, 'DS1')
     ds.content = "foo"
     new_ds = ds.save
     @test_object.add_datastream(new_ds)
