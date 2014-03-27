@@ -14,7 +14,7 @@ module ActiveFedora::Rdf
     end
 
     def persisted?
-      @persisted ||= (not datastream.new?)
+      @persisted ||= (not datastream.new_record?)
     end
   end
 end

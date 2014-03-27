@@ -2,13 +2,6 @@ module ActiveFedora
   module Core
     extend ActiveSupport::Concern
     
-    included do
-      attribute :has_model, [ RDF::URI.new("info:fedora/fedora-system:def/relations-external#hasModel")]
-      # TODO is it possible to put defaults here?
-      attribute :create_date, [ RDF::URI.new("http://fedora.info/definitions/v4/repository#created")]
-      attribute :modified_date, [ RDF::URI.new("http://fedora.info/definitions/v4/repository#lastModified")]
-    end
-
     # Constructor.  You may supply a custom +:pid+, or we call the Fedora Rest API for the
     # next available Fedora pid, and mark as new object.
     # Also, if +attrs+ does not contain +:pid+ but does contain +:namespace+ it will pass the
@@ -17,7 +10,6 @@ module ActiveFedora
     def initialize(attrs = nil)
       super
       @association_cache = {}
-      self.relationships_loaded = true
       load_datastreams
       run_callbacks :initialize
     end
@@ -26,8 +18,10 @@ module ActiveFedora
     def reload
       raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved" unless persisted?
       clear_association_cache
-      clear_relationships
-      init_with(self.class.find(self.pid).inner_object)
+      clear_datastreams
+      load_datastreams
+      super
+      self
     end
 
     # Initialize an empty model object and set the +inner_obj+
@@ -139,6 +133,22 @@ module ActiveFedora
     end
     
     module ClassMethods
+      # Returns a suitable uri object for :has_model
+      # Should reverse Model#from_class_uri
+      def to_class_uri(attrs = {})
+        if self.respond_to? :pid_suffix
+          pid_suffix = self.pid_suffix
+        else
+          pid_suffix = attrs.fetch(:pid_suffix, ContentModel::CMODEL_PID_SUFFIX)
+        end
+        if self.respond_to? :pid_namespace
+          namespace = self.pid_namespace
+        else
+          namespace = attrs.fetch(:namespace, ContentModel::CMODEL_NAMESPACE)
+        end
+        "info:fedora/#{namespace}:#{ContentModel.sanitized_class_name(self)}#{pid_suffix}" 
+      end
+
       private
       def relation
         Relation.new(self)

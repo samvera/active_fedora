@@ -22,9 +22,9 @@ module ActiveFedora
       # while enforcing mimeType and/or datastream type (ie. external, managed, etc.) if defined. 
       # ====Examples 
       #                 
-      #  has_datastream :name=>"thumbnails",:prefix => "THUMB",:type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'                     
-      #  has_datastream :name=>"EADs", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml", :controlGroup=>'M' 
-      #  has_datastream :name=>"external_images", :type=>ActiveFedora::Datastream, :controlGroup=>'E' 
+      #  has_datastream "thumbnails", prefix: "THUMB", type: ActiveFedora::Datastream, :mimeType=>"image/jpeg"                     
+      #  has_datastream "EADs", type: ActiveFedora::Datastream, :mimeType=>"application/xml" 
+      #  has_datastream "external_images", type: ActiveFedora::Datastream 
       #
       # Required Keys in args
       #  :name  -  name to give this datastream (must be unique)
@@ -32,8 +32,7 @@ module ActiveFedora
       # Optional Keys in args
       #  :prefix - used to create the DSID plus an index ie. THUMB1, THUMB2.  If :prefix is not specified, defaults to :name value in all uppercase 
       #  :type - defaults to ActiveFedora::Datastream if you would like content specific class to be used supply it here
-      #  :mimeType - if supplied it will ensure any datastreams added are of this type, if not supplied any mimeType is acceptabl e
-      #  :controlGroup -  possible values "X", "M", "R", or "E" (InlineXML, Managed Content, Redirect, or External Referenced) If controlGroup is 'E' or 'R' it expects a dsLocation be defined when adding the datastream.
+      #  :mimeType - if supplied it will ensure any datastreams added are of this type, if not supplied any mimeType is acceptable
       #
       # You use the datastream attribute using helper methods created for each datastream name:
       #
@@ -131,11 +130,11 @@ module ActiveFedora
       # ActiveFedora::Base child class.    
       #  
       #  has_datastream :name=>"audio_file", :prefix=>"AUDIO", :type=>ActiveFedora::Datastream, :mimeType=>"audio/x-wav" 
-      #  has_datastream :name=>"external_images", :prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'E'
+      #  has_datastream :name=>"external_images", :prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg"
       #
       # The above examples result in the following hash
-      #  {"audio_file"=>{:prefix=>"AUDIO",:type=>ActiveFedora::Datastream, :mimeType=>"audio/x-wav", :controlGroup=>'M'},
-      #   "external_images=>{:prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'E'}}
+      #  {"audio_file"=>{:prefix=>"AUDIO",:type=>ActiveFedora::Datastream, :mimeType=>"audio/x-wav"},
+      #   "external_images=>{:prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg"}}
       #
       # This hash is later used when adding a named datastream such as an "audio_file" as defined above.
       def named_datastreams_desc
@@ -147,13 +146,13 @@ module ActiveFedora
         named_datastreams_desc.keys
       end
       
-      # Calls add_named_datastream while assuming it will be managed content and sets :blob and :controlGroup values accordingly
+      # Calls add_named_datastream while assuming it will be managed content and sets :blob value accordingly
       # ====Parameters
       #  name: Datastream name
       #  file: The file to add for this datastream
       #  opts: Options hash.  See +add_named_datastream+ for expected keys and values
       def add_named_file_datastream(name, file, opts={})
-        opts.merge!({:blob=>file,:controlGroup=>'M'})
+        opts.merge!({:blob=>file})
         add_named_datastream(name,opts)
       end
       
@@ -165,9 +164,7 @@ module ActiveFedora
       # The following are expected keys in opts hash:
       #   :label => Defaults to the file name
       #   :blob or :file  => Required to point to the datastream file being added if managed content
-      #   :controlGroup => defaults to 'M' for managed, can also be 'E' external and 'R' for redirected
       #   :content_type => required if the file does not respond to 'content_type' and should match :mimeType in has_datastream definition if defined
-      #   :dsLocation => holds uri location of datastream.  Required only if :controlGroup is type 'E' or 'R'.
       #   :dsid or :dsId => Optional, and used to update an existing datastream with dsid supplied.  Will throw an error if dsid does not exist and does not match prefix pattern for datastream name
       def add_named_datastream(name,opts={})
         unless named_datastreams_desc.has_key?(name) && named_datastreams_desc[name].has_key?(:type) 
@@ -183,32 +180,27 @@ module ActiveFedora
           
         label = opts.has_key?(:label) ? opts[:label] : ""
 
-        #only do these steps for managed datastreams
-        unless (opts.has_key?(:controlGroup)&&opts[:controlGroup]!="M")
-          if opts.has_key?(:file)
-            opts.merge!({:blob => opts[:file]}) 
-            opts.delete(:file)
-          end
-          
-          raise "You must define parameter blob for this managed datastream to load for #{pid}" unless opts.has_key?(:blob)
-          
-          #if no explicit label and is a file use original file name for label
-          if !opts.has_key?(:label)&&opts[:blob].respond_to?(:original_filename)
-            label = opts[:blob].original_filename
-          end
-          
-          if opts[:blob].respond_to?(:content_type)&&!opts[:blob].content_type.nil? && !opts.has_key?(:content_type)
-            opts.merge!({:content_type=>opts[:blob].content_type})
-          end
+        if opts.has_key?(:file)
+          opts.merge!({:blob => opts[:file]}) 
+          opts.delete(:file)
+        end
+        
+        raise "You must define parameter blob for this managed datastream to load for #{pid}" unless opts.has_key?(:blob)
+        
+        #if no explicit label and is a file use original file name for label
+        if !opts.has_key?(:label)&&opts[:blob].respond_to?(:original_filename)
+          label = opts[:blob].original_filename
+        end
+        
+        if opts[:blob].respond_to?(:content_type)&&!opts[:blob].content_type.nil? && !opts.has_key?(:content_type)
+          opts.merge!({:content_type=>opts[:blob].content_type})
+        end
 
-          raise "The blob must respond to content_type or the hash must have :content_type or :mime_type property set" unless opts.has_key?(:content_type)
-          
-          #throw error for mimeType mismatch
-          if named_datastreams_desc[name].has_key?(:mimeType) && !named_datastreams_desc[name][:mimeType].eql?(opts[:content_type])
-            raise "Content type mismatch for add datastream #{name} to #{pid}.  Expected: #{named_datastreams_desc[name][:mimeType]}, Actual: #{opts[:content_type]}"
-          end
-        else 
-          label = opts[:dsLocation] if (opts.has_key?(:dsLocation)) 
+        raise "The blob must respond to content_type or the hash must have :content_type or :mime_type property set" unless opts.has_key?(:content_type)
+        
+        #throw error for mimeType mismatch
+        if named_datastreams_desc[name].has_key?(:mimeType) && !named_datastreams_desc[name][:mimeType].eql?(opts[:content_type])
+          raise "Content type mismatch for add datastream #{name} to #{pid}.  Expected: #{named_datastreams_desc[name][:mimeType]}, Actual: #{opts[:content_type]}"
         end
         
         opts.merge!(:dsLabel => label)
@@ -256,11 +248,8 @@ module ActiveFedora
       # array of datastream objects that have been added
       # ====Example
       # For the following has_datastream entries and a datastream defined for minivan only would be
-      #  has_datastream :name=>"minivan", :prefix => "VAN", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'M'
-      #  has_datastream :name=>"external_images", :prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'E'
-      #
-      # Returns
-      #  {"external_images"=>[],"thumbnails"=>{#<ActiveFedora::Datastream:0x7ffd6512daf8 ...}} 
+      #  has_datastream :name=>"minivan", :prefix => "VAN", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg"
+      #  has_datastream :name=>"external_images", :prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg"
       def named_datastreams
         ds_values = {}
         self.class.class_named_datastreams_desc.keys.each do |name|
@@ -274,7 +263,7 @@ module ActiveFedora
       # === Example
       # For the following has_datastream call, assume we have added two datastreams.
       # 
-      #  has_datastream :name=>"thumbnails",:prefix => "THUMB",:type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'                     
+      #  has_datastream :name=>"thumbnails",:prefix => "THUMB",:type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
       #
       # It would then return
       #  {"thumbnails=>["THUMB1", "THUMB2"]}
@@ -291,11 +280,11 @@ module ActiveFedora
       # ActiveFedora::Base child class.    
       #  
       #  has_datastream :name=>"audio_file", :prefix=>"AUDIO", :type=>ActiveFedora::Datastream, :mimeType=>"audio/x-wav" 
-      #  has_datastream :name=>"external_images", :prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'E'
+      #  has_datastream :name=>"external_images", :prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg"
       #
       # The above examples result in the following hash
-      #  {"audio_file"=>{:prefix=>"AUDIO",:type=>ActiveFedora::Datastream, :mimeType=>"audio/x-wav", :controlGroup=>'M'},
-      #   "external_images=>{:prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg", :controlGroup=>'E'}}
+      #  {"audio_file"=>{:prefix=>"AUDIO",:type=>ActiveFedora::Datastream, :mimeType=>"audio/x-wav"},
+      #   "external_images=>{:prefix=>"EXTIMG", :type=>ActiveFedora::Datastream,:mimeType=>"image/jpeg"}}
       #
       # This hash is later used when adding a named datastream such as an "audio_file" as defined above.
       def named_datastreams_desc

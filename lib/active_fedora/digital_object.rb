@@ -1,5 +1,5 @@
 module ActiveFedora
-  class DigitalObject# < Rubydora::DigitalObject
+  class DigitalObject
     attr_accessor :original_class
     
     module DatastreamBootstrap
@@ -22,27 +22,13 @@ module ActiveFedora
         ds.default_attributes = attributes
         # would rather not load profile here in the call to .new?, so trusting :autocreate attribute
         if ds_spec[:autocreate] # and ds.new?
-          ds.datastream_will_change!
+          # TODO need to do something here
+          #ds.datastream_will_change!
         end
         ds
       end
     end    
     include DatastreamBootstrap
-
-    def self.find(original_class, pid)
-      raise ActiveFedora::ObjectNotFoundError.new("Unable to find #{pid.inspect} in fedora. ") unless pid.present?
-      conn = original_class.connection_for_pid(pid)
-      obj = begin
-        super(pid, conn)
-      rescue #Rubydora::RecordNotFound
-        raise ActiveFedora::ObjectNotFoundError, "Unable to find '#{pid}' in fedora. See logger for details."
-      end
-      obj.original_class = original_class
-      # PID is not found, but was "well-formed" for its Fedora request. So
-      # an object is instantiated with that PID.
-      raise ActiveFedora::ObjectNotFoundError, "Unable to find '#{pid}' in fedora" if obj.new?
-      obj
-    end
 
     def self.find_or_initialize(original_class, pid)
       conn = original_class.connection_for_pid(pid)

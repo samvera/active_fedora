@@ -2,42 +2,14 @@ module ActiveFedora
   module Associations
     class BelongsToAssociation < SingularAssociation #:nodoc:
 
-      def id_writer(id)
-        remove_matching_property_relationship
-        return if id.blank?
-        @owner.add_relationship(@reflection.options[:property], ActiveFedora::Base.internal_uri(id))
-      end
-
-      def id_reader
-        # need to find the id with the correct class
-        ids = @owner.ids_for_outbound(@reflection.options[:property])
-
-        return if ids.empty? 
-        # This incurs a lot of overhead, but it's necessary if the users use one property for more than one association.
-        # e.g.
-        #   belongs_to :author, :property=>:has_member, :class_name=>'Person'
-        #   belongs_to :publisher, :property=>:has_member
-        results = SolrService.query(ActiveFedora::SolrService.construct_query_for_pids(ids))
-        results.each do |result|
-          return result['id'] if SolrService.classes_from_solr_document(result).include? klass
-        end
-        return nil
-      end
-
       def replace(record)
-        if record.nil?
-          id_writer(nil)
-        else
-          raise_on_type_mismatch(record)
-          id_writer(record.id)
-          @updated = true
+        raise_on_type_mismatch(record) if record
 
-          #= (AssociationProxy === record ? record.target : record)
-        end
+        replace_keys(record)
+
+        @updated = true if record
+
         self.target = record
-
-        loaded!
-        record
       end
 
       def reset
@@ -50,11 +22,13 @@ module ActiveFedora
       end
 
       private
-        def find_target
-          pid = id_reader
-          return unless pid
-          solr_result = SolrService.query(construct_query(pid)) 
-          return ActiveFedora::SolrService.reify_solr_results(solr_result).first
+
+        def replace_keys(record)
+          if record
+            owner[reflection.foreign_key] = record.uri
+          else
+            owner[reflection.foreign_key] = nil
+          end
         end
 
         def construct_query pid
@@ -68,8 +42,10 @@ module ActiveFedora
         end
 
         def remove_matching_property_relationship
-          ids = @owner.ids_for_outbound(@reflection.options[:property])
-          return if ids.empty? 
+          # puts "Results: #{@owner.graph.query([@owner.uri,  predicate, nil])}"
+          ids = @owner.send :"#{@reflection.name}_id"
+          # ids = @owner.ids_for_outbound(@reflection.options[:property])
+          # puts "new #{new_ids.inspect} vs old #{ids.inspect}"
           ids.each do |id|
             result = SolrService.query(ActiveFedora::SolrService.construct_query_for_pids([id]))
             hit = ActiveFedora::SolrService.reify_solr_results(result).first

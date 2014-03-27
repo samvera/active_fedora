@@ -109,7 +109,7 @@ module ActiveFedora::Rdf
           return
         end
         val = val.to_uri if val.respond_to? :to_uri
-        raise 'value must be an RDF URI, Node, Literal, or a valid datatype. See RDF::Literal' unless
+        raise "value must be an RDF URI, Node, Literal, or a valid datatype. You passed #{val.class} See RDF::Literal" unless
           val.kind_of? RDF::Value or val.kind_of? RDF::Literal
         parent.insert [rdf_subject, predicate, val]
       end

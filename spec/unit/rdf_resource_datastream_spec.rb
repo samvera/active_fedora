@@ -25,20 +25,19 @@ describe ActiveFedora::RDFDatastream do
     end
 
     class DummyAsset < ActiveFedora::Base
-      has_metadata :name => 'descMetadata', :type => DummyResource
-      has_attributes :title, datastream: 'descMetadata', multiple: true
-      has_attributes :license, :datastream => 'descMetadata', :multiple => true
-      has_attributes :relation, :datastream => 'descMetadata', :at => [:license, :relation], :multiple => false
+      has_metadata  'descMetadata', type: DummyResource
+      has_attributes :title, :license, datastream: 'descMetadata', multiple: true
+      has_attributes :relation, datastream: 'descMetadata', at: [:license, :relation], multiple: false
     end
   end
 
   after do
-    Object.send(:remove_const, "DummyAsset") if Object
-    Object.send(:remove_const, "DummyResource") if Object
-    Object.send(:remove_const, "DummySubnode") if Object
+    Object.send(:remove_const, "DummyAsset")
+    Object.send(:remove_const, "DummyResource")
+    Object.send(:remove_const, "DummySubnode")
   end
 
-  subject {DummyAsset.new}
+  subject { DummyAsset.new }
 
   describe "#to_solr" do
     before do

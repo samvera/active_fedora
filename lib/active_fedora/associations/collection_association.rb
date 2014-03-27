@@ -331,7 +331,7 @@ module ActiveFedora
 
         def construct_query
 
-          clauses = {find_predicate => @owner.internal_uri}
+          clauses = {find_predicate => @owner.uri}
           clauses[:has_model] = @reflection.class_name.constantize.to_class_uri if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base'
           @counter_query = @finder_query = ActiveFedora::SolrService.construct_query_for_rel(clauses)
         end
@@ -343,7 +343,8 @@ module ActiveFedora
         # If the association is polymorphic the type of the owner is also set.
         def set_belongs_to_association_for(record)
           unless @owner.new_record?
-            record.add_relationship(find_predicate, @owner)
+            record["#{@reflection.name}_id"] = @owner.uri
+            # record.add_relationship(find_predicate, @owner)
           end
         end
 
@@ -372,13 +373,13 @@ module ActiveFedora
           find_class_for_relation(klass, @owner.class.superclass.to_s.underscore.to_sym)
         end
 
-        def create_record(attrs)
+        def create_record(attrs, raise = false)
           attrs.update(@reflection.options[:conditions]) if @reflection.options[:conditions].is_a?(Hash)
           ensure_owner_is_not_new
           record = @reflection.klass.create do
             @reflection.build_association(attrs)
           end
-          set_belongs_to_association_for(record)
+          insert_record(record, true, raise)
           if block_given?
             add_record_to_target_with_callbacks(record) { |*block_args| yield(*block_args) }
           else
