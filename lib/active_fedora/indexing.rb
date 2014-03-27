@@ -91,23 +91,14 @@ module ActiveFedora
       # @param [String] query a string that conforms to the query param format
       #   of the underlying search's API
       def reindex_everything(query = nil)
-        connections.each do |conn|
-          conn.search(query) do |object|
-            next if object.pid.start_with?('fedora-system:')
-            ActiveFedora::Base.find(object.pid).update_index
-          end
-        end
+        #TODO this is broken because it's a fedora3 api
+        # we should write a Sparql query: all things where fcrepo:mixinTypes is fedora:object 
+        raise "not implemented"
+        # big_list_of_node_ids.each do |id|
+        #   ActiveFedora::Base.find(id).update_index
+        # end
       end
 
-      private
-
-      def connections
-        if ActiveFedora.config.sharded?
-          return ActiveFedora.config.credentials.map { |cred| ActiveFedora::RubydoraConnection.new(cred).connection}
-        else
-          return [ActiveFedora::RubydoraConnection.new(ActiveFedora.config.credentials).connection]
-        end
-      end
     end
   end
 end

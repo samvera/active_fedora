@@ -2,11 +2,17 @@ module ActiveFedora
 
   #This class represents a Fedora datastream
   class Datastream
+    include FedoraLens
+    attribute :mime_type, [RDF::URI.new("http://fedora.info/definitions/v4/repository#mimeType"), Lenses.single, Lenses.literal_to_string]
+
+    include ActiveModel::Dirty
+    define_attribute_methods :content
+
     extend ActiveModel::Callbacks
     define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, :only => :after    
 
-    attr_writer :digital_object
+    attr_reader :digital_object, :dsid
     attr_accessor :last_modified
 
     # @param digital_object [DigitalObject] the digital object that this object belongs to
@@ -15,14 +21,70 @@ module ActiveFedora
     # @option options [String,IO] :content the content for the datastream
     # @option options [String] :dsLabel label for the datastream
     # @option options [String] :dsLocation location for an external or redirect datastream
-    # @option options [String] :controlGroup a controlGroup for the datastream
     # @option options [String] :mimeType the mime-type of the content
     # @option options [String] :prefix the prefix for the auto-generated DSID (not to be confused with the solr prefix)
     # @option options [Boolean] :versionable is the datastream versionable
-    def initialize(digital_object=nil, dsid=nil, options={})
-      prefix = options.delete(:prefix)
+    def initialize(digital_object, dsid=nil, options={})
+      raise ArgumentError, "Digital object is nil" unless digital_object
+      @digital_object = digital_object
       dsid = nil if dsid == ''
-      dsid ||= generate_dsid(digital_object, prefix || "DS")
+      dsid ||= generate_dsid(digital_object, options.delete(:prefix) || "DS")
+      @dsid = dsid
+      if digital_object.new_record?
+        init_core("#{digital_object.uri}/#{dsid}")
+      else
+        init_core(nil)
+      end
+    end
+
+    def content= string_or_io
+      content_will_change!
+      @content = string_or_io
+    end
+
+    def content
+      return @content if new_record?
+      @content ||= datastream_content
+      @content
+    end
+
+    def datastream_content
+      return if new_record?
+      @ds_content ||= retrieve_content
+    end
+
+    def mime_type
+      attributes["mimeType"] || default_mime_type
+    end
+
+    def default_mime_type
+      'text/plain'
+    end
+
+    def content_changed?
+      !!@content
+    end
+
+    def uri
+      new_record? ? "#{digital_object.uri}/#{dsid}" : super
+    end
+
+    def save
+      return unless content_changed?
+      raise "Can't generate uri because the parent object isn't saved" if digital_object.new_record?
+      resp = orm.resource.client.post "#{uri}/fcr:content", content, 'Content-Type' => mime_type
+      case resp.status
+        when 201
+          return true
+        when 404
+          raise ActiveFedora::ObjectNotFoundError, "Unable to add content at #{uri}/fcr:content"
+        else
+          raise "unexpected return value #{resp.status}"
+      end
+    end
+
+    def retrieve_content
+      orm.resource.client.get("#{uri}/fcr:content").body
     end
 
     class << self
@@ -39,6 +101,7 @@ module ActiveFedora
       @default_attributes = default_attributes.merge attributes
     end
     
+    # TODO size premis:hasSize
 
     # alias_method :realLabel, :label
 
@@ -48,7 +111,7 @@ module ActiveFedora
     # alias_method :dsLabel, :label
 
     def inspect
-      "#<#{self.class} @pid=\"#{digital_object ? pid : nil}\" @dsid=\"#{dsid}\" @controlGroup=\"#{controlGroup}\" changed=\"#{changed?}\" @mimeType=\"#{mimeType}\" >"
+      "#<#{self.class} @pid=\"#{digital_object.id}\" @dsid=\"#{dsid}\" changed=\"#{changed?}\" @mimeType=\"#{mimeType}\" >"
     end
 
     #compatibility method for rails' url generators. This method will 
@@ -63,16 +126,6 @@ module ActiveFedora
     def metadata?
       false
     end
-
-    # def save
-    #   super
-    #   self
-    # end
-
-    # def create
-    #   super
-    #   self
-    # end
 
     # Freeze datastreams such that they can be loaded from Fedora, but can't be changed
     def freeze

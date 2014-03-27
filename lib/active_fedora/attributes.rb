@@ -15,16 +15,16 @@ module ActiveFedora
       end
     end
 
-    # def attributes=(properties)
-    #   properties.each do |k, v|
-    #     respond_to?(:"#{k}=") ? send(:"#{k}=", v) : raise(UnknownAttributeError, "#{self.class} does not have an attribute `#{k}'")
-    #   end
-    # end
+    def attributes=(properties)
+      properties.each do |k, v|
+        respond_to?(:"#{k}=") ? send(:"#{k}=", v) : raise(UnknownAttributeError, "#{self.class} does not have an attribute `#{k}'")
+      end
+    end
 
 
-    # def attributes
-    #   self.class.defined_attributes.keys.each_with_object({"id" => id}) {|key, hash| hash[key] = self[key]}
-    # end
+    def attributes
+      self.class.defined_attributes.keys.each_with_object({"id" => id}) {|key, hash| hash[key] = self[key]}.merge(super)
+    end
 
     # Calling inspect may trigger a bunch of loads, but it's mainly for debugging, so no worries.
     def inspect
@@ -65,9 +65,7 @@ module ActiveFedora
     private
     def array_reader(field, *args)
       if md = /^(.+)_id$/.match(field)
-        # a belongs_to association reader
-        association = association(md[1].to_sym)
-        return association.id_reader if association
+        return self.send(field)
       end
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
 
@@ -76,9 +74,7 @@ module ActiveFedora
 
     def array_setter(field, args)
       if md = /^(.+)_id$/.match(field)
-        # a belongs_to association writer
-        association = association(md[1].to_sym)
-        return association.id_writer(args) if association
+        return self.send(:"#{field}=", args)
       end
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
       self.class.defined_attributes[field].writer(self, args)

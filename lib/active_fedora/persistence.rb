@@ -52,6 +52,8 @@ module ActiveFedora
     #the underlying inner_object.  If this object is held in any relationships (ie inbound relationships
     #outside of this object it will remove it from those items rels-ext as well
     def delete
+      return self if new_record?
+
       reflections.each_pair do |name, reflection|
         if reflection.macro == :has_many
           association(name).delete_all

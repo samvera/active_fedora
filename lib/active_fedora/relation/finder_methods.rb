@@ -60,13 +60,32 @@ module ActiveFedora
       end
     end
 
+    # Gives a record (or N records if a parameter is supplied) without any implied
+    # order. The order will depend on the database implementation.
+    # If an order is supplied it will be respected.
+    #
+    #   Person.take # returns an object fetched by SELECT * FROM people LIMIT 1
+    #   Person.take(5) # returns 5 objects fetched by SELECT * FROM people LIMIT 5
+    #   Person.where(["name LIKE '%?'", name]).take
+    def take(limit = nil)
+      limit ? limit(limit).to_a : find_take
+    end
+
+    def find_take
+      if loaded?
+        @records.first
+      else
+        @take ||= limit(1).to_a.first
+      end
+    end
+
     # Returns true if the pid exists in the repository
     # @param[String] pid
     # @return[boolean]
     def exists?(conditions)
       conditions = conditions.id if Base === conditions
       return false if !conditions
-      !!DigitalObject.find(self.klass, conditions)
+      !!find(conditions)
     rescue ActiveFedora::ObjectNotFoundError
       false
     end
@@ -159,14 +178,17 @@ module ActiveFedora
     
     protected
 
-    def load_from_fedora(pid, cast)
+    def load_from_fedora(id, cast)
       cast = true if self == ActiveFedora::Base && cast.nil?
-      inner = DigitalObject.find(@klass, pid)
-      af_base = @klass.allocate.init_with(inner)
-      cast ? af_base.adapt_to_cmodel : af_base
+      # inner = @klass.find(id)
+      resource = Ldp::Resource.new(FedoraLens.connection, @klass.id_to_uri(id))
+      inner = @klass.new(resource)
+    rescue Ldp::NotFound
+      raise ActiveFedora::ObjectNotFoundError
+      # af_base = @klass.allocate.init_with(inner)
+      # cast ? af_base.adapt_to_cmodel : af_base
 
     end
-
 
     def find_with_ids(ids, cast)
       expects_array = ids.first.kind_of?(Array)

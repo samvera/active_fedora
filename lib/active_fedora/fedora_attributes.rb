@@ -1,7 +1,14 @@
 module ActiveFedora
   module FedoraAttributes
+    extend ActiveSupport::Concern
 
-    delegate :state=, :label=, to: :inner_object
+    included do
+      attribute :has_model, [ RDF::URI.new("info:fedora/fedora-system:def/relations-external#hasModel")]
+      # TODO is it possible to put defaults here?
+      attribute :create_date, [ RDF::URI.new("http://fedora.info/definitions/v4/repository#created")]
+      attribute :modified_date, [ RDF::URI.new("http://fedora.info/definitions/v4/repository#lastModified")]
+    end
+
 
     def pid
       # TODO deprecate this
@@ -16,24 +23,5 @@ module ActiveFedora
     def owner_id=(owner_id)
       @inner_object.ownerId=(owner_id)
     end
-
-    def label
-      Array(@inner_object.label).first
-    end
-
-    # def state
-    #   Array(@inner_object.state).first
-    # end
-
-    #return the create_date of the inner object (unless it's a new object)
-    # def create_date
-    #   new_record? ?  Time.now : Array(@inner_object.createdDate).first
-    # end
-
-    #return the modification date of the inner object (unless it's a new object)
-    # def modified_date
-    #   new_record? ? Time.now : Array(@inner_object.lastModifiedDate).first
-    # end
-
   end
 end

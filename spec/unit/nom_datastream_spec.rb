@@ -22,10 +22,6 @@ describe ActiveFedora::NomDatastream do
       subject.to_solr['a_s'].should include('123')
       subject.to_solr['b_s'].should include('asdf')
     end
-
-    it "should be a managed datastream" do
-      subject.controlGroup.should == 'M'
-    end
   end
 
   describe "with options for .set_terminology" do

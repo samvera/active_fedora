@@ -21,7 +21,6 @@ describe ActiveFedora::ContentModel do
   before(:each) do
     stub_get('__nextid__')
     ActiveFedora::Base.stub(:assign_pid).and_return("__nextid__")
-    Rubydora::Repository.any_instance.stub(:client).and_return(@mock_client)
     @test_cmodel = ActiveFedora::ContentModel.new
   end
   

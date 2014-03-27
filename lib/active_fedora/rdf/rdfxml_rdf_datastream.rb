@@ -6,8 +6,8 @@ module ActiveFedora
       :rdfxml 
     end
 
-    def self.default_attributes
-      super.merge(:mimeType => 'text/xml')
+    def mime_type 
+      'text/xml'
     end
   end
 end
