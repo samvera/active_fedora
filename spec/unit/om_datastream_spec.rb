@@ -190,11 +190,12 @@ describe ActiveFedora::OmDatastream do
     it "should provide .save" do
       @test_ds.should respond_to(:save)
     end
+
     it "should persist the product of .to_xml in fedora" do
       @test_ds.stub(new_record?: true)
       resp = double("response", status: 201)
       client = double("client")
-      client.should_receive(:post).with("/fcr:content", 'fake xml', {"Content-Type"=>"text/xml"}).and_return(resp)
+      client.should_receive(:post).with("/descMetadata/fcr:content", 'fake xml', {"Content-Type"=>"text/xml"}).and_return(resp)
       resource = double("mock resource", client: client)
       orm = double("orm", resource: resource)
       @test_ds.stub(orm: orm)
