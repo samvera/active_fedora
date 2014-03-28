@@ -54,7 +54,6 @@ module ActiveFedora
     end
 
     def content
-      puts "Get content new? #{new_record?}"
       return @content if new_record?
       @content ||= datastream_content
       @content
@@ -100,9 +99,14 @@ module ActiveFedora
       resp = orm.resource.client.get("#{uri}/fcr:content")
       case resp.status
         when 201
-          return resp.body
+          resp.body
         when 404
-          raise ActiveFedora::ObjectNotFoundError, "Unable to find content at #{uri}/fcr:content"
+          # TODO
+          # this happens because rdf_datastream calls datastream_content. 
+          # which happens because it needs a PID even though it isn't saved.
+          # which happens because we don't know if something exists if you give it a pid
+          #raise ActiveFedora::ObjectNotFoundError, "Unable to find content at #{uri}/fcr:content"
+          ''
         else
           raise "unexpected return value #{resp.status}"
       end

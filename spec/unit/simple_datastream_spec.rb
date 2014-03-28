@@ -7,6 +7,7 @@ describe ActiveFedora::SimpleDatastream do
 
   before do
     @test_ds = ActiveFedora::SimpleDatastream.new(digital_object, 'test_ds')
+    @test_ds.stub(retrieve_content: '') # DS grabs the old content to compare against the new
     @test_ds.content = sample_xml
     @test_ds.field :coverage
     @test_ds.field :creation_date, :date
