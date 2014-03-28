@@ -6,7 +6,7 @@ module ActiveFedora
     attribute :mime_type, [RDF::URI.new("http://fedora.info/definitions/v4/repository#mimeType"), Lenses.single, Lenses.literal_to_string]
 
     include ActiveModel::Dirty
-    define_attribute_methods :content
+    define_attribute_methods 'content'
 
     extend ActiveModel::Callbacks
     define_model_callbacks :save, :create, :destroy
@@ -30,10 +30,21 @@ module ActiveFedora
       dsid = nil if dsid == ''
       dsid ||= generate_dsid(digital_object, options.delete(:prefix) || "DS")
       @dsid = dsid
-      if digital_object.new_record?
-        init_core("#{digital_object.uri}/#{dsid}")
+      init_core("#{digital_object.uri}/#{dsid}")
+      unless digital_object.new_record?
+        @new_record = false
+      end
+    end
+
+    def datastream_will_change!
+      attribute_will_change! :profile
+    end
+
+    def attribute_will_change!(attr)
+      if attr == 'content'
+        changed_attributes['content'] = true
       else
-        init_core(nil)
+        super
       end
     end
 
@@ -43,6 +54,7 @@ module ActiveFedora
     end
 
     def content
+      puts "Get content new? #{new_record?}"
       return @content if new_record?
       @content ||= datastream_content
       @content
@@ -75,6 +87,7 @@ module ActiveFedora
       resp = orm.resource.client.post "#{uri}/fcr:content", content, 'Content-Type' => mime_type
       case resp.status
         when 201
+          @changed_attributes.clear
           return true
         when 404
           raise ActiveFedora::ObjectNotFoundError, "Unable to add content at #{uri}/fcr:content"
@@ -84,7 +97,15 @@ module ActiveFedora
     end
 
     def retrieve_content
-      orm.resource.client.get("#{uri}/fcr:content").body
+      resp = orm.resource.client.get("#{uri}/fcr:content")
+      case resp.status
+        when 201
+          return resp.body
+        when 404
+          raise ActiveFedora::ObjectNotFoundError, "Unable to find content at #{uri}/fcr:content"
+        else
+          raise "unexpected return value #{resp.status}"
+      end
     end
 
     class << self
