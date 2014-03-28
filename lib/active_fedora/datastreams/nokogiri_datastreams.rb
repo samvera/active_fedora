@@ -5,26 +5,6 @@ module ActiveFedora
 
       module ClassMethods
 
-        # Create an instance of this class based on xml content
-        # @param [String, File, Nokogiri::XML::Node] xml the xml content to build from
-        # @param [ActiveFedora::OmDatastream] tmpl the Datastream object that you are building @default a new instance of this class
-        # Careful! If you call this from a constructor, be sure to provide something 'ie. self' as the @tmpl. Otherwise, you will get an infinite loop!
-        def from_xml(xml, tmpl=nil)
-          tmpl = self.new if tmpl.nil?  ## This path is used only for unit testing (e.g. MarpaDCDatastream.from_xml(fixture("data.xml")) )
-
-          if !xml.present?
-            tmpl.ng_xml = self.xml_template
-          elsif xml.kind_of? Nokogiri::XML::Node || xml.kind_of?(Nokogiri::XML::Document)
-            tmpl.ng_xml = xml
-          else
-            tmpl.ng_xml = Nokogiri::XML::Document.parse(xml)
-          end
-
-          tmpl.ng_xml_doesnt_change!
-
-          return tmpl
-        end
-        
         def xml_template
           Nokogiri::XML::Document.parse("<xml/>")
         end
