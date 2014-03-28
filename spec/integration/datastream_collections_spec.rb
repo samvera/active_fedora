@@ -4,8 +4,8 @@ describe ActiveFedora::DatastreamCollections do
   before(:all) do
     class MockAFBaseDatastream < ActiveFedora::Base
       include ActiveFedora::DatastreamCollections
-      has_datastream "thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
-      has_datastream "high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
+      has_datastream name: "thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
+      has_datastream name: "high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
     end
   end
 
@@ -32,12 +32,12 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2.named_datastreams["high"].size.should == 1
       t2_thumb1 = @test_object2.named_datastreams["thumbnail"].first
       t2_thumb1.dsid.should == ds.dsid
-      t2_thumb1.mimeType.should == ds.mimeType
+      t2_thumb1.mime_type.should == ds.mime_type
       t2_thumb1.pid.should == ds.pid
       t2_thumb1.dsLabel.should == ds.dsLabel
       t2_high1 = @test_object2.named_datastreams["high"].first
       t2_high1.dsid.should == ds2.dsid
-      t2_high1.mimeType.should == ds2.mimeType
+      t2_high1.mime_type.should == ds2.mime_type
       t2_high1.pid.should == ds2.pid
       t2_high1.dsLabel.should == ds2.dsLabel
     end
