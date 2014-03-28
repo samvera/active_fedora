@@ -74,7 +74,6 @@ module ActiveFedora #:nodoc:
 
     autoload :RelationshipGraph
     autoload :Scoping
-    autoload :SemanticNode
     autoload :Serialization
     autoload :SimpleDatastream
     autoload :SolrDigitalObject

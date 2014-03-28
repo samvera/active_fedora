@@ -27,7 +27,6 @@ module ActiveFedora
     include FedoraLens::Lenses
     extend ActiveModel::Naming
     extend ActiveSupport::DescendantsTracker
-    # include SemanticNode
     include ActiveFedora::Persistence
     include Scoping
     include Loggable
