@@ -37,9 +37,10 @@ describe ActiveFedora::Datastream do
       title.content = "Test Title"
       xml_content.root.add_child title
       
-      @test_object.datastreams["descMetadata"].stub(:before_save)
-      @test_object.datastreams["descMetadata"].content = xml_content.to_s
-      @test_object.datastreams["descMetadata"].save
+      ds = @test_object.descMetadata
+      ds.stub(:before_save)
+      ds.content = xml_content.to_s
+      ds.save
       
       found = Nokogiri::XML::Document.parse(@test_object.class.find(@test_object.pid).datastreams['descMetadata'].content)
       found.xpath('//dc/title/text()').first.inner_text.should == title.content
