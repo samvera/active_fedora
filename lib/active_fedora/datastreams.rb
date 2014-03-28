@@ -93,19 +93,9 @@ module ActiveFedora
     # Add the given file as a datastream in the object
     #
     # @param [File] file the file to add
-    # @param [Hash] opts options: :dsid, :label, :mimeType, :prefix, :checksumType
+    # @param [Hash] opts options: :dsid, :prefix, :checksumType
     def add_file_datastream(file, opts={})
-      label = opts.has_key?(:label) ? opts[:label] : ""
       attrs = {:blob => file, :prefix=>opts[:prefix]}
-      if opts.has_key?(:mime_type)
-        attrs.merge!({:mimeType=>opts[:mime_type]})
-      elsif opts.has_key?(:mimeType)
-        attrs.merge!({:mimeType=>opts[:mimeType]})
-      elsif opts.has_key?(:content_type)
-        attrs.merge!({:mimeType=>opts[:content_type]})
-      end
-      attrs[:checksumType] = opts[:checksumType] if opts[:checksumType]
-      attrs[:versionable] = opts[:versionable] unless opts[:versionable].nil?
       ds = create_datastream(self.class.datastream_class_for_name(opts[:dsid]), opts[:dsid], attrs)
       add_datastream(ds).tap do |dsid|
         self.class.build_datastream_accessor(dsid) unless respond_to? dsid
@@ -117,18 +107,7 @@ module ActiveFedora
       klass = type.kind_of?(Class) ? type : type.constantize
       raise ArgumentError, "Argument dsid must be of type string" if dsid && !dsid.kind_of?(String)
       ds = klass.new(self, dsid, prefix: opts[:prefix])
-      [:mimeType, :dsLocation, :checksumType, :versionable].each do |key|
-        ds.send("#{key}=".to_sym, opts[key]) unless opts[key].nil?
-      end
-      blob = opts[:blob] 
-      if blob 
-        if !ds.mimeType.present? 
-          ##TODO, this is all done by rubydora -- remove
-          ds.mimeType = blob.respond_to?(:content_type) ? blob.content_type : "application/octet-stream"
-        end
-      end
-
-      ds.content = blob || "" 
+      ds.content = opts[:blob] || "" 
       ds
     end
 
@@ -148,7 +127,6 @@ module ActiveFedora
       # @param [Hash] args 
       # @option args [Class] :type The class that will represent this datastream, should extend ``Datastream''
       # @option args [String] :name the handle to refer to this datastream as
-      # @option args [String] :label sets the fedora label
       # @option args [String] :url 
       # @option args [Boolean] :autocreate Always create this datastream on new objects
       # @option args [Boolean] :versionable Should versioned datastreams be stored
@@ -157,7 +135,6 @@ module ActiveFedora
         @metadata_ds_defaults ||= {
           :autocreate => false,
           :type=>nil,
-          :label=>"",
           :disseminator=>"",
           :url=>"",
           :name=>nil
