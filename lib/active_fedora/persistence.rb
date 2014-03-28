@@ -155,6 +155,10 @@ module ActiveFedora
       # @inner_object.datastreams.each do |dsid, ds|
       #   datastreams[dsid] = ds
       # end 
+      datastreams.select { |_, ds| ds.changed? }.each do |_, ds|
+        ds.save
+      end
+
       refresh
       update_index if should_update_index
     end
