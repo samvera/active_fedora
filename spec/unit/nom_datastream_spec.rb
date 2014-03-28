@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::NomDatastream do
+  let(:inner_object) { ActiveFedora::Base.new('/test:1') }
   describe "test" do
     subject {
       class MyNomDatastream < ActiveFedora::NomDatastream
@@ -11,8 +12,11 @@ describe ActiveFedora::NomDatastream do
         end
       end 
 
-      MyNomDatastream.from_xml '<root><a>123</a><b><c>asdf</c></b></root>'
+      MyNomDatastream.new(inner_object, 'descMetadata')
     }
+    before do
+      subject.content = '<root><a>123</a><b><c>asdf</c></b></root>'
+    end
 
     it "should work" do
       subject.a.should include("123")
@@ -37,7 +41,11 @@ describe ActiveFedora::NomDatastream do
         end
       end
 
-      TerminologyOptions.from_xml %(
+      TerminologyOptions.new(inner_object, 'descMetadata')
+    }
+    
+    before do
+      subject.content = %(
         <root
           xmlns:dc="http://purl.org/dc/elements/1.1/"
           xmlns:dcterms="http://purl.org/dc/terms/"
@@ -47,7 +55,7 @@ describe ActiveFedora::NomDatastream do
           <dcterms:b>abcd</dcterms:b>
         </root>
       )
-    }
+    end
 
     it "should scope #a attribute to only the dc namespace" do
       subject.a.should == ["123"]
