@@ -15,7 +15,8 @@ describe ActiveFedora::SimpleDatastream do
     @test_ds.field :publisher
 
   end
-  it "from_xml should parse everything correctly" do
+
+  it "ng_xml should parse everything correctly" do
     @test_ds.ng_xml.should be_equivalent_to sample_xml
   end
 
