@@ -58,7 +58,7 @@ module ActiveFedora
         end
 
         def delete_records(records, method)
-          records.each do |r| 
+          records.each do |r|
             @owner.remove_relationship(@reflection.options[:property], r)
             
             if (@reflection.options[:inverse_of])
@@ -71,7 +71,7 @@ module ActiveFedora
               r.save
             end
           end
-          @owner.save!
+          @owner.save! unless @owner.new_record?
         end
 
     end
