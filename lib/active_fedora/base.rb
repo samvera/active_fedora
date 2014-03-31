@@ -47,5 +47,7 @@ module ActiveFedora
     include ReloadOnSave
     include Rdf::Identifiable
 
+    puts "Creds #{ActiveFedora.config.credentials.inspect}"
+
   end
 end
