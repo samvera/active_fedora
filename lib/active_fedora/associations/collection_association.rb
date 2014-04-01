@@ -90,6 +90,21 @@ module ActiveFedora
         end
       end
 
+      # Returns true if the collection is empty.
+      #
+      # If the collection has been loaded it is equivalent to <tt>collection.
+      # size.zero?</tt>. If the collection has not been loaded, it is equivalent to
+      # <tt>collection.count_records == 0</tt>. If the collection has not already been
+      # loaded and you are going to fetch the records anyway it is better to
+      # check <tt>collection.length.zero?</tt>.
+      def empty?
+        if loaded?
+          size.zero?
+        else
+          @target.blank? && count_records == 0
+        end
+      end
+
       # Replace this collection with +other_array+
       # This will perform a diff and delete/add only records that have changed.
       def replace(other_array)
