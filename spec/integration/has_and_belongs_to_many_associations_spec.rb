@@ -123,24 +123,40 @@ describe ActiveFedora::Base do
 
     let (:book) { Book.create }
     let (:collection) { Collection.create }
-    before do
-      book.collections << collection
-      book.save!
+
+    context "when the book is a member of the collection" do
+      before do
+        book.collections << collection
+        book.save!
+      end
+      after do
+        collection.delete
+        book.delete
+      end
+
+      it "should have a collection" do
+        book.relationships(:is_member_of_collection).should == [collection.internal_uri]
+        book.collections.should == [collection]
+      end
+      it "habtm should not set foreign relationships if :inverse_of is not specified" do
+         collection.relationships(:is_member_of_collection).should == []
+      end
+      it "should load the collections" do
+        reloaded = Book.find(book.pid)
+        reloaded.collections.should == [collection]
+      end
+
+      describe "#empty?" do
+        subject { book.collections }
+        its(:empty?) { should be_false }
+      end
     end
-    after do
-      collection.delete
-      book.delete
-    end
-    it "should have a collection" do
-      book.relationships(:is_member_of_collection).should == [collection.internal_uri]
-      book.collections.should == [collection]
-    end
-    it "habtm should not set foreign relationships if :inverse_of is not specified" do
-       collection.relationships(:is_member_of_collection).should == []
-    end
-    it "should load the collections" do
-      reloaded = Book.find(book.pid)
-      reloaded.collections.should == [collection]
+
+    context "when a book isn't in a collection" do 
+      describe "#empty?" do
+        subject { book.collections }
+        its(:empty?) { should be_true }
+      end
     end
   end
 
