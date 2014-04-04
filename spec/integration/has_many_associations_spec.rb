@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Looking up collection members" do
+describe "Collection members" do
   before :all do
     class Library < ActiveFedora::Base 
       has_many :books
@@ -14,7 +14,17 @@ describe "Looking up collection members" do
     Object.send(:remove_const, :Book)
     Object.send(:remove_const, :Library)
   end
-  describe "of has_many" do
+  describe "size of has_many" do
+    let(:library) { Library.create }
+    context "when no members" do
+      it "should cache the count" do
+        expect(library.books).not_to be_loaded
+        expect(library.books.size).to eq(0)
+        expect(library.books).to be_loaded
+      end
+    end
+  end
+  describe "looking up has_many" do
     let(:book) { Book.create }
     let(:library) { Library.create() }
     before do
