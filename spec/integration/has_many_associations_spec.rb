@@ -44,6 +44,12 @@ describe "Collection members" do
       expect(library.books).to eq [book]
       expect(library.books.loaded?).to be_true
     end
+    it "should load from solr" do
+      expect(library.books.load_from_solr.map {|r| r["id"]}).to eq([book.pid])
+    end
+    it "should load from solr with options" do
+      expect(library.books.load_from_solr(rows: 0).size).to eq(0)
+    end
   end
 end
 
