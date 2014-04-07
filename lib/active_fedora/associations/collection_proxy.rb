@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 module ActiveFedora
   module Associations
     # Association proxies in Active Fedora are middlemen between the object that
@@ -47,6 +48,10 @@ module ActiveFedora
 
       def load_target
         @association.load_target
+      end
+
+      def load_from_solr(opts = Hash.new)
+        @association.load_from_solr(opts)
       end
 
       def loaded?
