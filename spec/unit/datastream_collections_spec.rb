@@ -149,9 +149,10 @@ describe ActiveFedora::DatastreamCollections do
   
   describe '#add_named_file_datastream' do
     before do
+      class MockDS < ActiveFedora::Datastream; end
       class MockAddNamedFileDatastream < ActiveFedora::Base
         include ActiveFedora::DatastreamCollections
-        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M'
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>MockDS, :mimeType=>"image/jpeg", :controlGroup=>'M'
         has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg", :controlGroup=>'M' 
         has_datastream :name=>"anymime", :type=>ActiveFedora::Datastream, :controlGroup=>'M' 
       end
@@ -165,7 +166,7 @@ describe ActiveFedora::DatastreamCollections do
       f.stub(:content_type).and_return("image/jpeg")
       @test_object2.add_named_file_datastream("thumbnail",f)
       thumb = @test_object2.thumbnail.first
-      thumb.class.should == ActiveFedora::Datastream
+      thumb.class.should == MockDS
       thumb.mimeType.should == "image/jpeg"
       thumb.dsid.should == "THUMB1"
       thumb.controlGroup.should == "M"
