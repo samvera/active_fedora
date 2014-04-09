@@ -56,9 +56,12 @@ module ActiveFedora
             
         args.merge!({:mimeType=>args[:mime_type]}) if args.has_key?(:mime_type)
         
-        unless class_named_datastreams_desc[args[:name]].has_key?(:type) 
+        unless args.has_key?(:type) 
           #default to type ActiveFedora::Datastream
-          args.merge!({:type => "ActiveFedora::Datastream"})
+          args[:type] = "ActiveFedora::Datastream"
+        else
+          # stringify class/model names
+          args[:type] = args[:type].name if args[:type].is_a? Class
         end
         class_named_datastreams_desc[args[:name]]= args   
         create_named_datastream_finders(args[:name],args[:prefix])
