@@ -29,6 +29,10 @@ describe ActiveFedora::Rdf::Resource do
       expect(subject.rdf_subject).to eq RDF::URI('http://example.org/moomin')
     end
 
+    it "should raise an error when setting to an invalid uri" do
+      expect{ subject.set_subject!('not_a_uri') }.to raise_error "could not make a valid RDF::URI from not_a_uri"
+    end
+
     describe 'when changing subject' do
       before do
         subject << RDF::Statement.new(subject.rdf_subject, RDF::DC.title, RDF::Literal('Comet in Moominland'))
