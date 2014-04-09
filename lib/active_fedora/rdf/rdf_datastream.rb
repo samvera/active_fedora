@@ -33,14 +33,14 @@ module ActiveFedora
     def metadata?
       true
     end
-    
+
     def content
       serialize
     end
 
     def content=(content)
       resource.clear!
-      resource << RDF::Reader.for(serialization_format).new(content)
+      resource << deserialize(content)
       content
     end
 
@@ -69,7 +69,7 @@ module ActiveFedora
                       end
                       r.datastream = self
                       r.singleton_class.accepts_nested_attributes_for(*nested_attributes_options.keys) unless nested_attributes_options.blank?
-                      r << RDF::Reader.for(serialization_format).new(datastream_content) if datastream_content
+                      r << deserialize
                       r
                     end
     end

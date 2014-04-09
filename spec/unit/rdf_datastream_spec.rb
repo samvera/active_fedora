@@ -63,4 +63,26 @@ describe ActiveFedora::RDFDatastream do
       result.dump(:ntriples).should == "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
     end
   end
+
+  describe 'content=' do
+    let(:ds) {ActiveFedora::NtriplesRDFDatastream.new}
+    it "should be able to handle non-utf-8 characters" do
+      data = "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT')
+      ds.content = data
+      expect(ds.resource.dump(:ntriples)).to eq "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
+    end
+  end
+
+  describe 'legacy non-utf-8 characters' do
+    let(:ds) do
+      datastream = ActiveFedora::NtriplesRDFDatastream.new
+      datastream.stub(:new?).and_return(false)
+      datastream.stub(:datastream_content).and_return("<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT'))
+      datastream
+    end
+    it "should not error on access" do
+      expect(ds.resource.dump(:ntriples)).to eq "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
+    end
+  end
+
 end
