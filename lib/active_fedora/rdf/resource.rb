@@ -318,7 +318,7 @@ module ActiveFedora::Rdf
         return RDF::Node(uri_or_str[2..-1]) if uri_or_str.start_with? '_:'
         return RDF::URI(uri_or_str) if RDF::URI(uri_or_str).valid? and (URI.scheme_list.include?(RDF::URI.new(uri_or_str).scheme.upcase) or RDF::URI.new(uri_or_str).scheme == 'info')
         return RDF::URI(self.base_uri.to_s + (self.base_uri.to_s[-1,1] =~ /(\/|#)/ ? '' : '/') + uri_or_str) if base_uri && !uri_or_str.start_with?(base_uri.to_s)
-        raise RuntimeError "could not make a valid RDF::URI from #{uri_or_str}"
+        raise RuntimeError, "could not make a valid RDF::URI from #{uri_or_str}"
       end
   end
 end
