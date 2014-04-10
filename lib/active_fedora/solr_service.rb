@@ -55,7 +55,18 @@ module ActiveFedora
           klass.find(hit[SOLR_DOCUMENT_ID], cast: true)
         end
       end
-    
+
+      #Returns all possible classes for the solr object
+      def classes_from_solr_document(hit, opts = {})
+        #Add ActiveFedora::Base as never stored in Solr explicitely.
+        classes = [ActiveFedora::Base]
+
+        hit[HAS_MODEL_SOLR_FIELD].each { |value| classes << Model.from_class_uri(value) }
+
+        classes
+      end
+
+      #Returns the best singular class for the solr object
       def class_from_solr_document(hit, opts = {})
         #Set the default starting point to the class specified, if available.
         best_model_match = Model.from_class_uri(opts[:class]) unless opts[:class].nil?

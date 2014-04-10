@@ -76,7 +76,7 @@ describe ActiveFedora::Base do
     end
   end
 
-  describe "casting inheritance additional test cases" do
+  describe "casting inheritance detailed test cases" do
     before :all do
       class SimpleObject < ActiveFedora::Base
         belongs_to :simple_collection, property: :is_part_of, class_name: 'SimpleCollection'
@@ -109,15 +109,18 @@ describe ActiveFedora::Base do
 
         @simple_object = SimpleObject.create
         @simple_object_second = SimpleObject.create
+        @simple_object_third = SimpleObject.create
         @complex_object = ComplexObject.create
+        @complex_object_second = ComplexObject.create
 
         #Need to add the simpler cmodel here as currently inheritance support is read-only.
         #See ActiveFedora pull request 207 on how to do this programmatically.
         @complex_object.add_relationship(:has_model, @complex_object.class.superclass.to_class_uri)
+        @complex_collection.add_relationship(:has_model, @complex_collection.class.superclass.to_class_uri)
 
         @simple_collection.objects = [@simple_object, @simple_object_second, @complex_object]
         @simple_collection.save!
-        @complex_collection.objects = [@simple_object, @complex_object]
+        @complex_collection.objects = [@simple_object_third, @complex_object_second]
         @complex_collection.save!
         @complex_object.save!
         @simple_object.save!
@@ -126,32 +129,41 @@ describe ActiveFedora::Base do
 
 
       it "casted association methods should work and return the most complex class" do
+
         @complex_object.simple_collection.should be_instance_of SimpleCollection
-        @complex_object.complex_collection.should be_instance_of ComplexCollection
+        @complex_object.complex_collection.should be_nil
+
+        @complex_object_second.simple_collection.should be_instance_of ComplexCollection
+        @complex_object_second.complex_collection.should be_instance_of ComplexCollection
 
         @simple_object.simple_collection.should be_instance_of SimpleCollection
-        @simple_object.complex_collection.should be_instance_of ComplexCollection
+        @simple_object.complex_collection.should be_nil
+
         @simple_object_second.simple_collection.should be_instance_of SimpleCollection
         @simple_object_second.complex_collection.should be_nil
 
-        @complex_collection.objects[0].should be_instance_of SimpleObject
-        @complex_collection.objects[1].should be_instance_of ComplexObject
+        @simple_object_third.simple_collection.should be_instance_of ComplexCollection
+        @simple_object_third.complex_collection.should be_instance_of ComplexCollection
 
+        @simple_collection.objects.size.should == 3
         @simple_collection.objects[0].should be_instance_of SimpleObject
         @simple_collection.objects[1].should be_instance_of SimpleObject
         @simple_collection.objects[2].should be_instance_of ComplexObject
 
+        @complex_collection.objects.size.should == 2
+        @complex_collection.objects[0].should be_instance_of SimpleObject
+        @complex_collection.objects[1].should be_instance_of ComplexObject
+
       end
 
       it "specified ending relationships should ignore classes not specified" do
-        @complex_collection.complex_objects.count.should == 1
-        @complex_collection.complex_objects[0].should be_instance_of ComplexObject
-        @complex_collection.complex_objects[1].should be_nil
-
-        @simple_collection.complex_objects.count.should == 1
+        @simple_collection.complex_objects.size.should == 1
         @simple_collection.complex_objects[0].should be_instance_of ComplexObject
         @simple_collection.complex_objects[1].should be_nil
 
+        @complex_collection.complex_objects.size.should == 1
+        @complex_collection.complex_objects[0].should be_instance_of ComplexObject
+        @complex_collection.complex_objects[1].should be_nil
       end
 
       after do
