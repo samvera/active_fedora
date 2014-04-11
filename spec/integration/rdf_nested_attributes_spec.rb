@@ -128,6 +128,16 @@ describe "Nesting attribute behavior of RDFDatastream" do
           expect(subject.topic[0].elementList.first[0].rdf_subject).to eq 'http://library.ucsd.edu/ark:/20775/bb3333333x'
           expect(subject.personalName.first.rdf_subject).to eq  'http://library.ucsd.edu/ark:20775/jefferson'
         end
+        
+        it 'should fail when writing to a non-predicate' do
+          attributes = { topic_attributes: { '0' => { elementList_attributes: [{ topicElement_attributes: [{ fake_predicate:"Cosmology" }] }]}}}
+          expect{ subject.attributes = attributes }.to raise_error ArgumentError
+        end
+
+        it 'should fail when writing to a non-predicate with a setter method' do
+          attributes = { topic_attributes: { '0' => { elementList_attributes: [{ topicElement_attributes: [{ name:"Cosmology" }] }]}}}
+          expect{ subject.attributes = attributes }.to raise_error ArgumentError
+        end
       end
     end
 
