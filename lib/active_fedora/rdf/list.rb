@@ -103,6 +103,7 @@ module ActiveFedora::Rdf
             klass = properties[key[0..-12]]['class_name']
             klass = ActiveFedora.class_from_string(klass, final_parent.class) if klass.is_a? String
             value.is_a?(Hash) ? attributes_hash_to_list(values[key], klass) : attributes_to_list(value, klass)
+            values.delete key
           end
         end
         persist!

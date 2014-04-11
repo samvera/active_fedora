@@ -84,6 +84,8 @@ module ActiveFedora::Rdf
           set_value(rdf_subject, key, value)
         elsif self.singleton_class.nested_attributes_options.keys.map{ |k| "#{k}_attributes"}.include?(key)
           send("#{key}=".to_sym, value)
+        else
+          raise ArgumentError, "No association found for name `#{key}'. Has it been defined yet?"
         end
       end
     end
