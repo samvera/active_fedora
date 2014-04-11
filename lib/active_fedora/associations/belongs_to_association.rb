@@ -19,7 +19,7 @@ module ActiveFedora
         #   belongs_to :publisher, :property=>:has_member
         results = SolrService.query(ActiveFedora::SolrService.construct_query_for_pids(ids))
         results.each do |result|
-          return result['id'] if SolrService.class_from_solr_document(result) == klass
+          return result['id'] if SolrService.classes_from_solr_document(result).include? klass
         end
         return nil
       end
