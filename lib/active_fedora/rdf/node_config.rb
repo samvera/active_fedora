@@ -11,6 +11,10 @@ module ActiveFedora
         raise ArgumentError, "Invalid arguments for Rdf Node configuration: #{args} on #{predicate}" unless args.empty?
       end
 
+      def [](value)
+        value = value.to_sym
+        self.respond_to?(value) ? self.send(value) : nil
+      end
 
       def with_index (&block)
         # needed for solrizer integration

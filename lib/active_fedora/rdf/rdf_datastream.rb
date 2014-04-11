@@ -62,7 +62,7 @@ module ActiveFedora
     # set_value, get_value, and property accessors are delegated to this object.
     def resource
       @resource ||= begin
-                      r = self.class.resource_class.new(digital_object ? self.class.rdf_subject.call(self) : nil)
+                      r = self.singleton_class.resource_class.new(digital_object ? self.class.rdf_subject.call(self) : nil)
                       r.singleton_class.properties = self.class.properties
                       r.singleton_class.properties.keys.each do |property|
                         r.singleton_class.send(:register_property, property)

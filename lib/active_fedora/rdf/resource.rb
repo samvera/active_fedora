@@ -80,7 +80,7 @@ module ActiveFedora::Rdf
       values = values.with_indifferent_access
       set_subject!(values.delete(:id)) if values.has_key?(:id) and node?
       values.each do |key, value|
-        if self.singleton_class.properties.keys.include?(key)
+        if properties.keys.include?(key)
           set_value(rdf_subject, key, value)
         elsif self.singleton_class.nested_attributes_options.keys.map{ |k| "#{k}_attributes"}.include?(key)
           send("#{key}=".to_sym, value)
