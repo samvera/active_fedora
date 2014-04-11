@@ -49,6 +49,17 @@ describe ActiveFedora::Rdf::Properties do
       DummyProperties.property :title, :predicate => RDF::DC.title, :class_name => RDF::Literal
       expect(DummyProperties.properties[:title][:class_name]).to eq RDF::Literal
     end
+
+    it "should constantize string class names" do
+      DummyProperties.property :title, :predicate => RDF::DC.title, :class_name => "RDF::Literal"
+      expect(DummyProperties.properties[:title][:class_name]).to eq RDF::Literal
+    end
+
+    it "should keep strings which it can't constantize as strings" do
+      DummyProperties.property :title, :predicate => RDF::DC.title, :class_name => "FakeClassName"
+      expect(DummyProperties.properties[:title][:class_name]).to eq "FakeClassName"
+    end
+
   end
 
   context "when using a subclass" do

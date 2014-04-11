@@ -16,6 +16,17 @@ module ActiveFedora
         self.respond_to?(value) ? self.send(value) : nil
       end
 
+      def class_name
+        if @class_name.kind_of?(String)
+          begin
+            new_class = @class_name.constantize
+            @class_name = new_class
+          rescue NameError
+          end
+        end
+        @class_name
+      end
+
       def with_index (&block)
         # needed for solrizer integration
         iobj = IndexObject.new
