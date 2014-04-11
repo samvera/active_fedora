@@ -44,7 +44,11 @@ module ActiveFedora::Rdf::Identifiable
     # @see ActiveFedora::Rdf::Resource.from_uri
     # @param [RDF::URI] uri URI that is being looked up.
     def from_uri(uri,_)
-      self.find(pid_from_subject(uri))
+      begin
+        self.find(pid_from_subject(uri))
+      rescue ActiveFedora::ObjectNotFoundError
+        self.ds_specs[resource_datastream.to_s][:type].resource_class.new(uri)
+      end
     end
 
     ##
