@@ -69,7 +69,10 @@ describe "Nesting attribute behavior of RDFDatastream" do
               '0' =>
               {
                 elementList_attributes: [{
-                  topicElement_attributes: [{elementValue:"Cosmology"}]
+                  topicElement_attributes: [{
+                    id: 'http://library.ucsd.edu/ark:/20775/bb3333333x',
+                    elementValue:"Cosmology"
+                     }]
                   }]
               },
               '1' =>
@@ -81,7 +84,8 @@ describe "Nesting attribute behavior of RDFDatastream" do
             },
             personalName_attributes: [
               {
-                elementList_attributes: [{
+                id: 'http://library.ucsd.edu/ark:20775/jefferson',
+                elementList_attributes: [{                         
                   fullNameElement: "Jefferson, Thomas",
                   dateNameElement: "1743-1826"
                 }]
@@ -107,22 +111,23 @@ describe "Nesting attribute behavior of RDFDatastream" do
         end
       end
 
-      it "should create nested objects" do
-        # Replace the graph's contents with the Hash
-        subject.attributes = params[:myResource]
+      context "from nested objects" do
+        before do
+          # Replace the graph's contents with the Hash
+          subject.attributes = params[:myResource]
+        end
 
-        # Here's how this would happen if we didn't have attributes=
-        # personal_name = subject.personalName.build
-        # elem_list = personal_name.elementList.build
-        # elem_list.fullNameElement = "Jefferson, Thomas"
-        # elem_list.dateNameElement = "1743-1826"
-        # topic = subject.topic.build
-        # elem_list = topic.elementList.build
-        # elem_list.fullNameElement = 'Cosmology'
-        subject.topic[0].elementList.first[0].elementValue.should == ["Cosmology"]
-        subject.topic[1].elementList.first[0].elementValue.should == ["Quantum Behavior"]
-        subject.personalName.first.elementList.first.fullNameElement.should == ["Jefferson, Thomas"]
-        subject.personalName.first.elementList.first.dateNameElement.should == ["1743-1826"]
+        it 'should have attributes' do
+          subject.topic[0].elementList.first[0].elementValue.should == ["Cosmology"]
+          subject.topic[1].elementList.first[0].elementValue.should == ["Quantum Behavior"]
+          subject.personalName.first.elementList.first.fullNameElement.should == ["Jefferson, Thomas"]
+          subject.personalName.first.elementList.first.dateNameElement.should == ["1743-1826"]
+        end
+        
+        it 'should build nodes with ids' do
+          expect(subject.topic[0].elementList.first[0].rdf_subject).to eq 'http://library.ucsd.edu/ark:/20775/bb3333333x'
+          expect(subject.personalName.first.rdf_subject).to eq  'http://library.ucsd.edu/ark:20775/jefferson'
+        end
       end
     end
 

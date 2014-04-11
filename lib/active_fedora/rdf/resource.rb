@@ -77,7 +77,9 @@ module ActiveFedora::Rdf
 
     def attributes=(values)
       raise ArgumentError, "values must be a Hash, you provided #{values.class}" unless values.kind_of? Hash
-      values.with_indifferent_access.each do |key, value|
+      values = values.with_indifferent_access
+      set_subject!(values.delete(:id)) if values.has_key?(:id) and node?
+      values.each do |key, value|
         if self.singleton_class.properties.keys.include?(key)
           set_value(rdf_subject, key, value)
         elsif self.singleton_class.nested_attributes_options.keys.map{ |k| "#{k}_attributes"}.include?(key)
