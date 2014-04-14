@@ -61,11 +61,6 @@ describe ActiveFedora::SolrService do
       end
     end
     
-    it 'should instantiate all datastreams in the solr doc, even ones undeclared by the class' do
-      obj = ActiveFedora::Base.load_instance_from_solr @foo_object.pid 
-      obj.datastreams.keys.should include('descMetadata')
-    end
-    
     it 'should #reify a lightweight object as a new instance' do
       query = "id\:#{RSolr.escape(@foo_object.pid)}"
       solr_result = ActiveFedora::SolrService.query(query)
@@ -77,36 +72,5 @@ describe ActiveFedora::SolrService do
       solr_foo.label.should == 'foo_object'
       real_foo.label.should == 'foo_object'
     end
-    
-    it 'should #reify! a lightweight object within the same instance' do
-      query = "id\:#{RSolr.escape(@foo_object.pid)}"
-      solr_result = ActiveFedora::SolrService.query(query)
-      result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
-      solr_foo = result.first
-      solr_foo.inner_object.should be_a(ActiveFedora::SolrDigitalObject)
-      solr_foo.reify!
-      solr_foo.inner_object.should be_a(ActiveFedora::DigitalObject)
-      solr_foo.label.should == 'foo_object'
-    end
-    
-    it 'should raise an exception when attempting to reify a first-class object' do
-      query = "id\:#{RSolr.escape(@foo_object.pid)}"
-      solr_result = ActiveFedora::SolrService.query(query)
-      result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
-      solr_foo = result.first
-      lambda {solr_foo.reify}.should_not raise_exception
-      lambda {solr_foo.reify!}.should_not raise_exception
-      lambda {solr_foo.reify!}.should raise_exception(/already a full/)
-      lambda {solr_foo.reify}.should raise_exception(/already a full/)
-    end
-  
-    it 'should call load_instance_from_solr if :load_from_solr option passed in' do
-      query = "id\:#{RSolr.escape(@test_object.pid)} OR id\:#{RSolr.escape(@foo_object.pid)}"
-      solr_result = ActiveFedora::SolrService.query(query)
-      ActiveFedora::Base.should_receive(:load_instance_from_solr).once
-      FooObject.should_receive(:load_instance_from_solr).once
-      result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
-    end
-    
   end
 end

@@ -100,43 +100,6 @@ describe ActiveFedora::OmDatastream do
       end
     end
 
-    describe '.term_values' do
-      before do
-        @obj.descMetadata.content = File.read(fixture('mods_articles/mods_article1.xml'))
-        @obj.save
-        @obj.reload
-        @solr_obj = ActiveFedora::Base.load_instance_from_solr(@obj.pid)
-      end
-
-      it "should return the same values whether getting from solr or Fedora" do
-        @solr_obj.datastreams["descMetadata"].term_values(:name,:role,:text).should == ["Creator","Contributor","Funder","Host"]
-        @solr_obj.datastreams["descMetadata"].term_values({:name=>0},:role,:text).should == ["Creator"]
-        @solr_obj.datastreams["descMetadata"].term_values({:name=>1},:role,:text).should == ["Contributor"]
-        @solr_obj.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text).should == ["Creator"]
-        @solr_obj.datastreams["descMetadata"].term_values({:name=>1},{:role=>0},:text).should == ["Contributor"]
-        @solr_obj.datastreams["descMetadata"].term_values({:name=>1},{:role=>1},:text).should == []
-        ar = @solr_obj.datastreams["descMetadata"].term_values(:name,{:role=>0},:text)
-        ar.length.should == 4
-        ar.include?("Creator").should == true
-        ar.include?("Contributor").should == true
-        ar.include?("Funder").should == true
-        ar.include?("Host").should == true
-
-        @obj.datastreams["descMetadata"].term_values(:name,:role,:text).should == ["Creator","Contributor","Funder","Host"]
-        @obj.datastreams["descMetadata"].term_values({:name=>0},:role,:text).should == ["Creator"]
-        @obj.datastreams["descMetadata"].term_values({:name=>1},:role,:text).should == ["Contributor"]
-        @obj.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text).should == ["Creator"]
-        @obj.datastreams["descMetadata"].term_values({:name=>1},{:role=>0},:text).should == ["Contributor"]
-        @obj.datastreams["descMetadata"].term_values({:name=>1},{:role=>1},:text).should == []
-        ar = @obj.datastreams["descMetadata"].term_values(:name,{:role=>0},:text)
-        ar.length.should == 4
-        ar.include?("Creator").should == true
-        ar.include?("Contributor").should == true
-        ar.include?("Funder").should == true
-        ar.include?("Host").should == true
-      end
-    end
-    
     describe '.update_values' do
       before do
         @obj.descMetadata.content = File.read(fixture('mods_articles/mods_article1.xml'))
