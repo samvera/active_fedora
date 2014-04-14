@@ -186,24 +186,14 @@ module ActiveFedora
     
     protected
 
-<<<<<<< HEAD
-    def load_from_fedora(pid, cast)
-      cast = true if klass == ActiveFedora::Base && cast.nil?
-      inner = DigitalObject.find(klass, pid)
-      af_base = klass.allocate.init_with_object(inner)
-      cast ? af_base.adapt_to_cmodel : af_base
-=======
     def load_from_fedora(id, cast)
-      cast = true if self == ActiveFedora::Base && cast.nil?
-      # inner = @klass.find(id)
-      resource = Ldp::Resource.new(FedoraLens.connection, @klass.id_to_uri(id))
-      inner = @klass.new(resource)
-    rescue Ldp::NotFound
-      raise ActiveFedora::ObjectNotFoundError
+      cast = true if klass == ActiveFedora::Base && cast.nil?
+      resource = Ldp::Resource.new(FedoraLens.connection, klass.id_to_uri(id))
       # af_base = @klass.allocate.init_with(inner)
       # cast ? af_base.adapt_to_cmodel : af_base
-
->>>>>>> WIP checkpoint
+      klass.new(resource)
+    rescue Ldp::NotFound
+      raise ActiveFedora::ObjectNotFoundError
     end
 
     def find_with_ids(ids, cast)

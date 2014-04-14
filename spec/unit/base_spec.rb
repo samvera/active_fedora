@@ -274,70 +274,7 @@ describe ActiveFedora::Base do
         FooHistory.should_receive(:new).and_return(obj)
         @hist = FooHistory.create(:fubar=>'ta', :swank=>'da')
       end
-
     end
-
-    describe ".adapt_to" do
-      it "should return an adapted object of the requested type" do
-        @test_object = FooHistory.new()
-        @test_object.adapt_to(FooAdaptation).class.should == FooAdaptation
-      end
-      it "should not make an additional call to fedora to create the adapted object" do
-        @test_object = FooHistory.new()
-        adapted = @test_object.adapt_to(FooAdaptation)
-      end
-      it "should propagate new datastreams to the adapted object" do
-        @test_object = FooHistory.new()
-        @test_object.add_file_datastream("XXX", :dsid=>'MY_DSID')
-        adapted = @test_object.adapt_to(FooAdaptation)
-        adapted.datastreams.keys.should include 'MY_DSID'
-        adapted.datastreams['MY_DSID'].content.should == "XXX"
-        adapted.datastreams['MY_DSID'].changed?.should be_true
-      end
-      it "should propagate modified datastreams to the adapted object" do
-        @test_object = FooHistory.new()
-        orig_ds = @test_object.datastreams['someData']
-        orig_ds.content="<YYY/>"
-        adapted = @test_object.adapt_to(FooAdaptation)
-        adapted.datastreams.keys.should include 'someData'
-        adapted.datastreams['someData'].should == orig_ds
-        adapted.datastreams['someData'].content.strip.should == "<YYY/>"
-        adapted.datastreams['someData'].changed?.should be_true
-      end
-      it "should use the datastream definitions from the adapted object" do
-        @test_object = FooHistory.new()
-        adapted = @test_object.adapt_to(FooAdaptation)
-        adapted.datastreams.keys.should include 'someData'
-        adapted.datastreams['someData'].class.should == ActiveFedora::OmDatastream
-      end
-    end
-
-    describe ".adapt_to_cmodel with implemented (non-ActiveFedora::Base) cmodel" do
-      subject { FooHistory.new }
-
-      it "should not cast to a random first cmodel if it has a specific cmodel already" do
-        ActiveFedora::ContentModel.should_receive(:known_models_for).with(subject).and_return([FooAdaptation])
-        subject.adapt_to_cmodel.should be_kind_of FooHistory
-      end
-      it "should cast to an inherited model over a random one" do
-        ActiveFedora::ContentModel.should_receive(:known_models_for).with(subject).and_return([FooAdaptation, FooInherited])
-        subject.adapt_to_cmodel.should be_kind_of FooInherited
-      end
-      it "should not cast when a cmodel is same as the class" do
-        ActiveFedora::ContentModel.should_receive(:known_models_for).with(subject).and_return([FooHistory])
-        subject.adapt_to_cmodel.should === subject
-      end
-    end
-
-    describe ".adapt_to_cmodel with ActiveFedora::Base" do
-      subject { ActiveFedora::Base.new }
-
-      it "should cast to the first cmodel if ActiveFedora::Base (or no specified cmodel)" do
-        ActiveFedora::ContentModel.should_receive(:known_models_for).with(subject).and_return([FooAdaptation, FooHistory])
-        subject.adapt_to_cmodel.should be_kind_of FooAdaptation
-      end
-    end
-
 
     describe ".to_solr" do
       it "should provide .to_solr" do
