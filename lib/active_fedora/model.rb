@@ -6,7 +6,7 @@ module ActiveFedora
   # much in the way ActiveRecord does.  
   module Model 
 
-    MODEL_NAMESPACE = "afmodel"
+    NAMESPACE = "afmodel"
 
     # Takes a Fedora URI for a cModel and returns classname, namespace
     def self.classname_from_uri(uri)
@@ -29,7 +29,7 @@ module ActiveFedora
       end
       result = ActiveFedora.class_from_string(model_value)
       unless result.nil?
-        model_ns = (result.respond_to? :pid_namespace) ? result.pid_namespace : MODEL_NAMESPACE
+        model_ns = (result.respond_to? :pid_namespace) ? result.pid_namespace : NAMESPACE
         if model_ns != pid_ns
           logger.warn "Model class namespace '#{model_ns}' does not match uri: '#{uri}'"
         end
