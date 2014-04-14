@@ -7,7 +7,7 @@ describe ActiveFedora::Datastreams do
     before do
       class FooHistory < ActiveFedora::Base
          has_metadata :name => 'dsid', type: ActiveFedora::SimpleDatastream
-         has_metadata 'complex_ds', :versionable => true, :autocreate => true, :type => 'Z', :label => 'My Label', :control_group => 'Z'
+         has_metadata 'complex_ds', :versionable => true, :autocreate => true, :type => 'Z'
       end
     end
 
@@ -20,7 +20,7 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should let you override defaults" do
-      FooHistory.ds_specs['complex_ds'].should include(:versionable => true, :autocreate => true, :type => 'Z', :label => 'My Label', :control_group => 'Z')
+      FooHistory.ds_specs['complex_ds'].should include(:versionable => true, :autocreate => true, :type => 'Z')
     end
 
     it "should raise an error if you don't give a type" do
@@ -43,8 +43,8 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should have reasonable defaults" do
-      FooHistory.ds_specs['dsid'].should include(:type => ActiveFedora::Datastream, :label => 'File Datastream', :control_group => 'M')
-      FooHistory.ds_specs['another'].should include(:type => ActiveFedora::Datastream, :label => 'File Datastream', :control_group => 'M')
+      FooHistory.ds_specs['dsid'].should include(type: ActiveFedora::Datastream)
+      FooHistory.ds_specs['another'].should include(type: ActiveFedora::Datastream)
     end
   end
 
@@ -117,7 +117,7 @@ describe ActiveFedora::Datastreams do
 
   describe "#datastream_from_spec" do
     it "should fetch the rubydora datastream" do
-      subject.inner_object.should_receive(:datastream_object_for).with('dsid', {}, {})
+      subject.should_receive(:datastream_object_for).with('dsid', {}, {})
       subject.datastream_from_spec({}, 'dsid')
     end
   end
@@ -130,7 +130,7 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should mint a dsid" do
-      ds = ActiveFedora::Datastream.new(subject.inner_object)
+      ds = ActiveFedora::Datastream.new(subject)
       subject.add_datastream(ds).should == 'DS1'
     end
   end
@@ -155,24 +155,6 @@ describe ActiveFedora::Datastreams do
 
     it "should raise an argument error if the supplied dsid is nonsense" do
       expect { subject.create_datastream(ActiveFedora::Datastream, 0) }.to raise_error(ArgumentError)
-    end
-
-    it "should try to get a mime type from the blob" do
-      mock_file = double(:content_type => 'x-application/asdf')
-      ds = subject.create_datastream(ActiveFedora::Datastream, nil, {:blob => mock_file})
-      ds.mimeType.should == 'x-application/asdf'
-    end
-
-    it "should provide a default mime type" do
-      mock_file = double()
-      ds = subject.create_datastream(ActiveFedora::Datastream, nil, {:blob => mock_file})
-      ds.mimeType.should == 'application/octet-stream'
-    end
-
-    it "should use the filename as a default label" do
-     mock_file = double(:path => '/asdf/fdsa')
-      ds = subject.create_datastream(ActiveFedora::Datastream, nil, {:blob => mock_file})
-      ds.dsLabel.should == 'fdsa'
     end
   end
 
