@@ -43,34 +43,7 @@ describe ActiveFedora::Datastream do
 
   describe ".size" do
     it "should lazily load the datastream size attribute from the fedora repository" do
-      ds_profile = <<-EOS
-        <datastreamProfile 
-            xmlns=\"http://www.fedora.info/definitions/1/0/management/\"  
-            xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" 
-            xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" 
-            xsi:schemaLocation=\"http://www.fedora.info/definitions/1/0/management/ http://www.fedora.info/definitions/1/0/datastreamProfile.xsd\" 
-            pid=\"#{test_object.pid}\" 
-            dsID=\"#{subject.dsid}\" >
-         <dsLabel></dsLabel>
-         <dsVersionID>#{subject.dsid}.1</dsVersionID>
-         <dsCreateDate>2011-07-11T16:48:13.536Z</dsCreateDate>
-         <dsState>A</dsState>
-         <dsMIME>text/xml</dsMIME>
-         <dsFormatURI></dsFormatURI>
-         <dsControlGroup>X</dsControlGroup>
-         <dsSize>9999</dsSize>
-         <dsVersionable>true</dsVersionable>
-         <dsInfoType></dsInfoType>
-         <dsLocation>#{test_object.pid}+#{subject.dsid}+#{subject.dsid}.1</dsLocation>
-         <dsLocationType></dsLocationType>
-         <dsChecksumType>DISABLED</dsChecksumType>
-         <dsChecksum>none</dsChecksum>
-         </datastreamProfile>"
-      EOS
-
-      mock_repo = double
-      test_object.stub(:repository).and_return(mock_repo)
-      mock_repo.api.should_receive(:datastream).with(:dsid => 'abcd', :pid => test_object.pid).and_return(ds_profile)
+      #TODO need to stub something out
       subject.size.should == 9999
     end
 

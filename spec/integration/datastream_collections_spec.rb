@@ -34,12 +34,10 @@ describe ActiveFedora::DatastreamCollections do
       t2_thumb1.dsid.should == ds.dsid
       t2_thumb1.mime_type.should == ds.mime_type
       t2_thumb1.pid.should == ds.pid
-      t2_thumb1.dsLabel.should == ds.dsLabel
       t2_high1 = @test_object2.named_datastreams["high"].first
       t2_high1.dsid.should == ds2.dsid
       t2_high1.mime_type.should == ds2.mime_type
       t2_high1.pid.should == ds2.pid
-      t2_high1.dsLabel.should == ds2.dsLabel
     end
   end
   
@@ -57,7 +55,6 @@ describe ActiveFedora::DatastreamCollections do
       t2_thumb1.dsid.should == "THUMB1"
       t2_thumb1.mimeType.should == "image/jpeg"
       t2_thumb1.pid.should == @test_object2.pid
-      t2_thumb1.dsLabel.should == "minivan.jpg"
     end
   end
   
@@ -85,7 +82,6 @@ describe ActiveFedora::DatastreamCollections do
       ds.dsid.should == "THUMB1"
       ds.mimeType.should == "image/jpeg"
       ds.pid.should == @test_object2.pid
-      ds.dsLabel.should == "minivan.jpg"
 
       ds.content.should == minivan 
       @test_object2.update_named_datastream("thumbnail",{:file=>f2,:dsid=>"THUMB1"})
@@ -97,7 +93,6 @@ describe ActiveFedora::DatastreamCollections do
       ds2.dsid.should == "THUMB1"
       ds2.mimeType.should == "image/jpeg"
       ds2.pid.should == @test_object2.pid
-      ds2.dsLabel.should == "dino.jpg"
       (ds2.content == dino).should be_true
     end
   end

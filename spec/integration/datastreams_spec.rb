@@ -39,7 +39,7 @@ describe ActiveFedora::Datastreams do
       @base = ActiveFedora::Base.new(:pid=>"test:ds_versionable_base")
       @base.save
       @base2 = ActiveFedora::Base.new(:pid=>"test:ds_versionable_base2")
-      @base2.add_datastream(@base2.create_datastream(ActiveFedora::Datastream,"file_ds", :versionable=>true,:dsLabel=>"Pre-existing DS"))
+      @base2.add_datastream(@base2.create_datastream(ActiveFedora::Datastream, "file_ds"))
       @base2.datastreams["file_ds"].content = "blah blah blah"
       @base2.save
       @has_file = HasFile.new(:pid=>"test:ds_versionable_has_file")
@@ -62,18 +62,6 @@ describe ActiveFedora::Datastreams do
       test_obj.file_ds.changed?.should be_false
       test_obj.file_ds2.changed?.should be_false
       expect(test_obj.file_ds2).to be_new_record
-    end
-    
-    it "should use ds_specs on migrated objects" do
-      test_obj = HasFile.find(@base.pid)
-      test_obj.file_ds.new_record?.should be_true
-      test_obj.file_ds.content = "blah blah blah"
-      test_obj.save
-      # look it up again to check datastream profile
-      test_obj = HasFile.find(@base.pid)
-      test_obj.file_ds.dsLabel.should == "File Datastream"
-      test_obj = HasFile.find(@base2.pid)
-      test_obj.file_ds.dsLabel.should == "Pre-existing DS"
     end
   end
 end
