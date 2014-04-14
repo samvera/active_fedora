@@ -32,7 +32,6 @@ module ActiveFedora #:nodoc:
     autoload :Attributes
     autoload :AutosaveAssociation
     autoload :Base
-    autoload :ContentModel
     autoload :Callbacks
     autoload :Config
     autoload :Core
