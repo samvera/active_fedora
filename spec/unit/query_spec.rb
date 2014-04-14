@@ -56,13 +56,6 @@ describe ActiveFedora::Base do
         end
       end
     end
-    describe "with default :cast of true" do
-      it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
-        SpecModel::Basic.any_instance.should_receive(:init_with).and_return(double("Model", :adapt_to_cmodel=>SpecModel::Basic.new ))
-        ActiveFedora::DigitalObject.should_receive(:find).and_return(double("inner obj", :'new?'=>false))
-        SpecModel::Basic.find("_PID_")
-      end
-    end
 
     describe "with conditions" do
       before do

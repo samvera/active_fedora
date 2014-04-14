@@ -1,6 +1,6 @@
 module ActiveFedora
   class SolrDigitalObject
-    include DigitalObject::DatastreamBootstrap
+    include DatastreamBootstrap
 
     attr_reader :pid, :label, :state, :ownerId, :profile, :datastreams, :solr_doc
     attr_accessor :original_class
