@@ -52,21 +52,4 @@ describe ActiveFedora::Model do
       it { should be_instance_of ModelIntegrationSpec::Basic}
     end
   end
-
-  describe "#load_instance_from_solr" do
-    describe "with a valid pid" do
-      subject { ActiveFedora::Base.load_instance_from_solr(@test_instance.pid) }
-      it { should be_instance_of ModelIntegrationSpec::Basic}
-    end
-    describe "with metadata datastream spec" do
-      subject { ActiveFedora::Base.load_instance_from_solr(@test_instance.pid) }
-      it "should create an xml datastream" do
-        subject.datastreams['properties'].should be_kind_of ActiveFedora::SimpleDatastream
-      end
-
-      it "should know the datastreams properties" do
-        subject.properties.dsSize.should == 9
-      end
-    end
-  end
 end
