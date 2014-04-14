@@ -44,11 +44,6 @@ describe ActiveFedora::Base do
   describe '#find' do
     describe "with :cast false" do
       describe "and a pid is specified" do
-        it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
-          SpecModel::Basic.any_instance.should_receive(:init_with).and_return(SpecModel::Basic.new )
-          ActiveFedora::Base.should_receive(:new).and_return(double("obj", :'new_record?'=>false))
-          SpecModel::Basic.find("_PID_", cast: false).should be_a SpecModel::Basic
-        end
         it "should raise an exception if it is not found" do
           FedoraLens.should_receive(:find).and_raise(Ldp::NotFound)
           SpecModel::Basic.should_receive(:connection_for_pid).with("_PID_")
