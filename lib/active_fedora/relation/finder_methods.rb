@@ -158,8 +158,7 @@ module ActiveFedora
       end while docs.has_next? 
     end
 
-    # Retrieve the Fedora object with the given pid, explore the returned object, determine its model 
-    # using #{ActiveFedora::ContentModel.known_models_for} and cast to that class.
+    # Retrieve the Fedora object with the given pid, explore the returned object
     # Raises a ObjectNotFoundError if the object is not found.
     # @param [String] pid of the object to load
     # @param [Boolean] cast when true, cast the found object to the class of the first known model defined in it's RELS-EXT
