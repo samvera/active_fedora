@@ -69,7 +69,6 @@ module ActiveFedora #:nodoc:
       autoload :FinderMethods
     end
 
-    autoload :RelationshipGraph
     autoload :Scoping
     autoload :Serialization
     autoload :SimpleDatastream
