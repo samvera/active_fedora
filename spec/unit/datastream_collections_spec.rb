@@ -6,9 +6,9 @@ describe ActiveFedora::DatastreamCollections do
       
       class MockHasDatastream < ActiveFedora::Base
         include ActiveFedora::DatastreamCollections
-        has_datastream "thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream
-        has_datastream "EAD", :type=>ActiveFedora::Datastream
-        has_datastream "external", :type=>ActiveFedora::Datastream
+        has_datastream name: "thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream
+        has_datastream name: "EAD", :type=>ActiveFedora::Datastream
+        has_datastream name: "external", :type=>ActiveFedora::Datastream
       end
     end
     
@@ -16,9 +16,9 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2 = MockHasDatastream.new
       #prefix should default to name in caps if not specified in has_datastream call
       @test_object2.named_datastreams_desc.should == {"thumbnail"=>{:name=>"thumbnail",:prefix => "THUMB", 
-                                                                    :type=>"ActiveFedora::Datastream", :mimeType=>"image/jpeg"}, 
+                                                                    :type=>"ActiveFedora::Datastream"}, 
                                                       "EAD"=>       {:name=>"EAD", :prefix=>"EAD",
-                                                                    :type=>"ActiveFedora::Datastream", :mimeType=>"application/xml"}, 
+                                                                    :type=>"ActiveFedora::Datastream"}, 
                                                       "external"=>  {:name=>"external", :prefix=>"EXTERNAL",
                                                                     :type=>"ActiveFedora::Datastream"}}
       @test_object2.should respond_to(:thumbnail_append)
@@ -37,8 +37,8 @@ describe ActiveFedora::DatastreamCollections do
     before(:all) do
       class MockDatastreamNames < ActiveFedora::Base
         include ActiveFedora::DatastreamCollections
-        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
-        has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml"
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream
+        has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream
       end
     end
     
@@ -52,8 +52,8 @@ describe ActiveFedora::DatastreamCollections do
     before(:all) do
       class MockAddNamedDatastream < ActiveFedora::Base
         include ActiveFedora::DatastreamCollections
-        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
-        has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream
+        has_datastream :name=>"high", :type=>ActiveFedora::Datastream
         has_datastream :name=>"anymime", :type=>ActiveFedora::Datastream
         has_datastream :name=>"external", :type=>ActiveFedora::Datastream
       end
@@ -89,16 +89,6 @@ describe ActiveFedora::DatastreamCollections do
       expect { @test_object2.add_named_datastream("thumbnail",{:content_type=>"image/jpeg"}) }.to raise_error
     end
 
-    it "should use the given label for the dsLabel" do
-      @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>@f2, :label=>"my_image"})
-      @test_object2.high.first.dsLabel.should == "my_image"
-    end
-
-    it "should fallback on using the file name" do
-      @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>@f2})
-      @test_object2.high.first.dsLabel.should == "dino.jpg"
-    end 
-
     it "should check the file for a content type" do
       @f.should_receive(:content_type).and_return("image/jpeg")
       @test_object2.add_named_datastream("thumbnail",{:file=>@f})
@@ -132,15 +122,6 @@ describe ActiveFedora::DatastreamCollections do
       #@test_object2.high.first.attributes[:prefix].should == "HIGH"
       @test_object2.high.first.dsid.match(/HIGH[0-9]/)
     end
-
-    it "should work with external datastreams" do
-      
-      #check external datastream
-      @test_object2.add_named_datastream("external",{:dsLocation=>"http://myreasource.com"})
-      #check dslocation goes to dslabel
-      @test_object2.external.first.dsLabel.should == "http://myreasource.com"
-      #check datastreams added to fedora (may want to stub this at first)
-    end
   end
   
   describe '#add_named_file_datastream' do
@@ -148,8 +129,8 @@ describe ActiveFedora::DatastreamCollections do
       class MockDS < ActiveFedora::Datastream; end
       class MockAddNamedFileDatastream < ActiveFedora::Base
         include ActiveFedora::DatastreamCollections
-        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>MockDS, :mimeType=>"image/jpeg"
-        has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>MockDS
+        has_datastream :name=>"high", :type=>ActiveFedora::Datastream
         has_datastream :name=>"anymime", :type=>ActiveFedora::Datastream
       end
     end
@@ -163,9 +144,7 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2.add_named_file_datastream("thumbnail",f)
       thumb = @test_object2.thumbnail.first
       thumb.class.should == MockDS
-      thumb.mimeType.should == "image/jpeg"
       thumb.dsid.should == "THUMB1"
-      thumb.dsLabel.should == "minivan.jpg"
     end
   end
 
@@ -173,7 +152,7 @@ describe ActiveFedora::DatastreamCollections do
     before do
       class MockUpdateNamedDatastream < ActiveFedora::Base
         include ActiveFedora::DatastreamCollections
-        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream
       end
     end
     
@@ -207,16 +186,14 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2.thumbnail_ids == ["THUMB1"]
       thumb1 = @test_object2.thumbnail.first
       thumb1.dsid.should == 'THUMB1'
-      thumb1.pid.should == @test_object2.pid
-      thumb1.dsLabel.should == 'minivan.jpg'
+      thumb1.id.should == @test_object2.id
       f.rewind
       @test_object2.update_named_datastream("thumbnail",{:file=>f2,:dsid=>"THUMB1"})
       @test_object2.thumbnail.size.should == 1
       @test_object2.thumbnail_ids == ["THUMB1"]
       thumb1 = @test_object2.thumbnail.first
       thumb1.dsid.should == 'THUMB1'
-      thumb1.pid.should == @test_object2.pid
-      thumb1.dsLabel.should == 'dino.jpg'
+      thumb1.id.should == @test_object2.id
     end
   end
   describe '#named_datastreams_desc' do
@@ -224,14 +201,14 @@ describe ActiveFedora::DatastreamCollections do
     before do
       class MockNamedDatastreamsDesc < ActiveFedora::Base
         include ActiveFedora::DatastreamCollections
-        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream
       end
     end
     
     it 'should intialize a value to an empty hash and then not modify afterward' do
       @test_object2 = MockNamedDatastreamsDesc.new
       @test_object2.named_datastreams_desc.should == {"thumbnail"=>{:name=>"thumbnail",:prefix => "THUMB", 
-                                                                    :type=>"ActiveFedora::Datastream", :mimeType=>"image/jpeg" }}
+                                                                    :type=>"ActiveFedora::Datastream" }}
     end
   end
 
@@ -239,7 +216,7 @@ describe ActiveFedora::DatastreamCollections do
     before do
       class MockIsNamedDatastream < ActiveFedora::Base
         include ActiveFedora::DatastreamCollections
-        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream
       end
     end
     
@@ -255,8 +232,8 @@ describe ActiveFedora::DatastreamCollections do
     before do
       class MockNamedDatastreams < ActiveFedora::Base
         include ActiveFedora::DatastreamCollections
-        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
-        has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream
+        has_datastream :name=>"high", :type=>ActiveFedora::Datastream
         has_datastream :name=>"external", :type=>ActiveFedora::Datastream
       end
     end
@@ -279,7 +256,6 @@ describe ActiveFedora::DatastreamCollections do
       datastreams.keys.size.should == 3
       datastreams["thumbnail"].size.should == 1
       datastreams["thumbnail"].first.dsid.should == 'THUMB1'
-      datastreams["thumbnail"].first.dsLabel.should == 'minivan.jpg'
 
       datastreams["external"].size.should == 1
       datastreams["external"].first.dsid.should == "EXTERNAL1"
@@ -287,7 +263,6 @@ describe ActiveFedora::DatastreamCollections do
       datastreams["external"].first.content.should == "" 
 
       datastreams["high"].size.should == 1
-      datastreams["high"].first.dsLabel.should == 'dino.jpg'
       datastreams["high"].first.dsid.should == "HIGH1"
     end
   end
@@ -298,9 +273,9 @@ describe ActiveFedora::DatastreamCollections do
     before do
       class MockNamedDatastreamsIds < ActiveFedora::Base
         include ActiveFedora::DatastreamCollections
-        has_datastream "thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
-        has_datastream "high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
-        has_datastream "external", :type=>ActiveFedora::Datastream
+        has_datastream name: "thumbnail", prefix: "THUMB", type: ActiveFedora::Datastream
+        has_datastream name: "high", type: ActiveFedora::Datastream
+        has_datastream name: "external", type: ActiveFedora::Datastream
       end
     end
     
@@ -324,8 +299,8 @@ describe ActiveFedora::DatastreamCollections do
     before do
       class MockCreateNamedDatastreamFinder < ActiveFedora::Base
         include ActiveFedora::DatastreamCollections
-        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
-        has_datastream :name=>"high", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream
+        has_datastream :name=>"high", :type=>ActiveFedora::Datastream
       end
     end
     
@@ -343,9 +318,7 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2})
       @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2})
       t2_thumb1 = @test_object2.thumbnail.first
-      t2_thumb1.mimeType.should == "image/jpeg"
-      t2_thumb1.dsLabel.should == "testDS"
-      t2_thumb1.pid.should == @test_object2.pid 
+      t2_thumb1.id.should == @test_object2.id 
       t2_thumb1.dsid.should == "THUMB1"
       @test_object2.thumbnail_ids.should == ["THUMB1"]
       @test_object2.high_ids.include?("HIGH1") == true
@@ -360,8 +333,8 @@ describe ActiveFedora::DatastreamCollections do
     before do
       class MockCreateNamedDatastreamUpdateMethods < ActiveFedora::Base
         include ActiveFedora::DatastreamCollections
-        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream, :mimeType=>"image/jpeg"
-        has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream, :mimeType=>"application/xml"
+        has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream
+        has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream
         has_datastream :name=>"external", :type=>ActiveFedora::Datastream
       end
     end
@@ -376,21 +349,16 @@ describe ActiveFedora::DatastreamCollections do
       f.stub(:original_filename).and_return("minivan.jpg")
       @test_object2.thumbnail_file_append(f)
       t2_thumb1 = @test_object2.thumbnail.first
-      t2_thumb1.mimeType.should == "image/jpeg"
-      t2_thumb1.dsLabel.should == "minivan.jpg"
-      t2_thumb1.pid.should == @test_object2.pid 
+      t2_thumb1.id.should == @test_object2.id 
       t2_thumb1.dsid.should == "THUMB1"
       @test_object3.thumbnail_append({:file=>f})
       t3_thumb1 = @test_object3.thumbnail.first
-      t3_thumb1.mimeType.should == "image/jpeg"
-      t3_thumb1.dsLabel.should == "minivan.jpg"
-      t3_thumb1.pid.should == @test_object3.pid 
+      t3_thumb1.id.should == @test_object3.id 
       t3_thumb1.dsid.should == "THUMB1"
       @test_object3.external_append({:dsLocation=>"http://myresource.com"})
       t3_external1 = @test_object3.external.first
-      t3_external1.dsLabel.should == "http://myresource.com"
       t3_external1.dsLocation.should == "http://myresource.com"
-      t3_external1.pid.should == @test_object3.pid 
+      t3_external1.id.should == @test_object3.id 
       t3_external1.dsid.should == "EXTERNAL1"
     end
   end
