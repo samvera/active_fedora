@@ -72,20 +72,6 @@ module ActiveFedora
 
 
     module ClassMethods
-      # This method can be used instead of ActiveFedora::Model::ClassMethods.find.
-      # It works similarly except it populates an object from Solr instead of Fedora.
-      # It is most useful for objects used in read-only displays in order to speed up loading time.  If only
-      # a pid is passed in it will query solr for a corresponding solr document and then use it
-      # to populate this object.
-      #
-      # If a value is passed in for optional parameter solr_doc it will not query solr again and just use the
-      # one passed to populate the object.
-      #
-      # It will anything stored within solr such as metadata and relationships.  Non-metadata datastreams will not
-      # be loaded and if needed you should use find instead.
-      def load_instance_from_solr(pid,solr_doc=nil)
-        SolrInstanceLoader.new(self, pid, solr_doc).object
-      end
 
       # Using the fedora search (not solr), get every object and reindex it.
       # @param [String] query a string that conforms to the query param format

@@ -54,11 +54,6 @@ describe ActiveFedora::SolrService do
         AudioRecord.should_receive(:find).with("my:_PID1_", cast: true)
         ActiveFedora::SolrService.reify_solr_result(@sample_solr_hits.first)
       end
-      it "should use .load_instance_from_solr when called with :load_from_solr option" do
-        AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID1_", @sample_solr_hits.first)
-        ActiveFedora::SolrService.should_not_receive(:query)
-        ActiveFedora::SolrService.reify_solr_result(@sample_solr_hits.first, load_from_solr: true)
-      end
     end
     describe ".reify_solr_results" do
       it "should use AudioRecord.find to instantiate objects" do
@@ -67,13 +62,6 @@ describe ActiveFedora::SolrService do
         AudioRecord.should_receive(:find).with("my:_PID3_", cast: true)
         ActiveFedora::SolrService.reify_solr_results(@sample_solr_hits)
       end
-      it "should use AudioRecord.load_instance_from_solr when called with :load_from_solr option" do
-        AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID1_", @sample_solr_hits[0])
-        AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID2_", @sample_solr_hits[1])
-        AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID3_", @sample_solr_hits[2])
-        ActiveFedora::SolrService.should_not_receive(:query)
-        ActiveFedora::SolrService.reify_solr_results(@sample_solr_hits, load_from_solr: true)
-      end
     end
     describe ".lazy_reify_solr_results" do
       it "should lazily reify solr results" do
@@ -81,13 +69,6 @@ describe ActiveFedora::SolrService do
         AudioRecord.should_receive(:find).with("my:_PID2_", cast: true)
         AudioRecord.should_receive(:find).with("my:_PID3_", cast: true)
         ActiveFedora::SolrService.lazy_reify_solr_results(@sample_solr_hits).each {|r| r}
-      end
-      it "should use AudioRecord.load_instance_from_solr when called with :load_from_solr option" do
-        AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID1_", @sample_solr_hits[0])
-        AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID2_", @sample_solr_hits[1])
-        AudioRecord.should_receive(:load_instance_from_solr).with("my:_PID3_", @sample_solr_hits[2])
-        ActiveFedora::SolrService.should_not_receive(:query)
-        ActiveFedora::SolrService.lazy_reify_solr_results(@sample_solr_hits, load_from_solr: true).each {|r| r}
       end
     end
   end

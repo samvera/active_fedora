@@ -288,49 +288,6 @@ describe ActiveFedora::OmDatastream do
     
   end
   
-  describe '.from_solr' do
-    it "should set the internal_solr_doc attribute to the solr document passed in" do 
-      @test_ds.from_solr(@solr_doc)
-      @test_ds.internal_solr_doc.should == @solr_doc
-    end
-  end
-
-  describe '.get_values_from_solr' do
-    before(:each) do
-      @mods_ds = ActiveFedora::OmDatastream.new(@mock_inner, 'descMetadata')
-      @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
-    end
-
-    it "should return empty array if internal_solr_doc not set" do
-      @mods_ds.get_values_from_solr(:name,:role,:roleTerm)
-    end
- 
-    it "should return correct values from solr_doc given different term pointers" do
-      mock_term = double("OM::XML::Term")
-      mock_term.stub(:type).and_return(:text)
-      mock_terminology = double("OM::XML::Terminology")
-      mock_terminology.stub(:retrieve_term).and_return(mock_term)
-      ActiveFedora::OmDatastream.stub(:terminology).and_return(mock_terminology)
-      @mods_ds.from_solr(@solr_doc)
-      term_pointer = [:name,:role,:roleTerm]
-      @mods_ds.get_values_from_solr(:name,:role,:roleTerm).should == ["creator","submitter","teacher"]
-      ar = @mods_ds.get_values_from_solr({:name=>0},:role,:roleTerm)
-      ar.length.should == 2
-      ar.include?("creator").should == true
-      ar.include?("submitter").should == true
-      @mods_ds.get_values_from_solr({:name=>1},:role,:roleTerm).should == ["teacher"]
-      @mods_ds.get_values_from_solr({:name=>0},{:role=>0},:roleTerm).should == ["creator"]
-      @mods_ds.get_values_from_solr({:name=>0},{:role=>1},:roleTerm).should == ["submitter"]
-      @mods_ds.get_values_from_solr({:name=>0},{:role=>2},:roleTerm).should == []
-      @mods_ds.get_values_from_solr({:name=>1},{:role=>0},:roleTerm).should == ["teacher"]
-      @mods_ds.get_values_from_solr({:name=>1},{:role=>1},:roleTerm).should == []
-      ar = @mods_ds.get_values_from_solr(:name,{:role=>0},:roleTerm)
-      ar.length.should == 2
-      ar.include?("creator").should == true
-      ar.include?("teacher").should == true
-      @mods_ds.get_values_from_solr(:name,{:role=>1},:roleTerm).should == ["submitter"]
-    end
-  end
 
   describe '.has_solr_name?' do
     it "should return true if the given key exists in the solr document passed in" do
@@ -357,17 +314,6 @@ describe ActiveFedora::OmDatastream do
       @mods_ds.content= fixture(File.join("mods_articles","mods_article1.xml")).read
     end
 
-    it "should throw an exception if we have initialized the internal_solr_doc." do
-      @mods_ds.from_solr(@solr_doc)
-      found_exception = false
-      begin
-        @mods_ds.update_values([{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"})
-      rescue
-        found_exception = true
-      end
-      found_exception.should == true
-    end
-
     it "should update a value internally call OM::XML::TermValueOperators::update_values if internal_solr_doc is not set" do
       @mods_ds.stub(:om_update_values).once()
       term_pointer = [:name,:role,:roleTerm]
@@ -392,14 +338,6 @@ describe ActiveFedora::OmDatastream do
     it "should call OM::XML::term_values if internal_solr_doc is not set and return values from xml" do
       @mods_ds.stub(:om_term_values).once()
       term_pointer = [:name,:role,:roleTerm]
-      @mods_ds.term_values(*term_pointer)
-    end
-
-    # we will know this is working because solr_doc and xml are not synced so that wrong return mechanism can be detected
-    it "should call get_values_from_solr if internal_solr_doc is set" do
-      @mods_ds.from_solr(@solr_doc)
-      term_pointer = [:name,:role,:roleTerm]
-      @mods_ds.stub(:get_values_from_solr).once()
       @mods_ds.term_values(*term_pointer)
     end
   end
