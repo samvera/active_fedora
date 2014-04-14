@@ -23,7 +23,6 @@ module ActiveFedora
     # @option options [String] :dsLocation location for an external or redirect datastream
     # @option options [String] :mimeType the mime-type of the content
     # @option options [String] :prefix the prefix for the auto-generated DSID (not to be confused with the solr prefix)
-    # @option options [Boolean] :versionable is the datastream versionable
     def initialize(digital_object, dsid=nil, options={})
       raise ArgumentError, "Digital object is nil" unless digital_object
       @digital_object = digital_object

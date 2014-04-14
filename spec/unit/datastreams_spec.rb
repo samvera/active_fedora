@@ -7,7 +7,7 @@ describe ActiveFedora::Datastreams do
     before do
       class FooHistory < ActiveFedora::Base
          has_metadata :name => 'dsid', type: ActiveFedora::SimpleDatastream
-         has_metadata 'complex_ds', :versionable => true, :autocreate => true, :type => 'Z'
+         has_metadata 'complex_ds', autocreate: true, type: 'Z'
       end
     end
 
@@ -16,11 +16,11 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should have reasonable defaults" do
-      FooHistory.ds_specs['dsid'].should include(:autocreate => false)
+      FooHistory.ds_specs['dsid'].should include(autocreate: false)
     end
 
     it "should let you override defaults" do
-      FooHistory.ds_specs['complex_ds'].should include(:versionable => true, :autocreate => true, :type => 'Z')
+      FooHistory.ds_specs['complex_ds'].should include(autocreate: true, type: 'Z')
     end
 
     it "should raise an error if you don't give a type" do
