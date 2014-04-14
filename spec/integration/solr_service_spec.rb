@@ -1,7 +1,5 @@
 require 'spec_helper'
 
-require 'active_fedora'
-
 describe ActiveFedora::SolrService do
   describe "#reify_solr_results" do
     before(:all) do
@@ -13,9 +11,7 @@ describe ActiveFedora::SolrService do
         has_metadata :name => "descMetadata", :type => ActiveFedora::QualifiedDublinCoreDatastream
       end
       @test_object = ActiveFedora::Base.new
-      @test_object.label = 'test_object'
       @foo_object = FooObject.new
-      @foo_object.label = 'foo_object'
       attributes = {"language"=>{0=>"Italian"},
                     "creator"=>{0=>"Linguist, A."},
                     "geography"=>{0=>"Italy"},
@@ -24,9 +20,9 @@ describe ActiveFedora::SolrService do
       @test_object.save
       @foo_object.save
       @profiles = {
-        'test' => @test_object.profile,
-        'foo' => @foo_object.profile,
-        'foo_descMetadata' => @foo_object.datastreams['descMetadata'].profile
+        # 'test' => @test_object.profile,
+        # 'foo' => @foo_object.profile,
+        # 'foo_descMetadata' => @foo_object.datastreams['descMetadata'].profile
       }
       @foo_content = @foo_object.datastreams['descMetadata'].content
     end
@@ -49,9 +45,7 @@ describe ActiveFedora::SolrService do
       query = "id\:#{RSolr.escape(@foo_object.pid)}"
       solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
-      solr_foo = result.first
-      solr_foo.inner_object.should be_a(ActiveFedora::SolrDigitalObject)
-      solr_foo.label.should == 'foo_object'
+      expect(result.first).to be_instance_of FooObject
     end
   end
 end
