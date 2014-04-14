@@ -51,7 +51,7 @@ describe ActiveFedora::Base do
         has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText", :autocreate => true do |m|
           m.field "fubar", :text
         end
-        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel", :autocreate => true do |m|
+        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :autocreate => true do |m|
           m.field "fubar", :text
         end 
         has_attributes :fubar, datastream: 'withText', multiple: true
@@ -78,7 +78,6 @@ describe ActiveFedora::Base do
 
     before(:each) do
       @this_pid = increment_pid.to_s
-      stub_get(@this_pid)
       ActiveFedora::Base.stub(:assign_pid).and_return(@this_pid)
 
       @test_object = ActiveFedora::Base.new
@@ -175,59 +174,6 @@ describe ActiveFedora::Base do
       @test_object.should respond_to(:modified_date)
     end
 
-    it 'should provide #add_relationship' do
-      @test_object.should respond_to(:add_relationship)
-    end
-
-    describe '#add_relationship' do
-      it 'should add the assertion to the graph' do
-        @test_object.add_relationship("predicate", "info:fedora/object")
-        pred = ActiveFedora::Predicates.vocabularies["info:fedora/fedora-system:def/relations-external#"]["predicate"]
-        @test_object.relationships.should have_statement(RDF::Statement.new(RDF::URI.new(@test_object.internal_uri), pred, RDF::URI.new("info:fedora/object")))
-      end
-
-      it 'should add a relationship to an object only if it does not exist already' do
-        next_pid = increment_pid.to_s
-        ActiveFedora::Base.stub(:assign_pid).and_return(next_pid)
-        stub_get(next_pid)
-
-        @test_object3 = ActiveFedora::Base.new
-        @test_object.add_relationship(:has_part,@test_object3)
-        @test_object.ids_for_outbound(:has_part).should == [@test_object3.pid]
-        #try adding again and make sure not there twice
-        @test_object.add_relationship(:has_part,@test_object3)
-        @test_object.ids_for_outbound(:has_part).should == [@test_object3.pid]
-      end
-
-      it 'should add literal relationships if requested' do
-        @test_object.add_relationship(:conforms_to,"AnInterface",true)
-        @test_object.ids_for_outbound(:conforms_to).should == ["AnInterface"]
-      end
-    end
-
-    it 'should provide #remove_relationship' do
-      @test_object.should respond_to(:remove_relationship)
-    end
-
-    describe '#remove_relationship' do
-      it 'should remove a relationship from the relationships hash' do
-        @test_object3 = ActiveFedora::Base.new()
-        @test_object3.stub(:pid=>'7')
-        @test_object4 = ActiveFedora::Base.new()
-        @test_object4.stub(:pid=>'8')
-        @test_object.add_relationship(:has_part,@test_object3)
-        @test_object.add_relationship(:has_part,@test_object4)
-        #check both are there
-        @test_object.ids_for_outbound(:has_part).should == [@test_object3.pid,@test_object4.pid]
-        @test_object.remove_relationship(:has_part,@test_object3)
-        #check only one item removed
-        @test_object.ids_for_outbound(:has_part).should == [@test_object4.pid]
-        @test_object.remove_relationship(:has_part,@test_object4)
-        #check last item removed and predicate removed since now emtpy
-        @test_object.relationships.size.should == 0
-      end
-    end
-
     it 'should provide #relationships' do
       @test_object.should respond_to(:relationships)
     end
@@ -241,7 +187,6 @@ describe ActiveFedora::Base do
 
     describe '.assert_content_model' do
       it "should default to the name of the class" do
-        stub_get(@this_pid)
         @test_object.assert_content_model
         @test_object.relationships(:has_model).should == ["info:fedora/afmodel:ActiveFedora_Base"]
 
@@ -281,15 +226,13 @@ describe ActiveFedora::Base do
         @test_object.should respond_to(:to_solr)
       end
 
-      it "should add pid, system_create_date, system_modified_date and object_state from object attributes" do
+      it "should add pid, system_create_date, system_modified_date from object attributes" do
         @test_object.should_receive(:create_date).and_return("2012-03-04T03:12:02Z")
         @test_object.should_receive(:modified_date).and_return("2012-03-07T03:12:02Z")
         @test_object.stub(pid: 'changeme:123')
-        @test_object.state = "D"
         solr_doc = @test_object.to_solr
         solr_doc[ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)].should eql("2012-03-04T03:12:02Z")
         solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :stored_sortable, type: :date)].should eql("2012-03-07T03:12:02Z")
-        solr_doc[ActiveFedora::SolrService.solr_name("object_state", :stored_sortable)].should eql("D")
         solr_doc[:id].should eql("changeme:123")
       end
 
@@ -303,8 +246,6 @@ describe ActiveFedora::Base do
       end
 
       it "should add self.class as the :active_fedora_model" do
-        stub_get(@this_pid)
-        stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
         @test_history = FooHistory.new()
         solr_doc = @test_history.to_solr
         solr_doc[ActiveFedora::SolrService.solr_name("active_fedora_model", :stored_sortable)].should eql("FooHistory")
@@ -339,20 +280,6 @@ describe ActiveFedora::Base do
 
     end
 
-    describe ".label" do
-      it "should return the label of the inner object" do
-        @test_object.inner_object.should_receive(:label).and_return("foo label")
-        @test_object.label.should == "foo label"
-      end
-    end
-
-    describe ".label=" do
-      it "should set the label of the inner object" do
-        @test_object.label.should_not == "foo label"
-        @test_object.label = "foo label"
-        @test_object.label.should == "foo label"
-      end
-    end
     describe "update_attributes" do
       it "should set the attributes and save" do
         m = FooHistory.new

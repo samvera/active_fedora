@@ -71,7 +71,7 @@ module ActiveFedora
         if self.respond_to? :pid_namespace
           namespace = self.pid_namespace
         else
-          namespace = attrs.fetch(:namespace, MODEL_NAMESPACE)
+          namespace = attrs.fetch(:namespace, ActiveFedora::Model::NAMESPACE)
         end
         "info:fedora/#{namespace}:#{sanitized_class_name(self)}" 
       end
