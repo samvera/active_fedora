@@ -46,7 +46,7 @@ describe ActiveFedora do
     end
     
     it "should prevent Base.save from calling update_index if false" do
-      dirty_ds = ActiveFedora::SimpleDatastream.new(@test_object.inner_object, 'ds1')
+      dirty_ds = ActiveFedora::SimpleDatastream.new(@test_object, 'ds1')
       @test_object.datastreams['ds1'] = dirty_ds
       @test_object.stub(:datastreams).and_return({:ds1 => dirty_ds})
       @test_object.should_receive(:update_index).never
@@ -55,7 +55,7 @@ describe ActiveFedora do
     end
     it "should prevent Base.delete from deleting the corresponding Solr document if false" do
       ActiveFedora::SolrService.instance.conn.should_receive(:delete).with(@test_object.pid).never 
-      @test_object.inner_object.should_receive(:delete)
+      @test_object.should_receive(:delete)
       @test_object.delete
     end
   end
