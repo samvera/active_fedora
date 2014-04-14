@@ -32,8 +32,10 @@ describe ActiveFedora::Rdf::List do
     Object.send(:remove_const, :MADS)
   end
 
+  let(:parent) { double('parent object', id: 'foo', uri: '/fedora/rest/foo', new_record?: true) }
+
   describe "a new list" do
-    let (:ds) { DemoList.new(double('parent object', :uri=>'foo', :new_record? =>true), 'descMetadata')}
+    let (:ds) { DemoList.new(parent, 'descMetadata')}
     subject { ds.elementList.build}
 
     it "should insert at the end" do
@@ -83,14 +85,14 @@ describe ActiveFedora::Rdf::List do
   end
 
   describe "an empty list" do
-    subject { DemoList.new(double('parent object', :uri=>'foo', :new_record? =>true), 'descMd').elementList.build } 
+    subject { DemoList.new(parent, 'descMd').elementList.build } 
     it "should have to_ary" do
       subject.to_ary.should == []
     end
   end
 
   describe "a list that has a constructed element" do
-    let(:ds) { DemoList.new(double('parent object', :uri=>'foo', :new_record? =>true), 'descMd') }
+    let(:ds) { DemoList.new(parent, 'descMd') }
     let(:list) { ds.elementList.build } 
     let!(:topic) { list.topicElement.build }
 
@@ -111,7 +113,7 @@ describe ActiveFedora::Rdf::List do
 
   describe "a list with content" do
     subject do
-      subject = DemoList.new(double('parent object', :uri=>'foo', :new_record? =>true), 'descMetadata')
+      subject = DemoList.new(parent, 'descMetadata')
       subject.content =<<END
   <rdf:RDF
       xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:mads="http://www.loc.gov/mads/rdf/v1#">
