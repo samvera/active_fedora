@@ -19,9 +19,6 @@ module ActiveFedora
     # @param dsid [String] the datastream id, if this is nil, a datastream id will be generated.
     # @param options [Hash]
     # @option options [String,IO] :content the content for the datastream
-    # @option options [String] :dsLabel label for the datastream
-    # @option options [String] :dsLocation location for an external or redirect datastream
-    # @option options [String] :mimeType the mime-type of the content
     # @option options [String] :prefix the prefix for the auto-generated DSID (not to be confused with the solr prefix)
     def initialize(digital_object, dsid=nil, options={})
       raise ArgumentError, "Digital object is nil" unless digital_object
@@ -126,13 +123,6 @@ module ActiveFedora
     end
     
     # TODO size premis:hasSize
-
-    # alias_method :realLabel, :label
-
-    # def label
-    #   Array(realLabel).first
-    # end
-    # alias_method :dsLabel, :label
 
     def inspect
       "#<#{self.class} @pid=\"#{digital_object.id}\" @dsid=\"#{dsid}\" changed=\"#{changed?}\" @mimeType=\"#{mimeType}\" >"

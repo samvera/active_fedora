@@ -203,8 +203,6 @@ module ActiveFedora
           raise "Content type mismatch for add datastream #{name} to #{pid}.  Expected: #{named_datastreams_desc[name][:mimeType]}, Actual: #{opts[:content_type]}"
         end
         
-        opts.merge!(:dsLabel => label)
-        
         ds = create_datastream(named_datastreams_desc[name][:type], opts[:dsid], opts)
         #Must be of type datastream
         assert_kind_of 'datastream',  ds, ActiveFedora::Datastream
