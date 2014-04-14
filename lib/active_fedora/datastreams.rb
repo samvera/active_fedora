@@ -129,7 +129,6 @@ module ActiveFedora
       # @option args [String] :name the handle to refer to this datastream as
       # @option args [String] :url 
       # @option args [Boolean] :autocreate Always create this datastream on new objects
-      # @option args [Boolean] :versionable Should versioned datastreams be stored
       # @yield block executed by some kinds of datastreams
       def has_metadata(*args, &block)
         @metadata_ds_defaults ||= {
@@ -149,14 +148,12 @@ module ActiveFedora
       #   @param [Hash] args 
       #     @option args :type (ActiveFedora::Datastream) The class the datastream should have
       #     @option args [Boolean] :autocreate Always create this datastream on new objects
-      #     @option args [Boolean] :versionable Should versioned datastreams be stored
       # @overload has_file_datastream(args)
       #   Declares a file datastream exists for objects of this type
       #   @param [Hash] args 
       #     @option args :name ("content") The dsid of the datastream
       #     @option args :type (ActiveFedora::Datastream) The class the datastream should have
       #     @option args [Boolean] :autocreate Always create this datastream on new objects
-      #     @option args [Boolean] :versionable Should versioned datastreams be stored
       def has_file_datastream(*args)
         @file_ds_defaults ||= {
           :autocreate => false,
@@ -192,7 +189,6 @@ module ActiveFedora
         name = spec.delete(:name)
         raise ArgumentError, "You must provide a name (dsid) for the datastream" unless name
         raise ArgumentError, "You must provide a :type property for the datastream '#{name}'" unless spec[:type]
-        spec[:versionable] = args[:versionable] if args.has_key? :versionable
         spec[:block] = block if block
         build_datastream_accessor(name)
         ds_specs[name]= spec
