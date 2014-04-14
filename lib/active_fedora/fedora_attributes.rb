@@ -15,13 +15,5 @@ module ActiveFedora
       id
     end
 
-    #return the owner id
-    def owner_id
-      Array(@inner_object.ownerId).first
-    end
-    
-    def owner_id=(owner_id)
-      @inner_object.ownerId=(owner_id)
-    end
   end
 end
