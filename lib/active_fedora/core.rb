@@ -84,34 +84,6 @@ module ActiveFedora
       datastreams.frozen?
     end
 
-    # This method adapts the inner_object to a new ActiveFedora::Base implementation
-    # This is intended to minimize redundant interactions with Fedora
-    def adapt_to(klass)
-      unless klass.ancestors.include? ActiveFedora::Base
-        raise "Cannot adapt #{self.class.name} to #{klass.name}: Not a ActiveFedora::Base subclass"
-      end
-      klass.allocate.init_with(inner_object)
-    end
-
-    # Examines the :has_model assertions in the RELS-EXT.
-    #
-    # If the object is of type ActiveFedora::Base, then use the first :has_model
-    # in the RELS-EXT for this object. Due to how the RDF writer works, this is
-    # currently just the first alphabetical model.
-    #
-    # If the object was instantiated with any other class, then use that class
-    # as the base of the type the user wants rather than casting to the first
-    # :has_model found on the object.
-    #
-    # In either case, if an extended model of that initial base model of the two
-    # cases above exists in the :has_model, then instantiate as that extended
-    # model type instead.
-    def adapt_to_cmodel
-      best_model_match = ActiveFedora::ContentModel.best_model_for(self)
-
-      self.instance_of?(best_model_match) ? self : self.adapt_to(best_model_match)
-    end
-    
     # ** EXPERIMENTAL **
     # This method returns a new object of the same class, with the internal SolrDigitalObject
     # replaced with an actual DigitalObject.

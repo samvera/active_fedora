@@ -54,7 +54,7 @@ module ActiveFedora
       end
     end
 
-    include DigitalObject::DatastreamBootstrap
+    include ActiveFedora::DatastreamBootstrap
     def datastream_from_spec(ds_spec, name)
       datastream_object_for name, {}, ds_spec
     end
