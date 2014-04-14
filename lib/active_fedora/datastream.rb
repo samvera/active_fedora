@@ -125,7 +125,7 @@ module ActiveFedora
     # TODO size premis:hasSize
 
     def inspect
-      "#<#{self.class} @pid=\"#{digital_object.id}\" @dsid=\"#{dsid}\" changed=\"#{changed?}\" @mimeType=\"#{mimeType}\" >"
+      "#<#{self.class} @pid=\"#{digital_object.id}\" @dsid=\"#{dsid}\" changed=\"#{changed?}\" >"
     end
 
     #compatibility method for rails' url generators. This method will 
