@@ -33,35 +33,6 @@ module ActiveFedora
       self
     end
 
-    # Initialize an empty model object and set the +inner_obj+
-    # example:
-    #
-    #   class Post < ActiveFedora::Base
-    #     has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream
-    #   end
-    #
-    #   post = Post.allocate
-    #   post.init_with_object(DigitalObject.find(pid))
-    #   post.properties.title # => 'hello world'
-    def init_with_object(inner_obj)
-      @association_cache = {}
-      @inner_object = inner_obj
-      unless @inner_object.is_a? SolrDigitalObject
-        @inner_object.original_class = self.class
-        ## Replace existing unchanged datastreams with the definitions found in this class if they have a different type.
-        ## Any datastream that is deleted here will cause a reload from fedora, so avoid it whenever possible
-        ds_specs.keys.each do |key|
-          if @inner_object.datastreams[key] != nil && !@inner_object.datastreams[key].content_changed? && @inner_object.datastreams[key].class != self.class.ds_specs[key][:type]
-            @inner_object.datastreams.delete(key)
-          end
-        end
-      end
-      load_datastreams
-      run_callbacks :find
-      run_callbacks :initialize
-      self
-    end
-
     def ==(comparison_object)
          comparison_object.equal?(self) ||
            (comparison_object.instance_of?(self.class) &&
