@@ -24,8 +24,8 @@ describe ActiveFedora::SolrService do
       @test_object.save
       @foo_object.save
       @profiles = {
-        'test' => @test_object.inner_object.profile,
-        'foo' => @foo_object.inner_object.profile,
+        'test' => @test_object.profile,
+        'foo' => @foo_object.profile,
         'foo_descMetadata' => @foo_object.datastreams['descMetadata'].profile
       }
       @foo_content = @foo_object.datastreams['descMetadata'].content
@@ -45,32 +45,13 @@ describe ActiveFedora::SolrService do
       end
     end
     
-    it 'should load objects from solr data if a :load_from_solr option is passed in' do
-      query = "id\:#{RSolr.escape(@test_object.pid)} OR id\:#{RSolr.escape(@foo_object.pid)}"
-      solr_result = ActiveFedora::SolrService.query(query)
-      result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
-      result.length.should == 2
-      result.each do |r|
-        r.inner_object.should be_a(ActiveFedora::SolrDigitalObject)
-        [ActiveFedora::Base, FooObject].should include(r.class)
-        ['test_object','foo_object'].should include(r.label)
-        @test_object.inner_object.profile.should == @profiles['test']
-        @foo_object.inner_object.profile.should == @profiles['foo']
-        @foo_object.datastreams['descMetadata'].profile.should == @profiles['foo_descMetadata']
-        @foo_object.datastreams['descMetadata'].content.should be_equivalent_to(@foo_content)
-      end
-    end
-    
     it 'should #reify a lightweight object as a new instance' do
       query = "id\:#{RSolr.escape(@foo_object.pid)}"
       solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
       solr_foo = result.first
-      real_foo = solr_foo.reify
       solr_foo.inner_object.should be_a(ActiveFedora::SolrDigitalObject)
-      real_foo.inner_object.should be_a(ActiveFedora::DigitalObject)
       solr_foo.label.should == 'foo_object'
-      real_foo.label.should == 'foo_object'
     end
   end
 end
