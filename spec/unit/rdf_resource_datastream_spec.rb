@@ -180,18 +180,6 @@ describe ActiveFedora::RDFDatastream do
     end
   end
 
-  describe "asset.load_instance_from_solr" do
-    before do
-      subject.descMetadata.title = "Monkeys"
-      subject.save
-      @loaded_object = DummyAsset.load_instance_from_solr(subject.pid)
-    end
-
-    it "should load the datastream" do
-      expect(@loaded_object.title).to eq ["Monkeys"]
-    end
-  end
-
   describe "relationships" do
     before do
       @new_object = DummyAsset.new

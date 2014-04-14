@@ -103,16 +103,6 @@ module ActiveFedora
       self.class.find self.pid
     end
     
-    # ** EXPERIMENTAL **
-    # This method reinitializes a lightweight, loaded-from-solr object with an actual
-    # DigitalObject inside.
-    def reify!
-      if self.inner_object.is_a? DigitalObject
-        raise "#{self.inspect} is already a full digital object"
-      end
-      self.init_with_object DigitalObject.find(self.class,self.pid)
-    end
-    
     module ClassMethods
       # Returns a suitable uri object for :has_model
       # Should reverse Model#from_class_uri

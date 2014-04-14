@@ -46,11 +46,7 @@ module ActiveFedora
 
       def reify_solr_result(hit, opts = {})
         klass = class_from_solr_document(hit)
-        if opts[:load_from_solr]
-          klass.load_instance_from_solr(hit[SOLR_DOCUMENT_ID], hit)
-        else
-          klass.find(hit[SOLR_DOCUMENT_ID], cast: true)
-        end
+        klass.find(hit[SOLR_DOCUMENT_ID], cast: true)
       end
 
       #Returns the best singular class for the solr object
