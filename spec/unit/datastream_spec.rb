@@ -18,12 +18,7 @@ describe ActiveFedora::Datastream do
   end
   
   it "should be inspectable" do
-    subject.inspect.should match /#<ActiveFedora::Datastream @pid=\"\" @dsid=\"abcd\" changed=\"true\" @mimeType=\"\" >/
-  end
-
-  it "should have mimeType accessors" do
-    subject.mimeType = "text/foo"
-    subject.mimeType.should == "text/foo"
+    subject.inspect.should match /#<ActiveFedora::Datastream @pid=\"\" @dsid=\"abcd\" changed=\"true\">/
   end
 
   describe "#generate_dsid" do

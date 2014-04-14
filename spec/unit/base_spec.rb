@@ -174,25 +174,6 @@ describe ActiveFedora::Base do
       @test_object.should respond_to(:modified_date)
     end
 
-    it 'should provide #relationships' do
-      @test_object.should respond_to(:relationships)
-    end
-
-    describe '#relationships' do
-      it 'should return a graph' do
-        @test_object.relationships.kind_of?(RDF::Graph).should be_true
-        @test_object.relationships.size.should == 0
-      end
-    end
-
-    describe '.assert_content_model' do
-      it "should default to the name of the class" do
-        @test_object.assert_content_model
-        @test_object.relationships(:has_model).should == ["info:fedora/afmodel:ActiveFedora_Base"]
-
-      end
-    end
-
     describe '.save' do
       it "should create a new record" do
         @test_object.stub(:new_record? => true)
@@ -236,15 +217,6 @@ describe ActiveFedora::Base do
         solr_doc[:id].should eql("changeme:123")
       end
 
-      it "should omit base metadata and RELS-EXT if :model_only==true" do
-        @test_object.add_relationship(:has_part, "foo", true)
-        solr_doc = @test_object.to_solr(Hash.new, :model_only => true)
-        solr_doc[ActiveFedora::SolrService.solr_name("system_create", type: :date)].should be_nil
-        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", type: :date)].should be_nil
-        solr_doc["id"].should be_nil
-        solr_doc[ActiveFedora::SolrService.solr_name("has_part", :symbol)].should be_nil
-      end
-
       it "should add self.class as the :active_fedora_model" do
         @test_history = FooHistory.new()
         solr_doc = @test_history.to_solr
@@ -255,19 +227,8 @@ describe ActiveFedora::Base do
         mock1 = double("ds1", :to_solr => {})
         mock2 = double("ds2", :to_solr => {})
         ngds = double("ngds", :to_solr => {})
-        ngds.should_receive(:solrize_profile)
-        mock1.should_receive(:solrize_profile)
-        mock2.should_receive(:solrize_profile)
 
         @test_object.should_receive(:datastreams).twice.and_return({:ds1 => mock1, :ds2 => mock2, :ngds => ngds})
-        @test_object.should_receive(:solrize_relationships)
-        @test_object.to_solr
-      end
-      it "should call .to_solr on all RDFDatastreams, passing the resulting document to solr" do
-        mock = double("ds1", :to_solr => {})
-        mock.should_receive(:solrize_profile)
-
-        @test_object.should_receive(:datastreams).twice.and_return({:ds1 => mock})
         @test_object.should_receive(:solrize_relationships)
         @test_object.to_solr
       end
