@@ -257,7 +257,7 @@ describe ActiveFedora::RDFDatastream do
     context 'when the object has no Rdf::Resource' do
       before do
         class DummyOmAsset < ActiveFedora::Base
-          has_metadata :name => 'descMetadata', :type => OmDatastream
+          has_metadata 'descMetadata', type: ActiveFedora::OmDatastream
         end
 
         @new_object = DummyOmAsset.new
