@@ -7,7 +7,7 @@ describe ActiveFedora::OmDatastream do
     before(:all) do 
       class ModsArticle3 < ActiveFedora::Base
         # Uses the Hydra MODS Article profile for tracking most of the descriptive metadata
-        has_metadata "descMetadata", type: Hydra::ModsArticleDatastream, control_group: 'X', autocreate: true
+        has_metadata "descMetadata", type: Hydra::ModsArticleDatastream, autocreate: true
       end
     end
 
@@ -23,10 +23,6 @@ describe ActiveFedora::OmDatastream do
 
     after(:each) do
       @obj.destroy
-    end
-
-    it "should report being inline" do
-      @obj.descMetadata.should be_inline
     end
 
     it "should not be changed when no fields have been set" do
@@ -72,10 +68,6 @@ describe ActiveFedora::OmDatastream do
 
     after(:each) do
       @obj.destroy
-    end
-
-    it "should not report being inline" do
-      @obj.descMetadata.should be_managed
     end
 
     describe "#changed?" do
