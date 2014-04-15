@@ -134,8 +134,8 @@ module ActiveFedora
 
       def create_attribute_setter(field, dsid, args)
         find_or_create_defined_attribute(field, dsid, args)
-        define_method "#{field}=".to_sym do |v|
-          self[field]=v
+        define_method "#{field}=".to_sym do |value|
+          array_setter(field, value)
         end
       end
     end
