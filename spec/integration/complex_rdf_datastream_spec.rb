@@ -145,10 +145,8 @@ END
         Object.send(:remove_const, :SpecDatastream)
       end
 
-      let (:ds) do
-        mock_obj = double(:mock_obj, pid: 'test:124', :new_record? => true)
-        ds = SpecDatastream.new(mock_obj, 'descMd')
-      end
+      let(:mock_obj) { double(:mock_obj, uri: '/fedora/test/124', id: '124', new_record?: true) }
+      let (:ds) { SpecDatastream.new(mock_obj, 'descMd') }
 
 
       it "should store the type of complex objects when type is specified" do
@@ -206,10 +204,8 @@ END
         Object.send(:remove_const, :SpecDatastream)
       end
 
-      let (:ds) do
-        mock_obj = double(:mock_obj, pid: 'test:124', :new_record? => true)
-        ds = SpecDatastream.new(mock_obj, 'descMd')
-      end
+      let(:mock_obj) { double(:mock_obj, uri: '/fedora/test/124', id: '124', new_record?: true) }
+      let (:ds) { SpecDatastream.new(mock_obj, 'descMd') }
 
 
       it "should store the type of complex objects when type is specified" do
