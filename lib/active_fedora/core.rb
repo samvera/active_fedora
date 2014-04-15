@@ -31,21 +31,6 @@ module ActiveFedora
              !comparison_object.new_record?)
     end
 
-    def clone
-      new_object = self.class.create
-      clone_into(new_object)
-    end
-
-    # Clone the datastreams from this object into the provided object, while preserving the pid of the provided object
-    # @param [Base] new_object clone into this object
-    def clone_into(new_object)
-      raise "need to rewrite the local graph"
-      datastreams.each do |k, v|
-        new_object.datastreams[k].content = v.content
-      end
-      new_object if new_object.save
-    end
-
     def freeze
       datastreams.freeze
       self
