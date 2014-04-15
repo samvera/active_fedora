@@ -181,8 +181,8 @@ module ActiveFedora
       cast = true if self == ActiveFedora::Base && cast.nil?
       resource = Ldp::Resource.new(FedoraLens.connection, @klass.id_to_uri(id))
       model = @klass.new(resource)
-      # byebug
-      model
+      klass = Model.from_class_uri(model.has_model)
+      model.becomes(klass)
     rescue Ldp::NotFound
       raise ActiveFedora::ObjectNotFoundError
     end
