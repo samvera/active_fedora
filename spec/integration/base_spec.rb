@@ -1,5 +1,4 @@
 require 'spec_helper'
-# require 'byebug'
 
 describe "A base object with metadata" do
   before :all do
@@ -19,7 +18,7 @@ describe "A base object with metadata" do
     end
     it "should save the datastream." do
       obj = ActiveFedora::Base.find(@obj.pid)
-      obj.foo.should_not be_new
+      obj.foo.should_not be_new_record
       obj.foo.person.should == ['bob']
       person_field = ActiveFedora::SolrService.solr_name('foo__person', type: :string)
       solr_result = ActiveFedora::SolrService.query("{!raw f=id}#{@obj.pid}", :fl=>"id #{person_field}").first
