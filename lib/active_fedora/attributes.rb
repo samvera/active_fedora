@@ -33,13 +33,13 @@ module ActiveFedora
       "#<#{self.class} #{values.flatten.join(', ')}>"
     end
 
-    def [](key)
-      array_reader(key)
-    end
+    # def [](key)
+    #   array_reader(key)
+    # end
 
-    def []=(key, value)
-      array_setter(key, value)
-    end
+    # def []=(key, value)
+    #   array_setter(key, value)
+    # end
 
     # @return [Boolean] true if there is an reader method and it returns a
     # value different from the new_value.
