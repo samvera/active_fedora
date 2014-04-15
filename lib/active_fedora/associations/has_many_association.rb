@@ -59,7 +59,6 @@ module ActiveFedora
               #update_counter(-scope.delete_all)
             else
 
-                
               if reflection.inverse_of # Can't get an inverse when class_name: 'ActiveFedora::Base' is supplied
                 inverse = reflection.inverse_of.name
                 records.each do |record|
@@ -70,7 +69,7 @@ module ActiveFedora
                       record.association(inverse).delete(@owner)
                     else
                       # Remove from a belongs_to
-                      record.association(inverse).id_writer(nil)
+                      record[reflection.foreign_key] = nil
                     end
                     # Check to see if the object still exists (may be already deleted).
                     # In Rails, they do this with an update_all to avoid callbacks and validations, we may need the same.
