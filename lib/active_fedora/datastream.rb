@@ -3,10 +3,12 @@ module ActiveFedora
   #This class represents a Fedora datastream
   class Datastream
     include FedoraLens
-    attribute :mime_type, [RDF::URI.new("http://fedora.info/definitions/v4/repository#mimeType"), Lenses.single, Lenses.literal_to_string]
-
     include ActiveModel::Dirty
-    define_attribute_methods 'content'
+    attribute :mime_type, [RDF::URI.new("http://fedora.info/definitions/v4/repository#mimeType"), Lenses.single, Lenses.literal_to_string]
+    attribute :size, [RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasSize"), Lenses.single, Lenses.literal_to_string]
+    generate_method 'content'
+
+
 
     extend ActiveModel::Callbacks
     define_model_callbacks :save, :create, :destroy
@@ -61,7 +63,7 @@ module ActiveFedora
     end
 
     def mime_type
-      attributes["mimeType"] || default_mime_type
+      super || default_mime_type
     end
 
     def default_mime_type
@@ -122,8 +124,6 @@ module ActiveFedora
       @default_attributes = default_attributes.merge attributes
     end
     
-    # TODO size premis:hasSize
-
     def inspect
       "#<#{self.class} @pid=\"#{digital_object.id}\" @dsid=\"#{dsid}\" changed=\"#{changed?}\" >"
     end
