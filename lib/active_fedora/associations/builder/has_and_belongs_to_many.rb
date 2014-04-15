@@ -10,6 +10,12 @@ module ActiveFedora::Associations::Builder
       reflection
     end
 
+    def define_readers
+      super
+      accessor_name = "#{name.to_s.singularize}_ids"
+      model.attribute accessor_name, [predicate]#, FedoraLens::Lenses.literal_to_string]
+    end
+
     private
 
       def redefine_destroy
