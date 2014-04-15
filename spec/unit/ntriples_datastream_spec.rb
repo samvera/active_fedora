@@ -2,9 +2,7 @@ require 'spec_helper'
 
 describe ActiveFedora::NtriplesRDFDatastream do
   let(:inner_object) { ActiveFedora::Base.new('/test:1') }
-  # after {
-  #   inner_object.delete
-  # }
+
   describe "an instance with content" do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
@@ -203,17 +201,12 @@ describe ActiveFedora::NtriplesRDFDatastream do
           has_attributes :created, :title, :publisher, :based_near, :related_url, :rights, datastream: :descMetadata, multiple: true
         end
         @obj = MyDatastream.new(inner_object, 'solr_rdf')
-        repository = double()
-          @obj.stub(repository: repository, pid: 'test:1')
-          repository.stub(:modify_datastream)
-          repository.stub(:add_datastream)
         @obj.created = Date.parse("2012-03-04")
         @obj.title = "Of Mice and Men, The Sequel"
         @obj.publisher = "Bob's Blogtastic Publishing"
         @obj.based_near = ["Tacoma, WA", "Renton, WA"]
         @obj.related_url = "http://example.org/blogtastic/"
         @obj.rights = "Totally open, y'all"
-        @obj.save
       end
       after do
         Object.send(:remove_const, :Foo)
