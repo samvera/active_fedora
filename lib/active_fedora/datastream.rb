@@ -94,7 +94,7 @@ module ActiveFedora
     def retrieve_content
       resp = orm.resource.client.get("#{uri}/fcr:content")
       case resp.status
-        when 201
+        when 200, 201
           resp.body
         when 404
           # TODO
