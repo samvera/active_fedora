@@ -8,12 +8,6 @@ module ActiveFedora
     end
 
     module ClassMethods
-      def reflection_name_for_predicate(predicate)
-        reflections.each do |k, v|
-          return k if v.options[:property] == predicate
-        end
-      end
-
       def create_reflection(macro, name, options, active_fedora)
         case macro
           when :has_many, :belongs_to, :has_and_belongs_to_many
@@ -120,6 +114,10 @@ module ActiveFedora
           macro == :belongs_to
         end
 
+        def has_and_belongs_to_many?
+          macro == :has_and_belongs_to_many
+        end
+
         private
           def derive_class_name
             class_name = name.to_s.camelize
@@ -130,6 +128,8 @@ module ActiveFedora
           def derive_foreign_key
             if belongs_to?
               "#{name}_id"
+            elsif has_and_belongs_to_many?
+              "#{name.to_s.singularize}_ids"
             elsif options[:as]
               "#{options[:as]}_id"
             else
@@ -165,6 +165,18 @@ module ActiveFedora
           @foreign_key ||= options[:foreign_key] || derive_foreign_key
         end
 
+        def check_validity!
+          check_validity_of_inverse!
+        end
+
+        def check_validity_of_inverse!
+          unless options[:polymorphic]
+            if has_inverse? && inverse_of.nil?
+              raise InverseOfAssociationNotFoundError.new(self)
+            end
+          end
+        end
+
         # A chain of reflections from this one back to the owner. For more see the explanation in
         # ThroughReflection.
         def chain
@@ -172,6 +184,10 @@ module ActiveFedora
         end
 
         alias :source_macro :macro
+
+        def has_inverse?
+          inverse_name
+        end
 
         def inverse_of
           return unless inverse_name

@@ -6,7 +6,7 @@ module ActiveFedora::Associations::Builder
     # Set by subclasses
     class_attribute :macro
 
-    attr_reader :model, :name, :options, :reflection, :mixin
+    attr_reader :model, :name, :options, :mixin
 
     def self.build(model, name, options)
       new(model, name, options).build
@@ -24,6 +24,14 @@ module ActiveFedora::Associations::Builder
       define_accessors
       reflection
     end
+
+    # Returns the RDF predicate as defined by the :property attribute
+    def predicate
+      predicate = options[:property]
+      return predicate if predicate.kind_of? RDF::URI
+      ActiveFedora::Predicates.find_graph_predicate(predicate)
+    end
+
 
     private
 

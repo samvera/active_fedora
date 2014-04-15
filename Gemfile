@@ -5,6 +5,7 @@ source "https://rubygems.org"
 gemspec
 
 gem "fedora_lens", github: 'curationexperts/fedora_lens'
+gem 'byebug' unless ENV['TRAVIS']
 
 group :test do
   gem 'simplecov', require: false

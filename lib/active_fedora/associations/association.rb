@@ -13,7 +13,7 @@ module ActiveFedora
       delegate :options, :klass, to: :reflection
 
       def initialize(owner, reflection)
-        #reflection.check_validity!
+        reflection.check_validity!
         @owner, @reflection = owner, reflection
         @updated = false
         reset
@@ -107,6 +107,7 @@ module ActiveFedora
         loaded! unless loaded?
         target
       end
+
 
         private
 
