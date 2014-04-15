@@ -1,4 +1,5 @@
 require 'spec_helper'
+# require 'byebug'
 
 describe "A base object with metadata" do
   before :all do
@@ -29,8 +30,6 @@ describe "A base object with metadata" do
   describe "that already exists in the repo" do
     before do
       @release = MockAFBaseRelationship.create()
-      @release.add_relationship(:is_governed_by, 'info:fedora/test:catalog-fixture')
-      @release.add_relationship(:is_part_of, 'info:fedora/test:777')
       @release.foo.person = "test foo content"
       @release.save
     end
@@ -43,45 +42,6 @@ describe "A base object with metadata" do
         MockAFBaseRelationship.find(@release.pid).foo.person.should == ['frank']
         person_field = ActiveFedora::SolrService.solr_name('foo__person', type: :string)
         ActiveFedora::SolrService.query("id:#{@release.pid.gsub(":", "\\:")}", :fl=>"id #{person_field}").first.should == {"id"=>@release.pid, person_field =>['frank']}
-      end
-    end
-    describe "clone_into a new object" do
-      before do
-        begin
-          new_object = MockAFBaseRelationship.find('test:999')
-          new_object.delete
-        rescue ActiveFedora::ObjectNotFoundError
-        end
-        
-        new_object = MockAFBaseRelationship.create(:pid => 'test:999')
-        @release.clone_into(new_object)
-        @new_object = MockAFBaseRelationship.find('test:999')
-      end
-      it "should have all the assertions" do
-        pending "should have assertions"
-           # <ns0:isGovernedBy rdf:resource="info:fedora/test:catalog-fixture"/>
-           # <ns1:hasModel rdf:resource="info:fedora/afmodel:MockAFBaseRelationship"/>
-           # <ns2:isPartOf rdf:resource="info:fedora/test:777"/>
-      end
-      it "should have the other datastreams too" do
-        @new_object.datastreams.keys.should include "foo"
-        @new_object.foo.content.should be_equivalent_to @release.foo.content
-      end
-    end
-    describe "clone" do
-      before do
-        @new_object = @release.clone
-      end
-      it "should have all the assertions" do
-        pending "should have assertions"
-           # <ns0:isGovernedBy rdf:resource="info:fedora/test:catalog-fixture"/>
-           # <ns1:hasModel rdf:resource="info:fedora/afmodel:MockAFBaseRelationship"/>
-           # <ns2:isPartOf rdf:resource="info:fedora/test:777"/>
-
-      end
-      it "should have the other datastreams too" do
-        @new_object.datastreams.keys.should include "foo"
-        @new_object.foo.content.should be_equivalent_to @release.foo.content
       end
     end
   end
@@ -227,12 +187,11 @@ describe ActiveFedora::Base do
       # Make sure the modification time changes by at least 1 second
       sleep 1
 
-      @test_object2.state = 'I' 
       @test_object2.save
       @test_object2.reload
 
       pid = @test_object2.pid.sub(':', '\:')
-      solr_doc = ActiveFedora::SolrService.query("id:#{pid}")
+      solr_doc = ActiveFedora::SolrService.query("id:\"#{pid}\"")
 
       new_time_fedora = Time.parse(@test_object2.modified_date).to_i
       new_time_solr = Time.parse(solr_doc.first['system_modified_dtsi']).to_i

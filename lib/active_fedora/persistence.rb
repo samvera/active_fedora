@@ -50,6 +50,7 @@ module ActiveFedora
     # Refreshes the object's info from Fedora
     # Note: Currently just registers any new datastreams that have appeared in fedora
     def refresh
+      # TODO need to set the new modified_date after save
 #      inner_object.load_attributes_from_fedora
     end
 
