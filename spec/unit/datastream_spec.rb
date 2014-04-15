@@ -2,13 +2,13 @@ require 'spec_helper'
 
 describe ActiveFedora::Datastream do
   
-  let (:test_object) { ActiveFedora::Base.create }
+  let(:parent) { double('inner object', uri: '/fedora/rest/1234', id: '1234', new_record?: true) }
 
   before(:each) do
     subject.content = "hi there"
   end
 
-  subject { ActiveFedora::Datastream.new(test_object, 'abcd') }
+  subject { ActiveFedora::Datastream.new(parent, 'abcd') }
 
   its(:metadata?) { should be_false }
 
@@ -18,20 +18,25 @@ describe ActiveFedora::Datastream do
   end
   
   it "should be inspectable" do
-    subject.inspect.should match /#<ActiveFedora::Datastream @pid=\"\" @dsid=\"abcd\" changed=\"true\">/
+    subject.inspect.should match /#<ActiveFedora::Datastream @pid=\"1234\" @dsid=\"abcd\" changed=\"true\" >/
   end
 
   describe "#generate_dsid" do
-    subject {ActiveFedora::Datastream.new(test_object) }
-    let(:digital_object) { double(datastreams: {})}
+    let(:parent) { double('inner object', uri: '/fedora/rest/1234', id: '1234',
+                          new_record?: true, datastreams: datastreams) }
+
+    subject {ActiveFedora::Datastream.new(parent, nil, prefix: 'FOO') }
+
+    let(:datastreams) { { } }
     it "should create an autoincrementing dsid" do
-      subject.send(:generate_dsid, digital_object, 'FOO').should == 'FOO1'
+      expect(subject.dsid).to eq 'FOO1'
     end
 
-    describe "when some datastreams exist" do
-      let(:digital_object) { double(datastreams: {'FOO56' => double})}
+    context "when some datastreams exist" do
+      let(:datastreams) { {'FOO56' => double} }
+
       it "should start from the highest existing dsid" do
-        subject.send(:generate_dsid, digital_object, 'FOO').should == 'FOO57'
+        expect(subject.dsid).to eq 'FOO57'
       end
     end
   end
