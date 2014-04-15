@@ -81,7 +81,6 @@ module ActiveFedora
       # @param [Array] pid_array the pids that you want included in the query
       def construct_query_for_pids(pid_array)
         q = pid_array.reject { |x| x.empty? }.map { |pid| raw_query(SOLR_DOCUMENT_ID, pid) }
-
         q.empty? ? "id:NEVER_USE_THIS_ID" : q.join(" OR ".freeze)
       end
 
