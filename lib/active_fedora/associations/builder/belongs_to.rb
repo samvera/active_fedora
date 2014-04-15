@@ -15,12 +15,6 @@ module ActiveFedora::Associations::Builder
     end
 
     private
-      def predicate
-        predicate = options[:property]
-        return predicate if predicate.kind_of? RDF::URI
-        ActiveFedora::Predicates.find_graph_predicate(predicate)
-      end
-
       def add_counter_cache_callbacks(reflection)
         cache_column = reflection.counter_cache_column
         name         = self.name
@@ -87,22 +81,23 @@ module ActiveFedora::Associations::Builder
         super
         name = self.name
         accessor_name = "#{name}_id"
-        model.find_or_create_defined_attribute(accessor_name, 'RELS-EXT', {})
+        #model.find_or_create_defined_attribute(accessor_name, 'RELS-EXT', {})
+        model.attribute accessor_name, [predicate, FedoraLens::Lenses.single, FedoraLens::Lenses.literal_to_string]
 
-        mixin.redefine_method(accessor_name) do
-          association(name).id_reader
-        end
+        # mixin.redefine_method(accessor_name) do
+        #   association(name).id_reader
+        # end
       end
 
       def define_writers
         super
-        name = self.name
-        writer_name = "#{name}_id"
-        model.find_or_create_defined_attribute(writer_name, 'RELS-EXT', {})
-        mixin.redefine_method("#{writer_name}=") do |id|
-          raise "can't modify frozen #{self.class}" if self.frozen?
-          association(name).id_writer(id)
-        end
+        # name = self.name
+        # writer_name = "#{name}_id"
+        # model.find_or_create_defined_attribute(writer_name, 'RELS-EXT', {})
+        # mixin.redefine_method("#{writer_name}=") do |id|
+        #   raise "can't modify frozen #{self.class}" if self.frozen?
+        #   association(name).id_writer(id)
+        # end
       end
   end
 end

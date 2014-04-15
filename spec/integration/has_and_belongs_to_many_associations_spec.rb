@@ -4,8 +4,8 @@ describe ActiveFedora::Base do
   describe "with inverse" do
     before do
       class Book < ActiveFedora::Base 
-        has_and_belongs_to_many :topics, :property=>:has_topic, :inverse_of=>:is_topic_of
-        has_and_belongs_to_many :collections, :property=>:is_member_of_collection
+        has_and_belongs_to_many :topics, property: :has_topic, inverse_of: :books
+        has_and_belongs_to_many :collections, property: :is_member_of_collection
       end
 
       class SpecialInheritedBook < Book
@@ -16,7 +16,7 @@ describe ActiveFedora::Base do
       end
 
       class Topic < ActiveFedora::Base 
-        has_and_belongs_to_many :books, :property=>:is_topic_of
+        has_and_belongs_to_many :books, property: :is_topic_of
       end
     end
 
@@ -84,9 +84,9 @@ describe ActiveFedora::Base do
       it "should set relationships bidirectionally" do
         @book.topics << @topic1
         @book.topics.should == [@topic1]
-        @book.relationships(:has_topic).should == [@topic1.internal_uri]
-        @topic1.relationships(:has_topic).should == []
-        @topic1.relationships(:is_topic_of).should == [@book.internal_uri]
+        @book['topic_ids'].should == [@topic1.id]
+        @topic1['topic_ids'].should be_nil
+        @topic1['book_ids'].should == [@book.id]
         Topic.find(@topic1.pid).books.should == [@book] #Can't have saved it because @book isn't saved yet.
       end
       it "should save new child objects" do
@@ -109,7 +109,7 @@ describe ActiveFedora::Base do
   describe "when inverse is not specified" do
     before do
       class Book < ActiveFedora::Base 
-        has_and_belongs_to_many :collections, :property=>:is_member_of_collection
+        has_and_belongs_to_many :collections, property: :is_member_of_collection
       end
 
       class Collection < ActiveFedora::Base
@@ -135,11 +135,11 @@ describe ActiveFedora::Base do
       end
 
       it "should have a collection" do
-        book.relationships(:is_member_of_collection).should == [collection.internal_uri]
+        book['collection_ids'].should == [collection.id]
         book.collections.should == [collection]
       end
       it "habtm should not set foreign relationships if :inverse_of is not specified" do
-         collection.relationships(:is_member_of_collection).should == []
+         collection['collection_ids'].should == []
       end
       it "should load the collections" do
         reloaded = Book.find(book.pid)

@@ -21,9 +21,9 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     ac = ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, predicate)
     ac.should_receive(:callback).twice
     object = Page.new(:pid => 'object:b')
-    object.stub(:new_record? => false, save: true)
+    object.stub(:new_record? => false, save: true, id: '1234')
   
-    subject.should_receive(:add_relationship).with('predicate', object)
+    subject.should_receive(:[]=).with('pages_ids', '1234')
  
     ac << object
 

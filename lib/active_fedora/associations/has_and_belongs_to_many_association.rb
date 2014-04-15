@@ -15,13 +15,14 @@ module ActiveFedora
           end
         end
 
-        ### TODO save relationship
-        @owner.add_relationship(@reflection.options[:property], record)
+        owner[reflection.foreign_key] ||= []
+        owner[reflection.foreign_key] += [record.id]
 
         if @owner.new_record? and @reflection.options[:inverse_of]
           ActiveFedora::Base.logger.warn("has_and_belongs_to_many #{@reflection.inspect} is cowardly refusing to insert the inverse relationship into #{record}, because #{@owner} is not persisted yet.") if ActiveFedora::Base.logger
         elsif @reflection.options[:inverse_of]
-          record.add_relationship(@reflection.options[:inverse_of], @owner)
+          inverse = @reflection.inverse_of
+          record[@reflection.inverse_of.foreign_key] = [owner.id]
           record.save
         end
 
@@ -32,8 +33,8 @@ module ActiveFedora
       def find_target
           page_size = @reflection.options[:solr_page_size]
           page_size ||= 200
-          pids = @owner.ids_for_outbound(@reflection.options[:property])
-          return [] if pids.empty?
+          pids = owner[reflection.foreign_key]
+          return [] unless pids
           solr_result = []
           0.step(pids.size,page_size) do |startIdx|
             query = ActiveFedora::SolrService.construct_query_for_pids(pids.slice(startIdx,page_size))
@@ -44,7 +45,7 @@ module ActiveFedora
 
       # In a HABTM, just look in the rels-ext, no need to run a count query from solr.
       def count(options = {})
-        @owner.ids_for_outbound(@reflection.options[:property]).size
+        owner[reflection.foreign_key].size
       end
 
       def first
@@ -59,15 +60,12 @@ module ActiveFedora
 
         def delete_records(records, method)
           records.each do |r|
-            @owner.remove_relationship(@reflection.options[:property], r)
+            owner[reflection.foreign_key].delete(r.id)
             
             if (@reflection.options[:inverse_of])
-              r.remove_relationship(@reflection.options[:inverse_of], @owner)
-              # It looks like inverse_of points at a predicate, not at a relationship name,
-              # which is what we should have done. Now we need a way to look up the
-              # reflection by predicate
-              name = r.class.reflection_name_for_predicate(@reflection.options[:inverse_of])
-              r.association(name).reset
+              inverse = @reflection.inverse_of
+              r[inverse.foreign_key].delete(@owner.id)
+              r.association(inverse.name).reset
               r.save
             end
           end
