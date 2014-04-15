@@ -117,15 +117,15 @@ end
 describe "When relationship is restricted to AF::Base" do
   before do
     class Email < ActiveFedora::Base 
-      has_many :attachments, :property=>:is_part_of, :class_name=>'ActiveFedora::Base'
+      has_many :attachments, property: :is_part_of, :class_name=>'ActiveFedora::Base'
     end
 
     class Image < ActiveFedora::Base
-      belongs_to :email, :property=>:is_part_of
+      belongs_to :email, property: :is_part_of
     end
 
     class PDF < ActiveFedora::Base
-      belongs_to :email, :property=>:is_part_of
+      belongs_to :email, property: :is_part_of
     end
   end
 
