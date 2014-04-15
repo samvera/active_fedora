@@ -13,7 +13,7 @@ module ActiveFedora::Associations::Builder
     def define_readers
       super
       accessor_name = "#{name.to_s.singularize}_ids"
-      model.attribute accessor_name, [predicate]#, FedoraLens::Lenses.literal_to_string]
+      model.attribute accessor_name, [predicate, FedoraLens::Lenses.literals_to_strings]
     end
 
     private
