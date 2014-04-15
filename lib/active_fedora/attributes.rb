@@ -136,12 +136,10 @@ module ActiveFedora
       def create_attribute_setter(field, dsid, args)
         find_or_create_defined_attribute(field, dsid, args)
         define_method "#{field}=".to_sym do |v|
-          if self.class.multiple?(field)
-            unless v.nil? || v.respond_to?(:each)
-              Deprecation.warn(ActiveFedora::Attributes, "You attempted to set the attribute `#{field}' on `#{self.class}' to a scalar value. However, this attribute is declared as being multivalued. This behavior is deprecated and will raise an ArgumentError in active-fedora 8.0.0")
-            end
-          elsif v.respond_to?(:each) # unique
-            Deprecation.warn(ActiveFedora::Attributes, "You attempted to set the attribute `#{field}' on `#{self.class}' to an enumerable value. However, this attribute is declared as being singular. This behavior is deprecated and will raise an ArgumentError in active-fedora 8.0.0")
+          if self.class.multiple?(field) && v.present? && !v.respond_to?(:each)
+              raise ArgumentError, "You attempted to set the attribute `#{field}' on `#{self.class}' to a scalar value. However, this attribute is declared as being multivalued."
+          elsif v.respond_to?(:each) # singular
+            raise ArgumentError, "You attempted to set the attribute `#{field}' on `#{self.class}' to an enumerable value. However, this attribute is declared as being singular."
           end
           self[field]=v
         end

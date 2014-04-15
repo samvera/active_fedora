@@ -17,8 +17,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
         property :related_url, predicate: RDF::RDFS.seeAlso
       end
       @subject = MyDatastream.new(inner_object, 'descMetadata')
-      puts "INNER #{inner_object.id}"
-      puts "subj #{@subject.rdf_subject}"
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
     after do
