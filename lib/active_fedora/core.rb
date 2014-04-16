@@ -7,10 +7,18 @@ module ActiveFedora
     # Also, if +attrs+ does not contain +:pid+ but does contain +:namespace+ it will pass the
     # +:namespace+ value to Fedora::Repository.nextid to generate the next pid available within
     # the given namespace.
-    def initialize(attrs = nil)
-      super
+    def initialize(attributes_or_resource_or_url = nil)
+      if attributes_or_resource_or_url.kind_of?(Ldp::Resource) ||
+        attributes_or_resource_or_url.kind_of?(String)
+        super
+      else
+        attributes = attributes_or_resource_or_url
+        super()
+      end
+
       @association_cache = {}
       load_datastreams
+      self.attributes = attributes if attributes
       run_callbacks :initialize
     end
 
