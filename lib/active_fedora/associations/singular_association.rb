@@ -33,7 +33,9 @@ module ActiveFedora
       private
 
         def find_target
-          scope.take.tap { |record| set_inverse_instance(record) }
+          # TODO this forces a solr query, but I think it's likely we can just lookup from Fedora.
+          rec = scope.take
+          rec.tap { |record| set_inverse_instance(record) }
         end
 
         # Implemented by subclasses

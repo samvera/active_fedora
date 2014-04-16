@@ -25,7 +25,7 @@ module ActiveFedora
 
         def replace_keys(record)
           if record
-            owner[reflection.foreign_key] = record.uri
+            owner[reflection.foreign_key] = record.id # TODO change to url here 
           else
             owner[reflection.foreign_key] = nil
           end

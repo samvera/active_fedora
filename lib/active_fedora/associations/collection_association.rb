@@ -5,9 +5,7 @@ module ActiveFedora
 
       def initialize(owner, reflection)
         super
-
         construct_query
-        @proxy = CollectionProxy.new(self)
       end
 
 
@@ -24,7 +22,7 @@ module ActiveFedora
           force_reload = opts
         end
         reload if force_reload || stale_target?
-        proxy
+        @proxy ||= CollectionProxy.new(self)
       end
 
       # Implements the writer method, e.g. foo.items= for Foo.has_many :items
@@ -331,7 +329,8 @@ module ActiveFedora
 
         def construct_query
 
-          clauses = {find_predicate => @owner.uri}
+          #TODO use primary_key instead of id
+          clauses = {find_predicate => @owner.id}
           clauses[:has_model] = @reflection.class_name.constantize.to_class_uri if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base'
           @counter_query = @finder_query = ActiveFedora::SolrService.construct_query_for_rel(clauses)
         end

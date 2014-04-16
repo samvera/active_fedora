@@ -28,13 +28,13 @@ describe ActiveFedora::Base do
   describe "complex example" do
     before do
       class Library < ActiveFedora::Base 
-        has_many :books, :property=>:has_constituent
+        has_many :books, property: :has_constituent
       end
 
       class Book < ActiveFedora::Base 
-        belongs_to :library, :property=>:has_constituent
-        belongs_to :author, :property=>:has_member, :class_name=>'Person'
-        belongs_to :publisher, :property=>:has_member
+        belongs_to :library, property: :has_constituent
+        belongs_to :author, property: :has_member, class_name: 'Person'
+        belongs_to :publisher, property: :has_member
       end
 
       class Person < ActiveFedora::Base
@@ -183,7 +183,7 @@ describe ActiveFedora::Base do
           @book.library_id = @library.pid
           @book.library.should == @library
           @book.library.pid.should == @library.pid
-          @book.attributes= {:library_id => ""}
+          @book.attributes= {:library_id => nil }
           @book.library_id.should be_nil
         end
         after do
@@ -235,12 +235,14 @@ describe ActiveFedora::Base do
           @book.author = @person
           @book.publisher = @publisher
           @book.save
-          
-          Book.find(@book.id).publisher_id.should == @publisher.pid
-          Book.find(@book.id).publisher.should be_kind_of Publisher
 
-          Book.find(@book.id).author_id.should == @person.pid
-          Book.find(@book.id).author.should be_kind_of Person
+          new_book = Book.find(@book.id)
+
+          new_book.publisher_id.should == @publisher.pid
+          new_book.publisher.should be_kind_of Publisher
+
+          new_book.author_id.should == @person.pid
+          new_book.author.should be_kind_of Person
         end
 
         describe "when changing the belonger" do
@@ -512,7 +514,7 @@ describe ActiveFedora::Base do
           belongs_to :media_object, property: :is_part_of
         end
         class MediaObject < ActiveFedora::Base
-          has_many :parts, :class_name=>'MasterFile'
+          has_many :parts, class_name: 'MasterFile'
         end
       end
       after :all do
