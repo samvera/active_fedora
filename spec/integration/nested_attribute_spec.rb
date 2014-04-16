@@ -49,7 +49,7 @@ describe "NestedAttribute behavior" do
   it "should update the child objects" do
     @car, @bar1, @bar2 = create_car_with_bars
 
-    @car.attributes = {:bars_attributes=>[{:id=>@bar1.pid, :uno=>"bar1 uno"}, {:uno=>"newbar uno"}, {:id=>@bar2.pid, :_destroy=>'1', :uno=>'bar2 uno'}]}
+    @car.attributes = {bars_attributes: [{id: @bar1.pid, uno: "bar1 uno"}, {uno: "newbar uno"}, {id: @bar2.pid, _destroy: '1', uno: 'bar2 uno'}]}
     Bar.find(@bar1.pid).uno.should == 'bar1 uno'
     Bar.where(:id => @bar2.pid).first.should be_nil
     Bar.where(:uno => "newbar uno").first.should_not be_nil
