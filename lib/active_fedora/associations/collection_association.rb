@@ -155,7 +155,7 @@ module ActiveFedora
 
       # Add +records+ to this association.  Returns +self+ so method calls may be chained.
       # Since << flattens its argument list and inserts each record, +push+ and +concat+ behave identically.
-      def <<(*records)
+      def concat(*records)
         result = true
         load_target unless loaded?
 
@@ -168,9 +168,6 @@ module ActiveFedora
 
         result && self
       end
-
-      alias_method :push, :<<
-      alias_method :concat, :<<
 
       # Remove all records from this association
       #
