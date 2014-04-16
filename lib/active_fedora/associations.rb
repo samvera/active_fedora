@@ -2,13 +2,13 @@ require 'active_support/core_ext/module/delegation'
 require 'active_support/core_ext/object/blank'
 
 module ActiveFedora
-  module Associations
-
-    class InverseOfAssociationNotFoundError < RuntimeError #:nodoc:
-      def initialize(reflection, associated_class = nil)
-        super("Could not find the inverse association for #{reflection.name} (#{reflection.options[:inverse_of].inspect} in #{associated_class.nil? ? reflection.class_name : associated_class.name})")
-      end
+  class InverseOfAssociationNotFoundError < RuntimeError #:nodoc:
+    def initialize(reflection, associated_class = nil)
+      super("Could not find the inverse association for #{reflection.name} (#{reflection.options[:inverse_of].inspect} in #{associated_class.nil? ? reflection.class_name : associated_class.name})")
     end
+  end
+
+  module Associations
 
     extend ActiveSupport::Concern
 

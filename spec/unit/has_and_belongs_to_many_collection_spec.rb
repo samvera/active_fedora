@@ -16,34 +16,38 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
   it "should call add_relationship" do
     subject = Book.new('subject:a')
     subject.stub(:new_record? => false, save: true)
-    predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {:property=>'predicate'}, nil)
+    predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {:property=>'predicate'}, Book)
     ActiveFedora::SolrService.stub(:query).and_return([])
     ac = ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, predicate)
     ac.should_receive(:callback).twice
-    object = Page.new('object:b')
+    object = Page.new
     object.stub(:new_record? => false, save: true, id: '1234')
   
-    subject.should_receive(:[]=).with('pages_ids', '1234')
+    subject.stub(:[]).with('page_ids').and_return([])
+    subject.should_receive(:[]=).with('page_ids', ['1234'])
  
-    ac << object
+    ac.concat object
 
   end
 
   it "should call add_relationship on subject and object when inverse_of given" do
     subject = Book.new('subject:a')
     subject.stub(:new_record? => false, save: true)
-    predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {:property=>'predicate', :inverse_of => 'inverse_predicate'}, nil)
+
+    Page.create_reflection(:has_and_belongs_to_many, 'books', {:property=>'inverse_predicate'}, Page)
+    predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {:property=>'predicate', :inverse_of => 'books'}, Book)
     ActiveFedora::SolrService.stub(:query).and_return([])
     ac = ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, predicate)
     ac.should_receive(:callback).twice
     object = Page.new('object:b')
     object.stub(:new_record? => false, save: true)
   
-    subject.should_receive(:add_relationship).with('predicate', object)
+    subject.stub(:[]).with('page_ids').and_return([])
+    subject.should_receive(:[]=).with('page_ids', [object.id])
  
-    object.should_receive(:add_relationship).with('inverse_predicate', subject)
+    object.should_receive(:[]=).with('book_ids', [subject.id])
  
-    ac << object
+    ac.concat object
 
   end
 
@@ -51,12 +55,12 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
 
     subject = Book.new('subject:a')
     subject.stub(:new_record? => false, save: true)
-    predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {:property=>'predicate', :solr_page_size => 10}, nil)
+    predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {:property=>'predicate', :solr_page_size => 10}, Book)
     ids = []
     0.upto(15) {|i| ids << i.to_s}
     query1 = ids.slice(0,10).map {|i| "_query_:\"{!raw f=id}#{i}\""}.join(" OR ")
     query2 = ids.slice(10,10).map {|i| "_query_:\"{!raw f=id}#{i}\""}.join(" OR ")
-    subject.should_receive(:ids_for_outbound).and_return(ids)
+    subject.should_receive(:[]).with('page_ids').and_return(ids)
     ActiveFedora::SolrService.should_receive(:query).with(query1, {:rows=>10}).and_return([])
     ActiveFedora::SolrService.should_receive(:query).with(query2, {:rows=>10}).and_return([])
 
