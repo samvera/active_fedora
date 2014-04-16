@@ -14,13 +14,13 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
   end
 
   it "should call add_relationship" do
-    subject = Book.new(pid: 'subject:a')
+    subject = Book.new('subject:a')
     subject.stub(:new_record? => false, save: true)
     predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {:property=>'predicate'}, nil)
     ActiveFedora::SolrService.stub(:query).and_return([])
     ac = ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, predicate)
     ac.should_receive(:callback).twice
-    object = Page.new(:pid => 'object:b')
+    object = Page.new('object:b')
     object.stub(:new_record? => false, save: true, id: '1234')
   
     subject.should_receive(:[]=).with('pages_ids', '1234')
@@ -30,13 +30,13 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
   end
 
   it "should call add_relationship on subject and object when inverse_of given" do
-    subject = Book.new(pid: 'subject:a')
+    subject = Book.new('subject:a')
     subject.stub(:new_record? => false, save: true)
     predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {:property=>'predicate', :inverse_of => 'inverse_predicate'}, nil)
     ActiveFedora::SolrService.stub(:query).and_return([])
     ac = ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, predicate)
     ac.should_receive(:callback).twice
-    object = Page.new(:pid => 'object:b')
+    object = Page.new('object:b')
     object.stub(:new_record? => false, save: true)
   
     subject.should_receive(:add_relationship).with('predicate', object)
@@ -49,7 +49,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
 
   it "should call solr query multiple times" do
 
-    subject = Book.new(pid: 'subject:a')
+    subject = Book.new('subject:a')
     subject.stub(:new_record? => false, save: true)
     predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {:property=>'predicate', :solr_page_size => 10}, nil)
     ids = []

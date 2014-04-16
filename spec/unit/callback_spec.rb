@@ -35,7 +35,7 @@ describe ActiveFedora::Base do
     CallbackStub.any_instance.should_receive :a_create
     CallbackStub.any_instance.should_receive(:b_save)
     CallbackStub.any_instance.should_receive(:a_save)
-    cb = CallbackStub.new :pid => 'test:123'
+    cb = CallbackStub.new 'test:123'
     cb.save
 end
  it "Should have after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do

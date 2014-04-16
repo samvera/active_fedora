@@ -46,7 +46,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
   end
 
   it "should save content properly upon save" do
-    foo = RdfTest.new(pid: 'test:1') #Pid needs to match the subject in the loaded file
+    foo = RdfTest.new('test:1') #Pid needs to match the subject in the loaded file
     foo.title = 'Hamlet'
     foo.save
     foo.title.should == 'Hamlet'
