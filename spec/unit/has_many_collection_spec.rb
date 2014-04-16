@@ -13,7 +13,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
     Object.send(:remove_const, :Page)
   end
 
-  subject { Book.new(pid: 'subject:a') }
+  subject { Book.new('subject:a') }
   before {
     subject.stub(:new_record? => false, save: true)
   }
