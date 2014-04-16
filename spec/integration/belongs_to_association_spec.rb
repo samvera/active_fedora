@@ -113,10 +113,6 @@ describe ActiveFedora::Base do
         @complex_object = ComplexObject.create
         @complex_object_second = ComplexObject.create
 
-        #Need to add the simpler cmodel here as currently inheritance support is read-only.
-        #See ActiveFedora pull request 207 on how to do this programmatically.
-        # @complex_object.add_relationship(:has_model, @complex_object.class.superclass.to_class_uri)
-        # @complex_collection.add_relationship(:has_model, @complex_collection.class.superclass.to_class_uri)
         @complex_object.has_model = @complex_object.class.superclass.to_class_uri
 
         @simple_collection.objects = [@simple_object, @simple_object_second, @complex_object]

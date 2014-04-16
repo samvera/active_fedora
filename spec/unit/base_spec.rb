@@ -226,13 +226,6 @@ describe ActiveFedora::Base do
         @test_object.should_receive(:solrize_relationships)
         @test_object.to_solr
       end
-
-      it "should call .to_solr when relationships are changed" do
-        @test_object.add_relationship(:has_collection_member, "info:fedora/test:member")
-        @test_object.should_receive(:solrize_relationships)
-        @test_object.to_solr
-      end
-
     end
 
     describe "update_attributes" do
