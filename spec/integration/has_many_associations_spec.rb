@@ -69,7 +69,7 @@ describe "After save callbacks" do
     end
 
     class Book < ActiveFedora::Base 
-      belongs_to :library, :property=>:has_constituent
+      belongs_to :library, property: :has_constituent
       after_save :find_self
       attr_accessor :library_books
 
@@ -83,8 +83,10 @@ describe "After save callbacks" do
     Object.send(:remove_const, :Book)
     Object.send(:remove_const, :Library)
   end
-  let(:library) { Library.create() }
+
+  let(:library) { Library.create }
   let(:book) { Book.new(library: library) }
+
   it "should have the relationship available in after_save" do
     book.save!
     book.library_books.should include book
