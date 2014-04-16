@@ -68,7 +68,8 @@ describe ActiveFedora::RDFDatastream do
   end
 
   describe 'content=' do
-    let(:ds) {ActiveFedora::NtriplesRDFDatastream.new}
+    let(:parent) { double(new_record?: true, uri: '/test:1', id: 'test:1') }
+    let(:ds) {ActiveFedora::NtriplesRDFDatastream.new(parent, 'descMetadata')}
     it "should be able to handle non-utf-8 characters" do
       data = "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT')
       ds.content = data
@@ -77,11 +78,12 @@ describe ActiveFedora::RDFDatastream do
   end
 
   describe 'legacy non-utf-8 characters' do
+    let(:parent) { double(new_record?: true, uri: '/test:1', id: 'test:1') }
     let(:ds) do
-      datastream = ActiveFedora::NtriplesRDFDatastream.new
-      datastream.stub(:new?).and_return(false)
-      datastream.stub(:datastream_content).and_return("<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT'))
-      datastream
+      ActiveFedora::NtriplesRDFDatastream.new(parent, 'descMetadata').tap do |datastream|
+        datastream.stub(:new_record?).and_return(false)
+        datastream.stub(:datastream_content).and_return("<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT'))
+      end
     end
     it "should not error on access" do
       expect(ds.resource.dump(:ntriples)).to eq "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
