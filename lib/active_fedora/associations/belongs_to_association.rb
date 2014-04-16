@@ -41,21 +41,6 @@ module ActiveFedora
               ActiveFedora::SolrService.construct_query_for_rel(model_pairs, 'OR') + ')'
         end
 
-        def remove_matching_property_relationship
-          # puts "Results: #{@owner.graph.query([@owner.uri,  predicate, nil])}"
-          ids = @owner.send :"#{@reflection.name}_id"
-          # ids = @owner.ids_for_outbound(@reflection.options[:property])
-          # puts "new #{new_ids.inspect} vs old #{ids.inspect}"
-          ids.each do |id|
-            result = SolrService.query(ActiveFedora::SolrService.construct_query_for_pids([id]))
-            hit = ActiveFedora::SolrService.reify_solr_results(result).first
-            # We remove_relationship on subjects that match the same class, or if the subject is nil 
-            if hit.class == klass || hit.nil?
-              @owner.remove_relationship(@reflection.options[:property], hit)
-            end
-          end
-        end
-
         def foreign_key_present?
           owner[reflection.foreign_key]
         end
