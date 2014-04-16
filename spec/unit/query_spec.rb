@@ -119,16 +119,16 @@ describe ActiveFedora::Base do
       mock_docs.should_receive(:has_next?).and_return(false)
       ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
       
-      relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:30'))
-      relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:22'))
+      relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return(SpecModel::Basic.new('changeme:30'))
+      relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return(SpecModel::Basic.new('changeme:22'))
       yielded = double("yielded method")
       yielded.should_receive(:run).with { |obj| obj.class == SpecModel::Basic}.twice
       SpecModel::Basic.find_each(){|obj| yielded.run(obj) }
     end
     describe "with conditions" do
       it "should filter by the provided fields" do
-        relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:30'))
-        relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return(SpecModel::Basic.new(:pid=>'changeme:22'))
+        relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return(SpecModel::Basic.new('changeme:30'))
+        relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return(SpecModel::Basic.new('changeme:22'))
 
         mock_docs = [{"id" => "changeme:30"},{"id" => "changeme:22"}]
         mock_docs.should_receive(:has_next?).and_return(false)

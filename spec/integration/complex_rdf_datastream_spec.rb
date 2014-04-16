@@ -18,7 +18,7 @@ describe "Nested Rdf Objects" do
     end
 
     let (:ds) do
-      test_obj = ActiveFedora::Base.new(pid: 'test:124')
+      test_obj = ActiveFedora::Base.new('test:124')
       ds = SpecDatastream.new(test_obj, 'descMd')
     end
 

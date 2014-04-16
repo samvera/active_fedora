@@ -36,13 +36,13 @@ describe ActiveFedora::Datastreams do
       Object.send(:remove_const, :HasFile)
     end
     before :each do
-      @base = ActiveFedora::Base.new(:pid=>"test:ds_versionable_base")
+      @base = ActiveFedora::Base.new("test:ds_versionable_base")
       @base.save
-      @base2 = ActiveFedora::Base.new(:pid=>"test:ds_versionable_base2")
+      @base2 = ActiveFedora::Base.new("test:ds_versionable_base2")
       @base2.add_datastream(@base2.create_datastream(ActiveFedora::Datastream, "file_ds"))
       @base2.datastreams["file_ds"].content = "blah blah blah"
       @base2.save
-      @has_file = HasFile.new(:pid=>"test:ds_versionable_has_file")
+      @has_file = HasFile.new("test:ds_versionable_has_file")
       @has_file.save
     end
     
