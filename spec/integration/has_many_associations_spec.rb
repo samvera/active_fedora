@@ -179,10 +179,10 @@ end
 describe "Deleting a dependent relationship" do
   before do
     class Item < ActiveFedora::Base
-      has_many :components, :property => :is_part_of
+      has_many :components
     end
     class Component < ActiveFedora::Base
-      belongs_to :item, :property => :is_part_of
+      belongs_to :item, property: :is_part_of
     end
   end
 
@@ -201,7 +201,7 @@ describe "Deleting a dependent relationship" do
     item.components.delete(component)
     item.reload
     component.reload
-    component.relationships(:is_part_of).should == []
+    expect(component['item_id']).to be_nil
     item.components.should == []
   end
 
@@ -210,7 +210,7 @@ describe "Deleting a dependent relationship" do
     component.save!
     item.delete
     component.reload
-    component.relationships(:is_part_of).should == []
+    expect(component['item_id']).to be_nil
   end
 
   it "should only try to delete objects that exist in the datastore (not cached objects)" do
