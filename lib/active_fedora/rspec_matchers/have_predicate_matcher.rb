@@ -21,9 +21,7 @@ RSpec::Matchers.define :have_predicate do |predicate|
           "#{@subject.class} PID=#{@subject.pid} relationship: #{@predicate.inspect} count <Expected Count: #{expected_count}> <Actual: #{actual_count}>"
         )
       end
-      intersection = @actual_objects.collect do |ao|
-        internal_uri = ao.respond_to?(:internal_uri) ? ao.internal_uri : ao
-      end & @expected_objects
+      intersection = @actual_objects & @expected_objects
 
       intersection.count == @expected_objects.count
     end

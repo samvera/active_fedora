@@ -105,12 +105,6 @@ describe ActiveFedora::Base do
       end
     end
 
-    describe ".internal_uri" do
-      it "should return pid as fedors uri" do
-        @test_object.internal_uri.should eql("info:fedora/#{@test_object.pid}")
-      end
-    end
-
     ### Methods for ActiveModel::Conversions
     it "should have to_param once it's saved" do
       @test_object.to_param.should be_nil
