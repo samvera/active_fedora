@@ -21,9 +21,11 @@ module ActiveFedora
       def add_constraints(scope)
         chain.each_with_index do |reflection, i|
           if reflection.source_macro == :belongs_to
+            #TODO I think we can do without the solr query here.
+            scope = scope.where( ActiveFedora::SolrService.construct_query_for_pids([owner[reflection.foreign_key]]))
           elsif reflection.source_macro == :has_and_belongs_to_many
           else
-            scope = scope.where( ActiveFedora::SolrService.construct_query_for_rel(association.send(:find_predicate) => owner.uri))
+            scope = scope.where( ActiveFedora::SolrService.construct_query_for_rel(association.send(:find_predicate) => owner.id))
           end
 
           
