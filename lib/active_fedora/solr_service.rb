@@ -78,7 +78,7 @@ module ActiveFedora
       # If the pid_array is empty, defaults to a query of "id:NEVER_USE_THIS_ID", which will return an empty solr response
       # @param [Array] pid_array the pids that you want included in the query
       def construct_query_for_pids(pid_array)
-        q = pid_array.reject { |x| x.empty? }.map { |pid| raw_query(SOLR_DOCUMENT_ID, pid) }
+        q = pid_array.reject { |x| x.blank? }.map { |pid| raw_query(SOLR_DOCUMENT_ID, pid) }
         q.empty? ? "id:NEVER_USE_THIS_ID" : q.join(" OR ".freeze)
       end
 
@@ -101,8 +101,10 @@ module ActiveFedora
       #   # => _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ComplexCollection" OR _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ActiveFedora_Base"
       def construct_query_for_rel(field_pairs, join_with = 'AND')
         field_pairs = field_pairs.to_a if field_pairs.kind_of? Hash
-        clauses = field_pairs.map { |(predicate, target_uri)| raw_query(solr_name(predicate, :symbol), target_uri) }
-        clauses.join(" #{join_with} ".freeze)
+        
+        clauses = field_pairs.reject{ |_, target_uri| target_uri.blank? }.
+          map { |predicate, target_uri| raw_query(solr_name(predicate, :symbol), target_uri) }
+        clauses.empty? ? "id:NEVER_USE_THIS_ID" : clauses.join(" #{join_with} ".freeze)
       end
 
       def query(query, args={})
