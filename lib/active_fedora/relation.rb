@@ -75,6 +75,7 @@ module ActiveFedora
 
     def inspect
       to_a.inspect
+      # "<#{self.class} @klass=\"#{@klass}\" @values=\"#{@values.inspect}\">"
     end
 
     # Destroys the records matching +conditions+ by instantiating each

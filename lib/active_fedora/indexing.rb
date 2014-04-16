@@ -54,10 +54,15 @@ module ActiveFedora
     # Serialize the datastream's RDF relationships to solr
     # @param [Hash] solr_doc @deafult an empty Hash
     def solrize_relationships(solr_doc = Hash.new)
-      reflections.map { |_, reflection| reflection.foreign_key }.each do |key|
+      reflections.values.each do |reflection|
+        key = reflection.foreign_key
         value = self[key]
-        ::Solrizer::Extractor.insert_solr_field_value(solr_doc, solr_name(key, :symbol), value )
+        solr_key = solr_name(reflection.options[:property], :symbol)
+        # puts "Key (#{key}) #{solr_key} value #{value}"
+        # TODO make reflection.options[:property] a method
+        ::Solrizer::Extractor.insert_solr_field_value(solr_doc, solr_key, value )
       end
+      # byebug
       solr_doc
     end
 
