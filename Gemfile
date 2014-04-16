@@ -4,6 +4,7 @@ source "https://rubygems.org"
 
 gemspec
 
+gem "ldp", github: 'cbeer/ldp'
 gem "fedora_lens", github: 'curationexperts/fedora_lens'
 gem 'byebug' unless ENV['TRAVIS']
 
