@@ -13,7 +13,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     Object.send(:remove_const, :Page)
   end
 
-  it "should call add_relationship" do
+  it "should set the relationship attribute" do
     subject = Book.new('subject:a')
     subject.stub(:new_record? => false, save: true)
     predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {:property=>'predicate'}, Book)
@@ -30,7 +30,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
 
   end
 
-  it "should call add_relationship on subject and object when inverse_of given" do
+  it "should set the relationship attribute on subject and object when inverse_of is given" do
     subject = Book.new('subject:a')
     subject.stub(:new_record? => false, save: true)
 

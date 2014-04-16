@@ -235,17 +235,6 @@ describe ActiveFedora::Base do
     end
   end
   
-  describe '.add_relationship' do
-    it "should update the relationships in Fedora when the object is saved" do
-      @test_object.add_relationship(:is_member_of, "info:fedora/demo:5")
-      @test_object.add_relationship(:is_member_of, "info:fedora/demo:10")
-      @test_object.add_relationship(:conforms_to, "info:fedora/afmodel:OralHistory")
-      @test_object.save
-      pending 'should have isMemberOf info:fedora/demo:5'
-      pending 'should have isMemberOf info:fedora/demo:10'
-    end
-  end
-
   describe '.add_file_datastream' do
 
    it "should set the correct mime_type if :mime_type, :mimeType, or :content_type passed in and path does not contain correct extension" do
