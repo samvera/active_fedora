@@ -18,18 +18,17 @@ describe ActiveFedora::Associations::HasManyAssociation do
     subject.stub(:new_record? => false, save: true)
   }
 
-  it "should call add_relationship" do
+  it "should set the book_id attribute" do
     reflection = Book.create_reflection(:has_many, 'pages', {:property=>'predicate'}, Book)
     ActiveFedora::SolrService.stub(:query).and_return([])
     ac = ActiveFedora::Associations::HasManyAssociation.new(subject, reflection)
     ac.should_receive(:callback).twice
-    object = Page.new(:pid => 'object:b')
+    object = Page.new('object:b')
     object.stub(:new_record? => false, save: true)
   
-    object.should_receive(:add_relationship).with('predicate', subject)
+    object.should_receive(:[]=).with('book_id', subject.id)
  
-    ac << object
-
+    ac.concat object
   end
   
 end
