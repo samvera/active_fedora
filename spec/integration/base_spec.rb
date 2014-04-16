@@ -323,28 +323,6 @@ describe ActiveFedora::Base do
     end
   end
 
-  describe '#remove_relationship' do
-    it 'should remove a relationship from an object after a save' do
-      @test_object2 = ActiveFedora::Base.new
-      @test_object2.save
-      @test_object.add_relationship(:has_part,@test_object2)
-      @test_object.save
-      @pid = @test_object.pid
-      begin
-        @test_object = ActiveFedora::Base.find(@pid)
-      rescue => e
-        puts "#{e.message}\n#{e.backtrace}"
-        raise e
-      end
-      @test_object.object_relations[:has_part].should include @test_object2.internal_uri
-      @test_object.remove_relationship(:has_part,@test_object2)
-      @test_object.save
-      @test_object = ActiveFedora::Base.find(@pid)
-      @test_object.object_relations[:has_part].should be_empty
-    end
-  end
-
-  
   describe "#exists?" do
     let(:obj) { ActiveFedora::Base.create } 
     it "should return true for objects that exist" do
