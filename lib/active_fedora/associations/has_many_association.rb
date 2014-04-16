@@ -29,7 +29,8 @@ module ActiveFedora
       end
 
       def set_owner_attributes(record)
-        record[reflection.foreign_key] = owner.uri
+        #TODO use primary_key
+        record[reflection.foreign_key] = owner.id
       end
 
       def insert_record(record, validate = true, raise = false)

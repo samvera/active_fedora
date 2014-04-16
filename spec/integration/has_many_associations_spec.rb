@@ -14,6 +14,7 @@ describe "Collection members" do
     Object.send(:remove_const, :Book)
     Object.send(:remove_const, :Library)
   end
+
   describe "size of has_many" do
     let(:library) { Library.create }
     context "when no members" do
@@ -25,6 +26,7 @@ describe "Collection members" do
       end
     end
   end
+
   describe "looking up has_many" do
     let(:book) { Book.create }
     let(:library) { Library.create() }
@@ -33,6 +35,7 @@ describe "Collection members" do
       library.save!
       library.reload
     end
+
     it "should read book_ids from solr" do
       expect(library.book_ids).to eq [book.pid]
     end
