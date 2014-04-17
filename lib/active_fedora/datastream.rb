@@ -106,7 +106,7 @@ module ActiveFedora
           #raise ActiveFedora::ObjectNotFoundError, "Unable to find content at #{uri}/fcr:content"
           ''
         else
-          raise "unexpected return value #{resp.status}"
+          raise "unexpected return value #{resp.status} for when getting datastream content at #{uri}"
       end
     end
 
