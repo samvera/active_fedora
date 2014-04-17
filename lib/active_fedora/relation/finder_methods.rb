@@ -182,7 +182,11 @@ module ActiveFedora
       resource = Ldp::Resource.new(FedoraLens.connection, @klass.id_to_uri(id))
       model = @klass.new(resource)
       klass = Model.from_class_uri(model.has_model)
-      model.becomes(klass)
+      if klass
+        model.becomes(klass) # TODO This might not be necessary if @klass == klass
+      else
+        model
+      end
     rescue Ldp::NotFound
       raise ActiveFedora::ObjectNotFoundError
     end
