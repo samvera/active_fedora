@@ -173,6 +173,7 @@ module ActiveFedora
       #
       # See delete for more info.
       def delete_all
+        # TODO load_target causes extra loads. Can't we just send delete requests?
         delete(load_target).tap do
           reset
           loaded!
@@ -255,7 +256,7 @@ module ActiveFedora
       def find_target
         # TODO: don't reify, just store the solr results and lazily reify.
         # For now, we set a hard limit of 1000 results.
-        return ActiveFedora::SolrService.reify_solr_results(load_from_solr(rows: 1000))
+        ActiveFedora::SolrService.reify_solr_results(load_from_solr(rows: 1000))
       end
 
       def merge_target_lists(loaded, existing)
@@ -406,7 +407,6 @@ module ActiveFedora
           existing_records = records.reject { |r| r.new_record? }
 
           records.each { |record| callback(:before_remove, record) }
-
           delete_records(existing_records, method) if existing_records.any?
           records.each { |record| target.delete(record) }
 
