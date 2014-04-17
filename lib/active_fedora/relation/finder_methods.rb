@@ -188,10 +188,13 @@ module ActiveFedora
     def load_from_fedora(id, cast)
       cast = true if klass == ActiveFedora::Base && cast.nil?
       resource = Ldp::Resource.new(FedoraLens.connection, klass.id_to_uri(id))
-      klass.new(resource)
       model = klass.new(resource)
       model_klass = Model.from_class_uri(model.has_model)
-      model.becomes(model_klass)
+      if model_klass
+        model.becomes(model_klass) # TODO This might not be necessary if @klass == klass
+      else
+        model
+      end
     rescue Ldp::NotFound
       raise ActiveFedora::ObjectNotFoundError
     end
