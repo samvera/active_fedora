@@ -72,10 +72,8 @@ module ActiveFedora
       rescue Ldp::NotFound
         raise ObjectNotFoundError, "Unable to find #{pid} in the repository"
       end
-      if ENABLE_SOLR_UPDATES
-        solr = ActiveFedora::SolrService.instance.conn
-        solr.delete_by_id(pid, params: {'softCommit' => true}) 
-      end
+
+      ActiveFedora::SolrService.delete(pid) if ENABLE_SOLR_UPDATES
       @destroyed = true
       freeze
     end

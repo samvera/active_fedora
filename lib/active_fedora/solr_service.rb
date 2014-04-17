@@ -125,6 +125,10 @@ module ActiveFedora
         result['response']['docs']
       end
 
+      def delete(id)
+        SolrService.instance.conn.delete_by_id(id, params: {'softCommit' => true})
+      end
+
       # Get the count of records that match the query
       # @param [String] query a solr query 
       # @param [Hash] args arguments to pass through to `args' param of SolrService.query (note that :rows will be overwritten to 0)
