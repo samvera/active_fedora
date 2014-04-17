@@ -25,7 +25,7 @@ module ActiveFedora
 
       unless class_exists?(model_value)
         logger.warn "#{model_value} is not a real class"
-        return false
+        return nil
       end
       result = ActiveFedora.class_from_string(model_value)
       unless result.nil?

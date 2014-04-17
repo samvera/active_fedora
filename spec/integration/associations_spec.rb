@@ -227,8 +227,9 @@ describe ActiveFedora::Base do
         it "should respect the :class_name parameter" do
           @book.author = @person
           @book.save
-          Book.find(@book.id).author_id.should == @person.pid
-          Book.find(@book.id).author.should be_kind_of Person
+          new_book = Book.find(@book.id)
+          new_book.author_id.should == @person.pid
+          new_book.author.should be_kind_of Person
         end
 
         it "should respect multiple associations that share the same :property and respect associated class" do
