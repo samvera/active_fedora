@@ -73,8 +73,11 @@ module ActiveFedora
     def deserialize(data = nil)
       repository = RDF::Repository.new
       return repository if new? and data.nil?
-
       data ||= datastream_content
+
+      # Because datastream_content can return nil, we should check that here.
+      return repository if data.nil?
+
       data.force_encoding('utf-8')
       RDF::Reader.for(serialization_format).new(data) do |reader|
         reader.each_statement do |statement|
