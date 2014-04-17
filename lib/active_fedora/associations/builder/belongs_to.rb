@@ -9,9 +9,22 @@ module ActiveFedora::Associations::Builder
       reflection = super
       add_counter_cache_callbacks(reflection) if options[:counter_cache]
       add_touch_callbacks(reflection)         if options[:touch]
-      model.attribute :"#{name}_id", [ predicate, FedoraLens::Lenses.uris_to_ids, FedoraLens::Lenses.single ]
+      predicate_lens = FedoraLens::Lenses.get_predicate(predicate, select: filter_by_class(reflection))
+      model.attribute :"#{name}_id", [ predicate_lens, FedoraLens::Lenses.uris_to_ids, FedoraLens::Lenses.single ]
       configure_dependency
       reflection
+    end
+
+    # TODO this is a huge waste of time that can be completely avoided if the attributes aren't sharing predicates.
+    def filter_by_class(reflection)
+      lambda do |obj|
+        id = ActiveFedora::Base.uri_to_id(obj)
+        results = ActiveFedora::SolrService.query(ActiveFedora::SolrService.construct_query_for_pids([id]))
+        
+        results.any? do |result|
+          ActiveFedora::SolrService.classes_from_solr_document(result).include? reflection.klass
+        end
+      end
     end
 
     private
