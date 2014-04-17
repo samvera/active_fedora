@@ -17,12 +17,14 @@ module ActiveFedora
     # +:namespace+ value to Fedora::Repository.nextid to generate the next pid available within
     # the given namespace.
     def initialize(attributes_or_resource_or_url = nil)
-      if attributes_or_resource_or_url.kind_of?(Ldp::Resource) ||
-        attributes_or_resource_or_url.kind_of?(String)
-        super
-      else
-        attributes = attributes_or_resource_or_url
-        super()
+      case attributes_or_resource_or_url
+        when Ldp::Resource
+          super
+        when String
+          super(ActiveFedora::Base.id_to_uri(attributes_or_resource_or_url))
+        else
+          attributes = attributes_or_resource_or_url
+          super()
       end
 
       @association_cache = {}
