@@ -43,6 +43,23 @@ module ActiveFedora
       self
     end
 
+    # Initialize an empty model object and set its +resource+
+    # example:
+    #
+    #   class Post < ActiveFedora::Base
+    #   end
+    #
+    #   post = Post.allocate
+    #   post.init_with(Ldp::Resource.new('http://example.com/post/1'))
+    #   post.title # => 'hello world'
+    def init_with(resource)
+      init_core(resource)
+      @association_cache = {}
+      run_callbacks :find
+      run_callbacks :initialize
+      self
+    end
+
     def ==(comparison_object)
          comparison_object.equal?(self) ||
            (comparison_object.instance_of?(self.class) &&
