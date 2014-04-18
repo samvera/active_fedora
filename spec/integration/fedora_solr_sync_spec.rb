@@ -21,7 +21,7 @@ describe "fedora_solr_sync_issues" do
   subject { ChildThing.create :parent => parent }
 
   it "should not go into an infinite loop" do
-    subject.inner_object.delete
+    subject.orm.delete
     parent.reload
     parent.things.should == []
   end
