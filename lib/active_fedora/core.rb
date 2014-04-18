@@ -55,6 +55,7 @@ module ActiveFedora
     def init_with(resource)
       init_core(resource)
       @association_cache = {}
+      load_datastreams
       run_callbacks :find
       run_callbacks :initialize
       self
