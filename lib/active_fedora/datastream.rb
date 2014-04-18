@@ -154,24 +154,6 @@ module ActiveFedora
     def serialize!
     end
     
-    def solrize_profile # :nodoc:
-      profile_hash = {}
-      profile.each_pair do |property,value|
-        if property =~ /Date/
-          value = Time.parse(value) unless value.is_a?(Time)
-          value = value.xmlschema
-        end
-        profile_hash[property] = value
-      end
-      profile_hash
-    end
-    
-    def profile_from_hash(profile_hash)
-      profile_hash.each_pair do |key,value|
-        profile[key] = value
-      end
-    end
-    
     def to_solr(solr_doc = Hash.new)
       solr_doc
     end
