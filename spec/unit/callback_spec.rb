@@ -2,6 +2,11 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
   before :all do
+    begin 
+      ActiveFedora::Base.find('test:123').delete
+    rescue
+    end
+
     class CallbackStub < ActiveFedora::Base
       has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
         m.field "fubar", :string
@@ -26,6 +31,7 @@ describe ActiveFedora::Base do
     end
   end
   after :all do
+    @cb.destroy if @cb # this only is called if the test failed to run all the way through.
     Object.send(:remove_const, :CallbackStub)
   end
 
@@ -35,10 +41,12 @@ describe ActiveFedora::Base do
     CallbackStub.any_instance.should_receive :a_create
     CallbackStub.any_instance.should_receive(:b_save)
     CallbackStub.any_instance.should_receive(:a_save)
-    cb = CallbackStub.new 'test:123'
-    cb.save
-end
- it "Should have after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
+    @cb = CallbackStub.new 'test:123'
+    @cb.save
+  end
+
+  # TODO this test is order dependent. It expects to use the object created in the previous test
+  it "Should have after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
     CallbackStub.any_instance.should_receive(:a_init)
     CallbackStub.any_instance.should_receive(:b_save)
     CallbackStub.any_instance.should_receive(:a_save)
@@ -47,9 +55,10 @@ end
     CallbackStub.any_instance.should_receive(:a_update)
     CallbackStub.any_instance.should_receive(:do_stuff)
 
-    cb2 = CallbackStub.find('test:123')
-    cb2.save
+    @cb = CallbackStub.find('test:123')
+    @cb.save!
 
-    cb2.destroy
+    @cb.destroy
+
   end
 end

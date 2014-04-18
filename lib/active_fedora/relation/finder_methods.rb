@@ -179,14 +179,10 @@ module ActiveFedora
 
     def load_from_fedora(id, cast)
       cast = true if self == ActiveFedora::Base && cast.nil?
-      resource = Ldp::Resource.new(FedoraLens.connection, @klass.id_to_uri(id))
-      model = @klass.new(resource)
-      klass = Model.from_class_uri(model.has_model)
-      if klass
-        model.becomes(klass) # TODO This might not be necessary if @klass == klass
-      else
-        model
-      end
+      resource = Ldp::Resource::RdfSource.new(FedoraLens.connection, @klass.id_to_uri(id))
+      # TODO we may need to grab the has_model on the resource at this point.
+      # klass = Model.from_class_uri(resource.has_model)
+      @klass.allocate.init_with(resource) # Triggers the find callback
     rescue Ldp::NotFound
       raise ActiveFedora::ObjectNotFoundError
     end
