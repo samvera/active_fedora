@@ -38,7 +38,7 @@ describe ActiveFedora::Base do
     describe "when a model is missing" do
       let(:model3) { SpecModel::Basic.create! }
       let!(:pid) { model3.pid }
-      before { model3.inner_object.delete }
+      before { model3.orm.delete }
       after do
         ActiveFedora::SolrService.instance.conn.tap do |conn|
           conn.delete_by_query "id:\"#{pid}\""

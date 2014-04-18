@@ -114,7 +114,7 @@ describe "scoped queries" do
 
     describe "when one of the objects in solr isn't in fedora" do
       let!(:pid) { test_instance2.pid }
-      before { test_instance2.inner_object.delete }
+      before { test_instance2.orm.delete }
       after do
         ActiveFedora::SolrService.instance.conn.tap do |conn|
           conn.delete_by_query "id:\"#{pid}\""
