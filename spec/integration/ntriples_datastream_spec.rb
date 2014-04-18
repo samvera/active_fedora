@@ -151,22 +151,24 @@ describe ActiveFedora::NtriplesRDFDatastream do
     before do
       # reopening existing class
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        rdf_subject { |ds| RDF::URI.new("http://oregondigital.org/ns/#{ds.pid.split(':')[1]}") }
+        rdf_subject { |ds| RDF::URI.new("http://oregondigital.org/ns/#{ds.digital_object.id.split(':')[1]}") }
         property :type, predicate: RDF::DC.type
         property :spatial, predicate: RDF::DC.spatial
       end
-    end
-    after do
-      @subject.destroy
+      subject.rdf.type = "Frog"
+      subject.save!
     end
 
+    after do
+      subject.destroy
+    end
+
+    subject { RdfTest.new('/test:99') }
+
     it "should write rdf with proper subjects" do
-      @subject.inner_object.pid = 'test:99'
-      @subject.rdf.type = "Frog"
-      @subject.save!
-      @subject.reload
-      @subject.rdf.graph.dump(:ntriples).should == "<http://oregondigital.org/ns/99> <http://purl.org/dc/terms/type> \"Frog\" .\n"
-      @subject.rdf.type == ['Frog']
+      subject.reload
+      subject.rdf.graph.dump(:ntriples).should == "<http://oregondigital.org/ns/99> <http://purl.org/dc/terms/type> \"Frog\" .\n"
+      subject.rdf.type == ['Frog']
 
     end
 

@@ -74,6 +74,10 @@ module ActiveFedora
       !!@content
     end
 
+    def changed?
+      super || content_changed?
+    end
+
     def uri
       new_record? ? "#{digital_object.uri}/#{dsid}" : super
     end
@@ -125,7 +129,7 @@ module ActiveFedora
     end
     
     def inspect
-      "#<#{self.class} @pid=\"#{digital_object.id}\" @dsid=\"#{dsid}\" changed=\"#{changed?}\" >"
+      "#<#{self.class} uri=\"#{uri}\" changed_attributes=#{changed_attributes} changed=\"#{changed?}\" >"
     end
 
     #compatibility method for rails' url generators. This method will 
