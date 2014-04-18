@@ -170,13 +170,6 @@ describe ActiveFedora::Base do
       @test_object2.delete
     end
     
-    it "passing namespace to constructor with no pid should generate a pid with the supplied namespace" do
-      @test_object2 = ActiveFedora::Base.new({:namespace=>"randomNamespace"})
-      # will be nil if match failed, otherwise will equal pid
-      @test_object2.save
-      @test_object2.pid.match('randomNamespace:\d+').to_a.first.should == @test_object2.pid
-    end
-
     it "should set the CMA hasModel relationship" do 
       @test_object2.save
       pending "@test_object2 should have assertion hasModel is 'info:fedora/afmodel:ActiveFedora_Base'"
