@@ -310,13 +310,22 @@ module ActiveFedora::Rdf
       #
       # @TODO: URI.scheme_list is naive and incomplete. Find a better way to check for an existing scheme.
       def get_uri(uri_or_str)
-        return uri_or_str.to_uri if uri_or_str.respond_to? :to_uri
-        return uri_or_str if uri_or_str.kind_of? RDF::Node
-        uri_or_str = uri_or_str.to_s
-        return RDF::Node(uri_or_str[2..-1]) if uri_or_str.start_with? '_:'
-        return RDF::URI(uri_or_str) if RDF::URI(uri_or_str).valid? and (URI.scheme_list.include?(RDF::URI.new(uri_or_str).scheme.upcase) or RDF::URI.new(uri_or_str).scheme == 'info')
-        return RDF::URI(self.base_uri.to_s + (self.base_uri.to_s[-1,1] =~ /(\/|#)/ ? '' : '/') + uri_or_str) if base_uri && !uri_or_str.start_with?(base_uri.to_s)
-        raise RuntimeError, "could not make a valid RDF::URI from #{uri_or_str}"
+        if uri_or_str.respond_to? :to_uri
+          uri_or_str.to_uri
+        elsif uri_or_str.kind_of? RDF::Node
+          uri_or_str
+        else
+          uri_or_str = uri_or_str.to_s
+          if uri_or_str.start_with? '_:'
+            RDF::Node(uri_or_str[2..-1])
+          elsif RDF::URI(uri_or_str).valid? and (URI.scheme_list.include?(RDF::URI.new(uri_or_str).scheme.upcase) or RDF::URI.new(uri_or_str).scheme == 'info')
+            RDF::URI(uri_or_str)
+          elsif base_uri && !uri_or_str.start_with?(base_uri.to_s)
+            RDF::URI(self.base_uri.to_s + uri_or_str)
+          else
+            raise RuntimeError, "could not make a valid RDF::URI from #{uri_or_str}"
+          end
+        end
       end
   end
 end
