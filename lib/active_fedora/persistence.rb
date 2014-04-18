@@ -3,11 +3,6 @@ module ActiveFedora
   module Persistence
     extend ActiveSupport::Concern
 
-    ## Required by associations
-    def new_record?
-      id.nil?
-    end
-
     def persisted?
       !(new_record? || destroyed?)
     end
@@ -75,22 +70,6 @@ module ActiveFedora
 
     def destroy
       delete
-    end
-
-    # Returns an instance of the specified +klass+ with the attributes of the
-    # current record. 
-    # Note: The new instance will share a link to the same attributes as the original class.
-    # So any change to the attributes in either instance will affect the other.
-    def becomes(klass)
-      became = klass.new
-      became.instance_variable_set("@orm", @orm)
-      became.instance_variable_set("@attributes", @attributes)
-      # became.instance_variable_set("@attributes_cache", @attributes_cache)
-      became.instance_variable_set("@changed_attributes", @changed_attributes) if defined?(@changed_attributes)
-      became.instance_variable_set("@new_record", new_record?)
-      became.instance_variable_set("@destroyed", destroyed?)
-      became.instance_variable_set("@errors", errors)
-      became
     end
 
     module ClassMethods
