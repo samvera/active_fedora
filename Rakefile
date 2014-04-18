@@ -1,8 +1,5 @@
 require 'rake/clean'
-require 'rubygems'
 require 'bundler'
-require "bundler/setup"
-require "active-fedora"
 
 Bundler::GemHelper.install_tasks
 
