@@ -18,7 +18,7 @@ describe ActiveFedora::Datastream do
   end
   
   it "should be inspectable" do
-    subject.inspect.should match /#<ActiveFedora::Datastream @pid=\"1234\" @dsid=\"abcd\" changed=\"true\" >/
+    subject.inspect.should eq "#<ActiveFedora::Datastream uri=\"/fedora/rest/1234/abcd\" changed=\"true\" >"
   end
 
   describe "#generate_dsid" do
@@ -43,11 +43,10 @@ describe ActiveFedora::Datastream do
 
   describe ".size" do
     it "should lazily load the datastream size attribute from the fedora repository" do
-      #TODO need to stub something out
       subject.size.should == 9999
     end
 
-    it "should default to an empty string if ds has not been saved" do
+    it "should default to nil if ds has not been saved" do
       subject.size.should be_nil
     end
   end
