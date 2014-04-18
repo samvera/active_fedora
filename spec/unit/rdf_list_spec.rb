@@ -32,7 +32,7 @@ describe ActiveFedora::Rdf::List do
     Object.send(:remove_const, :MADS)
   end
 
-  let(:parent) { double('parent object', id: 'foo', uri: '/fedora/rest/foo', new_record?: true) }
+  let(:parent) { double('parent object', id: '/foo', uri: '/fedora/rest/foo', new_record?: true) }
 
   describe "a new list" do
     let (:ds) { DemoList.new(parent, 'descMetadata')}
