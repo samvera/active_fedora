@@ -161,8 +161,6 @@ describe ActiveFedora::Base do
         
         end
 
-
-
         after do
           @book.delete
           @book2.delete
@@ -318,13 +316,14 @@ describe ActiveFedora::Base do
 
         @book.publisher = @publisher
         @book.author = @author      
-        @book.save 
+        @book.save!
 
         @book.publisher = @publisher2
-        @book.save
+        @book.save!
 
-        Book.find(@book.pid).publisher.pid.should == @publisher2.pid
-        Book.find(@book.pid).author.pid.should == @author.pid
+        new_book = Book.find(@book.pid)
+        new_book.publisher.pid.should == @publisher2.pid
+        new_book.author.pid.should == @author.pid
       end
 
       it "should only clear the matching class association" do

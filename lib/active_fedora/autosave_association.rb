@@ -305,7 +305,7 @@ module ActiveFedora
           saved = record.save(:validate => !autosave) if record.new_record? || (autosave && record.changed_for_autosave?)
 
           if association.updated?
-            self[reflection.name.to_s + "_id"] = record.id
+            self[reflection.name.to_s + "_id"] = record.id #TODO use primary_key here
             association.loaded!
           end
 
