@@ -96,9 +96,11 @@ describe ActiveFedora::NtriplesRDFDatastream do
         property :related_url, predicate: RDF::RDFS.seeAlso
       end
       @subject = MyDatastream.new(inner_object, 'mixed_rdf')
-      @subject.stub(pid: 'test:1')
-      @subject.stub(:new_record? => false)
-      @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
+      @subject.stub(pid: 'test:1', new_record?: false, datastream_content: datastream_content)
+    end
+
+    let(:datastream_content) do
+        File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
 
     after do
