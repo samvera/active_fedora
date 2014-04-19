@@ -85,7 +85,8 @@ module ActiveFedora
     def save
       return unless content_changed?
       raise "Can't generate uri because the parent object isn't saved" if digital_object.new_record?
-      resp = orm.resource.client.put "#{uri}/fcr:content", content, 'Content-Type' => mime_type
+      payload = content.is_a?(IO) ? content.read : content
+      resp = orm.resource.client.put "#{uri}/fcr:content", payload, 'Content-Type' => mime_type
       case resp.status
         when 201, 204
           @changed_attributes.clear
