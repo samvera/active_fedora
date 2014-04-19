@@ -40,7 +40,7 @@ describe "A base object with metadata" do
       it "should save the datastream." do
         MockAFBaseRelationship.find(@release.pid).foo.person.should == ['frank']
         person_field = ActiveFedora::SolrService.solr_name('foo__person', type: :string)
-        ActiveFedora::SolrService.query("id:#{@release.pid.gsub(":", "\\:")}", :fl=>"id #{person_field}").first.should == {"id"=>@release.pid, person_field =>['frank']}
+        ActiveFedora::SolrService.query("id:\"#{@release.pid}\"", :fl=>"id #{person_field}").first.should == {"id"=>@release.pid, person_field =>['frank']}
       end
     end
   end
@@ -197,13 +197,9 @@ describe ActiveFedora::Base do
     it "should return a Hash of datastreams from fedora" do
       datastreams = @test_object.datastreams
       datastreams.should be_a_kind_of(Hash) 
-      datastreams.each_value do |ds| 
-        ds.should be_a_kind_of(ActiveFedora::Datastream)
-      end
-      @test_object.datastreams["DC"].should be_an_instance_of(ActiveFedora::Datastream)
-      datastreams["DC"].should_not be_nil
-      datastreams["DC"].should be_an_instance_of(ActiveFedora::Datastream)       
+      datastreams.should be_empty
     end
+
     it "should initialize the datastream pointers with @new_object=false" do
       datastreams = @test_object.datastreams
       datastreams.each_value do |ds| 
