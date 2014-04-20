@@ -4,9 +4,8 @@ source "https://rubygems.org"
 
 gemspec
 
-#gem "fedora_lens", github: 'curationexperts/fedora_lens'
-gem "fedora_lens", path: '../fedora_lens'
-gem "ldp", path: '../ldp'
+gem "fedora_lens", github: 'curationexperts/fedora_lens'
+gem "ldp", github: 'cbeer/ldp'
 gem 'byebug' unless ENV['TRAVIS']
 
 group :test do
