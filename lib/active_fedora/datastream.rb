@@ -94,7 +94,7 @@ module ActiveFedora
       resp = orm.resource.client.put "#{uri}/fcr:content", payload, 'Content-Type' => mime_type
       case resp.status
         when 201, 204
-          @changed_attributes.clear
+          changed_attributes.clear
           return true
         when 404
           raise ActiveFedora::ObjectNotFoundError, "Unable to add content at #{uri}/fcr:content"
