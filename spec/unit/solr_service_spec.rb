@@ -45,9 +45,9 @@ describe ActiveFedora::SolrService do
         def self.connection_for_pid(pid)
         end
       end
-      @sample_solr_hits = [{"id"=>"my:_PID1_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["info:fedora/afmodel:AudioRecord"]},
-                           {"id"=>"my:_PID2_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["info:fedora/afmodel:AudioRecord"]},
-                           {"id"=>"my:_PID3_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["info:fedora/afmodel:AudioRecord"]}]
+      @sample_solr_hits = [{"id"=>"my:_PID1_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["http://fedora.info/definitions/v4/model#AudioRecord"]},
+                           {"id"=>"my:_PID2_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["http://fedora.info/definitions/v4/model#AudioRecord"]},
+                           {"id"=>"my:_PID3_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["http://fedora.info/definitions/v4/model#AudioRecord"]}]
     end
     describe ".reify_solr_result" do
       it "should use .find to instantiate objects" do
