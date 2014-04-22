@@ -78,6 +78,7 @@ describe ActiveFedora::OmDatastream do
             t.root(:path=>"mods")
             t.title(:index_as=>[:stored_searchable])
           end
+
           def prefix
             "foo__"
           end
@@ -186,7 +187,7 @@ describe ActiveFedora::OmDatastream do
       @test_ds.stub(new_record?: true)
       resp = double("response", status: 201)
       client = double("client")
-      client.should_receive(:post).with("/descMetadata/fcr:content", 'fake xml', {"Content-Type"=>"text/xml"}).and_return(resp)
+      client.should_receive(:put).with("/descMetadata/fcr:content", 'fake xml', {"Content-Type"=>"text/xml"}).and_return(resp)
       resource = double("mock resource", client: client)
       orm = double("orm", resource: resource)
       @test_ds.stub(orm: orm)
