@@ -7,7 +7,6 @@ describe ActiveFedora::Model do
       class Basic < ActiveFedora::Base
       end
     end
-    @model_query = "has_model_s:#{solr_uri("http://fedora.info/definitions/v4/model#SpecModel_Basic")}"
   end
   
   after(:all) do
@@ -27,32 +26,4 @@ describe ActiveFedora::Model do
       SpecModel::Basic.solr_query_handler.should == 'search'
     end
   end
-  
-  describe "URI translation" do
-    before :all do
-      module SpecModel
-        class CamelCased
-          include ActiveFedora::Model
-        end
-      end
-    end
-    
-    after :all do
-      SpecModel.send(:remove_const, :CamelCased)
-    end
-    subject {SpecModel::CamelCased}
-  
-    describe ".classname_from_uri" do 
-      it "should turn an afmodel URI into a Model class name" do
-        ActiveFedora::Model.classname_from_uri('http://fedora.info/definitions/v4/model#SpecModel_CamelCased').should == ['SpecModel::CamelCased', 'afmodel']
-      end
-      it "should not change plurality" do
-        ActiveFedora::Model.classname_from_uri('http://fedora.info/definitions/v4/model#MyMetadata').should == ['MyMetadata', 'afmodel']
-      end
-      it "should capitalize the first letter" do
-        ActiveFedora::Model.classname_from_uri('http://fedora.info/definitions/v4/model#image').should == ['Image', 'afmodel']
-      end
-    end
-  end
-  
 end
