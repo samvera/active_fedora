@@ -25,13 +25,18 @@ module ActiveFedora
     def initialize(digital_object, dsid=nil, options={})
       raise ArgumentError, "Digital object is nil" unless digital_object
       @digital_object = digital_object
-      dsid = nil if dsid == ''
-      dsid ||= generate_dsid(digital_object, options.delete(:prefix) || "DS")
-      @dsid = dsid
+      initialize_dsid(dsid, options.delete(:prefix))
       init_core("#{digital_object.uri}/#{dsid}")
       unless digital_object.new_record?
         @new_record = false
       end
+    end
+
+    def initialize_dsid(dsid, prefix)
+      prefix  ||= 'DS'
+      dsid = nil if dsid == ''
+      dsid ||= generate_dsid(digital_object, prefix)
+      @dsid = dsid
     end
 
     def datastream_will_change!
@@ -182,7 +187,6 @@ module ActiveFedora
     # The string to prefix all solr fields with. Override this method if you want
     # a prefix other than the default
     def prefix
-      raise RuntimeError, "to_solr requires the dsid to be set" unless dsid
       "#{dsid.underscore}__"
     end
 
