@@ -7,7 +7,7 @@ describe ActiveFedora::Model do
       class Basic < ActiveFedora::Base
       end
     end
-    @model_query = "has_model_s:#{solr_uri("info:fedora/afmodel:SpecModel_Basic")}"
+    @model_query = "has_model_s:#{solr_uri("http://fedora.info/definitions/v4/model#SpecModel_Basic")}"
   end
   
   after(:all) do
@@ -44,13 +44,13 @@ describe ActiveFedora::Model do
   
     describe ".classname_from_uri" do 
       it "should turn an afmodel URI into a Model class name" do
-        ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:SpecModel_CamelCased').should == ['SpecModel::CamelCased', 'afmodel']
+        ActiveFedora::Model.classname_from_uri('http://fedora.info/definitions/v4/model#SpecModel_CamelCased').should == ['SpecModel::CamelCased', 'afmodel']
       end
       it "should not change plurality" do
-        ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:MyMetadata').should == ['MyMetadata', 'afmodel']
+        ActiveFedora::Model.classname_from_uri('http://fedora.info/definitions/v4/model#MyMetadata').should == ['MyMetadata', 'afmodel']
       end
       it "should capitalize the first letter" do
-        ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:image').should == ['Image', 'afmodel']
+        ActiveFedora::Model.classname_from_uri('http://fedora.info/definitions/v4/model#image').should == ['Image', 'afmodel']
       end
     end
   end

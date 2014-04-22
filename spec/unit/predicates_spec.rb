@@ -28,7 +28,7 @@ describe ActiveFedora::Predicates do
   end
   
   it 'should provide .default_predicate_namespace' do
-    ActiveFedora::Predicates.default_predicate_namespace.should == 'info:fedora/fedora-system:def/relations-external#'
+    ActiveFedora::Predicates.default_predicate_namespace.should == 'http://fedora.info/definitions/v4/rels-ext#'
   end
  
   describe "#predicate_mappings" do 
@@ -37,7 +37,7 @@ describe ActiveFedora::Predicates do
       ActiveFedora::Predicates.predicate_mappings.should be_kind_of Hash
     end
 
-    it "should provide mappings to the fedora ontology via the info:fedora/fedora-system:def/relations-external default namespace mapping" do
+    it "should provide mappings to the fedora ontology via the http://fedora.info/definitions/v4/rels-ext# default namespace mapping" do
       ActiveFedora::Predicates.predicate_mappings.keys.include?(ActiveFedora::Predicates.default_predicate_namespace).should be_true
       ActiveFedora::Predicates.predicate_mappings[ActiveFedora::Predicates.default_predicate_namespace].should be_kind_of Hash
     end
@@ -94,7 +94,7 @@ describe ActiveFedora::Predicates do
     end
     
     it 'should allow explicit initialization of predicates' do
-      ActiveFedora::Predicates.find_predicate(:is_part_of).should == ["isPartOf", "info:fedora/fedora-system:def/relations-external#"]
+      ActiveFedora::Predicates.find_predicate(:is_part_of).should == ["isPartOf", "http://fedora.info/definitions/v4/rels-ext#"]
       ActiveFedora::Predicates.predicate_config = {
         :default_namespace => 'http://example.com/foo',
         :predicate_mapping => {
@@ -112,17 +112,17 @@ describe ActiveFedora::Predicates do
     it "should allow adding predicates without wiping out existing predicates" do
       ActiveFedora::Predicates.set_predicates({
                                                   "http://projecthydra.org/ns/relations#"=>{has_profile:"hasProfile"},
-                                                  "info:fedora/fedora-system:def/relations-external#"=>{
+                                                  "http://fedora.info/definitions/v4/rels-ext#"=>{
                                                       references:"references",
                                                       has_derivation: "cameFrom"
                                                   },
                                               })
       # New & Modified Predicates
       ActiveFedora::Predicates.find_predicate(:has_profile).should == ["hasProfile", "http://projecthydra.org/ns/relations#"]
-      ActiveFedora::Predicates.find_predicate(:references).should == ["references", "info:fedora/fedora-system:def/relations-external#"]
-      ActiveFedora::Predicates.find_predicate(:has_derivation).should == ["cameFrom", "info:fedora/fedora-system:def/relations-external#"]
+      ActiveFedora::Predicates.find_predicate(:references).should == ["references", "http://fedora.info/definitions/v4/rels-ext#"]
+      ActiveFedora::Predicates.find_predicate(:has_derivation).should == ["cameFrom", "http://fedora.info/definitions/v4/rels-ext#"]
       # Pre-Existing predicates should be unharmed
-      ActiveFedora::Predicates.find_predicate(:is_part_of).should == ["isPartOf", "info:fedora/fedora-system:def/relations-external#"]
+      ActiveFedora::Predicates.find_predicate(:is_part_of).should == ["isPartOf", "http://fedora.info/definitions/v4/rels-ext#"]
       ActiveFedora::Predicates.find_predicate(:is_governed_by).should == ["isGovernedBy", "http://projecthydra.org/ns/relations#"]
     end
 

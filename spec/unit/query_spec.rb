@@ -7,7 +7,7 @@ describe ActiveFedora::Base do
       class Basic < ActiveFedora::Base
       end
     end
-    @model_query = "_query_:\"{!raw f=" + ActiveFedora::SolrService.solr_name("has_model", :symbol) + "}info:fedora/afmodel:SpecModel_Basic" + "\""
+    @model_query = "_query_:\"{!raw f=" + ActiveFedora::SolrService.solr_name("has_model", :symbol) + "}http://fedora.info/definitions/v4/model#SpecModel_Basic" + "\""
     @sort_query = ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date) + ' asc'
   end
   

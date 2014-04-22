@@ -1,7 +1,7 @@
-:default_namespace: info:fedora/fedora-system:def/relations-external#
+:default_namespace: http://fedora.info/definitions/v4/rels-ext#
 
 :predicate_mapping:
-  info:fedora/fedora-system:def/relations-external#: 
+  http://fedora.info/definitions/v4/rels-ext#: 
     :is_derivation_of: isDerivationOf
     :is_metadata_for: isMetadataFor
     :is_member_of_collection: isMemberOfCollection
@@ -25,7 +25,7 @@
     :has_description: hasDescription
     :has_part: hasPart
     :has_member: hasMember
-  info:fedora/fedora-system:def/model#:
+  http://fedora.info/definitions/v4/model#:
     :has_model: hasModel
 #  http://www.openarchives.org/OAI/2.0/: 
 #    :oai_item_id: itemID
