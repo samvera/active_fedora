@@ -74,7 +74,7 @@ describe ActiveFedora::Rdf::List do
         ds.elementList = subject
         doc = Nokogiri::XML(ds.content)
         ns = {rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#", mads: "http://www.loc.gov/mads/rdf/v1#"}
-        expect(doc.xpath('/rdf:RDF/rdf:Description/@rdf:about', ns).map(&:value)).to eq ["info:fedora/foo"]
+        expect(doc.xpath('/rdf:RDF/rdf:Description/@rdf:about', ns).map(&:value)).to eq ["http://localhost:8983/fedora/rest/foo"]
         expect(doc.xpath('//rdf:Description/mads:elementList/@rdf:parseType', ns).map(&:value)).to eq ["Collection"]
         expect(doc.xpath('//rdf:Description/mads:elementList/*[position() = 1]/@rdf:about', ns).map(&:value)).to eq ["http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"]
         expect(doc.xpath('//rdf:Description/mads:elementList/*[position() = 2]/mads:elementValue', ns).map(&:text)).to eq ["Relations with Mexican Americans"]
@@ -118,7 +118,7 @@ describe ActiveFedora::Rdf::List do
   <rdf:RDF
       xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:mads="http://www.loc.gov/mads/rdf/v1#">
 
-        <mads:ComplexSubject rdf:about="info:fedora/foo">
+        <mads:ComplexSubject rdf:about="http://localhost:8983/fedora/rest/foo">
           <mads:elementList rdf:parseType="Collection">
             <rdf:Description rdf:about="http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"/>
             <mads:TopicElement>
@@ -136,7 +136,7 @@ END
       subject
     end
     it "should have a subject" do
-      subject.rdf_subject.to_s.should == "info:fedora/foo"
+      subject.rdf_subject.to_s.should == "http://localhost:8983/fedora/rest/foo"
     end
 
     let (:list) { subject.elementList.first }
@@ -170,7 +170,7 @@ END
       list[3].elementValue = ["1900s"]
       doc = Nokogiri::XML(subject.content)
       ns = {rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#", mads: "http://www.loc.gov/mads/rdf/v1#"}
-      expect(doc.xpath('/rdf:RDF/mads:ComplexSubject/@rdf:about', ns).map(&:value)).to eq ["info:fedora/foo"]
+      expect(doc.xpath('/rdf:RDF/mads:ComplexSubject/@rdf:about', ns).map(&:value)).to eq ["http://localhost:8983/fedora/rest/foo"]
       expect(doc.xpath('//mads:ComplexSubject/mads:elementList/@rdf:parseType', ns).map(&:value)).to eq ["Collection"]
       expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 1]/@rdf:about', ns).map(&:value)).to eq ["http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"]
       expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 2]/mads:elementValue', ns).map(&:text)).to eq ["Relations with Mexican Americans"]
