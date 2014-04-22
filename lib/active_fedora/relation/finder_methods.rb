@@ -186,7 +186,11 @@ module ActiveFedora
     end
 
     def class_to_load(resource)
-      @klass == ActiveFedora::Base ? Model.from_class_uri(has_model_value(resource)) : @klass
+      if @klass == ActiveFedora::Base
+        Model.from_class_uri(has_model_value(resource)) || ActiveFedora::Base
+      else
+        @klass
+      end
     end
 
     def has_model_value(resource)
