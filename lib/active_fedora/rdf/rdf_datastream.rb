@@ -94,7 +94,7 @@ module ActiveFedora
     end
 
     def serialize
-      resource.set_subject!(id) if id and rdf_subject.node?
+      resource.set_subject!(digital_object.id) if digital_object.id and rdf_subject.node?
       resource.dump serialization_format
     end
 
