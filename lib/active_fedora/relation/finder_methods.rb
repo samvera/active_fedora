@@ -193,8 +193,12 @@ module ActiveFedora
     end
 
     def class_to_load(resource)
-      # This is not correct. The class may be a subclass of @klass, so always use from_class_uri
-      @klass == ActiveFedora::Base ? Model.from_class_uri(has_model_value(resource)) : @klass
+      if @klass == ActiveFedora::Base
+        Model.from_class_uri(has_model_value(resource)) || ActiveFedora::Base
+      else
+        # This is not correct. The class may be a subclass of @klass, so always use from_class_uri
+        @klass
+      end
     end
 
     def has_model_value(resource)
