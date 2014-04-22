@@ -74,7 +74,6 @@ module ActiveFedora #:nodoc:
     autoload :SimpleDatastream
     autoload :SolrDigitalObject
     autoload :SolrService
-    autoload :DatastreamCollections
     autoload :Predicates
     autoload :Validations
     autoload :SolrInstanceLoader
