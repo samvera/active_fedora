@@ -186,14 +186,14 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2.thumbnail_ids == ["THUMB1"]
       thumb1 = @test_object2.thumbnail.first
       thumb1.dsid.should == 'THUMB1'
-      thumb1.id.should == @test_object2.id
+      thumb1.digital_object.id.should == @test_object2.id
       f.rewind
       @test_object2.update_named_datastream("thumbnail",{:file=>f2,:dsid=>"THUMB1"})
       @test_object2.thumbnail.size.should == 1
       @test_object2.thumbnail_ids == ["THUMB1"]
       thumb1 = @test_object2.thumbnail.first
       thumb1.dsid.should == 'THUMB1'
-      thumb1.id.should == @test_object2.id
+      thumb1.digital_object.id.should == @test_object2.id
     end
   end
   describe '#named_datastreams_desc' do
@@ -234,7 +234,6 @@ describe ActiveFedora::DatastreamCollections do
         include ActiveFedora::DatastreamCollections
         has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream
         has_datastream :name=>"high", :type=>ActiveFedora::Datastream
-        has_datastream :name=>"external", :type=>ActiveFedora::Datastream
       end
     end
     
@@ -248,19 +247,12 @@ describe ActiveFedora::DatastreamCollections do
       f2.stub(:original_filename).and_return("dino.jpg")
       @test_object2.thumbnail_file_append(f)
       @test_object2.high_file_append(f2)
-      @test_object2.external_append({:dsLocation=>"http://myresource.com"})
       datastreams = @test_object2.named_datastreams
       datastreams.keys.include?("thumbnail").should == true
-      datastreams.keys.include?("external").should == true
       datastreams.keys.include?("high").should == true
-      datastreams.keys.size.should == 3
+      datastreams.keys.size.should == 2
       datastreams["thumbnail"].size.should == 1
       datastreams["thumbnail"].first.dsid.should == 'THUMB1'
-
-      datastreams["external"].size.should == 1
-      datastreams["external"].first.dsid.should == "EXTERNAL1"
-      datastreams["external"].first.dsLocation.should == "http://myresource.com"
-      datastreams["external"].first.content.should == "" 
 
       datastreams["high"].size.should == 1
       datastreams["high"].first.dsid.should == "HIGH1"
@@ -275,7 +267,6 @@ describe ActiveFedora::DatastreamCollections do
         include ActiveFedora::DatastreamCollections
         has_datastream name: "thumbnail", prefix: "THUMB", type: ActiveFedora::Datastream
         has_datastream name: "high", type: ActiveFedora::Datastream
-        has_datastream name: "external", type: ActiveFedora::Datastream
       end
     end
     
@@ -289,8 +280,7 @@ describe ActiveFedora::DatastreamCollections do
       f2.stub(:original_filename).and_return("dino.jpg")
       @test_object2.thumbnail_file_append(f)
       @test_object2.high_file_append(f2)
-      @test_object2.external_append({:dsLocation=>"http://myresource.com"})
-      @test_object2.named_datastreams_ids.should == {"thumbnail"=>["THUMB1"],"high"=>["HIGH1"],"external"=>["EXTERNAL1"]}
+      @test_object2.named_datastreams_ids.should == {"thumbnail"=>["THUMB1"],"high"=>["HIGH1"]}
     end
   end
   
@@ -318,7 +308,7 @@ describe ActiveFedora::DatastreamCollections do
       @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2})
       @test_object2.add_named_datastream("high",{:content_type=>"image/jpeg",:blob=>f2})
       t2_thumb1 = @test_object2.thumbnail.first
-      t2_thumb1.id.should == @test_object2.id 
+      t2_thumb1.digital_object.id.should == @test_object2.id
       t2_thumb1.dsid.should == "THUMB1"
       @test_object2.thumbnail_ids.should == ["THUMB1"]
       @test_object2.high_ids.include?("HIGH1") == true
@@ -335,7 +325,6 @@ describe ActiveFedora::DatastreamCollections do
         include ActiveFedora::DatastreamCollections
         has_datastream :name=>"thumbnail",:prefix => "THUMB", :type=>ActiveFedora::Datastream
         has_datastream :name=>"EAD", :type=>ActiveFedora::Datastream
-        has_datastream :name=>"external", :type=>ActiveFedora::Datastream
       end
     end
     
@@ -349,17 +338,12 @@ describe ActiveFedora::DatastreamCollections do
       f.stub(:original_filename).and_return("minivan.jpg")
       @test_object2.thumbnail_file_append(f)
       t2_thumb1 = @test_object2.thumbnail.first
-      t2_thumb1.id.should == @test_object2.id 
+      t2_thumb1.digital_object.id.should == @test_object2.id
       t2_thumb1.dsid.should == "THUMB1"
       @test_object3.thumbnail_append({:file=>f})
       t3_thumb1 = @test_object3.thumbnail.first
-      t3_thumb1.id.should == @test_object3.id 
+      t3_thumb1.digital_object.id.should == @test_object3.id
       t3_thumb1.dsid.should == "THUMB1"
-      @test_object3.external_append({:dsLocation=>"http://myresource.com"})
-      t3_external1 = @test_object3.external.first
-      t3_external1.dsLocation.should == "http://myresource.com"
-      t3_external1.id.should == @test_object3.id 
-      t3_external1.dsid.should == "EXTERNAL1"
     end
   end
 end
