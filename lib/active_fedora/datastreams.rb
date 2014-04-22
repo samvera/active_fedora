@@ -61,12 +61,13 @@ module ActiveFedora
 
     def load_datastreams
       local_ds_specs = self.ds_specs.dup
-      # TODO load remote datastreams
-      # datastreams.each do |dsid, ds|
-      #   self.add_datastream(ds)
-      #   configure_datastream(datastreams[dsid])
-      #   local_ds_specs.delete(dsid)
-      # end
+      Array(datastream_assertions).each do |ds_uri|
+        dsid = ds_uri.to_s.sub(self.uri + '/', '')
+        spec = local_ds_specs.delete(dsid)
+        ds = spec ? datastream_from_spec(spec, dsid) : Datastream.new(self, dsid)
+        self.datastreams[dsid] = ds
+        configure_datastream(datastreams[dsid])
+      end
       local_ds_specs.each do |name,ds_spec|
         ds = datastream_from_spec(ds_spec, name)
         self.add_datastream(ds)
