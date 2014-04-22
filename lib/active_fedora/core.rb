@@ -29,8 +29,8 @@ module ActiveFedora
       raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved" unless persisted?
       clear_association_cache
       clear_datastreams
-      load_datastreams
       super
+      load_datastreams
       self
     end
 
