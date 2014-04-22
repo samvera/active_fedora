@@ -269,7 +269,7 @@ describe ActiveFedora::RDFDatastream do
       end
 
       after do
-        Object.send(:remove_const, "DummyOmAsset") if Object
+        Object.send(:remove_const, :DummyOmAsset)
       end
 
       it "should let me get to an AF:Base object" do
