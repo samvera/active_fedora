@@ -17,7 +17,7 @@ module ActiveFedora
       #TODO, these could be cached
       case predicate
       when :has_model, "hasModel", :hasModel
-        xmlns="info:fedora/fedora-system:def/model#"
+        xmlns="http://fedora.info/definitions/v4/model#"
         begin
           rel_predicate = predicate_lookup(predicate,xmlns)
         rescue UnregisteredPredicateError
@@ -25,7 +25,7 @@ module ActiveFedora
           rel_predicate = nil
         end
       else
-        xmlns="info:fedora/fedora-system:def/relations-external#"
+        xmlns="http://fedora.info/definitions/v4/rels-ext#"
         begin
           rel_predicate = predicate_lookup(predicate,xmlns)
         rescue UnregisteredPredicateError
@@ -52,7 +52,7 @@ module ActiveFedora
     # If predicate is a symbol, looks up the predicate in the predicate_mappings
     # If predicate is not a Symbol, returns the predicate untouched
     # @raise UnregisteredPredicateError if the predicate is a symbol but is not found in the predicate_mappings
-    def self.predicate_lookup(predicate,namespace="info:fedora/fedora-system:def/relations-external#")
+    def self.predicate_lookup(predicate,namespace="http://fedora.info/definitions/v4/rels-ext#")
       if predicate.class == Symbol 
         if predicate_mappings[namespace].has_key?(predicate)
           return predicate_mappings[namespace][predicate]
@@ -100,7 +100,7 @@ module ActiveFedora
     # @example
     #  ActiveFedora::Predicates.set_predicates({
     #                                              "http://projecthydra.org/ns/relations#"=>{has_profile:"hasProfile"},
-    #                                              "info:fedora/fedora-system:def/relations-external#"=>{
+    #                                              "http://fedora.info/definitions/v4/rels-ext#"=>{
     #                                                  references:"references",
     #                                                  has_derivation: "cameFrom"
     #                                              },

@@ -171,7 +171,7 @@ module ActiveFedora
     # @param [String] pid of the object to load
     # @param [Boolean] cast when true, cast the found object to the class of the first known model defined in it's RELS-EXT
     #
-    # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel info:fedora/afmodel:Dataset), return a Dataset object (not a Book).
+    # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel http://fedora.info/definitions/v4/model#Dataset), return a Dataset object (not a Book).
     #   Book.find_one("hydra:dataset1") 
     def find_one(pid, cast=nil)
       if where_values.empty?
@@ -198,7 +198,7 @@ module ActiveFedora
     end
 
     def has_model_value(resource)
-      Ldp::Orm.new(resource).value(RDF::URI.new("info:fedora/fedora-system:def/relations-external#hasModel")).first.to_s
+      Ldp::Orm.new(resource).value(RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel")).first.to_s
     end
 
     def find_with_ids(ids, cast)

@@ -58,13 +58,13 @@ describe ActiveFedora::Base do
     end
     subject {SpecModel::CamelCased}
     
-    its(:to_class_uri) {should == 'info:fedora/afmodel:SpecModel_CamelCased' }
+    its(:to_class_uri) {should == 'http://fedora.info/definitions/v4/model#SpecModel_CamelCased' }
   
     context "with the namespace declared in the model" do
       before do
-        subject.stub(:pid_namespace).and_return("test-cModel")
+        subject.stub(:pid_namespace).and_return("http://test.com/model#")
       end
-      its(:to_class_uri) {should == 'info:fedora/test-cModel:SpecModel_CamelCased' }
+      its(:to_class_uri) {should == 'http://test.com/model#SpecModel_CamelCased' }
     end
   end
 end

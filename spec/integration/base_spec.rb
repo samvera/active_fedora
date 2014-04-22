@@ -170,7 +170,7 @@ describe ActiveFedora::Base do
     
     it "should set the CMA hasModel relationship" do 
       @test_object2.save
-      pending "@test_object2 should have assertion hasModel is 'info:fedora/afmodel:ActiveFedora_Base'"
+      pending "@test_object2 should have assertion hasModel is 'http://fedora.info/definitions/v4/model#ActiveFedora_Base'"
     end
 
     it 'when the object is updated, it also updates modification time field in solr' do
