@@ -70,15 +70,6 @@ describe ActiveFedora::OmDatastream do
       subject { ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata") }
       its(:to_solr) {should == { }}
     end
-    describe "without a dsid" do
-      before do
-        @mock_inner.stub(datastreams: {})
-      end
-      subject { ActiveFedora::OmDatastream.new(@mock_inner) }
-      it "should raise an error" do
-        expect{subject.to_solr}.to raise_error RuntimeError, "to_solr requires the dsid to be set"
-      end
-    end
 
     describe "when prefix is set" do
       before do 
