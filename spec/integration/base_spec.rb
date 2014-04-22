@@ -231,8 +231,7 @@ describe ActiveFedora::Base do
      @test_object.add_file_datastream(f)
      @test_object.save
      test_obj = ActiveFedora::Base.find(@test_object.pid)
-     #check case where nothing passed in does not have correct mime type
-     test_obj.datastreams["DS1"].mime_type.should == "application/octet-stream"
+     test_obj.datastreams["DS1"].mime_type.should == "text/plain"
      @test_object2 = ActiveFedora::Base.new
      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
      @test_object2.add_file_datastream(f,{:mimeType=>"image/jpeg"})
@@ -275,9 +274,9 @@ describe ActiveFedora::Base do
   it "should retrieve blobs that match the saved blobs" do
     ds = ActiveFedora::Datastream.new(@test_object, 'DS1')
     ds.content = "foo"
-    new_ds = ds.save
-    @test_object.add_datastream(new_ds)
-    @test_object.class.find(@test_object.pid).datastreams["DS1"].content.should == new_ds.content
+    ds.save
+    @test_object.add_datastream(ds)
+    expect(@test_object.class.find(@test_object.pid).datastreams["DS1"].content).to eq "foo" 
   end
   
   describe ".create_date" do 
