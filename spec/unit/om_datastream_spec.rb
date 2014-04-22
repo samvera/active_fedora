@@ -328,20 +328,6 @@ describe ActiveFedora::OmDatastream do
     end
   end
 
-  describe '.term_values' do
-
-    before(:each) do
-      @mods_ds = ActiveFedora::OmDatastream.new(@mock_inner, 'descMetadata')
-      @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
-    end
-
-    it "should call OM::XML::term_values if internal_solr_doc is not set and return values from xml" do
-      @mods_ds.stub(:om_term_values).once()
-      term_pointer = [:name,:role,:roleTerm]
-      @mods_ds.term_values(*term_pointer)
-    end
-  end
-
   describe "an instance that exists in the datastore, but hasn't been loaded" do
     before do 
       class MyObj < ActiveFedora::Base
