@@ -6,35 +6,17 @@ module ActiveFedora
   # much in the way ActiveRecord does.  
   module Model 
 
-    NAMESPACE = "afmodel"
-
-    # Takes a Fedora URI for a cModel and returns classname, namespace
-    def self.classname_from_uri(uri)
-      local_path = uri.split('/')[1]
-      parts = local_path.split(':')
-      return parts[-1].split(/_/).map(&:camelize).join('::'), parts[0]
-    end
-
     # Takes a Fedora URI for a cModel, and returns a 
     # corresponding Model if available
     # This method should reverse ClassMethods#to_class_uri
     # @return [Class, False] the class of the model or false, if it does not exist
-    def self.from_class_uri(uri)
-      model_value, pid_ns = classname_from_uri(uri)
-      raise "model URI incorrectly formatted: #{uri}" unless model_value
+    def self.from_class_uri(model_value)
 
       unless class_exists?(model_value)
         ActiveFedora::Base.logger.warn "#{model_value} is not a real class" if ActiveFedora::Base.logger
         return nil
       end
-      result = ActiveFedora.class_from_string(model_value)
-      unless result.nil?
-        model_ns = (result.respond_to? :pid_namespace) ? result.pid_namespace : NAMESPACE
-        if model_ns != pid_ns
-          ActiveFedora::Base.logger.warn "Model class namespace '#{model_ns}' does not match uri: '#{uri}'" if ActiveFedora::Base.logger
-        end
-      end
-      result
+      ActiveFedora.class_from_string(model_value)
     end
 
     private 

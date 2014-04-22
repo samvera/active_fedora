@@ -80,20 +80,12 @@ module ActiveFedora
     module ClassMethods
       # Returns a suitable uri object for :has_model
       # Should reverse Model#from_class_uri
+      # TODO this is a poorly named method
       def to_class_uri(attrs = {})
-        if self.respond_to? :pid_namespace
-          namespace = self.pid_namespace
-        else
-          namespace = attrs.fetch(:namespace, ActiveFedora::Model::NAMESPACE)
-        end
-        "info:fedora/#{namespace}:#{sanitized_class_name(self)}" 
+        self.name
       end
 
       private
-
-      def sanitized_class_name(klass)
-        klass.name.gsub(/(::)/, '_')
-      end
 
       def relation
         Relation.new(self)

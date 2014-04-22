@@ -7,7 +7,7 @@ describe ActiveFedora::Base do
       class Basic < ActiveFedora::Base
       end
     end
-    @model_query = "_query_:\"{!raw f=" + ActiveFedora::SolrService.solr_name("has_model", :symbol) + "}http://fedora.info/definitions/v4/model#SpecModel_Basic" + "\""
+    @model_query = "_query_:\"{!raw f=" + ActiveFedora::SolrService.solr_name("has_model", :symbol) + "}SpecModel::Basic" + "\""
     @sort_query = ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date) + ' asc'
   end
   
@@ -45,8 +45,7 @@ describe ActiveFedora::Base do
     describe "with :cast false" do
       describe "and a pid is specified" do
         it "should raise an exception if it is not found" do
-          allow(FedoraLens).to receive(:find).and_raise(Ldp::NotFound)
-          SpecModel::Basic.should_receive(:connection_for_pid).with("_PID_")
+          allow_any_instance_of(SpecModel::Basic).to receive(:init_core).and_raise(Ldp::NotFound)
           lambda {SpecModel::Basic.find("_PID_")}.should raise_error ActiveFedora::ObjectNotFoundError
         end
       end

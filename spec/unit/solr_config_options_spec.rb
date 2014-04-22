@@ -30,7 +30,7 @@ describe ActiveFedora do
 
     it "should be used by ActiveFedora::Base#find_with_conditions" do
       mock_response = double("SolrResponse")
-      ActiveFedora::SolrService.should_receive(:query).with("_query_:\"{!raw f=#{ActiveFedora::SolrService.solr_name("has_model", :symbol)}}http://fedora.info/definitions/v4/model#SolrSpecModel_Basic\" AND " + SOLR_DOCUMENT_ID + ':changeme\\:30', {:sort => ["#{ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)} asc"]}).and_return(mock_response)
+      ActiveFedora::SolrService.should_receive(:query).with("_query_:\"{!raw f=#{ActiveFedora::SolrService.solr_name("has_model", :symbol)}}SolrSpecModel::Basic\" AND " + SOLR_DOCUMENT_ID + ':changeme\\:30', {:sort => ["#{ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)} asc"]}).and_return(mock_response)
   
       SolrSpecModel::Basic.find_with_conditions(:id=>"changeme:30").should equal(mock_response)
     end

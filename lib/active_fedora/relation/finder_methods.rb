@@ -271,7 +271,7 @@ module ActiveFedora
     # Return the solr clause that queries for this type of class
     def search_model_clause
       unless @klass == ActiveFedora::Base
-        return ActiveFedora::SolrService.construct_query_for_rel(:has_model => @klass.to_class_uri)
+        return ActiveFedora::SolrService.construct_query_for_rel(:has_model => @klass.to_s)
       end
     end
 

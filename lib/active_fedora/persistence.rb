@@ -31,7 +31,7 @@ module ActiveFedora
     # This can be overriden to assert a different model
     # It's normally called once in the lifecycle, by #create#
     def assert_content_model
-      self.has_model = self.class.to_class_uri
+      self.has_model = self.class.to_s
     end
 
     # Pushes the object and all of its new or dirty datastreams into Fedora
