@@ -29,7 +29,8 @@ module ActiveFedora
     # Calling inspect may trigger a bunch of loads, but it's mainly for debugging, so no worries.
     def inspect
       values = ["pid: #{pid.inspect}"]
-      values << self.class.defined_attributes.keys.map {|r| "#{r}: #{send(r).inspect}"}
+      values << self.class.defined_attributes.keys.map {|r| "#{r}: #{send(r).inspect}" }
+      values << reflections.values.map { |reflection| "#{reflection.foreign_key}: #{self[reflection.foreign_key].inspect}" }
       "#<#{self.class} #{values.flatten.join(', ')}>"
     end
 

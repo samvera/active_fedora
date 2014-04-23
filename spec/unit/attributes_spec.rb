@@ -86,11 +86,14 @@ describe ActiveFedora::Base do
           end
           subject.library = library
         end
+
         let (:library) { BarHistory2.create }
-        subject {BarHistory3.new}
+        subject { BarHistory3.new }
+
         after do 
           Object.send(:remove_const, :BarHistory3)
         end
+
         it "should show the library_id" do
           expect(subject.inspect).to eq "#<BarHistory3 pid: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], library_id: \"#{library.pid}\">"
         end
