@@ -255,19 +255,17 @@ describe ActiveFedora::Base do
 
     describe ".solrize_relationships" do
       it "should serialize the relationships into a Hash" do
-        graph = RDF::Graph.new
-        subject = RDF::URI.new "info:fedora/test:sample_pid"
-        graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:is_member_of),  RDF::URI.new('info:fedora/demo:10'))
-        graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:is_part_of),  RDF::URI.new('info:fedora/demo:11'))
-        graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new('info:fedora/demo:12'))
-        graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:conforms_to),  "AnInterface")
 
-        @test_object.should_receive(:relationships).and_return(graph)
+        person_reflection = double('person', foreign_key: 'person_id', options: {property: :is_member_of})
+        location_reflection = double('location', foreign_key: 'location_id', options: {property: :is_part_of})
+        reflections = { 'person' => person_reflection, 'location' => location_reflection }
+
+        @test_object.should_receive(:[]).with('person_id').and_return('info:fedora/demo:10')
+        @test_object.should_receive(:[]).with('location_id').and_return('info:fedora/demo:11')
+        @test_object.should_receive(:reflections).and_return(reflections)
         solr_doc = @test_object.solrize_relationships
         solr_doc[ActiveFedora::SolrService.solr_name("is_member_of", :symbol)].should == "info:fedora/demo:10"
         solr_doc[ActiveFedora::SolrService.solr_name("is_part_of", :symbol)].should == "info:fedora/demo:11"
-        solr_doc[ActiveFedora::SolrService.solr_name("has_part", :symbol)].should == "info:fedora/demo:12"
-        solr_doc[ActiveFedora::SolrService.solr_name("conforms_to", :symbol)].should == "AnInterface"
       end
     end
   end
