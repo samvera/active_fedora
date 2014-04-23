@@ -1,15 +1,15 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-  before(:each) do
+  before do
     class Foo < ActiveFedora::Base
-      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"foostream" do|m|
+      has_metadata "foostream", type: ActiveFedora::SimpleDatastream do |m|
         m.field "foostream", :string
       end
-      has_metadata :type=>ActiveFedora::QualifiedDublinCoreDatastream, :name=>"dcstream" 
+      has_metadata 'dcstream', type: ActiveFedora::QualifiedDublinCoreDatastream
     end
     class Bar  < ActiveFedora::Base
-      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"barstream" do |m|
+      has_metadata 'barstream', type: ActiveFedora::SimpleDatastream do |m|
         m.field "barfield", :string
       end
     end
@@ -17,7 +17,7 @@ describe ActiveFedora::Base do
 
   it "doesn't overwrite stream specs" do
     f = Foo.new
-    f.datastreams.size.should == 3
+    f.datastreams.size.should == 2
     streams = f.datastreams.values.map{|x| x.class.to_s}.sort
     streams.pop.should == "ActiveFedora::SimpleDatastream"
     streams.pop.should == "ActiveFedora::QualifiedDublinCoreDatastream"
