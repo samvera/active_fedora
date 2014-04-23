@@ -91,8 +91,8 @@ describe ActiveFedora::Base do
       end
 
       it "should be able to create with a custom pid" do
-        f = FooHistory.new('/baz:1')
-        f.pid.should == 'baz:1'
+        f = FooHistory.new('/baz_1')
+        expect(f.pid).to eq '/baz_1'
       end
     end
 
