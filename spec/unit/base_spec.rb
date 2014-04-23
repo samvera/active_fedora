@@ -170,18 +170,18 @@ describe ActiveFedora::Base do
 
     describe '.save' do
       it "should create a new record" do
-        @test_object.stub(:new_record? => true)
+        @test_object.stub(new_record?: true)
         @test_object.should_receive(:assign_pid)
         @test_object.should_receive(:serialize_datastreams)
-        @test_object.should_receive(:create_record)
+        @test_object.orm.should_receive(:create)
         @test_object.should_receive(:update_index)
         @test_object.save
       end
 
       it "should update an existing record" do
-        @test_object.stub(:new_record? => false)
+        @test_object.stub(new_record?: false)
         @test_object.should_receive(:serialize_datastreams)
-        @test_object..should_receive(:update_record)
+        @test_object.orm.should_receive(:save!)
         @test_object.should_receive(:update_index)
         @test_object.save
       end
