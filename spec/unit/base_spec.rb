@@ -108,13 +108,13 @@ describe ActiveFedora::Base do
     ### Methods for ActiveModel::Conversions
     it "should have to_param once it's saved" do
       @test_object.to_param.should be_nil
-      @test_object.stub(new_record?: false, pid: 'foo:123')
+      @test_object.stub(new_record?: false, id: '/foo:123')
       @test_object.to_param.should == 'foo:123'
     end
 
     it "should have to_key once it's saved" do
       @test_object.to_key.should be_nil
-      @test_object.stub(new_record?: false, pid: 'foo:123')
+      @test_object.stub(new_record?: false, id: '/foo:123')
       @test_object.to_key.should == ['foo:123']
     end
 

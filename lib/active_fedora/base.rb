@@ -45,6 +45,12 @@ module ActiveFedora
     include FedoraAttributes
     include ReloadOnSave
     include Rdf::Identifiable
+
+    # If the id is "/foo:1" then to_key ought to return ["foo:1"]
+    def to_key
+      id && [id.sub('/', '')]
+    end
+
   end
 
   ActiveSupport.run_load_hooks(:active_fedora, Base)
