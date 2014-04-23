@@ -10,6 +10,7 @@ rescue LoadError
   $stderr.puts "Couldn't load simplecov"
 end
 
+require 'byebug'
 require 'active-fedora'
 require 'rspec'
 require 'equivalent-xml/rspec_matchers'
@@ -18,6 +19,7 @@ Dir[File.expand_path("../support/**/*.rb", __FILE__)].each {|f| require f }
 require 'samples/samples'
 
 
+#Ldp.logger.level = Logger::DEBUG
 logger.level = Logger::WARN if logger.respond_to? :level ###MediaShelf StubLogger doesn't have a level= method
 $VERBOSE=nil
 
