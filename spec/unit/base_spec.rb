@@ -256,8 +256,8 @@ describe ActiveFedora::Base do
     describe ".solrize_relationships" do
       it "should serialize the relationships into a Hash" do
 
-        person_reflection = double('person', foreign_key: 'person_id', options: {property: :is_member_of})
-        location_reflection = double('location', foreign_key: 'location_id', options: {property: :is_part_of})
+        person_reflection = double('person', foreign_key: 'person_id', options: {property: :is_member_of}, has_and_belongs_to_many?: false, belongs_to?: true)
+        location_reflection = double('location', foreign_key: 'location_id', options: {property: :is_part_of}, has_and_belongs_to_many?: false, belongs_to?: true)
         reflections = { 'person' => person_reflection, 'location' => location_reflection }
 
         @test_object.should_receive(:[]).with('person_id').and_return('info:fedora/demo:10')

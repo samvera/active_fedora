@@ -22,9 +22,9 @@ module ActiveFedora
     end
 
 
-    # def attributes
-    #   self.class.defined_attributes.keys.each_with_object({"id" => id}) {|key, hash| hash[key] = self[key]}.merge(super)
-    # end
+    def attributes
+      self.class.defined_attributes.keys.each_with_object({"id" => id}) {|key, hash| hash[key] = self[key]}.merge(super)
+    end
 
     # Calling inspect may trigger a bunch of loads, but it's mainly for debugging, so no worries.
     def inspect
@@ -34,13 +34,17 @@ module ActiveFedora
       "#<#{self.class} #{values.flatten.join(', ')}>"
     end
 
-    # def [](key)
-    #   array_reader(key)
-    # end
+    def [](key)
+      super || array_reader(key)
+    end
 
-    # def []=(key, value)
-    #   array_setter(key, value)
-    # end
+    def []=(key, value)
+      begin
+        super 
+      rescue ActiveModel::MissingAttributeError
+        array_setter(key, value)
+      end
+    end
 
     # @return [Boolean] true if there is an reader method and it returns a
     # value different from the new_value.
