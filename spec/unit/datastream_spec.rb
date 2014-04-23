@@ -4,11 +4,11 @@ describe ActiveFedora::Datastream do
   
   let(:parent) { double('inner object', uri: '/fedora/rest/1234', id: '1234', new_record?: true) }
 
-  before(:each) do
+  subject { ActiveFedora::Datastream.new(parent, 'abcd') }
+
+  before do
     subject.content = "hi there"
   end
-
-  subject { ActiveFedora::Datastream.new(parent, 'abcd') }
 
   its(:metadata?) { should be_false }
 
@@ -25,9 +25,10 @@ describe ActiveFedora::Datastream do
     let(:parent) { double('inner object', uri: '/fedora/rest/1234', id: '1234',
                           new_record?: true, datastreams: datastreams) }
 
-    subject {ActiveFedora::Datastream.new(parent, nil, prefix: 'FOO') }
+    subject { ActiveFedora::Datastream.new(parent, nil, prefix: 'FOO') }
 
     let(:datastreams) { { } }
+
     it "should create an autoincrementing dsid" do
       expect(subject.dsid).to eq 'FOO1'
     end
@@ -42,7 +43,8 @@ describe ActiveFedora::Datastream do
   end
 
   describe ".size" do
-    it "should lazily load the datastream size attribute from the fedora repository" do
+    it "should load the datastream size attribute from the fedora repository" do
+      subject.size = 9999
       subject.size.should == 9999
     end
 
