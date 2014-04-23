@@ -8,8 +8,6 @@ module ActiveFedora
     attribute :size, [RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasSize"), Lenses.single, Lenses.literal_to_string]
     generate_method 'content'
 
-
-
     extend ActiveModel::Callbacks
     define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, :only => :after    
