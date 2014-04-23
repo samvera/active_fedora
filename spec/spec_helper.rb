@@ -10,6 +10,7 @@ rescue LoadError
   $stderr.puts "Couldn't load simplecov"
 end
 
+require 'byebug'
 require 'active-fedora'
 require 'rspec'
 require 'rspec/its'
