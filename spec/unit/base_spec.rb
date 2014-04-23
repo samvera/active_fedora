@@ -217,12 +217,13 @@ describe ActiveFedora::Base do
         solr_doc[ActiveFedora::SolrService.solr_name("active_fedora_model", :stored_sortable)].should eql("FooHistory")
       end
 
-      it "should call .to_solr on all SimpleDatastreams and OmDatastreams, passing the resulting document to solr" do
-        mock1 = double("ds1", :to_solr => {})
-        mock2 = double("ds2", :to_solr => {})
-        ngds = double("ngds", :to_solr => {})
+      it "should call .to_solr on all datastreams, passing the resulting document to solr" do
+        mock1 = double("ds1")
+        mock1.should_receive(:to_solr).and_return({})
+        mock2 = double("ds2")
+        mock2.should_receive(:to_solr).and_return({})
 
-        @test_object.should_receive(:datastreams).twice.and_return({:ds1 => mock1, :ds2 => mock2, :ngds => ngds})
+        @test_object.stub(datastreams: {:ds1 => mock1, :ds2 => mock2})
         @test_object.should_receive(:solrize_relationships)
         @test_object.to_solr
       end
