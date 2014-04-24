@@ -85,7 +85,6 @@ describe ActiveFedora::Base do
         @book.topics << @topic1
         @book.topics.should == [@topic1]
         @book['topic_ids'].should == [@topic1.id]
-        @topic1['topic_ids'].should be_nil
         @topic1['book_ids'].should == [@book.id]
         Topic.find(@topic1.pid).books.should == [@book] #Can't have saved it because @book isn't saved yet.
       end
@@ -323,8 +322,9 @@ describe "Autosave" do
       end
       has_attributes :title, datastream: 'foo'
     end
+
     class Component < ActiveFedora::Base
-      has_and_belongs_to_many :items, :property => :is_part_of
+      has_and_belongs_to_many :items, property: :is_part_of
       has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
         m.field "description", :string
       end
@@ -333,8 +333,8 @@ describe "Autosave" do
   end
 
   after do
-      Object.send(:remove_const, :Item)
-      Object.send(:remove_const, :Component)
+    Object.send(:remove_const, :Item)
+    Object.send(:remove_const, :Component)
   end
 
   describe "From the has_and_belongs_to_many side" do
@@ -345,6 +345,7 @@ describe "Autosave" do
       component.items.first.title.should == 'my title'
     end
   end
+
   describe "From the has_many side" do
     let(:item) { Item.create(components: [Component.new(description: 'my description')]) }
 
