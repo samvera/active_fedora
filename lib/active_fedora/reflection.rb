@@ -134,6 +134,7 @@ module ActiveFedora
           elsif options[:as]
             "#{options[:as]}_id"
           else
+            # This works well if this is a has_many that is the inverse of a belongs_to, but it isn't correct for a has_many that is the invers of a has_and_belongs_to_many
             active_fedora.name.foreign_key
           end
         end
