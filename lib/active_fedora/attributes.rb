@@ -35,13 +35,17 @@ module ActiveFedora
     end
 
     def [](key)
-      super || array_reader(key)
+      if attributes_as_lenses.key?(key)
+        super
+      else
+        array_reader(key)
+      end
     end
 
     def []=(key, value)
-      begin
+      if attributes_as_lenses.key?(key)
         super 
-      rescue ActiveModel::MissingAttributeError
+      else
         array_setter(key, value)
       end
     end

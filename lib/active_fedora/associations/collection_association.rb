@@ -340,7 +340,7 @@ module ActiveFedora
         # If the association is polymorphic the type of the owner is also set.
         def set_belongs_to_association_for(record)
           unless @owner.new_record?
-            record["#{@reflection.name}_id"] = @owner.id # TODO use primary_key instead of id
+            record[@reflection.foreign_key] = @owner.id # TODO use primary_key instead of id
           end
         end
 
