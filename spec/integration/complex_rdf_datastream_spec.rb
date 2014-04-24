@@ -30,7 +30,7 @@ describe "Nested Rdf Objects" do
 
       it "should not be new when it's loaded from fedora" do
         ds.content = '_:g70324142325120 <http://purl.org/dc/terms/title> "Alternator" .
-<info:fedora/test:124> <http://purl.org/dc/terms/hasPart> _:g70324142325120 .'
+<http://localhost:8983/fedora/rest/test:124> <http://purl.org/dc/terms/hasPart> _:g70324142325120 .'
         ds.resource.persist!
         ds.parts.first.should_not be_new_record
       end
@@ -83,8 +83,8 @@ describe "Nested Rdf Objects" do
     it "should load complex objects" do
       ds.content = <<END
 _:g70350851837440 <http://purl.org/dc/terms/title> "Alternator" .
-<info:fedora/test:124> <http://purl.org/dc/terms/hasPart> _:g70350851837440 .
-<info:fedora/test:124> <http://purl.org/dc/terms/hasPart> _:g70350851833380 .
+<http://localhost:8983/fedora/rest/test:124> <http://purl.org/dc/terms/hasPart> _:g70350851837440 .
+<http://localhost:8983/fedora/rest/test:124> <http://purl.org/dc/terms/hasPart> _:g70350851833380 .
 _:g70350851833380 <http://purl.org/dc/terms/title> "Crankshaft" .
 END
       ds.parts.first.label.should == ["Alternator"]
@@ -144,8 +144,7 @@ END
       after(:each) do
         Object.send(:remove_const, :SpecDatastream)
       end
-
-      let(:mock_obj) { double(:mock_obj, uri: '/fedora/test/124', id: '124', new_record?: true) }
+      let(:mock_obj) { ActiveFedora::Base.new('test:124') }
       let (:ds) { SpecDatastream.new(mock_obj, 'descMd') }
 
 
@@ -161,7 +160,7 @@ END
       it "should add the type of complex object when it is not provided" do
         ds.content = <<END
   _:g70350851837440 <http://purl.org/dc/terms/title> "Mediation Person" .
-  <info:fedora/test:124> <http://purl.org/dc/terms/mediator> _:g70350851837440 .
+  <http://localhost:8983/fedora/rest/test:124> <http://purl.org/dc/terms/mediator> _:g70350851837440 .
 END
         ds.mediator.first.type.first.to_s.should == "http://purl.org/dc/terms/AgentClass"
       end
@@ -170,7 +169,7 @@ END
         ds.content = <<END
   _:g70350851837440 <http://purl.org/dc/terms/title> "Mediation Orgainzation" .
   _:g70350851837440 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.ebu.ch/metadata/ontologies/ebucore#Organisation> .
-  <info:fedora/test:124> <http://purl.org/dc/terms/mediator> _:g70350851837440 .
+  <http://localhost:8983/fedora/rest/test:124> <http://purl.org/dc/terms/mediator> _:g70350851837440 .
 END
         ds.mediator.first.type.first.to_s.should == "http://www.ebu.ch/metadata/ontologies/ebucore#Organisation"
       end
