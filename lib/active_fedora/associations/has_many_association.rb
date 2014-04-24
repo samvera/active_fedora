@@ -29,7 +29,7 @@ module ActiveFedora
       end
 
       def set_owner_attributes(record)
-        #TODO use primary_key
+        #TODO use primary_key instead of `owner.id`
         record[reflection.foreign_key] = owner.id
       end
 
