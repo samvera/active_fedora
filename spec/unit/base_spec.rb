@@ -11,33 +11,22 @@ describe ActiveFedora::Base do
   end
 
   describe "reindex_everything" do
-    it "should call update_index on every object except for the fedora-system objects" do
-       # TODO redo these expectations when we reimplement reindex_everything
-       # Rubydora::Repository.any_instance.should_receive(:search).
-       #      and_yield(double(pid:'XXX')).and_yield(double(pid:'YYY')).and_yield(double(pid:'ZZZ')).
-       #      and_yield(double(pid:'fedora-system:ServiceDeployment-3.0')).
-       #      and_yield(double(pid:'fedora-system:ServiceDefinition-3.0')).
-       #      and_yield(double(pid:'fedora-system:FedoraObject-3.0'))
-
-       mock_update = double(:mock_obj)
-       mock_update.should_receive(:update_index).exactly(3).times
-       ActiveFedora::Base.should_receive(:find).with('XXX').and_return(mock_update)
-       ActiveFedora::Base.should_receive(:find).with('YYY').and_return(mock_update)
-       ActiveFedora::Base.should_receive(:find).with('ZZZ').and_return(mock_update)
-       ActiveFedora::Base.reindex_everything
+    it "should call update_index on every object represented in the sitemap" do
+      allow(ActiveFedora::Base).to receive(:ids_from_sitemap_index) { ['XXX', 'YYY', 'ZZZ'] }
+      mock_update = double(:mock_obj)
+      mock_update.should_receive(:update_index).exactly(3).times
+      ActiveFedora::Base.should_receive(:find).with('XXX').and_return(mock_update)
+      ActiveFedora::Base.should_receive(:find).with('YYY').and_return(mock_update)
+      ActiveFedora::Base.should_receive(:find).with('ZZZ').and_return(mock_update)
+      ActiveFedora::Base.reindex_everything
     end
+  end
 
-    it "should accept a query param for the search" do
-       query_string = "pid~*"
-       # TODO redo these expectations when we reimplement reindex_everything
-       # Rubydora::Repository.any_instance.should_receive(:search).with(query_string).
-            # and_yield(double(pid:'XXX')).and_yield(double(pid:'YYY')).and_yield(double(pid:'ZZZ'))
-       mock_update = double(:mock_obj)
-       mock_update.should_receive(:update_index).exactly(3).times
-       ActiveFedora::Base.should_receive(:find).with('XXX').and_return(mock_update)
-       ActiveFedora::Base.should_receive(:find).with('YYY').and_return(mock_update)
-       ActiveFedora::Base.should_receive(:find).with('ZZZ').and_return(mock_update)
-       ActiveFedora::Base.reindex_everything(query_string)
+  describe "ids_from_sitemap_index" do
+    before { @obj = ActiveFedora::Base.create }
+    after { @obj.destroy }
+    it "should return a list of all the ids in all the sitemaps in the sitemap index" do
+      expect(ActiveFedora::Base.ids_from_sitemap_index).to include(@obj.pid)
     end
   end
 
