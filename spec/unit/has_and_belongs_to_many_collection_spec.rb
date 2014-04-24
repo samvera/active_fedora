@@ -71,25 +71,26 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
   context "class with association" do
     before do
       class Collection < ActiveFedora::Base
-        has_and_belongs_to_many :members, :property => :has_collection_member, :class_name => "ActiveFedora::Base" , :after_remove => :remove_member
+        has_and_belongs_to_many :members, property: :has_collection_member, class_name: "ActiveFedora::Base", after_remove: :remove_member
         def remove_member (m)
         end
       end
 
       class Thing < ActiveFedora::Base
-        has_many :collections, property: :has_collection_member, :class_name => "ActiveFedora::Base"
+        has_many :collections, property: :has_collection_member, class_name: "ActiveFedora::Base"
       end
     end
 
     after do
       Collection.destroy_all
       Thing.destroy_all
+
       Object.send(:remove_const, :Collection)
       Object.send(:remove_const, :Thing)
     end
 
-    let(:thing) {Thing.create()}
-    let(:collection) {Collection.create().tap {|c| c.members << thing}}
+    let(:thing) { Thing.create() }
+    let(:collection) { Collection.create().tap {|c| c.members << thing} }
 
     it "should call destroy" do
       expect(collection.destroy).to_not raise_error

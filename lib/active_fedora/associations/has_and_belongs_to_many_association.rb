@@ -69,7 +69,7 @@ module ActiveFedora
               r.save
             end
           end
-          @owner.save! unless @owner.new_record?
+          @owner.save! unless @owner.new_record? || @owner.destroyed?
         end
 
     end
