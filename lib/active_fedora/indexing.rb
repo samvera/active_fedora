@@ -61,16 +61,24 @@ module ActiveFedora
 
     module ClassMethods
 
-      # Using the fedora search (not solr), get every object and reindex it.
-      # @param [String] query a string that conforms to the query param format
-      #   of the underlying search's API
-      def reindex_everything(query = nil)
-        #TODO this is broken because it's a fedora3 api
-        # we should write a Sparql query: all things where fcrepo:mixinTypes is fedora:object 
-        raise "not implemented"
-        # big_list_of_node_ids.each do |id|
-        #   ActiveFedora::Base.find(id).update_index
-        # end
+      def reindex_everything
+        ids_from_sitemap_index.each do |id|
+          logger.debug "Re-index everything ... #{id}"
+          ActiveFedora::Base.find(id).update_index
+        end
+      end
+
+      def ids_from_sitemap_index
+        ids = []
+        sitemap_index_uri = ActiveFedora::Base.id_to_uri('/sitemap')
+        sitemap_index = Nokogiri::XML(open(sitemap_index_uri))
+        sitemap_uris = sitemap_index.xpath("//sitemap:loc/text()", sitemap_index.namespaces)
+        sitemap_uris.map(&:to_s).each do |sitemap_uri|
+          sitemap = Nokogiri::XML(open(sitemap_uri))
+          sitemap_ids = sitemap.xpath("//sitemap:loc/text()", sitemap_index.namespaces)
+          ids += sitemap_ids.map { |u| ActiveFedora::Base.uri_to_id(u) }
+        end
+        ids
       end
 
     end
