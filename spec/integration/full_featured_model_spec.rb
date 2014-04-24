@@ -169,8 +169,8 @@ describe ActiveFedora::Base do
   
   describe '#new' do
     it "should support custom pids" do
-      oh = OralHistory.new("uuid:blah-blah-blah")
-      oh.pid.should == "uuid:blah-blah-blah"
+      oh = OralHistory.new("blah-blah-blah")
+      oh.pid.should == "/blah-blah-blah"
     end
   end
   
