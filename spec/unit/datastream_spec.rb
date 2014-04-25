@@ -42,9 +42,13 @@ describe ActiveFedora::Datastream do
   end
 
   describe ".size" do
-    it "should load the datastream size attribute from the fedora repository" do
-      subject.size = 9999
-      subject.size.should == 9999
+    context "when the graph has a size" do
+      before do
+        subject.orm.graph.insert([RDF::URI.new(subject.content_path), RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasSize"), RDF::Literal.new(9999) ])
+      end
+      it "should load the datastream size attribute from the fedora repository" do
+        subject.size.should == 9999
+      end
     end
 
     it "should default to nil if ds has not been saved" do
