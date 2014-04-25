@@ -29,9 +29,8 @@ describe ActiveFedora::Datastream do
 
     let(:datastreams) { { } }
 
-    it "should create an autoincrementing dsid" do
-      expect(subject.dsid).to eq 'FOO1'
-    end
+    its(:dsid) {should eq 'FOO1'}
+    its(:uri) {should eq '/fedora/rest/1234/FOO1'}
 
     context "when some datastreams exist" do
       let(:datastreams) { {'FOO56' => double} }
