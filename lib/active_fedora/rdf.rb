@@ -13,5 +13,6 @@ module ActiveFedora
     autoload :ObjectResource
     autoload :Term
     autoload :List
+    autoload :Fcrepo
   end
 end
