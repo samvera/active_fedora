@@ -24,7 +24,7 @@ module ActiveFedora
       raise ArgumentError, "Digital object is nil" unless digital_object
       @digital_object = digital_object
       initialize_dsid(dsid, options.delete(:prefix))
-      init_core("#{digital_object.uri}/#{dsid}")
+      init_core("#{digital_object.uri}/#{@dsid}")
       unless digital_object.new_record?
         @new_record = false
       end
