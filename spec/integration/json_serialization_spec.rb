@@ -16,11 +16,14 @@ describe "Objects should be serialized to JSON" do
         has_attributes :bar, datastream: 'descMetadata', multiple: false
       end
     end
+
     after do
       Object.send(:remove_const, :Foo)
     end
+
     subject { Foo.new(foo: "baz", bar: 'quix') }
-    before { subject.stub(pid: 'test:123') }
+
+    before { subject.stub(id: 'test:123') }
     it "should have to_json" do
       json = JSON.parse(subject.to_json)
       expect(json['id']).to eq "test:123"
