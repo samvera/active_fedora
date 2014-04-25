@@ -4,8 +4,6 @@ module ActiveFedora
   class Datastream
     include FedoraLens
     include ActiveModel::Dirty
-    attribute :mime_type, [RDF::URI.new("http://fedora.info/definitions/v4/repository#mimeType"), Lenses.single, Lenses.literal_to_string]
-    attribute :size, [RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasSize"), Lenses.single, Lenses.literal_to_string]
     generate_method 'content'
 
     extend ActiveModel::Callbacks
@@ -24,7 +22,8 @@ module ActiveFedora
       raise ArgumentError, "Digital object is nil" unless digital_object
       @digital_object = digital_object
       initialize_dsid(dsid, options.delete(:prefix))
-      init_core("#{digital_object.uri}/#{@dsid}")
+      resource = Ldp::Resource::RdfSource.new(FedoraLens.connection, "#{digital_object.uri}/#{@dsid}")
+      init_core(resource)
       unless digital_object.new_record?
         @new_record = false
       end
@@ -65,13 +64,20 @@ module ActiveFedora
       @ds_content ||= retrieve_content
     end
 
+    attr_writer :mime_type
     def mime_type
-      super || default_mime_type
+      @mime_type ||= fetch_mime_type_from_content_node
+      @mime_type || default_mime_type
     end
 
     def default_mime_type
       'text/plain'
     end
+
+    def size
+      query_content_node RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasSize")
+    end
+
 
     def content_changed?
       !!@content
@@ -85,11 +91,15 @@ module ActiveFedora
       new_record? ? "#{digital_object.uri}/#{dsid}" : super
     end
 
+    def content_path
+      "#{uri}/fcr:content"
+    end
+
     def save
       return unless content_changed?
       raise "Can't generate uri because the parent object isn't saved" if digital_object.new_record?
       payload = content.is_a?(IO) ? content.read : content
-      resp = orm.resource.client.put "#{uri}/fcr:content", payload, 'Content-Type' => mime_type
+      resp = orm.resource.client.put content_path, payload, 'Content-Type' => mime_type
       case resp.status
         when 201, 204
           changed_attributes.clear
@@ -188,8 +198,15 @@ module ActiveFedora
       "#{dsid.underscore}__"
     end
 
-  end
-  
-  class DatastreamConcurrencyException < Exception # :nodoc:
+    def fetch_mime_type_from_content_node
+      query_content_node RDF::URI.new("http://fedora.info/definitions/v4/repository#mimeType")
+    end
+
+    def query_content_node(predicate)
+      query = orm.graph.query([RDF::URI.new(content_path), predicate, nil])
+      stmt = query.first
+      stmt.object.object if stmt
+    end
+
   end
 end

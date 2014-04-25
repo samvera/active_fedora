@@ -223,30 +223,12 @@ describe ActiveFedora::Base do
   end
   
   describe '.add_file_datastream' do
-
-   it "should set the correct mime_type if :mime_type, :mimeType, or :content_type passed in and path does not contain correct extension" do
+   it "should set the correct mime_type if :mime_type is passed in and path does not contain correct extension" do
+     @test_object = ActiveFedora::Base.new
      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
-     @test_object.add_file_datastream(f)
+     @test_object.add_file_datastream(f, mime_type: "image/jpeg")
      @test_object.save
      test_obj = ActiveFedora::Base.find(@test_object.pid)
-     test_obj.datastreams["DS1"].mime_type.should == "text/plain"
-     @test_object2 = ActiveFedora::Base.new
-     f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
-     @test_object2.add_file_datastream(f,{:mimeType=>"image/jpeg"})
-     @test_object2.save
-     test_obj = ActiveFedora::Base.find(@test_object2.pid)
-     test_obj.datastreams["DS1"].mime_type.should == "image/jpeg"
-     @test_object3 = ActiveFedora::Base.new
-     f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
-     @test_object3.add_file_datastream(f,{:mime_type=>"image/jpeg"})
-     @test_object3.save
-     test_obj = ActiveFedora::Base.find(@test_object3.pid)
-     test_obj.datastreams["DS1"].mime_type.should == "image/jpeg"
-     @test_object4 = ActiveFedora::Base.new
-     f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
-     @test_object4.add_file_datastream(f,{:content_type=>"image/jpeg"})
-     @test_object4.save
-     test_obj = ActiveFedora::Base.find(@test_object4.pid)
      test_obj.datastreams["DS1"].mime_type.should == "image/jpeg"
    end
   end
