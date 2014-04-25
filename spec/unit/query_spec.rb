@@ -45,8 +45,7 @@ describe ActiveFedora::Base do
     describe "with :cast false" do
       describe "and a pid is specified" do
         it "should raise an exception if it is not found" do
-          allow_any_instance_of(SpecModel::Basic).to receive(:init_core).and_raise(Ldp::NotFound)
-          lambda {SpecModel::Basic.find("_PID_")}.should raise_error ActiveFedora::ObjectNotFoundError
+          expect { SpecModel::Basic.find("_PID_") }.to raise_error ActiveFedora::ObjectNotFoundError
         end
       end
     end
