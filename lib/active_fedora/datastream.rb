@@ -13,6 +13,8 @@ module ActiveFedora
     attr_reader :digital_object, :dsid
     attr_accessor :last_modified
 
+    attribute :has_content, [ActiveFedora::Rdf::Fcrepo.hasContent, FedoraLens::Lenses.single]
+
     # @param digital_object [DigitalObject] the digital object that this object belongs to
     # @param dsid [String] the datastream id, if this is nil, a datastream id will be generated.
     # @param options [Hash]
@@ -69,6 +71,11 @@ module ActiveFedora
       @mime_type ||= fetch_mime_type_from_content_node
       @mime_type || default_mime_type
     end
+
+    def has_content?
+      has_content.present? || @content.present?
+    end
+
 
     def default_mime_type
       'text/plain'
