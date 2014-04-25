@@ -98,6 +98,7 @@ module ActiveFedora
     def add_file_datastream(file, opts={})
       attrs = {:blob => file, :prefix=>opts[:prefix]}
       ds = create_datastream(self.class.datastream_class_for_name(opts[:dsid]), opts[:dsid], attrs)
+      ds.mime_type = opts[:mime_type]
       add_datastream(ds).tap do |dsid|
         self.class.build_datastream_accessor(dsid) unless respond_to? dsid
       end
