@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'byebug'
 
 describe ActiveFedora::Datastream do
   let(:parent) { double('inner object', uri: '/fedora/rest/1234', id: '1234', new_record?: true) }
