@@ -4,7 +4,6 @@ module ActiveFedora::Associations::Builder
 
     self.valid_options += [:touch]
 
-
     def build
       reflection = super
       add_counter_cache_callbacks(reflection) if options[:counter_cache]
@@ -90,27 +89,10 @@ module ActiveFedora::Associations::Builder
         end
       end
 
+      # A bit of a misnomer because this is actually defining readers and writers
       def define_readers
         super
-        name = self.name
-        accessor_name = "#{name}_id"
-        #model.find_or_create_defined_attribute(accessor_name, 'RELS-EXT', {})
-        model.attribute accessor_name, [predicate, FedoraLens::Lenses.single, FedoraLens::Lenses.literal_to_string]
-
-        # mixin.redefine_method(accessor_name) do
-        #   association(name).id_reader
-        # end
-      end
-
-      def define_writers
-        super
-        # name = self.name
-        # writer_name = "#{name}_id"
-        # model.find_or_create_defined_attribute(writer_name, 'RELS-EXT', {})
-        # mixin.redefine_method("#{writer_name}=") do |id|
-        #   raise "can't modify frozen #{self.class}" if self.frozen?
-        #   association(name).id_writer(id)
-        # end
+        model.attribute "#{name}_id", [predicate, FedoraLens::Lenses.single, FedoraLens::Lenses.literal_to_string]
       end
   end
 end
