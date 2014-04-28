@@ -134,6 +134,7 @@ module ActiveFedora
       assert_content_model
       serialize_datastreams
       result = super
+      assign_uri_to_datstreams
       should_update_index = create_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
       return !!result
@@ -150,10 +151,16 @@ module ActiveFedora
     def assign_pid
       # TODO maybe need save here?
     end
+
+    def assign_uri_to_datstreams
+      datastreams.each do |_, ds|
+        ds.digital_object= self
+      end
+    end
     
     def persist(should_update_index)
       datastreams.select { |_, ds| ds.changed? }.each do |_, ds|
-        ds.save
+        ds.save # Don't call save! because if the content_changed? returns false, it'll raise an error.
       end
 
       refresh
