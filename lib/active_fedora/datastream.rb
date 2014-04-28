@@ -31,6 +31,12 @@ module ActiveFedora
       end
     end
 
+    def digital_object=(digital_object)
+      raise ArgumentError unless new_record?
+      resource = Ldp::Resource::RdfSource.new(FedoraLens.connection, "#{digital_object.uri}/#{@dsid}")
+      init_core(resource)
+    end
+
     def initialize_dsid(dsid, prefix)
       prefix  ||= 'DS'
       dsid = nil if dsid == ''
@@ -51,7 +57,7 @@ module ActiveFedora
     end
 
     def content= string_or_io
-      content_will_change!
+      content_will_change! unless @content == string_or_io
       @content = string_or_io
     end
 

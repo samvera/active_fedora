@@ -60,19 +60,20 @@ module ActiveFedora
       end
 
       def datastream_content
-        @datastream_content ||= Nokogiri::XML(super).to_xml  {|config| config.no_declaration}.strip
+        @datastream_content ||= Nokogiri::XML(super).to_xml {|config| config.no_declaration}.strip
       end
       
       def content=(new_content)
         if datastream_content != new_content
           ng_xml_will_change! 
           @ng_xml = Nokogiri::XML::Document.parse(new_content)
-          super(@ng_xml.to_s)
+          super(@ng_xml.to_s.strip)
         end
         self.class.decorate_ng_xml @ng_xml
       end
 
       def content_changed?
+        return true if autocreate? && new_record?
         return false unless xml_loaded
         ng_xml_changed?
       end
@@ -97,7 +98,7 @@ module ActiveFedora
           end
         end
         
-        return xml.to_xml {|config| config.no_declaration}.strip
+        return xml.to_xml.strip
       end
 
       def content

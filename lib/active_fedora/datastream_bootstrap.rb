@@ -5,7 +5,7 @@ module ActiveFedora
       ds_spec ||= (original_class.ds_specs[dsid] || {}).merge(:autocreate=>false)
       ds = ds_spec.fetch(:type, ActiveFedora::Datastream).new(self, dsid, options)
       ds.default_attributes = {}
-      if ds_spec[:autocreate]
+      if ds.new_record? && ds_spec[:autocreate]
         ds.datastream_will_change!
       end
       ds
