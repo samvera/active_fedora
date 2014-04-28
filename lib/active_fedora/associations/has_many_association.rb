@@ -32,9 +32,13 @@ module ActiveFedora
         if klass == ActiveFedora::Base
           # This is a polymorphic case.  Find a reflection that matches by property
           inverse = record.reflections.values.find{ |r| r.options[:property] == :is_part_of}
-          record[inverse.foreign_key] ||= []
-          #TODO use primary_key instead of `owner.id`
-          record[inverse.foreign_key] << owner.id
+          if inverse.belongs_to?
+            record[inverse.foreign_key] = owner.id
+          else # HABTM
+            record[inverse.foreign_key] ||= []
+            #TODO use primary_key instead of `owner.id`
+            record[inverse.foreign_key] << owner.id
+          end
         else
           #TODO use primary_key instead of `owner.id`
           record[reflection.foreign_key] = owner.id
