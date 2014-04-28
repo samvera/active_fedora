@@ -184,16 +184,13 @@ describe ActiveFedora::OmDatastream do
     end
 
     it "should persist the product of .to_xml in fedora" do
-      @test_ds.stub(new_record?: true)
       resp = double("response", status: 201)
       client = double("client")
       client.should_receive(:put).with("/descMetadata/fcr:content", 'fake xml', {"Content-Type"=>"text/xml"}).and_return(resp)
       resource = double("mock resource", client: client)
       orm = double("orm", resource: resource)
-      @test_ds.stub(orm: orm)
-      @test_ds.stub(:ng_xml_changed? => true)
-      @test_ds.stub(:xml_loaded => true)
-      @test_ds.stub(:to_xml => "fake xml")
+      @test_ds.stub(new_record?: true, orm: orm, ng_xml_changed?: true, xml_loaded: true)
+      @test_ds.stub(to_xml: "fake xml", fetch_mime_type_from_content_node: nil)
 
       @test_ds.serialize!
       @test_ds.save
@@ -206,7 +203,7 @@ describe ActiveFedora::OmDatastream do
     it "should update the content" do
       subject.stub(:new? => false )
       subject.content = "<a />"
-      subject.content.should == '<a/>'
+      expect(subject.content).to eq "<?xml version=\"1.0\"?>\n<a/>"
     end
 
     it "should mark the object as changed" do
@@ -254,7 +251,7 @@ describe ActiveFedora::OmDatastream do
     
     it "should ng_xml.to_xml" do
       @test_ds.stub(:ng_xml => Nokogiri::XML::Document.parse("<text_document/>"))
-      @test_ds.to_xml.should == "<text_document/>"       
+      expect(@test_ds.to_xml).to eq "<?xml version=\"1.0\"?>\n<text_document/>"
     end
     
     it 'should accept an optional Nokogiri::XML Document as an argument and insert its fields into that (mocked test)' do

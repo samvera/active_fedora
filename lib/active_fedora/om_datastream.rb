@@ -17,8 +17,6 @@ module ActiveFedora
     alias_method(:om_term_values, :term_values) unless method_defined?(:om_term_values)
     alias_method(:om_update_values, :update_values) unless method_defined?(:om_update_values)
     
-    attr_accessor :internal_solr_doc
-
     def default_mime_type
       'text/xml'
     end
@@ -130,13 +128,9 @@ module ActiveFedora
     #   => {"person_0_role_text"=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}, "person_1_role_text"=>{"0"=>"otherrole1", "1"=>"otherrole2"}} 
     def update_values(params={})
       raise "can't modify frozen #{self.class}" if frozen?
-      if @internal_solr_doc
-        raise "No update performed, this object was initialized via Solr instead of Fedora and is therefore read-only.  Please utilize ActiveFedora::Base.find to first load object via Fedora instead."
-      else
-        ng_xml_will_change!
-        result = om_update_values(params)
-        return result
-      end
+      ng_xml_will_change!
+      result = om_update_values(params)
+      return result
     end
 
   end
