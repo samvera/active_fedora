@@ -245,13 +245,13 @@ describe ActiveFedora::Base do
     describe ".solrize_relationships" do
       it "should serialize the relationships into a Hash" do
 
-        person_reflection = double('person', foreign_key: 'person_id', options: {property: :is_member_of}, has_and_belongs_to_many?: false, belongs_to?: true)
-        location_reflection = double('location', foreign_key: 'location_id', options: {property: :is_part_of}, has_and_belongs_to_many?: false, belongs_to?: true)
+        person_reflection = double('person', foreign_key: 'person_id', options: {property: :is_member_of}, has_many?: false)
+        location_reflection = double('location', foreign_key: 'location_id', options: {property: :is_part_of}, has_many?: false)
         reflections = { 'person' => person_reflection, 'location' => location_reflection }
 
         @test_object.should_receive(:[]).with('person_id').and_return('info:fedora/demo:10')
         @test_object.should_receive(:[]).with('location_id').and_return('info:fedora/demo:11')
-        @test_object.should_receive(:reflections).and_return(reflections)
+        @test_object.class.should_receive(:reflections).and_return(reflections)
         solr_doc = @test_object.solrize_relationships
         solr_doc[ActiveFedora::SolrService.solr_name("is_member_of", :symbol)].should == "info:fedora/demo:10"
         solr_doc[ActiveFedora::SolrService.solr_name("is_part_of", :symbol)].should == "info:fedora/demo:11"
