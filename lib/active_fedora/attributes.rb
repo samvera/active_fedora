@@ -30,7 +30,9 @@ module ActiveFedora
     def inspect
       values = ["pid: #{pid.inspect}"]
       values << self.class.defined_attributes.keys.map {|r| "#{r}: #{send(r).inspect}" }
-      values << reflections.values.map { |reflection| "#{reflection.foreign_key}: #{self[reflection.foreign_key].inspect}" }
+      values << self.class.outgoing_reflections.values.map do |reflection|
+        "#{reflection.foreign_key}: #{self[reflection.foreign_key].inspect}"
+      end
       "#<#{self.class} #{values.flatten.join(', ')}>"
     end
 
