@@ -21,7 +21,7 @@ module ActiveFedora
         #Initialize the datastreams that are in the solr document, but not found in the classes spec.
         mime_type = profile_hash['datastreams'][dsid]['dsMIME']
         ds_class = mime_type =~ /[\/\+]xml$/ ? OmDatastream : Datastream
-        @datastreams[dsid] = ds_class.new(self, dsid)
+        @datastreams[dsid] = ds_class.new(klass.new(@pid), dsid)
       end
 
       @label = @profile['objLabel']
