@@ -1,4 +1,5 @@
 require 'spec_helper'
+
 describe ActiveFedora::OmDatastream do
   
   before(:all) do
