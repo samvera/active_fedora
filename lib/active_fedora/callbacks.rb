@@ -232,16 +232,16 @@ module ActiveFedora
 
   private
 
-    def persist(should_update_index) #:nodoc:
-      run_callbacks(:save) { super }
-    end
-
     def create_record #:nodoc:
-      run_callbacks(:create) { super }
+      run_callbacks(:create) {
+        run_callbacks(:save) { super }
+      }
     end
 
     def update_record(*) #:nodoc:
-      run_callbacks(:update) { super }
+      run_callbacks(:update) { 
+        run_callbacks(:save) { super }
+      }
     end
   end
 end

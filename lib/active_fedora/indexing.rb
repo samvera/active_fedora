@@ -38,7 +38,7 @@ module ActiveFedora
     # Serialize the datastream's RDF relationships to solr
     # @param [Hash] solr_doc @deafult an empty Hash
     def solrize_relationships(solr_doc = Hash.new)
-      outgoing_reflections.each do |reflection|
+      self.class.outgoing_reflections.values.each do |reflection|
         value = self[reflection.foreign_key]
         # TODO make reflection.options[:property] a method
         solr_key = solr_name(reflection.options[:property], :symbol)
@@ -83,9 +83,5 @@ module ActiveFedora
 
     end
 
-    private
-      def outgoing_reflections
-        reflections.values.select { |reflection| reflection.has_and_belongs_to_many? || reflection.belongs_to? }
-      end
   end
 end

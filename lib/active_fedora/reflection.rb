@@ -29,6 +29,10 @@ module ActiveFedora
         read_inheritable_attribute(:reflections) || write_inheritable_attribute(:reflections, {})
       end
 
+      def outgoing_reflections
+        reflections.reject { |_, reflection| reflection.has_many? }
+      end
+
       # Returns the AssociationReflection object for the +association+ (use the symbol).
       #
       #   Account.reflect_on_association(:owner)             # returns the owner AssociationReflection
@@ -113,6 +117,10 @@ module ActiveFedora
       # Returns +true+ if +self+ is a +belongs_to+ reflection.
       def belongs_to?
         macro == :belongs_to
+      end
+
+      def has_many?
+        macro == :has_many
       end
 
       def has_and_belongs_to_many?

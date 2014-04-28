@@ -141,9 +141,9 @@ describe "When relationship is restricted to AF::Base" do
   end
 
   after do
-      Object.send(:remove_const, :Image)
-      Object.send(:remove_const, :PDF)
-      Object.send(:remove_const, :Email)
+    Object.send(:remove_const, :Image)
+    Object.send(:remove_const, :PDF)
+    Object.send(:remove_const, :Email)
   end
 
 
@@ -165,9 +165,9 @@ describe "When relationship is restricted to AF::Base" do
     let!(:pdf) { PDF.create }
 
     after do
-      email.destroy
       pdf.destroy
       image.destroy
+      email.destroy
     end
 
     it "Should not restrict relationships " do
@@ -262,6 +262,7 @@ describe "Autosave" do
       component.item.title.should == 'my title'
     end
   end
+
   describe "From the has_many side" do
     let(:item) { Item.create(components: [Component.new(description: 'my description')]) }
 
