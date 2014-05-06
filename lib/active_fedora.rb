@@ -23,6 +23,7 @@ module ActiveFedora #:nodoc:
   class UnregisteredPredicateError < RuntimeError; end # :nodoc:
   class RecordNotSaved < RuntimeError; end # :nodoc:
   class IllegalOperation < RuntimeError; end # :nodoc:
+  class Rollback < RuntimeError; end # :nodoc:
 
 
   eager_autoload do
