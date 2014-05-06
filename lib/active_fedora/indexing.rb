@@ -42,7 +42,9 @@ module ActiveFedora
         value = Array(self[reflection.foreign_key]).compact
         # TODO make reflection.options[:property] a method
         solr_key = solr_name(reflection.options[:property], :symbol)
-        ::Solrizer::Extractor.insert_solr_field_value(solr_doc, solr_key, value )
+        value.each do |v|
+          ::Solrizer::Extractor.insert_solr_field_value(solr_doc, solr_key, v )
+        end
       end
       solr_doc
     end
