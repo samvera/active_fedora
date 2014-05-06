@@ -39,6 +39,7 @@ describe ActiveFedora::Base do
           m.field "fubar", :string
           m.field "bandana", :string
           m.field "swank", :text
+          m.field "animal_id", :string
         end
         has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText" do |m|
           m.field "fubar", :text
@@ -53,6 +54,7 @@ describe ActiveFedora::Base do
         has_attributes :pig, datastream: 'xmlish', multiple: false
         has_attributes :horse, datastream: 'xmlish', multiple: true
         has_attributes :duck, datastream: 'xmlish', :at=>[:waterfowl, :ducks, :duck], multiple: true
+        has_attributes :animal_id, datastream: 'someData', multiple: false
       end
     end
 
@@ -64,12 +66,12 @@ describe ActiveFedora::Base do
 
     describe "inspect" do
       it "should show the attributes" do
-        expect(subject.inspect).to eq "#<BarHistory2 pid: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"]>"
+        expect(subject.inspect).to eq "#<BarHistory2 pid: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil>"
       end
       describe "with a pid" do
         before { subject.stub(pid: 'test:123') }
         it "should show a pid" do
-          expect(subject.inspect).to eq "#<BarHistory2 pid: \"test:123\", cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"]>"
+          expect(subject.inspect).to eq "#<BarHistory2 pid: \"test:123\", cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil>"
         end
       end
       describe "with no attributes" do
@@ -92,7 +94,7 @@ describe ActiveFedora::Base do
           Object.send(:remove_const, :BarHistory3)
         end
         it "should show the library_id" do
-          expect(subject.inspect).to eq "#<BarHistory3 pid: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], library_id: \"#{library.pid}\">"
+          expect(subject.inspect).to eq "#<BarHistory3 pid: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil, library_id: \"#{library.pid}\">"
         end
       end
     end
@@ -154,6 +156,11 @@ describe ActiveFedora::Base do
         subject['duck'].should == ["Cluck", "Gobble"]
       end
 
+      it "should accept field names with _id that are not associations" do
+        subject['animal_id'] = ["lemur"]
+        subject['animal_id'].should == ["lemur"]
+      end
+
       it "should raise an error on the reader when the field isn't delegated" do
         expect {subject['goose'] }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `goose'"
       end
@@ -170,7 +177,7 @@ describe ActiveFedora::Base do
     end
 
     describe "attributes" do
-      let(:vals) { {'cow'=>["moo"], 'pig' => ['oink'], 'horse' =>['neigh'], "fubar"=>[], 'duck'=>['quack'] } }
+      let(:vals) { {'cow'=>["moo"], 'pig' => ['oink'], 'horse' =>['neigh'], "fubar"=>[], 'duck'=>['quack'], 'animal_id'=>[] } }
       before { subject.attributes = vals }
       it "should return a hash" do
         expect(subject.attributes).to eq(vals.merge('id' => nil))
