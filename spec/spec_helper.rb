@@ -1,9 +1,6 @@
 ENV["environment"] ||= 'test'
 require "bundler/setup"
 
-require 'simplecov'
-SimpleCov.start
-
 require 'active-fedora'
 require 'rspec'
 require 'equivalent-xml/rspec_matchers'
