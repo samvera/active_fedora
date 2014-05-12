@@ -22,15 +22,14 @@ Getting Help
 Installation
 ------------
 
-The gem is hosted on gemcutter.
+The gem is hosted on rubygems.
 
     gem install active-fedora
 
 Getting Started
 ---------------
 
-The [ActiveFedora Console
-Tour](https://github.com/projecthydra/active_fedora/wiki/Getting-Started:-Console-Tour)
+The [Dive into Hydra](https://github.com/projecthydra/hydra/wiki/Dive-into-Hydra)
 gives you a brief tour through ActiveFedora’s features on the command
 line.
 
@@ -106,7 +105,7 @@ Acknowledgements
 
 Creator: Matt Zumwalt ([MediaShelf](http://yourmediashelf.com))
 
-Developers: \
+Developers:
 Justin Coyne, McClain Looney & Eddie Shin
 ([MediaShelf](http://yourmediashelf.com)), Rick Johnson (Notre Dame)
 
