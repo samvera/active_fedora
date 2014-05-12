@@ -5,7 +5,7 @@ Description
 [![Version](https://badge.fury.io/rb/active-fedora.png)](http://badge.fury.io/rb/active-fedora)
 [![Dependencies](https://gemnasium.com/projecthydra/active_fedora.png)](https://gemnasium.com/projecthydra/active\_fedora)
 
-RubyFedora and ActiveFedora provide a set of Ruby gems for creating and
+Rubydora and ActiveFedora provide a set of Ruby gems for creating and
 managing objects in the Fedora Repository Architecture
 ([http://fedora-commons.org](http://fedora-commons.org)). ActiveFedora
 is loosely based on “ActiveRecord” in Rails. The 3.x series of
