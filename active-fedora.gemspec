@@ -21,11 +21,13 @@ Gem::Specification.new do |s|
   s.add_dependency('solrizer', '~>2.1')
   s.add_dependency("activeresource", '>= 3.0.0')
   s.add_dependency("activesupport", '>= 3.0.0')
-  s.add_dependency("builder", '~> 3.0.0')
+  s.add_dependency("activemodel", '>= 3.0.0')
+  s.add_dependency("builder", '~> 3.0')
   s.add_dependency("mediashelf-loggable")
-  s.add_dependency("rubydora", '~>1.6')
-  s.add_dependency("rdf")
-  s.add_dependency("rdf-rdfxml", '~>0.3.8')
+  s.add_dependency("rubydora", '~>1.6.0')
+  s.add_dependency 'rdf', '~> 1.0.0'
+  s.add_dependency 'addressable', "2.3.5" # rdf 1.0.0 and addressable 2.3.6 don't work together
+  s.add_dependency("rdf-rdfxml")
   s.add_dependency("deprecation")
   s.add_development_dependency("yard")
   s.add_development_dependency("RedCloth") # for RDoc formatting
@@ -44,4 +46,3 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
 end
-

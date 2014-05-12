@@ -1,5 +1,6 @@
 require "loggable"
 require 'active_support'
+require 'active_model'
 require "solrizer"
 require 'active_fedora/file_configurator'
 require 'active_fedora/rubydora_connection'
