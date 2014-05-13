@@ -18,38 +18,6 @@ describe ActiveFedora::ContentModel do
     end
   end
   
-  before(:each) do
-    stub_get('__nextid__')
-    ActiveFedora::Base.stub(:assign_pid).and_return("__nextid__")
-    Rubydora::Repository.any_instance.stub(:client).and_return(@mock_client)
-    @test_cmodel = ActiveFedora::ContentModel.new
-  end
-  
-  it "should provide #new" do
-    ActiveFedora::ContentModel.should respond_to(:new)
-  end
-  
-  describe "#new" do
-    it "should create a kind of ActiveFedora::Base object" do
-      @test_cmodel.should be_kind_of(ActiveFedora::Base)
-    end
-    it "should set pid_suffix to empty string unless overriden in options hash" do
-      @test_cmodel.pid_suffix.should == ""
-      boo_model = ActiveFedora::ContentModel.new(:pid_suffix => "boo")
-      boo_model.pid_suffix.should == "boo"
-    end
-    it "should set namespace to cmodel unless overriden in options hash" do
-      @test_cmodel.namespace.should == "afmodel"
-      boo_model = ActiveFedora::ContentModel.new(:namespace => "boo")
-      boo_model.namespace.should == "boo"
-    end
-  end
-  
-  it "should provide @pid_suffix" do
-    @test_cmodel.should respond_to(:pid_suffix)
-    @test_cmodel.should respond_to(:pid_suffix=)
-  end
-  
   describe '.best_model_for' do
     it 'should be the input model if no relationships' do
       mock_object = BaseModel.new

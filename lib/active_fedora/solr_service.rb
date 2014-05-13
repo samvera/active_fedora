@@ -56,16 +56,6 @@ module ActiveFedora
         end
       end
 
-      #Returns all possible classes for the solr object
-      def classes_from_solr_document(hit, opts = {})
-        #Add ActiveFedora::Base as never stored in Solr explicitely.
-        classes = [ActiveFedora::Base]
-
-        hit[HAS_MODEL_SOLR_FIELD].each { |value| classes << Model.from_class_uri(value) }
-
-        classes
-      end
-
       #Returns the best singular class for the solr object
       def class_from_solr_document(hit, opts = {})
         #Set the default starting point to the class specified, if available.
@@ -117,10 +107,15 @@ module ActiveFedora
       end
       
       # Create a query with a clause for each key, value
-      # @param [Hash] args key is the predicate, value is the target_uri
-      def construct_query_for_rel(args)
-        clauses = args.map { |predicate, target_uri| raw_query(solr_name(predicate, :symbol), target_uri) }
-        clauses.join(" AND ".freeze)
+      # @param [Hash, Array<Array<String>>] args key is the predicate, value is the target_uri
+      # @param [String] join_with ('AND') the value we're joining the clauses with
+      # @example
+      #   construct_query_for_rel [[:has_model, "info:fedora/afmodel:ComplexCollection"], [:has_model, "info:fedora/afmodel:ActiveFedora_Base"]], 'OR'
+      #   # => _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ComplexCollection" OR _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ActiveFedora_Base"
+      def construct_query_for_rel(field_pairs, join_with = 'AND')
+        field_pairs = field_pairs.to_a if field_pairs.kind_of? Hash
+        clauses = field_pairs.map { |(predicate, target_uri)| raw_query(solr_name(predicate, :symbol), target_uri) }
+        clauses.join(" #{join_with} ".freeze)
       end
 
       def query(query, args={})

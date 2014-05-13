@@ -3,25 +3,29 @@ module ActiveFedora
     class BelongsToAssociation < SingularAssociation #:nodoc:
 
       def id_writer(id)
+        @full_result = nil
         remove_matching_property_relationship
         return if id.blank? or id == ActiveFedora::UnsavedDigitalObject::PLACEHOLDER
         @owner.add_relationship(@reflection.options[:property], ActiveFedora::Base.internal_uri(id))
       end
 
       def id_reader
-        # need to find the id with the correct class
-        ids = @owner.ids_for_outbound(@reflection.options[:property])
+        @full_result ||= begin
+          # need to find the id with the correct class
+          ids = @owner.ids_for_outbound(@reflection.options[:property])
 
-        return if ids.empty? 
-        # This incurs a lot of overhead, but it's necessary if the users use one property for more than one association.
-        # e.g.
-        #   belongs_to :author, :property=>:has_member, :class_name=>'Person'
-        #   belongs_to :publisher, :property=>:has_member
-        results = SolrService.query(ActiveFedora::SolrService.construct_query_for_pids(ids))
-        results.each do |result|
-          return result['id'] if SolrService.classes_from_solr_document(result).include? klass
+          return if ids.empty? 
+          # This incurs a lot of overhead, but it's necessary if the users use one property for more than one association.
+          # e.g.
+          #   belongs_to :author, property: :has_member, class_name: 'Person'
+          #   belongs_to :publisher, property: :has_member
+
+          results = SolrService.query(construct_query(ids))
+          if results.present?
+            results.first
+          end
         end
-        return nil
+        @full_result['id'] if @full_result
       end
 
       def replace(record)
@@ -51,20 +55,17 @@ module ActiveFedora
 
       private
         def find_target
-          pid = id_reader
-          return unless pid
-          solr_result = SolrService.query(construct_query(pid)) 
-          return ActiveFedora::SolrService.reify_solr_results(solr_result).first
+          ActiveFedora::SolrService.reify_solr_results([@full_result]).first if id_reader
         end
 
-        def construct_query pid
-          if klass != ActiveFedora::Base
-            clauses = {}  
-            clauses[:has_model] = klass.to_class_uri
-            query = ActiveFedora::SolrService.construct_query_for_rel(clauses) + " AND (" + ActiveFedora::SolrService.construct_query_for_pids([pid]) + ")"
-          else
-            query = ActiveFedora::SolrService.construct_query_for_pids(pid)
-          end
+        # Constructs a query that checks solr for the correct id & class_name combination
+        def construct_query(ids)
+          # Some descendants of ActiveFedora::Base are anonymous classes. They don't have names. Filter them out.
+          candidate_classes = klass.descendants.select {|d| d.name }
+          candidate_classes += [klass] unless klass == ActiveFedora::Base
+          model_pairs = candidate_classes.inject([]) { |arr, klass| arr << [:has_model, klass.to_class_uri]; arr }
+          '(' + ActiveFedora::SolrService.construct_query_for_pids(ids) + ') AND (' +
+              ActiveFedora::SolrService.construct_query_for_rel(model_pairs, 'OR') + ')'
         end
 
         def remove_matching_property_relationship
