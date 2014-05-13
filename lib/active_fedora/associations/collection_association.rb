@@ -130,6 +130,14 @@ module ActiveFedora
         end
       end
 
+      def any?
+        if block_given?
+          load_target.any? { |*block_args| yield(*block_args) }
+        else
+          !empty?
+        end
+      end
+
       def to_ary
         load_target.dup
       end
