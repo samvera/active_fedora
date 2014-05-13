@@ -21,6 +21,7 @@ describe "Collection members" do
         expect(library.books).not_to be_loaded
         expect(library.books.size).to eq(0)
         expect(library.books).to be_loaded
+        expect(library.books.any?).to be_false
       end
     end
   end
@@ -49,6 +50,11 @@ describe "Collection members" do
     end
     it "should load from solr with options" do
       expect(library.books.load_from_solr(rows: 0).size).to eq(0)
+    end
+    it "should respond to #any?" do
+      expect(library.books.any?).to be_true
+      expect(library.books.any? {|book| book.library == nil}).to be_false
+      expect(library.books.any? {|book| book.library == library}).to be_true
     end
   end
 end
