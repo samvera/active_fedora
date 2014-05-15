@@ -76,6 +76,9 @@ describe "scoped queries" do
       it "should limit" do
         ModelIntegrationSpec::Basic.limit(1).should == [test_instance1]
       end
+      it "should offset" do
+        ModelIntegrationSpec::Basic.offset(1).should == [test_instance2, test_instance3]
+      end
 
       it "should chain queries" do
         ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').limit(1).should == [test_instance2]
