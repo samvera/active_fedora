@@ -54,6 +54,7 @@ module ActiveFedora
       return @records if loaded?
       args = @klass == ActiveFedora::Base ? {:cast=>true} : {}
       args[:rows] = limit_value if limit_value
+      args[:start] = offset_value if offset_value
       args[:sort] = order_values if order_values
       
       @records = to_enum(:find_each, where_values, args).to_a
@@ -121,7 +122,7 @@ module ActiveFedora
 
     private
 
-    VALID_FIND_OPTIONS = [:order, :limit, :conditions, :cast]
+    VALID_FIND_OPTIONS = [:order, :limit, :start, :conditions, :cast]
     
     def apply_finder_options(options)
       relation = clone
@@ -131,7 +132,7 @@ module ActiveFedora
       finders = options.dup
       finders.delete_if { |key, value| value.nil? && key != :limit }
 
-      ([:order,:limit] & finders.keys).each do |finder|
+      ([:order,:limit,:start] & finders.keys).each do |finder|
         relation = relation.send(finder, finders[finder])
       end
 

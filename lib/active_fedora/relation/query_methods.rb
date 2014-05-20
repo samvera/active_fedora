@@ -37,6 +37,15 @@ module ActiveFedora
       @values[:limit] = value
     end   
 
+    def offset_value
+      @values[:offset]
+    end
+
+    def offset_value=(value)
+      raise ImmutableRelation if loaded?
+      @values[:offset] = value
+    end   
+
     # Limits the returned records to those that match the provided search conditions
     #
     # @option [Hash] opts a hash of solr conditions
@@ -94,6 +103,23 @@ module ActiveFedora
 
     def limit!(value)
       self.limit_value = value
+      self
+    end
+
+    # Start the returned records at an offset position.
+    # Useful for paginated results
+    #
+    # @option [Integer] value the number of records offset
+    #
+    # @example
+    #  Person.where(name_t: 'Jones').offset(1000)
+    #    => [#<Person @id="foo:123" @name='Jones'>, #<Person @id="foo:125" @name='Jones'>, ...]
+    def offset(value)
+      spawn.offset!(value)
+    end
+
+    def offset!(value)
+      self.offset_value = value
       self
     end
 
