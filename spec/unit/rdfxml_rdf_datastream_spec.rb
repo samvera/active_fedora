@@ -78,7 +78,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
     end
 
     describe "a new instance" do
-      subject { MyDatastream.new(double('parent object', :uri=>'http://localhost/foo', :new_record? =>true), 'descMetadata', about:"http://library.ucsd.edu/ark:/20775/") }
+      subject { MyDatastream.new(double('parent object', :uri=>'/fedora/rest/123', :new_record? =>true), 'descMetadata', about:"http://library.ucsd.edu/ark:/20775/") }
       it "should have a subject" do
         subject.rdf_subject.to_s.should == "http://library.ucsd.edu/ark:/20775/"
       end
@@ -86,7 +86,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
     end
 
     describe "an instance with content" do
-      let(:parent) { double('parent object', uri: 'http://localhost/foo', id: 'foo',  new_record?: true) }
+      let(:parent) { double('parent object', uri: '/fedora/rest/234', id: 'foo',  new_record?: true) }
       subject do
         subject = MyDatastream.new(parent, 'descMetadata', about: "http://library.ucsd.edu/ark:/20775/")
         subject.content = File.new('spec/fixtures/damsObjectModel.xml').read
