@@ -189,11 +189,11 @@ module ActiveFedora
       raise ActiveFedora::ObjectNotFoundError if id.empty?
       resource = Ldp::Resource::RdfSource.new(FedoraLens.connection, klass.id_to_uri(id))
       raise ActiveFedora::ObjectNotFoundError if resource.new?
-      class_to_load(resource).allocate.init_with(resource) # Triggers the find callback
+      class_to_load(resource, cast).allocate.init_with(resource) # Triggers the find callback
     end
 
-    def class_to_load(resource)
-      if @klass == ActiveFedora::Base
+    def class_to_load(resource, cast=true)
+      if @klass == ActiveFedora::Base && cast
         Model.from_class_uri(has_model_value(resource)) || ActiveFedora::Base
       else
         # This is not correct. The class may be a subclass of @klass, so always use from_class_uri
