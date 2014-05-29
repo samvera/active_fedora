@@ -35,6 +35,21 @@ restore_spec_configuration
 ActiveSupport::Deprecation.behavior= Proc.new { |message, callstack| }
 
 RSpec.configure do |config|
+  # Stub out test stuff.
+  config.before(:each) do
+    begin
+      FedoraLens.connection.delete("test")
+    rescue StandardError
+    end
+    FedoraLens.connection.put("test","")
+    restore_spec_configuration if ActiveFedora::SolrService.instance.nil? || ActiveFedora::SolrService.instance.conn.nil?
+    ActiveFedora::SolrService.instance.conn.delete_by_query('*:*')
+    ActiveFedora::SolrService.commit
+    host = FedoraLens.host+"/test"
+    connection = Ldp::Client.new(host)
+    FedoraLens.stub(:connection).and_return(connection)
+    FedoraLens.stub(:host).and_return(host)
+  end
 end
 
 def fixture(file)

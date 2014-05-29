@@ -21,7 +21,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       Object.send(:remove_const, :MyDatastream)
     end
     it "should have a subject" do
-      @subject.rdf_subject.should == "http://localhost:8983/fedora/rest/test:1"
+      @subject.rdf_subject.should == "http://localhost:8983/fedora/rest/test/test:1"
     end
     it "should have mime_type" do
       @subject.mime_type.should == 'text/plain'
@@ -88,7 +88,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "an instance with a custom subject" do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        rdf_subject { |ds| "http://localhost:8983/fedora/rest/#{ds.pid}/content" }
+        rdf_subject { |ds| "http://localhost:8983/fedora/rest/test/#{ds.pid}/content" }
         property :created, predicate: RDF::DC.created
         property :title, predicate: RDF::DC.title
         property :publisher, predicate: RDF::DC.publisher
@@ -112,7 +112,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
 
     it "should have a custom subject" do
-      @subject.rdf_subject.should == 'http://localhost:8983/fedora/rest/test:1/content'
+      @subject.rdf_subject.should == 'http://localhost:8983/fedora/rest/test/test:1/content'
     end
   end
 

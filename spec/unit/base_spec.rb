@@ -31,7 +31,7 @@ describe ActiveFedora::Base do
   end
 
   describe "With a test class" do
-    before :all do
+    before :each do
       class FooHistory < ActiveFedora::Base
         has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData", :autocreate => true do |m|
           m.field "fubar", :string
@@ -55,7 +55,7 @@ describe ActiveFedora::Base do
       end
     end
 
-    after :all do
+    after :each do
       Object.send(:remove_const, :FooHistory)
       Object.send(:remove_const, :FooAdaptation)
       Object.send(:remove_const, :FooInherited)

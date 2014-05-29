@@ -5,7 +5,7 @@ module ActiveFedora::Rdf
   #
   # @see ActiveFedora::RDFDatastream
   class ObjectResource < ActiveTriples::Resource
-    configure base_uri: FedoraLens::HOST
+    configure base_uri: FedoraLens.host
     attr_accessor :datastream
 
     def persist!

@@ -217,10 +217,14 @@ describe ActiveFedora::RDFDatastream do
 
     context "when the subject is set with base_uri" do
       before do
+        @old_uri = DummyResource.resource_class.base_uri
         DummyResource.resource_class.configure :base_uri => 'http://example.org/'
         new_object = DummyAsset.new
         new_object.save
         subject.descMetadata.creator = new_object
+      end
+      after do
+        DummyResource.resource_class.configure :base_uri => @old_uri
       end
 
       it "should let me get to an AF:Base object" do

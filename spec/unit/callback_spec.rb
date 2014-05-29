@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-  before :all do
+  before :each do
     begin 
       ActiveFedora::Base.find('test:123').delete
     rescue
@@ -30,8 +30,8 @@ describe ActiveFedora::Base do
       end
     end
   end
-  after :all do
-    @cb.destroy if @cb # this only is called if the test failed to run all the way through.
+  after :each do
+    @cb.destroy if @cb && @cb.persisted?# this only is called if the test failed to run all the way through.
     Object.send(:remove_const, :CallbackStub)
   end
 
@@ -45,8 +45,10 @@ describe ActiveFedora::Base do
     @cb.save
   end
 
-  # TODO this test is order dependent. It expects to use the object created in the previous test
   it "Should have after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
+    CallbackStub.any_instance.stub({a_init: true, b_create: true, a_create: true, b_save: true, a_save: true})
+    @cb = CallbackStub.new 'test:123'
+    @cb.save
     CallbackStub.any_instance.should_receive(:a_init)
     CallbackStub.any_instance.should_receive(:b_save)
     CallbackStub.any_instance.should_receive(:a_save)

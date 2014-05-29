@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ActiveFedora::SolrService do
   describe "#reify_solr_results" do
-    before(:all) do
+    before(:each) do
       class FooObject < ActiveFedora::Base
         def self.pid_namespace
           "foo"
@@ -26,7 +26,7 @@ describe ActiveFedora::SolrService do
       }
       @foo_content = @foo_object.datastreams['descMetadata'].content
     end
-    after(:all) do
+    after(:each) do
       @test_object.delete
       @foo_object.delete
       Object.send(:remove_const, :FooObject)

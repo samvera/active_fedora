@@ -61,7 +61,8 @@ module ActiveFedora
         end
       end
 
-      @pid ||= self.pid ## cache so it's still available after delete
+      pid = self.pid ## cache so it's still available after delete
+      reload # Reload to pick up any changes because of updating reflections.
       begin
         super
       rescue Ldp::NotFound
