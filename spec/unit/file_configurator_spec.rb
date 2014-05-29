@@ -306,11 +306,11 @@ describe ActiveFedora::FileConfigurator do
     end
     
     describe "within Rails" do
-      before(:all) do        
+      before do        
         stub_rails(:root=>File.dirname(__FILE__) + '/../fixtures/rails_root')
       end
 
-      after(:all) do
+      after do
         unstub_rails
       end
       

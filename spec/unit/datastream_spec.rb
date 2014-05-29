@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::Datastream do
-  let(:parent) { double('inner object', uri: '/fedora/rest/1234', id: '1234', new_record?: true) }
+  let(:parent) { double('inner object', uri: '/fedora/rest/test/1234', id: '1234', new_record?: true) }
 
   subject { ActiveFedora::Datastream.new(parent, 'abcd') }
 
@@ -23,11 +23,11 @@ describe ActiveFedora::Datastream do
     end
 
     it "should be inspectable" do
-      subject.inspect.should eq "#<ActiveFedora::Datastream uri=\"/fedora/rest/1234/abcd\" changed=\"true\" >"
+      subject.inspect.should eq "#<ActiveFedora::Datastream uri=\"/fedora/rest/test/1234/abcd\" changed=\"true\" >"
     end
 
     describe "#generate_dsid" do
-      let(:parent) { double('inner object', uri: '/fedora/rest/1234', id: '1234',
+      let(:parent) { double('inner object', uri: '/fedora/rest/test/1234', id: '1234',
                             new_record?: true, datastreams: datastreams) }
 
       subject { ActiveFedora::Datastream.new(parent, nil, prefix: 'FOO') }
@@ -35,7 +35,7 @@ describe ActiveFedora::Datastream do
       let(:datastreams) { { } }
 
       its(:dsid) {should eq 'FOO1'}
-      its(:uri) {should eq '/fedora/rest/1234/FOO1'}
+      its(:uri) {should eq '/fedora/rest/test/1234/FOO1'}
 
       context "when some datastreams exist" do
         let(:datastreams) { {'FOO56' => double} }

@@ -8,7 +8,6 @@ describe ActiveFedora::Base do
     class Book < ActiveFedora::Base; end
   end
   after :all do
-    Library.delete_all
     Object.send(:remove_const, :Library)
     Object.send(:remove_const, :Book)
   end
@@ -16,7 +15,7 @@ describe ActiveFedora::Base do
   subject { Library.all } 
   its(:class) {should eq ActiveFedora::Relation }
 
-  before :all do
+  before :each do
     Library.create
     @library = Library.create
   end

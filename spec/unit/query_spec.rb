@@ -195,7 +195,7 @@ describe ActiveFedora::Base do
 
   describe '#last' do
     describe 'with multiple objects' do
-      before(:all) do
+      before(:each) do
         (@a, @b, @c) = 3.times {SpecModel::Basic.create!}
       end
       it 'should return one object' do
@@ -216,7 +216,7 @@ describe ActiveFedora::Base do
 
   describe '#first' do
     describe 'with multiple objects' do
-      before(:all) do
+      before(:each) do
         (@a, @b, @c) = 3.times {SpecModel::Basic.create!}
       end
       it 'should return one object' do

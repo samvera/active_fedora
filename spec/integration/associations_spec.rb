@@ -215,11 +215,14 @@ describe ActiveFedora::Base do
         end
 
         it "should have a count once it has been saved" do
-          @library.books << @book << Book.create 
+          @book_2 = Book.create
+          @library.books << @book << @book_2
           @library.save
 
           @library2 = Library.find(@library.pid)
           @library2.books.size.should == 2
+          @book_2.reload
+          @book_2.delete
         end
 
         it "should respect the :class_name parameter" do
@@ -263,10 +266,11 @@ describe ActiveFedora::Base do
 
 
         after do
-          @library.delete
-          @book.delete
-          @person.delete
-          @publisher.delete
+          [@library, @book, @person, @publisher].each do |var|
+            var.reload
+            #binding.pry
+            var.delete
+          end
         end
       end
     end
@@ -430,6 +434,9 @@ describe ActiveFedora::Base do
           def after_hook(m)
             say_hi(m)
             m.reload.library_books.count.should == 0
+          end
+
+          def say_hi(var)
           end
 
 

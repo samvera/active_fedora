@@ -1,12 +1,12 @@
 require 'spec_helper'
 
 describe "A base object with metadata" do
-  before :all do
+  before :each do
     class MockAFBaseRelationship < ActiveFedora::Base
       has_metadata 'foo', type: Hydra::ModsArticleDatastream 
     end
   end
-  after :all do
+  after :each do
     Object.send(:remove_const, :MockAFBaseRelationship)
   end
   describe "a new document" do
@@ -98,7 +98,7 @@ end
 
 
 describe ActiveFedora::Base do
-  before :all do
+  before do
     class MockAFBaseRelationship < ActiveFedora::Base
     end
 
@@ -118,11 +118,11 @@ describe ActiveFedora::Base do
     end
   end
   
-  before(:all) do
+  before do
     ActiveFedora::SolrService.register(ActiveFedora.solr_config[:url])
   end
 
-  after :all do
+  after do
     Object.send(:remove_const, :MockAFBaseRelationship)
   end
   
