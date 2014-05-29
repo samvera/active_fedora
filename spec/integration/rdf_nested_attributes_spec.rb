@@ -2,11 +2,12 @@ require 'spec_helper'
 
 describe "Nesting attribute behavior of RDFDatastream" do
   describe ".attributes=" do
-    let(:parent) { double('inner object', uri: '/fedora/rest/1234', id: '1234', new_record?: true) }
+    let(:parent) { double('inner object', uri: '/fedora/rest/test/1234', id: '1234', new_record?: true) }
 
     describe "complex properties" do
       before do
         class DummyMADS < RDF::Vocabulary("http://www.loc.gov/mads/rdf/v1#")
+  # TODO this test is order dependent. It expects to use the object created in the previous test
           # componentList and Types of components
           property :componentList
           property :Topic
