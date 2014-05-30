@@ -10,6 +10,9 @@ describe ActiveFedora::Datastreams do
          has_metadata 'complex_ds', autocreate: true, type: 'Z'
       end
     end
+    after do
+      Object.send(:remove_const, :FooHistory)
+    end
 
     it "should have a ds_specs entry" do
       FooHistory.ds_specs.should have_key('dsid')
@@ -40,6 +43,9 @@ describe ActiveFedora::Datastreams do
          has_file_datastream :name => 'dsid'
          has_file_datastream 'another'
       end
+    end
+    after do
+      Object.send(:remove_const, :FooHistory)
     end
 
     it "should have reasonable defaults" do
