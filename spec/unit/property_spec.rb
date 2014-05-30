@@ -5,8 +5,8 @@ require 'active_fedora/model'
 
 describe ActiveFedora::Property do
   
-  before(:all) do
-    @test_property = ActiveFedora::Property.new(stub("model_stub"),"file_name", :string)
+  before(:each) do
+    @test_property = ActiveFedora::Property.new(double("model_stub"),"file_name", :string)
   end
   
   it 'should provide .new' do
