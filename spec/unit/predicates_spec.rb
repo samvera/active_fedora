@@ -9,10 +9,10 @@ describe ActiveFedora::Predicates do
       ActiveFedora::Predicates.short_predicate(RDF::DC.creator).should == 'dc_terms_creator'
       ActiveFedora::Predicates.short_predicate(RDF::SKOS.hasTopConcept).should == '2004_02_skos_core_has_top_concept'
     end
-    before(:all) do
+    before do
       @original_mapping = ActiveFedora::Predicates.predicate_config[:predicate_mapping]
     end
-    after(:all) do
+    after do
       ActiveFedora::Predicates.predicate_config[:predicate_mapping] = @original_mapping
     end
     it "should find predicates regardless of order loaded or shared namespace prefixes" do
@@ -86,7 +86,7 @@ describe ActiveFedora::Predicates do
     
   context 'initialization' do
     before :each do
-      @old_predicate_config = ActiveFedora::Predicates.predicate_config
+      @old_predicate_config = Marshal.load(Marshal.dump(ActiveFedora::Predicates.predicate_config))
     end
     
     after :each do
