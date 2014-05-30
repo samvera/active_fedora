@@ -23,6 +23,7 @@ describe ActiveFedora::Base do
   after do 
     Object.send(:remove_const, :Book)
     Object.send(:remove_const, :Library)
+    Object.send(:remove_const, :MyDatastream)
   end
 
   describe "#freeze" do

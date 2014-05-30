@@ -5,6 +5,9 @@ require 'config_helper'
 
 describe ActiveFedora do
   
+  before(:each) do
+    restore_spec_configuration
+  end
   after :all do
     unstub_rails
     # Restore to default fedora configs
@@ -51,7 +54,7 @@ describe ActiveFedora do
   
   describe ".init" do
     
-    after(:all) do
+    after(:each) do
       # Restore to default fedora configs
       ActiveFedora.init(:environment => "test", :fedora_config_path => File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml"))
     end
@@ -65,7 +68,7 @@ describe ActiveFedora do
 
     describe "within rails" do
 
-      after(:all) do
+      after(:each) do
         unstub_rails
       end
 
