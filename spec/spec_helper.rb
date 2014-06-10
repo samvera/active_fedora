@@ -32,7 +32,6 @@ restore_spec_configuration
 ActiveSupport::Deprecation.behavior= Proc.new { |message, callstack| }
 
 RSpec.configure do |config|
-  config.color_enabled = true
 end
 
 def fixture(file)
