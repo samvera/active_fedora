@@ -99,7 +99,25 @@ describe ActiveFedora::Base do
       end
     end
 
-
+    describe "deprecated behavior" do
+      before(:all) do
+        @behavior = ActiveFedora::Attributes.deprecation_behavior
+        ActiveFedora::Attributes.deprecation_behavior = :raise
+      end
+      after(:all) do
+        ActiveFedora::Attributes.deprecation_behavior = @behavior
+      end
+      it "should deprecate passing a string to a multiple attribute writer" do
+        expect { subject.fubar = "Quack" }.to raise_error
+        expect { subject.fubar = ["Quack"] }.not_to raise_error
+        expect { subject.fubar = nil }.not_to raise_error
+      end
+      it "should deprecate passing an enumerable to a unique attribute writer" do
+        expect { subject.cow = "Low" }.not_to raise_error
+        expect { subject.cow = ["Low"] }.to raise_error
+        expect { subject.cow = nil }.not_to raise_error
+      end
+    end
 
     it "should reveal the unique properties" do
       BarHistory2.unique?(:horse).should be_false
