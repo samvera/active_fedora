@@ -11,7 +11,7 @@ describe ActiveFedora::Rdf::Configurable do
 
   describe '#configure' do
     before do
-      DummyConfigurable.configure :base_uri => "http://example.org/base", :type => RDF.Class, :rdf_label => RDF::DC.title
+      DummyConfigurable.configure base_uri: "http://example.org/base", type: RDF::RDFS.Class, rdf_label: RDF::DC.title
     end
 
     it 'should set a base uri' do
@@ -23,15 +23,15 @@ describe ActiveFedora::Rdf::Configurable do
     end
 
     it 'should set a type' do
-      expect(DummyConfigurable.type).to eq RDF.Class
+      expect(DummyConfigurable.type).to eq RDF::RDFS.Class
     end
   end
 
   describe '#rdf_type' do
     it "should set the type the old way" do
-      DummyConfigurable.should_receive(:configure).with(:type => RDF.Class).and_call_original
-      DummyConfigurable.rdf_type(RDF.Class)
-      expect(DummyConfigurable.type).to eq RDF.Class
+      DummyConfigurable.should_receive(:configure).with(type: RDF::RDFS.Class).and_call_original
+      DummyConfigurable.rdf_type(RDF::RDFS.Class)
+      expect(DummyConfigurable.type).to eq RDF::RDFS.Class
     end
   end
 end
