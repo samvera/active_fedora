@@ -433,18 +433,39 @@ describe ActiveFedora::Base do
 
   
   describe "#exists?" do
+    let(:obj) { ActiveFedora::Base.create } 
     it "should return true for objects that exist" do
-      @obj = ActiveFedora::Base.create
-      ActiveFedora::Base.exists?(@obj.pid).should be_true
+      expect(ActiveFedora::Base.exists?(obj)).to be true
     end
-    it "should return false for objects that don't exist" do
-      ActiveFedora::Base.exists?('test:missing_object').should be_false
+    it "should return true for pids that exist" do
+      expect(ActiveFedora::Base.exists?(obj.pid)).to be true
+    end
+    it "should return false for pids that don't exist" do
+      expect(ActiveFedora::Base.exists?('test:missing_object')).to be false
     end
     it "should return false for nil" do
-      ActiveFedora::Base.exists?(nil).should be_false
+      expect(ActiveFedora::Base.exists?(nil)).to be false
+    end
+    it "should return false for false" do
+      expect(ActiveFedora::Base.exists?(false)).to be false
     end
     it "should return false for empty" do
-      ActiveFedora::Base.exists?('').should be_false
+      expect(ActiveFedora::Base.exists?('')).to be false
+    end
+    context "when passed a hash of conditions" do
+      let(:conditions) { {foo: "bar"} }
+      context "and at least one object matches the conditions" do
+        it "should return true" do
+          allow(ActiveFedora::SolrService).to receive(:query) { [double("solr document")] }
+          expect(ActiveFedora::Base.exists?(conditions)).to be true
+        end
+      end
+      context "and no object matches the conditions" do
+        it "should return false" do
+          allow(ActiveFedora::SolrService).to receive(:query) { [] }
+          expect(ActiveFedora::Base.exists?(conditions)).to be false
+        end
+      end
     end
   end
 end

@@ -60,14 +60,22 @@ module ActiveFedora
       end
     end
 
-    # Returns true if the pid exists in the repository
-    # @param[String] pid
+    # Returns true if object having the pid or matching the conditions exists in the repository
+    # Returns false if param is false (or nil) 
+    # @param[ActiveFedora::Base, String, Hash] object, pid or hash of conditions
     # @return[boolean]
     def exists?(conditions)
       conditions = conditions.id if Base === conditions
       return false if !conditions
-      !!DigitalObject.find(self.klass, conditions)
-    rescue ActiveFedora::ObjectNotFoundError
+      case conditions
+      when Hash
+        find_with_conditions(conditions, {rows: 1}).present?
+      when String
+        !!DigitalObject.find(self.klass, conditions) 
+      else
+        raise ArgumentError, "`conditions' argument must be ActiveFedora::Base, String, or Hash: #{conditions.inspect}"
+      end
+    rescue ActiveFedora::ObjectNotFoundError 
       false
     end
 
