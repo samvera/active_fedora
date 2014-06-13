@@ -4,7 +4,6 @@ module ActiveFedora
     extend ActiveSupport::Concern
     extend Deprecation
     self.deprecation_horizon = 'active-fedora version 8.0.0'
-    
 
     def new?
       new_record?
@@ -16,7 +15,6 @@ module ActiveFedora
       new_record?
     end
     deprecation_deprecate :new_object?
-    
 
     ## Required by associations
     def new_record?
@@ -73,10 +71,10 @@ module ActiveFedora
         end
       end
 
-      pid = self.pid ## cache so it's still available after delete
+      @pid ||= self.pid ## cache so it's still available after delete
       begin
         @inner_object.delete
-      rescue RestClient::ResourceNotFound =>e
+      rescue RestClient::ResourceNotFound => e
         raise ObjectNotFoundError, "Unable to find #{pid} in the repository"
       end
       if ENABLE_SOLR_UPDATES
