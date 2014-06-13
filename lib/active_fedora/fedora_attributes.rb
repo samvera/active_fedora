@@ -7,7 +7,7 @@ module ActiveFedora
     # if there is no fedora object (loaded from solr) get the instance var
     # TODO make inner_object a proxy that can hold the pid
     def pid
-       @inner_object.pid
+       @pid ||= @inner_object.pid
     end
 
     def id   ### Needed for the nested form helper
