@@ -76,18 +76,12 @@ module ActiveFedora
 
     private
     def array_reader(field, *args)
-      if md = /^(.+)_id$/.match(field)
-        return self.send(field)
-      end
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
 
       self.class.defined_attributes[field].reader(self, *args)
     end
 
     def array_setter(field, args)
-      if md = /^(.+)_id$/.match(field)
-        return self.send(:"#{field}=", args)
-      end
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
       self.class.defined_attributes[field].writer(self, args)
     end

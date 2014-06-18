@@ -123,9 +123,9 @@ describe ActiveFedora::Base do
     end
 
     it "should reveal the unique properties" do
-      BarHistory2.unique?(:horse).should be_false
-      BarHistory2.unique?(:pig).should be_true
-      BarHistory2.unique?(:cow).should be_true
+      BarHistory2.unique?(:horse).should be false
+      BarHistory2.unique?(:pig).should be true
+      BarHistory2.unique?(:cow).should be true
     end
 
     it "should save a delegated property uniquely" do
@@ -161,9 +161,9 @@ describe ActiveFedora::Base do
     end
 
     it "should be able to track change status" do
-      subject.fubar_changed?.should be_false
+      subject.fubar_changed?.should be false
       subject.fubar = "Meow"
-      subject.fubar_changed?.should be_true
+      subject.fubar_changed?.should be true
     end
 
     describe "array getters and setters" do
@@ -226,13 +226,13 @@ describe ActiveFedora::Base do
 
     it "should be able to delegate deeply into the terminology" do
       subject.donkey=["Bray", "Hee-haw"]
-      subject.donkey.should == ["Bray", "Hee-haw"]
+      expect(subject.donkey).to eq ["Bray", "Hee-haw"]
     end
 
     it "should be able to track change status" do
-      subject.cow_changed?.should be_false
-      subject.cow = ["Moo"]
-      subject.cow_changed?.should be_true
+      expect {
+        subject.cow = ["Moo"]
+      }.to change { subject.cow_changed? }.from(false).to(true)
     end 
   end
 
@@ -257,16 +257,16 @@ describe ActiveFedora::Base do
 
     describe "with a multivalued field" do
       it "should be able to track change status" do
-        subject.title_changed?.should be_false
-        subject.title = ["Title1", "Title2"]
-        subject.title_changed?.should be_true
+        expect {
+          subject.title = ["Title1", "Title2"]
+        }.to change { subject.title_changed? }.from(false).to(true)
       end
     end
     describe "with a single-valued field" do
       it "should be able to track change status" do
-        subject.description_changed?.should be_false
-        subject.description = "A brief description"
-        subject.description_changed?.should be_true
+        expect {
+          subject.description = "A brief description"
+        }.to change { subject.description_changed? }.from(false).to(true)
       end
     end
   end 
