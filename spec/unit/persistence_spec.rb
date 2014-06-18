@@ -52,4 +52,46 @@ describe ActiveFedora::Persistence do
       expect(subject.pid).not_to be_nil
     end
   end
+
+  describe "save" do
+    subject { ActiveFedora::Base.new }
+    context "when called with option :update_index=>false" do
+      context "on a new record" do
+        it "should not update the index" do
+          expect(subject).to receive(:persist).with(false)
+          subject.save(update_index: false)
+        end
+      end
+      context "on a persisted record" do
+        before do
+          allow(subject).to receive(:new_record?) { false }
+          allow(subject.inner_object).to receive(:save) { true }
+        end
+        it "should not update the index" do
+          expect(subject).to receive(:persist).with(false)
+          subject.save(update_index: false)
+        end        
+      end
+    end
+    context "when called with option :update_index=>true" do
+      context "on create" do
+        before { allow(subject).to receive(:create_needs_index?) { false } }
+        it "should not override `create_needs_index?'" do
+          expect(subject).to receive(:persist).with(false)
+          subject.save(update_index: true)
+        end
+      end
+      context "on update" do
+        before do
+          allow(subject).to receive(:new_record?) { false }
+          allow(subject.inner_object).to receive(:save) { true }
+          allow(subject).to receive(:update_needs_index?) { false }
+        end
+        it "should not override `update_needs_index?'" do
+          expect(subject).to receive(:persist).with(false)
+          subject.save(update_index: true)
+        end
+      end
+    end
+  end
 end

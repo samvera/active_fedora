@@ -236,7 +236,7 @@ module ActiveFedora
       run_callbacks(:save) { super }
     end
 
-    def create #:nodoc:
+    def create(*) #:nodoc:
       run_callbacks(:create) { super }
     end
 
