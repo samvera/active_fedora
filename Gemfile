@@ -2,7 +2,8 @@ source "https://rubygems.org"
 
 # Bundler will rely on active-fedora.gemspec for dependency information.
 
-gemspec
+gemspec path: File.expand_path('..', __FILE__)
+
 
 gem "fedora_lens", github: 'projecthydra-labs/fedora_lens'
 gem "ldp", github: 'cbeer/ldp'
