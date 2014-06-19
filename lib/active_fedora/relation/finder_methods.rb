@@ -168,13 +168,11 @@ module ActiveFedora
     protected
 
     def load_from_fedora(pid, cast)
-      cast = true if self == ActiveFedora::Base && cast.nil?
-      inner = DigitalObject.find(@klass, pid)
-      af_base = @klass.allocate.init_with(inner)
+      cast = true if klass == ActiveFedora::Base && cast.nil?
+      inner = DigitalObject.find(klass, pid)
+      af_base = klass.allocate.init_with(inner)
       cast ? af_base.adapt_to_cmodel : af_base
-
     end
-
 
     def find_with_ids(ids, cast)
       expects_array = ids.first.kind_of?(Array)

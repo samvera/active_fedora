@@ -288,4 +288,14 @@ describe ActiveFedora::Base do
       ActiveFedora::Base.find_with_conditions('chunky:monkey').should == mock_result
     end
   end
+
+  describe "#load_from_fedora" do
+    let(:relation) { ActiveFedora::Relation.new(ActiveFedora::Base) }
+    before { @obj = SpecModel::Basic.create(pid: "test:123") }
+    after { @obj.destroy }
+    it "should cast when klass == ActiveFedora::Base and cast argument is nil" do
+      expect(relation.send(:load_from_fedora, "test:123", nil)).to be_a SpecModel::Basic
+    end
+  end
+
 end
