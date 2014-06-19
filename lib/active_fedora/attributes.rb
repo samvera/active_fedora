@@ -78,11 +78,19 @@ module ActiveFedora
     def array_reader(field, *args)
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
 
-      self.class.defined_attributes[field].reader(self, *args)
+      val = self.class.defined_attributes[field].reader(self, *args)
+      self.class.multiple?(field) ? val : val.first
     end
 
     def array_setter(field, args)
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
+      if self.class.multiple?(field)
+        if args.present? && !args.respond_to?(:each)
+          raise ArgumentError, "You attempted to assign a scalar value to the attribute #{field}, which is defined as multiple"
+        end
+      elsif args.respond_to?(:each) # singular
+        raise ArgumentError, "You attempted to assign an enumerable value to the attribute #{field}, which is defined as singular"
+      end
       self.class.defined_attributes[field].writer(self, args)
     end
 
@@ -133,19 +141,13 @@ module ActiveFedora
         find_or_create_defined_attribute(field, dsid, args)
 
         define_method field do |*opts|
-          val = array_reader(field, *opts)
-          self.class.multiple?(field) ? val : val.first
+          array_reader(field, *opts)
         end
       end
 
       def create_attribute_setter(field, dsid, args)
         find_or_create_defined_attribute(field, dsid, args)
         define_method "#{field}=".to_sym do |v|
-          if self.class.multiple?(field) && v.present? && !v.respond_to?(:each)
-              raise ArgumentError, "You attempted to assign a scalar value to the attribute #{field}, which is defined as multiple"
-          elsif v.respond_to?(:each) # singular
-            raise ArgumentError, "You attempted to assign an enumerable value to the attribute #{field}, which is defined as singular"
-          end
           self[field]=v
         end
       end

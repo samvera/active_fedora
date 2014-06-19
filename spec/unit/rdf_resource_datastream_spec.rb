@@ -65,7 +65,7 @@ describe ActiveFedora::RDFDatastream do
     end
 
     it "should set values" do
-      subject.title = "blah"
+      subject.title = ["blah"]
       expect(subject.descMetadata.title).to eq ["blah"]
     end
 
@@ -183,9 +183,9 @@ describe ActiveFedora::RDFDatastream do
   describe "relationships" do
     before do
       @new_object = DummyAsset.new
-      @new_object.title = "subbla"
+      @new_object.title = ["subbla"]
       @new_object.save
-      subject.title = "bla"
+      subject.title = ["bla"]
       subject.descMetadata.creator = @new_object
     end
 
@@ -211,7 +211,7 @@ describe ActiveFedora::RDFDatastream do
     end
 
     it "should allow for deep attributes to be set directly" do
-      subject.descMetadata.creator.first.title = "Bla"
+      subject.descMetadata.creator.first.title = ["Bla"]
       expect(subject.descMetadata.creator.first.title).to eq ["Bla"]
     end
 
@@ -266,7 +266,7 @@ describe ActiveFedora::RDFDatastream do
 
         @new_object = DummyOmAsset.new
         @new_object.save
-        subject.title = "bla"
+        subject.title = ["bla"]
         subject.descMetadata.creator = @new_object
         subject.save
         subject.reload

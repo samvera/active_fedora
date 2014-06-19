@@ -24,7 +24,7 @@ describe ActiveFedora::Base do
 
   describe "a valid object" do
     before do
-      subject.attributes={ fubar:'here', swank:'long enough'}
+      subject.attributes={ fubar: ['here'], swank:'long enough'}
     end
     
     it { should be_valid}
