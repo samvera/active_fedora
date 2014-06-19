@@ -43,7 +43,7 @@ describe "NestedAttribute behavior" do
   end
 
   it "should have _destroy" do
-    Bar.new._destroy.should be_false
+    expect(Bar.new._destroy).to be_nil
   end
 
   it "should update the child objects" do
@@ -111,10 +111,10 @@ describe "NestedAttribute behavior" do
   #
   # @return [car,bar,bar] returns 1 Car and 2 Bars
   def create_car_with_bars(car_class = Car, bar_class = Bar)
-    car = car_class.new; car.save
+    car = car_class.new; car.save!
 
-    bar1 = bar_class.new(:car=>car); bar1.save
-    bar2 = bar_class.new(:car=>car); bar2.save
+    bar1 = bar_class.new(car: car); bar1.save!
+    bar2 = bar_class.new(car: car); bar2.save!
     [car, bar1, bar2]
   end
 
