@@ -5,6 +5,7 @@ module ActiveFedora
       # Implements the reader method, e.g. foo.bar for Foo.has_one :bar
       def reader(force_reload = false)
         if force_reload
+          raise NotImplementedError, "Need to define the uncached method" #TODO
           klass.uncached { reload }
         elsif !loaded? || stale_target?
           reload
