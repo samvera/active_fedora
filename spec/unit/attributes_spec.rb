@@ -128,58 +128,59 @@ describe ActiveFedora::Base do
       BarHistory2.unique?(:cow).should be true
     end
 
-    it "should save a delegated property uniquely" do
-      subject.fubar="Quack"
-      subject.fubar.should == ["Quack"]
-      subject.withText.get_values(:fubar).first.should == 'Quack'
+    it "should save a delegated property" do
+      subject.fubar= ["Quack"]
+      expect(subject.fubar).to eq ["Quack"]
+      expect(subject.withText.get_values(:fubar).first).to eq 'Quack'
       subject.cow="Low"
-      subject.cow.should == "Low"
-      subject.xmlish.term_values(:cow).first.should == 'Low'
+      expect(subject.cow).to eq "Low"
+      expect(subject.xmlish.term_values(:cow).first).to eq 'Low'
 
       subject.pig="Oink"
-      subject.pig.should == "Oink"
+      expect(subject.pig).to eq "Oink"
     end
 
     it "should allow passing parameters to the delegate accessor" do
-      subject.cow=["one", "two"]
-      subject.cow(1).should == 'two'
+      subject.fubar = ["one", "two"]
+      expect(subject.fubar(1)).to eq ['two']
     end
 
-    it "should return a single value if not marked as multiple" do
-      subject.cow=["one", "two"]
-      subject.cow.should == "one"
+    it "should raise an error when assigning an enumerable to a singular" do
+      expect {
+        subject.cow = ["one", "two"]
+      }.to raise_error ArgumentError, "You attempted to assign an enumerable value to the attribute cow, which is defined as singular"
     end
 
     it "should return an array if marked as multiple" do
       subject.horse=["neigh", "whinny"]
-      subject.horse.should == ["neigh", "whinny"]
+      expect(subject.horse).to eq ["neigh", "whinny"]
     end
 
     it "should be able to delegate deeply into the terminology" do
       subject.duck=["Quack", "Peep"]
-      subject.duck.should == ["Quack", "Peep"]
+      expect(subject.duck).to eq ["Quack", "Peep"]
     end
 
     it "should be able to track change status" do
-      subject.fubar_changed?.should be false
-      subject.fubar = "Meow"
-      subject.fubar_changed?.should be true
+      expect {
+        subject.fubar = ["Meow"]
+      }.to change { subject.fubar_changed? }.from(false).to(true)
     end
 
     describe "array getters and setters" do
       it "should accept symbol keys" do
         subject[:duck]= ["Cluck", "Gobble"]
-        subject[:duck].should == ["Cluck", "Gobble"]
+        expect(subject[:duck]).to eq ["Cluck", "Gobble"]
       end
 
       it "should accept string keys" do
         subject['duck']= ["Cluck", "Gobble"]
-        subject['duck'].should == ["Cluck", "Gobble"]
+        expect(subject['duck']).to eq ["Cluck", "Gobble"]
       end
 
       it "should accept field names with _id that are not associations" do
-        subject['animal_id'] = ["lemur"]
-        subject['animal_id'].should == ["lemur"]
+        subject['animal_id'] = "lemur"
+        expect(subject['animal_id']).to eq "lemur"
       end
 
       it "should raise an error on the reader when the field isn't delegated" do
@@ -198,7 +199,7 @@ describe ActiveFedora::Base do
     end
 
     describe "attributes" do
-      let(:vals) { {'cow'=>["moo"], 'pig' => ['oink'], 'horse' =>['neigh'], "fubar"=>[], 'duck'=>['quack'], 'animal_id'=>[] } }
+      let(:vals) { {'cow'=>"moo", 'pig' => 'oink', 'horse' =>['neigh'], "fubar"=>[], 'duck'=>['quack'], 'animal_id'=>'' } }
       before { subject.attributes = vals }
       it "should return a hash" do
         expect(subject.attributes).to eq(vals.merge('id' => nil))
@@ -240,11 +241,12 @@ describe ActiveFedora::Base do
     before :all do
       class BarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
         property :title, :predicate => RDF::DC.title
-        property :description, :predicate => RDF::DC.description, :multivalue => false
+        property :description, :predicate => RDF::DC.description
       end
       class BarHistory4 < ActiveFedora::Base
         has_metadata 'rdfish', :type=>BarRdfDatastream
-        has_attributes :title, :description, datastream: 'rdfish', multiple: true
+        has_attributes :title, datastream: 'rdfish', multiple: true
+        has_attributes :description, datastream: 'rdfish', multiple: false
       end
     end
 
@@ -306,7 +308,7 @@ describe ActiveFedora::Base do
     end
 
     it "should raise an error on set" do
-      expect {subject.description = 'Neat'}.to raise_error(ArgumentError, "Undefined datastream id: `rdfish' in has_attributes")
+      expect { subject.description = ['Neat'] }.to raise_error(ArgumentError, "Undefined datastream id: `rdfish' in has_attributes")
     end
   end
 

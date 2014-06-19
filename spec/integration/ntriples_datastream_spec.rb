@@ -74,7 +74,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
   describe "serializing" do
     it "should handle dates" do
-      subject.date_uploaded = Date.parse('2012-11-02')
+      subject.date_uploaded = [Date.parse('2012-11-02')]
       subject.date_uploaded.first.should be_kind_of Date
       solr_document = subject.to_solr
       solr_document[ActiveFedora::SolrService.solr_name('rdf__date_uploaded', type: :date)].should == ['2012-11-02T00:00:00Z']
@@ -97,9 +97,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
   it "should set and recall values" do
     @subject.title = 'War and Peace'
     @subject.rdf.should be_changed
-    @subject.based_near = "Moscow, Russia"
-    @subject.related_url = "http://en.wikipedia.org/wiki/War_and_Peace"
-    @subject.part = "this is a part"
+    @subject.based_near = ["Moscow, Russia"]
+    @subject.related_url = ["http://en.wikipedia.org/wiki/War_and_Peace"]
+    @subject.part = ["this is a part"]
     @subject.save
     @subject.title.should == 'War and Peace'
     @subject.based_near.should == ["Moscow, Russia"]
@@ -108,9 +108,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
   end
   it "should set, persist, and recall values" do
     @subject.title = 'War and Peace'
-    @subject.based_near = "Moscow, Russia"
-    @subject.related_url = "http://en.wikipedia.org/wiki/War_and_Peace"
-    @subject.part = "this is a part"
+    @subject.based_near = ["Moscow, Russia"]
+    @subject.related_url = ["http://en.wikipedia.org/wiki/War_and_Peace"]
+    @subject.part = ["this is a part"]
     @subject.save
 
     loaded = RdfTest.find(@subject.pid)
@@ -127,7 +127,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     loaded.part.should == ['part 1', 'part 2']
   end
   it "should append values" do
-    @subject.part = "thing 1"
+    @subject.part = ["thing 1"]
     @subject.save
 
     @subject.part << "thing 2"
@@ -177,7 +177,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
   it "should delete values" do
     @subject.title = "Hamlet"
-    @subject.related_url = "http://psu.edu/"
+    @subject.related_url = ["http://psu.edu/"]
     @subject.related_url << "http://projecthydra.org/"
 
     @subject.title.should == "Hamlet"
@@ -194,7 +194,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.related_url.should == ["http://psu.edu/"]
   end
   it "should delete multiple values at once" do
-    @subject.part = "MacBeth"
+    @subject.part = ["MacBeth"]
     @subject.part << "Hamlet"
     @subject.part << "Romeo & Juliet"
     @subject.part.first.should == "MacBeth"
@@ -238,10 +238,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.title.should == ["title1", "title2", "title3"]
     end
     it "should support the empty? method" do
-      @subject.title.should respond_to(:empty?)
-      @subject.title.empty?.should be_false
+      expect(@subject.title).to_not be_empty
       @subject.title.delete("title1", "title2", "title3")
-      @subject.title.empty?.should be_true
+      expect(@subject.title).to be_empty
     end
     it "should support the is_a? method" do
       @subject.title.is_a?(Array).should == true

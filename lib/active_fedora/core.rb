@@ -22,9 +22,14 @@ module ActiveFedora
           super
         when String
           super(ActiveFedora::Base.id_to_uri(attributes_or_resource_or_url))
-        else
+        when Hash
           attributes = attributes_or_resource_or_url
-          super()
+          pid = attributes.delete(:pid)
+          pid ? super(ActiveFedora::Base.id_to_uri(pid)) : super()
+        when NilClass
+          super
+        else
+          raise ArgumentError
       end
 
       @association_cache = {}

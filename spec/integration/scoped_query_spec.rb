@@ -56,9 +56,9 @@ describe "scoped queries" do
   end
 
   describe "with multiple objects" do
-    let!(:test_instance1) { ModelIntegrationSpec::Basic.create!(foo: ['Beta'], bar: ['Chips']) }
-    let!(:test_instance2) { ModelIntegrationSpec::Basic.create!(foo: ['Alpha'], bar: ['Peanuts']) }
-    let!(:test_instance3) { ModelIntegrationSpec::Basic.create!(foo: ['Sigma'], bar: ['Peanuts']) }
+    let!(:test_instance1) { ModelIntegrationSpec::Basic.create!(foo: ['Beta'], bar: ['Chips'])}
+    let!(:test_instance2) { ModelIntegrationSpec::Basic.create!(foo: ['Alpha'], bar: ['Peanuts'])}
+    let!(:test_instance3) { ModelIntegrationSpec::Basic.create!(foo: ['Sigma'], bar: ['Peanuts'])}
 
     describe "when the objects are in fedora" do
       after do

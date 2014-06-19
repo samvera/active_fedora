@@ -192,8 +192,8 @@ module ActiveFedora
       class_to_load(resource, cast).allocate.init_with(resource) # Triggers the find callback
     end
 
-    def class_to_load(resource, cast=true)
-      if @klass == ActiveFedora::Base && cast
+    def class_to_load(resource, cast)
+      if @klass == ActiveFedora::Base && (cast || cast.nil?)
         Model.from_class_uri(has_model_value(resource)) || ActiveFedora::Base
       else
         # This is not correct. The class may be a subclass of @klass, so always use from_class_uri
