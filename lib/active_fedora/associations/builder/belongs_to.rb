@@ -21,12 +21,28 @@ module ActiveFedora::Associations::Builder
         results = ActiveFedora::SolrService.query(ActiveFedora::SolrService.construct_query_for_pids([id]))
         
         results.any? do |result|
-          ActiveFedora::SolrService.classes_from_solr_document(result).include? reflection.klass
+          ActiveFedora::SolrService.classes_from_solr_document(result).any? { |klass|
+            class_ancestors(klass).include? reflection.klass
+          }
         end
       end
     end
 
     private
+
+      ##
+      # Returns a list of all the ancestor classes up to ActiveFedora::Base including the class itself
+      # @param [Class] klass
+      # @return [Array<Class>]
+      # @example
+      #   class Car < ActiveFedora::Base; end
+      #   class SuperCar < Car; end
+      #   class_ancestors(SuperCar)
+      #   # => [SuperCar, Car, ActiveFedora::Base]
+      def class_ancestors(klass)
+        klass.ancestors.select {|k| k.instance_of?(Class) } - [Object, BasicObject]
+      end
+
       def add_counter_cache_callbacks(reflection)
         cache_column = reflection.counter_cache_column
         name         = self.name

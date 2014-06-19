@@ -54,7 +54,8 @@ module ActiveFedora
       #Returns all possible classes for the solr object
       def classes_from_solr_document(hit, opts = {})
         #Add ActiveFedora::Base as never stored in Solr explicitely.
-        classes = [ActiveFedora::Base]
+        #classes = [ActiveFedora::Base]
+        classes = []
 
         hit[HAS_MODEL_SOLR_FIELD].each { |value| classes << Model.from_class_uri(value) }
 

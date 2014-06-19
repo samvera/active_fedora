@@ -124,6 +124,7 @@ module ActiveFedora
         end
       end
 
+
       association = send(association_name)
 
       existing_records = if association.loaded?
