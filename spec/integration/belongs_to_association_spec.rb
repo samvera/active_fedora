@@ -84,6 +84,8 @@ describe ActiveFedora::Base do
       end
 
       class ComplexObject < SimpleObject
+        belongs_to :simple_collection, property: :is_part_of, class_name: 'SimpleCollection'
+        belongs_to :complex_collection, property: :is_part_of, class_name: 'ComplexCollection'
       end
 
       class SimpleCollection < ActiveFedora::Base
@@ -92,6 +94,8 @@ describe ActiveFedora::Base do
       end
 
       class ComplexCollection < SimpleCollection
+        has_many :objects, property: :is_part_of, class_name: 'SimpleObject'
+        has_many :complex_objects, property: :is_part_of, class_name: 'ComplexObject'
       end
 
     end
@@ -103,70 +107,78 @@ describe ActiveFedora::Base do
     end
 
     describe "saving between the before and after hooks" do
-      before do
-        @simple_collection = SimpleCollection.create
-        @complex_collection = ComplexCollection.create
+      require 'byebug'
 
-        @simple_object = SimpleObject.create
-        @simple_object_second = SimpleObject.create
-        @simple_object_third = SimpleObject.create
-        @complex_object = ComplexObject.create
-        @complex_object_second = ComplexObject.create
-
-        @complex_object.has_model = @complex_object.class.superclass.to_class_uri
-
-        @simple_collection.objects = [@simple_object, @simple_object_second, @complex_object]
-        @simple_collection.save!
-        @complex_collection.objects = [@simple_object_third, @complex_object_second]
-        @complex_collection.save!
-        @complex_object.save!
-        @simple_object.save!
-        @simple_object_second.save!
+      context "Add a complex_object into a simple_collection" do
+        before do
+          @simple_collection = SimpleCollection.create
+          @complex_collection = ComplexCollection.create
+          @complex_object = ComplexObject.create
+          @simple_collection.objects = [@complex_object]
+          @simple_collection.save!
+          @complex_collection.save!
+        end
+        it "should have added the inverse relationship for the correct class" do
+          @complex_object.simple_collection.should be_instance_of SimpleCollection
+          @complex_object.complex_collection.should be_nil
+        end
       end
 
-
-      it "casted association methods should work and return the most complex class" do
-
-        @complex_object.simple_collection.should be_instance_of SimpleCollection
-        @complex_object.complex_collection.should be_nil
-
-        @complex_object_second.simple_collection.should be_instance_of ComplexCollection
-        @complex_object_second.complex_collection.should be_instance_of ComplexCollection
-
-        @simple_object.simple_collection.should be_instance_of SimpleCollection
-        @simple_object.complex_collection.should be_nil
-
-        @simple_object_second.simple_collection.should be_instance_of SimpleCollection
-        @simple_object_second.complex_collection.should be_nil
-
-        @simple_object_third.simple_collection.should be_instance_of ComplexCollection
-        @simple_object_third.complex_collection.should be_instance_of ComplexCollection
-
-        @simple_collection.objects.size.should == 3
-        @simple_collection.objects[0].should be_instance_of SimpleObject
-        @simple_collection.objects[1].should be_instance_of SimpleObject
-        @simple_collection.objects[2].should be_instance_of ComplexObject
-
-        @complex_collection.objects.size.should == 2
-        @complex_collection.objects[0].should be_instance_of SimpleObject
-        @complex_collection.objects[1].should be_instance_of ComplexObject
-
+      context "Add a complex_object into a complex_collection" do
+        before do
+          @complex_collection = ComplexCollection.create
+          @complex_object = ComplexObject.create
+          @complex_collection.objects = [@complex_object]
+          @complex_collection.save!
+        end
+        it "should have added the inverse relationship for the correct class" do
+          @complex_object.complex_collection.should be_instance_of ComplexCollection
+          @complex_object.reload.simple_collection.should be_instance_of ComplexCollection
+        end
       end
 
-      it "specified ending relationships should ignore classes not specified" do
-        @simple_collection.complex_objects.size.should == 1
-        @simple_collection.complex_objects[0].should be_instance_of ComplexObject
-        @simple_collection.complex_objects[1].should be_nil
+      context "Adding mixed types on a base class with a filtered has_many relationship" do
+        before do
+          @simple_collection = SimpleCollection.create
+          @complex_object = ComplexObject.create
+          @simple_object = SimpleObject.create
+          @simple_collection.objects = [@complex_object, @simple_object]
+          @simple_collection.save!
+        end
+        it "ignores objects who's classes aren't specified" do
+          @simple_collection.complex_objects.size.should == 1
+          @simple_collection.complex_objects[0].should be_instance_of ComplexObject
+          @simple_collection.complex_objects[1].should be_nil
 
-        @complex_collection.complex_objects.size.should == 1
-        @complex_collection.complex_objects[0].should be_instance_of ComplexObject
-        @complex_collection.complex_objects[1].should be_nil
+          @simple_collection.objects.size.should == 2
+          @simple_collection.objects[0].should be_instance_of ComplexObject
+          @simple_collection.objects[1].should be_instance_of SimpleObject
+
+          @simple_object.simple_collection.should be_instance_of SimpleCollection
+          @simple_object.complex_collection.should be_nil
+        end
       end
 
-      after do
-        @simple_object.delete
-        @simple_object_second.delete
-        @complex_object.delete
+      context "Adding mixed types on a subclass with a filtered has_many relationship" do
+        before do
+          @complex_collection = ComplexCollection.create
+          @complex_object = ComplexObject.create
+          @simple_object = SimpleObject.create
+          @complex_collection.objects = [@complex_object, @simple_object]
+          @complex_collection.save!
+        end
+        it "ignores objects who's classes aren't specified" do
+          @complex_collection.complex_objects.size.should == 1
+          @complex_collection.complex_objects[0].should be_instance_of ComplexObject
+          @complex_collection.complex_objects[1].should be_nil
+
+          @complex_collection.objects.size.should == 2
+          @complex_collection.objects[0].should be_instance_of ComplexObject
+          @complex_collection.objects[1].should be_instance_of SimpleObject
+
+          @simple_object.complex_collection.should be_instance_of ComplexCollection
+          @simple_object.reload.simple_collection.should be_instance_of ComplexCollection
+        end
       end
     end
   end

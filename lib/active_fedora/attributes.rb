@@ -39,16 +39,20 @@ module ActiveFedora
 
     def [](key)
       if attributes_as_lenses.key?(key)
+        # The attribute is stored in the RDF graph for this object
         super
       else
+        # The attribute is a delegate to a datastream
         array_reader(key)
       end
     end
 
     def []=(key, value)
       if attributes_as_lenses.key?(key)
+        # The attribute is stored in the RDF graph for this object
         super 
       else
+        # The attribute is a delegate to a datastream
         array_setter(key, value)
       end
     end

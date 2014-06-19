@@ -118,7 +118,7 @@ module ActiveFedora
     #
     # @param [Hash] conditions the conditions for the solr search to match
     # @param [Hash] opts 
-    # @option opts [Boolean] :cast when true, examine the model and cast it to the first known cModel
+    # @option opts [Boolean] :cast (true) when true, examine the model and cast it to the first known cModel
     def find_each( conditions={}, opts={})
       cast = opts.delete(:cast)
       find_in_batches(conditions, opts.merge({:fl=>SOLR_DOCUMENT_ID})) do |group|
@@ -193,11 +193,11 @@ module ActiveFedora
     end
 
     def class_to_load(resource, cast)
-      if @klass == ActiveFedora::Base && (cast || cast.nil?)
-        Model.from_class_uri(has_model_value(resource)) || ActiveFedora::Base
+      if @klass == ActiveFedora::Base && cast == false
+        ActiveFedora::Base
       else
-        # This is not correct. The class may be a subclass of @klass, so always use from_class_uri
-        @klass
+        # The true class may be a subclass of @klass, so always use from_class_uri
+        Model.from_class_uri(has_model_value(resource)) || ActiveFedora::Base
       end
     end
 
@@ -225,7 +225,6 @@ module ActiveFedora
     def find_some(ids, cast)
       ids.map{|id| find_one(id, cast)}
     end
-
 
     private 
 
@@ -274,8 +273,12 @@ module ActiveFedora
 
     # Return the solr clause that queries for this type of class
     def search_model_clause
+      # The concrete class could could be any subclass of @klass or @klass itself
       unless @klass == ActiveFedora::Base
-        return ActiveFedora::SolrService.construct_query_for_rel(:has_model => @klass.to_s)
+        clauses = ([@klass] + @klass.descendants).map do |k|
+          ActiveFedora::SolrService.construct_query_for_rel(has_model: k.to_s)
+        end
+        clauses.size == 1 ? clauses.first : "(#{clauses.join(" OR ")})"
       end
     end
 
