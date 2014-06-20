@@ -45,6 +45,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     subject.stub(:[]).with('page_ids').and_return([])
     subject.should_receive(:[]=).with('page_ids', [object.id])
  
+    expect(object).to receive(:[]).with('book_ids').and_return([]).twice
     object.should_receive(:[]=).with('book_ids', [subject.id])
  
     ac.concat object

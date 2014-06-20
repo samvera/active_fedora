@@ -107,8 +107,6 @@ describe ActiveFedora::Base do
     end
 
     describe "saving between the before and after hooks" do
-      require 'byebug'
-
       context "Add a complex_object into a simple_collection" do
         before do
           @simple_collection = SimpleCollection.create

@@ -104,7 +104,7 @@ describe ActiveFedora::Base do
         end
 
         it "should let you shift onto the association" do
-          @library.new_record?.should be_true
+          expect(@library).to be_new_record
           @library.books.size.should == 0
           @library.books.should == []
           @library.book_ids.should == []
