@@ -12,6 +12,24 @@ module ActiveFedora::Associations::Builder
 
     private
 
+      def define_readers
+        super
+
+        name = self.name
+        mixin.redefine_method("#{name.to_s.singularize}_ids") do
+          association(name).ids_reader
+        end
+      end
+
+      def define_writers
+        super
+
+        name = self.name
+        mixin.redefine_method("#{name.to_s.singularize}_ids=") do |ids|
+          association(name).ids_writer(ids)
+        end
+      end
+
       def configure_dependency
         if options[:dependent]
           unless [:destroy, :delete_all, :nullify, :restrict].include?(options[:dependent])

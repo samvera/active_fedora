@@ -22,7 +22,8 @@ module ActiveFedora
           logger.warn("has_and_belongs_to_many #{@reflection.inspect} is cowardly refusing to insert the inverse relationship into #{record}, because #{@owner} is not persisted yet.")
         elsif @reflection.options[:inverse_of]
           inverse = @reflection.inverse_of
-          record[@reflection.inverse_of.foreign_key] = [owner.id]
+          record[inverse.foreign_key] ||= []
+          record[inverse.foreign_key] += [owner.id]
           record.save
         end
 

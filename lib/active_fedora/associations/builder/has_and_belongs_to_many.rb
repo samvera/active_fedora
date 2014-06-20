@@ -7,13 +7,9 @@ module ActiveFedora::Associations::Builder
     def build
       reflection = super
       redefine_destroy
-      reflection
-    end
-
-    def define_readers
-      super
       accessor_name = "#{name.to_s.singularize}_ids"
       model.attribute accessor_name, [predicate, FedoraLens::Lenses.uris_to_ids]
+      reflection
     end
 
     private

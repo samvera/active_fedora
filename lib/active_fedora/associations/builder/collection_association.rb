@@ -36,22 +36,5 @@ module ActiveFedora::Associations::Builder
         model.send("#{full_callback_name}=", Array(options[callback_name.to_sym]))
       end
 
-      def define_readers
-        super
-
-        name = self.name
-        mixin.redefine_method("#{name.to_s.singularize}_ids") do
-          association(name).ids_reader
-        end
-      end
-
-      def define_writers
-        super
-
-        name = self.name
-        mixin.redefine_method("#{name.to_s.singularize}_ids=") do |ids|
-          association(name).ids_writer(ids)
-        end
-      end
   end
 end
