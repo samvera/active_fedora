@@ -38,17 +38,16 @@ module ActiveFedora::Rdf
 
     def build(attributes={})
       new_subject = attributes.key?('id') ? attributes.delete('id') : RDF::Node.new
-      node = make_node(new_subject)
-      node.attributes = attributes
-      if parent.kind_of? List::ListResource
-        parent.list << node
-        return node
-      elsif node.kind_of? RDF::List
-        self.push node.rdf_subject
-        return node
+      make_node(new_subject).tap do |node|
+        node.attributes = attributes
+        if parent.kind_of? List::ListResource
+          parent.list << node
+        elsif node.kind_of? RDF::List
+          self.push node.rdf_subject
+        else
+          self.push node
+        end
       end
-      self.push node
-      node
     end
 
     def first_or_create(attributes={})
@@ -74,7 +73,7 @@ module ActiveFedora::Rdf
     end
 
     def type_property
-      {:multivalue => true, :predicate => RDF.type}
+      { multivalue: true, predicate: RDF.type }
     end
 
     def reset!
@@ -126,8 +125,7 @@ module ActiveFedora::Rdf
       end
 
       def predicate
-        return property_config[:predicate] unless property.kind_of? RDF::URI
-        property
+        property.kind_of?(RDF::URI) ? property : property_config[:predicate]
       end
 
       def valid_datatype?(val)
@@ -136,9 +134,14 @@ module ActiveFedora::Rdf
 
       # Converts an object to the appropriate class.
       def convert_object(value)
-        value = value.object if value.kind_of? RDF::Literal
-        value = make_node(value) if value.kind_of? RDF::Resource
-        value
+        case value
+        when RDF::Literal
+          value.object 
+        when RDF::Resource
+          make_node(value)
+        else
+          value
+        end
       end
 
       ##
@@ -178,11 +181,8 @@ module ActiveFedora::Rdf
       end
 
       def class_for_property
-        klass = property_config[:class_name]
-        klass ||= ActiveFedora::Rdf::Resource
-        klass = ActiveFedora.class_from_string(klass, final_parent.class) if klass.kind_of? String
-        klass
+        klass = property_config[:class_name] || ActiveFedora::Rdf::Resource
+        klass.kind_of?(String) ? ActiveFedora.class_from_string(klass, final_parent.class) : klass
       end
-
   end
 end
