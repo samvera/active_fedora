@@ -10,7 +10,6 @@ module ActiveFedora
         @proxy = CollectionProxy.new(self)
       end
 
-
       # Implements the reader method, e.g. foo.items for Foo.has_many :items
       # @param opts [Boolean, Hash] if true, force a reload
       # @option opts [Symbol] :response_format can be ':solr' to return a solr result.
