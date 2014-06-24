@@ -93,7 +93,7 @@ module ActiveFedora
     def reload
       raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved" unless persisted?
       clear_association_cache
-      init_with(self.class.find(self.pid, cast: false).inner_object)
+      init_with_object(self.class.find(self.pid, cast: false).inner_object)
     end
 
     # Initialize an empty model object and set the +inner_obj+
@@ -104,9 +104,9 @@ module ActiveFedora
     #   end
     #
     #   post = Post.allocate
-    #   post.init_with(DigitalObject.find(pid))
+    #   post.init_with_object(DigitalObject.find(pid))
     #   post.properties.title # => 'hello world'
-    def init_with(inner_obj)
+    def init_with_object(inner_obj)
       @association_cache = {}
       @inner_object = inner_obj
       unless @inner_object.is_a? SolrDigitalObject
@@ -279,7 +279,7 @@ module ActiveFedora
       unless klass.ancestors.include? ActiveFedora::Base
         raise "Cannot adapt #{self.class.name} to #{klass.name}: Not a ActiveFedora::Base subclass"
       end
-      klass.allocate.init_with(inner_object)
+      klass.allocate.init_with_object(inner_object)
     end
 
     # Examines the :has_model assertions in the RELS-EXT.
@@ -328,7 +328,7 @@ module ActiveFedora
       if self.inner_object.is_a? DigitalObject
         raise "#{self.inspect} is already a full digital object"
       end
-      self.init_with DigitalObject.find(self.class,self.pid)
+      self.init_with_object DigitalObject.find(self.class,self.pid)
     end
     
     def self.pids_from_uris(uris) 

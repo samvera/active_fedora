@@ -59,8 +59,8 @@ describe ActiveFedora::Base do
         end
       end
       describe "and a pid is specified" do
-        it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
-          SpecModel::Basic.any_instance.should_receive(:init_with).and_return(SpecModel::Basic.new)
+        it "should use SpecModel::Basic.allocate.init_with_object to instantiate an object" do
+          SpecModel::Basic.any_instance.should_receive(:init_with_object).and_return(SpecModel::Basic.new)
           ActiveFedora::DigitalObject.should_receive(:find).and_return(double("inner obj", :'new?'=>false))
           SpecModel::Basic.find("_PID_").should be_a SpecModel::Basic
         end
@@ -73,8 +73,8 @@ describe ActiveFedora::Base do
       end
     end
     describe "with :cast" do
-      it "should use SpecModel::Basic.allocate.init_with to instantiate an object" do
-        SpecModel::Basic.any_instance.should_receive(:init_with).and_return(double("Model", :adapt_to_cmodel=>SpecModel::Basic.new ))
+      it "should use SpecModel::Basic.allocate.init_with_object to instantiate an object" do
+        SpecModel::Basic.any_instance.should_receive(:init_with_object).and_return(double("Model", :adapt_to_cmodel=>SpecModel::Basic.new ))
         ActiveFedora::DigitalObject.should_receive(:find).and_return(double("inner obj", :'new?'=>false))
         SpecModel::Basic.find("_PID_", :cast=>true)
       end

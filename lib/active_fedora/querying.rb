@@ -121,7 +121,7 @@ module ActiveFedora
         Deprecation.warn(Querying, "find_one's cast parameter will default to true in ActiveFedora 7.0.0. If you want to maintain your existing behavior set `false' as the second parameter.", caller)
       end
       inner = DigitalObject.find(self, pid)
-      af_base = self.allocate.init_with(inner)
+      af_base = self.allocate.init_with_object(inner)
       cast ? af_base.adapt_to_cmodel : af_base
     end
     
