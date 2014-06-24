@@ -1,9 +1,14 @@
+require 'forwardable'
+
 module ActiveFedora
-  class DatastreamHash < Hash
+  class DatastreamHash
+    extend Forwardable
+
+    def_delegators :@hash, *(Hash.instance_methods(false))
     
-    def initialize (obj)
+    def initialize (obj, &block)
       @obj = obj
-      super()
+      @hash = Hash.new &block
     end
 
     def [] (key)
@@ -11,18 +16,19 @@ module ActiveFedora
         ds = Datastream.new(@obj.inner_object, key, :controlGroup=>'X')
         self[key] = ds
       end
-      super
+      @hash[key]
     end 
 
     def []= (key, val)
       @obj.inner_object.datastreams[key]=val
-      super
-    end 
+      @hash[key]=val
+    end
 
     def freeze
       each_value do |datastream|
         datastream.freeze
       end
+      @hash.freeze
       super
     end
   end
