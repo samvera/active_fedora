@@ -38,7 +38,7 @@ describe ActiveFedora::SolrService do
     before(:all) do
       class AudioRecord
         attr_accessor :pid
-        def init_with(inner_obj)
+        def init_with_object(inner_obj)
           self.pid = inner_obj.pid
           self
         end

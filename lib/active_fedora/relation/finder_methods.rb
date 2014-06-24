@@ -170,7 +170,7 @@ module ActiveFedora
     def load_from_fedora(pid, cast)
       cast = true if klass == ActiveFedora::Base && cast.nil?
       inner = DigitalObject.find(klass, pid)
-      af_base = klass.allocate.init_with(inner)
+      af_base = klass.allocate.init_with_object(inner)
       cast ? af_base.adapt_to_cmodel : af_base
     end
 
