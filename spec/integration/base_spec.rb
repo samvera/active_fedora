@@ -252,7 +252,7 @@ describe ActiveFedora::Base do
   describe ".datastreams" do
     it "should return a Hash of datastreams from fedora" do
       datastreams = @test_object.datastreams
-      datastreams.should be_a_kind_of(Hash) 
+      datastreams.should be_a_kind_of(ActiveFedora::DatastreamHash) 
       datastreams.each_value do |ds| 
         ds.should be_a_kind_of(ActiveFedora::Datastream)
       end
