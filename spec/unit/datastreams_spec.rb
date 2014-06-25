@@ -96,6 +96,10 @@ describe ActiveFedora::Datastreams do
       subject.stub(:load_datastreams)
       subject.datastreams.should be_a_kind_of(ActiveFedora::DatastreamHash)
     end
+    
+    it "should round-trip to/from YAML" do
+      YAML.load(subject.datastreams.to_yaml).inspect.should == subject.datastreams.inspect
+    end
   end
 
   describe "#configure_datastream" do
