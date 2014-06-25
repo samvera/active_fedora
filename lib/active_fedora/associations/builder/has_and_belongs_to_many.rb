@@ -2,7 +2,7 @@ module ActiveFedora::Associations::Builder
   class HasAndBelongsToMany < CollectionAssociation #:nodoc:
     self.macro = :has_and_belongs_to_many
 
-    self.valid_options += [:inverse_of]
+    self.valid_options += [:inverse_of, :solr_page_size]
 
     def build
       reflection = super
