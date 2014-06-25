@@ -8,7 +8,7 @@ describe ActiveFedora do
   before(:all) do
     module SolrSpecModel
       class Basic < ActiveFedora::Base
-        def init_with(inner_obj)
+        def init_with_object(inner_obj)
         end
       end
     end

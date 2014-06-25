@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("RedCloth") # for RDoc formatting
   s.add_development_dependency("rake")
   s.add_development_dependency("jettywrapper", ">=1.4.0")
-  s.add_development_dependency("rspec", ">= 2.9.0")
+  s.add_development_dependency("rspec", "~> 2.9")
   s.add_development_dependency("equivalent-xml")
   s.add_development_dependency("rest-client")
   s.add_development_dependency("webmock")

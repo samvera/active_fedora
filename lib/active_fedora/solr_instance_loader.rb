@@ -28,7 +28,7 @@ module ActiveFedora
     private
 
     def allocate_object
-      active_fedora_class.allocate.init_with(solr_digital_object)
+      active_fedora_class.allocate.init_with_object(solr_digital_object)
     end
 
     def solr_digital_object

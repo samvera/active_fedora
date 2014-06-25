@@ -1,9 +1,14 @@
+require 'forwardable'
+
 module ActiveFedora
-  class DatastreamHash < Hash
-    
-    def initialize (obj)
+  class DatastreamHash
+    extend Forwardable
+
+    def_delegators :@hash, *(Hash.instance_methods(false))
+
+    def initialize (obj, &block)
       @obj = obj
-      super()
+      @hash = Hash.new &block
     end
 
     def [] (key)
@@ -11,12 +16,12 @@ module ActiveFedora
         ds = Datastream.new(@obj.inner_object, key, :controlGroup=>'X')
         self[key] = ds
       end
-      super
+      @hash[key]
     end 
 
     def []= (key, val)
-      @obj.inner_object.datastreams[key]=val# unless @obj.inner_object.new?
-      super
-    end 
+      @obj.inner_object.datastreams[key]=val
+      @hash[key]=val
+    end
   end
 end

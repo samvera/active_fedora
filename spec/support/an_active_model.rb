@@ -25,4 +25,10 @@ shared_examples_for "An ActiveModel" do
     subject
   end
 
+  # Because minitest assumes a method #assertions that is an integer.
+  attr_accessor :assertions
+  def assertions
+    @assertions ||= 0
+  end
+
 end
