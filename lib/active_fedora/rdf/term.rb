@@ -1,7 +1,7 @@
 module ActiveFedora::Rdf
   class Term
     attr_accessor :parent, :value_arguments, :node_cache
-    delegate *(Array.public_instance_methods - [:__send__, :__id__, :class, :object_id] + [:as_json]), :to => :result
+    delegate *(Array.public_instance_methods - [:__send__, :__id__, :class, :object_id] + [:as_json]), to: :result
     def initialize(parent, value_arguments)
       self.parent = parent
       self.value_arguments = value_arguments
@@ -12,11 +12,7 @@ module ActiveFedora::Rdf
     end
 
     def result
-      result = parent.query(:subject => rdf_subject, :predicate => predicate)
-      .map{|x| convert_object(x.object)}
-      .reject(&:nil?)
-      return result if !property_config || property_config[:multivalue]
-      result.first
+      Query.new(self)
     end
 
     def set(values)
@@ -92,6 +88,25 @@ module ActiveFedora::Rdf
       end
     end
 
+    def predicate
+      property.kind_of?(RDF::URI) ? property : property_config[:predicate]
+    end
+
+    ##
+    # Build a child resource or return it from this object's cache
+    #
+    # Builds the resource from the class_name specified for the
+    # property.
+    def make_node(value)
+      klass = class_for_value(value)
+      value = RDF::Node.new if value.nil?
+      node = node_cache[value] if node_cache[value]
+      node ||= klass.from_uri(value, parent)
+      return nil if property_config[:class_name] && class_for_value(value) != class_for_property
+      self.node_cache[value] ||= node
+      node
+    end
+
     protected
 
       def node_cache
@@ -108,7 +123,7 @@ module ActiveFedora::Rdf
           return
         end
         val = val.to_uri if val.respond_to? :to_uri
-        raise 'value must be an RDF URI, Node, Literal, or a valid datatype. See RDF::Literal' unless
+        raise "value must be an RDF URI, Node, Literal, or a valid datatype. See RDF::Literal. You specified #{val.class}" unless
           val.kind_of? RDF::Value or val.kind_of? RDF::Literal
         parent.insert [rdf_subject, predicate, val]
       end
@@ -124,39 +139,8 @@ module ActiveFedora::Rdf
         resource.persist! if resource.class.repository == :parent
       end
 
-      def predicate
-        property.kind_of?(RDF::URI) ? property : property_config[:predicate]
-      end
-
       def valid_datatype?(val)
         val.is_a? String or val.is_a? Date or val.is_a? Time or val.is_a? Numeric or val.is_a? Symbol or val == !!val
-      end
-
-      # Converts an object to the appropriate class.
-      def convert_object(value)
-        case value
-        when RDF::Literal
-          value.object 
-        when RDF::Resource
-          make_node(value)
-        else
-          value
-        end
-      end
-
-      ##
-      # Build a child resource or return it from this object's cache
-      #
-      # Builds the resource from the class_name specified for the
-      # property.
-      def make_node(value)
-        klass = class_for_value(value)
-        value = RDF::Node.new if value.nil?
-        node = node_cache[value] if node_cache[value]
-        node ||= klass.from_uri(value,parent)
-        return nil if property_config[:class_name] && class_for_value(value) != class_for_property
-        self.node_cache[value] ||= node
-        node
       end
 
       def final_parent

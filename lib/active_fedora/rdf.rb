@@ -9,6 +9,7 @@ module ActiveFedora
     autoload :Identifiable
     autoload :Repositories
     autoload :Resource
+    autoload :Query
     autoload :VocabularyLoader
     autoload :ObjectResource
     autoload :Term

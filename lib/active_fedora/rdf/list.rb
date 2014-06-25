@@ -53,6 +53,8 @@ module ActiveFedora::Rdf
       end
     end
 
+    # TODO we need a [] and a to_ary method that calls node_from_value
+
     ##
     # Override to return AF::Rdf::Resources as values, where
     # appropriate.
