@@ -1,3 +1,6 @@
+v6.7.8
+Backported changes from master for proper deserialization of ActiveFedora::DatastreamHash (Fixed #439) [Michael B. Klein]
+
 v6.7.7
 Backported changes from master for rubydora 1.7.1+ compatibility (Fixes #354). Upgraded rubydora to ~> 1.7.4. [David Chandek-Stark]
 
