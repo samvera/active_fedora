@@ -133,6 +133,7 @@ END
 
       subject
     end
+
     it "should have a subject" do
       subject.rdf_subject.to_s.should == "info:fedora/foo"
     end
@@ -164,16 +165,27 @@ END
       list.size.should == 4
     end
 
-    it "should update fields" do
-      list[3].elementValue = ["1900s"]
-      doc = Nokogiri::XML(subject.content)
-      ns = {rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#", mads: "http://www.loc.gov/mads/rdf/v1#"}
-      expect(doc.xpath('/rdf:RDF/mads:ComplexSubject/@rdf:about', ns).map(&:value)).to eq ["info:fedora/foo"]
-      expect(doc.xpath('//mads:ComplexSubject/mads:elementList/@rdf:parseType', ns).map(&:value)).to eq ["Collection"]
-      expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 1]/@rdf:about', ns).map(&:value)).to eq ["http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"]
-      expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 2]/mads:elementValue', ns).map(&:text)).to eq ["Relations with Mexican Americans"]
-      expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 3]/@rdf:about', ns).map(&:value)).to eq ["http://library.ucsd.edu/ark:/20775/bbXXXXXXX4"]
-      expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 4]/mads:elementValue', ns).map(&:text)).to eq ["1900s"]
+    describe "updating fields" do
+      it "stores the values in a containing node" do
+        list[3].elementValue = ["1900s"]
+        doc = Nokogiri::XML(subject.content)
+        ns = {rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#", mads: "http://www.loc.gov/mads/rdf/v1#"}
+        expect(doc.xpath('/rdf:RDF/mads:ComplexSubject/@rdf:about', ns).map(&:value)).to eq ["info:fedora/foo"]
+        expect(doc.xpath('//mads:ComplexSubject/mads:elementList/@rdf:parseType', ns).map(&:value)).to eq ["Collection"]
+        expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 1]/@rdf:about', ns).map(&:value)).to eq ["http://library.ucsd.edu/ark:/20775/bbXXXXXXX6"]
+        expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 2]/mads:elementValue', ns).map(&:text)).to eq ["Relations with Mexican Americans"]
+        expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 3]/@rdf:about', ns).map(&:value)).to eq ["http://library.ucsd.edu/ark:/20775/bbXXXXXXX4"]
+        expect(doc.xpath('//mads:ComplexSubject/mads:elementList/*[position() = 4]/mads:elementValue', ns).map(&:text)).to eq ["1900s"]
+        expect(RDF::List.new(list.rdf_subject, subject.graph)).to be_valid
+      end
+
+      it "should be a valid list" do
+        list << "Val"
+        # TODO this is a workaround for https://github.com/projecthydra/active_fedora/issues/444
+        # remove the following line when #444 is closed.
+        list.resource.persist!
+        expect(RDF::List.new(list.rdf_subject, subject.graph)).to be_valid
+      end
     end
   end
 end
