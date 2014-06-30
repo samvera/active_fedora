@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ActiveFedora::RDFDatastream do
   before do
-    class DummySubnode < ActiveFedora::Rdf::Resource
+    class DummySubnode < ActiveTriples::Resource
       property :title, :predicate => RDF::DC[:title], :class_name => RDF::Literal
       property :relation, :predicate => RDF::DC[:relation]
     end
@@ -216,9 +216,9 @@ describe ActiveFedora::RDFDatastream do
         subject.save
         @new_object.destroy
       end
-      it "should give back an AF::Rdf::Resource" do
+      it "should give back an ActiveTriples::Resource" do
         subject.reload
-        expect(subject.descMetadata.creator.first).to be_kind_of(ActiveFedora::Rdf::Resource)
+        expect(subject.descMetadata.creator.first).to be_kind_of(ActiveTriples::Resource)
         expect(subject.descMetadata.creator.first.rdf_subject).to eq @new_object.resource.rdf_subject
       end
     end

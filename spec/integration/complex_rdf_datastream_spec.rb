@@ -6,7 +6,7 @@ describe "Nested Rdf Objects" do
       class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
         property :parts, predicate: RDF::DC.hasPart, class_name: 'Component'
 
-        class Component < ActiveFedora::Rdf::Resource
+        class Component < ActiveTriples::Resource
           property :label, predicate: RDF::DC.title
         end
       end
@@ -134,7 +134,7 @@ END
         class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
           property :mediator, predicate: RDF::DC.mediator, class_name: 'MediatorUser'
 
-          class MediatorUser < ActiveFedora::Rdf::Resource
+          class MediatorUser < ActiveTriples::Resource
             configure type: RDF::DC.AgentClass
             property :title, predicate: RDF::DC.title
           end
@@ -189,12 +189,12 @@ END
           property :series, predicate: EbuCore.isEpisodeOf, class_name: 'Series'
           property :program, predicate: EbuCore.isEpisodeOf, class_name: 'Program'
 
-          class Series < ActiveFedora::Rdf::Resource
+          class Series < ActiveTriples::Resource
             configure type: 'http://www.ebu.ch/metadata/ontologies/ebucore#Series'
             property :title, predicate: EbuCore.title
           end
 
-          class Program  < ActiveFedora::Rdf::Resource
+          class Program  < ActiveTriples::Resource
             configure type: 'http://www.ebu.ch/metadata/ontologies/ebucore#Programme'
             property :title, predicate: EbuCore.title
           end

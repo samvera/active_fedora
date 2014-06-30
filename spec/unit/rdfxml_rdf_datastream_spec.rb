@@ -62,7 +62,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
           super
         end
 
-        class Description < ActiveFedora::Rdf::Resource
+        class Description < ActiveTriples::Resource
           configure :type => DAMS.Description
           property :value, :predicate => RDF.value do |index|
               index.as :searchable
