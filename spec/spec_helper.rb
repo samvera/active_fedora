@@ -15,6 +15,8 @@ require 'rspec'
 require 'rspec/its'
 require 'equivalent-xml/rspec_matchers'
 
+ActiveFedora::Base.logger = Logger.new(STDERR);
+
 Dir[File.expand_path("../support/**/*.rb", __FILE__)].each {|f| require f }
 require 'samples/samples'
 

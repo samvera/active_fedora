@@ -49,4 +49,5 @@ module ActiveFedora
     include Rdf::Identifiable
   end
 
+  ActiveSupport.run_load_hooks(:active_fedora, Base)
 end
