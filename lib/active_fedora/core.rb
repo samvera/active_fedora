@@ -3,6 +3,15 @@ module ActiveFedora
     extend ActiveSupport::Concern
     
     attr_reader :inner_object
+    included do
+      ##
+      # :singleton-method:
+      #
+      # Accepts a logger conforming to the interface of Log4r which is then
+      # passed on to any new database connections made and which can be
+      # retrieved on both a class and instance level by calling +logger+.
+      mattr_accessor :logger, instance_writer: false
+    end
 
     # Constructor.  You may supply a custom +:pid+, or we call the Fedora Rest API for the
     # next available Fedora pid, and mark as new object.

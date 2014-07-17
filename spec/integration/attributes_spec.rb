@@ -21,12 +21,12 @@ describe "delegating attributes" do
       obj
     end
     it "should keep a list of changes after a successful save" do
-      subject.previous_changes.should_not be_empty
-      subject.previous_changes.keys.should include("title")
+      expect(subject.previous_changes).to_not be_empty
+      expect(subject.previous_changes.keys).to include("title")
     end
     it "should clean out changes" do
-      subject.title_changed?.should be_false
-      subject.changes.should be_empty
+      expect(subject).to_not be_title_changed
+      expect(subject.changes).to be_empty
     end
   end
 end
