@@ -4,7 +4,7 @@ module ActiveFedora::Rdf
   # with a Datastream and ActiveFedora::Base object.
   #
   # @see ActiveFedora::RDFDatastream
-  class ObjectResource < Resource
+  class ObjectResource < ActiveTriples::Resource
     configure :base_uri => 'info:fedora/'
     attr_accessor :datastream
 

@@ -32,16 +32,16 @@ describe "Nesting attribute behavior of RDFDatastream" do
 
           accepts_nested_attributes_for :topic, :personalName
 
-          class Topic < ActiveFedora::Rdf::Resource
+          class Topic < ActiveTriples::Resource
             property :elementList, predicate: DummyMADS.elementList, class_name: "ComplexRDFDatastream::ElementList"
             accepts_nested_attributes_for :elementList
           end
-          class PersonalName < ActiveFedora::Rdf::Resource
+          class PersonalName < ActiveTriples::Resource
             property :elementList, predicate: DummyMADS.elementList, class_name: "ComplexRDFDatastream::ElementList"
             property :extraProperty, predicate: DummyMADS.elementValue, class_name: "ComplexRDFDatastream::Topic"
             accepts_nested_attributes_for :elementList, :extraProperty
           end
-          class ElementList < ActiveFedora::Rdf::List
+          class ElementList < ActiveTriples::List
             configure type: DummyMADS.elementList
             property :topicElement, predicate: DummyMADS.TopicElement, class_name: "ComplexRDFDatastream::MadsTopicElement"
             property :temporalElement, predicate: DummyMADS.TemporalElement
@@ -51,7 +51,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
             property :elementValue, predicate: DummyMADS.elementValue
             accepts_nested_attributes_for :topicElement
           end
-          class MadsTopicElement < ActiveFedora::Rdf::Resource
+          class MadsTopicElement < ActiveTriples::Resource
             configure :type => DummyMADS.TopicElement
             property :elementValue, predicate: DummyMADS.elementValue
           end
