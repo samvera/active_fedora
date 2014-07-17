@@ -125,7 +125,11 @@ module ActiveFedora
     end
 
     def retrieve_content
+      begin
       resp = orm.resource.client.get("#{uri}/fcr:content")
+      rescue Ldp::NotFound
+        return nil
+      end
       case resp.status
         when 200, 201
           resp.body
