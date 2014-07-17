@@ -30,15 +30,19 @@ module ActiveFedora
       @destroyed
     end
 
-    #Saves a Base object, and any dirty datastreams, then updates 
-    #the Solr index for this object.
-    def save(*)
-      # If it's a new object, set the conformsTo relationship for Fedora CMA
-      new_record? ? create : update_record
+    # Saves a Base object, and any dirty datastreams, then updates 
+    # the Solr index for this object, unless option :update_index=>false is present.
+    # Indexing is also controlled by the `create_needs_index?' and `update_needs_index?' methods.
+    #
+    # @param [Hash] options
+    # @option options [Boolean] :update_index (true) set false to skip indexing
+    # @return [Boolean] true if save was successful, otherwise false
+    def save(options={})
+      new_record? ? create(options) : update_record(options)
     end
 
-    def save!(*)
-      save
+    def save!(options={})
+      save(options)
     end
 
     # This can be overriden to assert a different model
@@ -126,13 +130,13 @@ module ActiveFedora
 
   protected
 
-    # Determines whether a create operation cause a solr index of this object.
-    # Override this if you need different behavior
+    # Determines whether a create operation causes a solr index of this object by default.
+    # Override this if you need different behavior.
     def create_needs_index?
       ENABLE_SOLR_UPDATES
     end
 
-    # Determines whether an update operation cause a solr index of this object.
+    # Determines whether an update operation causes a solr index of this object by default.
     # Override this if you need different behavior
     def update_needs_index?
       ENABLE_SOLR_UPDATES
@@ -141,14 +145,16 @@ module ActiveFedora
   private
     
     # Deals with preparing new object to be saved to Fedora, then pushes it and its datastreams into Fedora. 
-    def create
+    def create(options={})
       assign_pid
       assert_content_model
-      persist(create_needs_index?)
+      should_update_index = create_needs_index? && options.fetch(:update_index, true)
+      persist(should_update_index)
     end
 
-    def update_record
-      persist(update_needs_index?)
+    def update_record(options={})
+      should_update_index = update_needs_index? && options.fetch(:update_index, true)
+      persist(should_update_index)
     end
 
     # replace the unsaved digital object with a saved digital object
