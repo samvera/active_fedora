@@ -1,4 +1,3 @@
-require "loggable"
 require 'active_support'
 require "solrizer"
 require 'active_fedora/file_configurator'
@@ -100,10 +99,6 @@ module ActiveFedora #:nodoc:
     end
   end
 
-
-  
-  include Loggable
-  
   class << self
     attr_reader :fedora_config, :solr_config, :config_options
     attr_accessor :configurator

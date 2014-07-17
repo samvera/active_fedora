@@ -18,7 +18,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'om', '~> 3.0.0'
   s.add_dependency 'nom-xml', '>=0.5.1'
   s.add_dependency "activesupport", '>= 3.0.0'
-  s.add_dependency "mediashelf-loggable"
   s.add_dependency "rubydora", '~>1.7.4'
   s.add_dependency "linkeddata"
   s.add_dependency "rdf-rdfxml", '~>1.1.0'
@@ -35,7 +34,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "simplecov", '~> 0.7.1'
 
   s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.test_files    = `git ls-files -- {spec}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.extra_rdoc_files = [
     "LICENSE",
