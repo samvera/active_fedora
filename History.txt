@@ -1,4 +1,54 @@
-v7.0.0 Unreleased
+v7.1.0
+
+  2014-07-17: Update Om and Rubydora depencencies [Justin Coyne]
+
+  2014-07-17: Change the deprecation message so that it helps you find where the
+  problem is [Justin Coyne]
+
+  2014-06-30: Refactoring ActiveFedora::Rdf to use ActiveTriples [Tom Johnson]
+
+  2014-07-16: Make logger an accessor that can be set [Justin Coyne]
+
+  2014-07-16: Remove mediashelf-loggable [Justin Coyne]
+
+  2014-06-24: Replace ActiveFedora::Core#init_with with #init_with_object to avoid
+  a respond_to? false positive in Psych [Michael B. Klein]
+
+  2014-06-24: Have DatastreamHash delegate to a Hash instead of descending from
+  one [Michael B. Klein]
+
+  2014-06-24: Add solr_page_size as a valid option for HABTM [Justin Coyne]
+
+  2014-06-23: Refactor for style/readability [Justin Coyne]
+
+  2014-06-18: Adds :update_index option to `save' -- passing a false value will
+  prevent `update_index' from being called after the object is persisted.  The
+  `create_needs_index?' and `update_needs_index?' methods, however, will not be
+  overridden when they return false. [David Chandek-Stark]
+
+  2014-06-18: Fixed bug in ActiveFedora::FinderMethods#load_from_fedora so that it
+  casts when klass is ActiveFedora::Base and `cast' argument is nil, as intended.
+  Fixes #431 since by default it calls load_from_fedora(pid, nil) on each hit.
+  [David Chandek-Stark]
+
+  2014-06-13: Created pid instance variable so value can be retained after destroy
+  Fixes #422 [David Chandek-Stark]
+
+  2014-06-10: Added support to `exists?' finder method for a hash of conditions
+  Fixes #427 [David Chandek-Stark]
+
+  2014-06-10: Deprecate setting multiple attribute to scalar value Deprecate
+  setting unique attribute to enumerable value [David Chandek-Stark]
+
+  2014-06-10: Remove useage of RDF.Class from test code. That's not a real URI
+  [Justin Coyne]
+
+  2014-06-10: Peg rspec to ~> 2.99 [Justin Coyne]
+
+  2014-06-10: Put rspec options in a .rspec file for rspec 3 [Justin Coyne]
+
+
+v7.0.0
 
 Removed update_indexed_attributes, update_datastream_attributes, get_values_from_datastream
 
