@@ -13,7 +13,7 @@ describe ActiveFedora::FileConfigurator do
 
   describe "#initialize" do
     it "should trigger configuration reset (to empty defaults)" do
-      ActiveFedora::FileConfigurator.any_instance.should_receive(:reset!)
+      expect_any_instance_of(ActiveFedora::FileConfigurator).to receive(:reset!)
       ActiveFedora::FileConfigurator.new
     end 
   end
@@ -88,7 +88,7 @@ describe ActiveFedora::FileConfigurator do
         Dir.should_receive(:getwd).and_return("/current/working/directory")
         File.should_receive(:file?).with("/current/working/directory/config/fedora.yml").and_return(false)
         File.should_receive(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"),'config','fedora.yml'))).and_return(true)
-        logger.should_receive(:warn).with("Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml to ActiveFedora - ie. ActiveFedora.init(:fedora_config_path => '/path/to/fedora.yml') - or set Rails.root and put fedora.yml into \#{Rails.root}/config.")
+        expect(ActiveFedora::Base.logger).to receive(:warn).with("Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml to ActiveFedora - ie. ActiveFedora.init(:fedora_config_path => '/path/to/fedora.yml') - or set Rails.root and put fedora.yml into \#{Rails.root}/config.")
         subject.get_config_path(:fedora).should eql(File.expand_path(File.join(File.dirname("__FILE__"),'config','fedora.yml')))
       end
     end
@@ -120,7 +120,7 @@ describe ActiveFedora::FileConfigurator do
         Dir.should_receive(:getwd).and_return("/current/working/directory")
         File.should_receive(:file?).with("/current/working/directory/config/predicate_mappings.yml").and_return(false)
         File.should_receive(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"),'config','predicate_mappings.yml'))).and_return(true)
-        logger.should_receive(:warn).with("Using the default predicate_mappings.yml that comes with active-fedora.  If you want to override this, pass the path to predicate_mappings.yml to ActiveFedora - ie. ActiveFedora.init(:predicate_mappings_config_path => '/path/to/predicate_mappings.yml') - or set Rails.root and put predicate_mappings.yml into \#{Rails.root}/config.")
+        expect(ActiveFedora::Base.logger).to receive(:warn).with("Using the default predicate_mappings.yml that comes with active-fedora.  If you want to override this, pass the path to predicate_mappings.yml to ActiveFedora - ie. ActiveFedora.init(:predicate_mappings_config_path => '/path/to/predicate_mappings.yml') - or set Rails.root and put predicate_mappings.yml into \#{Rails.root}/config.")
         subject.get_config_path(:predicate_mappings).should eql(File.expand_path(File.join(File.dirname("__FILE__"),'config','predicate_mappings.yml')))
       end
     end
@@ -165,7 +165,7 @@ describe ActiveFedora::FileConfigurator do
           Dir.stub(:getwd => "/current/working/directory")
           File.should_receive(:file?).with("/current/working/directory/config/solr.yml").and_return(false)
           File.should_receive(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"),'config','solr.yml'))).and_return(true)
-          logger.should_receive(:warn).with("Using the default solr.yml that comes with active-fedora.  If you want to override this, pass the path to solr.yml to ActiveFedora - ie. ActiveFedora.init(:solr_config_path => '/path/to/solr.yml') - or set Rails.root and put solr.yml into \#{Rails.root}/config.")
+          expect(ActiveFedora::Base.logger).to receive(:warn).with("Using the default solr.yml that comes with active-fedora.  If you want to override this, pass the path to solr.yml to ActiveFedora - ie. ActiveFedora.init(:solr_config_path => '/path/to/solr.yml') - or set Rails.root and put solr.yml into \#{Rails.root}/config.")
           subject.get_config_path(:solr).should eql(File.expand_path(File.join(File.dirname("__FILE__"),'config','solr.yml')))
         end
       end
@@ -292,7 +292,7 @@ describe ActiveFedora::FileConfigurator do
     it "loads the config that ships with this gem as a last choice" do
       Dir.stub(:getwd).and_return("/fake/path")
       subject.stub(:load_solrizer_config)
-      logger.should_receive(:warn).with("Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml to ActiveFedora - ie. ActiveFedora.init(:fedora_config_path => '/path/to/fedora.yml') - or set Rails.root and put fedora.yml into \#{Rails.root}/config.").exactly(3).times
+      expect(ActiveFedora::Base.logger).to receive(:warn).with("Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml to ActiveFedora - ie. ActiveFedora.init(:fedora_config_path => '/path/to/fedora.yml') - or set Rails.root and put fedora.yml into \#{Rails.root}/config.").exactly(3).times
       subject.init
       expected_config = File.expand_path(File.join(File.dirname(__FILE__), "..", "..", "config"))
       subject.get_config_path(:fedora).should eql(expected_config+'/fedora.yml')

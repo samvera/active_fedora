@@ -127,7 +127,7 @@ describe ActiveFedora::OmDatastream do
     end
     it "should do nothing if field key is a string (must be an array or symbol).  Will not accept xpath queries!" do
       xml_before = @mods_ds.to_xml
-      logger.should_receive(:warn).with "WARNING: descMetadata ignoring {\"fubar\" => \"the role\"} because \"fubar\" is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it."
+      expect(ActiveFedora::Base.logger).to receive(:warn).with "WARNING: descMetadata ignoring {\"fubar\" => \"the role\"} because \"fubar\" is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it."
       @mods_ds.update_indexed_attributes( { "fubar"=>"the role" } ).should == {}
       @mods_ds.to_xml.should == xml_before
     end

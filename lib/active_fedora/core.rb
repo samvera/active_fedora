@@ -7,8 +7,7 @@ module ActiveFedora
       ##
       # :singleton-method:
       #
-      # Accepts a logger conforming to the interface of Log4r which is then
-      # passed on to any new database connections made and which can be
+      # Accepts a logger conforming to the interface of Log4r which can be
       # retrieved on both a class and instance level by calling +logger+.
       mattr_accessor :logger, instance_writer: false
     end

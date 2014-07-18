@@ -48,7 +48,7 @@ module ActiveFedora
           return obj.inner_object.fetch(field)
         rescue NoMethodError => e
           # couldn't get it from solr, so try from fedora.
-          logger.info "Couldn't get #{field} out of solr, because #{e.message}. Trying another way."
+          ActiveFedora::Base.logger.info "Couldn't get #{field} out of solr, because #{e.message}. Trying another way." if ActiveFedora::Base.logger
         end
       end
       # Load from fedora

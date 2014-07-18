@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "scoped queries" do
 
-  before(:each) do 
+  before do 
     module ModelIntegrationSpec
       class Basic < ActiveFedora::Base
         has_metadata "properties", type: ActiveFedora::SimpleDatastream do |m|
@@ -24,7 +24,7 @@ describe "scoped queries" do
 
   end
   
-  after(:each) do
+  after do
     Object.send(:remove_const, :ModelIntegrationSpec)
   end
 
@@ -56,9 +56,9 @@ describe "scoped queries" do
   end
 
   describe "with multiple objects" do
-    let!(:test_instance1) { ModelIntegrationSpec::Basic.create!(:foo=>'Beta', :bar=>'Chips')}
-    let!(:test_instance2) { ModelIntegrationSpec::Basic.create!(:foo=>'Alpha', :bar=>'Peanuts')}
-    let!(:test_instance3) { ModelIntegrationSpec::Basic.create!(:foo=>'Sigma', :bar=>'Peanuts')}
+    let!(:test_instance1) { ModelIntegrationSpec::Basic.create!(foo: ['Beta'], bar: ['Chips']) }
+    let!(:test_instance2) { ModelIntegrationSpec::Basic.create!(foo: ['Alpha'], bar: ['Peanuts']) }
+    let!(:test_instance3) { ModelIntegrationSpec::Basic.create!(foo: ['Sigma'], bar: ['Peanuts']) }
 
     describe "when the objects are in fedora" do
       after do
@@ -124,7 +124,7 @@ describe "scoped queries" do
         test_instance3.delete
       end
       it "should log an error" do
-        ActiveFedora::Relation.logger.should_receive(:error).with("Although #{pid} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
+        expect(ActiveFedora::Base.logger).to receive(:error).with("Although #{pid} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
         ModelIntegrationSpec::Basic.all.should == [test_instance1, test_instance3]
       end
     end

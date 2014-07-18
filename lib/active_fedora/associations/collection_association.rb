@@ -246,7 +246,7 @@ module ActiveFedora
           begin
             targets = find_target
           rescue ObjectNotFoundError => e
-            ActiveFedora::Base.logger.error "Solr and Fedora may be out of sync:\n" + e.message
+            ActiveFedora::Base.logger.error "Solr and Fedora may be out of sync:\n" + e.message if ActiveFedora::Base.logger
             reset
           end
 
