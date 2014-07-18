@@ -52,7 +52,7 @@ describe "Loading from solr" do
     expect(obj.date_uploaded).to eq [Date.parse('1959-01-01')]
     expect(obj.identifier).to eq 12345
     expect{obj.part}.to raise_error KeyError, "Tried to fetch `part' from solr, but it isn't indexed."
-    ActiveFedora::DatastreamAttribute.logger.should_receive(:info).with "Couldn't get duck out of solr, because the datastream 'MyOmDatastream' doesn't respond to 'primary_solr_name'. Trying another way."
+    expect(ActiveFedora::Base.logger).to receive(:info).with "Couldn't get duck out of solr, because the datastream 'MyOmDatastream' doesn't respond to 'primary_solr_name'. Trying another way."
     expect(obj.duck).to eq 'quack'
   end
 

@@ -15,10 +15,10 @@ module ActiveFedora
         ActiveFedora::Base.find(pid, cast: true).delete
         1
       rescue ActiveFedora::ObjectNotFoundError
-        logger.debug "The object #{pid} has already been deleted (or was never created)."
+        ActiveFedora::Base.logger.debug "The object #{pid} has already been deleted (or was never created)." if ActiveFedora::Base.logger
         0
       rescue Errno::ECONNREFUSED => e
-        logger.debug "Can't connect to Fedora! Are you sure jetty is running?"
+        ActiveFedora::Base.logger.debug "Can't connect to Fedora! Are you sure jetty is running?" if ActiveFedora::Base.logger
        0
       end
     end

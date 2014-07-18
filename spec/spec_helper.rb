@@ -14,14 +14,14 @@ require 'active-fedora'
 require 'rspec'
 require 'rspec/its'
 require 'equivalent-xml/rspec_matchers'
+require 'logger'
 
 ActiveFedora::Base.logger = Logger.new(STDERR);
+ActiveFedora::Base.logger.level = Logger::WARN
 
 Dir[File.expand_path("../support/**/*.rb", __FILE__)].each {|f| require f }
 require 'samples/samples'
 
-
-logger.level = Logger::WARN if logger.respond_to? :level ###MediaShelf StubLogger doesn't have a level= method
 $VERBOSE=nil
 
 # This loads the Fedora and Solr config info from /config/fedora.yml

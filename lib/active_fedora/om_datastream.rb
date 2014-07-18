@@ -5,7 +5,7 @@ module ActiveFedora
 
     before_save do
       if content.blank?
-        logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}"
+        ActiveFedora::Base.logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}" if ActiveFedora::Base.logger
         false
       end
     end
@@ -247,7 +247,7 @@ module ActiveFedora
       current_params = params.clone
       current_params.delete_if do |term_pointer,new_values| 
         if term_pointer.kind_of?(String)
-          logger.warn "WARNING: #{dsid} ignoring {#{term_pointer.inspect} => #{new_values.inspect}} because #{term_pointer.inspect} is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it."
+          ActiveFedora::Base.logger.warn "WARNING: #{dsid} ignoring {#{term_pointer.inspect} => #{new_values.inspect}} because #{term_pointer.inspect} is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it." if ActiveFedora::Base.logger
           true
         else
           !self.class.terminology.has_term?(*OM.destringify(term_pointer))

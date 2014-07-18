@@ -19,7 +19,7 @@ module ActiveFedora
         @owner.add_relationship(@reflection.options[:property], record)
 
         if @owner.new_record? and @reflection.options[:inverse_of]
-          logger.warn("has_and_belongs_to_many #{@reflection.inspect} is cowardly refusing to insert the inverse relationship into #{record}, because #{@owner} is not persisted yet.")
+          ActiveFedora::Base.logger.warn("has_and_belongs_to_many #{@reflection.inspect} is cowardly refusing to insert the inverse relationship into #{record}, because #{@owner} is not persisted yet.") if ActiveFedora::Base.logger
         elsif @reflection.options[:inverse_of]
           record.add_relationship(@reflection.options[:inverse_of], @owner)
           record.save

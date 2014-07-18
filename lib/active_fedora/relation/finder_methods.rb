@@ -107,7 +107,7 @@ module ActiveFedora
           begin 
             yield(load_from_fedora(hit[SOLR_DOCUMENT_ID], cast))
           rescue ActiveFedora::ObjectNotFoundError
-            logger.error "Although #{hit[SOLR_DOCUMENT_ID]} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch."
+            ActiveFedora::Base.logger.error "Although #{hit[SOLR_DOCUMENT_ID]} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch." if ActiveFedora::Base.logger
           end
         end
       end

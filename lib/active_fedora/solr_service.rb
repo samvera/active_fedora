@@ -4,8 +4,6 @@ module ActiveFedora
   class SolrService 
     extend Deprecation
     
-    include Loggable
-    
     attr_reader :conn
 
     def initialize(host, args)
@@ -76,7 +74,7 @@ module ActiveFedora
           end
         end
 
-        logger.warn "Could not find a model for #{hit["id"]}, defaulting to ActiveFedora::Base" unless best_model_match
+        ActiveFedora::Base.logger.warn "Could not find a model for #{hit["id"]}, defaulting to ActiveFedora::Base" unless best_model_match if ActiveFedora::Base.logger
         best_model_match || ActiveFedora::Base
       end
       

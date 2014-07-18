@@ -46,7 +46,7 @@ describe ActiveFedora::Base do
         end
       end
       it "should be able to skip a missing model" do 
-        ActiveFedora::Relation.logger.should_receive(:error).with("Although #{pid} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
+        expect(ActiveFedora::Base.logger).to receive(:error).with("Although #{pid} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
         SpecModel::Basic.destroy_all
         SpecModel::Basic.count.should == 1 
       end
