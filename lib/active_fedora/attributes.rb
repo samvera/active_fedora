@@ -141,10 +141,10 @@ module ActiveFedora
         define_method "#{field}=".to_sym do |v|
           if self.class.multiple?(field)
             unless v.nil? || v.respond_to?(:each)
-              Deprecation.warn(ActiveFedora::Attributes, "Setting an attribute defined as multiple to a scalar value is deprecated and will raise an ArgumentError in active-fedora 8.0.0")
+              Deprecation.warn(ActiveFedora::Attributes, "You attempted to set the attribute `#{field}' on `#{self.class}' to a scalar value. However, this attribute is declared as being multivalued. This behavior is deprecated and will raise an ArgumentError in active-fedora 8.0.0")
             end
           elsif v.respond_to?(:each) # unique
-            Deprecation.warn(ActiveFedora::Attributes, "Setting an attribute defined as unique to an enumerable value is deprecated and will raise an ArgumentError in active-fedora 8.0.0")
+            Deprecation.warn(ActiveFedora::Attributes, "You attempted to set the attribute `#{field}' on `#{self.class}' to an enumerable value. However, this attribute is declared as being singular. This behavior is deprecated and will raise an ArgumentError in active-fedora 8.0.0")
           end
           self[field]=v
         end
