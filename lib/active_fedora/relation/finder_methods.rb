@@ -189,7 +189,7 @@ module ActiveFedora
       raise ActiveFedora::ObjectNotFoundError if id.empty?
       resource = Ldp::Resource::RdfSource.new(FedoraLens.connection, klass.id_to_uri(id))
       raise ActiveFedora::ObjectNotFoundError if resource.new?
-      class_to_load(resource, cast).allocate.init_with(resource) # Triggers the find callback
+      class_to_load(resource, cast).allocate.init_with_resource(resource) # Triggers the find callback
     end
 
     def class_to_load(resource, cast)

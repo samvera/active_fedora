@@ -3,7 +3,6 @@ module ActiveFedora
     extend ActiveSupport::Concern
     extend ActiveSupport::Autoload
     include ActiveModel::Dirty
-    extend Deprecation
     
     autoload :Serializers
 

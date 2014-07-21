@@ -102,26 +102,6 @@ describe ActiveFedora::Base do
       end
     end
 
-    describe "deprecated behavior" do
-      before(:all) do
-        @behavior = ActiveFedora::Attributes.deprecation_behavior
-        ActiveFedora::Attributes.deprecation_behavior = :raise
-      end
-      after(:all) do
-        ActiveFedora::Attributes.deprecation_behavior = @behavior
-      end
-      it "should deprecate passing a string to a multiple attribute writer" do
-        expect { subject.fubar = "Quack" }.to raise_error
-        expect { subject.fubar = ["Quack"] }.not_to raise_error
-        expect { subject.fubar = nil }.not_to raise_error
-      end
-      it "should deprecate passing an enumerable to a unique attribute writer" do
-        expect { subject.cow = "Low" }.not_to raise_error
-        expect { subject.cow = ["Low"] }.to raise_error
-        expect { subject.cow = nil }.not_to raise_error
-      end
-    end
-
     it "should reveal the unique properties" do
       BarHistory2.unique?(:horse).should be false
       BarHistory2.unique?(:pig).should be true
@@ -145,11 +125,20 @@ describe ActiveFedora::Base do
       expect(subject.fubar(1)).to eq ['two']
     end
 
-    it "should raise an error when assigning an enumerable to a singular" do
-      expect {
-        subject.cow = ["one", "two"]
-      }.to raise_error ArgumentError, "You attempted to assign an enumerable value to the attribute cow, which is defined as singular"
+    describe "asigning wrong cardinality" do
+      it "should not allow passing a string to a multiple attribute writer" do
+        expect { subject.fubar = "Quack" }.to raise_error ArgumentError
+        expect { subject.fubar = ["Quack"] }.not_to raise_error
+        expect { subject.fubar = nil }.not_to raise_error
+      end
+      it "should deprecate passing an enumerable to a unique attribute writer" do
+        expect { subject.cow = "Low" }.not_to raise_error
+        expect { subject.cow = ["Low"]
+          }.to raise_error ArgumentError, "You attempted to set the attribute `cow' on `BarHistory2' to an enumerable value. However, this attribute is declared as being singular."
+        expect { subject.cow = nil }.not_to raise_error
+      end
     end
+
 
     it "should return an array if marked as multiple" do
       subject.horse=["neigh", "whinny"]

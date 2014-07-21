@@ -14,15 +14,13 @@ describe ActiveFedora::Persistence do
     subject { SpecNode.new }
 
     describe "#create_needs_index?" do
-      it "should be true" do
-        subject.send(:create_needs_index?).should be_true
-      end
+      subject { SpecNode.new.send(:create_needs_index?) }
+      it { should be true }
     end
 
     describe "#update_needs_index?" do
-      it "should be true" do
-        subject.send(:update_needs_index?).should be_true
-      end
+      subject { SpecNode.new.send(:update_needs_index?) }
+      it { should be true }
     end
   end
 
@@ -65,7 +63,7 @@ describe ActiveFedora::Persistence do
       context "on a persisted record" do
         before do
           allow(subject).to receive(:new_record?) { false }
-          allow(subject.inner_object).to receive(:save) { true }
+          allow_any_instance_of(Ldp::Orm).to receive(:save!) { true }
         end
         it "should not update the index" do
           expect(subject).to receive(:persist).with(false)
@@ -84,7 +82,7 @@ describe ActiveFedora::Persistence do
       context "on update" do
         before do
           allow(subject).to receive(:new_record?) { false }
-          allow(subject.inner_object).to receive(:save) { true }
+          allow_any_instance_of(Ldp::Orm).to receive(:save!) { true }
           allow(subject).to receive(:update_needs_index?) { false }
         end
         it "should not override `update_needs_index?'" do

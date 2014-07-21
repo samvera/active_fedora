@@ -55,9 +55,9 @@ module ActiveFedora
     #   end
     #
     #   post = Post.allocate
-    #   post.init_with(Ldp::Resource.new('http://example.com/post/1'))
+    #   post.init_with_resource(Ldp::Resource.new('http://example.com/post/1'))
     #   post.title # => 'hello world'
-    def init_with(resource)
+    def init_with_resource(resource)
       init_core(resource)
       @association_cache = {}
       load_datastreams

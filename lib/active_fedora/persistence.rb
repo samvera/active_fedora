@@ -134,7 +134,7 @@ module ActiveFedora
       assign_pid
       assert_content_model
       serialize_datastreams
-      result = super
+      result = super()
       assign_uri_to_datstreams
       should_update_index = create_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
@@ -143,7 +143,7 @@ module ActiveFedora
 
     def update_record(options = {})
       serialize_datastreams
-      result = super
+      result = super()
       should_update_index = update_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
       return !!result
