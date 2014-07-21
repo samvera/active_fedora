@@ -1,13 +1,12 @@
 module ActiveFedora
   module Attributes
     extend ActiveSupport::Concern
-    extend ActiveSupport::Autoload
     include ActiveModel::Dirty
     
-    autoload :Serializers
-
     included do
       include Serializers
+      include PrimaryKey
+
       after_save :clear_changed_attributes
       def clear_changed_attributes
         @previously_changed = changes

@@ -79,6 +79,15 @@ module ActiveFedora #:nodoc:
     autoload :SolrInstanceLoader
   end
 
+  module Attributes
+    extend ActiveSupport::Autoload
+
+    eager_autoload do
+      autoload :Serializers
+      autoload :PrimaryKey
+    end
+  end
+
   module Scoping
     extend ActiveSupport::Autoload
 
