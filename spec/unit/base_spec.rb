@@ -162,7 +162,7 @@ describe ActiveFedora::Base do
         @test_object.stub(new_record?: true)
         @test_object.should_receive(:assign_pid)
         @test_object.should_receive(:serialize_datastreams)
-        @test_object.orm.should_receive(:create)
+        @test_object.should_receive(:create_and_fetch_attributes)
         @test_object.should_receive(:update_index)
         @test_object.save
       end
