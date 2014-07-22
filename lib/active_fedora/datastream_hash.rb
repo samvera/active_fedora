@@ -6,8 +6,7 @@ module ActiveFedora
 
     def_delegators :@hash, *(Hash.instance_methods(false))
     
-    def initialize (obj, &block)
-      @obj = obj
+    def initialize (&block)
       @hash = Hash.new &block
     end
 

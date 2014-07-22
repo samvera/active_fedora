@@ -37,7 +37,7 @@ module ActiveFedora
     # Datastreams that have been modified in memory are given preference over 
     # the copy in Fedora.
     def datastreams
-      @datastreams ||= DatastreamHash.new(self)
+      @datastreams ||= DatastreamHash.new
     end
 
     def clear_datastreams
