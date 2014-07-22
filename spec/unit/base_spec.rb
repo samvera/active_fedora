@@ -191,8 +191,8 @@ describe ActiveFedora::Base do
       end
 
       it "should add pid, system_create_date, system_modified_date from object attributes" do
-        @test_object.should_receive(:create_date).and_return("2012-03-04T03:12:02Z")
-        @test_object.should_receive(:modified_date).and_return("2012-03-07T03:12:02Z")
+        expect(@test_object).to receive(:create_date).and_return("2012-03-04T03:12:02Z").twice
+        expect(@test_object).to receive(:modified_date).and_return("2012-03-07T03:12:02Z").twice
         @test_object.stub(pid: 'changeme:123')
         solr_doc = @test_object.to_solr
         solr_doc[ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)].should eql("2012-03-04T03:12:02Z")

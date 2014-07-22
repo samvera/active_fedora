@@ -124,12 +124,12 @@ describe ActiveFedora::Base do
     Object.send(:remove_const, :MockAFBaseRelationship)
   end
   
-  before(:each) do
+  before do
     @test_object = ActiveFedora::Base.new
     @test_object.save
   end
   
-  after(:each) do
+  after do
     begin
       @test_object.delete
     rescue
@@ -160,11 +160,11 @@ describe ActiveFedora::Base do
   end
   
   describe "#save" do
-    before(:each) do
+    before do
       @test_object2 = ActiveFedora::Base.new
     end
 
-    after(:each) do
+    after do
       @test_object2.delete
     end
     
