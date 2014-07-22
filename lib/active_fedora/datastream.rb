@@ -62,9 +62,10 @@ module ActiveFedora
     end
 
     def content
-      return @content if new_record?
-      @content ||= datastream_content
-      @content
+      local_or_remote_content(true)
+      # return @content if new_record?
+      # @content ||= datastream_content
+      # @content
     end
 
     def datastream_content
@@ -93,7 +94,8 @@ module ActiveFedora
 
 
     def content_changed?
-      !!@content
+      return true if new_record? and !local_or_remote_content(false).blank?
+      local_or_remote_content(false) != @ds_content
     end
 
     def changed?
@@ -111,8 +113,9 @@ module ActiveFedora
     def save
       return unless content_changed?
       raise "Can't generate uri because the parent object isn't saved" if digital_object.new_record?
-      payload = content.is_a?(IO) ? content.read : content
+      payload = behaves_like_io?(content) ? content.read : content
       resp = orm.resource.client.put content_path, payload, 'Content-Type' => mime_type
+      reset_attributes
       case resp.status
         when 201, 204
           changed_attributes.clear
@@ -223,6 +226,34 @@ module ActiveFedora
       query = orm.graph.query([RDF::URI.new(content_path), predicate, nil])
       stmt = query.first
       stmt.object.object if stmt
+    end
+
+    def reset_attributes
+      @content = nil
+    end
+
+    private
+
+    def local_or_remote_content(ensure_fetch = true)
+      return @content if new_record? 
+
+      @content ||= ensure_fetch ? datastream_content : @ds_content
+
+      if behaves_like_io?(@content)
+        begin
+          @content.rewind
+          @content.read
+        ensure
+          @content.rewind
+        end
+      else
+        @content
+      end
+    end
+
+    # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
+    def behaves_like_io?(obj)
+      obj.is_a?(IO) || obj.is_a?(StringIO) || (defined?(Rack) && obj.is_a?(Rack::Test::UploadedFile))
     end
 
   end

@@ -139,7 +139,7 @@ describe ActiveFedora::Base do
         book.collections.should == [collection]
       end
       it "habtm should not set foreign relationships if :inverse_of is not specified" do
-        collection['book_ids'].should be_nil
+        collection['book_ids'].should be_empty
       end
       it "should load the collections" do
         reloaded = Book.find(book.pid)
@@ -148,14 +148,14 @@ describe ActiveFedora::Base do
 
       describe "#empty?" do
         subject { book.collections }
-        its(:empty?) { should be_false }
+        it { should_not be_empty }
       end
     end
 
     context "when a book isn't in a collection" do 
       describe "#empty?" do
         subject { book.collections }
-        its(:empty?) { should be_true }
+        it { should be_empty }
       end
     end
   end
@@ -197,7 +197,7 @@ describe ActiveFedora::Base do
         book.save!
         book.reload
         book.collections.should == [collection2]
-        expect {Collection.find(collection1.pid)}.to_not be_nil
+        expect(Collection.find(collection1.pid)).to_not be_nil
       end
 
       it "destroy should cause the entries to be removed from RELS-EXT, but not destroy the original record" do
@@ -207,7 +207,7 @@ describe ActiveFedora::Base do
         book.save!
         book.reload
         book.collections.should == [collection2]
-        expect {Collection.find(collection1.pid)}.to_not be_nil
+        expect(Collection.find(collection1.pid)).to_not be_nil
       end
     end
 

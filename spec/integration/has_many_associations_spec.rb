@@ -22,7 +22,7 @@ describe "Collection members" do
         expect(library.books).not_to be_loaded
         expect(library.books.size).to eq(0)
         expect(library.books).to be_loaded
-        expect(library.books.any?).to be_false
+        expect(library.books.any?).to be false
       end
     end
   end
@@ -44,9 +44,9 @@ describe "Collection members" do
     end
 
     it "should cache the results" do
-      expect(library.books.loaded?).to be_false
+      expect(library.books).to_not be_loaded
       expect(library.books).to eq [book]
-      expect(library.books.loaded?).to be_true
+      expect(library.books).to be_loaded
     end
     it "should load from solr" do
       expect(library.books.load_from_solr.map {|r| r["id"]}).to eq([book.pid])
@@ -55,9 +55,9 @@ describe "Collection members" do
       expect(library.books.load_from_solr(rows: 0).size).to eq(0)
     end
     it "should respond to #any?" do
-      expect(library.books.any?).to be_true
-      expect(library.books.any? {|book| book.library == nil}).to be_false
-      expect(library.books.any? {|book| book.library == library}).to be_true
+      expect(library.books.any?).to be true
+      expect(library.books.any? {|book| book.library == nil}).to be false
+      expect(library.books.any? {|book| book.library == library}).to be true
     end
   end
 end

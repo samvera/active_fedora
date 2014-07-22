@@ -12,51 +12,63 @@ describe ActiveFedora::Datastream do
       end
     end
   
-    before do
-      @test_object = MockAFBase.create
-    end
+    let(:test_object) { MockAFBase.create }
     
     after do
-      @test_object.delete
+      test_object.destroy
     end
 
-    it "should be able to access Datastreams using datastreams method" do
-      descMetadata = @test_object.datastreams["descMetadata"]
-      descMetadata.should be_a_kind_of(ActiveFedora::Datastream)
-      descMetadata.dsid.should eql("descMetadata")
+    let(:descMetadata) {  test_object.datastreams["descMetadata"] }
+
+    describe "the datastream" do
+      subject { descMetadata }
+      it { should be_a_kind_of(ActiveFedora::Datastream) }
     end
 
-    it "should be able to access Datastream content using content method" do    
-      descMetadata = @test_object.datastreams["descMetadata"].content
-      descMetadata.should_not be_nil
+    describe "dsid" do
+      subject { descMetadata.dsid }
+      it { should eql("descMetadata") }
+    end
+
+    describe "#content" do
+      subject { descMetadata.content }
+      it { should_not be_nil }
     end
     
-    it "should be able to update XML Datastream content and save to Fedora" do    
-      xml_content = Nokogiri::XML::Document.parse(@test_object.datastreams["descMetadata"].content)
-      title = Nokogiri::XML::Element.new "title", xml_content
-      title.content = "Test Title"
-      xml_content.root.add_child title
-      
-      ds = @test_object.descMetadata
-      ds.stub(:before_save)
-      ds.content = xml_content.to_s
-      ds.save
-      
-      found = Nokogiri::XML::Document.parse(@test_object.class.find(@test_object.pid).datastreams['descMetadata'].content)
-      found.xpath('//dc/title/text()').first.inner_text.should == title.content
+
+    context "an XML datastream" do
+      let(:xml_content) { Nokogiri::XML::Document.parse(descMetadata.content) }
+      let(:title) { Nokogiri::XML::Element.new "title", xml_content }
+      before do 
+        title.content = "Test Title"
+        xml_content.root.add_child title
+        
+        allow(descMetadata).to receive(:before_save)
+        descMetadata.content = xml_content.to_s
+        descMetadata.save
+      end
+
+      let(:found) { Nokogiri::XML::Document.parse(test_object.reload.descMetadata.content) }
+
+      subject { found.xpath('//dc/title/text()').first.inner_text }
+      it { should eq title.content }
     end
     
-    it "should be able to update Blob Datastream content and save to Fedora" do    
-      dsid = "ds#{Time.now.to_i}"
-      ds = ActiveFedora::Datastream.new(@test_object, dsid)
-      ds.content = fixture('dino.jpg')
-      @test_object.add_datastream(ds).should be_true
-      @test_object.save
-      @test_object.datastreams[dsid].should_not be_changed
-      to = ActiveFedora::Base.find(@test_object.pid) 
-      to.should_not be_nil 
-      to.datastreams[dsid].should_not be_nil
-      to.datastreams[dsid].content.should == fixture('dino.jpg').read
+    context "an Blob datastream" do
+      let(:dsid) { "ds#{Time.now.to_i}" }
+      let(:content) { fixture('dino.jpg') }
+      # let(:content) { StringIO.new("ONETWOTHREE") }
+      let(:datastream) { ActiveFedora::Datastream.new(test_object, dsid).tap { |ds| ds.content = content } }
+
+      it "should be able to update Blob Datastream content and save to Fedora" do    
+        expect(test_object.add_datastream(datastream)).to eq dsid
+        test_object.save
+        expect(test_object.datastreams[dsid]).to_not be_changed
+        expect(test_object.reload).to_not be_nil 
+        expect(test_object.datastreams[dsid]).to_not be_nil
+        content.rewind
+        expect(test_object.datastreams[dsid].content).to eq content.read
+      end
     end
     
   end
