@@ -104,7 +104,7 @@ describe ActiveFedora::RDFDatastream do
         end
 
         it "should be persisted" do
-          expect(subject.descMetadata.resource.persisted?).to be_true
+          expect(subject.descMetadata.resource).to be_persisted
         end
 
         context "and it's reloaded" do

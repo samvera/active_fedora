@@ -72,7 +72,7 @@ module ActiveFedora
 
       def ids_from_sitemap_index
         ids = []
-        sitemap_index_uri = ActiveFedora::Base.id_to_uri('/sitemap')
+        sitemap_index_uri = FedoraLens.host + '/sitemap'
         sitemap_index = Nokogiri::XML(open(sitemap_index_uri))
         sitemap_uris = sitemap_index.xpath("//sitemap:loc/text()", sitemap_index.namespaces)
         sitemap_uris.map(&:to_s).each do |sitemap_uri|

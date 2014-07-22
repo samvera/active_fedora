@@ -56,8 +56,7 @@ module ActiveFedora::Rdf::Identifiable
     # for URI configurations not of form base_uri + pid
     # @param [RDF::URI] uri URI to convert to pid
     def pid_from_subject(uri)
-      base_uri = resource_datastream ? self.ds_specs[resource_datastream.to_s][:type].resource_class.base_uri : ActiveFedora::Rdf::ObjectResource.base_uri
-      uri.to_s.gsub(base_uri, "")
+      ActiveFedora::Base.uri_to_id(uri)
     end
   end
 end

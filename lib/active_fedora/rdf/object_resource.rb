@@ -30,7 +30,7 @@ module ActiveFedora::Rdf
         elsif RDF::URI(uri_or_str).valid? and (URI.scheme_list.include?(RDF::URI.new(uri_or_str).scheme.upcase) or RDF::URI.new(uri_or_str).scheme == 'info')
           RDF::URI(uri_or_str)
         elsif base_uri && !uri_or_str.start_with?(base_uri.to_s)
-          RDF::URI(self.base_uri.to_s + uri_or_str)
+          RDF::URI(ActiveFedora::Base.id_to_uri(uri_or_str))
         else
           raise RuntimeError, "could not make a valid RDF::URI from #{uri_or_str}"
         end
