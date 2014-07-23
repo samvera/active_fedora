@@ -14,8 +14,6 @@ module ActiveFedora
     attr_accessor :last_modified
 
     attribute :has_content, [ActiveFedora::Rdf::Fcrepo.hasContent, FedoraLens::Lenses.single]
-    # original_name is set automatically if you send a Content-Disposition header to Fc4
-    attribute :original_name, [ RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasOriginalName"), FedoraLens::Lenses.single, FedoraLens::Lenses.literal_to_string ]
 
     # @param digital_object [DigitalObject] the digital object that this object belongs to
     # @param dsid [String] the datastream id, if this is nil, a datastream id will be generated.
@@ -78,19 +76,19 @@ module ActiveFedora
       @mime_type || default_mime_type
     end
 
-    def has_content?
-      has_content.present? || @content.present?
-    end
-
-
-    def default_mime_type
-      'text/plain'
+    # original_name is set automatically if you send a Content-Disposition header to Fc4
+    def original_name
+      @original_name ||= fetch_original_name_from_content_node
     end
 
     def size
       query_content_node RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasSize")
     end
 
+    
+    def has_content?
+      has_content.present? || @content.present?
+    end
 
     def content_changed?
       return true if new_record? and !local_or_remote_content(false).blank?
@@ -113,7 +111,9 @@ module ActiveFedora
       return unless content_changed?
       raise "Can't generate uri because the parent object isn't saved" if digital_object.new_record?
       payload = behaves_like_io?(content) ? content.read : content
-      resp = orm.resource.client.put content_path, payload, 'Content-Type' => mime_type
+      headers = { 'Content-Type' => mime_type }
+      headers['Content-Disposition'] = "attachment; filename=\"#{@original_name}\"" if @original_name
+      resp = orm.resource.client.put content_path, payload, headers
       reset_attributes
       case resp.status
         when 201, 204
@@ -178,7 +178,11 @@ module ActiveFedora
     def default_attributes= attributes
       @default_attributes = default_attributes.merge attributes
     end
-    
+
+    def original_name= name
+      @original_name = name
+    end
+
     def inspect
       "#<#{self.class} uri=\"#{uri}\" changed=\"#{changed?}\" >"
     end
@@ -215,6 +219,10 @@ module ActiveFedora
 
     protected
 
+    def default_mime_type
+      'text/plain'
+    end
+
     def content_url
       "#{uri}/fcr:content"
     end
@@ -237,6 +245,10 @@ module ActiveFedora
     # a prefix other than the default
     def prefix
       "#{dsid.underscore}__"
+    end
+
+    def fetch_original_name_from_content_node
+      query_content_node(RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasOriginalName"))
     end
 
     def fetch_mime_type_from_content_node

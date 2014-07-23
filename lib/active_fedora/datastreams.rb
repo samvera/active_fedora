@@ -99,6 +99,7 @@ module ActiveFedora
     # @option opts [String] :dsid The datastream id
     # @option opts [String] :prefix The datastream prefix (for auto-generated dsid)
     # @option opts [String] :mime_type The Mime-Type of the file
+    # @option opts [String] :original_name The original name of the file (used for Content-Disposition)
     def add_file_datastream(file, opts={})
       attrs = {blob: file, prefix: opts[:prefix]}
       ds = create_datastream(self.class.datastream_class_for_name(opts[:dsid]), opts[:dsid], attrs)
@@ -108,6 +109,7 @@ module ActiveFedora
       else
         opts[:mime_type]
       end
+      ds.original_name = opts[:original_name] if opts.key?(:original_name)
       add_datastream(ds).tap do |dsid|
         self.class.build_datastream_accessor(dsid) unless respond_to? dsid
       end

@@ -73,9 +73,25 @@ describe ActiveFedora::Datastream do
   end
 
   context "original_name" do
-    before { datastream.original_name = "my_image.png" }
     subject { datastream.original_name }
 
-    it { should eq "my_image.png" }
+    context "on a new datastream" do
+      before { datastream.original_name = "my_image.png" }
+      it { should eq "my_image.png" }
+    end
+
+    context "when its saved" do
+      let(:parent) { ActiveFedora::Base.create }
+      before do
+        parent.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm', original_name: "my_image.png")
+        parent.save!
+      end
+
+      it "should have original_name" do
+        parent.reload
+        parent.reload.abcd.original_name.should eq 'my_image.png'
+      end
+
+    end
   end
 end
