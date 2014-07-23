@@ -14,6 +14,8 @@ module ActiveFedora
     attr_accessor :last_modified
 
     attribute :has_content, [ActiveFedora::Rdf::Fcrepo.hasContent, FedoraLens::Lenses.single]
+    # original_name is set automatically if you send a Content-Disposition header to Fc4
+    attribute :original_name, [ RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasOriginalName"), FedoraLens::Lenses.single, FedoraLens::Lenses.literal_to_string ]
 
     # @param digital_object [DigitalObject] the digital object that this object belongs to
     # @param dsid [String] the datastream id, if this is nil, a datastream id will be generated.

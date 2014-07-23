@@ -19,8 +19,6 @@ module ActiveFedora
         end
         alias_method_chain :inherited, :datastreams
       end
-
-      #before_save :serialize_datastreams
     end
 
     def ds_specs

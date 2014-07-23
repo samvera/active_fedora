@@ -2,8 +2,9 @@ require 'spec_helper'
 
 describe ActiveFedora::Datastream do
   let(:parent) { double('inner object', uri: '/fedora/rest/test/1234', id: '1234', new_record?: true) }
+  let(:datastream) { ActiveFedora::Datastream.new(parent, 'abcd') }
 
-  subject { ActiveFedora::Datastream.new(parent, 'abcd') }
+  subject { datastream }
 
   context "has content" do
 
@@ -11,7 +12,7 @@ describe ActiveFedora::Datastream do
       subject.content = "hi there"
     end
 
-    its(:metadata?) { should be_false }
+    its(:metadata?) { should be false }
 
     it "should escape dots in  to_param" do
       subject.stub(:dsid).and_return('foo.bar')
@@ -19,7 +20,7 @@ describe ActiveFedora::Datastream do
     end
 
     it "should have content" do
-      expect(subject.has_content?).to be_true
+      expect(subject).to have_content
     end
 
     it "should be inspectable" do
@@ -59,19 +60,22 @@ describe ActiveFedora::Datastream do
   end
 
   context "does not have local content" do
-    it "should have content" do
-      expect(subject.has_content?).to be_false
-    end
-    describe ".has_content?" do
+    it { should_not have_content }
+
+    describe "#has_content?" do
       context "when the graph has content" do
         before do
           subject.has_content = RDF::URI.new(subject.content_path)
         end
-        it "should load the hasContent attribute from the fedora repository" do
-
-          expect(subject.has_content?).to be_true
-        end
+        it { should have_content }
       end
     end
+  end
+
+  context "original_name" do
+    before { datastream.original_name = "my_image.png" }
+    subject { datastream.original_name }
+
+    it { should eq "my_image.png" }
   end
 end
