@@ -37,7 +37,7 @@ describe ActiveFedora::SolrService do
       result = ActiveFedora::SolrService.reify_solr_results(solr_result)
       result.length.should == 2
       result.each do |r|
-        (r.class == ActiveFedora::Base || r.class == FooObject).should be_true
+        (r.class == ActiveFedora::Base || r.class == FooObject).should be true
       end
     end
     

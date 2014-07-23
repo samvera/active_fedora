@@ -74,7 +74,7 @@ describe ActiveFedora::SolrDigitalObject do
         subject.datastreams['properties'].should be_kind_of ActiveFedora::OmDatastream
       end
 
-      its(:new_record?) { should be_false }
+      it { should_not be_new_record }
     end
     
     describe "with a ds spec that's not part of the solrized object" do

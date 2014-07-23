@@ -52,13 +52,13 @@ describe ActiveFedora::Model do
     end
 
     it "should have all?" do
-      expect(subject.all? { |t| t.foo == ['Alpha']}).to be_false
-      expect(subject.all? { |t| t.bar == ['Peanuts']}).to be_true
+      expect(subject.all? { |t| t.foo == ['Alpha']}).to be false
+      expect(subject.all? { |t| t.bar == ['Peanuts']}).to be true
     end
 
     it "should have include?" do
-      expect(subject.include?(instance1)).to be_false
-      expect(subject.include?(instance2)).to be_true
+      expect(subject.include?(instance1)).to be false
+      expect(subject.include?(instance2)).to be true
     end
   end
 end

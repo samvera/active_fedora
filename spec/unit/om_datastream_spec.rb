@@ -30,7 +30,7 @@ describe ActiveFedora::OmDatastream do
 
   subject { ActiveFedora::OmDatastream.new @mock_inner, 'descMetadata' }
   
-  its(:metadata?) { should be_true}
+  it { should be_metadata }
 
   it "should include the Solrizer::XML::TerminologyBasedSolrizer for .to_solr support" do
     ActiveFedora::OmDatastream.included_modules.should include(OM::XML::TerminologyBasedSolrizer)
@@ -217,13 +217,13 @@ describe ActiveFedora::OmDatastream do
       subject.stub(:new? => false )
       subject.content = "<a />"
       subject.ng_xml.to_xml.should =~ /<a\/>/
-      subject.xml_loaded.should be_true
+      subject.xml_loaded.should be true
     end
   end
   
   describe 'ng_xml=' do
     before do
-      @mock_inner.stub(:new_record? => true)
+      allow(@mock_inner).to receive(:new_record?).and_return(true)
       @test_ds2 = ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata")
     end
     it "should parse raw xml for you" do

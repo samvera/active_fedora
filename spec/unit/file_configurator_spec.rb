@@ -233,9 +233,9 @@ describe ActiveFedora::FileConfigurator do
           subject.instance_variable_set :@config_loaded, nil
         end
         it "should load the fedora and solr configs" do
-          subject.config_loaded?.should be_false
+          expect(subject).to_not be_config_loaded
           subject.load_configs
-          subject.config_loaded?.should be_true
+          expect(subject).to be_config_loaded
         end
       end
       describe "when config is loaded" do
@@ -244,9 +244,9 @@ describe ActiveFedora::FileConfigurator do
         end
         it "should load the fedora and solr configs" do
           subject.should_receive(:load_config).never
-          subject.config_loaded?.should be_true
+          expect(subject).to be_config_loaded
           subject.load_configs
-          subject.config_loaded?.should be_true
+          expect(subject).to be_config_loaded
         end
       end
     end
@@ -349,23 +349,23 @@ describe ActiveFedora::FileConfigurator do
 
   describe ".valid_predicate_mapping" do
     it "should return true if the predicate mapping has the appropriate keys and value types" do
-      subject.send(:valid_predicate_mapping?,default_predicate_mapping_file).should be_true
+      subject.send(:valid_predicate_mapping?, default_predicate_mapping_file).should be true
     end
     it "should return false if the mapping is missing the :default_namespace" do
-      mock_yaml({:default_namespace0=>"my_namespace",:predicate_mapping=>{:key0=>"value0", :key1=>"value1"}},"/path/to/predicate_mappings.yml")
-      subject.send(:valid_predicate_mapping?,"/path/to/predicate_mappings.yml").should be_false
+      mock_yaml({:default_namespace0=>"my_namespace", :predicate_mapping=>{:key0=>"value0", :key1=>"value1"}},"/path/to/predicate_mappings.yml")
+      subject.send(:valid_predicate_mapping?, "/path/to/predicate_mappings.yml").should be false
     end
     it "should return false if the :default_namespace is not a string" do
       mock_yaml({:default_namespace=>{:foo=>"bar"}, :predicate_mapping=>{:key0=>"value0", :key1=>"value1"}},"/path/to/predicate_mappings.yml")
-      subject.send(:valid_predicate_mapping?,"/path/to/predicate_mappings.yml").should be_false
+      subject.send(:valid_predicate_mapping?,"/path/to/predicate_mappings.yml").should be false
     end
     it "should return false if the :predicate_mappings key is missing" do
       mock_yaml({:default_namespace=>"a string"},"/path/to/predicate_mappings.yml")
-      subject.send(:valid_predicate_mapping?,"/path/to/predicate_mappings.yml").should be_false
+      subject.send(:valid_predicate_mapping?,"/path/to/predicate_mappings.yml").should be false
     end
     it "should return false if the :predicate_mappings key is not a hash" do
       mock_yaml({:default_namespace=>"a string",:predicate_mapping=>"another string"},"/path/to/predicate_mappings.yml")
-      subject.send(:valid_predicate_mapping?,"/path/to/predicate_mappings.yml").should be_false
+      subject.send(:valid_predicate_mapping?,"/path/to/predicate_mappings.yml").should be false
     end
 
   end

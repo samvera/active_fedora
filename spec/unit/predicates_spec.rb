@@ -38,7 +38,7 @@ describe ActiveFedora::Predicates do
     end
 
     it "should provide mappings to the fedora ontology via the http://fedora.info/definitions/v4/rels-ext# default namespace mapping" do
-      ActiveFedora::Predicates.predicate_mappings.keys.include?(ActiveFedora::Predicates.default_predicate_namespace).should be_true
+      ActiveFedora::Predicates.predicate_mappings.keys.include?(ActiveFedora::Predicates.default_predicate_namespace).should be true
       ActiveFedora::Predicates.predicate_mappings[ActiveFedora::Predicates.default_predicate_namespace].should be_kind_of Hash
     end
 

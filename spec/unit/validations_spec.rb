@@ -41,10 +41,7 @@ describe ActiveFedora::Base do
   end
 
   describe "required terms" do
-    it "should be required" do
-       subject.required?(:fubar).should be_true
-       subject.required?(:swank).should be_false
-    end
+    it { should be_required(:fubar) }
+    it { should_not be_required(:swank) }
   end
-
 end

@@ -15,16 +15,20 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
 
   it "should set the relationship attribute" do
     subject = Book.new('subject:a')
-    subject.stub(:new_record? => false, save: true)
-    predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {:property=>'predicate'}, Book)
-    ActiveFedora::SolrService.stub(:query).and_return([])
+    allow(subject).to receive(:new_record?).and_return(false)
+    allow(subject).to receive(:save).and_return(true)
+
+    predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {property: 'predicate'}, Book)
+    allow(ActiveFedora::SolrService).to receive(:query).and_return([])
     ac = ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, predicate)
-    ac.should_receive(:callback).twice
+    expect(ac).to receive(:callback).twice
     object = Page.new
-    object.stub(:new_record? => false, save: true, id: '1234')
+    allow(object).to receive(:new_record?).and_return(false)
+    allow(object).to receive(:save).and_return(true)
+    allow(object).to receive(:id).and_return('1234')
   
-    subject.stub(:[]).with('page_ids').and_return([])
-    subject.should_receive(:[]=).with('page_ids', ['1234'])
+    allow(subject).to receive(:[]).with('page_ids').and_return([])
+    expect(subject).to receive(:[]=).with('page_ids', ['1234'])
  
     ac.concat object
 
@@ -32,21 +36,23 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
 
   it "should set the relationship attribute on subject and object when inverse_of is given" do
     subject = Book.new('subject:a')
-    subject.stub(:new_record? => false, save: true)
+    allow(subject).to receive(:new_record?).and_return(false)
+    allow(subject).to receive(:save).and_return(true)
 
     Page.create_reflection(:has_and_belongs_to_many, 'books', {:property=>'inverse_predicate'}, Page)
     predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {:property=>'predicate', :inverse_of => 'books'}, Book)
-    ActiveFedora::SolrService.stub(:query).and_return([])
+    allow(ActiveFedora::SolrService).to receive(:query).and_return([])
     ac = ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, predicate)
-    ac.should_receive(:callback).twice
+    expect(ac).to receive(:callback).twice
     object = Page.new('object:b')
-    object.stub(:new_record? => false, save: true)
+    allow(object).to receive(:new_record?).and_return(false)
+    allow(object).to receive(:save).and_return(true)
   
-    subject.stub(:[]).with('page_ids').and_return([])
-    subject.should_receive(:[]=).with('page_ids', [object.id])
+    allow(subject).to receive(:[]).with('page_ids').and_return([])
+    expect(subject).to receive(:[]=).with('page_ids', [object.id])
  
     expect(object).to receive(:[]).with('book_ids').and_return([]).twice
-    object.should_receive(:[]=).with('book_ids', [subject.id])
+    expect(object).to receive(:[]=).with('book_ids', [subject.id])
  
     ac.concat object
 
@@ -55,15 +61,16 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
   it "should call solr query multiple times" do
 
     subject = Book.new('subject:a')
-    subject.stub(:new_record? => false, save: true)
+    allow(subject).to receive(:new_record?).and_return(false)
+    allow(subject).to receive(:save).and_return(true)
     predicate = Book.create_reflection(:has_and_belongs_to_many, 'pages', {:property=>'predicate', :solr_page_size => 10}, Book)
     ids = []
     0.upto(15) {|i| ids << i.to_s}
     query1 = ids.slice(0,10).map {|i| "_query_:\"{!raw f=id}#{i}\""}.join(" OR ")
     query2 = ids.slice(10,10).map {|i| "_query_:\"{!raw f=id}#{i}\""}.join(" OR ")
-    subject.should_receive(:[]).with('page_ids').and_return(ids)
-    ActiveFedora::SolrService.should_receive(:query).with(query1, {:rows=>10}).and_return([])
-    ActiveFedora::SolrService.should_receive(:query).with(query2, {:rows=>10}).and_return([])
+    expect(subject).to receive(:[]).with('page_ids').and_return(ids)
+    expect(ActiveFedora::SolrService).to receive(:query).with(query1, {:rows=>10}).and_return([])
+    expect(ActiveFedora::SolrService).to receive(:query).with(query2, {:rows=>10}).and_return([])
 
     ac = ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, predicate)
     ac.find_target
@@ -94,7 +101,8 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     let(:collection) { Collection.create().tap {|c| c.members << thing} }
 
     it "should call destroy" do
-      expect(collection.destroy).to_not raise_error
+      # this is a pretty weak test
+      expect { collection.destroy }.to_not raise_error
     end
 
   end

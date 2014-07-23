@@ -4,9 +4,10 @@ require 'spec_helper'
 describe ActiveFedora::RDFDatastream do
   describe "a new instance" do
     subject { ActiveFedora::RDFDatastream.new(double(new_record?: true, uri: '/test:1') , 'descMetadata') }
-    its(:metadata?) { should be_true}
-    its(:content_changed?) { should be_false}
+    it { should be_metadata }
+    it { should_not be_content_changed }
   end
+
   describe "an instance that exists in the datastore, but hasn't been loaded" do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
@@ -30,7 +31,7 @@ describe ActiveFedora::RDFDatastream do
 
     it "should not load the descMetadata datastream when calling content_changed?" do
       subject.should_not_receive(:retrieve_content)
-      subject.should_not be_content_changed
+      expect(subject).to_not be_content_changed
     end
 
     it "should allow asserting an empty string" do

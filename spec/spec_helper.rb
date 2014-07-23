@@ -1,13 +1,12 @@
 ENV["environment"] ||= 'test'
 require "bundler/setup"
 
-
-begin
+if ENV["COVERAGE"]
   require 'simplecov'
-  SimpleCov.start
-rescue LoadError
-  #It's nbd if we don't have simplecov
-  $stderr.puts "Couldn't load simplecov"
+
+  SimpleCov.start do
+    add_filter "/spec/"
+  end
 end
 
 require 'active-fedora'
@@ -45,7 +44,7 @@ RSpec.configure do |config|
     end
     FedoraLens.connection.put("test","")
     restore_spec_configuration if ActiveFedora::SolrService.instance.nil? || ActiveFedora::SolrService.instance.conn.nil?
-    ActiveFedora::SolrService.instance.conn.delete_by_query('*:*', commit: true)
+    ActiveFedora::SolrService.instance.conn.delete_by_query('*:*', softCommit: true)
     FedoraLens.base_path = "/test"
   end
 end
