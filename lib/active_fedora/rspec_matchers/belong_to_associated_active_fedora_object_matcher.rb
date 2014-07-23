@@ -22,11 +22,11 @@ RSpec::Matchers.define :belong_to_associated_active_fedora_object do |associatio
     "#{@subject.class} PID=#{@subject.pid} association: #{@association_name.inspect} matches ActiveFedora"
   end
 
-  failure_message_for_should do |text|
+  failure_message do |text|
     "expected #{@subject.class} PID=#{@subject.pid} association: #{@association_name.inspect} to match"
   end
 
-  failure_message_for_should_not do |text|
+  failure_message_when_negated do |text|
     "expected #{@subject.class} PID=#{@subject.pid} association: #{@association_name.inspect} to NOT match"
   end
 

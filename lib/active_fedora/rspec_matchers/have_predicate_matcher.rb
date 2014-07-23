@@ -34,11 +34,11 @@ RSpec::Matchers.define :have_predicate do |predicate|
     "#{@subject.class} PID=#{@subject.pid} relationship: #{@predicate.inspect} matches Fedora"
   end
 
-  failure_message_for_should do |text|
+  failure_message do |text|
     "expected #{@subject.class} PID=#{@subject.pid} relationship: #{@predicate.inspect} to match"
   end
 
-  failure_message_for_should_not do |text|
+  failure_message_when_negated do |text|
     "expected #{@subject.class} PID=#{@subject.pid} relationship: #{@predicate.inspect} to NOT match"
   end
 

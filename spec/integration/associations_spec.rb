@@ -63,18 +63,18 @@ describe ActiveFedora::Base do
 
         it "should build child" do
           new_book = @library.books.build({})
-          new_book.should be_new_record
-          new_book.should be_kind_of Book
-          new_book.library.should be_kind_of Library
-          @library.books.should == [new_book]
+          expect(new_book).to be_new_record
+          expect(new_book).to be_kind_of Book
+          expect(new_book.library).to be_kind_of Library
+          expect(@library.books).to eq [new_book]
         end
 
         it "should make a new child" do
           new_book = @library.books.new
-          new_book.should be_new_record
-          new_book.should be_kind_of Book
-          new_book.library.should be_kind_of Library
-          @library.books.should == [new_book]
+          expect(new_book).to be_new_record
+          expect(new_book).to be_kind_of Book
+          expect(new_book.library).to be_kind_of Library
+          expect(@library.books).to eq [new_book]
         end
 
         it "should not create children if the parent isn't saved" do
