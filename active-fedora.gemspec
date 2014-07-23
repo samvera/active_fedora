@@ -31,8 +31,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec", "~> 2.99"
   s.add_development_dependency "rspec-its"
   s.add_development_dependency "equivalent-xml"
-  s.add_development_dependency "rest-client"
-  s.add_development_dependency "webmock"
   s.add_development_dependency "simplecov", '~> 0.7.1'
 
   s.files         = `git ls-files`.split("\n")

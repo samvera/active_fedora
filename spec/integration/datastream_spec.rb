@@ -76,7 +76,7 @@ describe ActiveFedora::Datastream do
       describe "streaming the response" do
         let(:stream_reader) { double }
         it "should stream the response" do
-          expect(stream_reader).to receive(:read).at_least_once
+          expect(stream_reader).to receive(:read).at_least(:once)
           test_object.datastreams[dsid].stream { |buff| stream_reader.read(buff) }
         end
 
