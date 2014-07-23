@@ -1,6 +1,9 @@
+require 'deprecation'
+
 module ActiveFedora
   module Datastreams
     extend ActiveSupport::Concern
+    extend Deprecation
 
     autoload :NokogiriDatastreams, 'active_fedora/datastreams/nokogiri_datastreams'
 
@@ -94,10 +97,17 @@ module ActiveFedora
     # Add the given file as a datastream in the object
     #
     # @param [File] file the file to add
-    # @param [Hash] opts options: :dsid, :prefix, :checksumType
+    # @param [Hash] opts options: :dsid, :prefix, :mime_type
+    # @option opts [String] :dsid The datastream id
+    # @option opts [String] :prefix The datastream prefix (for auto-generated dsid)
+    # @option opts [String] :mime_type The Mime-Type of the file
     def add_file_datastream(file, opts={})
-      attrs = {:blob => file, :prefix=>opts[:prefix]}
+      attrs = {blob: file, prefix: opts[:prefix]}
       ds = create_datastream(self.class.datastream_class_for_name(opts[:dsid]), opts[:dsid], attrs)
+      if opts[:mimeType]
+        Deprecation.warn Datastreams, "The :mimeType option to add_file_datastream is deprecated and will be removed in active-fedora 9.0. Use :mime_type instead", caller
+        ds.mime_type = opts[:mimeType]
+      end
       ds.mime_type = opts[:mime_type]
       add_datastream(ds).tap do |dsid|
         self.class.build_datastream_accessor(dsid) unless respond_to? dsid
