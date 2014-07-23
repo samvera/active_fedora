@@ -54,20 +54,31 @@ describe ActiveFedora::Datastream do
       it { should eq title.content }
     end
     
-    context "an Blob datastream" do
+    context "a blob datastream" do
       let(:dsid) { "ds#{Time.now.to_i}" }
       let(:content) { fixture('dino.jpg') }
-      # let(:content) { StringIO.new("ONETWOTHREE") }
       let(:datastream) { ActiveFedora::Datastream.new(test_object, dsid).tap { |ds| ds.content = content } }
 
-      it "should be able to update Blob Datastream content and save to Fedora" do    
-        expect(test_object.add_datastream(datastream)).to eq dsid
+      before do
+        test_object.add_datastream(datastream)
         test_object.save
+      end
+
+      it "should not be changed" do
         expect(test_object.datastreams[dsid]).to_not be_changed
-        expect(test_object.reload).to_not be_nil 
-        expect(test_object.datastreams[dsid]).to_not be_nil
+      end
+
+      it "should be able to read the content from fedora" do    
         content.rewind
         expect(test_object.datastreams[dsid].content).to eq content.read
+      end
+
+      describe "streaming the response" do
+        let(:stream_reader) { double }
+        it "should stream the response" do
+          expect(stream_reader).to receive(:read) # test file is too small to be chunked
+          test_object.datastreams[dsid].stream { |buff| stream_reader.read(buff) }
+        end
       end
     end
     

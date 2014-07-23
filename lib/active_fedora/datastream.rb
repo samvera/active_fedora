@@ -63,9 +63,6 @@ module ActiveFedora
 
     def content
       local_or_remote_content(true)
-      # return @content if new_record?
-      # @content ||= datastream_content
-      # @content
     end
 
     def datastream_content
@@ -129,7 +126,7 @@ module ActiveFedora
 
     def retrieve_content
       begin
-      resp = orm.resource.client.get("#{uri}/fcr:content")
+      resp = orm.resource.client.get(content_url)
       rescue Ldp::NotFound
         return nil
       end
@@ -145,6 +142,20 @@ module ActiveFedora
           ''
         else
           raise "unexpected return value #{resp.status} for when getting datastream content at #{uri}"
+      end
+    end
+
+    def stream(&block)
+      uri = URI(content_url)
+
+      Net::HTTP.start(uri.host, uri.port) do |http|
+        request = Net::HTTP::Get.new uri
+        http.request request do |response|
+          raise "Couldn't get data from Fedora (#{uri}). Response: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
+          response.read_body do |chunk|
+            block.call(chunk)
+          end
+        end
       end
     end
 
@@ -197,6 +208,10 @@ module ActiveFedora
     end
 
     protected
+
+    def content_url
+      "#{uri}/fcr:content"
+    end
 
     # return a valid dsid that is not currently in use.  Uses a prefix (default "DS") and an auto-incrementing integer
     # Example: if there are already datastreams with IDs DS1 and DS2, this method will return DS3.  If you specify FOO as the prefix, it will return FOO1.
