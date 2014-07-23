@@ -147,11 +147,15 @@ module ActiveFedora
       end
     end
 
-    def stream(&block)
+    # @param range [String] the Range HTTP header
+    # @yield [chunk] a block that receives chunked content
+    def stream(range = nil, &block)
       uri = URI(content_url)
 
+      headers = {}
+      headers['Range'] = range if range
       Net::HTTP.start(uri.host, uri.port) do |http|
-        request = Net::HTTP::Get.new uri
+        request = Net::HTTP::Get.new uri, headers
         http.request request do |response|
           raise "Couldn't get data from Fedora (#{uri}). Response: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
           response.read_body do |chunk|

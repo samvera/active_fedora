@@ -79,8 +79,34 @@ describe ActiveFedora::Datastream do
           expect(stream_reader).to receive(:read) # test file is too small to be chunked
           test_object.datastreams[dsid].stream { |buff| stream_reader.read(buff) }
         end
+
+        context "with a range request" do
+          before do
+            test_object.add_file_datastream('one1two2threfour', dsid: 'webm', mime_type: 'video/webm')
+            test_object.save!
+          end
+          subject { str = ''; test_object.webm.stream(range) {|chunk| str << chunk }; str }
+          context "whole thing" do
+            let(:range) { 'bytes=0-15' }
+            it { should eq 'one1two2threfour'}
+          end
+          context "open ended" do
+            let(:range) { 'bytes=0-' }
+            it "should get a response" do
+              pending "Fedora 4 beta 1 errors on this. https://github.com/fcrepo4/fcrepo4/issues/426"
+              expect(subject).to eq 'one1two2threfour'
+            end
+          end
+          context "not starting at the beginning" do
+            let(:range) { 'bytes=3-15' }
+            it { should eq '1two2threfour'}
+          end
+          context "not ending at the end" do
+            let(:range) { 'bytes=4-11' }
+            it { should eq 'two2thre'}
+          end
+        end
       end
     end
-    
   end
 end
