@@ -31,7 +31,7 @@ module ActiveFedora
       def set_owner_attributes(record)
         if klass == ActiveFedora::Base
           # This is a polymorphic case.  Find a reflection that matches by property
-          inverse = record.reflections.values.find{ |r| r.options[:property] == :is_part_of}
+          inverse = record.reflections.values.find{ |r| r.options[:property] == reflection.options[:property]}
           if inverse.belongs_to?
             record[inverse.foreign_key] = owner.id
           else # HABTM
