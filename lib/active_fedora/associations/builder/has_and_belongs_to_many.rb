@@ -9,6 +9,15 @@ module ActiveFedora::Associations::Builder
       redefine_destroy
       accessor_name = "#{name.to_s.singularize}_ids"
       model.attribute accessor_name, [predicate, FedoraLens::Lenses.uris_to_ids]
+
+      # If the assertion is empty, return an empty set
+      model.send(:include, Module.new {
+        class_eval <<-RUBY, __FILE__, __LINE__ + 1
+          def #{accessor_name}
+            super || []
+          end
+        RUBY
+      })
       reflection
     end
 

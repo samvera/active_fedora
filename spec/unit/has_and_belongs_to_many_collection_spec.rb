@@ -97,12 +97,22 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
       Object.send(:remove_const, :Thing)
     end
 
-    let(:thing) { Thing.create() }
-    let(:collection) { Collection.create().tap {|c| c.members << thing} }
+    context "with a new collection" do
+      let(:collection) { Collection.new }
+      it "should have an empty list of collection members" do
+        expect(collection.member_ids).to eq []
+        expect(collection.members).to eq []
+      end
+    end
 
-    it "should call destroy" do
-      # this is a pretty weak test
-      expect { collection.destroy }.to_not raise_error
+    context "with a persisted collection" do
+      let(:collection) { Collection.create().tap {|c| c.members << thing} }
+      let(:thing) { Thing.create() }
+
+      it "should call destroy" do
+        # this is a pretty weak test
+        expect { collection.destroy }.to_not raise_error
+      end
     end
 
   end
