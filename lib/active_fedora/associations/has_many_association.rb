@@ -30,8 +30,7 @@ module ActiveFedora
 
       def set_owner_attributes(record)
         if klass == ActiveFedora::Base
-          # This is a polymorphic case.  Find a reflection that matches by property
-          inverse = record.reflections.values.find{ |r| r.options[:property] == reflection.options[:property]}
+          inverse = find_polymorphic_inverse(record)
           if inverse.belongs_to?
             record[inverse.foreign_key] = owner.id
           else # HABTM
@@ -63,6 +62,10 @@ module ActiveFedora
       end
 
       protected
+
+        def find_polymorphic_inverse(record)
+          record.reflections.values.find{ |r| !r.has_many? && r.options[:property] == reflection.options[:property]}
+        end
 
         # Deletes the records according to the <tt>:dependent</tt> option.
         def delete_records(records, method)

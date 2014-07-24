@@ -89,7 +89,7 @@ describe "After save callbacks" do
 
   it "should have the relationship available in after_save" do
     book.save!
-    book.library_books.should include book
+    expect(book.library_books).to include book
   end
 end
 
@@ -120,8 +120,8 @@ describe "When two or more relationships share the same property" do
 
   it "Should only return relationships of the correct class" do
     @book.reload
-    @book.people.should == [@person1, @person2]
-    @book.collections.should == []
+    expect(@book.people).to eq [@person1, @person2]
+    expect(@book.collections).to eq []
   end
 end
 
@@ -155,7 +155,7 @@ describe "When relationship is restricted to AF::Base" do
     end
     it "Should not restrict relationships " do
       @book.reload
-      @book.attachments.should == [@image, @pdf]
+      expect(@book.attachments).to eq [@image, @pdf]
     end
   end
 
@@ -173,7 +173,7 @@ describe "When relationship is restricted to AF::Base" do
     it "Should not restrict relationships " do
       email.attachment_ids = [image.id, pdf.id]
       email.reload
-      email.attachments.should == [image, pdf]
+      expect(email.attachments).to eq [image, pdf]
     end
   end
 end
@@ -199,12 +199,12 @@ describe "Deleting a dependent relationship" do
   it "should remove relationships" do
     component.item = item
     component.save!
-    item.components.should == [component]
+    expect(item.components).to eq [component]
     item.components.delete(component)
     item.reload
     component.reload
     expect(component['item_id']).to be_nil
-    item.components.should == []
+    expect(item.components).to eq []
   end
 
   it "should remove the relationships that point at that object" do
@@ -232,46 +232,81 @@ describe "Deleting a dependent relationship" do
 end
 
 describe "Autosave" do
-  before do
-    class Item < ActiveFedora::Base
-      has_many :components
-      has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
-        m.field "title", :string
+  context "a has_many - belongs_to relationship" do
+    before do
+      class Item < ActiveFedora::Base
+        has_many :components
+        has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
+          m.field "title", :string
+        end
+        has_attributes :title, datastream: 'foo'
       end
-      has_attributes :title, datastream: 'foo'
-    end
-    class Component < ActiveFedora::Base
-      belongs_to :item, :property => :is_part_of
-      has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
-        m.field "description", :string
+      class Component < ActiveFedora::Base
+        belongs_to :item, :property => :is_part_of
+        has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
+          m.field "description", :string
+        end
+        has_attributes :description, datastream: 'foo'
       end
-      has_attributes :description, datastream: 'foo'
     end
-  end
 
-  after do
+    after do
       Object.send(:remove_const, :Item)
       Object.send(:remove_const, :Component)
-  end
+    end
 
-  describe "From the belongs_to side" do
-    let(:component) { Component.create(item: Item.new(title: 'my title')) }
+    context "From the belongs_to side" do
+      let(:component) { Component.create(item: Item.new(title: 'my title')) }
 
-    it "should save dependent records" do
-      component.reload
-      component.item.title.should == 'my title'
+      it "should save dependent records" do
+        component.reload
+        expect(component.item.title).to eq 'my title'
+      end
+    end
+
+    context "From the has_many side" do
+      let(:item) { Item.create(components: [Component.new(description: 'my description')]) }
+
+      it "should save dependent records" do
+        item.reload
+        expect(item.components.first.description).to eq 'my description'
+      end
     end
   end
 
-  describe "From the has_many side" do
-    let(:item) { Item.create(components: [Component.new(description: 'my description')]) }
+  context "a has_many - has_and_belongs_to_many relationship" do
+    context "with ActiveFedora::Base as classes" do
+      before do
+        class Novel < ActiveFedora::Base
+          has_many :books, property: :is_part_of, class_name: 'ActiveFedora::Base'
+          has_and_belongs_to_many :contents, property: :is_part_of, class_name: 'ActiveFedora::Base'
+        end
+        class Text < ActiveFedora::Base
+          has_many :books, property: :is_part_of, class_name: 'ActiveFedora::Base'
+        end
+      end
+      let(:text) { Text.create}
+      let(:novel) { Novel.create}
 
-    it "should save dependent records" do
-      item.reload
-      item.components.first.description.should == 'my description'
+      after do
+        Object.send(:remove_const, :Novel)
+        Object.send(:remove_const, :Text)
+      end
+
+      it "should work when added via the has_many" do
+        text.books << novel
+        novel.save
+        expect(novel.reload.contents).to eq [text]
+        expect(text.reload.books).to eq [novel]
+      end
+
+      it "should work when added via the has_and_belongs_to_many" do
+        novel.contents << text
+        novel.save!
+        text.reload
+        expect(text.books).to eq [novel]
+      end
+
     end
   end
-
 end
-
-

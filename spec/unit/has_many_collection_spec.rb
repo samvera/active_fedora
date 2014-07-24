@@ -13,22 +13,40 @@ describe ActiveFedora::Associations::HasManyAssociation do
     Object.send(:remove_const, :Page)
   end
 
-  subject { Book.new('subject:a') }
-  before {
-    subject.stub(:new_record? => false, save: true)
-  }
+  let(:book) { Book.new('subject:a') }
+  let(:page) { Page.new('object:b') }
 
-  it "should set the book_id attribute" do
-    reflection = Book.create_reflection(:has_many, 'pages', {:property=>'predicate'}, Book)
-    ActiveFedora::SolrService.stub(:query).and_return([])
-    ac = ActiveFedora::Associations::HasManyAssociation.new(subject, reflection)
-    ac.should_receive(:callback).twice
-    object = Page.new('object:b')
-    object.stub(:new_record? => false, save: true)
-  
-    object.should_receive(:[]=).with('book_id', subject.id)
- 
-    ac.concat object
+  describe "setting the foreign key" do
+    before do
+      allow(book).to receive(:new_record?).and_return(false)
+      allow(page).to receive(:save).and_return(true)
+      allow(ActiveFedora::SolrService).to receive(:query).and_return([])
+    end
+
+    let(:reflection) { Book.create_reflection(:has_many, 'pages', {:property=>'predicate'}, Book) }
+    let(:association) { ActiveFedora::Associations::HasManyAssociation.new(book, reflection) }
+
+    it "should set the book_id attribute" do
+      expect(association).to receive(:callback).twice
+      expect(page).to receive(:[]=).with('book_id', book.id)
+      association.concat page
+    end
   end
   
+  describe "Finding a polymorphic inverse relation" do
+
+    before do
+      # :books must come first, so that we can test that is being passed over in favor of :contents
+      Page.has_many :books, property: :is_part_of, class_name: 'ActiveFedora::Base'
+      Page.has_and_belongs_to_many :contents, property: :is_part_of, class_name: 'ActiveFedora::Base'
+    end
+    let(:book_reflection) { Book.create_reflection(:has_many, 'pages', {property: :is_part_of}, Book) }
+    let(:association) { ActiveFedora::Associations::HasManyAssociation.new(book, book_reflection) }
+
+    subject { association.send(:find_polymorphic_inverse, page) }
+
+    it "should find the HABTM reflection" do
+      expect(subject.name).to eq :contents
+    end
+  end
 end
