@@ -7,8 +7,8 @@ module ActiveFedora
 
     def initialize(host, args)
       host = 'http://localhost:8080/solr' unless host
-      args = {:read_timeout => 120, :open_timeout => 120}.merge(args.dup)
-      args.merge!(:url=>host)
+      args = {read_timeout: 120, open_timeout: 120}.merge(args.dup)
+      args.merge!(url: host)
       @conn = RSolr.connect args
     end
     
@@ -64,7 +64,7 @@ module ActiveFedora
       def class_from_solr_document(hit, opts = {})
         #Set the default starting point to the class specified, if available.
         best_model_match = Model.from_class_uri(opts[:class]) unless opts[:class].nil?
-        hit[HAS_MODEL_SOLR_FIELD].each do |value|
+        Array(hit[HAS_MODEL_SOLR_FIELD]).each do |value|
 
           model_value = Model.from_class_uri(value)
 
