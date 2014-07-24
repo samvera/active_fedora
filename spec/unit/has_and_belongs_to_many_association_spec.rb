@@ -109,6 +109,15 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
       let(:collection) { Collection.create().tap {|c| c.members << thing} }
       let(:thing) { Thing.create() }
 
+      context "when the ids are set" do
+        let(:thing2) { Thing.create() }
+        let(:thing3) { Thing.create() }
+        it "should clear the object set" do
+          expect(collection.members).to eq [thing]
+          collection.member_ids = [thing2.id, thing3.id]
+          expect(collection.members).to eq [thing2, thing3]
+        end
+      end
       it "should call destroy" do
         # this is a pretty weak test
         expect { collection.destroy }.to_not raise_error

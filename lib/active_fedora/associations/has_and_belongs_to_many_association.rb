@@ -73,6 +73,12 @@ module ActiveFedora
           @owner.save! unless @owner.new_record? || @owner.destroyed?
         end
 
+      private
+
+        def stale_state
+          owner[reflection.foreign_key]
+        end
+
     end
   end
 end
