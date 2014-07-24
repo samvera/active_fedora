@@ -197,7 +197,6 @@ module ActiveFedora
         ActiveFedora::Base
       else
         # The true class may be a subclass of @klass, so always use from_class_uri
-        puts "HAS_MODEL VALUE #{has_model_value(resource).inspect}"
         Model.from_class_uri(has_model_value(resource)) || ActiveFedora::Base
       end
     end

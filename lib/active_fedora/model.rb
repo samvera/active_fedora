@@ -13,7 +13,7 @@ module ActiveFedora
     def self.from_class_uri(model_value)
 
       unless class_exists?(model_value)
-        ActiveFedora::Base.logger.warn "#{model_value} is not a real class" if ActiveFedora::Base.logger
+        ActiveFedora::Base.logger.warn "'#{model_value}' is not a real class" if ActiveFedora::Base.logger
         return nil
       end
       ActiveFedora.class_from_string(model_value)
@@ -22,6 +22,7 @@ module ActiveFedora
     private 
     
     def self.class_exists?(class_name)
+      return false if class_name.empty?
       klass = class_name.constantize
       return klass.is_a?(Class)
     rescue NameError
