@@ -44,7 +44,7 @@ RSpec.configure do |config|
     end
     FedoraLens.connection.put("test","")
     restore_spec_configuration if ActiveFedora::SolrService.instance.nil? || ActiveFedora::SolrService.instance.conn.nil?
-    ActiveFedora::SolrService.instance.conn.delete_by_query('*:*', softCommit: true)
+    ActiveFedora::SolrService.instance.conn.delete_by_query('*:*', params: {'softCommit' => true})
     FedoraLens.base_path = "/test"
   end
 end
