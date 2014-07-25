@@ -35,7 +35,7 @@ module ActiveFedora
           page_size = @reflection.options[:solr_page_size]
           page_size ||= 200
           pids = owner[reflection.foreign_key]
-          return [] unless pids
+          return [] if pids.empty?
           solr_result = []
           0.step(pids.size,page_size) do |startIdx|
             query = ActiveFedora::SolrService.construct_query_for_pids(pids.slice(startIdx,page_size))
