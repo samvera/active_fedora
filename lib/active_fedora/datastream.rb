@@ -290,4 +290,6 @@ module ActiveFedora
     end
 
   end
+
+  Datastream.include ActiveFedora::Versionable
 end

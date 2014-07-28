@@ -15,7 +15,7 @@ module ActiveFedora
     end
 
     def versions
-      puts "Versions #{versions_graph.dump(:ttl)}"
+      # puts "Versions #{versions_graph.dump(:ttl)}"
       results = versions_graph.query([rdf_subject, RDF::URI.new('http://fedora.info/definitions/v4/repository#hasVersion'), nil])
       results.map(&:object)
     end
@@ -25,12 +25,11 @@ module ActiveFedora
       resp.success?
     end
 
-    protected
-
-      def assert_content_model
-        assert_versionable if versionable
-        super
-      end
+    # for datastreams
+    def save(*)
+      assert_versionable if versionable
+      super
+    end
 
     private
 
@@ -60,5 +59,6 @@ module ActiveFedora
         self.model_type ||= []
         self.model_type += [RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')]
       end
+
   end
 end

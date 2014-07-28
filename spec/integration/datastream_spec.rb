@@ -11,6 +11,10 @@ describe ActiveFedora::Datastream do
         has_metadata "descMetadata", type: ActiveFedora::QualifiedDublinCoreDatastream, autocreate: true
       end
     end
+
+    after(:all) do
+      Object.send(:remove_const, :MockAFBase)
+    end
   
     let(:test_object) { MockAFBase.create }
     
