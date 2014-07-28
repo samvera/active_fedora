@@ -56,15 +56,6 @@ module ActiveFedora
       end
     end
 
-    def content= string_or_io
-      content_will_change! unless @content == string_or_io
-      @content = string_or_io
-    end
-
-    def content
-      local_or_remote_content(true)
-    end
-
     def datastream_content
       return if new_record?
       @ds_content ||= retrieve_content
@@ -107,63 +98,6 @@ module ActiveFedora
       "#{uri}/fcr:content"
     end
 
-    def save
-      return unless content_changed?
-      raise "Can't generate uri because the parent object isn't saved" if digital_object.new_record?
-      payload = behaves_like_io?(content) ? content.read : content
-      headers = { 'Content-Type' => mime_type }
-      headers['Content-Disposition'] = "attachment; filename=\"#{@original_name}\"" if @original_name
-      resp = orm.resource.client.put content_path, payload, headers
-      reset_attributes
-      case resp.status
-        when 201, 204
-          changed_attributes.clear
-          return true
-        when 404
-          raise ActiveFedora::ObjectNotFoundError, "Unable to add content at #{content_path}"
-        else
-          raise "unexpected return value #{resp.status}\n\t#{resp.body[0,200]}"
-      end
-    end
-
-    def retrieve_content
-      begin
-      resp = orm.resource.client.get(content_url)
-      rescue Ldp::NotFound
-        return nil
-      end
-      case resp.status
-        when 200, 201
-          resp.body
-        when 404
-          # TODO
-          # this happens because rdf_datastream calls datastream_content. 
-          # which happens because it needs a PID even though it isn't saved.
-          # which happens because we don't know if something exists if you give it a pid
-          #raise ActiveFedora::ObjectNotFoundError, "Unable to find content at #{uri}/fcr:content"
-          ''
-        else
-          raise "unexpected return value #{resp.status} for when getting datastream content at #{uri}"
-      end
-    end
-
-    # @param range [String] the Range HTTP header
-    # @yield [chunk] a block that receives chunked content
-    def stream(range = nil, &block)
-      uri = URI(content_url)
-
-      headers = {}
-      headers['Range'] = range if range
-      Net::HTTP.start(uri.host, uri.port) do |http|
-        request = Net::HTTP::Get.new uri, headers
-        http.request request do |response|
-          raise "Couldn't get data from Fedora (#{uri}). Response: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
-          response.read_body do |chunk|
-            block.call(chunk)
-          end
-        end
-      end
-    end
 
     class << self
       def default_attributes
@@ -267,6 +201,81 @@ module ActiveFedora
 
     private
 
+    # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
+    def behaves_like_io?(obj)
+      obj.is_a?(IO) || obj.is_a?(StringIO) || (defined?(Rack) && obj.is_a?(Rack::Test::UploadedFile))
+    end
+
+    # Persistence is an included module, so that we can include other modules which override these methods
+    module Persistence
+      def content= string_or_io
+        content_will_change! unless @content == string_or_io
+        @content = string_or_io
+      end
+
+      def content
+        local_or_remote_content(true)
+      end
+
+      def save
+        return unless content_changed?
+        raise "Can't generate uri because the parent object isn't saved" if digital_object.new_record?
+        payload = behaves_like_io?(content) ? content.read : content
+        headers = { 'Content-Type' => mime_type }
+        headers['Content-Disposition'] = "attachment; filename=\"#{@original_name}\"" if @original_name
+        resp = orm.resource.client.put content_path, payload, headers
+        reset_attributes
+        case resp.status
+          when 201, 204
+            changed_attributes.clear
+            return true
+          when 404
+            raise ActiveFedora::ObjectNotFoundError, "Unable to add content at #{content_path}"
+          else
+            raise "unexpected return value #{resp.status}\n\t#{resp.body[0,200]}"
+        end
+      end
+
+      def retrieve_content
+        begin
+        resp = orm.resource.client.get(content_url)
+        rescue Ldp::NotFound
+          return nil
+        end
+        case resp.status
+          when 200, 201
+            resp.body
+          when 404
+            # TODO
+            # this happens because rdf_datastream calls datastream_content. 
+            # which happens because it needs a PID even though it isn't saved.
+            # which happens because we don't know if something exists if you give it a pid
+            #raise ActiveFedora::ObjectNotFoundError, "Unable to find content at #{uri}/fcr:content"
+            ''
+          else
+            raise "unexpected return value #{resp.status} for when getting datastream content at #{uri}"
+        end
+      end
+
+      # @param range [String] the Range HTTP header
+      # @yield [chunk] a block that receives chunked content
+      def stream(range = nil, &block)
+        uri = URI(content_url)
+
+        headers = {}
+        headers['Range'] = range if range
+        Net::HTTP.start(uri.host, uri.port) do |http|
+          request = Net::HTTP::Get.new uri, headers
+          http.request request do |response|
+            raise "Couldn't get data from Fedora (#{uri}). Response: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
+            response.read_body do |chunk|
+              block.call(chunk)
+            end
+          end
+        end
+      end
+    private
+
     def local_or_remote_content(ensure_fetch = true)
       return @content if new_record? 
 
@@ -283,13 +292,10 @@ module ActiveFedora
         @content
       end
     end
-
-    # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
-    def behaves_like_io?(obj)
-      obj.is_a?(IO) || obj.is_a?(StringIO) || (defined?(Rack) && obj.is_a?(Rack::Test::UploadedFile))
     end
 
+    include ActiveFedora::Datastream::Persistence
+    include ActiveFedora::Versionable
   end
 
-  Datastream.include ActiveFedora::Versionable
 end

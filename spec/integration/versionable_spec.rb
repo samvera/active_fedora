@@ -25,6 +25,10 @@ describe "A versionable class" do
       subject.create_version
     end
 
+    it "should set model_type to versionable" do
+      expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
+    end
+
     it "should have one version (plus the root version)" do
       expect(subject.versions.size).to eq 2
       expect(subject.versions.first).to be_kind_of RDF::URI
@@ -82,6 +86,10 @@ describe "a versionable datastream" do
       subject.title = "Greetings Earthlings"
       subject.save
       subject.create_version
+    end
+
+    it "should set model_type to versionable" do
+      expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
     end
 
     it "should have one version (plus the root version)" do
