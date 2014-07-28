@@ -28,12 +28,6 @@ module ActiveFedora
       save(options)
     end
 
-    # This can be overriden to assert a different model
-    # It's normally called once in the lifecycle, by #create#
-    def assert_content_model
-      self.has_model = self.class.to_s
-    end
-
     # Pushes the object and all of its new or dirty datastreams into Fedora
     def update(attributes)
       self.attributes=attributes
@@ -125,6 +119,12 @@ module ActiveFedora
     # Override this if you need different behavior
     def update_needs_index?
       ENABLE_SOLR_UPDATES
+    end
+
+    # This can be overriden to assert a different model
+    # It's normally called once in the lifecycle, by #create#
+    def assert_content_model
+      self.has_model = self.class.to_s
     end
 
   private

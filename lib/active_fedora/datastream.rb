@@ -120,7 +120,7 @@ module ActiveFedora
           changed_attributes.clear
           return true
         when 404
-          raise ActiveFedora::ObjectNotFoundError, "Unable to add content at #{uri}/fcr:content"
+          raise ActiveFedora::ObjectNotFoundError, "Unable to add content at #{content_path}"
         else
           raise "unexpected return value #{resp.status}\n\t#{resp.body[0,200]}"
       end

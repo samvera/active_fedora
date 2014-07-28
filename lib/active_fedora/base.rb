@@ -45,6 +45,7 @@ module ActiveFedora
     include FedoraAttributes
     include ReloadOnSave
     include Rdf::Identifiable
+    include ActiveFedora::Versionable
   end
 
   ActiveSupport.run_load_hooks(:active_fedora, Base)

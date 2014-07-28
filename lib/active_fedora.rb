@@ -73,10 +73,11 @@ module ActiveFedora #:nodoc:
     autoload :Serialization
     autoload :SimpleDatastream
     autoload :SolrDigitalObject
+    autoload :SolrInstanceLoader
     autoload :SolrService
     autoload :Predicates
     autoload :Validations
-    autoload :SolrInstanceLoader
+    autoload :Versionable
   end
 
   module Attributes
