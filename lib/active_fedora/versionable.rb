@@ -42,7 +42,11 @@ module ActiveFedora
       end
 
       def versions_request
-        resp = orm.resource.client.get(versions_url)
+        resp = begin
+          orm.resource.client.get(versions_url)
+        rescue Ldp::NotFound
+          return ''
+        end
         if !resp.success?
           raise "unexpected return value #{resp.status} for when getting datastream content at #{uri}\n\t#{resp.body}"
         elsif resp.headers['content-type'] != 'text/turtle'

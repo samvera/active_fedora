@@ -68,49 +68,56 @@ describe "a versionable datastream" do
     Object.send(:remove_const, :VersionableDatastream)
   end
 
-  let(:test_object) { MockAFBase.create }
-    
-  after do
-    test_object.destroy
-  end
-
   subject { test_object.descMetadata }
 
-  it "should be versionable" do
-    expect(subject).to be_versionable
-  end
-
-  context "after saving" do
-    before do
-      subject.content = "Dood"
-      subject.title = "Greetings Earthlings"
-      subject.save
-      subject.create_version
+  context "that exists in the repository" do
+    let(:test_object) { MockAFBase.create }
+      
+    after do
+      test_object.destroy
     end
 
-    it "should set model_type to versionable" do
-      expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
+    it "should be versionable" do
+      expect(subject).to be_versionable
     end
 
-    it "should have one version (plus the root version)" do
-      expect(subject.versions.size).to eq 2
-      expect(subject.versions.first).to be_kind_of RDF::URI
+    context "before creating the datastream" do
+      it "should not have versions" do
+        expect(subject.versions).to be_empty
+      end
     end
 
-    context "two times" do
+    context "after creating the datastream" do
       before do
-        subject.title= "Surrender and prepare to be boarded"
+        subject.content = "Dood"
+        subject.title = "Greetings Earthlings"
         subject.save
         subject.create_version
       end
 
-      it "should have two versions (plus the root version)" do
-        expect(subject.versions.size).to eq 3
-        subject.versions.each do |version|
-          expect(version).to be_kind_of RDF::URI
+      it "should set model_type to versionable" do
+        expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
+      end
+
+      it "should have one version (plus the root version)" do
+        expect(subject.versions.size).to eq 2
+        expect(subject.versions.first).to be_kind_of RDF::URI
+      end
+
+      context "two times" do
+        before do
+          subject.title= "Surrender and prepare to be boarded"
+          subject.save
+          subject.create_version
+        end
+
+        it "should have two versions (plus the root version)" do
+          expect(subject.versions.size).to eq 3
+          subject.versions.each do |version|
+            expect(version).to be_kind_of RDF::URI
+          end
         end
       end
     end
   end
-
 end
