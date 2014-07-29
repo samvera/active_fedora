@@ -56,8 +56,8 @@ describe ActiveFedora::Base do
     after :all do
       SpecModel.send(:remove_const, :CamelCased)
     end
-    subject {SpecModel::CamelCased}
+    subject {SpecModel::CamelCased.to_class_uri}
     
-    its(:to_class_uri) {should == 'SpecModel::CamelCased' }
+    it { should == 'SpecModel::CamelCased' }
   end
 end

@@ -33,7 +33,7 @@ module ActiveFedora
 
     def digital_object=(digital_object)
       raise ArgumentError unless new_record?
-      resource = Ldp::Resource::RdfSource.new(FedoraLens.connection, "#{digital_object.uri}/#{@dsid}")
+      resource = Ldp::Resource::RdfSource.new(FedoraLens.connection, uri)
       init_core(resource)
     end
 

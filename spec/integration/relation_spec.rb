@@ -13,7 +13,10 @@ describe ActiveFedora::Base do
   end
 
   subject { Library.all } 
-  its(:class) {should eq ActiveFedora::Relation }
+
+  it "should be a relation" do
+    expect(subject.class).to be ActiveFedora::Relation
+  end
 
   before :each do
     Library.create

@@ -11,7 +11,6 @@ end
 
 require 'active-fedora'
 require 'rspec'
-require 'rspec/its'
 require 'equivalent-xml/rspec_matchers'
 require 'logger'
 
