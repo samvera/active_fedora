@@ -86,7 +86,7 @@ describe ActiveFedora::Datastream do
       it { should eq "my_image.png" }
     end
 
-    context "when its saved" do
+    context "when it's saved" do
       let(:parent) { ActiveFedora::Base.create }
       before do
         parent.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm', original_name: "my_image.png")
@@ -96,20 +96,6 @@ describe ActiveFedora::Datastream do
       it "should have original_name" do
         expect(parent.reload.abcd.original_name).to eq 'my_image.png'
       end
-
-    end
-
-    context "when its saved" do
-      let(:parent) { ActiveFedora::Base.create }
-      before do
-        parent.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm', original_name: "my_image.png")
-        parent.save!
-      end
-
-      it "should have original_name" do
-        expect(parent.reload.abcd.original_name).to eq 'my_image.png'
-      end
-
     end
   end
 end
