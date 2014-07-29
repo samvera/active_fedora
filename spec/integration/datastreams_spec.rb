@@ -93,13 +93,13 @@ describe ActiveFedora::Datastreams do
     describe ".datastreams" do
       subject {obj.datastreams}
       it "should return a Hash of datastreams from fedora" do
-        subject.should be_a_kind_of(ActiveFedora::DatastreamHash) 
-        subject.should be_empty
+        expect(subject).to be_a_kind_of(ActiveFedora::DatastreamHash)
+        expect(subject).to be_empty
       end
 
       it "should initialize the datastream pointers with @new_object=false" do
         subject.each_value do |ds| 
-          ds.should_not be_new
+          expect(ds).to_not be_new
         end
       end
     end
@@ -115,10 +115,7 @@ describe ActiveFedora::Datastreams do
       end
 
       it "should return all of the datastreams from the object that are kinds of OmDatastream " do
-        result = obj.metadata_streams
-        result.length.should == 2
-        result.should include(mds1)
-        result.should include(mds2)
+        expect(obj.metadata_streams).to match_array [mds1, mds2]
       end
     end
     
@@ -142,10 +139,10 @@ describe ActiveFedora::Datastreams do
         
       it "adding and saving should add the datastream to the datastreams array" do
         ds.content = fixture('dino.jpg').read
-        obj.datastreams.should_not have_key("DS1")
+        expect(obj.datastreams).to_not have_key("DS1")
         obj.add_datastream(ds)
         obj.save
-        obj.datastreams.should have_key("DS1")
+        expect(obj.datastreams).to have_key("DS1")
       end
       
     end

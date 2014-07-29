@@ -228,12 +228,12 @@ module ActiveFedora
         case resp.status
           when 201, 204
             changed_attributes.clear
-            return true
           when 404
             raise ActiveFedora::ObjectNotFoundError, "Unable to add content at #{content_path}"
           else
             raise "unexpected return value #{resp.status}\n\t#{resp.body[0,200]}"
         end
+        super #TODO optimize. We only need to save if the properties such as model_type have changed
       end
 
       def retrieve_content
