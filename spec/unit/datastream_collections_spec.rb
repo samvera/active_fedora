@@ -302,7 +302,6 @@ describe ActiveFedora::DatastreamCollections do
       datastreams["external"].first.dsid.should == "EXTERNAL1"
       datastreams["external"].first.dsLocation.should == "http://myresource.com"
       datastreams["external"].first.controlGroup.should == "E"
-      datastreams["external"].first.content.should == "" 
 
       datastreams["high"].size.should == 1
       datastreams["high"].first.dsLabel.should == 'dino.jpg'

@@ -141,18 +141,19 @@ module ActiveFedora
       [:mimeType, :controlGroup, :dsLabel, :dsLocation, :checksumType, :versionable].each do |key|
         ds.send("#{key}=".to_sym, opts[key]) unless opts[key].nil?
       end
-      blob = opts[:blob] 
-      if blob 
-        if !ds.mimeType.present? 
-          ##TODO, this is all done by rubydora -- remove
-          ds.mimeType = blob.respond_to?(:content_type) ? blob.content_type : "application/octet-stream"
+      if ds.managed? || ds.inline?
+        blob = opts[:blob] 
+        if blob 
+          if !ds.mimeType.present? 
+            ##TODO, this is all done by rubydora -- remove
+            ds.mimeType = blob.respond_to?(:content_type) ? blob.content_type : "application/octet-stream"
+          end
+          if !ds.dsLabel.present? && blob.respond_to?(:path)
+            ds.dsLabel = File.basename(blob.path)
+          end
         end
-        if !ds.dsLabel.present? && blob.respond_to?(:path)
-          ds.dsLabel = File.basename(blob.path)
-        end
+        ds.content = blob || "" 
       end
-
-      ds.content = blob || "" 
       ds
     end
 

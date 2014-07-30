@@ -213,9 +213,19 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should use the filename as a default label" do
-     mock_file = double(:path => '/asdf/fdsa')
+      mock_file = double(:path => '/asdf/fdsa')
       ds = subject.create_datastream(ActiveFedora::Datastream, nil, {:blob => mock_file})
       ds.dsLabel.should == 'fdsa'
+    end
+
+    it "should not set content for controlGroup 'E'" do
+      ds = subject.create_datastream(ActiveFedora::Datastream, nil, {controlGroup: 'E'})
+      expect(ds.content).to be_nil
+    end
+
+    it "should not set content for controlGroup 'R'" do
+      ds = subject.create_datastream(ActiveFedora::Datastream, nil, {controlGroup: 'R'})
+      expect(ds.content).to be_nil
     end
   end
 
