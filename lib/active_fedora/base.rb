@@ -23,29 +23,31 @@ module ActiveFedora
   # Datastreams defined with +has_metadata+ are accessed via the +datastreams+ member hash.
   #
   class Base
-    include FedoraLens
-    include FedoraLens::Lenses
     extend ActiveModel::Naming
     extend ActiveSupport::DescendantsTracker
-    include ActiveFedora::Persistence
+
+    include FedoraLens::Core
+    include Core
+    include Persistence
     include Scoping
-    include Indexing
     include ActiveModel::Conversion
-    include Validations
     include Callbacks
-    include Datastreams
+    include Validations
+    include Attributes
     extend Querying
     include Associations
     include AutosaveAssociation
     include NestedAttributes
     include Reflection
-    include Attributes
     include Serialization
-    include Core
+
+    include Indexing
+    include FedoraLens::Lenses
+    include Datastreams
     include FedoraAttributes
     include ReloadOnSave
     include Rdf::Identifiable
-    include ActiveFedora::Versionable
+    include Versionable
   end
 
   ActiveSupport.run_load_hooks(:active_fedora, Base)
