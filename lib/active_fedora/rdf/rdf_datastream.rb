@@ -13,7 +13,7 @@ module ActiveFedora
           return @subject_block = block
         end
 
-        @subject_block ||= lambda { |ds| ds.digital_object.id }
+        @subject_block ||= lambda { |ds| ds.digital_object.uri }
       end
 
       # Utility method which can be overridden to determine the object
