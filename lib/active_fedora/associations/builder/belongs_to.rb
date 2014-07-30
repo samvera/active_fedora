@@ -9,7 +9,7 @@ module ActiveFedora::Associations::Builder
       add_counter_cache_callbacks(reflection) if options[:counter_cache]
       add_touch_callbacks(reflection)         if options[:touch]
       predicate_lens = FedoraLens::Lenses.get_predicate(predicate, select: filter_by_class(reflection))
-      model.attribute :"#{name}_id", [ predicate_lens, FedoraLens::Lenses.uris_to_ids, FedoraLens::Lenses.single ]
+      model.attribute :"#{name}_id", [ predicate_lens, FedoraLens::Lenses.uris_to_ids { reflection.klass }, FedoraLens::Lenses.single ]
       configure_dependency
       reflection
     end

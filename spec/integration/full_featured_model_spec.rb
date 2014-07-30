@@ -166,14 +166,4 @@ describe ActiveFedora::Base do
     solr_result = OralHistory.find_with_conditions({})
     solr_result.should_not be_nil
   end
-  
-  describe '#new' do
-    it "should support custom pids" do
-      oh = OralHistory.new("blah-blah-blah")
-      oh.pid.should == "/blah-blah-blah"
-    end
-  end
-  
-
-  
 end

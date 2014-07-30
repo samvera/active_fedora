@@ -8,7 +8,7 @@ module ActiveFedora::Associations::Builder
       reflection = super
       redefine_destroy
       accessor_name = "#{name.to_s.singularize}_ids"
-      model.attribute accessor_name, [predicate, FedoraLens::Lenses.uris_to_ids]
+      model.attribute accessor_name, [predicate, FedoraLens::Lenses.uris_to_ids { reflection.klass }]
 
       # If the assertion is empty, return an empty set
       model.send(:include, Module.new {
