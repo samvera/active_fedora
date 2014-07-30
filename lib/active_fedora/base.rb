@@ -42,7 +42,6 @@ module ActiveFedora
     include Serialization
 
     include Indexing
-    include FedoraLens::Lenses
     include Datastreams
     include FedoraAttributes
     include ReloadOnSave
