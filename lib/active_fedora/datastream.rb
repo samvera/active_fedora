@@ -2,7 +2,7 @@ module ActiveFedora
 
   #This class represents a Fedora datastream
   class Datastream
-    include FedoraLens
+    include FedoraLens::Core
     include ActiveModel::Dirty
     generate_method 'content'
 
