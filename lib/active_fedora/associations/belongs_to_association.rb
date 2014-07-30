@@ -45,6 +45,11 @@ module ActiveFedora
           owner[reflection.foreign_key]
         end
 
+        # belongs_to is not invertible (unless we implement has_one, then make an exception here)
+        def invertible_for?(_)
+          false
+        end
+
         def stale_state
           owner[reflection.foreign_key]
         end

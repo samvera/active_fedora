@@ -196,6 +196,16 @@ describe "Deleting a dependent relationship" do
   let(:item) { Item.create }
   let(:component) { Component.create }
 
+  context "when the relationship is set by an id" do
+    let(:item_id) { item.id }
+    let!(:component1) { Component.create(item_id: item_id) }
+    let!(:component2) { Component.create(item_id: item_id) }
+
+    it "should set the inverse relationship" do
+      expect(component1.item.components).to match_array [component1, component2]
+    end
+  end
+
   it "should remove relationships" do
     component.item = item
     component.save!
