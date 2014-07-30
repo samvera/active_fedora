@@ -15,7 +15,6 @@ module ActiveFedora
     end
 
     def versions
-      # puts "Versions #{versions_graph.dump(:ttl)}"
       results = versions_graph.query([rdf_subject, RDF::URI.new('http://fedora.info/definitions/v4/repository#hasVersion'), nil])
       results.map(&:object)
     end
@@ -25,7 +24,6 @@ module ActiveFedora
       resp.success?
     end
 
-    # for datastreams
     def save(*)
       assert_versionable if versionable
       super

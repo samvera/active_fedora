@@ -217,7 +217,7 @@ module ActiveFedora
         local_or_remote_content(true)
       end
 
-      def save
+      def save(*)
         return unless content_changed?
         raise "Can't generate uri because the parent object isn't saved" if digital_object.new_record?
         payload = behaves_like_io?(content) ? content.read : content
