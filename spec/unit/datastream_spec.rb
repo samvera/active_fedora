@@ -8,6 +8,26 @@ describe ActiveFedora::Datastream do
 
   it { should_not be_metadata }
 
+  describe "#behaves_like_io?" do
+    subject { datastream.send(:behaves_like_io?, object) }
+
+    context "with a File" do
+      let(:object) { File.new __FILE__ }
+      it { should be true }
+    end
+
+    context "with a Tempfile" do
+      after { object.close; object.unlink }
+      let(:object) { Tempfile.new('foo') }
+      it { should be true }
+    end
+
+    context "with a StringIO" do
+      let(:object) { StringIO.new('foo') }
+      it { should be true }
+    end
+  end
+
   describe "to_param" do
     before { allow(subject).to receive(:dsid).and_return('foo.bar') }
     it "should escape dots" do

@@ -203,7 +203,7 @@ module ActiveFedora
 
     # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
     def behaves_like_io?(obj)
-      obj.is_a?(IO) || obj.is_a?(StringIO) || (defined?(Rack) && obj.is_a?(Rack::Test::UploadedFile))
+      [IO, Tempfile, StringIO].any? { |klass| obj.kind_of? klass } || (defined?(Rack) && obj.is_a?(Rack::Test::UploadedFile))
     end
 
     # Persistence is an included module, so that we can include other modules which override these methods
