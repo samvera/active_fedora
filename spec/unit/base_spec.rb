@@ -185,9 +185,21 @@ describe ActiveFedora::Base do
       end
 
       context "when assign pid returns a value" do
-        it "should set the pid" do
-          @test_object.save
-          expect(@test_object.pid).to eq @this_pid
+        context "an no pid has been set" do
+          it "should set the pid" do
+            @test_object.save
+            expect(@test_object.pid).to eq @this_pid
+          end
+        end
+        context "when a pid is set" do
+          before do
+            @test_object = ActiveFedora::Base.new(pid: '999')
+            allow(@test_object).to receive(:assign_pid).and_return(@this_pid)
+          end
+          it "should not set the pid" do
+            @test_object.save
+            expect(@test_object.pid).to eq '999' 
+          end
         end
       end
     end

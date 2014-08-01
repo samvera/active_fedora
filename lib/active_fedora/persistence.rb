@@ -131,9 +131,7 @@ module ActiveFedora
     
     # Deals with preparing new object to be saved to Fedora, then pushes it and its datastreams into Fedora. 
     def create_record(options = {})
-      if new_pid = assign_pid
-        @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(FedoraLens.connection, self.class.id_to_uri(new_pid), RDF::Graph.new))
-      end
+      assign_rdf_subject
       assert_content_model
       serialize_datastreams
       result = super()
@@ -152,6 +150,12 @@ module ActiveFedora
     end
 
     def assign_pid
+    end
+
+    def assign_rdf_subject
+      if !pid && new_pid = assign_pid
+        @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(FedoraLens.connection, self.class.id_to_uri(new_pid), RDF::Graph.new))
+      end
     end
 
     def assign_uri_to_datstreams
