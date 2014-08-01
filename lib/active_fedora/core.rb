@@ -21,7 +21,7 @@ module ActiveFedora
         when Ldp::Resource
           super
         when String
-          super(ActiveFedora::Base.id_to_uri(attributes_or_resource_or_url))
+          super(self.class.id_to_uri(attributes_or_resource_or_url))
         when Hash
           attributes = attributes_or_resource_or_url
           pid = attributes.delete(:pid)

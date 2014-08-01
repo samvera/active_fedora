@@ -65,11 +65,10 @@ describe ActiveFedora::Base do
       @@last_pid += 1
     end
 
-    before(:each) do
+    before do
       @this_pid = increment_pid.to_s
-      ActiveFedora::Base.stub(:assign_pid).and_return(@this_pid)
-
       @test_object = ActiveFedora::Base.new
+      allow(@test_object).to receive(:assign_pid).and_return(@this_pid)
     end
 
 
@@ -183,6 +182,13 @@ describe ActiveFedora::Base do
         @test_object.orm.should_receive(:save!)
         @test_object.should_receive(:update_index)
         @test_object.save
+      end
+
+      context "when assign pid returns a value" do
+        it "should set the pid" do
+          @test_object.save
+          expect(@test_object.pid).to eq @this_pid
+        end
       end
     end
 
