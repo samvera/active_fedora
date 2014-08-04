@@ -38,10 +38,10 @@ module ActiveFedora
       serialize
     end
 
-    def content=(content)
+    def content=(new_content)
       resource.clear!
-      resource << deserialize(content)
-      content
+      resource << deserialize(new_content)
+      new_content
     end
 
     def content_changed?
@@ -100,7 +100,12 @@ module ActiveFedora
 
     def deserialize(data=nil)
       return RDF::Graph.new if new? && data.nil?
-      data ||= datastream_content
+
+      if data.nil?
+        data = datastream_content
+      elsif behaves_like_io?(data)
+        data = io_content(data)
+      end
 
       # Because datastream_content can return nil, we should check that here.
       return repository if data.nil?
@@ -111,6 +116,17 @@ module ActiveFedora
 
     def serialization_format
       raise "you must override the `serialization_format' method in a subclass"
+    end
+
+    private
+
+    def io_content(data)
+      begin
+        data.rewind
+        data.read
+      ensure
+        data.rewind
+      end
     end
 
   end

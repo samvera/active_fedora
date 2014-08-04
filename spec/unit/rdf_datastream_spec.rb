@@ -71,6 +71,13 @@ describe ActiveFedora::RDFDatastream do
       ds.content = data
       expect(ds.resource.dump(:ntriples)).to eq "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
     end
+    context "when passed an IO-like object" do
+      let(:file) { File.new(File.join(File.dirname(__FILE__), "..", "fixtures", "dublin_core_rdf_descMetadata.nt")) }
+      it "should read it" do
+        ds.content = file
+        expect(ds.resource.dump(:ntriples)).to eq File.read(file.path)
+      end
+    end
   end
 
   describe 'legacy non-utf-8 characters' do
