@@ -1,7 +1,7 @@
 module ActiveFedora
   module Core
     extend ActiveSupport::Concern
-    
+
     included do
       ##
       # :singleton-method:
@@ -25,7 +25,7 @@ module ActiveFedora
         when Hash
           attributes = attributes_or_resource_or_url
           pid = attributes.delete(:pid)
-          pid ? super(ActiveFedora::Base.id_to_uri(pid)) : super()
+          pid ? super(self.class.id_to_uri(pid)) : super()
         when NilClass
           super
         else
