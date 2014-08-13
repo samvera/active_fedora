@@ -12,7 +12,7 @@ module ActiveFedora
           values = resource.get_values(field_key)
           Array(values).each do |val|
             if val.kind_of? RDF::URI
-              val = val.to_s 
+              val = val.to_s
             elsif val.kind_of? ActiveTriples::Resource
               val = val.solrize
             end
@@ -22,7 +22,7 @@ module ActiveFedora
         solr_doc
       end
 
-      # Gives the primary solr name for a column. If there is more than one indexer on the field definition, it gives the first 
+      # Gives the primary solr name for a column. If there is more than one indexer on the field definition, it gives the first
       def primary_solr_name(field)
         config = self.class.config_for_term_or_uri(field)
         return nil unless config # punt on index names for deep nodes!
@@ -41,7 +41,7 @@ module ActiveFedora
           config_for_term_or_uri(field).type
         end
       end
-      
+
       private
         # returns a Hash, e.g.: {field => {:values => [], :type => :something, :behaviors => []}, ...}
         def fields

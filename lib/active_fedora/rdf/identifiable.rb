@@ -30,7 +30,7 @@ module ActiveFedora::Rdf::Identifiable
     def resource_datastream(ds=nil)
       @resource_datastream ||= ds ? ds : nil
       return @resource_datastream unless @resource_datastream.nil?
-      return :descMetadata if self.ds_specs['descMetadata'][:type].respond_to? :rdf_subject
+      return :descMetadata if self.ds_specs['descMetadata'] && self.ds_specs['descMetadata'][:type].respond_to?(:rdf_subject)
       self.ds_specs.each do |dsid, conf|
         return dsid.to_sym if conf[:type].respond_to? :rdf_subject
       end

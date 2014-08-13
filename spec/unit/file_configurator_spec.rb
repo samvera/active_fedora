@@ -2,9 +2,9 @@ require 'spec_helper'
 require 'config_helper'
 
 describe ActiveFedora::FileConfigurator do
-  
+
   subject {ActiveFedora.configurator }
-  
+
   after :all do
     unstub_rails
     # Restore to default fedora configs
@@ -15,7 +15,7 @@ describe ActiveFedora::FileConfigurator do
     it "should trigger configuration reset (to empty defaults)" do
       expect_any_instance_of(ActiveFedora::FileConfigurator).to receive(:reset!)
       ActiveFedora::FileConfigurator.new
-    end 
+    end
   end
 
   describe "#config_options" do
@@ -34,7 +34,7 @@ describe ActiveFedora::FileConfigurator do
     it "should trigger configuration to load" do
       subject.should_receive(:load_fedora_config)
       subject.fedora_config
-    end 
+    end
   end
   describe "#solr_config" do
     before do
@@ -43,7 +43,7 @@ describe ActiveFedora::FileConfigurator do
     it "should trigger configuration to load" do
       subject.should_receive(:load_solr_config)
       subject.solr_config
-    end 
+    end
   end
 
   describe "#reset!" do
@@ -52,7 +52,7 @@ describe ActiveFedora::FileConfigurator do
       subject.instance_variable_get(:@fedora_config).should == {} 
     end
     it "should clear @solr_config" do
-      subject.instance_variable_get(:@solr_config).should == {} 
+      subject.instance_variable_get(:@solr_config).should == {}
     end
     it "should clear @config_options" do
       subject.instance_variable_get(:@config_options).should == {}
@@ -60,7 +60,7 @@ describe ActiveFedora::FileConfigurator do
   end
 
   describe "initialization methods" do
-    
+
     describe "get_config_path(:fedora)" do
       it "should use the config_options[:config_path] if it exists" do
         subject.should_receive(:config_options).and_return({:fedora_config_path => "/path/to/fedora.yml"})
@@ -131,13 +131,13 @@ describe ActiveFedora::FileConfigurator do
         File.should_receive(:file?).with("/path/to/solr.yml").and_return(true)
         subject.get_config_path(:solr).should eql("/path/to/solr.yml")
       end
-      
+
       it "should return the solr.yml file in the same directory as the fedora.yml if it exists" do
         subject.should_receive(:path).and_return("/path/to/fedora/config/fedora.yml")
         File.should_receive(:file?).with("/path/to/fedora/config/solr.yml").and_return(true)
         subject.get_config_path(:solr).should eql("/path/to/fedora/config/solr.yml")
       end
-      
+
       context "no solr.yml in same directory as fedora.yml and fedora.yml does not contain solr url" do
 
         before :each do

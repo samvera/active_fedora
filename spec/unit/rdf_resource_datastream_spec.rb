@@ -100,6 +100,7 @@ describe ActiveFedora::RDFDatastream do
       context "after it is persisted" do
         before do
           subject.save
+          byebug
           subject.reload
         end
 
@@ -185,7 +186,7 @@ describe ActiveFedora::RDFDatastream do
       class AssetWithMap < ActiveFedora::Base
         class << self
           def id_to_uri(id)
-            "#{FedoraLens.host}/foobar/#{id}"
+            "#{ActiveFedora.fedora.host}/foobar/#{id}"
           end
 
           def uri_to_id(uri)

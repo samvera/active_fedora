@@ -3,6 +3,10 @@ module ActiveFedora
   module Persistence
     extend ActiveSupport::Concern
 
+    def new_record?
+      @orm.resource.new?
+    end
+
     def persisted?
       !(new_record? || destroyed?)
     end
@@ -58,7 +62,7 @@ module ActiveFedora
       pid = self.pid ## cache so it's still available after delete
       reload # Reload to pick up any changes because of updating reflections.
       begin
-        super
+        @orm.resource.delete
       rescue Ldp::NotFound
         raise ObjectNotFoundError, "Unable to find #{pid} in the repository"
       end
@@ -134,16 +138,19 @@ module ActiveFedora
       assign_rdf_subject
       assert_content_model
       serialize_datastreams
-      result = super()
+      puts "Creating with #{has_model}"
+      puts "AT: #{resource.dump(:ttl)}"
+      puts "LDP: #{orm.graph.dump(:ntriples)}"
+      @orm = orm.create
       assign_uri_to_datastreams
       should_update_index = create_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
-      return !!result
+      true
     end
 
     def update_record(options = {})
       serialize_datastreams
-      result = super()
+      result = orm.save!
       should_update_index = update_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
       return !!result
@@ -154,7 +161,10 @@ module ActiveFedora
 
     def assign_rdf_subject
       if !pid && new_pid = assign_pid
-        @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(FedoraLens.connection, self.class.id_to_uri(new_pid), RDF::Graph.new))
+        # TODO probably need to copy all the assertions from the @resource onto this graph
+        @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_pid), RDF::Graph.new))
+      else
+        @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, nil, @resource, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
       end
     end
 

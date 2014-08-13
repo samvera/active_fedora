@@ -21,6 +21,8 @@ module ActiveFedora
       #
       # Accepts a proc that takes a uri and transforms it to a pid
       mattr_accessor :translate_uri_to_id, instance_writer: false
+
+      attr_reader :orm
     end
 
     # Constructor.  You may supply a custom +:pid+, or we call the Fedora Rest API for the
@@ -29,24 +31,34 @@ module ActiveFedora
     # +:namespace+ value to Fedora::Repository.nextid to generate the next pid available within
     # the given namespace.
     def initialize(attributes_or_resource_or_url = nil)
+      conn = ActiveFedora.fedora.connection
+      g = RDF::Graph.new
       case attributes_or_resource_or_url
-        when Ldp::Resource
-          super
+        when Ldp::Resource::RdfSource
+          @orm = Ldp::Orm.new(subject_or_data)
+          @attributes = get_attributes_from_orm(@orm)
         when String
-          super(self.class.id_to_uri(attributes_or_resource_or_url))
+          @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, self.class.id_to_uri(attributes_or_resource_or_url), g))
+          @attributes = {}.with_indifferent_access
         when Hash
           attributes = attributes_or_resource_or_url
           pid = attributes.delete(:pid)
-          pid ? super(self.class.id_to_uri(pid)) : super()
+          @attributes = attributes.with_indifferent_access if attributes
+          @orm = if pid
+            Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, self.class.id_to_uri(pid), g))
+          else
+            Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, nil, g, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
+          end
         when NilClass
-          super
+          @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, nil, g, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
+          @attributes = {}.with_indifferent_access
         else
-          raise ArgumentError
+          raise ArgumentError, "#{attributes_or_resource_or_url.class} is not acceptable"
+
       end
 
       @association_cache = {}
       load_datastreams
-      self.attributes = attributes if attributes
       run_callbacks :initialize
     end
 
@@ -55,7 +67,7 @@ module ActiveFedora
       raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved" unless persisted?
       clear_association_cache
       clear_datastreams
-      super
+      @orm = @orm.reload
       load_datastreams
       self
     end
@@ -69,8 +81,8 @@ module ActiveFedora
     #   post = Post.allocate
     #   post.init_with_resource(Ldp::Resource.new('http://example.com/post/1'))
     #   post.title # => 'hello world'
-    def init_with_resource(resource)
-      init_core(resource)
+    def init_with_resource(rdf_resource)
+      @orm = Ldp::Orm.new(rdf_resource)
       @association_cache = {}
       load_datastreams
       run_callbacks :find
@@ -110,7 +122,9 @@ module ActiveFedora
         if translate_id_to_uri
           translate_id_to_uri.call(id)
         else
-          super
+          id = "/#{id}" unless id.start_with? '/'
+          id = ActiveFedora.fedora.base_path + id unless id.start_with? "#{ActiveFedora.fedora.base_path}/"
+          ActiveFedora.fedora.host + id
         end
       end
 
@@ -121,7 +135,8 @@ module ActiveFedora
         if translate_uri_to_id
           translate_uri_to_id.call(uri)
         else
-          super
+          id = uri.to_s.sub(ActiveFedora.fedora.host + ActiveFedora.fedora.base_path, '')
+          id.start_with?('/') ? id[1..-1] : id
         end
       end
 

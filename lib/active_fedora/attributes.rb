@@ -2,7 +2,7 @@ module ActiveFedora
   module Attributes
     extend ActiveSupport::Concern
     include ActiveModel::Dirty
-    
+
     included do
       include Serializers
       include PrimaryKey
@@ -18,6 +18,7 @@ module ActiveFedora
       properties.each do |k, v|
         respond_to?(:"#{k}=") ? send(:"#{k}=", v) : raise(UnknownAttributeError, "#{self.class} does not have an attribute `#{k}'")
       end
+
     end
 
 
@@ -48,7 +49,7 @@ module ActiveFedora
     def []=(key, value)
       if attributes_as_lenses.key?(key)
         # The attribute is stored in the RDF graph for this object
-        super 
+        super
       else
         # The attribute is a delegate to a datastream
         array_setter(key, value)

@@ -4,7 +4,8 @@ module ActiveFedora
 
     included do
       class_attribute :versionable
-      attribute :model_type, [ RDF.type ]
+      # attribute :model_type, [ RDF.type ]
+      property :model_type, predicate: RDF.type
 
     end
 

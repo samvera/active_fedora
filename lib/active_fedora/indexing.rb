@@ -66,13 +66,13 @@ module ActiveFedora
       def reindex_everything
         urls_from_sitemap_index.each do |url|
           logger.debug "Re-index everything ... #{url}"
-          ActiveFedora::Base.find(Ldp::Resource::RdfSource.new(FedoraLens.connection, url)).update_index
+          ActiveFedora::Base.find(Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, url)).update_index
         end
       end
 
       def urls_from_sitemap_index
         ids = []
-        sitemap_index_uri = FedoraLens.host + '/sitemap'
+        sitemap_index_uri = ActiveFedora.fedora.host + '/sitemap'
         sitemap_index = Nokogiri::XML(open(sitemap_index_uri))
         sitemap_uris = sitemap_index.xpath("//sitemap:loc/text()", sitemap_index.namespaces)
         sitemap_uris.map(&:to_s).each do |sitemap_uri|

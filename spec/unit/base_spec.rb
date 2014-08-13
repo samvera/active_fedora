@@ -4,6 +4,12 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   it_behaves_like "An ActiveModel"
 
+  describe 'rdf' do
+    it "should have a graph" do
+      puts subject.resource.dump(:ttl)
+      puts subject.datastream_assertions
+    end
+  end
   describe 'descendants' do
     it "should record the decendants" do
       expect(ActiveFedora::Base.descendants).to include(ModsArticle, SpecialThing)
@@ -195,19 +201,19 @@ describe ActiveFedora::Base do
 
     describe '.save' do
       it "should create a new record" do
-        @test_object.stub(new_record?: true)
-        @test_object.should_receive(:assign_pid)
-        @test_object.should_receive(:serialize_datastreams)
-        @test_object.should_receive(:create_and_fetch_attributes)
-        @test_object.should_receive(:update_index)
+        allow(@test_object).to receive(:new_record?).and_return(true)
+        expect(@test_object).to receive(:serialize_datastreams)
+        expect(@test_object).to receive(:assign_rdf_subject)
+        expect(@test_object.orm).to receive(:create)
+        expect(@test_object).to receive(:update_index)
         @test_object.save
       end
 
       it "should update an existing record" do
-        @test_object.stub(new_record?: false)
-        @test_object.should_receive(:serialize_datastreams)
-        @test_object.orm.should_receive(:save!)
-        @test_object.should_receive(:update_index)
+        allow(@test_object).to receive(:new_record?).and_return(false)
+        expect(@test_object).to receive(:serialize_datastreams)
+        expect(@test_object.orm).to receive(:save!)
+        expect(@test_object).to receive(:update_index)
         @test_object.save
       end
 
@@ -234,41 +240,41 @@ describe ActiveFedora::Base do
     describe "#create" do
       it "should build a new record and save it" do
         obj = double()
-        obj.should_receive(:save)
-        FooHistory.should_receive(:new).and_return(obj)
-        @hist = FooHistory.create(:fubar=>'ta', :swank=>'da')
+        expect(obj).to receive(:save)
+        expect(FooHistory).to receive(:new).and_return(obj)
+        @hist = FooHistory.create(fubar: 'ta', swank: 'da')
       end
     end
 
     describe ".to_solr" do
       it "should provide .to_solr" do
-        @test_object.should respond_to(:to_solr)
+        expect(@test_object).to respond_to(:to_solr)
       end
 
       it "should add pid, system_create_date, system_modified_date from object attributes" do
         expect(@test_object).to receive(:create_date).and_return("2012-03-04T03:12:02Z").twice
         expect(@test_object).to receive(:modified_date).and_return("2012-03-07T03:12:02Z").twice
-        @test_object.stub(pid: 'changeme:123')
+        allow(@test_object).to receive(:pid).and_return('changeme:123')
         solr_doc = @test_object.to_solr
-        solr_doc[ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)].should eql("2012-03-04T03:12:02Z")
-        solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :stored_sortable, type: :date)].should eql("2012-03-07T03:12:02Z")
-        solr_doc[:id].should eql("changeme:123")
+        expect(solr_doc[ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)]).to eql("2012-03-04T03:12:02Z")
+        expect(solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :stored_sortable, type: :date)]).to eql("2012-03-07T03:12:02Z")
+        expect(solr_doc[:id]).to eql("changeme:123")
       end
 
       it "should add self.class as the :active_fedora_model" do
         @test_history = FooHistory.new()
         solr_doc = @test_history.to_solr
-        solr_doc[ActiveFedora::SolrService.solr_name("active_fedora_model", :stored_sortable)].should eql("FooHistory")
+        expect(solr_doc[ActiveFedora::SolrService.solr_name("active_fedora_model", :stored_sortable)]).to eql("FooHistory")
       end
 
       it "should call .to_solr on all datastreams, passing the resulting document to solr" do
         mock1 = double("ds1")
-        mock1.should_receive(:to_solr).and_return({})
+        expect(mock1).to receive(:to_solr).and_return({})
         mock2 = double("ds2")
-        mock2.should_receive(:to_solr).and_return({})
+        expect(mock2).to receive(:to_solr).and_return({})
 
-        @test_object.stub(datastreams: {:ds1 => mock1, :ds2 => mock2})
-        @test_object.should_receive(:solrize_relationships)
+        allow(@test_object).to receive(:datastreams).and_return(ds1: mock1, ds2: mock2)
+        expect(@test_object).to receive(:solrize_relationships)
         @test_object.to_solr
       end
     end
@@ -278,9 +284,9 @@ describe ActiveFedora::Base do
         m = FooHistory.new
         att= {"fubar"=> '1234', "baz" =>'stuff'}
 
-        m.should_receive(:fubar=).with('1234')
-        m.should_receive(:baz=).with('stuff')
-        m.should_receive(:save)
+        expect(m).to receive(:fubar=).with('1234')
+        expect(m).to receive(:baz=).with('stuff')
+        expect(m).to receive(:save)
         m.update_attributes(att)
       end
     end
@@ -290,9 +296,9 @@ describe ActiveFedora::Base do
         m = FooHistory.new
         att= {"fubar"=> '1234', "baz" =>'stuff'}
 
-        m.should_receive(:fubar=).with('1234')
-        m.should_receive(:baz=).with('stuff')
-        m.should_receive(:save)
+        expect(m).to receive(:fubar=).with('1234')
+        expect(m).to receive(:baz=).with('stuff')
+        expect(m).to receive(:save)
         m.update(att)
       end
     end
@@ -304,12 +310,12 @@ describe ActiveFedora::Base do
         location_reflection = double('location', foreign_key: 'location_id', options: {property: :is_part_of}, has_many?: false)
         reflections = { 'person' => person_reflection, 'location' => location_reflection }
 
-        @test_object.should_receive(:[]).with('person_id').and_return('info:fedora/demo:10')
-        @test_object.should_receive(:[]).with('location_id').and_return('info:fedora/demo:11')
-        @test_object.class.should_receive(:reflections).and_return(reflections)
+        expect(@test_object).to receive(:[]).with('person_id').and_return('info:fedora/demo:10')
+        expect(@test_object).to receive(:[]).with('location_id').and_return('info:fedora/demo:11')
+        expect(@test_object.class).to receive(:reflections).and_return(reflections)
         solr_doc = @test_object.solrize_relationships
-        solr_doc[ActiveFedora::SolrService.solr_name("is_member_of", :symbol)].should == "info:fedora/demo:10"
-        solr_doc[ActiveFedora::SolrService.solr_name("is_part_of", :symbol)].should == "info:fedora/demo:11"
+        expect(solr_doc[ActiveFedora::SolrService.solr_name("is_member_of", :symbol)]).to eq "info:fedora/demo:10"
+        expect(solr_doc[ActiveFedora::SolrService.solr_name("is_part_of", :symbol)]).to eq "info:fedora/demo:11"
       end
     end
   end

@@ -60,6 +60,8 @@ module ActiveFedora
       datastream_object_for name, {}, ds_spec
     end
 
+    # TODO it looks like calling load_datastreams causes all the datastreams properties to load eagerly
+    # Because Datastream#new triggers a load of the graph.
     def load_datastreams
       local_ds_specs = self.ds_specs.dup
       Array(datastream_assertions).each do |ds_uri|
@@ -74,7 +76,7 @@ module ActiveFedora
         self.add_datastream(ds)
         configure_datastream(ds, ds_spec)
       end
-    end      
+    end
 
     # Adds datastream to the object.
     # @return [String] dsid of the added datastream

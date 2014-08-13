@@ -7,37 +7,37 @@ module ActiveFedora
     # Initializes ActiveFedora's connection to Fedora and Solr based on the info in fedora.yml and solr.yml
     # NOTE: this deprecates the use of a solr url in the fedora.yml
     #
-    # 
+    #
     # If Rails.env is set, it will use that environment.  Defaults to "development".
     # @param [Hash] options (optional) a list of options for the configuration of active_fedora
     # @option options [String] :environment The environment within which to run
     # @option options [String] :fedora_config_path The full path to the fedora.yml config file.
     # @option options [String] :solr_config_path The full path to the solr.yml config file.
-    # 
-    # If :environment is not set, order of preference is 
+    #
+    # If :environment is not set, order of preference is
     # 1. Rails.env
     # 2. ENV['environment']
     # 3. RAILS_ENV
     #
-    # If :fedora_config_path is not set, it will look in 
+    # If :fedora_config_path is not set, it will look in
     # 1. +Rails.root+/config
     # 2. +current working directory+/config
     # 3. (default) the fedora.yml shipped with gem
     #
-    # If :solr_config_path is not set, it will 
+    # If :solr_config_path is not set, it will
     # 1. look in config_options[:fedora_config_path].  If it finds a solr.yml there, it will use it.
-    # 2. If it does not find a solr.yml and the fedora.yml contains a solr url, it will raise an configuration error 
+    # 2. If it does not find a solr.yml and the fedora.yml contains a solr url, it will raise an configuration error
     # 3. If it does not find a solr.yml and the fedora.yml does not contain a solr url, it will look in: +Rails.root+/config, +current working directory+/config, then the solr.yml shipped with gem
 
     # Options allowed in fedora.yml
-    # first level is the environment (e.g. development, test, production and any custom environments you may have) 
+    # first level is the environment (e.g. development, test, production and any custom environments you may have)
     # the second level has these keys:
     # 1. url: url including protocol, host, port and path (e.g. http://127.0.0.1:8983/fedora)
     # 2. user: username
     # 3. password: password
-    # 4. validateChecksum:  indicates to the fedora server whether you want to validate checksums when the datastreams are queried.  
+    # 4. validateChecksum:  indicates to the fedora server whether you want to validate checksums when the datastreams are queried.
     #
-    # @example If you want to shard the fedora instance, you can specify an array of credentials. 
+    # @example If you want to shard the fedora instance, you can specify an array of credentials.
     #   production:
     #   - user: user1
     #     password: password1
@@ -56,7 +56,7 @@ module ActiveFedora
     end
 
     def init options = {}
-      if options.is_a?(String) 
+      if options.is_a?(String)
         raise ArgumentError, "Calling ActiveFedora.init with a path as an argument has been removed.  Use ActiveFedora.init(:fedora_config_path=>#{options})"
       end
       reset!
@@ -76,7 +76,7 @@ module ActiveFedora
     def path
       get_config_path(:fedora)
     end
-    
+
     def reset!
       @config_loaded = false  #Force reload of configs
       @fedora_config = {}
@@ -92,7 +92,7 @@ module ActiveFedora
     def load_configs
       return if config_loaded?
       @config_env = ActiveFedora.environment
-      
+
       load_fedora_config
       load_solr_config
       @config_loaded = true
@@ -144,7 +144,7 @@ module ActiveFedora
       @solr_config = {:url=> get_solr_url(config[ActiveFedora.environment.to_sym].symbolize_keys)}
     end
 
-    # Given the solr_config that's been loaded for this environment, 
+    # Given the solr_config that's been loaded for this environment,
     # determine which solr url to use
     def get_solr_url(solr_config)
       if @index_full_text == true && solr_config.has_key?(:fulltext) && solr_config[:fulltext].has_key?('url')

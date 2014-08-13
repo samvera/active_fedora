@@ -172,7 +172,7 @@ module ActiveFedora
     # @param [Boolean] cast when true, cast the found object to the class of the first known model defined in it's RELS-EXT
     #
     # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel http://fedora.info/definitions/v4/model#Dataset), return a Dataset object (not a Book).
-    #   Book.find_one("hydra:dataset1") 
+    #   Book.find_one("hydra:dataset1")
     def find_one(pid, cast=nil)
       if where_values.empty?
         load_from_fedora(pid, cast)
@@ -182,12 +182,13 @@ module ActiveFedora
         to_enum(:find_each, query, {}).to_a.first
       end
     end
-    
+
     protected
 
     def load_from_fedora(id, cast)
       raise ActiveFedora::ObjectNotFoundError if id.empty?
-      resource = Ldp::Resource::RdfSource.new(FedoraLens.connection, klass.id_to_uri(id))
+      puts "ID #{id}"
+      resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, klass.id_to_uri(id))
       raise ActiveFedora::ObjectNotFoundError if resource.new?
       class_to_load(resource, cast).allocate.init_with_resource(resource) # Triggers the find callback
     end
@@ -202,6 +203,7 @@ module ActiveFedora
     end
 
     def has_model_value(resource)
+      puts "HMV #{resource.graph.dump(:ttl)}"
       Ldp::Orm.new(resource).value(RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel")).first.to_s
     end
 

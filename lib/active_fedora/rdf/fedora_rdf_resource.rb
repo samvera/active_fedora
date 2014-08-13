@@ -1,21 +1,5 @@
-module ActiveFedora::Rdf
-  ##
-  # A class of RdfResources to act as the primary/root resource associated
-  # with a Datastream and ActiveFedora::Base object.
-  #
-  # @see ActiveFedora::RDFDatastream
-  class ObjectResource < ActiveTriples::Resource
-    configure base_uri: ActiveFedora.fedora.host
-    attr_accessor :datastream
-
-    def persist!
-      return false unless datastream and datastream.respond_to? :digital_object
-      @persisted ||= datastream.digital_object.save
-    end
-
-    def persisted?
-      @persisted ||= (not datastream.new_record?)
-    end
+module ActiveFedora
+  class FedoraRdfResource < ActiveTriples::Resource
 
     # This overrides ActiveTriples to cast id (e.g. /test-1) to a fully qualifed URI
     def get_uri(uri_or_str)
@@ -36,5 +20,6 @@ module ActiveFedora::Rdf
         end
       end
     end
+
   end
 end

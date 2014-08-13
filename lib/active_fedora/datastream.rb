@@ -2,18 +2,20 @@ module ActiveFedora
 
   #This class represents a Fedora datastream
   class Datastream
-    include FedoraLens::Core
+    include AttributeMethods
     include ActiveModel::Dirty
+    extend ActiveTriples::Properties
     generate_method 'content'
 
     extend ActiveModel::Callbacks
     define_model_callbacks :save, :create, :destroy
-    define_model_callbacks :initialize, :only => :after    
+    define_model_callbacks :initialize, only: :after
 
-    attr_reader :digital_object, :dsid
+    attr_reader :digital_object, :dsid, :orm
     attr_accessor :last_modified
 
-    attribute :has_content, [ActiveFedora::Rdf::Fcrepo.hasContent, FedoraLens::Lenses.single]
+    # attribute :has_content, [ActiveFedora::Rdf::Fcrepo.hasContent, FedoraLens::Lenses.single]
+    property :has_content, predicate: ActiveFedora::Rdf::Fcrepo.hasContent
 
     # @param digital_object [DigitalObject] the digital object that this object belongs to
     # @param dsid [String] the datastream id, if this is nil, a datastream id will be generated.
@@ -24,16 +26,27 @@ module ActiveFedora
       raise ArgumentError, "Digital object is nil" unless digital_object
       @digital_object = digital_object
       initialize_dsid(dsid, options.delete(:prefix))
-      resource = Ldp::Resource::RdfSource.new(FedoraLens.connection, "#{digital_object.uri}/#{@dsid}")
+      resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, "#{digital_object.uri}/#{@dsid}")
+      @attributes = {}.with_indifferent_access
       init_core(resource)
       unless digital_object.new_record?
         @new_record = false
       end
     end
 
+    def init_core(rdf_source)
+      @orm = Ldp::Orm.new(rdf_source)
+      #@attributes = get_attributes_from_orm(@orm)
+    end
+
+    def new_record?
+      @orm.resource.new?
+    end
+
+
     def digital_object=(digital_object)
       raise ArgumentError unless new_record?
-      resource = Ldp::Resource::RdfSource.new(FedoraLens.connection, uri)
+      resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
       init_core(resource)
     end
 
@@ -76,7 +89,6 @@ module ActiveFedora
       query_content_node RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasSize")
     end
 
-    
     def has_content?
       has_content.present? || @content.present?
     end
@@ -91,7 +103,7 @@ module ActiveFedora
     end
 
     def uri
-      new_record? ? "#{digital_object.uri}/#{dsid}" : super
+      new_record? ? "#{digital_object.uri}/#{dsid}" : @orm.try(:resource).try(:subject_uri).try(:to_s)
     end
 
     def content_path
@@ -121,14 +133,14 @@ module ActiveFedora
       "#<#{self.class} uri=\"#{uri}\" changed=\"#{changed?}\" >"
     end
 
-    #compatibility method for rails' url generators. This method will 
+    #compatibility method for rails' url generators. This method will
     #urlescape escape dots, which are apparently
     #invalid characters in a dsid.
     def to_param
       dsid.gsub(/\./, '%2e')
     end
-    
-    # @abstract Override this in your concrete datastream class. 
+
+    # @abstract Override this in your concrete datastream class.
     # @return [boolean] does this datastream contain metadata (not file data)
     def metadata?
       false
@@ -146,7 +158,7 @@ module ActiveFedora
     # serializes any changed data into the content field
     def serialize!
     end
-    
+
     def to_solr(solr_doc = Hash.new)
       solr_doc
     end
@@ -169,11 +181,11 @@ module ActiveFedora
       val = matches.empty? ? 1 : matches.max + 1
       format_dsid(prefix, val)
     end
-    
+
     ### Provided so that an application can override how generated pids are formatted (e.g DS01 instead of DS1)
     def format_dsid(prefix, suffix)
       sprintf("%s%i", prefix,suffix)
-    end    
+    end
 
     # The string to prefix all solr fields with. Override this method if you want
     # a prefix other than the default
@@ -233,7 +245,8 @@ module ActiveFedora
           else
             raise "unexpected return value #{resp.status}\n\t#{resp.body[0,200]}"
         end
-        super #TODO optimize. We only need to save if the properties such as model_type have changed
+        # TODO optimize. We only need to save if the properties such as model_type have changed
+        orm.save
       end
 
       def retrieve_content
