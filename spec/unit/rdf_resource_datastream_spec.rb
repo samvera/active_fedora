@@ -180,6 +180,32 @@ describe ActiveFedora::RDFDatastream do
     end
   end
 
+  context "with a custom id_to_uri mapping function" do
+    before do
+      class AssetWithMap < ActiveFedora::Base
+        class << self
+          def id_to_uri(id)
+            "#{FedoraLens.host}/foobar/#{id}"
+          end
+
+          def uri_to_id(uri)
+            uri.to_s.split('/')[-1]
+          end
+        end
+
+        has_metadata  'descMetadata', type: DummyResource
+        has_attributes :title, :license, datastream: 'descMetadata', multiple: true
+      end
+    end
+    subject { AssetWithMap.new(pid: '12345', title: ['my title']) }
+
+    it "should set the subject of the datastream using the uri" do
+      subject.save
+      expect(subject.descMetadata.content).to eq "<http://localhost:8983/fedora/rest/foobar/12345> <http://purl.org/dc/terms/title> \"my title\" .\n"
+    end
+
+  end
+
   describe "relationships" do
     before do
       @new_object = DummyAsset.new
