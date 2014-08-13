@@ -20,7 +20,8 @@ describe ActiveFedora::Base do
   end
   let (:library) { Library.create }
   subject {Book.new(library: library, title: "War and Peace", publisher: "Random House")}
-  after do 
+
+  after do
     Object.send(:remove_const, :Book)
     Object.send(:remove_const, :Library)
     Object.send(:remove_const, :MyDatastream)

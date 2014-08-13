@@ -1,12 +1,12 @@
 require 'spec_helper'
-@@last_pid = 0  
+@@last_pid = 0
 
 describe ActiveFedora::Base do
   it_behaves_like "An ActiveModel"
 
   describe 'descendants' do
     it "should record the decendants" do
-      ActiveFedora::Base.descendants.should include(ModsArticle, SpecialThing)
+      expect(ActiveFedora::Base.descendants).to include(ModsArticle, SpecialThing)
     end
   end
 
@@ -14,10 +14,10 @@ describe ActiveFedora::Base do
     it "should call update_index on every object represented in the sitemap" do
       allow(ActiveFedora::Base).to receive(:ids_from_sitemap_index) { ['XXX', 'YYY', 'ZZZ'] }
       mock_update = double(:mock_obj)
-      mock_update.should_receive(:update_index).exactly(3).times
-      ActiveFedora::Base.should_receive(:find).with('XXX').and_return(mock_update)
-      ActiveFedora::Base.should_receive(:find).with('YYY').and_return(mock_update)
-      ActiveFedora::Base.should_receive(:find).with('ZZZ').and_return(mock_update)
+      expect(mock_update).to receive(:update_index).exactly(3).times
+      expect(ActiveFedora::Base).to receive(:find).with('XXX').and_return(mock_update)
+      expect(ActiveFedora::Base).to receive(:find).with('YYY').and_return(mock_update)
+      expect(ActiveFedora::Base).to receive(:find).with('ZZZ').and_return(mock_update)
       ActiveFedora::Base.reindex_everything
     end
   end
@@ -33,21 +33,22 @@ describe ActiveFedora::Base do
   describe "With a test class" do
     before :each do
       class FooHistory < ActiveFedora::Base
-        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData", :autocreate => true do |m|
+        has_metadata 'someData', type: ActiveFedora::SimpleDatastream, autocreate: true do |m|
           m.field "fubar", :string
           m.field "swank", :text
         end
-        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText", :autocreate => true do |m|
+        has_metadata "withText", type: ActiveFedora::SimpleDatastream, autocreate: true do |m|
           m.field "fubar", :text
         end
-        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :autocreate => true do |m|
+        has_metadata "withText2", type: ActiveFedora::SimpleDatastream, autocreate: true do |m|
           m.field "fubar", :text
-        end 
+        end
         has_attributes :fubar, datastream: 'withText', multiple: true
         has_attributes :swank, datastream: 'someData', multiple: true
       end
+
       class FooAdaptation < ActiveFedora::Base
-        has_metadata :type=>ActiveFedora::OmDatastream, :name=>'someData'
+        has_metadata 'someData', type: ActiveFedora::OmDatastream
       end
 
       class FooInherited < FooHistory
@@ -73,24 +74,49 @@ describe ActiveFedora::Base do
 
 
     describe '#new' do
-      it "should not get a pid on init" do
-        ActiveFedora::Base.should_receive(:assign_pid).never
-        FooHistory.new
+      before do
+        allow_any_instance_of(FooHistory).to receive(:assign_pid).and_return(@this_pid)
+      end
+      context "with no arguments" do
+        it "should not get a pid on init" do
+          expect(FooHistory.new.pid).to be_nil
+        end
       end
 
-      it "should be able to create with a custom pid" do
-        f = FooHistory.new('baz_1')
-        expect(f.id).to eq 'baz_1'
-        expect(f.pid).to eq 'baz_1'
+      context "with a pid argument" do
+        it "should be able to create with a custom pid" do
+          expect(FooHistory).to receive(:id_to_uri).and_call_original
+          f = FooHistory.new('baz_1')
+          expect(f.id).to eq 'baz_1'
+          expect(f.pid).to eq 'baz_1'
+        end
+      end
+
+      context "with a hash argument" do
+        context "that has a pid" do
+          it "should be able to create with a custom pid" do
+            expect(FooHistory).to receive(:id_to_uri).and_call_original
+            f = FooHistory.new(pid: 'baz_1')
+            expect(f.id).to eq 'baz_1'
+            expect(f.pid).to eq 'baz_1'
+          end
+        end
+
+        context "that doesn't have a pid" do
+          it "should be able to create with a custom pid" do
+            f = FooHistory.new(fubar: ['baz_1'])
+            expect(f.id).to be_nil
+          end
+        end
       end
     end
 
     describe ".datastream_class_for_name" do
       it "should return the specifed class" do
-        FooAdaptation.datastream_class_for_name('someData').should == ActiveFedora::OmDatastream
+        expect(FooAdaptation.datastream_class_for_name('someData')).to eq ActiveFedora::OmDatastream
       end
       it "should return the specifed class" do
-        FooAdaptation.datastream_class_for_name('content').should == ActiveFedora::Datastream
+        expect(FooAdaptation.datastream_class_for_name('content')).to eq ActiveFedora::Datastream
       end
     end
 
@@ -107,7 +133,10 @@ describe ActiveFedora::Base do
     end
 
     context "when its saved" do
-      before { @test_object.stub(new_record?: false, uri: 'http://localhost:8983/fedora/rest/test/one/two/three') }
+      before do
+        allow(@test_object).to receive(:new_record?).and_return(false)
+        allow(@test_object).to receive(:uri).and_return('http://localhost:8983/fedora/rest/test/one/two/three')
+      end
 
       context "#to_param" do
         subject { @test_object.to_param }
@@ -123,8 +152,8 @@ describe ActiveFedora::Base do
 
     ### Methods for ActiveModel::Naming
     it "Should know the model_name" do
-      FooHistory.model_name.should == 'FooHistory'
-      FooHistory.model_name.human.should == 'Foo history'
+      expect(FooHistory.model_name).to eq 'FooHistory'
+      expect(FooHistory.model_name.human).to eq 'Foo history'
     end
     ### End ActiveModel::Naming
 
@@ -132,7 +161,7 @@ describe ActiveFedora::Base do
     describe ".datastreams" do
       let(:test_history) { FooHistory.new }
       it "should create accessors for datastreams declared with has_metadata" do
-        test_history.withText.should == test_history.datastreams['withText']
+        expect(test_history.withText).to eq test_history.datastreams['withText']
       end
       describe "dynamic accessors" do
         before do
@@ -142,28 +171,28 @@ describe ActiveFedora::Base do
         describe "when the datastream is named with dash" do
           let(:ds) {double('datastream', :dsid=>'eac-cpf')}
           it "should convert dashes to underscores" do
-            test_history.eac_cpf.should == ds
+            expect(test_history.eac_cpf).to eq ds
           end
         end
         describe "when the datastream is named with underscore" do
           let (:ds) { double('datastream', :dsid=>'foo_bar') }
           it "should preserve the underscore" do
-            test_history.foo_bar.should == ds
+            expect(test_history.foo_bar).to eq ds
           end
         end
       end
     end
 
     it 'should provide #find' do
-      ActiveFedora::Base.should respond_to(:find)
+      expect(ActiveFedora::Base).to respond_to(:find)
     end
 
     it "should provide .create_date" do
-      @test_object.should respond_to(:create_date)
+      expect(@test_object).to respond_to(:create_date)
     end
 
     it "should provide .modified_date" do
-      @test_object.should respond_to(:modified_date)
+      expect(@test_object).to respond_to(:modified_date)
     end
 
     describe '.save' do
@@ -198,7 +227,7 @@ describe ActiveFedora::Base do
           end
           it "should not set the pid" do
             @test_object.save
-            expect(@test_object.pid).to eq '999' 
+            expect(@test_object.pid).to eq '999'
           end
         end
       end
