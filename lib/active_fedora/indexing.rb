@@ -64,21 +64,20 @@ module ActiveFedora
     module ClassMethods
 
       def reindex_everything
-        ids_from_sitemap_index.each do |id|
-          logger.debug "Re-index everything ... #{id}"
-          ActiveFedora::Base.find(id).update_index
+        urls_from_sitemap_index.each do |url|
+          logger.debug "Re-index everything ... #{url}"
+          ActiveFedora::Base.find(Ldp::Resource::RdfSource.new(FedoraLens.connection, url)).update_index
         end
       end
 
-      def ids_from_sitemap_index
+      def urls_from_sitemap_index
         ids = []
         sitemap_index_uri = FedoraLens.host + '/sitemap'
         sitemap_index = Nokogiri::XML(open(sitemap_index_uri))
         sitemap_uris = sitemap_index.xpath("//sitemap:loc/text()", sitemap_index.namespaces)
         sitemap_uris.map(&:to_s).each do |sitemap_uri|
           sitemap = Nokogiri::XML(open(sitemap_uri))
-          sitemap_ids = sitemap.xpath("//sitemap:loc/text()", sitemap_index.namespaces)
-          ids += sitemap_ids.map { |u| ActiveFedora::Base.uri_to_id(u) }
+          ids += sitemap.xpath("//sitemap:loc/text()", sitemap_index.namespaces).map(&:to_s)
         end
         ids
       end

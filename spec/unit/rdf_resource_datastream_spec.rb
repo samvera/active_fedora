@@ -160,7 +160,7 @@ describe ActiveFedora::RDFDatastream do
       context "persisted to repository" do
         before do
           DummySubnode.configure :repository => :default
-          DummySubnode.any_instance.stub(:repository).and_return(RDF::Repository.new)
+          allow_any_instance_of(DummySubnode).to receive(:repository).and_return(RDF::Repository.new)
           dummy = DummySubnode.new(RDF::URI('http://example.org/dummy/blah'))
           dummy.title = 'subbla'
           # We want to have to manually persist to the repository.

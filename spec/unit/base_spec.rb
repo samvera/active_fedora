@@ -12,21 +12,19 @@ describe ActiveFedora::Base do
 
   describe "reindex_everything" do
     it "should call update_index on every object represented in the sitemap" do
-      allow(ActiveFedora::Base).to receive(:ids_from_sitemap_index) { ['XXX', 'YYY', 'ZZZ'] }
+      allow(ActiveFedora::Base).to receive(:urls_from_sitemap_index) { ['http://localhost/test/XXX', 'http://localhost/test/YYY', 'http://localhost/test/ZZZ'] }
       mock_update = double(:mock_obj)
       expect(mock_update).to receive(:update_index).exactly(3).times
-      expect(ActiveFedora::Base).to receive(:find).with('XXX').and_return(mock_update)
-      expect(ActiveFedora::Base).to receive(:find).with('YYY').and_return(mock_update)
-      expect(ActiveFedora::Base).to receive(:find).with('ZZZ').and_return(mock_update)
+      expect(ActiveFedora::Base).to receive(:find).with(instance_of Ldp::Resource::RdfSource ).and_return(mock_update).exactly(3).times
       ActiveFedora::Base.reindex_everything
     end
   end
 
-  describe "ids_from_sitemap_index" do
+  describe "urls_from_sitemap_index" do
     before { @obj = ActiveFedora::Base.create }
     after { @obj.destroy }
     it "should return a list of all the ids in all the sitemaps in the sitemap index" do
-      expect(ActiveFedora::Base.ids_from_sitemap_index).to include(@obj.pid)
+      expect(ActiveFedora::Base.urls_from_sitemap_index).to include(@obj.uri)
     end
   end
 
