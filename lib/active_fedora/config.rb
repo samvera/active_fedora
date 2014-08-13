@@ -1,4 +1,4 @@
-module ActiveFedora 
+module ActiveFedora
   class Config
     attr_reader :credentials
     def initialize(val)

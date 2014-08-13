@@ -9,6 +9,18 @@ module ActiveFedora
       # Accepts a logger conforming to the interface of Log4r which can be
       # retrieved on both a class and instance level by calling +logger+.
       mattr_accessor :logger, instance_writer: false
+
+      ##
+      # :singleton-method
+      #
+      # Accepts a proc that takes a pid and transforms it to a URI
+      mattr_accessor :translate_id_to_uri, instance_writer: false
+
+      ##
+      # :singleton-method
+      #
+      # Accepts a proc that takes a uri and transforms it to a pid
+      mattr_accessor :translate_uri_to_id, instance_writer: false
     end
 
     # Constructor.  You may supply a custom +:pid+, or we call the Fedora Rest API for the
@@ -89,6 +101,28 @@ module ActiveFedora
       # TODO this is a poorly named method
       def to_class_uri(attrs = {})
         self.name
+      end
+
+      ##
+      # Transforms a pid into a uri
+      # if translate_id_to_uri is set it uses that proc, otherwise just the default
+      def id_to_uri(id)
+        if translate_id_to_uri
+          translate_id_to_uri.call(id)
+        else
+          super
+        end
+      end
+
+      ##
+      # Transforms a uri into a pid
+      # if translate_uri_to_id is set it uses that proc, otherwise just the default
+      def uri_to_id(uri)
+        if translate_uri_to_id
+          translate_uri_to_id.call(uri)
+        else
+          super
+        end
       end
 
       private

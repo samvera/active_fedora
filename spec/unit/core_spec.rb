@@ -16,8 +16,8 @@ describe ActiveFedora::Base do
       has_attributes :title, datastream: 'foo' # Om backed property
       has_attributes :publisher, datastream: 'bar' # RDF backed property
     end
-    subject.library = library
   end
+
   let (:library) { Library.create }
   subject {Book.new(library: library, title: "War and Peace", publisher: "Random House")}
 
@@ -70,8 +70,44 @@ describe ActiveFedora::Base do
     it "should access associations" do
       f = Book.find(subject.id)
       f.freeze
-      f.library_id.should_not be_nil
+      expect(f.library_id).to_not be_nil
 
+    end
+  end
+
+  describe "id_to_uri" do
+    let(:id) { '123456w' }
+    subject { ActiveFedora::Base.id_to_uri(id) }
+
+    context "with no custom proc is set" do
+      it { should eq "#{FedoraLens.host}#{FedoraLens.base_path}/123456w" }
+    end
+
+    context "when custom proc is set" do
+      before do
+        ActiveFedora::Base.translate_id_to_uri = lambda { |id| "#{FedoraLens.host}#{FedoraLens.base_path}/foo/#{id}" }
+      end
+      after { ActiveFedora::Base.translate_id_to_uri = nil }
+
+      it { should eq "#{FedoraLens.host}#{FedoraLens.base_path}/foo/123456w" }
+    end
+  end
+
+  describe "uri_to_id" do
+    let(:uri) { "#{FedoraLens.host}#{FedoraLens.base_path}/foo/123456w" }
+    subject { ActiveFedora::Base.uri_to_id(uri) }
+
+    context "with no custom proc is set" do
+      it { should eq 'foo/123456w' }
+    end
+
+    context "when custom proc is set" do
+      before do
+        ActiveFedora::Base.translate_uri_to_id = lambda { |uri| uri.to_s.split('/')[-1] }
+      end
+      after { ActiveFedora::Base.translate_uri_to_id = nil }
+
+      it { should eq '123456w' }
     end
   end
 end
