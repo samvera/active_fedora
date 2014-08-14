@@ -6,6 +6,7 @@ gemspec path: File.expand_path('..', __FILE__)
 
 
 gem "ldp", github: 'cbeer/ldp'
+gem 'active-triples', github: 'no-reply/ActiveTriples'
 gem 'byebug' unless ENV['TRAVIS']
 
 group :test do

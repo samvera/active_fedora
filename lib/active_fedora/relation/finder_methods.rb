@@ -117,13 +117,13 @@ module ActiveFedora
     # Yields the found ActiveFedora::Base object to the passed block
     #
     # @param [Hash] conditions the conditions for the solr search to match
-    # @param [Hash] opts 
+    # @param [Hash] opts
     # @option opts [Boolean] :cast (true) when true, examine the model and cast it to the first known cModel
     def find_each( conditions={}, opts={})
       cast = opts.delete(:cast)
       find_in_batches(conditions, opts.merge({:fl=>SOLR_DOCUMENT_ID})) do |group|
         group.each do |hit|
-          begin 
+          begin
             yield(load_from_fedora(hit[SOLR_DOCUMENT_ID], cast))
           rescue ActiveFedora::ObjectNotFoundError
             ActiveFedora::Base.logger.error "Although #{hit[SOLR_DOCUMENT_ID]} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch." if ActiveFedora::Base.logger
@@ -138,15 +138,15 @@ module ActiveFedora
     #
     # Returns a solr result matching the supplied conditions
     # @param[Hash] conditions solr conditions to match
-    # @param[Hash] options 
-    # @option opts [Array] :sort a list of fields to sort by 
+    # @param[Hash] options
+    # @option opts [Array] :sort a list of fields to sort by
     # @option opts [Array] :rows number of rows to return
     #
     # @example
     #  Person.find_in_batches('age_t'=>'21', {:batch_size=>50}) do |group|
     #  group.each { |person| puts person['name_t'] }
     #  end
-    
+
     def find_in_batches conditions, opts={}
       opts[:q] = create_query(conditions)
       opts[:qt] = @klass.solr_query_handler
@@ -163,7 +163,7 @@ module ActiveFedora
         response = ActiveFedora::SolrService.instance.conn.paginate counter, batch_size, "select", :params => opts
         docs = response["response"]["docs"]
         yield docs
-      end while docs.has_next? 
+      end while docs.has_next?
     end
 
     # Retrieve the Fedora object with the given pid, explore the returned object
@@ -187,7 +187,6 @@ module ActiveFedora
 
     def load_from_fedora(id, cast)
       raise ActiveFedora::ObjectNotFoundError if id.empty?
-      puts "ID #{id}"
       resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, klass.id_to_uri(id))
       raise ActiveFedora::ObjectNotFoundError if resource.new?
       class_to_load(resource, cast).allocate.init_with_resource(resource) # Triggers the find callback
@@ -202,8 +201,8 @@ module ActiveFedora
       end
     end
 
+    # TODO just use has_model
     def has_model_value(resource)
-      puts "HMV #{resource.graph.dump(:ttl)}"
       Ldp::Orm.new(resource).value(RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel")).first.to_s
     end
 

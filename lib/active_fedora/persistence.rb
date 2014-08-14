@@ -138,9 +138,6 @@ module ActiveFedora
       assign_rdf_subject
       assert_content_model
       serialize_datastreams
-      puts "Creating with #{has_model}"
-      puts "AT: #{resource.dump(:ttl)}"
-      puts "LDP: #{orm.graph.dump(:ntriples)}"
       @orm = orm.create
       assign_uri_to_datastreams
       should_update_index = create_needs_index? && options.fetch(:update_index, true)
@@ -164,7 +161,7 @@ module ActiveFedora
         # TODO probably need to copy all the assertions from the @resource onto this graph
         @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_pid), RDF::Graph.new))
       else
-        @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, nil, @resource, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
+        @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, @orm.resource.subject, @resource, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
       end
     end
 

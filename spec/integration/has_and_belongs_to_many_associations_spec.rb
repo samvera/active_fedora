@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   describe "with inverse" do
     before do
-      class Book < ActiveFedora::Base 
+      class Book < ActiveFedora::Base
         has_and_belongs_to_many :topics, property: :has_topic, inverse_of: :books
         has_and_belongs_to_many :collections, property: :is_member_of_collection
       end
@@ -15,7 +15,7 @@ describe ActiveFedora::Base do
       class Collection < ActiveFedora::Base
       end
 
-      class Topic < ActiveFedora::Base 
+      class Topic < ActiveFedora::Base
         has_and_belongs_to_many :books, property: :is_topic_of
       end
     end
@@ -107,7 +107,7 @@ describe ActiveFedora::Base do
 
   describe "when inverse is not specified" do
     before do
-      class Book < ActiveFedora::Base 
+      class Book < ActiveFedora::Base
         has_and_belongs_to_many :collections, property: :is_member_of_collection
       end
 
@@ -152,7 +152,7 @@ describe ActiveFedora::Base do
       end
     end
 
-    context "when a book isn't in a collection" do 
+    context "when a book isn't in a collection" do
       describe "#empty?" do
         subject { book.collections }
         it { should be_empty }

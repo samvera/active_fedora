@@ -1,6 +1,6 @@
 shared_examples_for "An ActiveModel" do
   def assert(test, *args)
-    expect(test).to eq(true)
+    expect(test).to be true
   end
 
   def assert_kind_of(klass, inspected_object)

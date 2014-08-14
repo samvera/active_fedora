@@ -21,13 +21,19 @@ module ActiveFedora
     end
 
     def id
-      self.class.uri_to_id(URI.parse(uri)) if uri.present?
+      if uri.kind_of?(RDF::URI) && uri.value.blank?
+        nil
+      elsif uri.present?
+        self.class.uri_to_id(URI.parse(uri))
+      end
     end
 
     alias pid id
 
     def uri
-      @orm.try(:resource).try(:subject_uri).try(:to_s)
+      # TODO could we return a RDF::URI instead?
+      uri = @orm.try(:resource).try(:subject_uri)
+      uri.value == '' ? uri : uri.to_s
     end
 
     ##

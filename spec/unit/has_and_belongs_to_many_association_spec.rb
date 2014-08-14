@@ -1,11 +1,13 @@
 require 'spec_helper'
 
 describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
-  before do 
+  before do
     class Book < ActiveFedora::Base
     end
     class Page < ActiveFedora::Base
     end
+    allow_any_instance_of(Book).to receive(:load_datastreams).and_return(false)
+    allow_any_instance_of(Page).to receive(:load_datastreams).and_return(false)
   end
 
   after do
@@ -26,10 +28,10 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     allow(object).to receive(:new_record?).and_return(false)
     allow(object).to receive(:save).and_return(true)
     allow(object).to receive(:id).and_return('1234')
-  
+
     allow(subject).to receive(:[]).with('page_ids').and_return([])
     expect(subject).to receive(:[]=).with('page_ids', ['1234'])
- 
+
     ac.concat object
 
   end
@@ -47,13 +49,13 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     object = Page.new('object:b')
     allow(object).to receive(:new_record?).and_return(false)
     allow(object).to receive(:save).and_return(true)
-  
+
     allow(subject).to receive(:[]).with('page_ids').and_return([])
     expect(subject).to receive(:[]=).with('page_ids', [object.id])
- 
+
     expect(object).to receive(:[]).with('book_ids').and_return([]).twice
     expect(object).to receive(:[]=).with('book_ids', [subject.id])
- 
+
     ac.concat object
 
   end
@@ -115,6 +117,9 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
         it "should clear the object set" do
           expect(collection.members).to eq [thing]
           collection.member_ids = [thing2.id, thing3.id]
+          c = collection
+          byebug
+          c.members
           expect(collection.members).to eq [thing2, thing3]
         end
       end

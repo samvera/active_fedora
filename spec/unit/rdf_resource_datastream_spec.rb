@@ -100,7 +100,6 @@ describe ActiveFedora::RDFDatastream do
       context "after it is persisted" do
         before do
           subject.save
-          byebug
           subject.reload
         end
 

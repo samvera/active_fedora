@@ -98,7 +98,7 @@ module ActiveFedora
     end
 
     def freeze
-      @attributes = @attributes.clone.freeze
+      #@attributes = @attributes.clone.freeze
       datastreams.freeze
       self
     end

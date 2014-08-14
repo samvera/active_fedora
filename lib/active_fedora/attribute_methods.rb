@@ -37,7 +37,6 @@ module ActiveFedora
 
 
     included do
-      include Declarations
       initialize_generated_modules
       include Read
       include Write

@@ -26,9 +26,15 @@ module ActiveFedora
       raise ArgumentError, "Digital object is nil" unless digital_object
       @digital_object = digital_object
       initialize_dsid(dsid, options.delete(:prefix))
-      resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, "#{digital_object.uri}/#{@dsid}")
+
+      #TODO if digital_object.uri is empty, then this resource is not valid:
+      source = if digital_object.uri.kind_of?(RDF::URI) && digital_object.uri.value.empty?
+        Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, nil)
+      else
+        Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, "#{digital_object.uri}/#{@dsid}")
+      end
       @attributes = {}.with_indifferent_access
-      init_core(resource)
+      init_core(source)
       unless digital_object.new_record?
         @new_record = false
       end
@@ -103,7 +109,15 @@ module ActiveFedora
     end
 
     def uri
-      new_record? ? "#{digital_object.uri}/#{dsid}" : @orm.try(:resource).try(:subject_uri).try(:to_s)
+      if new_record?
+        if digital_object.uri.kind_of?(RDF::URI) && digital_object.uri.value.empty?
+          RDF::URI.new(nil)
+        else
+          "#{digital_object.uri}/#{dsid}"
+        end
+      else
+        @orm.try(:resource).try(:subject)
+      end
     end
 
     def content_path
@@ -260,7 +274,7 @@ module ActiveFedora
             resp.body
           when 404
             # TODO
-            # this happens because rdf_datastream calls datastream_content. 
+            # this happens because rdf_datastream calls datastream_content.
             # which happens because it needs a PID even though it isn't saved.
             # which happens because we don't know if something exists if you give it a pid
             #raise ActiveFedora::ObjectNotFoundError, "Unable to find content at #{uri}/fcr:content"
@@ -287,24 +301,26 @@ module ActiveFedora
           end
         end
       end
-    private
 
-    def local_or_remote_content(ensure_fetch = true)
-      return @content if new_record? 
+      private
 
-      @content ||= ensure_fetch ? datastream_content : @ds_content
+      def local_or_remote_content(ensure_fetch = true)
+        return @content if new_record?
 
-      if behaves_like_io?(@content)
-        begin
-          @content.rewind
-          @content.read
-        ensure
-          @content.rewind
+        @content ||= ensure_fetch ? datastream_content : @ds_content
+
+        if behaves_like_io?(@content)
+          begin
+            @content.rewind
+            @content.read
+          ensure
+            @content.rewind
+          end
+        else
+          @content
         end
-      else
         @content
       end
-    end
     end
 
     include ActiveFedora::Datastream::Persistence

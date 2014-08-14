@@ -87,7 +87,6 @@ module ActiveFedora #:nodoc:
     extend ActiveSupport::Autoload
 
     eager_autoload do
-      autoload :Declarations
       autoload :Read
       autoload :Write
     end

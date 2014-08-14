@@ -37,7 +37,7 @@ module ActiveFedora
     end
 
     def [](key)
-      if attributes_as_lenses.key?(key)
+      if self.class.properties.key?(key)
         # The attribute is stored in the RDF graph for this object
         super
       else
@@ -47,7 +47,7 @@ module ActiveFedora
     end
 
     def []=(key, value)
-      if attributes_as_lenses.key?(key)
+      if self.class.properties.key?(key)
         # The attribute is stored in the RDF graph for this object
         super
       else
@@ -134,7 +134,7 @@ module ActiveFedora
         defined_attributes[field].multiple
       end
 
-      def find_or_create_defined_attribute(field, dsid, args)  
+      def find_or_create_defined_attribute(field, dsid, args)
         self.defined_attributes[field] ||= DatastreamAttribute.new(field, dsid, datastream_class_for_name(dsid), args)
       end
 

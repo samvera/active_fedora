@@ -32,16 +32,16 @@ module ActiveFedora
 
 
       def find_target
-          page_size = @reflection.options[:solr_page_size]
-          page_size ||= 200
-          pids = owner[reflection.foreign_key]
-          return [] if pids.empty?
-          solr_result = []
-          0.step(pids.size,page_size) do |startIdx|
-            query = ActiveFedora::SolrService.construct_query_for_pids(pids.slice(startIdx,page_size))
-            solr_result += ActiveFedora::SolrService.query(query, rows: page_size)
-          end
-          return ActiveFedora::SolrService.reify_solr_results(solr_result)
+        page_size = @reflection.options[:solr_page_size]
+        page_size ||= 200
+        pids = owner[reflection.foreign_key]
+        return [] if pids.blank?
+        solr_result = []
+        0.step(pids.size,page_size) do |startIdx|
+          query = ActiveFedora::SolrService.construct_query_for_pids(pids.slice(startIdx,page_size))
+          solr_result += ActiveFedora::SolrService.query(query, rows: page_size)
+        end
+        return ActiveFedora::SolrService.reify_solr_results(solr_result)
       end
 
       # In a HABTM, just look in the rels-ext, no need to run a count query from solr.
@@ -62,7 +62,7 @@ module ActiveFedora
         def delete_records(records, method)
           records.each do |r|
             owner[reflection.foreign_key].delete(r.id)
-            
+
             if (@reflection.options[:inverse_of])
               inverse = @reflection.inverse_of
               r[inverse.foreign_key].delete(@owner.id)
@@ -76,6 +76,7 @@ module ActiveFedora
       private
 
         def stale_state
+          puts "stale state for #{reflection.foreign_key}: #{owner[reflection.foreign_key]}"
           owner[reflection.foreign_key]
         end
 

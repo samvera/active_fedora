@@ -44,8 +44,14 @@ module ActiveFedora
       content
     end
 
+    def digital_object=(new_object)
+      super
+      resource.set_subject!(digital_object.uri) if resource.rdf_subject.value.blank?
+    end
+
     def content_changed?
       return false unless instance_variable_defined? :@resource
+      return true if resource.rdf_subject.value.empty? # can't be serialized because a subject hasn't been assigned yet.
       @content = serialize
       super
     end
@@ -95,7 +101,9 @@ module ActiveFedora
 
     def serialize
       resource.set_subject!(digital_object.uri) if digital_object.id and rdf_subject.node?
-      resource.dump serialization_format
+      val = resource.dump serialization_format
+      puts "serialize #{uri} as:\n#{val}"
+      val
     end
 
     def deserialize(data=nil)
