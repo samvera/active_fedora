@@ -11,11 +11,8 @@ module ActiveFedora
     define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, only: :after
 
-    attr_reader :digital_object, :dsid, :orm
+    attr_reader :digital_object, :dsid, :container_resource
     attr_accessor :last_modified
-
-    # attribute :has_content, [ActiveFedora::Rdf::Fcrepo.hasContent, FedoraLens::Lenses.single]
-    property :has_content, predicate: ActiveFedora::Rdf::Fcrepo.hasContent
 
     # @param digital_object [DigitalObject] the digital object that this object belongs to
     # @param dsid [String] the datastream id, if this is nil, a datastream id will be generated.
@@ -28,32 +25,31 @@ module ActiveFedora
       initialize_dsid(dsid, options.delete(:prefix))
 
       #TODO if digital_object.uri is empty, then this resource is not valid:
-      source = if digital_object.uri.kind_of?(RDF::URI) && digital_object.uri.value.empty?
-        Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, nil)
+      uri = if digital_object.uri.kind_of?(RDF::URI) && digital_object.uri.value.empty?
+        nil
       else
-        Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, "#{digital_object.uri}/#{@dsid}")
+        "#{digital_object.uri}/#{@dsid}"
       end
+      raise "crate ds with #{uri}" if /default/.match(uri)
+      @container_resource = ContainerResource.new(self, uri)
+
       @attributes = {}.with_indifferent_access
-      init_core(source)
       unless digital_object.new_record?
         @new_record = false
       end
     end
 
-    def init_core(rdf_source)
-      @orm = Ldp::Orm.new(rdf_source)
-      #@attributes = get_attributes_from_orm(@orm)
-    end
 
     def new_record?
-      @orm.resource.new?
+      @container_resource.new_record?
     end
 
 
     def digital_object=(digital_object)
       raise ArgumentError unless new_record?
-      resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
-      init_core(resource)
+      @container_resource = ContainerResource.new(self, uri)
+      # resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
+      # init_core(resource)
     end
 
     def initialize_dsid(dsid, prefix)
@@ -96,7 +92,7 @@ module ActiveFedora
     end
 
     def has_content?
-      has_content.present? || @content.present?
+      @container_resource.has_content.present? || @content.present?
     end
 
     def content_changed?
@@ -120,9 +116,6 @@ module ActiveFedora
       end
     end
 
-    def content_path
-      "#{uri}/fcr:content"
-    end
 
 
     class << self
@@ -183,10 +176,6 @@ module ActiveFedora
       'text/plain'
     end
 
-    def content_url
-      "#{uri}/fcr:content"
-    end
-
     # return a valid dsid that is not currently in use.  Uses a prefix (default "DS") and an auto-incrementing integer
     # Example: if there are already datastreams with IDs DS1 and DS2, this method will return DS3.  If you specify FOO as the prefix, it will return FOO1.
     def generate_dsid(digital_object, prefix)
@@ -216,7 +205,7 @@ module ActiveFedora
     end
 
     def query_content_node(predicate)
-      query = orm.graph.query([RDF::URI.new(content_path), predicate, nil])
+      query = container_resource.query([RDF::URI.new(@container_resource.content_path), predicate, nil])
       stmt = query.first
       stmt.object.object if stmt
     end
@@ -230,6 +219,35 @@ module ActiveFedora
     # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
     def behaves_like_io?(obj)
       [IO, Tempfile, StringIO].any? { |klass| obj.kind_of? klass } || (defined?(Rack) && obj.is_a?(Rack::Test::UploadedFile))
+    end
+
+    class ContainerResource < ActiveTriples::Resource
+
+      # attribute :has_content, [ActiveFedora::Rdf::Fcrepo.hasContent, FedoraLens::Lenses.single]
+      property :has_content, predicate: ActiveFedora::Rdf::Fcrepo.hasContent
+
+      def initialize(ds, uri)
+        @datasteam = ds
+        @uri = uri
+        rdf_source = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
+        @orm = Ldp::Orm.new(rdf_source)
+        super(uri)
+        self << @orm.graph
+      end
+
+      def new_record?
+        @orm.resource.new?
+      end
+
+      # TODO optimize. We only need to save if the properties such as model_type have changed
+      def save
+        @orm.save
+      end
+
+      def content_path
+        "#{@uri}/fcr:content"
+      end
+
     end
 
     # Persistence is an included module, so that we can include other modules which override these methods
@@ -249,23 +267,22 @@ module ActiveFedora
         payload = behaves_like_io?(content) ? content.read : content
         headers = { 'Content-Type' => mime_type }
         headers['Content-Disposition'] = "attachment; filename=\"#{@original_name}\"" if @original_name
-        resp = orm.resource.client.put content_path, payload, headers
+        resp = ActiveFedora.fedora.connection.put @container_resource.content_path, payload, headers
         reset_attributes
         case resp.status
           when 201, 204
             changed_attributes.clear
           when 404
-            raise ActiveFedora::ObjectNotFoundError, "Unable to add content at #{content_path}"
+            raise ActiveFedora::ObjectNotFoundError, "Unable to add content at #{@container_resource.content_path}"
           else
             raise "unexpected return value #{resp.status}\n\t#{resp.body[0,200]}"
         end
-        # TODO optimize. We only need to save if the properties such as model_type have changed
-        orm.save
+        @container_resource.save
       end
 
       def retrieve_content
         begin
-        resp = orm.resource.client.get(content_url)
+        resp = ActiveFedora.fedora.connection.get(@container_resource.content_path)
         rescue Ldp::NotFound
           return nil
         end
@@ -287,7 +304,7 @@ module ActiveFedora
       # @param range [String] the Range HTTP header
       # @yield [chunk] a block that receives chunked content
       def stream(range = nil, &block)
-        uri = URI(content_url)
+        uri = URI(@container_resource.content_path)
 
         headers = {}
         headers['Range'] = range if range

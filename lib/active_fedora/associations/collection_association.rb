@@ -15,12 +15,13 @@ module ActiveFedora
       def reader(opts = false)
         if opts.kind_of?(Hash)
           if opts.delete(:response_format) == :solr
-            return load_from_solr(opts) 
+            return load_from_solr(opts)
           end
           raise ArgumentError, "Hash parameter must include :response_format=>:solr (#{opts.inspect})"
         else
           force_reload = opts
         end
+        puts "Here we go"
         reload if force_reload || stale_target?
         @proxy ||= CollectionProxy.new(self)
       end
@@ -69,7 +70,7 @@ module ActiveFedora
         first_or_last(:last, *args)
       end
 
-      # Returns the size of the collection 
+      # Returns the size of the collection
       #
       # If the collection has been already loaded +size+ and +length+ are
       # equivalent. If not and you are going to need the records anyway

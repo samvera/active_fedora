@@ -32,7 +32,7 @@ module ActiveFedora
     include ActiveModel::Conversion
     include Callbacks
     include Validations
-    include AttributeMethods
+    #include AttributeMethods
     extend Querying
     include Associations
     include AutosaveAssociation

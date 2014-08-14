@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-  
+
   before(:all) do
     module SpecModel
       class Basic < ActiveFedora::Base
@@ -10,7 +10,7 @@ describe ActiveFedora::Base do
     @model_query = "_query_:\"{!raw f=" + ActiveFedora::SolrService.solr_name("has_model", :symbol) + "}SpecModel::Basic" + "\""
     @sort_query = ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date) + ' asc'
   end
-  
+
   after(:all) do
     Object.send(:remove_const, :SpecModel)
   end
@@ -94,12 +94,12 @@ describe ActiveFedora::Base do
     before { ActiveFedora::Base.stub(:relation => relation) }
     let(:relation) { ActiveFedora::Relation.new(SpecModel::Basic) }
     it "should query solr for all objects with :active_fedora_model_s of self.class" do
-      mock_docs = [{"id" => "changeme:30"},{"id" => "changeme:22"}]
+      mock_docs = [{"id" => "changeme-30"},{"id" => "changeme-22"}]
       mock_docs.should_receive(:has_next?).and_return(false)
       ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
-      
-      relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return(SpecModel::Basic.new('changeme:30'))
-      relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return(SpecModel::Basic.new('changeme:22'))
+
+      allow(relation).to receive(:load_from_fedora).with("changeme-30", nil).and_return(SpecModel::Basic.new('changeme-30'))
+      allow(relation).to receive(:load_from_fedora).with("changeme-22", nil).and_return(SpecModel::Basic.new('changeme-22'))
       SpecModel::Basic.find_each(){ |obj| obj.class == SpecModel::Basic }
     end
 
@@ -107,11 +107,11 @@ describe ActiveFedora::Base do
       let(:solr) { ActiveFedora::SolrService.instance.conn }
       let(:expected_query) { "#{@model_query} AND foo:bar AND baz:quix AND baz:quack" }
       let(:expected_params) { { params: { sort: [@sort_query], fl: 'id', q: expected_query, qt: 'standard' } } }
-      let(:mock_docs) { [{"id" => "changeme:30"},{"id" => "changeme:22"}] }
+      let(:mock_docs) { [{"id" => "changeme-30"}, {"id" => "changeme-22"}] }
 
       it "should filter by the provided fields" do
-        relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return(SpecModel::Basic.new('changeme:30'))
-        relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return(SpecModel::Basic.new('changeme:22'))
+        relation.should_receive(:load_from_fedora).with("changeme-30", nil).and_return(SpecModel::Basic.new('changeme-30'))
+        relation.should_receive(:load_from_fedora).with("changeme-22", nil).and_return(SpecModel::Basic.new('changeme-22'))
 
         mock_docs.should_receive(:has_next?).and_return(false)
         expect(solr).to receive(:paginate).with(1, 1000, 'select', expected_params).and_return('response'=>{'docs'=>mock_docs})

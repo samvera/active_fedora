@@ -117,9 +117,6 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
         it "should clear the object set" do
           expect(collection.members).to eq [thing]
           collection.member_ids = [thing2.id, thing3.id]
-          c = collection
-          byebug
-          c.members
           expect(collection.members).to eq [thing2, thing3]
         end
       end

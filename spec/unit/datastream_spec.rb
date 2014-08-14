@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::Datastream do
-  let(:parent) { double('inner object', uri: '/fedora/rest/test/1234', id: '1234', new_record?: true) }
+  let(:parent) { double('inner object', uri: "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234", id: '1234', new_record?: true) }
   let(:datastream) { ActiveFedora::Datastream.new(parent, 'abcd') }
 
   subject { datastream }
@@ -36,7 +36,7 @@ describe ActiveFedora::Datastream do
   end
 
   describe "#generate_dsid" do
-    let(:parent) { double('inner object', uri: '/fedora/rest/test/1234', id: '1234',
+    let(:parent) { double('inner object', uri: "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234", id: '1234',
                           new_record?: true, datastreams: datastreams) }
 
     subject { ActiveFedora::Datastream.new(parent, nil, prefix: 'FOO') }
@@ -48,7 +48,7 @@ describe ActiveFedora::Datastream do
     end
 
     it "should set the uri" do
-      expect(subject.uri).to eq '/fedora/rest/test/1234/FOO1'
+      expect(subject.uri).to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234/FOO1"
     end
 
     context "when some datastreams exist" do
@@ -62,7 +62,7 @@ describe ActiveFedora::Datastream do
 
   describe ".size" do
     before do
-      subject.orm.graph.insert([RDF::URI.new(subject.content_path), RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasSize"), RDF::Literal.new(9999) ])
+      subject.container_resource.insert([RDF::URI.new(subject.container_resource.content_path), RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasSize"), RDF::Literal.new(9999) ])
     end
     it "should load the datastream size attribute from the fedora repository" do
       expect(subject.size).to eq 9999
@@ -81,7 +81,7 @@ describe ActiveFedora::Datastream do
 
     describe "#inspect" do
       subject { datastream.inspect }
-      it { should eq "#<ActiveFedora::Datastream uri=\"/fedora/rest/test/1234/abcd\" changed=\"true\" >" }
+      it { should eq "#<ActiveFedora::Datastream uri=\"http://localhost:8983/fedora/rest/test/1234/abcd\" changed=\"true\" >" }
     end
   end
 
@@ -91,7 +91,7 @@ describe ActiveFedora::Datastream do
     describe "#has_content?" do
       context "when the graph has content" do
         before do
-          subject.has_content = RDF::URI.new(subject.content_path)
+          subject.container_resource.has_content = RDF::URI.new(subject.container_resource.content_path)
         end
         it { should have_content }
       end
@@ -109,7 +109,8 @@ describe ActiveFedora::Datastream do
     context "when it's saved" do
       let(:parent) { ActiveFedora::Base.create }
       before do
-        parent.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm', original_name: "my_image.png")
+        p = parent
+        p.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm', original_name: "my_image.png")
         parent.save!
       end
 

@@ -101,9 +101,7 @@ module ActiveFedora
 
     def serialize
       resource.set_subject!(digital_object.uri) if digital_object.id and rdf_subject.node?
-      val = resource.dump serialization_format
-      puts "serialize #{uri} as:\n#{val}"
-      val
+      resource.dump serialization_format
     end
 
     def deserialize(data=nil)

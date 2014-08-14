@@ -10,9 +10,6 @@ module ActiveFedora
 
       property :has_model, predicate: RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel")
       # attribute :has_model, [ RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel"), FedoraLens::Lenses.single, FedoraLens::Lenses.literal_to_string ]
-      property :datastream_assertions, predicate: ActiveFedora::Rdf::Fcrepo.hasChild
-      # attribute :datastream_assertions, [ ActiveFedora::Rdf::Fcrepo.hasChild ]
-
       # # TODO is it possible to put defaults here?
       # attribute :create_date, [ ActiveFedora::Rdf::Fcrepo.created, FedoraLens::Lenses.single, FedoraLens::Lenses.literal_to_string ]
       property :create_date, predicate: ActiveFedora::Rdf::Fcrepo.created

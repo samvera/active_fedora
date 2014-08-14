@@ -80,21 +80,21 @@ describe ActiveFedora::Base do
     subject { ActiveFedora::Base.id_to_uri(id) }
 
     context "with no custom proc is set" do
-      it { should eq "#{FedoraLens.host}#{FedoraLens.base_path}/123456w" }
+      it { should eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/123456w" }
     end
 
     context "when custom proc is set" do
       before do
-        ActiveFedora::Base.translate_id_to_uri = lambda { |id| "#{FedoraLens.host}#{FedoraLens.base_path}/foo/#{id}" }
+        ActiveFedora::Base.translate_id_to_uri = lambda { |id| "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/foo/#{id}" }
       end
       after { ActiveFedora::Base.translate_id_to_uri = nil }
 
-      it { should eq "#{FedoraLens.host}#{FedoraLens.base_path}/foo/123456w" }
+      it { should eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/foo/123456w" }
     end
   end
 
   describe "uri_to_id" do
-    let(:uri) { "#{FedoraLens.host}#{FedoraLens.base_path}/foo/123456w" }
+    let(:uri) { "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/foo/123456w" }
     subject { ActiveFedora::Base.uri_to_id(uri) }
 
     context "with no custom proc is set" do

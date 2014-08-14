@@ -52,6 +52,7 @@ module ActiveFedora
       #
       # Note that if the target has not been loaded, it is not considered stale.
       def stale_target?
+        puts "Check if the target is stale. #{loaded?} ss: #{@stale_state}"
         loaded? && @stale_state != stale_state
       end
 
@@ -76,7 +77,7 @@ module ActiveFedora
           @association_scope ||= AssociationScope.new(self).scope
         end
       end
-      
+
       # Set the inverse association, if possible
       def set_inverse_instance(record)
         if record && invertible_for?(record)

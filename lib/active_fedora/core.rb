@@ -31,21 +31,20 @@ module ActiveFedora
     # +:namespace+ value to Fedora::Repository.nextid to generate the next pid available within
     # the given namespace.
     def initialize(attributes_or_resource_or_url = nil)
-      conn = ActiveFedora.fedora.connection
       g = RDF::Graph.new
       case attributes_or_resource_or_url
         when Ldp::Resource::RdfSource
           @orm = Ldp::Orm.new(subject_or_data)
           @attributes = get_attributes_from_orm(@orm)
         when String
-          @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, self.class.id_to_uri(attributes_or_resource_or_url), g))
+          @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, self.class.id_to_uri(attributes_or_resource_or_url)))
           @attributes = {}.with_indifferent_access
         when Hash
           attributes = attributes_or_resource_or_url
           pid = attributes.delete(:pid)
           @attributes = attributes.with_indifferent_access if attributes
           @orm = if pid
-            Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, self.class.id_to_uri(pid), g))
+            Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, self.class.id_to_uri(pid)))
           else
             Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, nil, g, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
           end
@@ -67,7 +66,8 @@ module ActiveFedora
       raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved" unless persisted?
       clear_association_cache
       clear_datastreams
-      @orm = @orm.reload
+      @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, uri))
+      @resource = nil
       load_datastreams
       self
     end
@@ -146,5 +146,11 @@ module ActiveFedora
         Relation.new(self)
       end
     end
+
+    private
+      def conn
+        ActiveFedora.fedora.connection
+      end
+
   end
 end

@@ -139,6 +139,7 @@ module ActiveFedora
       assert_content_model
       serialize_datastreams
       @orm = orm.create
+      @resource = nil
       assign_uri_to_datastreams
       should_update_index = create_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
@@ -148,6 +149,7 @@ module ActiveFedora
     def update_record(options = {})
       serialize_datastreams
       result = orm.save!
+      @resource = nil
       should_update_index = update_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
       return !!result

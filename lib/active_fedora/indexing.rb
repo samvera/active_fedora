@@ -13,9 +13,9 @@ module ActiveFedora
     # If opts[:model_only] == true, the base object metadata and the RELS-EXT datastream will be omitted.  This is mainly to support shelver, which calls .to_solr for each model an object subscribes to.
     def to_solr(solr_doc = Hash.new, opts={})
       unless opts[:model_only]
-        c_time = create_date.present? ? create_date : Time.now
+        c_time = create_date.present? ? create_date.first : Time.now
         c_time = Time.parse(c_time) unless c_time.is_a?(Time)
-        m_time = modified_date.present? ? modified_date : Time.now
+        m_time = modified_date.present? ? modified_date.first : Time.now
         m_time = Time.parse(m_time) unless m_time.is_a?(Time)
         Solrizer.set_field(solr_doc, 'system_create', c_time, :stored_sortable)
         Solrizer.set_field(solr_doc, 'system_modified', m_time, :stored_sortable)

@@ -32,10 +32,10 @@ module ActiveFedora
     #
     # Datastream Management
     #
-    
-    # Returns all known datastreams for the object.  If the object has been 
+
+    # Returns all known datastreams for the object.  If the object has been
     # saved to fedora, the persisted datastreams will be included.
-    # Datastreams that have been modified in memory are given preference over 
+    # Datastreams that have been modified in memory are given preference over
     # the copy in Fedora.
     def datastreams
       @datastreams ||= DatastreamHash.new
@@ -44,7 +44,7 @@ module ActiveFedora
     def clear_datastreams
       @datastreams = nil
     end
-  
+
     def configure_datastream(ds, ds_spec=nil)
       ds_spec ||= self.ds_specs[ds.dsid]
       if ds_spec
@@ -60,11 +60,15 @@ module ActiveFedora
       datastream_object_for name, {}, ds_spec
     end
 
+    def datastream_assertions
+      resource.query(subject: resource, predicate: ActiveFedora::Rdf::Fcrepo.hasChild).objects.map(&:to_s)
+    end
+
     # TODO it looks like calling load_datastreams causes all the datastreams properties to load eagerly
     # Because Datastream#new triggers a load of the graph.
     def load_datastreams
       local_ds_specs = self.ds_specs.dup
-      Array(datastream_assertions).each do |ds_uri|
+      datastream_assertions.each do |ds_uri|
         dsid = ds_uri.to_s.sub(self.uri + '/', '')
         spec = local_ds_specs.delete(dsid)
         ds = spec ? datastream_from_spec(spec, dsid) : Datastream.new(self, dsid)
@@ -89,11 +93,11 @@ module ActiveFedora
     def metadata_streams
       datastreams.select { |k, ds| ds.metadata? }.values
     end
-    
+
     #
     # File Management
     #
-    
+
     # Add the given file as a datastream in the object
     #
     # @param [File] file the file to add
@@ -116,13 +120,13 @@ module ActiveFedora
         self.class.build_datastream_accessor(dsid) unless respond_to? dsid
       end
     end
-    
-    
+
+
     def create_datastream(type, dsid, opts={})
       klass = type.kind_of?(Class) ? type : type.constantize
       raise ArgumentError, "Argument dsid must be of type string" if dsid && !dsid.kind_of?(String)
       ds = klass.new(self, dsid, prefix: opts[:prefix])
-      ds.content = opts[:blob] || "" 
+      ds.content = opts[:blob] || ""
       ds
     end
 
@@ -133,16 +137,16 @@ module ActiveFedora
         ds_specs[dsid] ? ds_specs[dsid].fetch(:type, ActiveFedora::Datastream) : ActiveFedora::Datastream
       end
 
-      # This method is used to specify the details of a datastream. 
+      # This method is used to specify the details of a datastream.
       # You can pass the name as the first argument and a hash of options as the second argument
       # or you can pass the :name as a value in the args hash. Either way, name is required.
       # Note that this method doesn't actually execute the block, but stores it, to be executed
       # by any the implementation of the datastream(specified as :type)
       #
-      # @param [Hash] args 
+      # @param [Hash] args
       # @option args [Class] :type The class that will represent this datastream, should extend ``Datastream''
       # @option args [String] :name the handle to refer to this datastream as
-      # @option args [String] :url 
+      # @option args [String] :url
       # @option args [Boolean] :autocreate Always create this datastream on new objects
       # @yield block executed by some kinds of datastreams
       def has_metadata(*args, &block)
@@ -156,16 +160,16 @@ module ActiveFedora
         spec_datastream(args, @metadata_ds_defaults, &block)
       end
 
-      
+
       # @overload has_file_datastream(name, args)
       #   Declares a file datastream exists for objects of this type
-      #   @param [String] name 
-      #   @param [Hash] args 
+      #   @param [String] name
+      #   @param [Hash] args
       #     @option args :type (ActiveFedora::Datastream) The class the datastream should have
       #     @option args [Boolean] :autocreate Always create this datastream on new objects
       # @overload has_file_datastream(args)
       #   Declares a file datastream exists for objects of this type
-      #   @param [Hash] args 
+      #   @param [Hash] args
       #     @option args :name ("content") The dsid of the datastream
       #     @option args :type (ActiveFedora::Datastream) The class the datastream should have
       #     @option args [Boolean] :autocreate Always create this datastream on new objects
@@ -193,7 +197,7 @@ module ActiveFedora
       # @param defaults [Hash] the default values for the datastream spec
       # @yield block executed by some kinds of datastreams
       def spec_datastream(args, defaults, &block)
-        if args.first.is_a? String 
+        if args.first.is_a? String
           name = args.first
           args = args[1] || {}
           args[:name] = name

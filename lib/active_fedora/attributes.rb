@@ -39,7 +39,7 @@ module ActiveFedora
     def [](key)
       if self.class.properties.key?(key)
         # The attribute is stored in the RDF graph for this object
-        super
+        resource[key]
       else
         # The attribute is a delegate to a datastream
         array_reader(key)
@@ -49,7 +49,7 @@ module ActiveFedora
     def []=(key, value)
       if self.class.properties.key?(key)
         # The attribute is stored in the RDF graph for this object
-        super
+        resource[key]=value
       else
         # The attribute is a delegate to a datastream
         array_setter(key, value)

@@ -1,17 +1,15 @@
 require 'spec_helper'
 
 describe ActiveFedora::OmDatastream do
-  
-  let(:mock_inner) { double('inner object', uri: nil, new_record?: false) }
+  let(:mock_inner) { double('inner object', uri: RDF::URI.new(nil), new_record?: false) }
 
   subject { ActiveFedora::OmDatastream.new mock_inner, 'descMetadata' }
-  
   it { should be_metadata }
 
   it "should include the Solrizer::XML::TerminologyBasedSolrizer for .to_solr support" do
     expect(ActiveFedora::OmDatastream.included_modules).to include(OM::XML::TerminologyBasedSolrizer)
   end
-  
+
   describe '#new' do
     it 'should load xml from blob if provided' do
       test_ds1 = ActiveFedora::OmDatastream.new(mock_inner, 'ds1')
@@ -159,18 +157,16 @@ describe ActiveFedora::OmDatastream do
 
     before do
       subject.content="<test_xml/>"
-      resource = double("mock resource", client: client)
-      orm = double("orm", resource: resource)
+      allow(ActiveFedora.fedora).to receive(:connection).and_return(client)
       allow(subject).to receive(:new_record?).and_return(true)
-      allow(subject).to receive(:orm).and_return(orm)
       allow(subject).to receive(:ng_xml_changed?).and_return(true)
       allow(subject).to receive(:xml_loaded).and_return(true)
       allow(subject).to receive(:to_xml).and_return('fake xml')
     end
 
     it "should persist the product of .to_xml in fedora" do
-      expect(client).to receive(:put).with("/descMetadata/fcr:content", 'fake xml', {"Content-Type"=>"text/xml"}).and_return(resp)
-      expect(subject).to receive(:create_record).and_return(true)
+      expect(client).to receive(:put).with("/fcr:content", 'fake xml', {"Content-Type"=>"text/xml"}).and_return(resp)
+      expect(subject.container_resource).to receive(:save).and_return(true)
       expect(subject).to receive(:fetch_mime_type_from_content_node).at_least(:once)
 
       subject.serialize!
@@ -178,7 +174,7 @@ describe ActiveFedora::OmDatastream do
       expect(subject.mime_type).to eq 'text/xml'
     end
   end
-  
+
   describe 'setting content' do
     subject { ActiveFedora::OmDatastream.new(mock_inner, "descMetadata") }
     before { subject.content = "<a />" }
