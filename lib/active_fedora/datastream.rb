@@ -30,7 +30,6 @@ module ActiveFedora
       else
         "#{digital_object.uri}/#{@dsid}"
       end
-      raise "crate ds with #{uri}" if /default/.match(uri)
       @container_resource = ContainerResource.new(self, uri)
 
       @attributes = {}.with_indifferent_access
@@ -47,7 +46,7 @@ module ActiveFedora
 
     def digital_object=(digital_object)
       raise ArgumentError unless new_record?
-      @container_resource = ContainerResource.new(self, uri)
+      @container_resource = ContainerResource.new(self, "#{digital_object.uri}/#{@dsid}")
       # resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
       # init_core(resource)
     end
@@ -214,6 +213,10 @@ module ActiveFedora
       @content = nil
     end
 
+    def uri
+      container_resource.uri
+    end
+
     private
 
     # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
@@ -225,6 +228,8 @@ module ActiveFedora
 
       # attribute :has_content, [ActiveFedora::Rdf::Fcrepo.hasContent, FedoraLens::Lenses.single]
       property :has_content, predicate: ActiveFedora::Rdf::Fcrepo.hasContent
+
+      attr_reader :uri
 
       def initialize(ds, uri)
         @datasteam = ds

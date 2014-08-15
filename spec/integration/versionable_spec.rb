@@ -4,7 +4,7 @@ describe "A versionable class" do
   before do
     class WithVersions < ActiveFedora::Base
       has_many_versions
-      attribute :title, [ RDF::DC.title, FedoraLens::Lenses.single, FedoraLens::Lenses.literal_to_string ]
+      property :title, predicate: RDF::DC.title
     end
   end
 
@@ -53,9 +53,9 @@ end
 
 describe "a versionable datastream" do
   before(:all) do
-    class VersionableDatastream < ActiveFedora::Datastream
+    class VersionableDatastream < ActiveFedora::NtriplesRDFDatastream
       has_many_versions
-      attribute :title, [ RDF::DC.title, FedoraLens::Lenses.single, FedoraLens::Lenses.literal_to_string ]
+      property :title, predicate: RDF::DC.title
     end
 
     class MockAFBase < ActiveFedora::Base
@@ -72,7 +72,7 @@ describe "a versionable datastream" do
 
   context "that exists in the repository" do
     let(:test_object) { MockAFBase.create }
-      
+
     after do
       test_object.destroy
     end
@@ -89,7 +89,6 @@ describe "a versionable datastream" do
 
     context "after creating the datastream" do
       before do
-        subject.content = "Dood"
         subject.title = "Greetings Earthlings"
         subject.save
         subject.create_version

@@ -12,9 +12,8 @@ describe ActiveFedora::Associations::HasManyAssociation do
     Object.send(:remove_const, :Book)
     Object.send(:remove_const, :Page)
   end
-
-  let(:book) { Book.new('subject:a') }
-  let(:page) { Page.new('object:b') }
+  let(:book) { Book.new('subject-a') }
+  let(:page) { Page.new('object-b') }
 
   describe "setting the foreign key" do
     before do
@@ -32,7 +31,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       association.concat page
     end
   end
-  
+
   describe "Finding a polymorphic inverse relation" do
 
     before do

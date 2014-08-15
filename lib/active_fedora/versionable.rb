@@ -4,9 +4,6 @@ module ActiveFedora
 
     included do
       class_attribute :versionable
-      # attribute :model_type, [ RDF.type ]
-      property :model_type, predicate: RDF.type
-
     end
 
     module ClassMethods
@@ -15,13 +12,17 @@ module ActiveFedora
       end
     end
 
+    def model_type
+      resource.query(subject: versionable_resource, predicate: RDF.type).objects
+    end
+
     def versions
-      results = versions_graph.query([rdf_subject, RDF::URI.new('http://fedora.info/definitions/v4/repository#hasVersion'), nil])
+      results = versions_graph.query([versionable_resource, RDF::URI.new('http://fedora.info/definitions/v4/repository#hasVersion'), nil])
       results.map(&:object)
     end
 
     def create_version
-      resp = orm.resource.client.post(versions_url)
+      resp = ActiveFedora.fedora.connection.post(versions_url)
       resp.success?
     end
 
@@ -30,9 +31,12 @@ module ActiveFedora
       super
     end
 
+
     private
 
-      def rdf_subject
+      # RdfDatastream has a rdf_subject/resource that would take precidence over this one.
+      # for a datastream we want the ContainerResource. For an Object just the regular resource
+      def versionable_resource
         RDF::URI.new uri
       end
 
@@ -42,7 +46,7 @@ module ActiveFedora
 
       def versions_request
         resp = begin
-          orm.resource.client.get(versions_url)
+          ActiveFedora.fedora.connection.get(versions_url)
         rescue Ldp::NotFound
           return ''
         end
@@ -51,6 +55,7 @@ module ActiveFedora
         elsif resp.headers['content-type'] != 'text/turtle'
           raise "unknown response format. got '#{resp.headers['content-type']}', but was expecting 'text/turtle'"
         end
+        # puts "Resp #{resp.body}"
         resp.body
       end
 
@@ -59,8 +64,7 @@ module ActiveFedora
       end
 
       def assert_versionable
-        self.model_type ||= []
-        self.model_type += [RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')]
+        resource.insert(subject: versionable_resource, predicate: RDF.type, object: RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable'))
       end
 
   end

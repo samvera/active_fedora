@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "Nested Rdf Objects" do
   describe "without type" do
-    before(:each) do
+    before do
       class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
         property :parts, predicate: RDF::DC.hasPart, class_name: 'Component'
 
@@ -13,11 +13,11 @@ describe "Nested Rdf Objects" do
 
     end
 
-    after(:each) do
+    after do
       Object.send(:remove_const, :SpecDatastream)
     end
 
-    let (:ds) do
+    let(:ds) do
       test_obj = ActiveFedora::Base.new('test:124')
       ds = SpecDatastream.new(test_obj, 'descMd')
     end
@@ -203,8 +203,8 @@ END
         Object.send(:remove_const, :SpecDatastream)
       end
 
-      let(:mock_obj) { double(:mock_obj, uri: '/fedora/test/124', id: '124', new_record?: true) }
-      let (:ds) { SpecDatastream.new(mock_obj, 'descMd') }
+      let(:parent) { double('inner object', uri: "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/124", id: '124', new_record?: true) }
+      let (:ds) { SpecDatastream.new(parent, 'descMd') }
 
 
       it "should store the type of complex objects when type is specified" do

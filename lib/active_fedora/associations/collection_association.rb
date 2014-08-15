@@ -21,7 +21,6 @@ module ActiveFedora
         else
           force_reload = opts
         end
-        puts "Here we go"
         reload if force_reload || stale_target?
         @proxy ||= CollectionProxy.new(self)
       end

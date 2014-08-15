@@ -52,7 +52,6 @@ module ActiveFedora
       #
       # Note that if the target has not been loaded, it is not considered stale.
       def stale_target?
-        puts "Check if the target is stale. #{loaded?} ss: #{@stale_state}"
         loaded? && @stale_state != stale_state
       end
 
