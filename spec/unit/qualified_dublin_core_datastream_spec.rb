@@ -9,9 +9,8 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
     require File.join( File.dirname(__FILE__), "..", "samples","oral_history_sample_model" )
     @dc_terms = []
   end
-  
-  before(:each) do
-    @sample_xml =  "<dc xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:dcterms='http://purl.org/dc/terms/'>
+
+  let(:sample_xml) do "<dc xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:dcterms='http://purl.org/dc/terms/'>
           <dcterms:type xsi:type='DCMITYPE'>sound</dcterms:type>
           <dcterms:medium>medium</dcterms:medium>
           <dcterms:rights>rights</dcterms:rights>
@@ -38,63 +37,59 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
           <dcterms:description>desc</dcterms:description>
           <dcterms:date>datestr</dcterms:date>
         </dc>"
+  end
+  before do
      @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new(inner_object, 'descMetadata')
-     @test_ds.content = @sample_xml
-
+     @test_ds.content = sample_xml
   end
 
   it "should create the right number of fields" do
-    ActiveFedora::QualifiedDublinCoreDatastream::DCTERMS.size.should == 54
+    expect(ActiveFedora::QualifiedDublinCoreDatastream::DCTERMS.size).to eq 54
   end
 
   it "should have unmodifiable constants" do
-    proc {ActiveFedora::QualifiedDublinCoreDatastream::DCTERMS<<:foo}.should raise_error((TypeError if RUBY_VERSION < "1.9.0") || RuntimeError, /can't modify frozen array/i)
-
+    expect { ActiveFedora::QualifiedDublinCoreDatastream::DCTERMS<<:foo }.to raise_error(RuntimeError, /can't modify frozen array/i)
   end
 
   it "should default dc elements to :multiple=>true" do
     @test_ds.fields.values.each do |s|
-      s.has_key?(:multiple).should == true
+      expect(s.has_key?(:multiple)).to be true
     end
   end
-  
-  after(:each) do
-  end
-  
+
   describe '#new' do
     it 'should provide #new' do
-      ActiveFedora::QualifiedDublinCoreDatastream.should respond_to(:new)
+      expect(ActiveFedora::QualifiedDublinCoreDatastream).to respond_to(:new)
     end
-    
-    
-    describe "model methods" do 
+
+
+    describe "model methods" do
 
       DC_ELEMENTS.each do |el|
         it "should respond to getters and setters for #{el} element" do
           pending if el == :type
           value = "Hey #{el}"
-          @test_ds.send("#{el.to_s}=", value) 
-          @test_ds.send(el).first.should == value  #Looking at first because creator has 2 nodes
+          @test_ds.send("#{el.to_s}=", value)
+          expect(@test_ds.send(el).first).to eq value  #Looking at first because creator has 2 nodes
         end
       end
     end
   end
-  
+
   describe '.to_xml' do
     it 'should output the fields hash as Qualified Dublin Core XML' do
-      #@test_ds.should_receive(:new?).and_return(true).twice
       sample_xml = "<dc xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'><dcterms:title>title1</dcterms:title><dcterms:publisher>publisher1</dcterms:publisher><dcterms:creator>creator1</dcterms:creator><dcterms:creator>creator2</dcterms:creator></dc>"
       @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new(inner_object, 'qdc' )
 
       @test_ds.field :publisher
       @test_ds.field :creator
       @test_ds.field :title
-      
+
       @test_ds.publisher= ["publisher1"]
       @test_ds.creator= ["creator1", "creator2"]
       @test_ds.title= ["title1"]
 
-      @test_ds.to_xml.should be_equivalent_to('
+      expect(@test_ds.to_xml).to be_equivalent_to('
         <dc xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
                  <dcterms:publisher>publisher1</dcterms:publisher>
                  <dcterms:creator>creator1</dcterms:creator>
@@ -109,7 +104,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
       @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new(inner_object, 'qdc' )
       @test_ds.title = "War and Peace"
       solr = @test_ds.to_solr
-      solr[ActiveFedora::SolrService.solr_name('title', type: :string)].should == "War and Peace"
+      expect(solr[ActiveFedora::SolrService.solr_name('title', type: :string)]).to eq "War and Peace"
     end
 
   end
@@ -120,16 +115,16 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
       sample_xml = "<dc xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'><dcterms:cust>custom</dcterms:cust></dc>"
       subject.content = sample_xml
       subject.field :cust
-      subject.cust.should == ['custom']
+      expect(subject.cust).to eq ['custom']
     end
   end
 
   describe "#field should accept :path option" do
     subject { ActiveFedora::QualifiedDublinCoreDatastream.new(inner_object, 'qdc' ) }
     it "should be able to map :dc_type to the path 'type'" do
-      subject.content = @sample_xml
+      subject.content = sample_xml
       subject.field :dc_type, :string, path: "type", multiple: true
-      subject.dc_type.should == ['sound']
+      expect(subject.dc_type).to eq ['sound']
     end
   end
 

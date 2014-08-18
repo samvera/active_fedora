@@ -22,7 +22,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       allow(ActiveFedora::SolrService).to receive(:query).and_return([])
     end
 
-    let(:reflection) { Book.create_reflection(:has_many, 'pages', {:property=>'predicate'}, Book) }
+    let(:reflection) { Book.create_reflection(:has_many, 'pages', { property: 'predicate'}, Book) }
     let(:association) { ActiveFedora::Associations::HasManyAssociation.new(book, reflection) }
 
     it "should set the book_id attribute" do

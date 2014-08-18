@@ -1,7 +1,7 @@
 module ActiveFedora
   # Represents the mapping between a model attribute and a field in a datastream
   class DatastreamAttribute
-    
+
     attr_accessor :dsid, :field, :datastream_class, :at, :multiple
 
     def initialize(field, dsid, datastream_class, args={})
@@ -12,7 +12,7 @@ module ActiveFedora
       self.at = args[:at]
     end
 
-    # Gives the primary solr name for a column. If there is more than one indexer on the field definition, it gives the first 
+    # Gives the primary solr name for a column. If there is more than one indexer on the field definition, it gives the first
     def primary_solr_name
       @datastream ||= datastream_class.new(ActiveFedora::Base.new, dsid)
       if @datastream.respond_to?(:primary_solr_name)

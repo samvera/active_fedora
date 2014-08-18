@@ -35,14 +35,14 @@ module ActiveFedora
       case attributes_or_resource_or_url
         when Ldp::Resource::RdfSource
           @orm = Ldp::Orm.new(subject_or_data)
-          @attributes = get_attributes_from_orm(@orm)
+          attributes = get_attributes_from_orm(@orm)
         when String
           @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, self.class.id_to_uri(attributes_or_resource_or_url)))
           @attributes = {}.with_indifferent_access
         when Hash
           attributes = attributes_or_resource_or_url
           pid = attributes.delete(:pid)
-          @attributes = attributes.with_indifferent_access if attributes
+          attributes = attributes.with_indifferent_access if attributes
           @orm = if pid
             Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, self.class.id_to_uri(pid)))
           else
@@ -50,7 +50,7 @@ module ActiveFedora
           end
         when NilClass
           @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, nil, g, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
-          @attributes = {}.with_indifferent_access
+          attributes = {}.with_indifferent_access
         else
           raise ArgumentError, "#{attributes_or_resource_or_url.class} is not acceptable"
 
@@ -58,6 +58,7 @@ module ActiveFedora
 
       @association_cache = {}
       load_datastreams
+      self.attributes = attributes if attributes
       run_callbacks :initialize
     end
 

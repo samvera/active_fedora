@@ -153,7 +153,6 @@ module ActiveFedora
         @metadata_ds_defaults ||= {
           :autocreate => false,
           :type=>nil,
-          :disseminator=>"",
           :url=>"",
           :name=>nil
         }
