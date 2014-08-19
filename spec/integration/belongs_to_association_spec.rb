@@ -2,11 +2,11 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
   before do
-    class Library < ActiveFedora::Base 
+    class Library < ActiveFedora::Base
       has_many :books
     end
 
-    class Book < ActiveFedora::Base 
+    class Book < ActiveFedora::Base
       belongs_to :library, property: :has_constituent
     end
     class SpecialInheritedBook < Book
@@ -25,12 +25,13 @@ describe ActiveFedora::Base do
   describe "setting the id property" do
     it "should store it" do
       book.library_id = library.id
-      book.library_id.should == library.id
+      expect(book.library_id).to eq library.id
     end
 
     describe "reassigning the parent_id" do
       let(:library2) { Library.create}
       before { book.library = library2 }
+
       it "should update the object" do
         expect(book.library).to eq library2 # cause the association to set @loaded
         library_proxy = book.send(:association_instance_get, :library)
@@ -43,14 +44,14 @@ describe ActiveFedora::Base do
 
     it "should be settable via []=" do
       book[:library_id] = library.id
-      book.library_id.should == library.id
+      expect(book.library_id).to eq library.id
     end
   end
 
   describe "getting the id property" do
     it "should be accessable via []" do
       book[:library_id] = library.id
-      book[:library_id].should == library.id
+      expect(book[:library_id]).to eq library.id
     end
   end
 

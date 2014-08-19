@@ -9,14 +9,20 @@ module ActiveFedora
 
     module ClassMethods
       def create_reflection(macro, name, options, active_fedora)
-        case macro
+        klass = case macro
           when :has_many, :belongs_to, :has_and_belongs_to_many
-            klass = AssociationReflection
-            reflection = klass.new(macro, name, options, active_fedora)
+            AssociationReflection
+          when :singular_rdf
+            RdfPropertyReflection
         end
+        reflection = klass.new(macro, name, options, active_fedora)
+        add_reflection name, reflection
 
-        self.reflections = self.reflections.merge(name => reflection)
         reflection
+      end
+
+      def add_reflection(name, reflection)
+        self.reflections = self.reflections.merge(name => reflection)
       end
 
       # Returns a hash containing all AssociationReflection objects for the current class.
@@ -41,11 +47,11 @@ module ActiveFedora
       def reflect_on_association(association)
         val = reflections[association].is_a?(AssociationReflection) ? reflections[association] : nil
         unless val
-          # When a has_many is paired with a has_and_belongs_to_many the assocation will have a plural name 
+          # When a has_many is paired with a has_and_belongs_to_many the assocation will have a plural name
           association = association.to_s.pluralize.to_sym
           val = reflections[association].is_a?(AssociationReflection) ? reflections[association] : nil
         end
-        val 
+        val
       end
 
       def reflect_on_all_autosave_associations
@@ -205,7 +211,7 @@ module ActiveFedora
         @inverse_of ||= klass.reflect_on_association inverse_name
       end
 
-      
+
       # Returns whether or not the association should be validated as part of
       # the parent's validation.
       #
@@ -227,12 +233,14 @@ module ActiveFedora
           Associations::HasAndBelongsToManyAssociation
         when :has_many
           Associations::HasManyAssociation
+        when :singular_rdf
+          Associations::SingularRdf
         end
       end
 
       VALID_AUTOMATIC_INVERSE_MACROS = [:has_many, :has_and_belongs_to_many, :belongs_to]
       INVALID_AUTOMATIC_INVERSE_OPTIONS = [:conditions, :through, :polymorphic, :foreign_key]
-      
+
 
       private
 
@@ -258,7 +266,7 @@ module ActiveFedora
           klass.name == reflection.active_fedora.name &&
           can_find_inverse_of_automatically?(reflection)
       end
-      
+
 
       # returns either nil or the inverse association name that it finds.
       def automatic_inverse_of
@@ -294,14 +302,25 @@ module ActiveFedora
       def can_find_inverse_of_automatically?(reflection)
         reflection.options[:inverse_of] != false &&
           VALID_AUTOMATIC_INVERSE_MACROS.include?(reflection.macro) &&
-          !INVALID_AUTOMATIC_INVERSE_OPTIONS.any? { |opt| reflection.options[opt] } 
+          !INVALID_AUTOMATIC_INVERSE_OPTIONS.any? { |opt| reflection.options[opt] }
           #&& !reflection.scope
       end
-
-      # def derive_primary_key_name
-      #   'pid'
-      # end        
-
     end
+
+    class RdfPropertyReflection < AssociationReflection
+
+      # Returns the RDF predicate as defined by the :property attribute
+      # TODO this is dupliacate code from Associations::Builder::Association
+      def predicate
+        predicate = options[:predicate] || options[:property]
+        return predicate if predicate.kind_of? RDF::URI
+        ActiveFedora::Predicates.find_graph_predicate(predicate)
+      end
+
+      def derive_foreign_key
+        name
+      end
+    end
+
   end
 end

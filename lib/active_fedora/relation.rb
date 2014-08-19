@@ -2,14 +2,14 @@ module ActiveFedora
   class Relation
 
     include FinderMethods, Calculations, SpawnMethods, QueryMethods, Delegation
-    
+
 
     attr_reader :loaded
     attr_accessor :default_scoped
     alias :loaded? :loaded
-    
+
     attr_accessor :values, :klass
-    
+
     def initialize(klass, values = {})
       @klass = klass
       @loaded = false
@@ -56,7 +56,7 @@ module ActiveFedora
       args[:rows] = limit_value if limit_value
       args[:start] = offset_value if offset_value
       args[:sort] = order_values if order_values
-      
+
       @records = to_enum(:find_each, where_values, args).to_a
       @loaded = true
 
@@ -124,7 +124,7 @@ module ActiveFedora
     private
 
     VALID_FIND_OPTIONS = [:order, :limit, :start, :conditions, :cast]
-    
+
     def apply_finder_options(options)
       relation = clone
       return relation unless options
@@ -140,6 +140,6 @@ module ActiveFedora
       relation = relation.where(finders[:conditions]) if options.has_key?(:conditions)
       relation
     end
-    
+
   end
 end

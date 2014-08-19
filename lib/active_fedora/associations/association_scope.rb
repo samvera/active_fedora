@@ -3,7 +3,7 @@ module ActiveFedora
     class AssociationScope #:nodoc:
 
       attr_reader :association
-      
+
       delegate :klass, :owner, :reflection, :interpolate, :to => :association
       delegate :chain, :scope_chain, :options, :source_options, :active_record, :to => :reflection
 
@@ -11,7 +11,7 @@ module ActiveFedora
         @association = association
       end
 
-      
+
       def scope
         scope = klass.unscoped
         add_constraints(scope)

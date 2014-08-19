@@ -37,7 +37,10 @@ module ActiveFedora
     end
 
     def [](key)
-      if self.class.properties.key?(key)
+      if assoc = self.association(key.to_sym)
+        # This is for id attributes stored in the rdf graph.
+        assoc.reader
+      elsif self.class.properties.key?(key)
         # The attribute is stored in the RDF graph for this object
         resource[key]
       else
@@ -47,7 +50,10 @@ module ActiveFedora
     end
 
     def []=(key, value)
-      if self.class.properties.key?(key)
+      if assoc = self.association(key.to_sym)
+        # This is for id attributes stored in the rdf graph.
+        assoc.replace(value)
+      elsif self.class.properties.key?(key)
         # The attribute is stored in the RDF graph for this object
         resource[key]=value
       else

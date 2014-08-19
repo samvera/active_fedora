@@ -76,7 +76,6 @@ module ActiveFedora
       private
 
         def stale_state
-          puts "stale state for #{reflection.foreign_key}: #{owner[reflection.foreign_key]}"
           owner[reflection.foreign_key]
         end
 

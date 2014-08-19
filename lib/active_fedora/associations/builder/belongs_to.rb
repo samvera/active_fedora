@@ -8,9 +8,6 @@ module ActiveFedora::Associations::Builder
       reflection = super
       add_counter_cache_callbacks(reflection) if options[:counter_cache]
       add_touch_callbacks(reflection)         if options[:touch]
-      # predicate_lens = FedoraLens::Lenses.get_predicate(predicate, select: filter_by_class(reflection))
-      # model.attribute :"#{name}_id", [ predicate_lens, FedoraLens::Lenses.uris_to_ids { reflection.klass }, FedoraLens::Lenses.single ]
-      model.property :"#{name}_id", predicate: predicate
       configure_dependency
       reflection
     end
@@ -109,8 +106,6 @@ module ActiveFedora::Associations::Builder
       # A bit of a misnomer because this is actually defining readers and writers
       def define_readers
         super
-        # model.attribute "#{name}_id", [predicate, FedoraLens::Lenses.single, FedoraLens::Lenses.literal_to_string]
-        model.property :"#{name}_id", predicate: predicate
       end
   end
 end

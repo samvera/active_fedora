@@ -15,6 +15,7 @@ module ActiveFedora
     autoload :Association,           'active_fedora/associations/association'
     autoload :AssociationScope,      'active_fedora/associations/association_scope'
     autoload :SingularAssociation,   'active_fedora/associations/singular_association'
+    autoload :SingularRdf,           'active_fedora/associations/singular_rdf'
     autoload :CollectionAssociation, 'active_fedora/associations/collection_association'
     autoload :CollectionProxy,       'active_fedora/associations/collection_proxy'
 
@@ -31,7 +32,6 @@ module ActiveFedora
       autoload :HasMany,             'active_fedora/associations/builder/has_many'
       autoload :HasAndBelongsToMany, 'active_fedora/associations/builder/has_and_belongs_to_many'
     end
-
 
     # Clears out the association cache.
     def clear_association_cache #:nodoc:
@@ -54,9 +54,9 @@ module ActiveFedora
 
       association
     end
-    
-    
-    private 
+
+
+    private
 
       # Returns the specified association instance if it responds to :loaded?, nil otherwise.
       def association_instance_get(name)
@@ -74,7 +74,7 @@ module ActiveFedora
         Builder::HasMany.build(self, name, options)
       end
 
-  
+
       # Specifies a one-to-one association with another class. This method should only be used
       # if this class contains the foreign key.
       #
@@ -93,7 +93,7 @@ module ActiveFedora
       #
       # A Post class declares <tt>belongs_to :author</tt>, which will add:
       # * <tt>Post#author</tt> (similar to <tt>Author.find(author_id)</tt>)
-      # * <tt>Post#author=(author)</tt> 
+      # * <tt>Post#author=(author)</tt>
       # The declaration can also include an options hash to specialize the behavior of the association.
       #
       # === Options
@@ -111,6 +111,8 @@ module ActiveFedora
       def belongs_to(name, options = {})
         raise "You must specify a property name for #{name}" if !options[:property]
         Builder::BelongsTo.build(self, name, options)
+
+        SingularPropertyBuilder.build(self, name, options)
       end
 
 

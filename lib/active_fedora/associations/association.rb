@@ -85,7 +85,7 @@ module ActiveFedora
         end
       end
 
-      
+
       # Can be overridden (i.e. in ThroughAssociation) to merge in other scopes (i.e. the
       # through association's scope)
       def target_scope
@@ -111,7 +111,7 @@ module ActiveFedora
 
         private
 
-        
+
         def find_target?
           !loaded? && (!owner.new_record? || foreign_key_present?) && klass
         end
