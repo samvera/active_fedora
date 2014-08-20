@@ -115,7 +115,7 @@ module ActiveFedora
         delete(@target.select { |v| !other.include?(v) })
         concat(other_array.select { |v| !current.include?(v) })
       end
-      
+
       def include?(record)
         if record.is_a?(reflection.klass)
           if record.new_record?
@@ -234,7 +234,7 @@ module ActiveFedora
       def count(options = {})
         @reflection.klass.count(:conditions => @counter_query)
       end
-      
+
       def load_target
         if find_target?
           targets = []
@@ -342,7 +342,7 @@ module ActiveFedora
         end
 
 
-      private 
+      private
 
         # Assigns the ID of the owner to the corresponding foreign key in +record+.
         # If the association is polymorphic the type of the owner is also set.

@@ -37,7 +37,7 @@ describe ActiveFedora::Base do
     it "should make the associations immutable" do
       expect {
         subject.library_id = Library.create!.pid
-      }.to raise_error RuntimeError, "can't modify frozen ActiveSupport::HashWithIndifferentAccess"
+      }.to raise_error RuntimeError, "can't modify frozen Book"
       expect(subject.library_id).to eq library.pid
     end
 

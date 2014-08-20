@@ -2,11 +2,11 @@ require 'spec_helper'
 
 describe "Collection members" do
   before :all do
-    class Library < ActiveFedora::Base 
+    class Library < ActiveFedora::Base
       has_many :books
     end
 
-    class Book < ActiveFedora::Base 
+    class Book < ActiveFedora::Base
       belongs_to :library, property: :has_constituent
     end
   end
@@ -64,11 +64,11 @@ end
 
 describe "After save callbacks" do
   before :all do
-    class Library < ActiveFedora::Base 
+    class Library < ActiveFedora::Base
       has_many :books
     end
 
-    class Book < ActiveFedora::Base 
+    class Book < ActiveFedora::Base
       belongs_to :library, property: :has_constituent
       after_save :find_self
       attr_accessor :library_books
@@ -93,9 +93,9 @@ describe "After save callbacks" do
   end
 end
 
-describe "When two or more relationships share the same property" do 
+describe "When two or more relationships share the same property" do
   before do
-    class Book < ActiveFedora::Base 
+    class Book < ActiveFedora::Base
       has_many :collections, :class_name=>'Collection'
       has_many :people
     end
@@ -127,7 +127,7 @@ end
 
 describe "When relationship is restricted to AF::Base" do
   before do
-    class Email < ActiveFedora::Base 
+    class Email < ActiveFedora::Base
       has_many :attachments, property: :is_part_of, :class_name=>'ActiveFedora::Base'
     end
 

@@ -118,8 +118,8 @@ describe ActiveFedora::Base do
           @complex_collection.save!
         end
         it "should have added the inverse relationship for the correct class" do
-          @complex_object.simple_collection.should be_instance_of SimpleCollection
-          @complex_object.complex_collection.should be_nil
+          expect(@complex_object.simple_collection).to be_instance_of SimpleCollection
+          expect(@complex_object.complex_collection).to be_nil
         end
       end
 
@@ -131,8 +131,8 @@ describe ActiveFedora::Base do
           @complex_collection.save!
         end
         it "should have added the inverse relationship for the correct class" do
-          @complex_object.complex_collection.should be_instance_of ComplexCollection
-          @complex_object.reload.simple_collection.should be_instance_of ComplexCollection
+          expect(@complex_object.complex_collection).to be_instance_of ComplexCollection
+          expect(@complex_object.reload.simple_collection).to be_instance_of ComplexCollection
         end
       end
 
@@ -145,16 +145,16 @@ describe ActiveFedora::Base do
           @simple_collection.save!
         end
         it "ignores objects who's classes aren't specified" do
-          @simple_collection.complex_objects.size.should == 1
-          @simple_collection.complex_objects[0].should be_instance_of ComplexObject
-          @simple_collection.complex_objects[1].should be_nil
+          expect(@simple_collection.complex_objects.size).to eq 1
+          expect(@simple_collection.complex_objects[0]).to be_instance_of ComplexObject
+          expect(@simple_collection.complex_objects[1]).to be_nil
 
-          @simple_collection.objects.size.should == 2
-          @simple_collection.objects[0].should be_instance_of ComplexObject
-          @simple_collection.objects[1].should be_instance_of SimpleObject
+          expect(@simple_collection.objects.size).to eq 2
+          expect(@simple_collection.objects[0]).to be_instance_of ComplexObject
+          expect(@simple_collection.objects[1]).to be_instance_of SimpleObject
 
-          @simple_object.simple_collection.should be_instance_of SimpleCollection
-          @simple_object.complex_collection.should be_nil
+          expect(@simple_object.simple_collection).to be_instance_of SimpleCollection
+          expect(@simple_object.complex_collection).to be_nil
         end
       end
 
@@ -167,16 +167,16 @@ describe ActiveFedora::Base do
           @complex_collection.save!
         end
         it "ignores objects who's classes aren't specified" do
-          @complex_collection.complex_objects.size.should == 1
-          @complex_collection.complex_objects[0].should be_instance_of ComplexObject
-          @complex_collection.complex_objects[1].should be_nil
+          expect(@complex_collection.complex_objects.size).to eq 1
+          expect(@complex_collection.complex_objects[0]).to be_instance_of ComplexObject
+          expect(@complex_collection.complex_objects[1]).to be_nil
 
-          @complex_collection.objects.size.should == 2
-          @complex_collection.objects[0].should be_instance_of ComplexObject
-          @complex_collection.objects[1].should be_instance_of SimpleObject
+          expect(@complex_collection.objects.size).to eq 2
+          expect(@complex_collection.objects[0]).to be_instance_of ComplexObject
+          expect(@complex_collection.objects[1]).to be_instance_of SimpleObject
 
-          @simple_object.complex_collection.should be_instance_of ComplexCollection
-          @simple_object.reload.simple_collection.should be_instance_of ComplexCollection
+          expect(@simple_object.complex_collection).to be_instance_of ComplexCollection
+          expect(@simple_object.reload.simple_collection).to be_instance_of ComplexCollection
         end
       end
     end

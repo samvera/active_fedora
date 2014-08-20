@@ -3,20 +3,18 @@ require 'spec_helper'
 describe ActiveFedora::RDFDatastream do
   before do
     class DummySubnode < ActiveTriples::Resource
-      property :title, :predicate => RDF::DC[:title], :class_name => RDF::Literal
-      property :relation, :predicate => RDF::DC[:relation]
+      property :title, predicate:  RDF::DC[:title], class_name: RDF::Literal
+      property :relation, predicate:  RDF::DC[:relation]
     end
 
-    class DummyAsset < ActiveFedora::Base; end;
-
     class DummyResource < ActiveFedora::RDFDatastream
-      property :title, :predicate => RDF::DC[:title], :class_name => RDF::Literal do |index|
+      property :title, predicate:  RDF::DC[:title], class_name: RDF::Literal do |index|
         index.as :searchable, :displayable
       end
-      property :license, :predicate => RDF::DC[:license], :class_name => DummySubnode do |index|
+      property :license, predicate:  RDF::DC[:license], class_name: DummySubnode do |index|
         index.as :searchable, :displayable
       end
-      property :creator, :predicate => RDF::DC[:creator], :class_name => DummyAsset do |index|
+      property :creator, predicate: RDF::DC[:creator], class_name: 'DummyAsset' do |index|
         index.as :searchable
       end
       def serialization_format
@@ -67,19 +65,6 @@ describe ActiveFedora::RDFDatastream do
     it "should set values" do
       subject.title = ["blah"]
       expect(subject.descMetadata.title).to eq ["blah"]
-    end
-
-    context "when the delegation is deep" do
-      before(:each) do
-        dummy = DummySubnode.new
-        dummy.relation = 'subbla'
-        subject.descMetadata.license = dummy
-      end
-
-      # This test is pending. For now we have no use case for deep delegation into an RDF graph.
-      xit "should retrieve values" do
-        expect(subject.relation).to eq ["subbla"]
-      end
     end
   end
 
@@ -286,29 +271,14 @@ describe ActiveFedora::RDFDatastream do
 
     context 'when the object has no Rdf::Resource' do
       before do
-        class DummyOmAsset < ActiveFedora::Base
-          has_metadata 'descMetadata', type: ActiveFedora::OmDatastream
-        end
-
-        @new_object = DummyOmAsset.new
-        @new_object.save
         subject.title = ["bla"]
         subject.descMetadata.creator = @new_object
         subject.save
         subject.reload
       end
 
-      after do
-        Object.send(:remove_const, :DummyOmAsset)
-      end
-
       it "should let me get to an AF:Base object" do
         expect(subject.descMetadata.creator.first).to be_kind_of(ActiveFedora::Base)
-      end
-
-      it "should not allow writing to the graph" do
-        expect{@new_object.resource << RDF::Statement.new(RDF::Node.new, RDF::DC.title, 'title')
-}.to raise_error TypeError
       end
     end
   end

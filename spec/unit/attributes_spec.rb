@@ -2,11 +2,11 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
   before :all do
-      class BarStream2 < ActiveFedora::OmDatastream 
+      class BarStream2 < ActiveFedora::OmDatastream
         set_terminology do |t|
           t.root(:path=>"animals", :xmlns=>"urn:zoobar")
           t.waterfowl do
-            t.ducks do 
+            t.ducks do
               t.duck
             end
           end
@@ -17,7 +17,7 @@ describe ActiveFedora::Base do
         end
 
         def self.xml_template
-              Nokogiri::XML::Document.parse '<animals xmlns="urn:zoobar"> 
+              Nokogiri::XML::Document.parse '<animals xmlns="urn:zoobar">
                 <waterfowl>
                   <ducks>
                     <duck/>
@@ -32,7 +32,7 @@ describe ActiveFedora::Base do
     Object.send(:remove_const, :BarStream2)
   end
 
-  describe "first level delegation" do 
+  describe "first level delegation" do
     before :all do
       class BarHistory2 < ActiveFedora::Base
         has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
@@ -46,7 +46,7 @@ describe ActiveFedora::Base do
         end
         has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel" do |m|
           m.field "fubar", :text
-        end 
+        end
 
         has_metadata :type=>BarStream2, :name=>"xmlish"
         has_attributes :cow, datastream: 'xmlish'                      # for testing the default value of multiple
@@ -68,12 +68,15 @@ describe ActiveFedora::Base do
       it "should show the attributes" do
         expect(subject.inspect).to eq "#<BarHistory2 pid: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil>"
       end
+
       describe "with a pid" do
-        before { subject.stub(pid: 'test:123') }
+        before { allow(subject).to receive(:pid).and_return('test:123') }
+
         it "should show a pid" do
           expect(subject.inspect).to eq "#<BarHistory2 pid: \"test:123\", cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil>"
         end
       end
+
       describe "with no attributes" do
         subject { ActiveFedora::Base.new }
         it "should show a pid" do
@@ -92,7 +95,7 @@ describe ActiveFedora::Base do
         let (:library) { BarHistory2.create }
         subject { BarHistory3.new }
 
-        after do 
+        after do
           Object.send(:remove_const, :BarHistory3)
         end
 
@@ -103,9 +106,9 @@ describe ActiveFedora::Base do
     end
 
     it "should reveal the unique properties" do
-      BarHistory2.unique?(:horse).should be false
-      BarHistory2.unique?(:pig).should be true
-      BarHistory2.unique?(:cow).should be true
+      expect(BarHistory2.unique?(:horse)).to be false
+      expect(BarHistory2.unique?(:pig)).to be true
+      expect(BarHistory2.unique?(:cow)).to be true
     end
 
     it "should save a delegated property" do
@@ -223,7 +226,7 @@ describe ActiveFedora::Base do
       expect {
         subject.cow = ["Moo"]
       }.to change { subject.cow_changed? }.from(false).to(true)
-    end 
+    end
   end
 
   describe "with a RDF datastream" do
@@ -253,6 +256,7 @@ describe ActiveFedora::Base do
         }.to change { subject.title_changed? }.from(false).to(true)
       end
     end
+
     describe "with a single-valued field" do
       it "should be able to track change status" do
         expect {
@@ -260,7 +264,7 @@ describe ActiveFedora::Base do
         }.to change { subject.description_changed? }.from(false).to(true)
       end
     end
-  end 
+  end
 
   describe "without a datastream" do
     before :all do

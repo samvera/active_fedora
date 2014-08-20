@@ -12,7 +12,7 @@ module ActiveFedora
         klass = case macro
           when :has_many, :belongs_to, :has_and_belongs_to_many
             AssociationReflection
-          when :singular_rdf
+          when :rdf, :singular_rdf
             RdfPropertyReflection
         end
         reflection = klass.new(macro, name, options, active_fedora)
@@ -36,7 +36,7 @@ module ActiveFedora
       end
 
       def outgoing_reflections
-        reflections.reject { |_, reflection| reflection.has_many? }
+        reflections.select { |_, reflection| reflection.kind_of? RdfPropertyReflection }
       end
 
       # Returns the AssociationReflection object for the +association+ (use the symbol).
@@ -235,6 +235,8 @@ module ActiveFedora
           Associations::HasManyAssociation
         when :singular_rdf
           Associations::SingularRdf
+        when :rdf
+          Associations::Rdf
         end
       end
 
@@ -319,6 +321,12 @@ module ActiveFedora
 
       def derive_foreign_key
         name
+      end
+
+      def derive_class_name
+        class_name = name.to_s.sub(/_ids?$/, '').camelize
+        class_name = class_name.singularize if collection?
+        class_name
       end
     end
 

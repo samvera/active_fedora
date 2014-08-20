@@ -18,8 +18,8 @@ describe "A base object with metadata" do
     end
     it "should save the datastream." do
       obj = ActiveFedora::Base.find(@obj.pid)
-      obj.foo.should_not be_new_record
-      obj.foo.person.should == ['bob']
+      expect(obj.foo).to_not be_new_record
+      expect(obj.foo.person).to eq ['bob']
       person_field = ActiveFedora::SolrService.solr_name('foo__person', type: :string)
       solr_result = ActiveFedora::SolrService.query("{!raw f=id}#{@obj.pid}", :fl=>"id #{person_field}").first
       expect(solr_result).to eq("id"=>@obj.pid, person_field =>['bob'])
@@ -38,9 +38,9 @@ describe "A base object with metadata" do
         @release.save!
       end
       it "should save the datastream." do
-        MockAFBaseRelationship.find(@release.pid).foo.person.should == ['frank']
+        expect(MockAFBaseRelationship.find(@release.pid).foo.person).to eq ['frank']
         person_field = ActiveFedora::SolrService.solr_name('foo__person', type: :string)
-        ActiveFedora::SolrService.query("id:\"#{@release.pid}\"", :fl=>"id #{person_field}").first.should == {"id"=>@release.pid, person_field =>['frank']}
+        expect(ActiveFedora::SolrService.query("id:\"#{@release.pid}\"", :fl=>"id #{person_field}").first).to eq("id"=>@release.pid, person_field =>['frank'])
       end
     end
   end
@@ -59,7 +59,7 @@ describe "A base object with metadata" do
 
     it 'should requery Fedora' do
       @object.reload
-      @object.foo.person.should == ['dave']
+      expect(@object.foo.person).to eq ['dave']
     end
 
     it 'should raise an error if not persisted' do

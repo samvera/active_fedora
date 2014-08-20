@@ -76,7 +76,6 @@ module ActiveFedora #:nodoc:
     autoload :Scoping
     autoload :Serialization
     autoload :SimpleDatastream
-    autoload :SingularPropertyBuilder
     autoload :SolrDigitalObject
     autoload :SolrService
     autoload :Predicates

@@ -40,11 +40,7 @@ module ActiveFedora
 
     alias update_attributes update
 
-    # Refreshes the object's info from Fedora
-    # Note: Currently just registers any new datastreams that have appeared in fedora
     def refresh
-      # TODO need to set the new modified_date after save
-#      inner_object.load_attributes_from_fedora
     end
 
     #Deletes a Base object, also deletes the info indexed in Solr, and
@@ -148,11 +144,16 @@ module ActiveFedora
 
     def update_record(options = {})
       serialize_datastreams
-      result = orm.save!
-      @resource = nil
+      # The resource has been modified, so we create a new RdfSource
+      result = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, rdf_subject, resource).update
+      update_modified_date(result)
       should_update_index = update_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
       return !!result
+    end
+
+    def update_modified_date(result)
+      self.modified_date = [Solrizer::DefaultDescriptors.iso8601_date(result.headers['last-modified'.freeze])]
     end
 
     def assign_pid

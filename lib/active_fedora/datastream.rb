@@ -104,18 +104,8 @@ module ActiveFedora
     end
 
     def uri
-      if new_record?
-        if digital_object.uri.kind_of?(RDF::URI) && digital_object.uri.value.empty?
-          RDF::URI.new(nil)
-        else
-          "#{digital_object.uri}/#{dsid}"
-        end
-      else
-        @orm.try(:resource).try(:subject)
-      end
+      container_resource.uri
     end
-
-
 
     class << self
       def default_attributes
@@ -211,10 +201,6 @@ module ActiveFedora
 
     def reset_attributes
       @content = nil
-    end
-
-    def uri
-      container_resource.uri
     end
 
     private

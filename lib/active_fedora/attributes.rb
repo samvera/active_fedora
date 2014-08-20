@@ -23,16 +23,13 @@ module ActiveFedora
 
 
     def attributes
-      self.class.defined_attributes.keys.each_with_object({"id" => id}) {|key, hash| hash[key] = self[key]}.merge(super)
+      self.class.attribute_names.each_with_object({"id" => id}) {|key, hash| hash[key] = self[key] }
     end
 
     # Calling inspect may trigger a bunch of datastream loads, but it's mainly for debugging, so no worries.
     def inspect
       values = ["pid: #{pid.inspect}"]
-      values << self.class.defined_attributes.keys.map {|r| "#{r}: #{send(r).inspect}" }
-      values << self.class.outgoing_reflections.values.map do |reflection|
-        "#{reflection.foreign_key}: #{self[reflection.foreign_key].inspect}"
-      end
+      values << self.class.attribute_names.map { |attr| "#{attr}: #{self[attr].inspect}" }
       "#<#{self.class} #{values.flatten.join(', ')}>"
     end
 
@@ -104,6 +101,11 @@ module ActiveFedora
     end
 
     module ClassMethods
+      def attribute_names
+        @attribute_names ||= defined_attributes.keys + properties.keys +
+          outgoing_reflections.values.map { |reflection| reflection.foreign_key.to_s } - ['has_model', 'create_date', 'modified_date']
+      end
+
       def defined_attributes
         @defined_attributes ||= {}.with_indifferent_access
         return @defined_attributes unless superclass.respond_to?(:defined_attributes) and value = superclass.defined_attributes

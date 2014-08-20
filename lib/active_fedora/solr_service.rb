@@ -1,8 +1,8 @@
 require 'rsolr'
 
 module ActiveFedora
-  class SolrService 
-    
+  class SolrService
+
     attr_reader :conn
 
     def initialize(host, args)
@@ -11,7 +11,7 @@ module ActiveFedora
       args.merge!(url: host)
       @conn = RSolr.connect args
     end
-    
+
     class << self
       def register(host=nil, args={})
         Thread.current[:solr_service] = new(host, args)
@@ -23,7 +23,7 @@ module ActiveFedora
 
       def instance
       # Register Solr
-          
+
         unless Thread.current[:solr_service]
           register(ActiveFedora.solr_config[:url])
         end
@@ -39,7 +39,7 @@ module ActiveFedora
           end
         end
       end
-      
+
       def reify_solr_results(solr_results, opts = {})
         solr_results.collect {|hit| reify_solr_result(hit, opts)}
       end
@@ -83,7 +83,7 @@ module ActiveFedora
         ActiveFedora::Base.logger.warn "Could not find a model for #{hit["id"]}, defaulting to ActiveFedora::Base" unless best_model_match if ActiveFedora::Base.logger
         best_model_match || ActiveFedora::Base
       end
-      
+
       # Construct a solr query for a list of pids
       # This is used to get a solr response based on the list of pids in an object's RELS-EXT relationhsips
       # If the pid_array is empty, defaults to a query of "id:NEVER_USE_THIS_ID", which will return an empty solr response
@@ -103,7 +103,7 @@ module ActiveFedora
       def solr_name(*args)
         Solrizer.default_field_mapper.solr_name(*args)
       end
-      
+
       # Create a query with a clause for each key, value
       # @param [Hash, Array<Array<String>>] args key is the predicate, value is the target_uri
       # @param [String] join_with ('AND') the value we're joining the clauses with
@@ -112,7 +112,7 @@ module ActiveFedora
       #   # => _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ComplexCollection" OR _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ActiveFedora_Base"
       def construct_query_for_rel(field_pairs, join_with = 'AND')
         field_pairs = field_pairs.to_a if field_pairs.kind_of? Hash
-        
+
         clauses = field_pairs.reject{ |_, target_uri| target_uri.blank? }.
           map { |predicate, target_uri| raw_query(solr_name(predicate, :symbol), target_uri) }
         clauses.empty? ? "id:NEVER_USE_THIS_ID" : clauses.join(" #{join_with} ".freeze)
@@ -131,7 +131,7 @@ module ActiveFedora
       end
 
       # Get the count of records that match the query
-      # @param [String] query a solr query 
+      # @param [String] query a solr query
       # @param [Hash] args arguments to pass through to `args' param of SolrService.query (note that :rows will be overwritten to 0)
       # @return [Integer] number of records matching
       def count(query, args={})
@@ -140,7 +140,7 @@ module ActiveFedora
       end
 
       # @param [Hash] doc the document to index
-      # @param [Hash] params 
+      # @param [Hash] params
       #   :commit => commits immediately
       #   :softCommit => commit to memory, but don't flush to disk
       def add(doc, params = {})

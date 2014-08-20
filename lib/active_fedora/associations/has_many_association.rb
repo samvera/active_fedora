@@ -14,7 +14,7 @@ module ActiveFedora
       # If the collection is empty the target is set to an empty array and
       # the loaded flag is set to true as well.
       def count_records
-        count = if loaded? 
+        count = if loaded?
           @target.size
         else
           @reflection.klass.count(:conditions => @counter_query)
@@ -36,14 +36,14 @@ module ActiveFedora
           else # HABTM
             record[inverse.foreign_key] ||= []
             #TODO use primary_key instead of `owner.id`
-            record[inverse.foreign_key] << owner.id
+            record[inverse.foreign_key] += [owner.id]
           end
-        else
+        elsif owner.persisted?
           inverse = reflection.inverse_of
           if inverse && inverse.collection?
             record[inverse.foreign_key] ||= []
             #TODO use primary_key instead of `owner.id`
-            record[inverse.foreign_key] << owner.id
+            record[inverse.foreign_key] += [owner.id]
           else
             #TODO use primary_key instead of `owner.id`
             record[reflection.foreign_key] = owner.id
@@ -55,9 +55,9 @@ module ActiveFedora
         set_owner_attributes(record)
 
         if raise
-          record.save!(:validate => validate)
+          record.save!(validate: validate)
         else
-          record.save(:validate => validate)
+          record.save(validate: validate)
         end
       end
 

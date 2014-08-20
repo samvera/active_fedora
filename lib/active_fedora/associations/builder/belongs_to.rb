@@ -12,35 +12,6 @@ module ActiveFedora::Associations::Builder
       reflection
     end
 
-    # TODO this is a huge waste of time that can be completely avoided if the attributes aren't sharing predicates.
-    def filter_by_class(reflection)
-      lambda do |obj|
-        id = reflection.klass.uri_to_id(obj)
-        results = ActiveFedora::SolrService.query(ActiveFedora::SolrService.construct_query_for_pids([id]))
-
-        results.any? do |result|
-          ActiveFedora::SolrService.classes_from_solr_document(result).any? { |klass|
-            class_ancestors(klass).include? reflection.klass
-          }
-        end
-      end
-    end
-
-    private
-
-      ##
-      # Returns a list of all the ancestor classes up to ActiveFedora::Base including the class itself
-      # @param [Class] klass
-      # @return [Array<Class>]
-      # @example
-      #   class Car < ActiveFedora::Base; end
-      #   class SuperCar < Car; end
-      #   class_ancestors(SuperCar)
-      #   # => [SuperCar, Car, ActiveFedora::Base]
-      def class_ancestors(klass)
-        klass.ancestors.select {|k| k.instance_of?(Class) } - [Object, BasicObject]
-      end
-
       def add_counter_cache_callbacks(reflection)
         cache_column = reflection.counter_cache_column
         name         = self.name
@@ -101,11 +72,6 @@ module ActiveFedora::Associations::Builder
           eoruby
           model.after_destroy method_name
         end
-      end
-
-      # A bit of a misnomer because this is actually defining readers and writers
-      def define_readers
-        super
       end
   end
 end

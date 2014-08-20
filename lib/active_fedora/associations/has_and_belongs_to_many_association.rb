@@ -44,7 +44,7 @@ module ActiveFedora
         return ActiveFedora::SolrService.reify_solr_results(solr_result)
       end
 
-      # In a HABTM, just look in the rels-ext, no need to run a count query from solr.
+      # In a HABTM, just look in the RDF, no need to run a count query from solr.
       def count(options = {})
         owner[reflection.foreign_key].size
       end
@@ -61,11 +61,11 @@ module ActiveFedora
 
         def delete_records(records, method)
           records.each do |r|
-            owner[reflection.foreign_key].delete(r.id)
+            owner[reflection.foreign_key] -= [r.id]
 
             if (@reflection.options[:inverse_of])
               inverse = @reflection.inverse_of
-              r[inverse.foreign_key].delete(@owner.id)
+              r[inverse.foreign_key] -= [owner.id]
               r.association(inverse.name).reset
               r.save
             end

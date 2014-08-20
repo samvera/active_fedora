@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   describe "use a URI as the property" do
     before do
-      class Book < ActiveFedora::Base 
+      class Book < ActiveFedora::Base
         belongs_to :author, property: RDF::DC.creator, class_name: 'Person'
       end
 
@@ -27,11 +27,11 @@ describe ActiveFedora::Base do
 
   describe "complex example" do
     before do
-      class Library < ActiveFedora::Base 
+      class Library < ActiveFedora::Base
         has_many :books, property: :has_constituent
       end
 
-      class Book < ActiveFedora::Base 
+      class Book < ActiveFedora::Base
         belongs_to :library, property: :has_constituent
         belongs_to :author, property: :has_member, class_name: 'Person'
         belongs_to :publisher, property: :has_member
@@ -121,7 +121,7 @@ describe ActiveFedora::Base do
 
           @library.books = [@book]
           expect(@library.books).to eq [@book]
-        
+
         end
         it "should let you set an array of object ids" do
           @library.book_ids = [@book.pid, @book2.pid]
@@ -132,7 +132,7 @@ describe ActiveFedora::Base do
           @library.book_ids = [@book.pid, @book2.pid]
           @library.book_ids = [@book2.pid]
           expect(@library.books).to eq [@book2]
-          
+
         end
 
         it "saving the parent should save the relationships on the children" do
@@ -153,12 +153,12 @@ describe ActiveFedora::Base do
 
           @library = Library.find(@library.pid)
           expect(@library.books).to eq [@book, @book2]
-        
+
           solr_resp =  @library.books(:response_format=>:solr)
           expect(solr_resp.size).to eq 2
           expect(solr_resp[0]['id']).to eq @book.pid
           expect(solr_resp[1]['id']).to eq @book2.pid
-        
+
         end
 
         after do
@@ -367,7 +367,7 @@ describe ActiveFedora::Base do
       class Textbook < ActiveFedora::Base
         has_many :courses, :property=>:is_part_of
       end
-        
+
     end
     after :all do
       Object.send(:remove_const, :Course)
@@ -474,8 +474,8 @@ describe ActiveFedora::Base do
         class Page < ActiveFedora::Base
           belongs_to :library_book, :property=>:is_part_of
         end
-          
       end
+
       after :all do
         Object.send(:remove_const, :LibraryBook)
         Object.send(:remove_const, :Page)
@@ -516,7 +516,7 @@ describe ActiveFedora::Base do
     end
 
     describe "when an object doesn't have a property, but has a class_name" do
-      before (:all) do
+      before :all do
         class MasterFile < ActiveFedora::Base
           belongs_to :media_object, property: :is_part_of
         end
@@ -524,6 +524,7 @@ describe ActiveFedora::Base do
           has_many :parts, class_name: 'MasterFile'
         end
       end
+
       after :all do
         Object.send(:remove_const, :MasterFile)
         Object.send(:remove_const, :MediaObject)
@@ -535,7 +536,7 @@ describe ActiveFedora::Base do
     end
 
     describe "an object has an explicity property" do
-      before (:all) do
+      before :all do
         class Bauble < ActiveFedora::Base
           belongs_to :media_object, property: :is_part_of
         end
@@ -543,6 +544,7 @@ describe ActiveFedora::Base do
           has_many :baubles, property: :has_baubles
         end
       end
+
       after :all do
         Object.send(:remove_const, :Bauble)
         Object.send(:remove_const, :MediaObject)
@@ -552,15 +554,18 @@ describe ActiveFedora::Base do
         expect(MediaObject.new.association(:baubles).send(:find_predicate)).to eq :has_baubles
       end
     end
+
     describe "an object doesn't have a property" do
-      before (:all) do
+      before :all do
         class Bauble < ActiveFedora::Base
           belongs_to :media_object, property: :is_part_of
         end
+
         class MediaObject < ActiveFedora::Base
           has_many :shoes
         end
       end
+
       after :all do
         Object.send(:remove_const, :Bauble)
         Object.send(:remove_const, :MediaObject)
@@ -587,8 +592,8 @@ describe ActiveFedora::Base do
         class Image < ActiveFedora::Base
           has_many :books, property: :is_part_of, class_name: 'ActiveFedora::Base'
         end
-          
       end
+
       after :all do
         Object.send(:remove_const, :Novel)
         Object.send(:remove_const, :TextBook)
@@ -618,7 +623,6 @@ describe ActiveFedora::Base do
           expect(text2.reload.books).to eq [book2]
           expect(image2.reload.books).to eq [book2]
         end
-
       end
     end
   end

@@ -15,6 +15,7 @@ module ActiveFedora
     autoload :Association,           'active_fedora/associations/association'
     autoload :AssociationScope,      'active_fedora/associations/association_scope'
     autoload :SingularAssociation,   'active_fedora/associations/singular_association'
+    autoload :Rdf,                   'active_fedora/associations/rdf'
     autoload :SingularRdf,           'active_fedora/associations/singular_rdf'
     autoload :CollectionAssociation, 'active_fedora/associations/collection_association'
     autoload :CollectionProxy,       'active_fedora/associations/collection_proxy'
@@ -31,6 +32,9 @@ module ActiveFedora
       autoload :BelongsTo,           'active_fedora/associations/builder/belongs_to'
       autoload :HasMany,             'active_fedora/associations/builder/has_many'
       autoload :HasAndBelongsToMany, 'active_fedora/associations/builder/has_and_belongs_to_many'
+
+      autoload :Property,         'active_fedora/associations/builder/property'
+      autoload :SingularProperty, 'active_fedora/associations/builder/singular_property'
     end
 
     # Clears out the association cache.
@@ -112,7 +116,7 @@ module ActiveFedora
         raise "You must specify a property name for #{name}" if !options[:property]
         Builder::BelongsTo.build(self, name, options)
 
-        SingularPropertyBuilder.build(self, name, options)
+        Builder::SingularProperty.build(self, name, options)
       end
 
 
@@ -180,6 +184,7 @@ module ActiveFedora
       #   has_and_belongs_to_many :topics, :property=>:has_topic, :inverse_of=>:is_topic_of
       def has_and_belongs_to_many(name, options = {})
         Builder::HasAndBelongsToMany.build(self, name, options)
+        Builder::Property.build(self, name, options.slice(:property, :class_name))
       end
     end
   end

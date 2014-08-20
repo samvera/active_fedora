@@ -209,12 +209,18 @@ describe ActiveFedora::Base do
         @test_object.save
       end
 
-      it "should update an existing record" do
-        allow(@test_object).to receive(:new_record?).and_return(false)
-        expect(@test_object).to receive(:serialize_datastreams)
-        expect(@test_object.orm).to receive(:save!)
-        expect(@test_object).to receive(:update_index)
-        @test_object.save
+      context "on an existing record" do
+        let(:stub_source) { double('RdfSource') }
+
+        it "should update" do
+          allow(@test_object).to receive(:new_record?).and_return(false)
+          expect(@test_object).to receive(:serialize_datastreams)
+          expect(Ldp::Resource::RdfSource).to receive(:new).and_return(stub_source)
+          expect(stub_source).to receive(:update)
+          expect(@test_object).to receive(:update_modified_date)
+          expect(@test_object).to receive(:update_index)
+          @test_object.save
+        end
       end
 
       context "when assign pid returns a value" do
@@ -252,8 +258,8 @@ describe ActiveFedora::Base do
       end
 
       it "should add pid, system_create_date, system_modified_date from object attributes" do
-        expect(@test_object).to receive(:create_date).and_return("2012-03-04T03:12:02Z").twice
-        expect(@test_object).to receive(:modified_date).and_return("2012-03-07T03:12:02Z").twice
+        expect(@test_object).to receive(:create_date).and_return(["2012-03-04T03:12:02Z"]).twice
+        expect(@test_object).to receive(:modified_date).and_return(["2012-03-07T03:12:02Z"]).twice
         allow(@test_object).to receive(:pid).and_return('changeme:123')
         solr_doc = @test_object.to_solr
         expect(solr_doc[ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)]).to eql("2012-03-04T03:12:02Z")
@@ -304,11 +310,11 @@ describe ActiveFedora::Base do
     end
 
     describe ".solrize_relationships" do
-      it "should serialize the relationships into a Hash" do
+      let(:person_reflection) { double('person', foreign_key: 'person_id', options: {property: :is_member_of}, kind_of?: true) }
+      let(:location_reflection) { double('location', foreign_key: 'location_id', options: {property: :is_part_of}, kind_of?: true) }
+      let(:reflections) { { 'person' => person_reflection, 'location' => location_reflection } }
 
-        person_reflection = double('person', foreign_key: 'person_id', options: {property: :is_member_of}, has_many?: false)
-        location_reflection = double('location', foreign_key: 'location_id', options: {property: :is_part_of}, has_many?: false)
-        reflections = { 'person' => person_reflection, 'location' => location_reflection }
+      it "should serialize the relationships into a Hash" do
 
         expect(@test_object).to receive(:[]).with('person_id').and_return('info:fedora/demo:10')
         expect(@test_object).to receive(:[]).with('location_id').and_return('info:fedora/demo:11')
