@@ -13,11 +13,11 @@ module ActiveFedora
     end
 
     def model_type
-      resource.query(subject: versionable_resource, predicate: RDF.type).objects
+      versionable_resource.query(subject: versionable_uri, predicate: RDF.type).objects
     end
 
     def versions
-      results = versions_graph.query([versionable_resource, RDF::URI.new('http://fedora.info/definitions/v4/repository#hasVersion'), nil])
+      results = versions_graph.query([versionable_uri, RDF::URI.new('http://fedora.info/definitions/v4/repository#hasVersion'), nil])
       results.map(&:object)
     end
 
@@ -31,13 +31,20 @@ module ActiveFedora
       super
     end
 
-
     private
 
       # RdfDatastream has a rdf_subject/resource that would take precidence over this one.
       # for a datastream we want the ContainerResource. For an Object just the regular resource
+      def versionable_uri
+        versionable_resource.rdf_subject
+      end
+
       def versionable_resource
-        RDF::URI.new uri
+        if kind_of? Datastream
+          container_resource
+        else
+          resource
+        end
       end
 
       def versions_graph
@@ -64,7 +71,7 @@ module ActiveFedora
       end
 
       def assert_versionable
-        resource.insert(subject: versionable_resource, predicate: RDF.type, object: RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable'))
+        versionable_resource.insert(subject: versionable_uri, predicate: RDF.type, object: RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable'))
       end
 
   end
