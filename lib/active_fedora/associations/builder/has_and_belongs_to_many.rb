@@ -6,21 +6,22 @@ module ActiveFedora::Associations::Builder
 
     def build
       reflection = super
-      redefine_destroy
+      define_destroy_hook
       reflection
     end
 
     private
 
-      def redefine_destroy
+      def define_destroy_hook
         # Don't use a before_destroy callback since users' before_destroy
         # callbacks will be executed after the association is wiped out.
+        # TODO Update to destroy_associations
         name = self.name
         model.send(:include, Module.new {
           class_eval <<-RUBY, __FILE__, __LINE__ + 1
             def destroy          # def destroy
-              super              #   super
               #{name}.clear      #   posts.clear
+              super              #   super
             end                  # end
           RUBY
         })

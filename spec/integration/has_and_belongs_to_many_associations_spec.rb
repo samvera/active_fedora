@@ -75,32 +75,48 @@ describe ActiveFedora::Base do
         @special_book.delete
       end
     end
+
     describe "a saved instance" do
-      before do
-        @book = Book.create
-        @topic1 = Topic.create
-        @topic2 = Topic.create
-      end
+      let!(:book) { Book.create }
+      let!(:topic1) { Topic.create }
+      let!(:topic2) { Topic.create }
+
       it "should set relationships bidirectionally" do
-        @book.topics << @topic1
-        expect(@book.topics).to eq [@topic1]
-        expect(@book['topic_ids']).to eq [@topic1.id]
-        expect(@topic1['book_ids']).to eq [@book.id]
-        expect(Topic.find(@topic1.pid).books).to eq [@book] #Can't have saved it because @book isn't saved yet.
+        book.topics << topic1
+        expect(book.topics).to eq [topic1]
+        expect(book['topic_ids']).to eq [topic1.id]
+        expect(topic1['book_ids']).to eq [book.id]
+        expect(Topic.find(topic1.pid).books).to eq [book] #Can't have saved it because book isn't saved yet.
       end
+
       it "should save new child objects" do
-        @book.topics << Topic.new
-        expect(@book.topics.first.pid).to_not be_nil
+        book.topics << Topic.new
+        expect(book.topics.first.pid).to_not be_nil
       end
+
       it "should clear out the old associtions" do
-        @book.topics = [@topic1]
-        @book.topics = [@topic2]
-        expect(@book.topic_ids).to eq [@topic2.pid]
+        book.topics = [topic1]
+        book.topics = [topic2]
+        expect(book.topic_ids).to eq [topic2.pid]
       end
+
+      context "with members" do
+        before do
+          book.topics = [topic1, topic2]
+          book.save
+        end
+
+        context "destroy" do
+          it "should remove the associations" do
+            book.destroy
+          end
+        end
+      end
+
       after do
-        @book.delete
-        @topic1.delete
-        @topic2.delete
+        book.delete unless book.destroyed?
+        topic1.delete
+        topic2.delete
       end
     end
   end
