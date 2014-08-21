@@ -27,6 +27,11 @@ describe ActiveFedora::Base do
     Object.send(:remove_const, :MyDatastream)
   end
 
+  it "should assert a content model" do
+    expect(subject.has_model).to eq ['Book']
+  end
+
+
   describe "#freeze" do
     before { subject.freeze }
 

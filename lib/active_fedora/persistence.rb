@@ -121,18 +121,11 @@ module ActiveFedora
       ENABLE_SOLR_UPDATES
     end
 
-    # This can be overriden to assert a different model
-    # It's normally called once in the lifecycle, by #create#
-    def assert_content_model
-      self.has_model = self.class.to_s
-    end
-
   private
 
     # Deals with preparing new object to be saved to Fedora, then pushes it and its datastreams into Fedora.
     def create_record(options = {})
       assign_rdf_subject
-      assert_content_model
       serialize_datastreams
       @orm = orm.create
       @resource = nil

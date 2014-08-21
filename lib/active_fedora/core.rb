@@ -57,6 +57,7 @@ module ActiveFedora
       end
 
       @association_cache = {}
+      assert_content_model
       load_datastreams
       self.attributes = attributes if attributes
       run_callbacks :initialize
@@ -107,6 +108,14 @@ module ActiveFedora
     def frozen?
       datastreams.frozen?
     end
+
+    protected
+
+      # This can be overriden to assert a different model
+      # It's normally called once in the lifecycle, by #create#
+      def assert_content_model
+        self.has_model = self.class.to_s
+      end
 
     module ClassMethods
       # Returns a suitable uri object for :has_model
