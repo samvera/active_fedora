@@ -2,24 +2,28 @@ module ActiveFedora
   module Rdf
     module Indexing
       extend ActiveSupport::Concern
-
-      def apply_prefix(name)
-        prefix + name.to_s
+      included do
+        include Solrizer::Common
       end
 
-      def to_solr(solr_doc = Hash.new) # :nodoc:
-        fields.each do |field_key, field_info|
-          values = resource.get_values(field_key)
-          Array(values).each do |val|
-            if val.kind_of? RDF::URI
-              val = val.to_s
-            elsif val.kind_of? ActiveTriples::Resource
-              val = val.solrize
+      def apply_prefix(name)
+        name.to_s
+      end
+
+      def to_solr(solr_doc={}, opts={}) # :nodoc:
+        super.tap do |solr_doc|
+          fields.each do |field_key, field_info|
+            values = resource.get_values(field_key)
+            Array(values).each do |val|
+              if val.kind_of? RDF::URI
+                val = val.to_s
+              elsif val.kind_of? ActiveTriples::Resource
+                val = val.solrize
+              end
+              self.class.create_and_insert_terms(apply_prefix(field_key), val, field_info[:behaviors], solr_doc)
             end
-            self.class.create_and_insert_terms(apply_prefix(field_key), val, field_info[:behaviors], solr_doc)
           end
         end
-        solr_doc
       end
 
       # Gives the primary solr name for a column. If there is more than one indexer on the field definition, it gives the first

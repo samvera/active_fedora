@@ -1,9 +1,10 @@
 module ActiveFedora
   module Rdf
     extend ActiveSupport::Autoload
+    autoload :DatastreamIndexing
+    autoload :Fcrepo
     autoload :Indexing
     autoload :Identifiable
     autoload :ObjectResource
-    autoload :Fcrepo
   end
 end

@@ -1,8 +1,7 @@
 module ActiveFedora
   class RDFDatastream < ActiveFedora::Datastream
-    include Solrizer::Common
     include ActiveTriples::NestedAttributes
-    include Rdf::Indexing
+    include Rdf::DatastreamIndexing
     extend ActiveTriples::Properties
 
     delegate :rdf_subject, :set_value, :get_values, :attributes=, :to => :resource

@@ -4,6 +4,7 @@ module ActiveFedora
     include Rdf::Identifiable
 
     included do
+      include Rdf::Indexing
       extend ActiveTriples::Properties
       delegate :rdf_subject, :set_value, :get_values, to: :resource
 

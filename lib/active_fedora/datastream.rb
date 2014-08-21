@@ -155,7 +155,7 @@ module ActiveFedora
     def serialize!
     end
 
-    def to_solr(solr_doc = Hash.new)
+    def to_solr(solr_doc={}, opts={})
       solr_doc
     end
 
