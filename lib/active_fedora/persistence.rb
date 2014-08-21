@@ -153,7 +153,7 @@ module ActiveFedora
     end
 
     def update_modified_date(result)
-      self.modified_date = [Solrizer::DefaultDescriptors.iso8601_date(result.headers['last-modified'.freeze])]
+      self.modified_date = DateTime.parse(result.headers['last-modified'.freeze])
     end
 
     def assign_pid

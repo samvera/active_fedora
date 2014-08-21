@@ -15,7 +15,20 @@ module ActiveFedora
       property :create_date, predicate: ActiveFedora::Rdf::Fcrepo.created
       # attribute :modified_date, [ ActiveFedora::Rdf::Fcrepo.lastModified, FedoraLens::Lenses.single, FedoraLens::Lenses.literal_to_string ]
       property :modified_date, predicate: ActiveFedora::Rdf::Fcrepo.lastModified
+
+      # Hack until https://github.com/no-reply/ActiveTriples/pull/37 is merged
+      def create_date_with_first
+        create_date_without_first.first
+      end
+      alias_method_chain :create_date, :first
+
+      # Hack until https://github.com/no-reply/ActiveTriples/pull/37 is merged
+      def modified_date_with_first
+        modified_date_without_first.first
+      end
+      alias_method_chain :modified_date, :first
     end
+
 
     def id
       if uri.kind_of?(RDF::URI) && uri.value.blank?
