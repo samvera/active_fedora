@@ -161,8 +161,7 @@ module ActiveFedora
 
     def assign_rdf_subject
       if !pid && new_pid = assign_pid
-        # TODO probably need to copy all the assertions from the @resource onto this graph
-        @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_pid), RDF::Graph.new))
+        @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_pid), @resource))
       else
         @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, @orm.resource.subject, @resource, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
       end
