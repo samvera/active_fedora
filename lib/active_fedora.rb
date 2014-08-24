@@ -45,6 +45,7 @@ module ActiveFedora #:nodoc:
     autoload :FedoraAttributes
     autoload :FileConfigurator
     autoload :Indexing
+    autoload :LdpResource
     autoload :Model
     autoload :NestedAttributes
     autoload :NomDatastream

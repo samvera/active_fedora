@@ -22,23 +22,23 @@ describe ActiveFedora::OmDatastream do
 
   describe "#changed?" do
     it "should not be changed when no fields have been set" do
-      subject.should_not be_content_changed
+      expect(subject).to_not be_content_changed
     end
     it "should be changed when a field has been set" do
       subject.title = 'Foobar'
-      subject.should be_content_changed
+      expect(subject).to be_content_changed
     end
     it "should not be changed if the new xml matches the old xml" do
       subject.content = subject.content
-      subject.should_not be_changed
+      expect(subject).to_not be_changed
     end
 
     it "should be changed if there are minor differences in whitespace" do
       subject.content = "<a><b>1</b></a>"
       obj.save
-      subject.should_not be_changed
+      expect(subject).to_not be_changed
       subject.content = "<a>\n<b>1</b>\n</a>"
-      subject.should be_changed
+      expect(subject).to be_changed
     end
   end
 
@@ -58,11 +58,11 @@ describe ActiveFedora::OmDatastream do
 
     it "should not be dirty after .update_values is saved" do
       obj.descMetadata.update_values([{:name=>0},{:role=>0},:text] =>"Funder")
-      obj.descMetadata.should be_changed
+      expect(obj.descMetadata).to be_changed
       obj.save
-      obj.descMetadata.should_not be_changed
-      obj.descMetadata.term_values({:name=>0},{:role=>0},:text).should == ["Funder"]
-    end    
+      expect(obj.descMetadata).to_not be_changed
+      expect(obj.descMetadata.term_values({:name=>0},{:role=>0},:text)).to eq ["Funder"]
+    end
   end
 
 
@@ -73,7 +73,7 @@ describe ActiveFedora::OmDatastream do
       obj.reload
     end
     it "should solrize terms with :type=>'date' to *_dt solr terms" do
-      obj.to_solr[ActiveFedora::SolrService.solr_name('desc_metadata__journal_issue_publication_date', type: :date)].should == ['2012-11-02T00:00:00Z']
+      expect(obj.to_solr[ActiveFedora::SolrService.solr_name('desc_metadata__journal_issue_publication_date', type: :date)]).to eq ['2012-11-02T00:00:00Z']
     end
   end
 end

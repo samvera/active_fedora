@@ -65,7 +65,7 @@ describe ActiveFedora::Persistence do
       context "on a persisted record" do
         before do
           allow(subject).to receive(:new_record?) { false }
-          allow_any_instance_of(Ldp::Orm).to receive(:save!) { true }
+          allow_any_instance_of(Ldp::Orm).to receive(:save) { true }
           allow(subject).to receive(:update_modified_date)
         end
 
@@ -89,7 +89,7 @@ describe ActiveFedora::Persistence do
       context "on update" do
         before do
           allow(subject).to receive(:new_record?) { false }
-          allow_any_instance_of(Ldp::Orm).to receive(:save!) { true }
+          allow_any_instance_of(Ldp::Orm).to receive(:save) { true }
           allow(subject).to receive(:update_needs_index?) { false }
           allow(subject).to receive(:update_modified_date)
         end

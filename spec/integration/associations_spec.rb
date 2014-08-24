@@ -16,7 +16,7 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :Person)
     end
 
-    let(:person) { Person.create}
+    let(:person) { Person.create }
     let(:book) { Book.new(author: person) }
 
     it "should go" do

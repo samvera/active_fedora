@@ -66,7 +66,7 @@ module ActiveFedora
       def reindex_everything
         urls_from_sitemap_index.each do |url|
           logger.debug "Re-index everything ... #{url}"
-          ActiveFedora::Base.find(Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, url)).update_index
+          ActiveFedora::Base.find(LdpResource.new(ActiveFedora.fedora.connection, url)).update_index
         end
       end
 

@@ -28,26 +28,24 @@ describe ActiveFedora::Base do
     end
 
     describe "an unsaved instance" do
+      let(:topic1) { Topic.create }
       before do
-        @topic1 = Topic.create
-        @topic2 = Topic.create
         @book = Book.create
-        @special_book = SpecialInheritedBook.create #TODO this isnt' needed in every test.
       end
 
       it "habtm should set and remove relationships bidirectionally" do
-        @book.topics << @topic1
-        expect(@book.topics).to eq [@topic1]
-        expect(@topic1.books).to eq [@book]
-        expect(@topic1.reload.books).to eq [@book]
+        @book.topics << topic1
+        expect(@book.topics).to eq [topic1]
+        expect(topic1.books).to eq [@book]
+        expect(topic1.reload.books).to eq [@book]
 
-        @book.topics.delete(@topic1)
+        @book.topics.delete(topic1)
         expect(@book.topics).to be_empty
-        expect(@topic1.books).to be_empty
+        expect(topic1.books).to be_empty
       end
 
       it "Should allow for more than 10 items" do
-        (0..11).each do
+        (1..12).each do
           @book.topics << Topic.create
         end
         @book.save
@@ -56,24 +54,21 @@ describe ActiveFedora::Base do
         expect(book2.topics.count).to eq 12
       end
 
-      it "Should find inherited objects along with base objects" do
-        @book.topics << @topic1
-        @special_book.topics << @topic1
-        expect(@topic1.books).to eq [@book, @special_book]
-        expect(@topic1.reload.books).to eq [@book, @special_book]
+      context "with subclassed objects" do
+        let!(:special_book) { SpecialInheritedBook.create }
+        it "Should find inherited objects along with base objects" do
+          @book.topics << topic1
+          special_book.topics << topic1
+          expect(topic1.books).to eq [@book, special_book]
+          expect(topic1.reload.books).to eq [@book, special_book]
+        end
       end
 
       it "Should cast found books to the correct cmodel" do
-        @topic1.books[0].class == Book
-        @topic1.books[1].class == SpecialInheritedBook
+        topic1.books[0].class == Book
+        topic1.books[1].class == SpecialInheritedBook
       end
 
-      after do
-        @topic1.delete
-        @topic2.delete
-        @book.delete
-        @special_book.delete
-      end
     end
 
     describe "a saved instance" do
@@ -112,12 +107,6 @@ describe ActiveFedora::Base do
           end
         end
       end
-
-      after do
-        book.delete unless book.destroyed?
-        topic1.delete
-        topic2.delete
-      end
     end
   end
 
@@ -144,10 +133,6 @@ describe ActiveFedora::Base do
       before do
         book.collections << collection
         book.save!
-      end
-      after do
-        collection.delete
-        book.delete
       end
 
       it "should have a collection" do
@@ -200,11 +185,6 @@ describe ActiveFedora::Base do
         book.collections << collection1 << collection2
         book.save!
       end
-      after do
-        collection1.delete
-        collection2.delete
-        book.delete
-      end
 
       it "delete should cause the entries to be removed from RELS-EXT, but not destroy the original record" do
         expect(book.collections).to eq [collection1, collection2]
@@ -250,10 +230,6 @@ describe ActiveFedora::Base do
         book.collections << collection
         book.save!
       end
-      after do
-        collection.delete
-        book.delete
-      end
 
       it "destroy should cause the before_remove and after_remove callback to be triggered" do
         expect(book).to receive(:foo).with(collection)
@@ -280,8 +256,8 @@ describe ActiveFedora::Base do
 
     describe "with add callbacks" do
       before do
-        class Book < ActiveFedora::Base 
-          has_and_belongs_to_many :collections, 
+        class Book < ActiveFedora::Base
+          has_and_belongs_to_many :collections,
                                   property: :is_member_of_collection,
                                   before_add: :foo, after_add: :bar
         end
@@ -295,12 +271,8 @@ describe ActiveFedora::Base do
         Object.send(:remove_const, :Collection)
       end
 
-      let (:book) { Book.create }
-      let (:collection) { Collection.create }
-      after do
-        collection.delete
-        book.delete
-      end
+      let(:book) { Book.create }
+      let(:collection) { Collection.create }
 
       it "shift should cause the before_add and after_add callback to be triggered" do
         expect(book).to receive(:foo).with(collection)

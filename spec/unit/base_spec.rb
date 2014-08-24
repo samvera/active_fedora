@@ -4,12 +4,6 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   it_behaves_like "An ActiveModel"
 
-  describe 'rdf' do
-    it "should have a graph" do
-      puts subject.resource.dump(:ttl)
-      puts subject.datastream_assertions
-    end
-  end
   describe 'descendants' do
     it "should record the decendants" do
       expect(ActiveFedora::Base.descendants).to include(ModsArticle, SpecialThing)
@@ -21,7 +15,7 @@ describe ActiveFedora::Base do
       allow(ActiveFedora::Base).to receive(:urls_from_sitemap_index) { ['http://localhost/test/XXX', 'http://localhost/test/YYY', 'http://localhost/test/ZZZ'] }
       mock_update = double(:mock_obj)
       expect(mock_update).to receive(:update_index).exactly(3).times
-      expect(ActiveFedora::Base).to receive(:find).with(instance_of Ldp::Resource::RdfSource ).and_return(mock_update).exactly(3).times
+      expect(ActiveFedora::Base).to receive(:find).with(instance_of ActiveFedora::LdpResource ).and_return(mock_update).exactly(3).times
       ActiveFedora::Base.reindex_everything
     end
   end
@@ -210,13 +204,11 @@ describe ActiveFedora::Base do
       end
 
       context "on an existing record" do
-        let(:stub_source) { double('RdfSource') }
 
         it "should update" do
           allow(@test_object).to receive(:new_record?).and_return(false)
           expect(@test_object).to receive(:serialize_datastreams)
-          expect(Ldp::Resource::RdfSource).to receive(:new).and_return(stub_source)
-          expect(stub_source).to receive(:update)
+          allow_any_instance_of(Ldp::Orm).to receive(:save) { true }
           expect(@test_object).to receive(:update_modified_date)
           expect(@test_object).to receive(:update_index)
           @test_object.save

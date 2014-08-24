@@ -137,12 +137,20 @@ module ActiveFedora
 
     def update_record(options = {})
       serialize_datastreams
-      # The resource has been modified, so we create a new RdfSource
-      result = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, rdf_subject, resource).update
-      update_modified_date(result)
+
+      # Clear out the etag  -- Remove when this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
+      orm.resource.instance_variable_set :@get, nil
+
+      result = orm.save
+      if result
+        update_modified_date(orm.last_response)
+      else
+        # Need to wait until this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
+        # raise "ERR #{orm.last_response} when updating #{uri}."
+      end
       should_update_index = update_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
-      return !!result
+      return result
     end
 
     def update_modified_date(result)
@@ -154,9 +162,9 @@ module ActiveFedora
 
     def assign_rdf_subject
       if !pid && new_pid = assign_pid
-        @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_pid), @resource))
+        @orm = Ldp::Orm.new(LdpResource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_pid), @resource))
       else
-        @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, @orm.resource.subject, @resource, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
+        @orm = Ldp::Orm.new(LdpResource.new(ActiveFedora.fedora.connection, @orm.resource.subject, @resource, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
       end
     end
 

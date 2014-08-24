@@ -31,25 +31,24 @@ module ActiveFedora
     # +:namespace+ value to Fedora::Repository.nextid to generate the next pid available within
     # the given namespace.
     def initialize(attributes_or_resource_or_url = nil)
-      g = RDF::Graph.new
       case attributes_or_resource_or_url
         when Ldp::Resource::RdfSource
           @orm = Ldp::Orm.new(subject_or_data)
           attributes = get_attributes_from_orm(@orm)
         when String
-          @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, self.class.id_to_uri(attributes_or_resource_or_url)))
+          @orm = Ldp::Orm.new(build_ldp_resource(attributes_or_resource_or_url))
           @attributes = {}.with_indifferent_access
         when Hash
           attributes = attributes_or_resource_or_url
           pid = attributes.delete(:pid)
           attributes = attributes.with_indifferent_access if attributes
           @orm = if pid
-            Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, self.class.id_to_uri(pid)))
+            Ldp::Orm.new(build_ldp_resource(pid))
           else
-            Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, nil, g, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
+            Ldp::Orm.new(build_ldp_resource)
           end
         when NilClass
-          @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, nil, g, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
+          @orm = Ldp::Orm.new(build_ldp_resource)
           attributes = {}.with_indifferent_access
         else
           raise ArgumentError, "#{attributes_or_resource_or_url.class} is not acceptable"
@@ -68,7 +67,7 @@ module ActiveFedora
       raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved" unless persisted?
       clear_association_cache
       clear_datastreams
-      @orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(conn, uri))
+      @orm = Ldp::Orm.new(LdpResource.new(conn, uri))
       @resource = nil
       load_datastreams
       self
@@ -160,6 +159,14 @@ module ActiveFedora
     private
       def conn
         ActiveFedora.fedora.connection
+      end
+
+      def build_ldp_resource(pid=nil)
+        if pid
+          LdpResource.new(conn, self.class.id_to_uri(pid))
+        else
+          LdpResource.new(conn, nil, nil, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
+        end
       end
 
   end
