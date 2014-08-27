@@ -3,7 +3,7 @@ require 'rdf/ntriples'
 module ActiveFedora
   class NtriplesRDFDatastream < RDFDatastream
     def self.default_attributes
-      super.merge(:controlGroup => 'M', :mimeType => 'text/plain')
+      super.merge(:controlGroup => 'M', :mimeType => 'application/n-triples')
     end
 
     def serialization_format

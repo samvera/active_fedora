@@ -25,7 +25,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.controlGroup.should == 'M'
     end
     it "should have mimeType" do
-      @subject.mimeType.should == 'text/plain'
+      @subject.mimeType.should == 'application/n-triples'
     end
     it "should have dsid" do
       @subject.dsid.should == 'descMetadata'
