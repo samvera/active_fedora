@@ -97,7 +97,6 @@ describe ActiveFedora::Datastream do
           context "open ended" do
             let(:range) { 'bytes=0-' }
             it "should get a response" do
-              pending "Fedora 4 beta 1 errors on this. https://github.com/fcrepo4/fcrepo4/issues/426"
               expect(subject).to eq 'one1two2threfour'
             end
           end
