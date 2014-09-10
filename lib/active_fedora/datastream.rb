@@ -51,6 +51,14 @@ module ActiveFedora
       # init_core(resource)
     end
 
+    # When restoring from previous versions, we need to reload certain attributes from Fedora
+    def reload
+      return if new_record?
+      @container_resource = ContainerResource.new(self, "#{@digital_object.uri}/#{@dsid}")
+      @original_name = nil
+      @mime_type = nil
+    end
+
     def initialize_dsid(dsid, prefix)
       prefix  ||= 'DS'
       dsid = nil if dsid == ''

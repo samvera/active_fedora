@@ -23,6 +23,16 @@ module ActiveFedora
 
     def create_version
       resp = ActiveFedora.fedora.connection.post(versions_url)
+      @versions_graph = nil
+      reload
+      resp.success?
+    end
+
+    def restore_version uuid
+      resp = ActiveFedora.fedora.connection.patch(version_url(uuid), nil)
+      @versions_graph = nil
+      reload
+      refresh_attributes if self.respond_to?("refresh_attributes")
       resp.success?
     end
 
@@ -62,12 +72,15 @@ module ActiveFedora
         elsif resp.headers['content-type'] != 'text/turtle'
           raise "unknown response format. got '#{resp.headers['content-type']}', but was expecting 'text/turtle'"
         end
-        # puts "Resp #{resp.body}"
         resp.body
       end
 
       def versions_url
         uri + '/fcr:versions'
+      end
+
+      def version_url uuid
+        versions_url + '/' + uuid
       end
 
       def assert_versionable
