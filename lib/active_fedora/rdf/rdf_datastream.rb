@@ -81,6 +81,10 @@ module ActiveFedora
 
     alias_method :graph, :resource
 
+    def refresh_attributes
+      @resource = nil
+    end
+
     ##
     # This method allows for delegation.
     # This patches the fact that there's no consistent API for allowing delegation - we're matching the
