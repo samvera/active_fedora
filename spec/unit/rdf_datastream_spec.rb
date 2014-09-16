@@ -54,13 +54,27 @@ describe ActiveFedora::RDFDatastream do
   end
 
   describe "deserialize" do
-    it "should be able to handle non-utf-8 characters" do
-      # see https://github.com/ruby-rdf/rdf/issues/142
-      ds = ActiveFedora::NtriplesRDFDatastream.new
-      data = "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT')
+    let(:ds) { ActiveFedora::NtriplesRDFDatastream.new }
+    subject { ds.deserialize(data) }
 
-      result = ds.deserialize(data)
-      result.dump(:ntriples).should == "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
+    context "with non-utf-8 characters" do
+      # see https://github.com/ruby-rdf/rdf/issues/142
+      let(:data) { "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT') }
+
+      it "should be able to handle non-utf-8 characters" do
+        expect(subject.dump(:ntriples)).to eq "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
+      end
+    end
+
+    context "when the object is saved and has no content in the datastream" do
+      let(:data) { nil }
+      before do
+        allow(ds).to receive(:new?).and_return(false);
+        allow(ds).to receive(:datastream_content).and_return(nil);
+      end
+      it "should return an empty graph" do
+        expect(subject).to be_kind_of RDF::Graph
+      end
     end
   end
 
