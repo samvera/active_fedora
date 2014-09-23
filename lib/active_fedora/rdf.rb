@@ -7,5 +7,6 @@ module ActiveFedora
     autoload :Indexing
     autoload :Identifiable
     autoload :ObjectResource
+    autoload :Persistence
   end
 end

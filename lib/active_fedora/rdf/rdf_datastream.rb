@@ -17,6 +17,9 @@ module ActiveFedora
 
       # Utility method which can be overridden to determine the object
       # resource that is created.
+      # 
+      # @return [Class] the object resource class
+      #   Must be a descendant of ActiveTriples::Resource and include ActiveFedora::Rdf::Persistence.
       def resource_class
         Rdf::ObjectResource
       end
