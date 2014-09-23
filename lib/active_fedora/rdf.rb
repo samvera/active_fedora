@@ -4,6 +4,7 @@ module ActiveFedora
     autoload :Indexing
     autoload :Identifiable
     autoload :ObjectResource
+    autoload :Persistence
 
     # Aliases for deprecated ActiveFedora::Rdf Classes/Modules
     # TODO: Remove in 8.0.0
