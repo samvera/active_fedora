@@ -57,7 +57,7 @@ module ActiveFedora
 
     include ActiveFedora::DatastreamBootstrap
     def datastream_from_spec(ds_spec, name)
-      datastream_object_for name, {}, ds_spec
+      datastream_object_for name, {load_graph: false}, ds_spec
     end
 
     def datastream_assertions
@@ -75,7 +75,7 @@ module ActiveFedora
         self.datastreams[dsid] = ds
         configure_datastream(datastreams[dsid])
       end
-      local_ds_specs.each do |name,ds_spec|
+      local_ds_specs.each do |name, ds_spec|
         ds = datastream_from_spec(ds_spec, name)
         self.add_datastream(ds)
         configure_datastream(ds, ds_spec)

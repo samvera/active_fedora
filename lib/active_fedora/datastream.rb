@@ -30,7 +30,7 @@ module ActiveFedora
       else
         "#{digital_object.uri}/#{@dsid}"
       end
-      @container_resource = ContainerResource.new(self, uri)
+      @container_resource = ContainerResource.new(self, uri, options.fetch(:load_graph, true))
 
       @attributes = {}.with_indifferent_access
       unless digital_object.new_record?
@@ -225,13 +225,13 @@ module ActiveFedora
 
       attr_reader :uri
 
-      def initialize(ds, uri)
+      def initialize(ds, uri, load_graph = true)
         @datasteam = ds
         @uri = uri
         rdf_source = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
         @orm = Ldp::Orm.new(rdf_source)
         super(uri)
-        self << @orm.graph
+        self << @orm.graph if load_graph
       end
 
       def new_record?

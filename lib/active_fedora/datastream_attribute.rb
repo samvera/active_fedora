@@ -34,38 +34,69 @@ module ActiveFedora
       ds = datastream_for_attribute(obj, dsid)
       obj.mark_as_changed(field) if obj.value_has_changed?(field, v)
       if ds.kind_of?(ActiveFedora::RDFDatastream)
-        ds.send("#{field}=", v)
+        write_rdf(ds, v)
       else
-        terminology = at || [field]
-        ds.send(:update_indexed_attributes, {terminology => v})
+        write_om(ds, v)
       end
     end
 
     def reader(obj, *opts)
-      if obj.is_a? SolrDigitalObject
-        begin
-          # Look in the cache
-          return obj.fetch(field)
-        rescue NoMethodError => e
-          # couldn't get it from solr, so try from fedora.
-          ActiveFedora::Base.logger.info "Couldn't get #{field} out of solr, because #{e.message}. Trying another way." if ActiveFedora::Base.logger
-        end
-      end
-      # Load from fedora
       ds = datastream_for_attribute(obj, dsid)
       if ds.kind_of?(ActiveFedora::RDFDatastream)
-        ds.send(field)
+        read_rdf(ds)
       else
-        terminology = at || [field]
-        if terminology.length == 1 && opts.present?
-          ds.send(terminology.first, *opts)
-        else
-          ds.send(:term_values, *terminology)
-        end
+        read_om(ds, *opts)
       end
     end
 
     private
+
+    def write_om(ds, v)
+      terminology = at || [field]
+      ds.send(:update_indexed_attributes, {terminology => v})
+    end
+
+    def read_om(ds, *opts)
+      terminology = at || [field]
+      if terminology.length == 1 && opts.present?
+        ds.send(terminology.first, *opts)
+      else
+        ds.send(:term_values, *terminology)
+      end
+    end
+
+    def write_rdf(node, v)
+      term = if at
+        vals = at.dup
+        while vals.length > 1
+          node = node.send(vals.shift)
+          node = node.build if node.empty?
+          node = node.first
+        end
+        vals.first
+      else
+        field
+      end
+      node.send("#{term}=", v)
+    end
+
+    def read_rdf(node)
+      term = if at
+        vals = at.dup
+        while vals.length > 1
+          node = node.send(vals.shift)
+          node = if node.empty?
+            node.build
+          else
+            node.first
+          end
+        end
+        vals.first
+      else
+        field
+      end
+      node.send(term)
+    end
 
     def datastream_for_attribute(obj, dsid)
       obj.datastreams[dsid] || raise(ArgumentError, "Undefined datastream id: `#{dsid}' in has_attributes")

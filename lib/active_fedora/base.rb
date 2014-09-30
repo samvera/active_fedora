@@ -46,6 +46,7 @@ module ActiveFedora
     include Attributes
     include ReloadOnSave
     include Versionable
+    include LoadableFromJson
   end
 
   ActiveSupport.run_load_hooks(:active_fedora, Base)

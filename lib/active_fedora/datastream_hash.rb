@@ -5,7 +5,7 @@ module ActiveFedora
     extend Forwardable
 
     def_delegators :@hash, *(Hash.instance_methods(false))
-    
+
     def initialize (&block)
       @hash = Hash.new &block
     end

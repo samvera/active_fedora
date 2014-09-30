@@ -15,9 +15,9 @@ describe ActiveFedora::Datastream do
     after(:all) do
       Object.send(:remove_const, :MockAFBase)
     end
-  
+
     let(:test_object) { MockAFBase.create }
-    
+
     after do
       test_object.destroy
     end
@@ -38,15 +38,15 @@ describe ActiveFedora::Datastream do
       subject { descMetadata.content }
       it { should_not be_nil }
     end
-    
+
 
     context "an XML datastream" do
       let(:xml_content) { Nokogiri::XML::Document.parse(descMetadata.content) }
       let(:title) { Nokogiri::XML::Element.new "title", xml_content }
-      before do 
+      before do
         title.content = "Test Title"
         xml_content.root.add_child title
-        
+
         allow(descMetadata).to receive(:before_save)
         descMetadata.content = xml_content.to_s
         descMetadata.save
@@ -57,7 +57,7 @@ describe ActiveFedora::Datastream do
       subject { found.xpath('//dc/title/text()').first.inner_text }
       it { should eq title.content }
     end
-    
+
     context "a blob datastream" do
       let(:dsid) { "ds#{Time.now.to_i}" }
       let(:content) { fixture('dino.jpg') }
@@ -72,7 +72,7 @@ describe ActiveFedora::Datastream do
         expect(test_object.datastreams[dsid]).to_not be_changed
       end
 
-      it "should be able to read the content from fedora" do    
+      it "should be able to read the content from fedora" do
         content.rewind
         expect(test_object.datastreams[dsid].content).to eq content.read
       end

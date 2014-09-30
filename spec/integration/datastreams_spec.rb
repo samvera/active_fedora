@@ -36,7 +36,7 @@ describe ActiveFedora::Datastreams do
     end
 
     let(:has_file) { HasFile.create("test:ds_versionable_has_file") }
-    
+
     it "should create datastreams from the spec on new objects" do
       has_file.file_ds.content = "blah blah blah"
       expect(has_file.file_ds).to be_changed
@@ -85,7 +85,7 @@ describe ActiveFedora::Datastreams do
         expect(DSTest.find(file.pid).test_ds.content).to eq 'Foobar'
       end
     end
-    
+
   end
 
   describe "an instance of ActiveFedora::Base" do
@@ -98,12 +98,12 @@ describe ActiveFedora::Datastreams do
       end
 
       it "should initialize the datastream pointers with @new_object=false" do
-        subject.each_value do |ds| 
+        subject.each_value do |ds|
           expect(ds).to_not be_new
         end
       end
     end
-    
+
     describe ".metadata_streams" do
       let(:mds1) { ActiveFedora::SimpleDatastream.new(obj, "md1") }
       let(:mds2) { ActiveFedora::QualifiedDublinCoreDatastream.new(obj, "qdc") }
@@ -111,32 +111,33 @@ describe ActiveFedora::Datastreams do
         fds = ActiveFedora::Datastream.new(obj, "fds")
         obj.add_datastream(mds1)
         obj.add_datastream(mds2)
-        obj.add_datastream(fds)      
+        obj.add_datastream(fds)
       end
 
       it "should return all of the datastreams from the object that are kinds of OmDatastream " do
         expect(obj.metadata_streams).to match_array [mds1, mds2]
       end
     end
-    
+
     describe '.add_file_datastream' do
       before do
         f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
         obj.add_file_datastream(f, mime_type: "image/jpeg")
         obj.save
       end
+
       it "should set the correct mime_type if :mime_type is passed in and path does not contain correct extension" do
         expect(obj.reload.datastreams["DS1"].mime_type).to eq "image/jpeg"
       end
     end
-    
+
     describe '.add_datastream' do
       let(:ds) { ActiveFedora::Datastream.new(obj, 'DS1') }
 
       it "should be able to add datastreams" do
-        expect(obj.add_datastream(ds)).to eq 'DS1' 
+        expect(obj.add_datastream(ds)).to eq 'DS1'
       end
-        
+
       it "adding and saving should add the datastream to the datastreams array" do
         ds.content = fixture('dino.jpg').read
         expect(obj.datastreams).to_not have_key("DS1")
@@ -144,18 +145,18 @@ describe ActiveFedora::Datastreams do
         obj.save
         expect(obj.datastreams).to have_key("DS1")
       end
-      
+
     end
-    
+
     describe "retrieving datastream content" do
       let(:obj) { ActiveFedora::Base.create }
       after { obj.destroy }
-    
+
       let(:ds) { ActiveFedora::Datastream.new(obj, 'DS1').tap {|ds| ds.content = "foo"; ds.save } }
 
       it "should retrieve blobs that match the saved blobs" do
         obj.add_datastream(ds)
-        expect(obj.reload.datastreams["DS1"].content).to eq "foo" 
+        expect(obj.reload.datastreams["DS1"].content).to eq "foo"
       end
     end
   end
