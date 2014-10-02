@@ -99,6 +99,7 @@ module ActiveFedora
     end
 
     def freeze
+      @resource.freeze
       #@attributes = @attributes.clone.freeze
       datastreams.freeze
       self
@@ -121,7 +122,7 @@ module ActiveFedora
       # Should reverse Model#from_class_uri
       # TODO this is a poorly named method
       def to_class_uri(attrs = {})
-        self.name
+        name
       end
 
       ##

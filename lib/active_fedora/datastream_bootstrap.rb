@@ -10,5 +10,5 @@ module ActiveFedora
       end
       ds
     end
-  end    
+  end
 end

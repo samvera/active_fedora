@@ -46,6 +46,7 @@ module ActiveFedora #:nodoc:
     autoload :FileConfigurator
     autoload :Indexing
     autoload :LdpResource
+    autoload :LoadableFromJson
     autoload :Model
     autoload :NestedAttributes
     autoload :NomDatastream
@@ -77,7 +78,7 @@ module ActiveFedora #:nodoc:
     autoload :Scoping
     autoload :Serialization
     autoload :SimpleDatastream
-    autoload :SolrDigitalObject
+    autoload :SolrInstanceLoader
     autoload :SolrService
     autoload :Predicates
     autoload :Validations
