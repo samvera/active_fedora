@@ -10,8 +10,10 @@ module ActiveFedora
     module Persistence
       extend ActiveSupport::Concern
 
+      BASE_URI = 'info:fedora/'
+
       included do
-        configure :base_uri => 'info:fedora/'
+        configure :base_uri => BASE_URI unless base_uri
         attr_accessor :datastream
       end
      
