@@ -115,6 +115,10 @@ module ActiveFedora
       attached_files.frozen?
     end
 
+    def to_uri(id)
+      self.class.id_to_uri(id)
+    end
+
     protected
 
       # This can be overriden to assert a different model
@@ -155,6 +159,16 @@ module ActiveFedora
           id.start_with?('/') ? id[1..-1] : id
         end
       end
+      
+      ##
+      # Provides the common interface for ActiveTriples::Identifiable
+      def from_uri(uri,_)
+        begin
+          self.find(uri_to_id(uri))
+        rescue ActiveFedora::ObjectNotFoundError, Ldp::Gone
+          ActiveTriples::Resource.new(uri)
+        end
+      end
 
       private
 
@@ -170,7 +184,7 @@ module ActiveFedora
 
       def build_ldp_resource(pid=nil)
         if pid
-          LdpResource.new(conn, self.class.id_to_uri(pid))
+          LdpResource.new(conn, to_uri(pid))
         else
           LdpResource.new(conn, nil, nil, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
         end

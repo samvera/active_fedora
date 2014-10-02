@@ -115,8 +115,8 @@ describe ActiveFedora do
     end
     it "should return class constants based on strings" do
       expect(ActiveFedora.class_from_string("Om")).to eq Om
-      expect(ActiveFedora.class_from_string("ActiveFedora::Rdf::ObjectResource")).to eq ActiveFedora::Rdf::ObjectResource
-      expect(ActiveFedora.class_from_string("ObjectResource", ActiveFedora::Rdf)).to eq ActiveFedora::Rdf::ObjectResource
+      expect(ActiveFedora.class_from_string("ActiveFedora::Rdf::Indexing")).to eq ActiveFedora::Rdf::Indexing
+      expect(ActiveFedora.class_from_string("Indexing", ActiveFedora::Rdf)).to eq ActiveFedora::Rdf::Indexing
     end
 
     it "should find sibling classes" do

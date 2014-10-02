@@ -15,7 +15,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
         index.type :date
         index.as :stored_searchable, :sortable
       end
-      property :size, predicate: FileVocabulary.size do |index|
+      property :filesize, predicate: FileVocabulary.size do |index|
         index.type :integer
         index.as :stored_sortable
       end
@@ -27,7 +27,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     class RdfTest < ActiveFedora::Base
       has_metadata 'rdf', type: MyDatastream
       has_attributes :based_near, :related_url, :part, :date_uploaded, datastream: 'rdf', multiple: true
-      has_attributes :title, :size, datastream: 'rdf', multiple: false
+      has_attributes :title, :filesize, datastream: 'rdf', multiple: false
     end
     @subject = RdfTest.new
   end
@@ -81,10 +81,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
       expect(solr_document[ActiveFedora::SolrService.solr_name('rdf__date_uploaded', type: :date)]).to eq ['2012-11-02T00:00:00Z']
     end
     it "should handle integers" do
-      subject.size = 12345
-      expect(subject.size).to be_kind_of Fixnum
+      subject.filesize = 12345 
+      subject.filesize.should be_kind_of Fixnum
       solr_document = subject.to_solr
-      expect(solr_document[ActiveFedora::SolrService.solr_name('rdf__size', :stored_sortable, type: :integer)]).to eq '12345'
+      solr_document[ActiveFedora::SolrService.solr_name('rdf__filesize', :stored_sortable, type: :integer)].should == '12345'
     end
   end
 
@@ -156,10 +156,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
       # reopening existing class
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         rdf_subject { |ds| RDF::URI.new("http://oregondigital.org/ns/#{ds.digital_object.id.split(':')[1]}") }
-        property :type, predicate: RDF::DC.type
-        property :spatial, predicate: RDF::DC.spatial
+        property :dctype, predicate: RDF::DC.type
       end
-      subject.rdf.type = "Frog"
+      subject.rdf.dctype = "Frog"
       subject.save!
     end
 
@@ -172,8 +171,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     it "should write rdf with proper subjects" do
       subject.reload
       expect(subject.rdf.graph.dump(:ntriples)).to eq "<http://oregondigital.org/ns/99> <http://purl.org/dc/terms/type> \"Frog\" .\n"
-      subject.rdf.type == ['Frog']
-
+      subject.rdf.dctype == ['Frog']
     end
 
   end
