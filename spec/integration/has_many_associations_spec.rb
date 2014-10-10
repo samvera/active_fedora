@@ -125,6 +125,33 @@ describe "When two or more relationships share the same property" do
   end
 end
 
+describe "with an polymorphic association" do
+  before do
+    class Permissionable1 < ActiveFedora::Base
+      has_many :permissions, property: :is_part_of, inverse_of: :access_to
+    end
+    class Permissionable2 < ActiveFedora::Base
+      has_many :permissions, property: :is_part_of, inverse_of: :access_to
+    end
+
+    class Permission < ActiveFedora::Base
+      belongs_to :access_to, property: :is_part_of, class_name: 'ActiveFedora::Base'
+    end
+  end
+
+  after do
+    Permissionable1.destroy_all
+    Object.send(:remove_const, :Permissionable1)
+    Object.send(:remove_const, :Permissionable2)
+    Object.send(:remove_const, :Permission)
+  end
+  let(:p1) { Permissionable1.create }
+
+  it "should make an association" do
+    expect(p1.permissions.create).to be_kind_of Permission
+  end
+end
+
 describe "When relationship is restricted to AF::Base" do
   before do
     class Email < ActiveFedora::Base
