@@ -148,7 +148,7 @@ module ActiveFedora
           build_record(attributes) do |record|
             block.call(record) if block_given?
             add_to_target(record)
-            set_belongs_to_association_for(record)
+            set_owner_attributes(record)
           end
         end
       end
@@ -343,14 +343,6 @@ module ActiveFedora
 
 
       private
-
-        # Assigns the ID of the owner to the corresponding foreign key in +record+.
-        # If the association is polymorphic the type of the owner is also set.
-        def set_belongs_to_association_for(record)
-          unless @owner.new_record?
-            record[@reflection.foreign_key] = @owner.id # TODO use primary_key instead of id
-          end
-        end
 
         def find_predicate
           if @reflection.options[:property]
