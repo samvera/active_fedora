@@ -44,6 +44,8 @@ module ActiveFedora
             record[inverse.foreign_key] ||= []
             #TODO use primary_key instead of `owner.id`
             record[inverse.foreign_key] += [owner.id]
+          elsif inverse && inverse.klass == ActiveFedora::Base
+            record[inverse.foreign_key] = owner.id
           else
             #TODO use primary_key instead of `owner.id`
             record[reflection.foreign_key] = owner.id
@@ -83,13 +85,14 @@ module ActiveFedora
             else
 
               if reflection.inverse_of # Can't get an inverse when class_name: 'ActiveFedora::Base' is supplied
-                inverse = reflection.inverse_of.name
+                inverse = reflection.inverse_of
                 records.each do |record|
                   if record.persisted?
-                    assoc = record.association(inverse)
-                    if assoc.reflection.collection?
+                    if inverse.collection?
                       # Remove from a has_and_belongs_to_many
-                      record.association(inverse).delete(@owner)
+                      record.association(inverse.name).delete(@owner)
+                    elsif inverse.klass == ActiveFedora::Base
+                      record[inverse.foreign_key] = nil
                     else
                       # Remove from a belongs_to
                       record[reflection.foreign_key] = nil
@@ -105,8 +108,6 @@ module ActiveFedora
             end
           end
         end
-
-        
     end
   end
 end
