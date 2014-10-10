@@ -9,7 +9,7 @@ module ActiveFedora
     end
 
     def base_path
-      @config[:base_path]
+      @config[:base_path] || '/'
     end
 
     def connection
