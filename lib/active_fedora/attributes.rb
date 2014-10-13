@@ -132,7 +132,7 @@ module ActiveFedora
 
         define_method field do |*opts|
           val = array_reader(field, *opts)
-          self.class.multiple?(field) ? val : val.first
+          self.class.multiple?(field) ? val : val.respond_to?(:first) ? val.first : val
         end
       end
 
