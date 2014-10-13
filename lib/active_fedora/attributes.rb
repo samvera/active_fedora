@@ -21,9 +21,12 @@ module ActiveFedora
 
     end
 
+    def attribute_names
+      self.class.attribute_names
+    end
 
     def attributes
-      self.class.attribute_names.each_with_object({"id" => id}) {|key, hash| hash[key] = self[key] }
+      attribute_names.each_with_object({"id" => id}) {|key, hash| hash[key] = self[key] }
     end
 
     # Calling inspect may trigger a bunch of datastream loads, but it's mainly for debugging, so no worries.

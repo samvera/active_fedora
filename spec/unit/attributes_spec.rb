@@ -65,6 +65,20 @@ describe ActiveFedora::Base do
 
       subject { BarHistory2.new }
 
+      describe "#attribute_names" do
+        context "on an instance" do
+          it "should list the attributes" do
+            expect(subject.attribute_names).to eq ["cow", "fubar", "pig", "horse", "duck", "animal_id"]
+          end
+        end
+
+        context "on a class" do
+          it "should list the attributes" do
+            expect(BarHistory2.attribute_names).to eq ["cow", "fubar", "pig", "horse", "duck", "animal_id"]
+          end
+        end
+      end
+
       describe "inspect" do
         it "should show the attributes" do
           expect(subject.inspect).to eq "#<BarHistory2 pid: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil>"
