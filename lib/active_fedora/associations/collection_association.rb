@@ -145,7 +145,8 @@ module ActiveFedora
         if attributes.is_a?(Array)
           attributes.collect { |attr| build(attr, &block) }
         else
-          build_record(attributes) do |record|
+          # TODO make initialize take a block and then remove the tap
+          build_record(attributes).tap do |record|
             block.call(record) if block_given?
             add_to_target(record)
             set_owner_attributes(record)
@@ -363,34 +364,24 @@ module ActiveFedora
             # Try it singular
             return klass.reflections[inverse_relation].options[:property]
           elsif klass.reflections.key?(inverse_relation.to_s.pluralize.to_sym)
-            # Try it plural 
+            # Try it plural
             return klass.reflections[inverse_relation.to_s.pluralize.to_sym].options[:property]
           end
           find_class_for_relation(klass, @owner.class.superclass.to_s.underscore.to_sym)
         end
 
-        def create_record(attrs, raise = false)
-          attrs.update(@reflection.options[:conditions]) if @reflection.options[:conditions].is_a?(Hash)
+        def create_record(attributes, raise = false)
+          attributes.update(@reflection.options[:conditions]) if @reflection.options[:conditions].is_a?(Hash)
           ensure_owner_is_not_new
-          record = @reflection.klass.create do
-            @reflection.build_association(attrs)
-          end
-          insert_record(record, true, raise)
-          if block_given?
-            add_record_to_target_with_callbacks(record) { |*block_args| yield(*block_args) }
-          else
-            add_record_to_target_with_callbacks(record)
+
+          add_to_target(build_record(attributes)) do |record|
+            yield(record) if block_given?
+            insert_record(record, true, raise)
           end
         end
 
-        def build_record(attrs)
-          #attrs.update(@reflection.options[:conditions]) if @reflection.options[:conditions].is_a?(Hash)
-          record = @reflection.build_association(attrs)
-          if block_given?
-            add_record_to_target_with_callbacks(record) { |*block_args| yield(*block_args) }
-          else
-            add_record_to_target_with_callbacks(record)
-          end
+        def create_scope
+          scope.scope_for_create.stringify_keys
         end
 
         def delete_or_destroy(records, method)

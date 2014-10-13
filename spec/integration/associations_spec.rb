@@ -65,6 +65,7 @@ describe ActiveFedora::Base do
           new_book = @library.books.build({})
           expect(new_book).to be_new_record
           expect(new_book).to be_kind_of Book
+          l = new_book.library
           expect(new_book.library).to be_kind_of Library
           expect(@library.books).to eq [new_book]
         end

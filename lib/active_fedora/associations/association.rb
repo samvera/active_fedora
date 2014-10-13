@@ -108,6 +108,12 @@ module ActiveFedora
         target
       end
 
+      def initialize_attributes(record) #:nodoc:
+        skip_assign = [reflection.foreign_key].compact
+        attributes = create_scope.except(*(record.changed - skip_assign))
+        record.attributes = attributes
+        set_inverse_instance(record)
+      end
 
         private
 
@@ -157,6 +163,13 @@ module ActiveFedora
         #
         # This is only relevant to certain associations, which is why it returns nil by default.
         def stale_state
+        end
+
+        def build_record(attributes)
+          # TODO make initalize take a block and get rid of the tap
+          reflection.build_association(attributes).tap do |record|
+            initialize_attributes(record)
+          end
         end
 
     end

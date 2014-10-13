@@ -26,7 +26,7 @@ module ActiveFedora
     def order_values=(values)
       raise ImmutableRelation if @loaded
       @values[:order] = values
-    end   
+    end
 
     def limit_value
       @values[:limit]
@@ -35,7 +35,7 @@ module ActiveFedora
     def limit_value=(value)
       raise ImmutableRelation if @loaded
       @values[:limit] = value
-    end   
+    end
 
     def offset_value
       @values[:offset]
@@ -44,7 +44,7 @@ module ActiveFedora
     def offset_value=(value)
       raise ImmutableRelation if loaded?
       @values[:offset] = value
-    end   
+    end
 
     # Limits the returned records to those that match the provided search conditions
     #
@@ -139,6 +139,10 @@ module ActiveFedora
 
     def select
       to_a.select { |*block_args| yield(*block_args) }
+    end
+
+    def create_with_value # :nodoc:
+      @values[:create_with] || {}
     end
   end
 end
