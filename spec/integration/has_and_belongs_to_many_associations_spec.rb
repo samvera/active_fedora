@@ -296,10 +296,36 @@ describe ActiveFedora::Base do
         expect(book.collections).to eq []
       end
     end
+  end
+end
 
+describe "create" do
+  before do
+    class Book < ActiveFedora::Base
+      has_and_belongs_to_many :collections, property: :is_member_of_collection
+    end
+
+    class Collection < ActiveFedora::Base
+      property :title, predicate: RDF::DC.title
+    end
   end
 
+  after do
+    Object.send(:remove_const, :Book)
+    Object.send(:remove_const, :Collection)
+  end
+
+  let(:book) { Book.create }
+
+  it "should create" do
+    collection = book.collections.create(title: ["Permanent"])
+    expect(collection).to be_kind_of Collection
+    expect(book.collections).to include collection
+    book.save
+    expect(book.reload.collections.first.title).to eq ['Permanent']
+  end
 end
+
 
 describe "Autosave" do
   before do

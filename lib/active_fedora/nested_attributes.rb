@@ -65,7 +65,7 @@ module ActiveFedora
           if reflection = reflect_on_association(association_name)
             reflection.options[:autosave] = true
             # add_autosave_association_callbacks(reflection)
-            ## TODO this ought to work, but doesn't seem to do the class inheitance right
+            ## TODO this ought to work, but doesn't seem to do the class inheritance right
 
             nested_attributes_options = self.nested_attributes_options.dup
             nested_attributes_options[association_name.to_sym] = options
@@ -101,7 +101,7 @@ module ActiveFedora
       marked_for_destruction?
     end
 
-    private 
+    private
 
     # Attribute hash keys that should not be assigned as normal attributes.
     # These hash keys are nested attributes implementation details.

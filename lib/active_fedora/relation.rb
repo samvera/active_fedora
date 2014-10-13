@@ -120,6 +120,17 @@ module ActiveFedora
       end
     end
 
+    # Returns a hash of where conditions.
+    #
+    #   User.where(name: 'Oscar').where_values_hash
+    #   # => {name: "Oscar"}
+    def where_values_hash
+      {}
+    end
+
+    def scope_for_create
+      @scope_for_create ||= where_values_hash.merge(create_with_value)
+    end
 
     private
 
