@@ -14,7 +14,7 @@ module ActiveFedora
   #   class Oralhistory < ActiveFedora::Base
   #     has_metadata "properties", type: ActiveFedora::SimpleDatastream do |m|
   #       m.field "narrator",  :string
-  #       m.field "narrator",  :text
+  #       m.field "bio",  :text
   #     end
   #   end
   #
