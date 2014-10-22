@@ -244,7 +244,7 @@ module ActiveFedora
       end
 
       def content_path
-        "#{@uri}/fcr:content"
+        "#{@uri}"
       end
 
     end
@@ -293,7 +293,7 @@ module ActiveFedora
             # this happens because rdf_datastream calls datastream_content.
             # which happens because it needs a PID even though it isn't saved.
             # which happens because we don't know if something exists if you give it a pid
-            #raise ActiveFedora::ObjectNotFoundError, "Unable to find content at #{uri}/fcr:content"
+            #raise ActiveFedora::ObjectNotFoundError, "Unable to find content at #{uri}"
             ''
           else
             raise "unexpected return value #{resp.status} for when getting datastream content at #{uri}"

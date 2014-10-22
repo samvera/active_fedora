@@ -162,13 +162,15 @@ describe ActiveFedora::OmDatastream do
       allow(subject).to receive(:ng_xml_changed?).and_return(true)
       allow(subject).to receive(:xml_loaded).and_return(true)
       allow(subject).to receive(:to_xml).and_return('fake xml')
+      allow(client).to receive(:delete).with("test")
+      allow(client).to receive(:delete).with("test/fcr:tombstone")
+      allow(client).to receive(:put).with("test", "")
     end
 
     it "should persist the product of .to_xml in fedora" do
-      expect(client).to receive(:put).with("/fcr:content", 'fake xml', {"Content-Type"=>"text/xml"}).and_return(resp)
+      expect(client).to receive(:put).with("", 'fake xml', {"Content-Type"=>"text/xml"}).and_return(resp)
       expect(subject.container_resource).to receive(:save).and_return(true)
       expect(subject).to receive(:fetch_mime_type_from_content_node).at_least(:once)
-
       subject.serialize!
       subject.save
       expect(subject.mime_type).to eq 'text/xml'
