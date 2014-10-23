@@ -37,8 +37,14 @@ module ActiveFedora
     end
 
     def save(*)
-      assert_versionable if versionable
-      super
+      if kind_of? Datastream
+        super.tap do |val|
+          assert_versionable if versionable && val
+        end
+      else
+        assert_versionable if versionable
+        super
+      end
     end
 
     private
@@ -46,12 +52,16 @@ module ActiveFedora
       # RdfDatastream has a rdf_subject/resource that would take precidence over this one.
       # for a datastream we want the ContainerResource. For an Object just the regular resource
       def versionable_uri
-        versionable_resource.rdf_subject
+        if kind_of? Datastream
+          RDF::URI.new(uri)
+        else
+          versionable_resource.rdf_subject
+        end
       end
 
       def versionable_resource
         if kind_of? Datastream
-          container_resource
+          metadata_resource.graph
         else
           resource
         end
@@ -84,7 +94,12 @@ module ActiveFedora
       end
 
       def assert_versionable
-        versionable_resource.insert(subject: versionable_uri, predicate: RDF.type, object: RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable'))
+        if kind_of? Datastream
+          stmt = "insert data { <#{versionable_uri}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.jcp.org/jcr/mix/1.0versionable> . }"
+          ActiveFedora.fedora.connection.patch(uri + '/fcr:metadata', stmt)
+        else
+          versionable_resource.insert(subject: versionable_uri, predicate: RDF.type, object: RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable'))
+        end
       end
 
   end

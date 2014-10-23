@@ -11,7 +11,7 @@ module ActiveFedora
     define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, only: :after
 
-    attr_reader :digital_object, :dsid, :container_resource
+    attr_reader :digital_object, :dsid, :uri
     attr_accessor :last_modified
 
     # @param digital_object [DigitalObject] the digital object that this object belongs to
@@ -25,12 +25,11 @@ module ActiveFedora
       initialize_dsid(dsid, options.delete(:prefix))
 
       #TODO if digital_object.uri is empty, then this resource is not valid:
-      uri = if digital_object.uri.kind_of?(RDF::URI) && digital_object.uri.value.empty?
+      @uri = if digital_object.uri.kind_of?(RDF::URI) && digital_object.uri.value.empty?
         nil
       else
         "#{digital_object.uri}/#{@dsid}"
       end
-      @container_resource = ContainerResource.new(self, uri, options.fetch(:load_graph, true))
 
       @attributes = {}.with_indifferent_access
       unless digital_object.new_record?
@@ -38,15 +37,29 @@ module ActiveFedora
       end
     end
 
+    def resource
+
+    end
+
+    def ldp_source
+      @ldp_source ||= Ldp::Resource::BinarySource.new(ActiveFedora.fedora.connection, uri)
+    end
+
+    def metadata_resource
+      #@orm ||= Rdf::ObjectResource.new(uri + '/fcr:metadata')
+      @metadata_resource ||= Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri + '/fcr:metadata')
+      puts "the Metadata resource is #{@metadata_resource.subject}."
+      @metadata_resource
+    end
 
     def new_record?
-      @container_resource.new_record?
+      uri.nil? || ldp_source.new?
     end
 
 
     def digital_object=(digital_object)
-      raise ArgumentError unless new_record?
-      @container_resource = ContainerResource.new(self, "#{digital_object.uri}/#{@dsid}")
+      raise ArgumentError, "must be a new record to assign a parent object" unless new_record?
+      @uri = "#{digital_object.uri}/#{@dsid}"
       # resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
       # init_core(resource)
     end
@@ -54,7 +67,7 @@ module ActiveFedora
     # When restoring from previous versions, we need to reload certain attributes from Fedora
     def reload
       return if new_record?
-      @container_resource = ContainerResource.new(self, "#{@digital_object.uri}/#{@dsid}")
+      @ldp_source = nil
       @original_name = nil
       @mime_type = nil
     end
@@ -85,7 +98,7 @@ module ActiveFedora
 
     attr_writer :mime_type
     def mime_type
-      @mime_type ||= fetch_mime_type_from_content_node
+      @mime_type ||= fetch_mime_type unless new_record?
       @mime_type || default_mime_type
     end
 
@@ -95,7 +108,8 @@ module ActiveFedora
     end
 
     def size
-      query_content_node RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasSize")
+      ldp_source.head.headers['Content-Length']
+      # query_metadata_node RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasSize")
     end
 
     def has_content?
@@ -111,9 +125,6 @@ module ActiveFedora
       super || content_changed?
     end
 
-    def uri
-      container_resource.uri
-    end
 
     class << self
       def default_attributes
@@ -197,12 +208,12 @@ module ActiveFedora
       query_content_node(RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasOriginalName"))
     end
 
-    def fetch_mime_type_from_content_node
-      query_content_node RDF::URI.new("http://fedora.info/definitions/v4/repository#mimeType")
+    def fetch_mime_type
+      ldp_source.head.headers['Content-Type']
     end
 
-    def query_content_node(predicate)
-      query = container_resource.query([RDF::URI.new(@container_resource.content_path), predicate, nil])
+    def query_metadata_node(predicate)
+      query = metadata_resource.query([RDF::URI.new(uri), predicate, nil])
       stmt = query.first
       stmt.object.object if stmt
     end
@@ -216,37 +227,6 @@ module ActiveFedora
     # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
     def behaves_like_io?(obj)
       [IO, Tempfile, StringIO].any? { |klass| obj.kind_of? klass } || (defined?(Rack) && obj.is_a?(Rack::Test::UploadedFile))
-    end
-
-    class ContainerResource < ActiveTriples::Resource
-
-      # attribute :has_content, [ActiveFedora::Rdf::Fcrepo.hasContent, FedoraLens::Lenses.single]
-      property :has_content, predicate: ActiveFedora::Rdf::Fcrepo.hasContent
-
-      attr_reader :uri
-
-      def initialize(ds, uri, load_graph = true)
-        @datasteam = ds
-        @uri = uri
-        rdf_source = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
-        @orm = Ldp::Orm.new(rdf_source)
-        super(uri)
-        self << @orm.graph if load_graph
-      end
-
-      def new_record?
-        @orm.resource.new?
-      end
-
-      # TODO optimize. We only need to save if the properties such as model_type have changed
-      def save
-        @orm.save
-      end
-
-      def content_path
-        "#{@uri}"
-      end
-
     end
 
     # Persistence is an included module, so that we can include other modules which override these methods
@@ -266,7 +246,7 @@ module ActiveFedora
         payload = behaves_like_io?(content) ? content.read : content
         headers = { 'Content-Type' => mime_type }
         headers['Content-Disposition'] = "attachment; filename=\"#{@original_name}\"" if @original_name
-        resp = ActiveFedora.fedora.connection.put @container_resource.content_path, payload, headers
+        resp = ActiveFedora.fedora.connection.put @uri, payload, headers
         reset_attributes
         case resp.status
           when 201, 204
@@ -276,12 +256,12 @@ module ActiveFedora
           else
             raise "unexpected return value #{resp.status}\n\t#{resp.body[0,200]}"
         end
-        @container_resource.save
       end
 
       def retrieve_content
+        return '' if uri.nil?
         begin
-        resp = ActiveFedora.fedora.connection.get(@container_resource.content_path)
+          resp = ActiveFedora.fedora.connection.get(uri)
         rescue Ldp::NotFound
           return nil
         end

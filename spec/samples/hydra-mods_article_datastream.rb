@@ -1,6 +1,6 @@
 require "active-fedora"
 module Hydra
-  
+
   # This is an example of a OmDatastream that defines an OM terminology for MODS xml
   # It focuses on the aspects of MODS that deal with descriptive metadata for published articles
   # This is not the hydra-head plugin version of this OM Terminology; See https://github.com/projecthydra/hydra-head/blob/master/lib/hydra/mods_article.rb
@@ -11,14 +11,14 @@ module Hydra
   # * Defines a term lang_code that maps to "languageTerm[@type=code]"
   # * Defines a variety of terms, date, last_name, first_name & terms_of_address, that all map to mods:namePart but use varying attributes to distinguish themselves
   # * Uses proxy terms to define familar terms like start_page and end_page that map to non-intuitive xml structures "extent[@unit=pages]/start" and "extent[@unit=pages]/end"
-  # * Uses proxy terms, publication_url, peer_reviewed, and title, to allow convenient access to frequently used terms 
+  # * Uses proxy terms, publication_url, peer_reviewed, and title, to allow convenient access to frequently used terms
   #
   # Things to note about the additional methods it defines:
-  # 
+  #
   # * Defines a series of templates, person_template, organization_template, etc. for generating a whole set of xml nodes to insert into the document (note: the new OM::TemplateRegistry provides an even better way to do this)
   # * Defines a custom method, insert_contributor, that uses the Terminology to manipulate xml documents in specialized ways
   # * Defines a series of relator_term Hashes that can then be used when generating views, etc.  In this case, the Hashes are hard-coded into the Class.  Ideally, they might be read from a configuration file or mixed into the class using a module
-  class ModsArticleDatastream < ActiveFedora::OmDatastream       
+  class ModsArticleDatastream < ActiveFedora::OmDatastream
 
     set_terminology do |t|
       t.root(:path=>"mods", :xmlns=>"http://www.loc.gov/mods/v3", :schema=>"http://www.loc.gov/standards/mods/v3/mods-3-2.xsd")

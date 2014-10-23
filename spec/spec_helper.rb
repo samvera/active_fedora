@@ -19,6 +19,7 @@ ActiveFedora::Base.logger = Logger.new(STDERR)
 ActiveFedora::Base.logger.level = Logger::WARN
 # HttpLogger.logger = Logger.new(STDOUT)
 # HttpLogger.ignore = [/localhost:8983\/solr/]
+# HttpLogger.colorize = false
 
 Dir[File.expand_path("../support/**/*.rb", __FILE__)].each {|f| require f }
 require 'samples/samples'

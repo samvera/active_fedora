@@ -72,7 +72,7 @@ module ActiveFedora
                       r.singleton_class.properties.keys.each do |property|
                         r.singleton_class.send(:register_property, property)
                       end
-                      r.datastream = self
+                      # r.datastream = self
                       r.singleton_class.accepts_nested_attributes_for(*nested_attributes_options.keys) unless nested_attributes_options.blank?
                       r << deserialize
                       r
