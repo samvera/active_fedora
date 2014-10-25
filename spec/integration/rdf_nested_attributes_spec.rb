@@ -150,7 +150,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
           property :parts, predicate: RDF::DC.hasPart, :class_name=>'Component'
           accepts_nested_attributes_for :parts, allow_destroy: true
 
-          class Component < ActiveFedora::Rdf::ObjectResource
+          class Component < ActiveTriples::Resource
             property :label, predicate: RDF::DC.title
           end
         end
