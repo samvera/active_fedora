@@ -283,7 +283,7 @@ module ActiveFedora
       # @param range [String] the Range HTTP header
       # @yield [chunk] a block that receives chunked content
       def stream(range = nil, &block)
-        uri = URI(@container_resource.content_path)
+        uri = URI.parse(self.uri)
 
         headers = {}
         headers['Range'] = range if range
