@@ -61,7 +61,7 @@ module ActiveFedora
     end
 
     def datastream_assertions
-      resource.query(subject: resource, predicate: ActiveFedora::Rdf::Fcrepo.hasChild).objects.map(&:to_s)
+      resource.query(subject: resource, predicate: Ldp.contains).objects.map(&:to_s)
     end
 
     # TODO it looks like calling load_datastreams causes all the datastreams properties to load eagerly

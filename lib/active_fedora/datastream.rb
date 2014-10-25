@@ -106,9 +106,8 @@ module ActiveFedora
       @mime_type || default_mime_type
     end
 
-    # original_name is set automatically if you send a Content-Disposition header to Fc4
     def original_name
-      @original_name ||= fetch_original_name_from_content_node
+      @original_name ||= fetch_original_name_from_headers
     end
 
     def size
@@ -207,8 +206,10 @@ module ActiveFedora
       "#{dsid.underscore}__"
     end
 
-    def fetch_original_name_from_content_node
-      query_content_node(RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasOriginalName"))
+    def fetch_original_name_from_headers
+      # TODO the HEAD didn't have Content-Disposition. Could this be a Fedora bug?
+      m = ldp_source.get.headers['Content-Disposition'].match(/filename="(?<filename>[^"]*)";/)
+      m[:filename]
     end
 
     def fetch_mime_type
