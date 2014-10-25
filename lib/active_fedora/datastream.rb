@@ -50,10 +50,7 @@ module ActiveFedora
     end
 
     def metadata_resource
-      #@orm ||= Rdf::ObjectResource.new(uri + '/fcr:metadata')
       @metadata_resource ||= Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri + '/fcr:metadata')
-      puts "the Metadata resource is #{@metadata_resource.subject}."
-      @metadata_resource
     end
 
     def new_record?
