@@ -42,7 +42,11 @@ module ActiveFedora
     end
 
     def ldp_source
-      @ldp_source ||= Ldp::Resource::BinarySource.new(ActiveFedora.fedora.connection, uri)
+      @ldp_source ||= Ldp::Resource::BinarySource.new(ldp_connection, uri)
+    end
+
+    def ldp_connection
+      ActiveFedora.fedora.connection
     end
 
     def metadata_resource
@@ -108,8 +112,7 @@ module ActiveFedora
     end
 
     def size
-      ldp_source.head.headers['Content-Length']
-      # query_metadata_node RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasSize")
+      ldp_source.head.headers['Content-Length'].to_i
     end
 
     def has_content?

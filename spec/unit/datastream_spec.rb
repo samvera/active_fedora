@@ -61,9 +61,27 @@ describe ActiveFedora::Datastream do
   end
 
   describe ".size" do
-    before do
-      subject.container_resource.insert([RDF::URI.new(subject.container_resource.content_path), RDF::URI.new("http://www.loc.gov/premis/rdf/v1#hasSize"), RDF::Literal.new(9999) ])
+    let(:mock_conn) do
+      Faraday.new do |builder|
+        builder.adapter :test, conn_stubs do |stub|
+        end
+      end
     end
+
+    let(:mock_client) do
+      Ldp::Client.new mock_conn
+    end
+
+    let(:conn_stubs) do
+      Faraday::Adapter::Test::Stubs.new do |stub|
+        stub.head('/fedora/rest/test/1234/abcd') { [200, {'Content-Length' => '9999' }] }
+      end
+    end
+
+    before do
+      allow(subject).to receive(:ldp_connection).and_return(mock_client)
+    end
+
     it "should load the datastream size attribute from the fedora repository" do
       expect(subject.size).to eq 9999
     end
