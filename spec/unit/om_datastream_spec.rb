@@ -168,9 +168,7 @@ describe ActiveFedora::OmDatastream do
     end
 
     it "should persist the product of .to_xml in fedora" do
-      expect(client).to receive(:put).with("", 'fake xml', {"Content-Type"=>"text/xml"}).and_return(resp)
-      expect(subject.container_resource).to receive(:save).and_return(true)
-      expect(subject).to receive(:fetch_mime_type_from_content_node).at_least(:once)
+      expect(client).to receive(:put).with(nil, 'fake xml', {"Content-Type"=>"text/xml"}).and_return(resp)
       subject.serialize!
       subject.save
       expect(subject.mime_type).to eq 'text/xml'
