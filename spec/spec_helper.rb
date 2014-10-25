@@ -20,6 +20,7 @@ ActiveFedora::Base.logger.level = Logger::WARN
 # HttpLogger.logger = Logger.new(STDOUT)
 # HttpLogger.ignore = [/localhost:8983\/solr/]
 # HttpLogger.colorize = false
+# HttpLogger.log_headers = true
 
 Dir[File.expand_path("../support/**/*.rb", __FILE__)].each {|f| require f }
 require 'samples/samples'
@@ -44,7 +45,7 @@ RSpec.configure do |config|
     cleanout_solr
   end
   config.after(:each) do
-    cleanout_fedora    
+    # cleanout_fedora
   end
   config.order = :random
 end
