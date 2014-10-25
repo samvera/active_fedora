@@ -114,10 +114,6 @@ module ActiveFedora
       ldp_source.head.headers['Content-Length'].to_i
     end
 
-    def has_content?
-      @container_resource.has_content.present? || @content.present?
-    end
-
     def content_changed?
       return true if new_record? and !local_or_remote_content(false).blank?
       local_or_remote_content(false) != @ds_content

@@ -87,32 +87,15 @@ describe ActiveFedora::Datastream do
     end
   end
 
-  context "has content" do
+  context "when the datastream has local content" do
 
     before do
       datastream.content = "hi there"
     end
 
-    it "should have content" do
-      expect(subject).to have_content
-    end
-
     describe "#inspect" do
       subject { datastream.inspect }
       it { should eq "#<ActiveFedora::Datastream uri=\"http://localhost:8983/fedora/rest/test/1234/abcd\" changed=\"true\" >" }
-    end
-  end
-
-  context "does not have local content" do
-    it { should_not have_content }
-
-    describe "#has_content?" do
-      context "when the graph has content" do
-        before do
-          subject.container_resource.has_content = RDF::URI.new(subject.container_resource.content_path)
-        end
-        it { should have_content }
-      end
     end
   end
 
