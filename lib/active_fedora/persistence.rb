@@ -143,13 +143,17 @@ module ActiveFedora
 
       result = orm.save
       if result
-        update_modified_date(orm.last_response)
+        update_modified_date(orm.last_response) # set the last modified date for indexing
       else
         # Need to wait until this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
-        # raise "ERR #{orm.last_response} when updating #{uri}."
+        raise "ERR #{orm.last_response} when updating #{uri}."
       end
       should_update_index = update_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
+
+      # clear the resource so we don't 409 conflicts
+      @orm = Ldp::Orm.new(LdpResource.new(conn, uri))
+      @resource = nil
       return result
     end
 

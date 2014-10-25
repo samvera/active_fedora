@@ -26,7 +26,7 @@ describe "a versionable class" do
     end
 
     it "should set model_type to versionable" do
-      expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
+      expect(subject.reload.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
     end
 
     it "should have one version (plus the root version)" do
@@ -54,15 +54,15 @@ describe "a versionable class" do
           subject.restore_version(first_version)
         end
 
-        it "will return to the first version's values" do          
+        it "will return to the first version's values" do
           expect(subject.versions.size).to eq 4
-          expect(subject.title).to eql(["Greetings Earthlings"])        
+          expect(subject.title).to eql(["Greetings Earthlings"])
         end
 
         context "and creating additional versions" do
           before do
             subject.title = "Now, surrender and prepare to be boarded"
-            subject.save
+            subject.save!
             subject.create_version
           end
 
@@ -75,7 +75,7 @@ describe "a versionable class" do
       end
     end
   end
-end 
+end
 
 describe "a versionable rdf datastream" do
   before(:all) do
@@ -100,7 +100,7 @@ describe "a versionable rdf datastream" do
     let(:test_object) { MockAFBase.create }
 
     after do
-      test_object.destroy
+      # test_object.destroy
     end
 
     it "should be versionable" do
@@ -237,7 +237,7 @@ describe "a versionable OM datastream" do
     let(:test_object) { MockAFBase.create }
 
     after do
-      test_object.destroy
+      # test_object.destroy
     end
 
     it "should be versionable" do
@@ -430,8 +430,8 @@ describe "a versionable binary datastream" do
             subject.restore_version(first_version)
           end
 
-          it "should have three versions (plus the root version)" do          
-            expect(subject.versions.size).to eq 4      
+          it "should have three versions (plus the root version)" do
+            expect(subject.versions.size).to eq 4
           end
 
           it "should load the restored datastream's content" do

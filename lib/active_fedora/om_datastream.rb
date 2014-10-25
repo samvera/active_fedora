@@ -16,13 +16,13 @@ module ActiveFedora
 
     alias_method(:om_term_values, :term_values) unless method_defined?(:om_term_values)
     alias_method(:om_update_values, :update_values) unless method_defined?(:om_update_values)
-    
+
     def default_mime_type
       'text/xml'
     end
 
-    # Indicates that this datastream has metadata content. 
-    # @return true 
+    # Indicates that this datastream has metadata content.
+    # @return true
     def metadata?
       true
     end
@@ -107,10 +107,10 @@ module ActiveFedora
       unless current_params.empty?
         result = update_values( current_params )
       end
-      
+
       return result
     end
-    
+
     def get_values(field_key,default=[])
       term_values(*field_key)
     end
@@ -125,7 +125,7 @@ module ActiveFedora
     #
     # @example Updating multiple values with a Hash of Term pointers and values
     #   ds.update_values( {[{":person"=>"0"}, "role", "text"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}, [{:person=>1}, :family_name]=>"Andronicus", [{"person"=>"1"},:given_name]=>["Titus"],[{:person=>1},:role,:text]=>["otherrole1","otherrole2"] } )
-    #   => {"person_0_role_text"=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}, "person_1_role_text"=>{"0"=>"otherrole1", "1"=>"otherrole2"}} 
+    #   => {"person_0_role_text"=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"}, "person_1_role_text"=>{"0"=>"otherrole1", "1"=>"otherrole2"}}
     def update_values(params={})
       raise "can't modify frozen #{self.class}" if frozen?
       ng_xml_will_change!

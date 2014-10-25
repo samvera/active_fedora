@@ -12,6 +12,24 @@ require 'active_triples'
 SOLR_DOCUMENT_ID = Solrizer.default_field_mapper.id_field unless defined?(SOLR_DOCUMENT_ID)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 
+# Monkey patching RDF::Literal::DateTime to support fractional seconds.
+# See https://github.com/projecthydra/active_fedora/issues/497
+module RDF
+  class Literal
+    class DateTime < Literal
+      ALTERNATIVE_FORMAT   = '%Y-%m-%dT%H:%M:%S'.freeze
+
+      def to_s
+        @string ||= begin
+          nano = @object.strftime('%N').sub(/0+\Z/, '')
+          nano = '.' + nano unless nano.blank?
+          @object.strftime(ALTERNATIVE_FORMAT) + nano + 'Z'
+        end
+      end
+    end
+  end
+end
+
 module ActiveFedora #:nodoc:
   extend ActiveSupport::Autoload
 

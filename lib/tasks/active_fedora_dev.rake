@@ -35,7 +35,7 @@ namespace :active_fedora do
 
   desc "Copies the default SOLR config for the bundled Testing Server"
   task :configure_jetty do
-    FileList['lib/generators/active_fedora/config/solr/templates/solr_conf/conf/*'].each do |f|  
+    FileList['lib/generators/active_fedora/config/solr/templates/solr_conf/conf/*'].each do |f|
       cp("#{f}", 'jetty/solr/development-core/conf/', :verbose => true)
       cp("#{f}", 'jetty/solr/test-core/conf/', :verbose => true)
     end
@@ -56,7 +56,7 @@ namespace :active_fedora do
   end
 
   desc "Execute specs with coverage"
-  task :coverage do 
+  task :coverage do
     # Put spec opts in a file named .rspec in root
     ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
     ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
