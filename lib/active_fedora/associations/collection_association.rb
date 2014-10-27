@@ -392,7 +392,7 @@ module ActiveFedora
 
           records.each { |record| callback(:before_remove, record) }
           delete_records(existing_records, method) if existing_records.any?
-          records.each { |record| target.delete(record) }
+          records.each { |record| target.delete(record); record.reload_managed_properties }
 
           records.each { |record| callback(:after_remove, record) }
         end
