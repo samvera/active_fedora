@@ -61,10 +61,17 @@ module ActiveFedora
 
       def versionable_resource
         if kind_of? Datastream
-          metadata_resource.graph
+          datastream_metadata_resource.graph
         else
           resource
         end
+      end
+
+      # TODO this should use the describedBy link header on the original resource to get the
+      # metadata node uri
+      def datastream_metadata_resource
+        @datastream_metadata_resource ||=
+          Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri + '/fcr:metadata')
       end
 
       def versions_graph

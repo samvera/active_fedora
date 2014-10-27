@@ -49,14 +49,9 @@ module ActiveFedora
       ActiveFedora.fedora.connection
     end
 
-    def metadata_resource
-      @metadata_resource ||= Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri + '/fcr:metadata')
-    end
-
     def new_record?
       uri.nil? || ldp_source.new?
     end
-
 
     def digital_object=(digital_object)
       raise ArgumentError, "must be a new record to assign a parent object" unless new_record?
@@ -207,12 +202,6 @@ module ActiveFedora
 
     def fetch_mime_type
       ldp_source.head.headers['Content-Type']
-    end
-
-    def query_metadata_node(predicate)
-      query = metadata_resource.query([RDF::URI.new(uri), predicate, nil])
-      stmt = query.first
-      stmt.object.object if stmt
     end
 
     def reset_attributes
