@@ -64,7 +64,13 @@ module ActiveFedora
 
     # Reloads the object from Fedora.
     def reload
-      raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved" unless persisted?
+      unless persisted?
+        if destroyed?
+          raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that has been destroyed"
+        else
+          raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved"
+        end
+      end
       clear_association_cache
       clear_datastreams
       @orm = Ldp::Orm.new(LdpResource.new(conn, uri))
