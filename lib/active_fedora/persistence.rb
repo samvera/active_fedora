@@ -49,6 +49,7 @@ module ActiveFedora
     def delete
       return self if new_record?
 
+      @destroyed = true
       reflections.each_pair do |name, reflection|
         if reflection.macro == :has_many
           association(name).delete_all
@@ -56,7 +57,8 @@ module ActiveFedora
       end
 
       pid = self.pid ## cache so it's still available after delete
-      reload # Reload to pick up any changes because of updating reflections.
+      # Clear out the ETag  -- Remove when this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
+      orm.resource.instance_variable_set :@get, nil
       begin
         @orm.resource.delete
       rescue Ldp::NotFound
@@ -64,7 +66,6 @@ module ActiveFedora
       end
 
       ActiveFedora::SolrService.delete(pid) if ENABLE_SOLR_UPDATES
-      @destroyed = true
       freeze
     end
 
@@ -112,6 +113,7 @@ module ActiveFedora
     def reload_managed_properties
       server_version = Ldp::Orm.new(LdpResource.new(conn, uri))
       self.modified_date = server_version.graph.last_modified.first
+    rescue Ldp::Gone
     end
 
   protected
@@ -145,7 +147,7 @@ module ActiveFedora
     def update_record(options = {})
       serialize_datastreams
 
-      # Clear out the etag  -- Remove when this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
+      # Clear out the ETag  -- Remove when this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
       orm.resource.instance_variable_set :@get, nil
 
       result = orm.save
