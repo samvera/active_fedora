@@ -166,6 +166,7 @@ module ActiveFedora
             result &&= insert_record(record)
           end
         end
+        owner.reload_managed_properties if result
 
         result && self
       end

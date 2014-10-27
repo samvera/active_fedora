@@ -1,5 +1,7 @@
 module ActiveFedora
   class FedoraRdfResource < ActiveTriples::Resource
+    # TODO is this duplicating code with FedoraAttributes?
+    property :last_modified, predicate: ActiveFedora::Rdf::Fcrepo.lastModified
 
     # This overrides ActiveTriples to cast id (e.g. /test-1) to a fully qualifed URI
     def get_uri(uri_or_str)

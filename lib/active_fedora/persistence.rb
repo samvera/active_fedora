@@ -107,6 +107,13 @@ module ActiveFedora
       end
     end
 
+    # Updates the lastModified from the server in order to avoid 409 Conflict
+    # TODO update ETag too.
+    def reload_managed_properties
+      server_version = Ldp::Orm.new(LdpResource.new(conn, uri))
+      self.modified_date = server_version.graph.last_modified.first
+    end
+
   protected
 
     # Determines whether a create operation causes a solr index of this object by default.
