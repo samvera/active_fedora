@@ -72,7 +72,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
         allow(subject).to receive(:[]).with('page_ids').and_return([])
         expect(subject).to receive(:[]=).with('page_ids', [object.id])
 
-        expect(object).to receive(:[]).with('book_ids').and_return([]).twice
+        expect(object).to receive(:[]).with('book_ids').and_return([]).exactly(3).times
         expect(object).to receive(:[]=).with('book_ids', [subject.id])
 
         ac.concat object
