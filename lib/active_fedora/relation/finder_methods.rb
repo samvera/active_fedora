@@ -94,7 +94,7 @@ module ActiveFedora
       else
         raise ArgumentError, "`conditions' argument must be ActiveFedora::Base, String, or Hash: #{conditions.inspect}"
       end
-    rescue ActiveFedora::ObjectNotFoundError
+    rescue ActiveFedora::ObjectNotFoundError, Ldp::Gone
       false
     end
 
