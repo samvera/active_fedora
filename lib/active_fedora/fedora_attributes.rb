@@ -6,8 +6,7 @@ module ActiveFedora
     included do
       include Rdf::Indexing
       extend ActiveTriples::Properties
-      delegate :rdf_subject, :set_value, :get_values, to: :resource
-
+      delegate :rdf_subject,  :get_values, to: :resource
 
       property :has_model, predicate: RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel")
       property :create_date, predicate: ActiveFedora::Rdf::Fcrepo.created
@@ -28,6 +27,9 @@ module ActiveFedora
       alias_method_chain :modified_date, :first
     end
 
+    def set_value(*args)
+      resource.set_value(*args)
+    end
 
     def id
       if uri.kind_of?(RDF::URI) && uri.value.blank?

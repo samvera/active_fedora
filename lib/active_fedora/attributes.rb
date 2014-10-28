@@ -28,6 +28,12 @@ module ActiveFedora
       attribute_names.each_with_object({"id" => id}) {|key, hash| hash[key] = self[key] }
     end
 
+    # def changed?
+    #   super.tap do |res|
+    #     byebug
+    #   end
+    # end
+
     # Calling inspect may trigger a bunch of datastream loads, but it's mainly for debugging, so no worries.
     def inspect
       values = ["pid: #{pid.inspect}"]
@@ -71,6 +77,9 @@ module ActiveFedora
       self.send("#{field}_will_change!")
     end
 
+    def local_attributes
+      self.class.local_attributes
+    end
 
 
     protected
@@ -104,8 +113,12 @@ module ActiveFedora
 
     module ClassMethods
       def attribute_names
-        @attribute_names ||= defined_attributes.keys + properties.keys +
-          outgoing_reflections.values.map { |reflection| reflection.foreign_key.to_s } - ['has_model', 'create_date', 'modified_date', 'ldp_member', 'ldp_contains']
+        @attribute_names ||= defined_attributes.keys + local_attributes
+      end
+
+      # Attributes that are asserted about this RdfSource (not on a datastream)
+      def local_attributes
+        outgoing_reflections.values.map { |reflection| reflection.foreign_key.to_s } + properties.keys - ['has_model', 'create_date', 'modified_date', 'ldp_member', 'ldp_contains']
       end
 
       def defined_attributes

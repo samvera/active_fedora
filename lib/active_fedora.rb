@@ -97,6 +97,7 @@ module ActiveFedora #:nodoc:
     autoload :SimpleDatastream
     autoload :SolrInstanceLoader
     autoload :SolrService
+    autoload :SparqlInsert
     autoload :Predicates
     autoload :Validations
     autoload :Versionable
@@ -108,6 +109,7 @@ module ActiveFedora #:nodoc:
     eager_autoload do
       autoload :Read
       autoload :Write
+      autoload :Dirty
     end
   end
 

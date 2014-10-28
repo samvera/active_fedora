@@ -32,7 +32,6 @@ module ActiveFedora
     include ActiveModel::Conversion
     include Callbacks
     include Validations
-    #include AttributeMethods
     extend Querying
     include Associations
     include AutosaveAssociation
@@ -43,6 +42,7 @@ module ActiveFedora
     include Indexing
     include Datastreams
     include FedoraAttributes
+    include AttributeMethods
     include Attributes
     include Versionable
     include LoadableFromJson

@@ -72,7 +72,16 @@ end
 
 describe ActiveFedora::Base do
   describe "a saved object" do
-    let!(:obj) { ActiveFedora::Base.create }
+    before do
+      class Book < ActiveFedora::Base
+        property :title, predicate: RDF::DC.title
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :Book)
+    end
+    let!(:obj) { Book.create }
 
     after { obj.destroy unless obj.destroyed? }
 
@@ -89,7 +98,7 @@ describe ActiveFedora::Base do
     describe "that is updated" do
       before do
         # Give something to save
-        obj.resource.insert([obj.rdf_subject, RDF::DC.title, 'sample'])
+        obj.title = ['sample']#resource.insert([obj.rdf_subject, RDF::DC.title, 'sample'])
         # Make sure the modification time changes by at least 1 second
         sleep 1
       end
@@ -101,16 +110,16 @@ describe ActiveFedora::Base do
       end
     end
 
-    describe "#create_date" do 
+    describe "#create_date" do
       subject { obj.create_date }
       it { should_not be_nil }
     end
-    
-    describe "#modified_date" do 
+
+    describe "#modified_date" do
       subject { obj.modified_date }
       it { should_not be_nil }
     end
-    
+
     describe "delete" do
       it "should delete the object from Fedora and Solr" do
         expect {

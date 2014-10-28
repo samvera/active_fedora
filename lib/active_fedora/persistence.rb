@@ -112,6 +112,8 @@ module ActiveFedora
 
     # Updates the lastModified from the server in order to avoid 409 Conflict
     # TODO update ETag too.
+    # WARNING this is super dangeous because it's not getting all the properties, just the ones that Fedora chokes on.
+    # saving the doc after using this can overwrite the pointers.
     def reload_managed_properties
       #sever_version is a FedoraRdfResource
       server_version = Ldp::Orm.new(LdpResource.new(conn, uri))
@@ -154,13 +156,23 @@ module ActiveFedora
 
       # Clear out the ETag  -- Remove when this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
       orm.resource.instance_variable_set :@get, nil
-      result = orm.save
+      result = execute_sparql_update
+      # result = orm.save
       # Need to wait until this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
       raise "ERR #{orm.last_response} when updating #{uri}." unless result
       should_update_index = update_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
       return result
     end
+
+    def execute_sparql_update
+      insert = SparqlInsert.new(self)
+      return true if insert.empty?
+      result = ActiveFedora.fedora.connection.patch(uri, insert.build, "Content-Type" => "application/sparql-update")
+      return true if result.status == 204
+      raise "Problem updating #{result.status} #{result.body}"
+    end
+
 
     def assign_pid
     end

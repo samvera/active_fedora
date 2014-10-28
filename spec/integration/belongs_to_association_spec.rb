@@ -28,6 +28,12 @@ describe ActiveFedora::Base do
       expect(book.library_id).to eq library.id
     end
 
+    it "should mark it as changed" do
+      expect {
+        book.library_id = library.id
+      }.to change { book.changed? }.from(false).to(true)
+    end
+
     describe "reassigning the parent_id" do
       let(:library2) { Library.create}
       before { book.library = library2 }
@@ -90,13 +96,13 @@ describe ActiveFedora::Base do
       end
 
       class SimpleCollection < ActiveFedora::Base
-        has_many :objects, property: :is_part_of, class_name: 'SimpleObject'
-        has_many :complex_objects, property: :is_part_of, class_name: 'ComplexObject'
+        has_many :objects, property: :is_part_of, class_name: 'SimpleObject', autosave: true
+        has_many :complex_objects, property: :is_part_of, class_name: 'ComplexObject', autosave: true
       end
 
       class ComplexCollection < SimpleCollection
-        has_many :objects, property: :is_part_of, class_name: 'SimpleObject'
-        has_many :complex_objects, property: :is_part_of, class_name: 'ComplexObject'
+        has_many :objects, property: :is_part_of, class_name: 'SimpleObject', autosave: true
+        has_many :complex_objects, property: :is_part_of, class_name: 'ComplexObject', autosave: true
       end
 
     end
@@ -127,9 +133,10 @@ describe ActiveFedora::Base do
         before do
           @complex_collection = ComplexCollection.create
           @complex_object = ComplexObject.create
-          @complex_collection.objects = [@complex_object]
-          @complex_collection.save!
+          @complex_collection.objects = [@complex_object] # this sticks it into the :objects association, but since it is a ComplexObject it should also be fetched by :complex_collection association
+          @complex_collection.save
         end
+
         it "should have added the inverse relationship for the correct class" do
           expect(@complex_object.complex_collection).to be_instance_of ComplexCollection
           expect(@complex_object.reload.simple_collection).to be_instance_of ComplexCollection

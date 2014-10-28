@@ -40,6 +40,7 @@ module ActiveFedora
       initialize_generated_modules
       include Read
       include Write
+      include Dirty
     end
 
     # Returns an array of names for the attributes available on this object.

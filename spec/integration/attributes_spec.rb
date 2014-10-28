@@ -15,7 +15,7 @@ describe "delegating attributes" do
 
   describe "save" do
     subject do
-      obj = TitledObject.create 
+      obj = TitledObject.create
       obj.title = "Hydra for Dummies"
       obj.save
       obj

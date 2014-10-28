@@ -9,6 +9,7 @@ module ActiveFedora
           uri = ActiveFedora::Base.id_to_uri(value)
           owner.resource.insert [owner.rdf_subject, reflection.predicate, RDF::URI.new(uri)]
         end
+        owner.send(:attribute_will_change!, reflection.name)
       end
 
       def reader
