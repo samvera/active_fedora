@@ -43,7 +43,6 @@ module ActiveFedora
     def refresh
       @orm = Ldp::Orm.new(LdpResource.new(conn, uri))
       @resource = nil
-      # reload_managed_properties
     end
 
     #Deletes a Base object, also deletes the info indexed in Solr, and

@@ -199,6 +199,7 @@ describe ActiveFedora::Base do
         expect(@test_object).to receive(:serialize_datastreams)
         expect(@test_object).to receive(:assign_rdf_subject)
         expect(@test_object.orm).to receive(:create)
+        expect(@test_object).to receive(:refresh)
         expect(@test_object).to receive(:update_index)
         @test_object.save
       end
@@ -209,7 +210,7 @@ describe ActiveFedora::Base do
           allow(@test_object).to receive(:new_record?).and_return(false)
           expect(@test_object).to receive(:serialize_datastreams)
           allow_any_instance_of(Ldp::Orm).to receive(:save) { true }
-          expect(@test_object).to receive(:reload_managed_properties)
+          expect(@test_object).to receive(:refresh)
           expect(@test_object).to receive(:update_index)
           @test_object.save
         end

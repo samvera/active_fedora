@@ -83,7 +83,11 @@ module ActiveFedora
       def set_inverse_instance(record)
         if record && invertible_for?(record)
           inverse = record.association(inverse_reflection_for(record).name)
-          inverse.target = owner
+          if inverse.is_a? ActiveFedora::Associations::HasAndBelongsToManyAssociation
+            inverse.target << owner
+          else
+            inverse.target = owner
+          end
           inverse.inversed = true
         end
       end
