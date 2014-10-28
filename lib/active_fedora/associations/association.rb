@@ -10,12 +10,12 @@ module ActiveFedora
     #
     class Association
       attr_reader :owner, :target, :reflection
+      attr_accessor :inversed
       delegate :options, :klass, to: :reflection
 
       def initialize(owner, reflection)
         reflection.check_validity!
         @owner, @reflection = owner, reflection
-        @updated = false
         reset
         # construct_scope
       end
@@ -24,6 +24,7 @@ module ActiveFedora
       def reset
         @loaded = false
         @target = nil
+        @inversed = false
       end
 
       # Reloads the \target and returns +self+ on success.
@@ -43,6 +44,7 @@ module ActiveFedora
       def loaded!
         @loaded = true
         @stale_state = stale_state
+        @inversed = false
       end
 
       # The target is stale if the target no longer points to the record(s) that the
@@ -52,7 +54,7 @@ module ActiveFedora
       #
       # Note that if the target has not been loaded, it is not considered stale.
       def stale_target?
-        loaded? && @stale_state != stale_state
+        !inversed && loaded? && @stale_state != stale_state
       end
 
       # Sets the target of this proxy to <tt>\target</tt>, and the \loaded flag to +true+.
@@ -82,6 +84,7 @@ module ActiveFedora
         if record && invertible_for?(record)
           inverse = record.association(inverse_reflection_for(record).name)
           inverse.target = owner
+          inverse.inversed = true
         end
       end
 

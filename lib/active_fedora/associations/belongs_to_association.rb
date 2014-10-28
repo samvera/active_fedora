@@ -3,11 +3,16 @@ module ActiveFedora
     class BelongsToAssociation < SingularAssociation #:nodoc:
 
       def replace(record)
-        raise_on_type_mismatch(record) if record
-
-        replace_keys(record)
-
-        @updated = true if record
+        if record
+          raise_on_type_mismatch(record)
+          # update_counters(record)
+          replace_keys(record)
+          set_inverse_instance(record)
+          @updated = true
+        else
+          # decrement_counters
+          remove_keys
+        end
 
         self.target = record
       end
@@ -24,11 +29,11 @@ module ActiveFedora
       private
 
         def replace_keys(record)
-          if record
-            owner[reflection.foreign_key] = record.id
-          else
-            owner[reflection.foreign_key] = nil
-          end
+          owner[reflection.foreign_key] = record.id
+        end
+
+        def remove_keys
+          owner[reflection.foreign_key] = nil
         end
 
         # Constructs a query that checks solr for the correct id & class_name combination

@@ -111,8 +111,11 @@ module ActiveFedora
     # Updates the lastModified from the server in order to avoid 409 Conflict
     # TODO update ETag too.
     def reload_managed_properties
+      #sever_version is a FedoraRdfResource
       server_version = Ldp::Orm.new(LdpResource.new(conn, uri))
       self.modified_date = server_version.graph.last_modified.first
+      self.ldp_member = server_version.graph.ldp_member
+      self.ldp_contains = server_version.graph.ldp_contains
     rescue Ldp::Gone
     end
 
@@ -160,9 +163,10 @@ module ActiveFedora
       should_update_index = update_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
 
+      reload_managed_properties
       # clear the resource so we don't 409 conflicts
-      @orm = Ldp::Orm.new(LdpResource.new(conn, uri))
-      @resource = nil
+      # @orm = Ldp::Orm.new(LdpResource.new(conn, uri))
+      # @resource = nil
       return result
     end
 

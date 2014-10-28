@@ -158,12 +158,12 @@ module ActiveFedora
       # Since << flattens its argument list and inserts each record, +push+ and +concat+ behave identically.
       def concat(*records)
         result = true
-        load_target unless loaded?
+        load_target unless owner.new_record?
 
         records.flatten.each do |record|
           raise_on_type_mismatch(record)
           add_record_to_target_with_callbacks(record) do |r|
-            result &&= insert_record(record)
+            result &&= insert_record(record) unless owner.new_record?
           end
         end
         owner.reload_managed_properties if result
@@ -237,6 +237,12 @@ module ActiveFedora
         @reflection.klass.count(:conditions => @counter_query)
       end
 
+      # Sets the target of this proxy to <tt>\target</tt>, and the \loaded flag to +true+.
+      def target=(target)
+        @target = [target]
+        loaded!
+      end
+
       def load_target
         if find_target?
           targets = []
@@ -258,7 +264,9 @@ module ActiveFedora
       def find_target
         # TODO: don't reify, just store the solr results and lazily reify.
         # For now, we set a hard limit of 1000 results.
-        ActiveFedora::SolrService.reify_solr_results(load_from_solr(rows: 1000))
+        records = ActiveFedora::SolrService.reify_solr_results(load_from_solr(rows: 1000))
+        records.each { |record| set_inverse_instance(record) }
+        records
       end
 
       def merge_target_lists(loaded, existing)
@@ -296,10 +304,10 @@ module ActiveFedora
         if index = @target.index(record)
           @target[index] = record
         else
-           @target << record
+          @target << record
         end
         callback(:after_add, record)
-      #  set_inverse_instance(record, @owner)
+        set_inverse_instance(record)
         record
       end
 
@@ -430,9 +438,10 @@ module ActiveFedora
 
           #collection = fetch_first_or_last_using_find?(args) ? scoped : load_target
           collection = load_target
-          collection.send(type, *args)
+          collection.send(type, *args).tap do |record|
+            set_inverse_instance record if record.is_a? ActiveFedora::Base
+          end
         end
-      
     end
   end
 end

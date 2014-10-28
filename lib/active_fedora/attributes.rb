@@ -18,7 +18,6 @@ module ActiveFedora
       properties.each do |k, v|
         respond_to?(:"#{k}=") ? send(:"#{k}=", v) : raise(UnknownAttributeError, "#{self.class} does not have an attribute `#{k}'")
       end
-
     end
 
     def attribute_names
@@ -106,7 +105,7 @@ module ActiveFedora
     module ClassMethods
       def attribute_names
         @attribute_names ||= defined_attributes.keys + properties.keys +
-          outgoing_reflections.values.map { |reflection| reflection.foreign_key.to_s } - ['has_model', 'create_date', 'modified_date']
+          outgoing_reflections.values.map { |reflection| reflection.foreign_key.to_s } - ['has_model', 'create_date', 'modified_date', 'ldp_member', 'ldp_contains']
       end
 
       def defined_attributes

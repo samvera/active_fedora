@@ -30,7 +30,6 @@ module ActiveFedora
         return true
       end
 
-
       def find_target
         page_size = @reflection.options[:solr_page_size]
         page_size ||= 200

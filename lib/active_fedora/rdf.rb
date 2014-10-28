@@ -3,6 +3,7 @@ module ActiveFedora
     extend ActiveSupport::Autoload
     autoload :DatastreamIndexing
     autoload :Fcrepo
+    autoload :Ldp
     autoload :Indexing
     autoload :Identifiable
     autoload :ObjectResource
