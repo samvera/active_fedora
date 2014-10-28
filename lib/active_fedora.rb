@@ -8,6 +8,7 @@ require 'active_support/core_ext/object'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/core_ext/hash/except'
 require 'active_triples'
+require 'rdf/ldp'
 
 SOLR_DOCUMENT_ID = Solrizer.default_field_mapper.id_field unless defined?(SOLR_DOCUMENT_ID)
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
