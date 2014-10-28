@@ -23,6 +23,7 @@ describe "fedora_solr_sync_issues" do
   it "should not go into an infinite loop" do
     subject.orm.delete
     parent.reload
-    parent.things.should == []
+    expect(ActiveFedora::Base.logger).to receive(:error).with("Solr and Fedora may be out of sync:\n")
+    expect(parent.things).to eq []
   end
 end
