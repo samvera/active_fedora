@@ -47,7 +47,7 @@ RSpec.configure do |config|
   config.after(:each) do
     # cleanout_fedora
   end
-  config.order = :random
+  config.order = :random if ENV['CI']
 end
 
 def fixture(file)
