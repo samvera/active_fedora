@@ -152,26 +152,13 @@ module ActiveFedora
 
       # Clear out the ETag  -- Remove when this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
       orm.resource.instance_variable_set :@get, nil
-
       result = orm.save
-      if result
-        update_modified_date(orm.last_response) # set the last modified date for indexing
-      else
-        # Need to wait until this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
-        raise "ERR #{orm.last_response} when updating #{uri}."
-      end
+      # Need to wait until this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
+      raise "ERR #{orm.last_response} when updating #{uri}." unless result
       should_update_index = update_needs_index? && options.fetch(:update_index, true)
-      persist(should_update_index)
-
       reload_managed_properties
-      # clear the resource so we don't 409 conflicts
-      # @orm = Ldp::Orm.new(LdpResource.new(conn, uri))
-      # @resource = nil
+      persist(should_update_index)
       return result
-    end
-
-    def update_modified_date(result)
-      self.modified_date = DateTime.parse(result.headers['last-modified'.freeze])
     end
 
     def assign_pid

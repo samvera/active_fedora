@@ -88,10 +88,12 @@ describe ActiveFedora::Base do
 
     describe "that is updated" do
       before do
+        # Give something to save
+        obj.resource.insert([obj.rdf_subject, RDF::DC.title, 'sample'])
         # Make sure the modification time changes by at least 1 second
         sleep 1
       end
-      
+
       it 'updates the modification time field in solr' do
         expect { obj.save }.to change {
           ActiveFedora::SolrService.query("id:\"#{obj.pid}\"").first['system_modified_dtsi']
