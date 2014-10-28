@@ -83,7 +83,6 @@ module ActiveFedora #:nodoc:
     end
     autoload :Reflection
     autoload :Relation
-    autoload :ReloadOnSave
 
     autoload_under 'relation' do
       autoload :Calculations

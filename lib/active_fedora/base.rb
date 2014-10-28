@@ -44,7 +44,6 @@ module ActiveFedora
     include Datastreams
     include FedoraAttributes
     include Attributes
-    include ReloadOnSave
     include Versionable
     include LoadableFromJson
   end

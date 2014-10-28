@@ -41,6 +41,9 @@ module ActiveFedora
     alias update_attributes update
 
     def refresh
+      @orm = Ldp::Orm.new(LdpResource.new(conn, uri))
+      @resource = nil
+      # reload_managed_properties
     end
 
     #Deletes a Base object, also deletes the info indexed in Solr, and
@@ -156,7 +159,6 @@ module ActiveFedora
       # Need to wait until this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
       raise "ERR #{orm.last_response} when updating #{uri}." unless result
       should_update_index = update_needs_index? && options.fetch(:update_index, true)
-      reload_managed_properties
       persist(should_update_index)
       return result
     end
