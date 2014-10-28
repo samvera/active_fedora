@@ -209,7 +209,7 @@ describe ActiveFedora::Base do
           allow(@test_object).to receive(:new_record?).and_return(false)
           expect(@test_object).to receive(:serialize_datastreams)
           allow_any_instance_of(Ldp::Orm).to receive(:save) { true }
-          expect(@test_object).to receive(:update_modified_date)
+          expect(@test_object).to receive(:reload_managed_properties)
           expect(@test_object).to receive(:update_index)
           @test_object.save
         end
