@@ -39,12 +39,11 @@ restore_spec_configuration
 # Shut those Rails deprecation warnings up
 ActiveSupport::Deprecation.behavior= Proc.new { |message, callstack| }
 
+require 'active_fedora/cleaner'
 RSpec.configure do |config|
   # Stub out test stuff.
   config.before(:each) do
-    cleanout_fedora
-    reinitialize_repo
-    cleanout_solr
+    ActiveFedora::Cleaner.clean!
   end
   config.after(:each) do
     # cleanout_fedora
@@ -54,31 +53,4 @@ end
 
 def fixture(file)
   File.open(File.join(File.dirname(__FILE__), 'fixtures', file), 'rb')
-end
-
-def solr_uri(uri)
-  uri.gsub(/(:)/, "\\:").gsub(/(\/)/,"\\/")
-end
-
-def cleanout_fedora
-  tombstone_path = ActiveFedora.fedora.base_path.sub('/', '') + "/fcr:tombstone"
-  begin
-    ActiveFedora.fedora.connection.delete(ActiveFedora.fedora.base_path.sub('/', ''))
-    ActiveFedora.fedora.connection.delete(tombstone_path)
-  rescue Ldp::HttpError => exception
-    ActiveFedora::Base.logger.debug "#cleanout_fedora in spec_helper.rb raised #{exception}"
-  end
-end
-
-def cleanout_solr
-  restore_spec_configuration if ActiveFedora::SolrService.instance.nil? || ActiveFedora::SolrService.instance.conn.nil?
-  ActiveFedora::SolrService.instance.conn.delete_by_query('*:*', params: {'softCommit' => true})
-end
-
-def reinitialize_repo
-  begin
-    ActiveFedora.fedora.connection.put(ActiveFedora.fedora.base_path.sub('/', ''),"")
-  rescue Ldp::HttpError
-    ActiveFedora::Base.logger.debug "#reinitialize_repo in spec_helper.rb raised #{exception}"
-  end
 end
