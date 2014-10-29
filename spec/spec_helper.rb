@@ -2,11 +2,8 @@ ENV["environment"] ||= 'test'
 require "bundler/setup"
 
 if ENV["COVERAGE"]
-  require 'simplecov'
-
-  SimpleCov.start do
-    add_filter "/spec/"
-  end
+  require 'coveralls'
+  Coveralls.wear!
 end
 
 require 'active-fedora'

@@ -11,6 +11,7 @@ gem 'byebug' unless ENV['TRAVIS']
 
 group :test do
   gem 'simplecov', require: false
+  gem 'coveralls', require: false
 end
 
 gem 'jruby-openssl', platform: :jruby
