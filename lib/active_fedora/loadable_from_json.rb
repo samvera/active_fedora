@@ -48,7 +48,7 @@ module ActiveFedora
       datastreams
       @orm = Ldp::Orm.new(build_ldp_resource(pid))
       @association_cache = {}
-      ds_specs.dup.each do |key, val|
+      child_resource_reflections.dup.each do |key, val|
         datastreams[key] = SolrBackedDatastream.new
       end
       @resource = SolrBackedResource.new

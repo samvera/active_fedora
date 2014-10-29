@@ -56,7 +56,6 @@ module ActiveFedora #:nodoc:
     autoload :Config
     autoload :Core
     autoload :Datastream
-    autoload :DatastreamBootstrap
     autoload :DatastreamAttribute
     autoload :DatastreamHash
     autoload :Datastreams

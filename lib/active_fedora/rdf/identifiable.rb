@@ -30,9 +30,9 @@ module ActiveFedora::Rdf::Identifiable
     def resource_datastream(ds=nil)
       @resource_datastream ||= ds ? ds : nil
       return @resource_datastream unless @resource_datastream.nil?
-      return :descMetadata if self.ds_specs['descMetadata'] && self.ds_specs['descMetadata'][:type].respond_to?(:rdf_subject)
-      self.ds_specs.each do |dsid, conf|
-        return dsid.to_sym if conf[:type].respond_to? :rdf_subject
+      return :descMetadata if child_resource_reflections['descMetadata'] && child_resource_reflections['descMetadata'].type.respond_to?(:rdf_subject)
+      child_resource_reflections.each do |dsid, conf|
+        return dsid.to_sym if conf.type.respond_to? :rdf_subject
       end
       nil
     end
@@ -45,9 +45,9 @@ module ActiveFedora::Rdf::Identifiable
     # @param [RDF::URI] uri URI that is being looked up.
     def from_uri(uri,_)
       begin
-        self.find(pid_from_subject(uri))
+        find(pid_from_subject(uri))
       rescue ActiveFedora::ObjectNotFoundError, Ldp::Gone
-        self.ds_specs[resource_datastream.to_s][:type].resource_class.new(uri)
+        child_resource_reflections[resource_datastream.to_s].type.resource_class.new(uri)
       end
     end
 

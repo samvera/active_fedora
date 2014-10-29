@@ -2,28 +2,57 @@ require 'spec_helper'
 
 describe ActiveFedora::Datastreams do
   subject { ActiveFedora::Base.new }
-
-  describe '.has_metadata' do
+  describe "contains" do
     before do
       class FooHistory < ActiveFedora::Base
-         has_metadata :name => 'dsid', type: ActiveFedora::SimpleDatastream
-         has_metadata 'complex_ds', autocreate: true, type: 'Z'
+         contains 'dsid', type: ActiveFedora::SimpleDatastream
+         contains 'complex_ds', autocreate: true, type: 'Z'
       end
     end
     after do
       Object.send(:remove_const, :FooHistory)
     end
 
-    it "should have a ds_specs entry" do
-      expect(FooHistory.ds_specs).to have_key('dsid')
-    end
-
-    it "should have reasonable defaults" do
-      expect(FooHistory.ds_specs['dsid']).to include(autocreate: false)
+    it "should have a child_resource_reflection" do
+      expect(FooHistory.child_resource_reflections).to have_key('dsid')
     end
 
     it "should let you override defaults" do
-      expect(FooHistory.ds_specs['complex_ds']).to include(autocreate: true, type: 'Z')
+      expect(FooHistory.child_resource_reflections['complex_ds'].options).to include(autocreate: true)
+      expect(FooHistory.child_resource_reflections['complex_ds'].type).to eq 'Z'
+    end
+
+    it "should raise an error if you don't give a dsid" do
+      expect{ FooHistory.contains nil, type: ActiveFedora::SimpleDatastream }.to raise_error ArgumentError,
+        "You must provide a name (dsid) for the datastream"
+    end
+  end
+
+  describe '.has_metadata' do
+    before do
+      @original_behavior = Deprecation.default_deprecation_behavior
+      Deprecation.default_deprecation_behavior = :silence
+      class FooHistory < ActiveFedora::Base
+         has_metadata :name => 'dsid', type: ActiveFedora::SimpleDatastream
+         has_metadata 'complex_ds', autocreate: true, type: 'Z'
+      end
+    end
+    after do
+      Deprecation.default_deprecation_behavior = @original_behavior
+      Object.send(:remove_const, :FooHistory)
+    end
+
+    it "should have a child_resource_reflection" do
+      expect(FooHistory.child_resource_reflections).to have_key('dsid')
+    end
+
+    it "should have reasonable defaults" do
+      expect(FooHistory.child_resource_reflections['dsid'].options).to include(autocreate: false)
+    end
+
+    it "should let you override defaults" do
+      expect(FooHistory.child_resource_reflections['complex_ds'].options).to include(autocreate: true)
+      expect(FooHistory.child_resource_reflections['complex_ds'].type).to eq 'Z'
     end
 
     it "should raise an error if you don't give a type" do
@@ -49,8 +78,8 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should have reasonable defaults" do
-      expect(FooHistory.ds_specs['dsid']).to include(type: ActiveFedora::Datastream)
-      expect(FooHistory.ds_specs['another']).to include(type: ActiveFedora::Datastream)
+      expect(FooHistory.child_resource_reflections['dsid'].type).to eq ActiveFedora::Datastream
+      expect(FooHistory.child_resource_reflections['another'].type).to eq ActiveFedora::Datastream
     end
   end
 
@@ -97,34 +126,34 @@ describe ActiveFedora::Datastreams do
 
   describe "#configure_datastream" do
     it "should look up the ds_spec" do
-      mock_dsspec = { :type => nil }
-      allow(subject).to receive(:ds_specs).and_return('abc' => mock_dsspec)
+      mock_dsspec = double(type: nil, options: {})
+      allow(subject).to receive(:child_resource_reflections).and_return('abc' => mock_dsspec)
       subject.configure_datastream(double(:dsid => 'abc'))
     end
 
     it "should be ok if there is no ds spec" do
       mock_dsspec = double()
-      allow(subject).to receive(:ds_specs).and_return({})
+      allow(subject).to receive(:child_resource_reflections).and_return({})
       subject.configure_datastream(double(:dsid => 'abc'))
     end
 
     it "should run a Proc" do
       ds = double(:dsid => 'abc')
       @count = 0
-      mock_dsspec = { :block => lambda { |x| @count += 1 } }
-      allow(subject).to receive(:ds_specs).and_return('abc' => mock_dsspec)
-
+      reflection = double(options: { block: lambda { |x| @count += 1 } })
+      allow(subject).to receive(:child_resource_reflections).and_return('abc' => reflection)
 
       expect {
-      subject.configure_datastream(ds)
+        subject.configure_datastream(ds)
       }.to change { @count }.by(1)
     end
   end
 
-  describe "#datastream_from_spec" do
-    it "should fetch the rubydora datastream" do
-      expect(subject).to receive(:datastream_object_for).with('dsid', {load_graph: false}, {})
-      subject.datastream_from_spec({}, 'dsid')
+  describe "#datastream_from_reflection" do
+    it "should fetch the datastream" do
+      reflection = double(name: 'dsid')
+      expect(subject).to receive(:datastream_object_for).with(reflection, {load_graph: false})
+      subject.datastream_from_reflection(reflection)
     end
   end
 
