@@ -12,71 +12,41 @@ module ActiveFedora
       end
     end
 
+    # TODO: This only applies to objects. If we want the same for child resources, it would need to go
+    # under fcr:metadata
     def model_type
-      versionable_resource.query(subject: versionable_uri, predicate: RDF.type).objects
+      resource.query(subject: resource.rdf_subject, predicate: RDF.type).objects
     end
 
     def versions
-      results = versions_graph.query([versionable_uri, RDF::URI.new('http://fedora.info/definitions/v4/repository#hasVersion'), nil])
+      results = versions_graph.query([nil, RDF::URI.new('http://fedora.info/definitions/v4/repository#hasVersionLabel'), nil])
       results.map(&:object)
     end
 
+    def versions_graph
+      @versions_graph ||= RDF::Graph.new << RDF::Reader.for(:ttl).new(versions_request)
+    end
+
+    def versions_url
+      uri + '/fcr:versions'
+    end
+
     def create_version
-      resp = ActiveFedora.fedora.connection.post(versions_url)
+      resp = ActiveFedora.fedora.connection.post(versions_url, nil, {slug: version_name})
       @versions_graph = nil
       reload
       resp.success?
     end
 
-    def restore_version uuid
-      resp = ActiveFedora.fedora.connection.patch(version_url(uuid), nil)
+    def restore_version label
+      resp = ActiveFedora.fedora.connection.patch(version_url(label), nil)
       @versions_graph = nil
       reload
       refresh_attributes if self.respond_to?("refresh_attributes")
       resp.success?
     end
 
-    def save(*)
-      if kind_of? Datastream
-        super.tap do |val|
-          assert_versionable if versionable && val
-        end
-      else
-        assert_versionable if versionable
-        super
-      end
-    end
-
     private
-
-      # RdfDatastream has a rdf_subject/resource that would take precidence over this one.
-      # for a datastream we want the ContainerResource. For an Object just the regular resource
-      def versionable_uri
-        if kind_of? Datastream
-          RDF::URI.new(uri)
-        else
-          versionable_resource.rdf_subject
-        end
-      end
-
-      def versionable_resource
-        if kind_of? Datastream
-          datastream_metadata_resource.graph
-        else
-          resource
-        end
-      end
-
-      # TODO this should use the describedBy link header on the original resource to get the
-      # metadata node uri
-      def datastream_metadata_resource
-        @datastream_metadata_resource ||=
-          Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri + '/fcr:metadata')
-      end
-
-      def versions_graph
-        @versions_graph ||= RDF::Graph.new << RDF::Reader.for(:ttl).new(versions_request)
-      end
 
       def versions_request
         resp = begin
@@ -92,20 +62,15 @@ module ActiveFedora
         resp.body
       end
 
-      def versions_url
-        uri + '/fcr:versions'
+      def version_url label
+        versions_url + '/' + label
       end
 
-      def version_url uuid
-        versions_url + '/' + uuid
-      end
-
-      def assert_versionable
-        if kind_of? Datastream
-          stmt = "insert data { <#{versionable_uri}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.jcp.org/jcr/mix/1.0versionable> . }"
-          ActiveFedora.fedora.connection.patch(uri + '/fcr:metadata', stmt)
+      def version_name
+        if versions.empty?
+          "version1"
         else
-          versionable_resource.insert(subject: versionable_uri, predicate: RDF.type, object: RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable'))
+          "version" + (versions.count + 1).to_s
         end
       end
 

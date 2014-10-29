@@ -14,11 +14,9 @@ describe "a versionable class" do
 
   subject { WithVersions.new }
 
-  it "should be versionable" do
-    expect(subject).to be_versionable
-  end
+  it { is_expected.to be_versionable }
 
-  context "after saving", pending: true do
+  context "after saving" do
     before do
       subject.title = "Greetings Earthlings"
       subject.save
@@ -29,9 +27,9 @@ describe "a versionable class" do
       expect(subject.reload.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
     end
 
-    it "should have one version (plus the root version)" do
-      expect(subject.versions.size).to eq 2
-      expect(subject.versions.first).to be_kind_of RDF::URI
+    it "should have one version" do
+      expect(subject.versions.size).to eq 1
+      expect(subject.versions.first).to be_kind_of RDF::Literal
     end
 
     context "two times" do
@@ -41,21 +39,20 @@ describe "a versionable class" do
         subject.create_version
       end
 
-      it "should have two versions (plus the root version)" do
-        expect(subject.versions.size).to eq 3
+      it "should have two versions" do
+        expect(subject.versions.size).to eq 2
         subject.versions.each do |version|
-          expect(version).to be_kind_of RDF::URI
+          expect(version).to be_kind_of RDF::Literal
         end
       end
 
       context "then restoring" do
-        let(:first_version) { subject.versions[1].to_s.split("/").last }
+        let(:first_version) { "version1" }
         before do
           subject.restore_version(first_version)
         end
 
         it "will return to the first version's values" do
-          expect(subject.versions.size).to eq 4
           expect(subject.title).to eql(["Greetings Earthlings"])
         end
 
@@ -66,8 +63,8 @@ describe "a versionable class" do
             subject.create_version
           end
 
-          it "should have five versions (plus the root version)" do
-            expect(subject.versions.size).to eq 5
+          it "should have three versions" do
+            expect(subject.versions.size).to eq 3
             expect(subject.title).to eql(["Now, surrender and prepare to be boarded"])
           end
 
@@ -94,14 +91,14 @@ describe "a versionable rdf datastream" do
     Object.send(:remove_const, :VersionableDatastream)
   end
 
+  it "should create the object" do
+    MockAFBase.create
+  end
+
   subject { test_object.descMetadata }
 
   context "that exists in the repository" do
     let(:test_object) { MockAFBase.create }
-
-    after do
-      # test_object.destroy
-    end
 
     it "should be versionable" do
       expect(subject).to be_versionable
@@ -114,13 +111,9 @@ describe "a versionable rdf datastream" do
       it "should not have a title" do
         expect(subject.title).to be_empty
       end
-      it "should not have a size" do
-        pending
-        expect(subject.size).to be_nil
-      end
     end
 
-    context "after creating the datastream", pending: true do
+    context "after creating the datastream" do
       before do
         subject.title = "Greetings Earthlings"
         subject.save
@@ -129,12 +122,12 @@ describe "a versionable rdf datastream" do
       end
 
       it "should set model_type to versionable" do
+        pending "This isn't getting saved because it should probaly go on fcr:metadata"
         expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
       end
 
-      it "should have one version (plus the root version)" do
-        expect(subject.versions.size).to eq 2
-        expect(subject.versions.first).to be_kind_of RDF::URI
+      it "should have one version" do
+        expect(subject.versions.first).to be_kind_of RDF::Literal
       end
 
       it "should have a title" do
@@ -152,10 +145,10 @@ describe "a versionable rdf datastream" do
           subject.create_version
         end
 
-        it "should have two versions (plus the root version)" do
-          expect(subject.versions.size).to eq 3
+        it "should have two versions" do
+          expect(subject.versions.size).to eq 2
           subject.versions.each do |version|
-            expect(version).to be_kind_of RDF::URI
+            expect(version).to be_kind_of RDF::Literal
           end
         end
 
@@ -169,13 +162,13 @@ describe "a versionable rdf datastream" do
         end
 
         context "then restoring" do
-          let(:first_version) { subject.versions[1].to_s.split("/").last }
+          let(:first_version) { "version1" }
           before do
             subject.restore_version(first_version)
           end
 
-          it "should have three versions (plus the root version)" do          
-            expect(subject.versions.size).to eq 4      
+          it "should have two unique versions" do
+            expect(subject.versions.size).to eq 2      
           end
 
           it "should load the restored datastream's content" do
@@ -193,8 +186,8 @@ describe "a versionable rdf datastream" do
               subject.create_version
             end
 
-            it "should have four versions (plus the root version)" do
-              expect(subject.versions.size).to eq 5
+            it "should have three unique versions" do
+              expect(subject.versions.size).to eq 3
             end
 
             it "should have a new title" do
@@ -237,10 +230,6 @@ describe "a versionable OM datastream" do
   context "that exists in the repository" do
     let(:test_object) { MockAFBase.create }
 
-    after do
-      # test_object.destroy
-    end
-
     it "should be versionable" do
       expect(subject).to be_versionable
     end
@@ -252,13 +241,9 @@ describe "a versionable OM datastream" do
       it "should not have a title" do
         expect(subject.title).to be_empty
       end
-      it "should not have a size" do
-        pending
-        expect(subject.size).to be_nil
-      end
     end
 
-    context "after creating the datastream", pending: true do
+    context "after creating the datastream" do
       before do
         subject.title = "Greetings Earthlings"
         subject.save
@@ -267,12 +252,13 @@ describe "a versionable OM datastream" do
       end
 
       it "should set model_type to versionable" do
+        pending "This isn't getting saved because it should probaly go on fcr:metadata"
         expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
       end
 
-      it "should have one version (plus the root version)" do
-        expect(subject.versions.size).to eq 2
-        expect(subject.versions.first).to be_kind_of RDF::URI
+      it "should have one version" do
+        expect(subject.versions.size).to eq 1
+        expect(subject.versions.first).to be_kind_of RDF::Literal
       end
 
       it "should have a title" do
@@ -291,10 +277,10 @@ describe "a versionable OM datastream" do
           subject.create_version
         end
 
-        it "should have two versions (plus the root version)" do
-          expect(subject.versions.size).to eq 3
+        it "should have two unique versions" do
+          expect(subject.versions.size).to eq 2
           subject.versions.each do |version|
-            expect(version).to be_kind_of RDF::URI
+            expect(version).to be_kind_of RDF::Literal
           end
         end
 
@@ -308,13 +294,13 @@ describe "a versionable OM datastream" do
         end
 
         context "then restoring" do
-          let(:first_version) { subject.versions[1].to_s.split("/").last }
+          let(:first_version) { "version1" }
           before do
             subject.restore_version(first_version)
           end
 
-          it "should have three versions (plus the root version)" do          
-            expect(subject.versions.size).to eq 4      
+          it "should still have two unique versions" do          
+            expect(subject.versions.size).to eq 2      
           end
 
           it "should load the restored datastream's content" do
@@ -332,8 +318,8 @@ describe "a versionable OM datastream" do
               subject.create_version
             end
 
-            it "should have four versions (plus the root version)" do
-              expect(subject.versions.size).to eq 5
+            it "should have three unique versions" do
+              expect(subject.versions.size).to eq 3
             end
 
             it "should have a new title" do
@@ -372,10 +358,6 @@ describe "a versionable binary datastream" do
   context "that exists in the repository" do
     let(:test_object) { MockAFBase.create }
 
-    after do
-      test_object.destroy
-    end
-
     it "should be versionable" do
       expect(subject).to be_versionable
     end
@@ -386,7 +368,7 @@ describe "a versionable binary datastream" do
       end
     end
 
-    context "after creating the datastream", pending: true do
+    context "after creating the datastream" do
       let(:first_file) { File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" )) }
       let(:first_name) { "dino.jpg" }
       before do
@@ -397,14 +379,15 @@ describe "a versionable binary datastream" do
       end
 
       it "should set model_type to versionable" do
+        pending "This isn't getting saved because it should probaly go on fcr:metadata"
         expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
       end
 
-      it "should have one version (plus the root version)" do
-        expect(subject.versions.size).to eq 2
+      it "should have one version" do
+        expect(subject.versions.size).to eq 1
         expect(subject.original_name).to eql(first_name)
         expect(subject.content.size).to eq first_file.size
-        expect(subject.versions.first).to be_kind_of RDF::URI
+        expect(subject.versions.first).to be_kind_of RDF::Literal
       end
 
       context "two times" do
@@ -417,23 +400,23 @@ describe "a versionable binary datastream" do
           subject.create_version
         end
 
-        it "should have two versions (plus the root version)" do
-          expect(subject.versions.size).to eq 3
+        it "should have two unique versions" do
+          expect(subject.versions.size).to eq 2
           expect(subject.original_name).to eql(second_name)
           expect(subject.content.size).to eq second_file.size
           subject.versions.each do |version|
-            expect(version).to be_kind_of RDF::URI
+            expect(version).to be_kind_of RDF::Literal
           end
         end
 
         context "then restoring" do
-          let(:first_version) { subject.versions[1].to_s.split("/").last }
+          let(:first_version) { "version1" }
           before do
             subject.restore_version(first_version)
           end
 
-          it "should have three versions (plus the root version)" do
-            expect(subject.versions.size).to eq 4
+          it "should still have two unique versions" do
+            expect(subject.versions.size).to eq 2
           end
 
           it "should load the restored datastream's content" do
@@ -452,11 +435,11 @@ describe "a versionable binary datastream" do
               subject.create_version
             end
 
-            it "should have four versions (plus the root version)" do
-              expect(subject.versions.size).to eq 5
+            it "should have three unique versions" do
+              expect(subject.versions.size).to eq 3
               expect(subject.original_name).to eql(first_name)
               expect(subject.content.size).to eq first_file.size
-              expect(subject.versions.first).to be_kind_of RDF::URI
+              expect(subject.versions.first).to be_kind_of RDF::Literal
             end
 
           end
