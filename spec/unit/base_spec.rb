@@ -12,7 +12,7 @@ describe ActiveFedora::Base do
 
   describe "reindex_everything" do
     it "should call update_index on every object represented in the sitemap" do
-      allow(ActiveFedora::Base).to receive(:urls_from_sitemap_index) { ['http://localhost/test/XXX', 'http://localhost/test/YYY', 'http://localhost/test/ZZZ'] }
+      allow(ActiveFedora::Base).to receive(:get_descendent_uris) { ['http://localhost/test/XXX', 'http://localhost/test/YYY', 'http://localhost/test/ZZZ'] }
       mock_update = double(:mock_obj)
       expect(mock_update).to receive(:update_index).exactly(3).times
       expect(ActiveFedora::Base).to receive(:find).with(instance_of ActiveFedora::LdpResource ).and_return(mock_update).exactly(3).times
@@ -20,11 +20,34 @@ describe ActiveFedora::Base do
     end
   end
 
-  describe "urls_from_sitemap_index" do
-    before { @obj = ActiveFedora::Base.create }
-    after { @obj.destroy }
-    it "should return a list of all the ids in all the sitemaps in the sitemap index" do
-      expect(ActiveFedora::Base.urls_from_sitemap_index).to include(@obj.uri)
+  describe "get_descendent_uris" do
+
+    before :each do
+      ids.each do |id|
+        ActiveFedora::Base.create pid: id
+      end
+    end
+
+    def root_uri(ids=[])
+      ActiveFedora::Base.id_to_uri(ids.first)
+    end
+
+    context 'when there there are no descendents' do
+
+      let(:ids) { ['foo'] }
+
+      it 'returns an array containing only the URI passed to it' do
+        expect(ActiveFedora::Base.get_descendent_uris(root_uri(ids))).to eq ids.map {|id| ActiveFedora::Base.id_to_uri(id) }
+      end
+    end
+
+    context 'when there are > 1 descendents' do
+
+      let(:ids) { ['foo', 'foo/bar', 'foo/bar/chu'] }
+
+      it 'returns an array containing the URI passed to it, as well as all descendent URIs' do
+        expect(ActiveFedora::Base.get_descendent_uris(root_uri(ids))).to eq ids.map {|id| ActiveFedora::Base.id_to_uri(id) }
+      end
     end
   end
 

@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
   s.add_dependency "linkeddata"
   s.add_dependency "deprecation"
   s.add_dependency "ldp", '~> 0.0.8'
+  s.add_dependency "rdf-ldp"
 
   s.add_development_dependency "rdoc"
   s.add_development_dependency "yard"

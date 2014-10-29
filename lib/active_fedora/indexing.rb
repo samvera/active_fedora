@@ -65,9 +65,9 @@ module ActiveFedora
     module ClassMethods
 
       def reindex_everything
-        urls_from_sitemap_index.each do |url|
-          logger.debug "Re-index everything ... #{url}"
-          ActiveFedora::Base.find(LdpResource.new(ActiveFedora.fedora.connection, url)).update_index
+        get_descendent_uris(ActiveFedora::Base.id_to_uri('')).each do |uri|
+          logger.debug "Re-index everything ... #{uri}"
+          ActiveFedora::Base.find(LdpResource.new(ActiveFedora.fedora.connection, uri)).update_index
         end
       end
 
@@ -86,16 +86,14 @@ module ActiveFedora
         SolrInstanceLoader.new(self, pid, solr_doc).object
       end
 
-      def urls_from_sitemap_index
-        ids = []
-        sitemap_index_uri = ActiveFedora.fedora.host + '/sitemap'
-        sitemap_index = Nokogiri::XML(open(sitemap_index_uri))
-        sitemap_uris = sitemap_index.xpath("//sitemap:loc/text()", sitemap_index.namespaces)
-        sitemap_uris.map(&:to_s).each do |sitemap_uri|
-          sitemap = Nokogiri::XML(open(sitemap_uri))
-          ids += sitemap.xpath("//sitemap:loc/text()", sitemap_index.namespaces).map(&:to_s)
+      def get_descendent_uris(uri)
+        orm = Ldp::Orm.new(Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri))
+        immediate_descendent_uris = orm.graph.query(predicate: RDF::LDP.contains).map { |descendent| descendent.object.to_s }
+        all_descendents_uris = [uri]
+        immediate_descendent_uris.each do |descendent_uri|
+          all_descendents_uris += get_descendent_uris(descendent_uri)
         end
-        ids
+        all_descendents_uris
       end
 
     end
