@@ -162,7 +162,7 @@ module ActiveFedora
 
         records.flatten.each do |record|
           raise_on_type_mismatch(record)
-          add_record_to_target_with_callbacks(record) do |r|
+          add_to_target(record) do |r|
             result &&= insert_record(record) unless owner.new_record?
           end
         end
@@ -296,23 +296,9 @@ module ActiveFedora
         SolrService.query(@finder_query, solr_opts.merge(opts))
       end
 
-      def add_record_to_target_with_callbacks(record)
-        callback(:before_add, record)
-        yield(record) if block_given?
-        @target ||= [] unless loaded?
-        if index = @target.index(record)
-          @target[index] = record
-        else
-          @target << record
-        end
-        callback(:after_add, record)
-        set_inverse_instance(record)
-        record
-      end
-
-      def add_to_target(record)
+      def add_to_target(record, skip_callbacks = false)
       #  transaction do
-          callback(:before_add, record)
+          callback(:before_add, record) unless skip_callbacks
           yield(record) if block_given?
 
           if @reflection.options[:uniq] && index = @target.index(record)
@@ -321,7 +307,7 @@ module ActiveFedora
             @target << record
           end
 
-          callback(:after_add, record)
+          callback(:after_add, record) unless skip_callbacks
           set_inverse_instance(record)
        # end
 
