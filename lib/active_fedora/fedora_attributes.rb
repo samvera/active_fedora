@@ -11,8 +11,6 @@ module ActiveFedora
       property :has_model, predicate: RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel")
       property :create_date, predicate: ActiveFedora::Rdf::Fcrepo.created
       property :modified_date, predicate: ActiveFedora::Rdf::Fcrepo.lastModified
-      property :ldp_member, predicate: ActiveFedora::Rdf::Ldp.member
-      property :ldp_contains, predicate: ActiveFedora::Rdf::Ldp.contains
 
       # Hack until https://github.com/no-reply/ActiveTriples/pull/37 is merged
       def create_date_with_first
