@@ -110,19 +110,6 @@ module ActiveFedora
       end
     end
 
-    # Updates the lastModified from the server in order to avoid 409 Conflict
-    # TODO update ETag too.
-    # WARNING this is super dangeous because it's not getting all the properties, just the ones that Fedora chokes on.
-    # saving the doc after using this can overwrite the pointers.
-    def reload_managed_properties
-      #sever_version is a FedoraRdfResource
-      server_version = Ldp::Orm.new(LdpResource.new(conn, uri))
-      self.modified_date = server_version.graph.last_modified.first
-      self.ldp_member = server_version.graph.ldp_member
-      self.ldp_contains = server_version.graph.ldp_contains
-    rescue Ldp::Gone
-    end
-
   protected
 
     # Determines whether a create operation causes a solr index of this object by default.

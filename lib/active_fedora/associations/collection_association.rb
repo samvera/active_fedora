@@ -166,7 +166,6 @@ module ActiveFedora
             result &&= insert_record(record) unless owner.new_record?
           end
         end
-        owner.reload_managed_properties if result
 
         result && self
       end
@@ -402,7 +401,6 @@ module ActiveFedora
           delete_records(existing_records, method) if existing_records.any?
           records.each do |record|
             target.delete(record)
-            record.reload_managed_properties unless record.destroyed?
           end
 
           records.each { |record| callback(:after_remove, record) }

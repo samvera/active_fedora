@@ -70,7 +70,6 @@ module ActiveFedora
             end
           end
           unless @owner.new_record? || @owner.destroyed?
-            @owner.reload_managed_properties
             @owner.save!
           end
         end
