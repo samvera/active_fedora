@@ -34,9 +34,9 @@ describe ActiveFedora::Base do
       subject.attributes={ swank:'smal'}
     end
     it "should have errors" do
-      subject.should_not be_valid
-      subject.errors[:fubar].should == ["can't be blank"]
-      subject.errors[:swank].should == ["is too short (minimum is 5 characters)"]
+      expect(subject).to_not be_valid
+      expect(subject.errors[:fubar]).to eq ["can't be blank"]
+      expect(subject.errors[:swank]).to eq ["is too short (minimum is 5 characters)"]
     end
   end
 

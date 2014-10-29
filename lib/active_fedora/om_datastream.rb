@@ -1,7 +1,7 @@
 require  "om"
 
 module ActiveFedora
-  class OmDatastream < Datastream
+  class OmDatastream < File
 
     # before_save do
     #   if content.blank?

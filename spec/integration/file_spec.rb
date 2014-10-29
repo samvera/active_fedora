@@ -3,7 +3,7 @@ require 'spec_helper'
 require 'active_fedora'
 require "rexml/document"
 
-describe ActiveFedora::Datastream do
+describe ActiveFedora::File do
 
   context "when autocreate is true" do
     before(:all) do
@@ -22,11 +22,11 @@ describe ActiveFedora::Datastream do
       test_object.destroy
     end
 
-    let(:descMetadata) {  test_object.datastreams["descMetadata"] }
+    let(:descMetadata) {  test_object.attached_files["descMetadata"] }
 
     describe "the datastream" do
       subject { descMetadata }
-      it { should be_a_kind_of(ActiveFedora::Datastream) }
+      it { should be_a_kind_of(ActiveFedora::File) }
     end
 
     describe "dsid" do
@@ -61,27 +61,27 @@ describe ActiveFedora::Datastream do
     context "a blob datastream" do
       let(:dsid) { "ds#{Time.now.to_i}" }
       let(:content) { fixture('dino.jpg') }
-      let(:datastream) { ActiveFedora::Datastream.new(test_object, dsid).tap { |ds| ds.content = content } }
+      let(:datastream) { ActiveFedora::File.new(test_object, dsid).tap { |ds| ds.content = content } }
 
       before do
-        test_object.add_datastream(datastream)
+        test_object.attach_file(datastream)
         test_object.save
       end
 
       it "should not be changed" do
-        expect(test_object.datastreams[dsid]).to_not be_changed
+        expect(test_object.attached_files[dsid]).to_not be_changed
       end
 
       it "should be able to read the content from fedora" do
         content.rewind
-        expect(test_object.datastreams[dsid].content).to eq content.read
+        expect(test_object.attached_files[dsid].content).to eq content.read
       end
 
       describe "streaming the response" do
         let(:stream_reader) { double }
         it "should stream the response" do
           expect(stream_reader).to receive(:read).at_least(:once)
-          test_object.datastreams[dsid].stream { |buff| stream_reader.read(buff) }
+          test_object.attached_files[dsid].stream { |buff| stream_reader.read(buff) }
         end
 
         context "with a range request" do

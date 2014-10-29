@@ -24,7 +24,7 @@ describe ActiveFedora::SolrService do
         # 'foo' => @foo_object.profile,
         # 'foo_descMetadata' => @foo_object.datastreams['descMetadata'].profile
       }
-      @foo_content = @foo_object.datastreams['descMetadata'].content
+      @foo_content = @foo_object.attached_files['descMetadata'].content
     end
     after(:each) do
       @test_object.delete
@@ -35,9 +35,9 @@ describe ActiveFedora::SolrService do
       query = "id\:#{RSolr.escape(@test_object.pid)} OR id\:#{RSolr.escape(@foo_object.pid)}"
       solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result)
-      result.length.should == 2
+      expect(result.length).to eq 2
       result.each do |r|
-        (r.class == ActiveFedora::Base || r.class == FooObject).should be true
+        expect((r.class == ActiveFedora::Base || r.class == FooObject)).to be true
       end
     end
     

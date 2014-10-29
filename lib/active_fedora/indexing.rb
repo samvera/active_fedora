@@ -25,7 +25,7 @@ module ActiveFedora
         solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid)
         solr_doc.merge!(ActiveFedora::Base.profile_solr_name => to_json)
       end
-      datastreams.each_value do |ds|
+      attached_files.each_value do |ds|
         solr_doc.merge! ds.to_solr()
       end
       solr_doc = solrize_relationships(solr_doc) unless opts[:model_only]
@@ -80,7 +80,7 @@ module ActiveFedora
       # If a value is passed in for optional parameter solr_doc it will not query solr again and just use the
       # one passed to populate the object.
       #
-      # It will anything stored within solr such as metadata and relationships.  Non-metadata datastreams will not
+      # It will anything stored within solr such as metadata and relationships.  Non-metadata attached files will not
       # be loaded and if needed you should use find instead.
       def load_instance_from_solr(pid, solr_doc=nil)
         SolrInstanceLoader.new(self, pid, solr_doc).object

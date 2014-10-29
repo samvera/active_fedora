@@ -16,7 +16,7 @@ module ActiveFedora
       @destroyed
     end
 
-    # Saves a Base object, and any dirty datastreams, then updates
+    # Saves a Base object, and any dirty attached files, then updates
     # the Solr index for this object, unless option :update_index=>false is present.
     # Indexing is also controlled by the `create_needs_index?' and `update_needs_index?' methods.
     #
@@ -32,7 +32,7 @@ module ActiveFedora
       save(options)
     end
 
-    # Pushes the object and all of its new or dirty datastreams into Fedora
+    # Pushes the object and all of its new or dirty attached files into Fedora
     def update(attributes)
       self.attributes=attributes
       save
@@ -126,20 +126,20 @@ module ActiveFedora
 
   private
 
-    # Deals with preparing new object to be saved to Fedora, then pushes it and its datastreams into Fedora.
+    # Deals with preparing new object to be saved to Fedora, then pushes it and its attached files into Fedora.
     def create_record(options = {})
       assign_rdf_subject
-      serialize_datastreams
+      serialize_attached_files
       @orm = orm.create
       @resource = nil
-      assign_uri_to_datastreams
+      assign_uri_to_attached_files
       should_update_index = create_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
       true
     end
 
     def update_record(options = {})
-      serialize_datastreams
+      serialize_attached_files
 
       # Clear out the ETag  -- Remove when this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
       orm.resource.instance_variable_set :@get, nil
@@ -172,14 +172,14 @@ module ActiveFedora
       end
     end
 
-    def assign_uri_to_datastreams
-      datastreams.each do |_, ds|
+    def assign_uri_to_attached_files
+      attached_files.each do |_, ds|
         ds.digital_object= self
       end
     end
 
     def persist(should_update_index)
-      datastreams.select { |_, ds| ds.changed? }.each do |_, ds|
+      attached_files.select { |_, ds| ds.changed? }.each do |_, ds|
         ds.save # Don't call save! because if the content_changed? returns false, it'll raise an error.
       end
 

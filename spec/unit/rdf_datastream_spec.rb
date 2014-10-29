@@ -31,30 +31,30 @@ describe ActiveFedora::RDFDatastream do
     subject { @obj.reload.descMetadata }
 
     it "should not load the descMetadata datastream when calling content_changed?" do
-      subject.should_not_receive(:retrieve_content)
+      expect(subject).to_not receive(:retrieve_content)
       expect(subject).to_not be_content_changed
     end
 
     it "should allow asserting an empty string" do
       subject.title = ['']
-      subject.title.should == ['']
+      expect(subject.title).to eq ['']
     end
 
     describe "when multivalue: false" do
       it "should return single values" do
         subject.description = 'my description'
-        subject.description.should == 'my description'
+        expect(subject.description).to eq 'my description'
       end
     end
 
     it "should clear stuff" do
       subject.title = ['one', 'two', 'three']
       subject.title.clear
-      subject.graph.query([subject.rdf_subject,  RDF::DC.title, nil]).first.should be_nil
+      expect(subject.graph.query([subject.rdf_subject,  RDF::DC.title, nil]).first).to be_nil
     end
 
     it "should have a list of fields" do
-      MyDatastream.fields.should == [:title, :description]
+      expect(MyDatastream.fields).to eq [:title, :description]
     end
   end
 
@@ -65,7 +65,7 @@ describe ActiveFedora::RDFDatastream do
       data = "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT')
 
       result = subject.deserialize(data)
-      result.dump(:ntriples).should == "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
+      expect(result.dump(:ntriples)).to eq "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
     end
   end
 

@@ -163,7 +163,7 @@ module ActiveFedora
       end
 
       def find_or_create_defined_attribute(field, dsid, args)
-        self.delegated_attributes[field] ||= DatastreamAttribute.new(field, dsid, datastream_class_for_name(dsid), args)
+        delegated_attributes[field] ||= DelegatedAttribute.new(field, dsid, datastream_class_for_name(dsid), args)
       end
 
       private

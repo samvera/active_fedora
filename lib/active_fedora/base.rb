@@ -20,7 +20,7 @@ module ActiveFedora
   # The above example creates a Fedora object with a metadata datastream named "properties", which is composed of a
   # narrator and bio field.
   #
-  # Datastreams defined with +has_metadata+ are accessed via the +datastreams+ member hash.
+  # Attached files defined with +contains+ are accessed via the +attached_files+ member hash.
   #
   class Base
     extend ActiveModel::Naming
@@ -40,7 +40,7 @@ module ActiveFedora
     include Serialization
 
     include Indexing
-    include Datastreams
+    include AttachedFiles
     include FedoraAttributes
     include AttributeMethods
     include Attributes

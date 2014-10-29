@@ -1,5 +1,5 @@
 module ActiveFedora
-  class RDFDatastream < ActiveFedora::Datastream
+  class RDFDatastream < File
     include ActiveTriples::NestedAttributes
     include Rdf::DatastreamIndexing
     extend ActiveTriples::Properties
@@ -88,7 +88,7 @@ module ActiveFedora
     ##
     # This method allows for delegation.
     # This patches the fact that there's no consistent API for allowing delegation - we're matching the
-    # OMDatastream implementation as our "consistency" point.
+    # OmDatastream implementation as our "consistency" point.
     # @TODO: We may need to enable deep RDF delegation at one point.
     def term_values(*values)
       self.send(values.first)

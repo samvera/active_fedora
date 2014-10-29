@@ -339,7 +339,7 @@ end
 
 describe "a versionable binary datastream" do
   before(:all) do
-    class BinaryDatastream < ActiveFedora::Datastream
+    class BinaryDatastream < ActiveFedora::File
       has_many_versions
     end
 

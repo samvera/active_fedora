@@ -1,6 +1,6 @@
 module ActiveFedora
   # Represents the mapping between a model attribute and a field in a datastream
-  class DatastreamAttribute
+  class DelegatedAttribute
 
     attr_accessor :dsid, :field, :datastream_class, :at, :multiple
 
@@ -99,7 +99,7 @@ module ActiveFedora
     end
 
     def datastream_for_attribute(obj, dsid)
-      obj.datastreams[dsid] || raise(ArgumentError, "Undefined datastream id: `#{dsid}' in has_attributes")
+      obj.attached_files[dsid] || raise(ArgumentError, "Undefined datastream id: `#{dsid}' in has_attributes")
     end
 
   end

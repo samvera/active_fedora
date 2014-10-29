@@ -8,14 +8,14 @@ describe ActiveFedora::RdfxmlRDFDatastream do
         property :publisher, :predicate => RDF::DC.publisher
       end
       @subject = MyRdfxmlDatastream.new(inner_object, 'mixed_rdf')
-      @subject.stub(pid: 'test:1')
+      allow(@subject).to receive(:pid).and_return('test:1')
     end
     after(:each) do
       Object.send(:remove_const, :MyRdfxmlDatastream)
     end
     it "should save and reload" do
       @subject.publisher = ["St. Martin's Press"]
-      @subject.serialize.should =~ /<rdf:RDF/
+      expect(@subject.serialize).to match /<rdf:RDF/
     end
   end
 
@@ -80,7 +80,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
     describe "a new instance" do
       subject { MyDatastream.new(double('parent object', uri: "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/123", new_record?: true), 'descMetadata', about: "http://library.ucsd.edu/ark:/20775/") }
       it "should have a subject" do
-        subject.rdf_subject.to_s.should == "http://library.ucsd.edu/ark:/20775/"
+        expect(subject.rdf_subject.to_s).to eq "http://library.ucsd.edu/ark:/20775/"
       end
 
     end
@@ -93,17 +93,17 @@ describe ActiveFedora::RdfxmlRDFDatastream do
         subject
       end
       it "should have a subject" do
-        subject.rdf_subject.to_s.should == "http://library.ucsd.edu/ark:/20775/"
+        expect(subject.rdf_subject.to_s).to eq "http://library.ucsd.edu/ark:/20775/"
       end
       it "should have mimeType" do
-        subject.mime_type.should == 'text/xml'
+        expect(subject.mime_type).to eq 'text/xml'
       end
       it "should have dsid" do
-        subject.dsid.should == 'descMetadata'
+        expect(subject.dsid).to eq 'descMetadata'
       end
       it "should have fields" do
-        subject.resource_type.should == ["image"]
-        subject.title.first.value.should == ["example title"]
+        expect(subject.resource_type).to eq ["image"]
+        expect(subject.title.first.value).to eq ["example title"]
       end
     end
   end

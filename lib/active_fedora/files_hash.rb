@@ -1,7 +1,7 @@
 require 'forwardable'
 
 module ActiveFedora
-  class DatastreamHash
+  class FilesHash
     extend Forwardable
 
     def_delegators :@hash, *(Hash.instance_methods(false))
@@ -11,8 +11,8 @@ module ActiveFedora
     end
 
     def freeze
-      each_value do |datastream|
-        datastream.freeze
+      each_value do |file|
+        file.freeze
       end
       @hash.freeze
       super

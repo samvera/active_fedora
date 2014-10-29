@@ -3,11 +3,11 @@ require 'spec_helper'
 describe ActiveFedora::Predicates do
   describe "#short_predicate" do
     it 'should parse strings' do
-      ActiveFedora::Predicates.short_predicate('http://www.openarchives.org/OAI/2.0/itemID').should == :oai_item_id
+      expect(ActiveFedora::Predicates.short_predicate('http://www.openarchives.org/OAI/2.0/itemID')).to eq :oai_item_id
     end
     it 'should parse uris' do
-      ActiveFedora::Predicates.short_predicate(RDF::DC.creator).should == 'dc_terms_creator'
-      ActiveFedora::Predicates.short_predicate(RDF::SKOS.hasTopConcept).should == '2004_02_skos_core_has_top_concept'
+      expect(ActiveFedora::Predicates.short_predicate(RDF::DC.creator)).to eq 'dc_terms_creator'
+      expect(ActiveFedora::Predicates.short_predicate(RDF::SKOS.hasTopConcept)).to eq '2004_02_skos_core_has_top_concept'
     end
     before do
       @original_mapping = ActiveFedora::Predicates.predicate_config[:predicate_mapping]
@@ -21,25 +21,25 @@ describe ActiveFedora::Predicates do
         "http://example.org/zoo/wolves/"=>{:alpha => 'Manager'},
         "http://example.org/zoo/"=>{:keeper => 'Manager'}
         }
-      ActiveFedora::Predicates.short_predicate("http://example.org/zoo/Manager").should == :keeper
-      ActiveFedora::Predicates.short_predicate("http://example.org/zoo/wolves/Manager").should == :alpha
-      ActiveFedora::Predicates.short_predicate("http://example.org/Manager").should == :ceo
+      expect(ActiveFedora::Predicates.short_predicate("http://example.org/zoo/Manager")).to eq :keeper
+      expect(ActiveFedora::Predicates.short_predicate("http://example.org/zoo/wolves/Manager")).to eq :alpha
+      expect(ActiveFedora::Predicates.short_predicate("http://example.org/Manager")).to eq :ceo
     end
   end
   
   it 'should provide .default_predicate_namespace' do
-    ActiveFedora::Predicates.default_predicate_namespace.should == 'http://fedora.info/definitions/v4/rels-ext#'
+    expect(ActiveFedora::Predicates.default_predicate_namespace).to eq 'http://fedora.info/definitions/v4/rels-ext#'
   end
  
   describe "#predicate_mappings" do 
 
     it 'should return a hash' do
-      ActiveFedora::Predicates.predicate_mappings.should be_kind_of Hash
+      expect(ActiveFedora::Predicates.predicate_mappings).to be_kind_of Hash
     end
 
     it "should provide mappings to the fedora ontology via the http://fedora.info/definitions/v4/rels-ext# default namespace mapping" do
-      ActiveFedora::Predicates.predicate_mappings.keys.include?(ActiveFedora::Predicates.default_predicate_namespace).should be true
-      ActiveFedora::Predicates.predicate_mappings[ActiveFedora::Predicates.default_predicate_namespace].should be_kind_of Hash
+      expect(ActiveFedora::Predicates.predicate_mappings.keys.include?(ActiveFedora::Predicates.default_predicate_namespace)).to be true
+      expect(ActiveFedora::Predicates.predicate_mappings[ActiveFedora::Predicates.default_predicate_namespace]).to be_kind_of Hash
     end
 
     it 'should provide predicate mappings for entire Fedora Relationship Ontology' do
@@ -67,21 +67,21 @@ describe ActiveFedora::Predicates do
                             :conforms_to => "conformsTo",
                             :has_model => "hasModel"]
       desired_mappings.each_pair do |k,v|
-        ActiveFedora::Predicates.predicate_mappings[ActiveFedora::Predicates.default_predicate_namespace].should have_key(k)
-        ActiveFedora::Predicates.predicate_mappings[ActiveFedora::Predicates.default_predicate_namespace][k].should == v
+        expect(ActiveFedora::Predicates.predicate_mappings[ActiveFedora::Predicates.default_predicate_namespace]).to have_key(k)
+        expect(ActiveFedora::Predicates.predicate_mappings[ActiveFedora::Predicates.default_predicate_namespace][k]).to eq v
       end
     end
   end
 
   it 'should provide #predicate_lookup that maps symbols to common RELS-EXT predicates' do
-    ActiveFedora::Predicates.should respond_to(:predicate_lookup)
-    ActiveFedora::Predicates.predicate_lookup(:is_part_of).should == "isPartOf"
-    ActiveFedora::Predicates.predicate_lookup(:is_member_of).should == "isMemberOf"
-    ActiveFedora::Predicates.predicate_lookup("isPartOfCollection").should == "isPartOfCollection"
+    expect(ActiveFedora::Predicates).to respond_to(:predicate_lookup)
+    expect(ActiveFedora::Predicates.predicate_lookup(:is_part_of)).to eq "isPartOf"
+    expect(ActiveFedora::Predicates.predicate_lookup(:is_member_of)).to eq "isMemberOf"
+    expect(ActiveFedora::Predicates.predicate_lookup("isPartOfCollection")).to eq "isPartOfCollection"
     ActiveFedora::Predicates.predicate_config[:predicate_mapping].merge!({"some_namespace"=>{:has_foo=>"hasFOO"}})
-    ActiveFedora::Predicates.find_predicate(:has_foo).should == ["hasFOO","some_namespace"]
-    ActiveFedora::Predicates.predicate_lookup(:has_foo,"some_namespace").should == "hasFOO"
-    lambda { ActiveFedora::Predicates.predicate_lookup(:has_foo) }.should raise_error ActiveFedora::UnregisteredPredicateError
+    expect(ActiveFedora::Predicates.find_predicate(:has_foo)).to eq ["hasFOO","some_namespace"]
+    expect(ActiveFedora::Predicates.predicate_lookup(:has_foo,"some_namespace")).to eq "hasFOO"
+    expect(lambda { ActiveFedora::Predicates.predicate_lookup(:has_foo) }).to raise_error ActiveFedora::UnregisteredPredicateError
   end
     
   context 'initialization' do
@@ -94,19 +94,19 @@ describe ActiveFedora::Predicates do
     end
     
     it 'should allow explicit initialization of predicates' do
-      ActiveFedora::Predicates.find_predicate(:is_part_of).should == ["isPartOf", "http://fedora.info/definitions/v4/rels-ext#"]
+      expect(ActiveFedora::Predicates.find_predicate(:is_part_of)).to eq ["isPartOf", "http://fedora.info/definitions/v4/rels-ext#"]
       ActiveFedora::Predicates.predicate_config = {
         :default_namespace => 'http://example.com/foo',
         :predicate_mapping => {
           'http://example.com/foo' => { :has_bar => 'hasBAR' }
         }
       }
-      ActiveFedora::Predicates.find_predicate(:has_bar).should == ["hasBAR", "http://example.com/foo"]
-      lambda { ActiveFedora::Predicates.find_predicate(:is_part_of) }.should raise_error ActiveFedora::UnregisteredPredicateError
+      expect(ActiveFedora::Predicates.find_predicate(:has_bar)).to eq ["hasBAR", "http://example.com/foo"]
+      expect(lambda { ActiveFedora::Predicates.find_predicate(:is_part_of) }).to raise_error ActiveFedora::UnregisteredPredicateError
     end
     
     it 'should ensure that the configuration has the correct keys' do
-      lambda { ActiveFedora::Predicates.predicate_config = { :foo => 'invalid!' } }.should raise_error TypeError
+      expect(lambda { ActiveFedora::Predicates.predicate_config = { :foo => 'invalid!' } }).to raise_error TypeError
     end
 
     it "should allow adding predicates without wiping out existing predicates" do
@@ -118,12 +118,12 @@ describe ActiveFedora::Predicates do
                                                   },
                                               })
       # New & Modified Predicates
-      ActiveFedora::Predicates.find_predicate(:has_profile).should == ["hasProfile", "http://projecthydra.org/ns/relations#"]
-      ActiveFedora::Predicates.find_predicate(:references).should == ["references", "http://fedora.info/definitions/v4/rels-ext#"]
-      ActiveFedora::Predicates.find_predicate(:has_derivation).should == ["cameFrom", "http://fedora.info/definitions/v4/rels-ext#"]
+      expect(ActiveFedora::Predicates.find_predicate(:has_profile)).to eq ["hasProfile", "http://projecthydra.org/ns/relations#"]
+      expect(ActiveFedora::Predicates.find_predicate(:references)).to eq ["references", "http://fedora.info/definitions/v4/rels-ext#"]
+      expect(ActiveFedora::Predicates.find_predicate(:has_derivation)).to eq ["cameFrom", "http://fedora.info/definitions/v4/rels-ext#"]
       # Pre-Existing predicates should be unharmed
-      ActiveFedora::Predicates.find_predicate(:is_part_of).should == ["isPartOf", "http://fedora.info/definitions/v4/rels-ext#"]
-      ActiveFedora::Predicates.find_predicate(:is_governed_by).should == ["isGovernedBy", "http://projecthydra.org/ns/relations#"]
+      expect(ActiveFedora::Predicates.find_predicate(:is_part_of)).to eq ["isPartOf", "http://fedora.info/definitions/v4/rels-ext#"]
+      expect(ActiveFedora::Predicates.find_predicate(:is_governed_by)).to eq ["isGovernedBy", "http://projecthydra.org/ns/relations#"]
     end
 
   end

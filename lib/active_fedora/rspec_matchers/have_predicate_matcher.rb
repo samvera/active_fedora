@@ -6,7 +6,7 @@ RSpec::Matchers.define :have_predicate do |predicate|
     if @predicate.nil? || !@expected_objects.respond_to?(:count)
       raise(
         ArgumentError,
-        "subject.should have_predicate(<predicate>).with_objects(<objects[]>)"
+        "expect(subject).to have_predicate(<predicate>).with_objects(<objects[]>)"
       )
     end
     @subject = subject.class.find(subject.pid)

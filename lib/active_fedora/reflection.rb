@@ -344,7 +344,7 @@ module ActiveFedora
       end
 
       def class_name
-        @class_name ||= (options[:class_name] || 'ActiveFedora::Datastream').to_s
+        @class_name ||= (options[:class_name] || 'ActiveFedora::File').to_s
       end
 
       def klass

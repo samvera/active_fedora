@@ -101,7 +101,7 @@ module ActiveFedora
     def load_fedora_config
       return @fedora_config unless @fedora_config.empty?
       @fedora_config_path = get_config_path(:fedora)
-      ActiveFedora::Base.logger.info("ActiveFedora: loading fedora config from #{File.expand_path(@fedora_config_path)}") if ActiveFedora::Base.logger
+      ActiveFedora::Base.logger.info("ActiveFedora: loading fedora config from #{::File.expand_path(@fedora_config_path)}") if ActiveFedora::Base.logger
 
       begin
         config_erb = ERB.new(IO.read(@fedora_config_path)).result(binding)
@@ -126,7 +126,7 @@ module ActiveFedora
       return @solr_config unless @solr_config.empty?
       @solr_config_path = get_config_path(:solr)
 
-      ActiveFedora::Base.logger.info "ActiveFedora: loading solr config from #{File.expand_path(@solr_config_path)}" if ActiveFedora::Base.logger
+      ActiveFedora::Base.logger.info "ActiveFedora: loading solr config from #{::File.expand_path(@solr_config_path)}" if ActiveFedora::Base.logger
       begin
         config_erb = ERB.new(IO.read(@solr_config_path)).result(binding)
       rescue Exception => e
@@ -159,7 +159,7 @@ module ActiveFedora
         raise URI::InvalidURIError
       end
     end
-      
+
     # Determine the fedora config file to use. Order of preference is:
     # 1. Use the config_options[:config_path] if it exists
     # 2. Look in +Rails.root+/config/fedora.yml
@@ -170,10 +170,10 @@ module ActiveFedora
     def get_config_path(config_type)
       config_type = config_type.to_s
       if (config_path = config_options.fetch("#{config_type}_config_path".to_sym,nil) )
-        raise ConfigurationError, "file does not exist #{config_path}" unless File.file? config_path
-        return File.expand_path(config_path)
+        raise ConfigurationError, "file does not exist #{config_path}" unless ::File.file? config_path
+        return ::File.expand_path(config_path)
       end
-    
+
       # if solr, attempt to use path where fedora.yml is first
       if config_type == "solr" && (config_path = check_fedora_path_for_solr)
         return config_path
@@ -181,27 +181,27 @@ module ActiveFedora
 
       if defined?(Rails.root)
         config_path = "#{Rails.root}/config/#{config_type}.yml"
-        return config_path if File.file? config_path
+        return config_path if ::File.file? config_path
       end
-    
-      if File.file? "#{Dir.getwd}/config/#{config_type}.yml"  
+
+      if ::File.file? "#{Dir.getwd}/config/#{config_type}.yml"
         return "#{Dir.getwd}/config/#{config_type}.yml"
       end
-    
+
       # Last choice, check for the default config file
-      config_path = File.join(ActiveFedora.root, "config", "#{config_type}.yml")
-      if File.file? config_path
+      config_path = ::File.join(ActiveFedora.root, "config", "#{config_type}.yml")
+      if ::File.file? config_path
         ActiveFedora::Base.logger.warn "Using the default #{config_type}.yml that comes with active-fedora.  If you want to override this, pass the path to #{config_type}.yml to ActiveFedora - ie. ActiveFedora.init(:#{config_type}_config_path => '/path/to/#{config_type}.yml') - or set Rails.root and put #{config_type}.yml into \#{Rails.root}/config." if ActiveFedora::Base.logger
         return config_path
       else
         raise ConfigurationError, "Couldn't load #{config_type} config file!"
       end
     end
-  
+
     # Checks the existing fedora_config.path to see if there is a solr.yml there
     def check_fedora_path_for_solr
-      path = File.dirname(self.path) + "/solr.yml"
-      if File.file? path
+      path = ::File.dirname(self.path) + "/solr.yml"
+      if ::File.file? path
         return path
       else
         return nil
@@ -210,21 +210,21 @@ module ActiveFedora
 
     def predicate_config
       @predicate_config_path ||= build_predicate_config_path
-      YAML.load(File.open(@predicate_config_path)) if File.exist?(@predicate_config_path)
+      YAML.load(::File.open(@predicate_config_path)) if ::File.exist?(@predicate_config_path)
     end
 
     protected
 
     def build_predicate_config_path
-      testfile = File.expand_path(get_config_path(:predicate_mappings))
-      if File.exist?(testfile) && valid_predicate_mapping?(testfile)
+      testfile = ::File.expand_path(get_config_path(:predicate_mappings))
+      if ::File.exist?(testfile) && valid_predicate_mapping?(testfile)
         return testfile
       end
       raise PredicateMappingsNotFoundError
     end
 
     def valid_predicate_mapping?(testfile)
-      mapping = YAML.load(File.open(testfile))
+      mapping = YAML.load(::File.open(testfile))
       return false unless mapping.has_key?(:default_namespace) && mapping[:default_namespace].is_a?(String)
       return false unless mapping.has_key?(:predicate_mapping) && mapping[:predicate_mapping].is_a?(Hash)
       true

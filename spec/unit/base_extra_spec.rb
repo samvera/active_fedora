@@ -5,12 +5,12 @@ describe ActiveFedora::Base do
   describe ".update_index" do
     before do
       mock_conn = double("SolrConnection")
-      mock_conn.should_receive(:add) do |_, opts|
-        opts.should == {:params=>{:softCommit=>true}}
+      expect(mock_conn).to receive(:add) do |_, opts|
+        expect(opts).to eq(:params=>{:softCommit=>true})
       end
       mock_ss = double("SolrService")
-      mock_ss.stub(:conn).and_return(mock_conn)
-      ActiveFedora::SolrService.stub(:instance).and_return(mock_ss)
+      allow(mock_ss).to receive(:conn).and_return(mock_conn)
+      allow(ActiveFedora::SolrService).to receive(:instance).and_return(mock_ss)
     end
     
     it "should call .to_solr on all Datastreams and pass the resulting document to solr" do
@@ -19,10 +19,10 @@ describe ActiveFedora::Base do
       mock2 = double("ds2", :to_solr => {})
       
       mock_datastreams = {:ds1 => mock1, :ds2 => mock2}
-      mock1.should_receive(:to_solr).and_return({})
-      mock2.should_receive(:to_solr).and_return({})
-      subject.should_receive(:datastreams).and_return(mock_datastreams)
-      subject.should_receive(:solrize_relationships)
+      expect(mock1).to receive(:to_solr).and_return({})
+      expect(mock2).to receive(:to_solr).and_return({})
+      expect(subject).to receive(:attached_files).and_return(mock_datastreams)
+      expect(subject).to receive(:solrize_relationships)
       subject.update_index
     end
 
@@ -35,12 +35,12 @@ describe ActiveFedora::Base do
   describe ".delete" do
     
     before do
-      subject.stub(new_record?: false)
-      subject.orm.resource.client.stub(:delete)
+      allow(subject).to receive(:new_record?).and_return(false)
+      allow(subject.orm.resource.client).to receive(:delete)
     end
     
     it "should delete object from repository and index" do
-      ActiveFedora::SolrService.should_receive(:delete).with(nil)
+      expect(ActiveFedora::SolrService).to receive(:delete).with(nil)
       subject.delete
     end
   end

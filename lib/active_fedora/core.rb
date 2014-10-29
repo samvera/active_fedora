@@ -57,7 +57,7 @@ module ActiveFedora
 
       @association_cache = {}
       assert_content_model
-      load_datastreams
+      load_attached_files
       self.attributes = attributes if attributes
       run_callbacks :initialize
     end
@@ -72,10 +72,10 @@ module ActiveFedora
         end
       end
       clear_association_cache
-      clear_datastreams
+      clear_attached_files
       @orm = Ldp::Orm.new(LdpResource.new(conn, uri))
       @resource = nil
-      load_datastreams
+      load_attached_files
       self
     end
 
@@ -91,7 +91,7 @@ module ActiveFedora
     def init_with_resource(rdf_resource)
       @orm = Ldp::Orm.new(rdf_resource)
       @association_cache = {}
-      load_datastreams
+      load_attached_files
       run_callbacks :find
       run_callbacks :initialize
       self
@@ -107,12 +107,12 @@ module ActiveFedora
     def freeze
       @resource.freeze
       #@attributes = @attributes.clone.freeze
-      datastreams.freeze
+      attached_files.freeze
       self
     end
 
     def frozen?
-      datastreams.frozen?
+      attached_files.frozen?
     end
 
     protected

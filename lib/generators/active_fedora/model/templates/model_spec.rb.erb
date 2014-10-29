@@ -12,12 +12,12 @@ describe <%= class_name %> do
     before { subject.save! }
     after { subject.destroy }
     it 'should exist' do
-      <%= class_name %>.exists?(subject.pid).should be_true
+      expect(<%= class_name %>.exists?(subject.pid)).to be true
     end
   end
 
   it 'should have a descMetadata datastream' do
-    subject.descMetadata.should be_kind_of <%= options['descMetadata'] ? options['descMetadata'] : "#{class_name}Metadata" %>
+    expect(subject.descMetadata).to be_kind_of <%= options['descMetadata'] ? options['descMetadata'] : "#{class_name}Metadata" %>
   end
 
 end

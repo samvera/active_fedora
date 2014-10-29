@@ -36,7 +36,7 @@ describe 'bugs' do
 
 
     x = FooHistory.find(@test_object.pid)
-    x.someData.fubar.should == ["replacement"] # recall the value
+    expect(x.someData.fubar).to eq ["replacement"] # recall the value
     x.save
   end
 end

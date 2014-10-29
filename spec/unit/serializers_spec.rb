@@ -14,7 +14,7 @@ describe ActiveFedora::Attributes::Serializers do
     subject { Foo.new }
     it "should deserialize dates" do
       subject.attributes = {'birthday(1i)' =>'2012', 'birthday(2i)' =>'10', 'birthday(3i)' => '31'}
-      subject.birthday.should == '2012-10-31'
+      expect(subject.birthday).to eq '2012-10-31'
     end
   end
 
