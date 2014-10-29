@@ -118,7 +118,7 @@ module ActiveFedora
 
       # Attributes that are asserted about this RdfSource (not on a datastream)
       def local_attributes
-        outgoing_reflections.values.map { |reflection| reflection.foreign_key.to_s } + properties.keys - ['has_model', 'create_date', 'modified_date', 'ldp_member', 'ldp_contains']
+        outgoing_reflections.values.map { |reflection| reflection.foreign_key.to_s } + properties.keys - ['has_model', 'create_date', 'modified_date']
       end
 
       def defined_attributes
