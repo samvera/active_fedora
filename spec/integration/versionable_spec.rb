@@ -18,7 +18,7 @@ describe "a versionable class" do
     expect(subject).to be_versionable
   end
 
-  context "after saving" do
+  context "after saving", pending: true do
     before do
       subject.title = "Greetings Earthlings"
       subject.save
@@ -115,11 +115,12 @@ describe "a versionable rdf datastream" do
         expect(subject.title).to be_empty
       end
       it "should not have a size" do
+        pending
         expect(subject.size).to be_nil
       end
     end
 
-    context "after creating the datastream" do
+    context "after creating the datastream", pending: true do
       before do
         subject.title = "Greetings Earthlings"
         subject.save
@@ -252,11 +253,12 @@ describe "a versionable OM datastream" do
         expect(subject.title).to be_empty
       end
       it "should not have a size" do
+        pending
         expect(subject.size).to be_nil
       end
     end
 
-    context "after creating the datastream" do
+    context "after creating the datastream", pending: true do
       before do
         subject.title = "Greetings Earthlings"
         subject.save
@@ -352,7 +354,7 @@ end
 describe "a versionable binary datastream" do
   before(:all) do
     class BinaryDatastream < ActiveFedora::Datastream
-      has_many_versions 
+      has_many_versions
     end
 
     class MockAFBase < ActiveFedora::Base
@@ -384,7 +386,7 @@ describe "a versionable binary datastream" do
       end
     end
 
-    context "after creating the datastream" do
+    context "after creating the datastream", pending: true do
       let(:first_file) { File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" )) }
       let(:first_name) { "dino.jpg" }
       before do
