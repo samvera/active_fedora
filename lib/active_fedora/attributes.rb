@@ -88,19 +88,19 @@ module ActiveFedora
     # the callback methods seem to trigger this, which means just initing an object (after_init)
     # causes a load of all the datastreams.
     def attribute_method?(attr_name) #:nodoc:
-      respond_to_without_attributes?(:attributes) && self.class.defined_attributes.include?(attr_name)
+      respond_to_without_attributes?(:attributes) && self.class.delegated_attributes.include?(attr_name)
     end
 
     private
     def array_reader(field, *args)
-      raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
+      raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.delegated_attributes.key?(field)
 
-      val = self.class.defined_attributes[field].reader(self, *args)
+      val = self.class.delegated_attributes[field].reader(self, *args)
       self.class.multiple?(field) ? val : val.first
     end
 
     def array_setter(field, args)
-      raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
+      raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.delegated_attributes.key?(field)
       if self.class.multiple?(field)
         if args.present? && !args.respond_to?(:each)
           raise ArgumentError, "You attempted to set the attribute `#{field}' on `#{self.class}' to a scalar value. However, this attribute is declared as being multivalued."
@@ -108,12 +108,12 @@ module ActiveFedora
       elsif args.respond_to?(:each) # singular
         raise ArgumentError, "You attempted to set the attribute `#{field}' on `#{self.class}' to an enumerable value. However, this attribute is declared as being singular."
       end
-      self.class.defined_attributes[field].writer(self, args)
+      self.class.delegated_attributes[field].writer(self, args)
     end
 
     module ClassMethods
       def attribute_names
-        @attribute_names ||= defined_attributes.keys + local_attributes
+        @attribute_names ||= delegated_attributes.keys + local_attributes
       end
 
       # Attributes that are asserted about this RdfSource (not on a datastream)
@@ -122,14 +122,19 @@ module ActiveFedora
       end
 
       def defined_attributes
-        @defined_attributes ||= {}.with_indifferent_access
-        return @defined_attributes unless superclass.respond_to?(:defined_attributes) and value = superclass.defined_attributes
-        @defined_attributes = value.dup if @defined_attributes.empty?
-        @defined_attributes
+        Deprecation.warn Attributes, "defined_attributes has been renamed to delegated_attributes. defined_attributes will be removed in ActiveFedora 9"
+        delegated_attributes
       end
 
-      def defined_attributes= val
-        @defined_attributes = val
+      def delegated_attributes
+        @delegated_attributes ||= {}.with_indifferent_access
+        return @delegated_attributes unless superclass.respond_to?(:delegated_attributes) and value = superclass.delegated_attributes
+        @delegated_attributes = value.dup if @delegated_attributes.empty?
+        @delegated_attributes
+      end
+
+      def delegated_attributes= val
+        @delegated_attributes = val
       end
 
       def has_attributes(*fields)
@@ -154,11 +159,11 @@ module ActiveFedora
       # @param [Symbol] field the field to query
       # @return [Boolean]
       def multiple?(field)
-        defined_attributes[field].multiple
+        delegated_attributes[field].multiple
       end
 
       def find_or_create_defined_attribute(field, dsid, args)
-        self.defined_attributes[field] ||= DatastreamAttribute.new(field, dsid, datastream_class_for_name(dsid), args)
+        self.delegated_attributes[field] ||= DatastreamAttribute.new(field, dsid, datastream_class_for_name(dsid), args)
       end
 
       private

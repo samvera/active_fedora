@@ -256,7 +256,7 @@ module ActiveFedora
     def condition_to_clauses(key, value)
       unless value.nil?
         # if the key is a property name, turn it into a solr field
-        if @klass.defined_attributes.key?(key)
+        if @klass.delegated_attributes.key?(key)
           # TODO Check to see if `key' is a possible solr field for this class, if it isn't try :searchable instead
           key = ActiveFedora::SolrService.solr_name(key, :stored_searchable, type: :string)
         end

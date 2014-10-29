@@ -18,15 +18,15 @@ describe "An object with RDF backed attributes" do
     end
   end
 
-  after do 
+  after do
     Object.send(:remove_const, :TestOne)
   end
 
   it "should be able to grab the solr name" do
-    expect(TestOne.defined_attributes[:title].primary_solr_name).to eq 'desc_metadata__title_tesim'
+    expect(TestOne.delegated_attributes[:title].primary_solr_name).to eq 'desc_metadata__title_tesim'
   end
 
   it "should be able to grab the solr name for a date" do
-    expect(TestOne.defined_attributes[:date_uploaded].primary_solr_name).to eq 'desc_metadata__date_uploaded_dtsim'
+    expect(TestOne.delegated_attributes[:date_uploaded].primary_solr_name).to eq 'desc_metadata__date_uploaded_dtsim'
   end
 end
