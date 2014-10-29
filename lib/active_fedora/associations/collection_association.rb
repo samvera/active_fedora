@@ -145,11 +145,8 @@ module ActiveFedora
         if attributes.is_a?(Array)
           attributes.collect { |attr| build(attr, &block) }
         else
-          # TODO make initialize take a block and then remove the tap
-          build_record(attributes).tap do |record|
-            block.call(record) if block_given?
-            add_to_target(record)
-            set_owner_attributes(record)
+          add_to_target(build_record(attributes)) do |record|
+            yield(record) if block_given?
           end
         end
       end
