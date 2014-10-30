@@ -49,7 +49,7 @@ describe "NestedAttribute behavior" do
   it "should update the child objects" do
     @car, @bar1, @bar2 = create_car_with_bars
 
-    @car.attributes = {bars_attributes: [{id: @bar1.pid, uno: "bar1 uno"}, {uno: "newbar uno"}, {id: @bar2.pid, _destroy: '1', uno: 'bar2 uno'}]}
+    @car.update bars_attributes: [{id: @bar1.pid, uno: "bar1 uno"}, {uno: "newbar uno"}, {id: @bar2.pid, _destroy: '1', uno: 'bar2 uno'}]
     expect(Bar.find(@bar1.pid).uno).to eq 'bar1 uno'
     expect(Bar.where(:id => @bar2.pid).first).to be_nil
     expect(Bar.where(:uno => "newbar uno").first).to_not be_nil
@@ -63,7 +63,7 @@ describe "NestedAttribute behavior" do
     @car, @bar1, @bar2 = create_car_with_bars(CarAllBlank)
 
     expect(@car.bars.count).to eq 2
-    @car.attributes = {:bars_attributes=>[{}, {:id=>@bar1.pid, :uno=>"bar1 uno"}]}
+    @car.update bars_attributes: [{}, {:id=>@bar1.pid, :uno=>"bar1 uno"}]
     expect(@car.bars(true).count).to eq 2
 
     @bar1.reload
@@ -73,7 +73,7 @@ describe "NestedAttribute behavior" do
   it "should reject attributes based on proc" do
     @car, @bar1, @bar2 = create_car_with_bars(CarProc)
 
-    @car.attributes = {:bars_attributes=>[{}, {:id=>@bar1.pid, :uno=>"bar1 uno"}, {:id=>@bar2.pid, :dos=>"bar2 dos"}]}
+    @car.update bars_attributes: [{}, {:id=>@bar1.pid, :uno=>"bar1 uno"}, {:id=>@bar2.pid, :dos=>"bar2 dos"}]
     @bar1.reload
     @bar2.reload
     expect(@bar1.uno).to eq "bar1 uno"
@@ -83,7 +83,7 @@ describe "NestedAttribute behavior" do
   it "should reject attributes base on method name" do
     @car, @bar1, @bar2 = create_car_with_bars(CarSymbol)
 
-    @car.attributes = {:bars_attributes=>[{}, {:id=>@bar1.pid, :uno=>"bar1 uno"}, {:id=>@bar2.pid, :dos=>"bar2 dos"}]}
+    @car.update bars_attributes: [{}, {:id=>@bar1.pid, :uno=>"bar1 uno"}, {:id=>@bar2.pid, :dos=>"bar2 dos"}]
     @bar1.reload
     @bar2.reload
     expect(@bar1.uno).to eq "bar1 uno"
