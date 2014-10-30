@@ -25,14 +25,14 @@ describe "Nested Rdf Objects" do
     describe "#new_record?" do
       it "should be true when its built" do
         v = ds.parts.build(label: 'Alternator')
-        v.should be_new_record
+        expect(v).to be_new_record
       end
 
       it "should not be new when it's loaded from fedora" do
         ds.content = '_:g70324142325120 <http://purl.org/dc/terms/title> "Alternator" .
 <http://localhost:8983/fedora/rest/test/test:124> <http://purl.org/dc/terms/hasPart> _:g70324142325120 .'
         ds.resource.persist!
-        ds.parts.first.should_not be_new_record
+        expect(ds.parts.first).to_not be_new_record
       end
     end
 
@@ -40,24 +40,24 @@ describe "Nested Rdf Objects" do
       comp = SpecDatastream::Component.new(ds.graph)
       comp.label = ["Alternator"]
       ds.parts = comp
-      ds.parts.first.label.should == ["Alternator"]
+      expect(ds.parts.first.label).to eq ["Alternator"]
     end
 
     it "should be able to replace attributes" do
       v = ds.parts.build(label: 'Alternator')
-      ds.parts.first.label.should == ['Alternator']
+      expect(ds.parts.first.label).to eq ['Alternator']
       ds.parts.first.label = ['Distributor']
-      ds.parts.first.label.should == ['Distributor']
+      expect(ds.parts.first.label).to eq ['Distributor']
     end
 
     it "should be able to replace objects" do
       ds.parts.build(label: 'Alternator')
       ds.parts.build(label: 'Distributor')
-      ds.parts.size.should == 2
+      expect(ds.parts.size).to eq 2
       comp = SpecDatastream::Component.new(ds.graph)
       comp.label = "Injector port"
       ds.parts = [comp]
-      ds.parts.size.should == 1
+      expect(ds.parts.size).to eq 1
     end
 
     it "should be able to nest many complex objects" do
@@ -66,8 +66,8 @@ describe "Nested Rdf Objects" do
       comp2 = SpecDatastream::Component.new ds.graph
       comp2.label = ["Crankshaft"]
       ds.parts = [comp1, comp2]
-      ds.parts.first.label.should == ["Alternator"]
-      ds.parts.last.label.should == ["Crankshaft"]
+      expect(ds.parts.first.label).to eq ["Alternator"]
+      expect(ds.parts.last.label).to eq ["Crankshaft"]
     end
 
     it "should be able to clear complex objects" do
@@ -77,7 +77,7 @@ describe "Nested Rdf Objects" do
       comp2.label = ["Crankshaft"]
       ds.parts = [comp1, comp2]
       ds.parts = []
-      ds.parts.should == []
+      expect(ds.parts).to eq []
     end
 
     it "should load complex objects" do
@@ -87,41 +87,41 @@ _:g70350851837440 <http://purl.org/dc/terms/title> "Alternator" .
 <http://localhost:8983/fedora/rest/test/test:124> <http://purl.org/dc/terms/hasPart> _:g70350851833380 .
 _:g70350851833380 <http://purl.org/dc/terms/title> "Crankshaft" .
 END
-      ds.parts.first.label.should == ["Alternator"]
+      expect(ds.parts.first.label).to eq ["Alternator"]
     end
 
     it "should build complex objects when a parent node doesn't exist" do
       part = ds.parts.build
-      part.should be_kind_of SpecDatastream::Component
+      expect(part).to be_kind_of SpecDatastream::Component
       part.label = "Wheel bearing"
-      ds.parts.first.label.should == ['Wheel bearing']
+      expect(ds.parts.first.label).to eq ['Wheel bearing']
     end
 
     it "should not create a child node when hitting the accessor" do
       ds.parts
-      ds.parts.first.should be_nil
-      ds.serialize.should == ''
+      expect(ds.parts.first).to be_nil
+      expect(ds.serialize).to eq ''
     end
 
     it "should build complex objects when a parent node exists" do
       part = ds.parts.build
-      part.should be_kind_of SpecDatastream::Component
+      expect(part).to be_kind_of SpecDatastream::Component
       part.label = "Wheel bearing"
-      ds.parts.first.label.should == ['Wheel bearing']
+      expect(ds.parts.first.label).to eq ['Wheel bearing']
     end
 
     describe "#first_or_create" do
       it "should return a result if the predicate exists" do
         part1 = ds.parts.build
         part2 = ds.parts.build
-        ds.parts.first_or_create.should == part1
+        expect(ds.parts.first_or_create).to eq part1
       end
 
       it "should create a new result if the predicate doesn't exist" do
-        ds.parts.should == []
+        expect(ds.parts).to eq []
         part = ds.parts.first_or_create(label: 'Front control arm bushing')
-        part.label.should == ['Front control arm bushing']
-        ds.parts.should == [part]
+        expect(part.label).to eq ['Front control arm bushing']
+        expect(ds.parts).to eq [part]
       end
 
     end
@@ -152,9 +152,9 @@ END
         comp = SpecDatastream::MediatorUser.new ds.graph
         comp.title = ["Doctor"]
         ds.mediator = comp
-        ds.mediator.first.type.first.should be_instance_of RDF::URI
-        ds.mediator.first.type.first.to_s.should == "http://purl.org/dc/terms/AgentClass"
-        ds.mediator.first.title.first.should == 'Doctor'
+        expect(ds.mediator.first.type.first).to be_instance_of RDF::URI
+        expect(ds.mediator.first.type.first.to_s).to eq "http://purl.org/dc/terms/AgentClass"
+        expect(ds.mediator.first.title.first).to eq 'Doctor'
       end
 
       it "should add the type of complex object when it is not provided" do
@@ -162,7 +162,7 @@ END
   _:g70350851837440 <http://purl.org/dc/terms/title> "Mediation Person" .
   <http://localhost:8983/fedora/rest/test/test:124> <http://purl.org/dc/terms/mediator> _:g70350851837440 .
 END
-        ds.mediator.first.type.first.to_s.should == "http://purl.org/dc/terms/AgentClass"
+        expect(ds.mediator.first.type.first.to_s).to eq "http://purl.org/dc/terms/AgentClass"
       end
 
       it "should add load the type of complex objects when provided (superceeding what is specified by the class)" do
@@ -171,7 +171,7 @@ END
   _:g70350851837440 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.ebu.ch/metadata/ontologies/ebucore#Organisation> .
   <http://localhost:8983/fedora/rest/test/test:124> <http://purl.org/dc/terms/mediator> _:g70350851837440 .
 END
-        ds.mediator.first.type.first.to_s.should == "http://www.ebu.ch/metadata/ontologies/ebucore#Organisation"
+        expect(ds.mediator.first.type.first.to_s).to eq "http://www.ebu.ch/metadata/ontologies/ebucore#Organisation"
       end
     end
 
@@ -216,15 +216,15 @@ END
         program.title = ["This old House"]
         ds.program = program
 
-        ds.program.first.type.size.should == 1
-        ds.program.first.type.first.to_s.should == 'http://www.ebu.ch/metadata/ontologies/ebucore#Programme'
-        ds.series.first.type.size.should == 1
-        ds.series.first.type.first.to_s.should == 'http://www.ebu.ch/metadata/ontologies/ebucore#Series'
+        expect(ds.program.first.type.size).to eq 1
+        expect(ds.program.first.type.first.to_s).to eq 'http://www.ebu.ch/metadata/ontologies/ebucore#Programme'
+        expect(ds.series.first.type.size).to eq 1
+        expect(ds.series.first.type.first.to_s).to eq 'http://www.ebu.ch/metadata/ontologies/ebucore#Series'
       end
 
       it "should create an object of the correct type" do
-        ds.program.build.should be_kind_of SpecDatastream::Program
-        ds.series.build.should be_kind_of SpecDatastream::Series
+        expect(ds.program.build).to be_kind_of SpecDatastream::Program
+        expect(ds.series.build).to be_kind_of SpecDatastream::Series
       end
     end
   end

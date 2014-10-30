@@ -20,10 +20,10 @@ describe ActiveFedora::Base do
   end
   describe "load_from_solr" do
     it "should set rows to count, if not specified" do
-      library.books(response_format: :solr).size.should == 2
+      expect(library.books(response_format: :solr).size).to eq 2
     end
     it "should limit rows returned if option passed" do
-      library.books(response_format: :solr, rows: 1).size.should == 1
+      expect(library.books(response_format: :solr, rows: 1).size).to eq 1
     end
   end
 

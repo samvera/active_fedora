@@ -6,7 +6,7 @@ RSpec::Matchers.define :have_many_associated_active_fedora_objects do |associati
     if @association_name.nil? || !@expected_objects.respond_to?(:count)
       raise(
         ArgumentError,
-        "subject.should have_many_associated_active_fedora_objects(<association_name>).with_objects(<objects[]>)"
+        "expect(subject).to have_many_associated_active_fedora_objects(<association_name>).with_objects(<objects[]>)"
       )
     end
 

@@ -10,28 +10,28 @@ describe ActiveFedora::SolrService do
   end
   
   it "should take a narg constructor and configure for localhost" do
-    RSolr.should_receive(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://localhost:8080/solr')
+    expect(RSolr).to receive(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://localhost:8080/solr')
     ActiveFedora::SolrService.register
   end
   it "should accept host arg into constructor" do
-    RSolr.should_receive(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://fubar')
+    expect(RSolr).to receive(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://fubar')
     ActiveFedora::SolrService.register('http://fubar')
   end
   it "should clobber options" do
-    RSolr.should_receive(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://localhost:8080/solr', :autocommit=>:off, :foo=>:bar)
+    expect(RSolr).to receive(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://localhost:8080/solr', :autocommit=>:off, :foo=>:bar)
     ActiveFedora::SolrService.register(nil, {:autocommit=>:off, :foo=>:bar})
   end
 
   it "should set the threadlocal solr service" do
-    RSolr.should_receive(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://localhost:8080/solr', :autocommit=>:off, :foo=>:bar)
+    expect(RSolr).to receive(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://localhost:8080/solr', :autocommit=>:off, :foo=>:bar)
     ss = ActiveFedora::SolrService.register(nil, {:autocommit=>:off, :foo=>:bar})
-    Thread.current[:solr_service].should == ss
-    ActiveFedora::SolrService.instance.should == ss
+    expect(Thread.current[:solr_service]).to eq ss
+    expect(ActiveFedora::SolrService.instance).to eq ss
   end
   it "should try to initialize if the service not initialized, and fail if it does not succeed" do
-    Thread.current[:solr_service].should be_nil
-    ActiveFedora::SolrService.should_receive(:register)
-    proc{ActiveFedora::SolrService.instance}.should raise_error(ActiveFedora::SolrNotInitialized)
+    expect(Thread.current[:solr_service]).to be_nil
+    expect(ActiveFedora::SolrService).to receive(:register)
+    expect(proc{ActiveFedora::SolrService.instance}).to raise_error(ActiveFedora::SolrNotInitialized)
   end
 
   describe "reify solr results" do
@@ -47,23 +47,23 @@ describe ActiveFedora::SolrService do
     end
     describe ".reify_solr_result" do
       it "should use .find to instantiate objects" do
-        AudioRecord.should_receive(:find).with("my:_PID1_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_PID1_", cast: true)
         ActiveFedora::SolrService.reify_solr_result(@sample_solr_hits.first)
       end
     end
     describe ".reify_solr_results" do
       it "should use AudioRecord.find to instantiate objects" do
-        AudioRecord.should_receive(:find).with("my:_PID1_", cast: true)
-        AudioRecord.should_receive(:find).with("my:_PID2_", cast: true)
-        AudioRecord.should_receive(:find).with("my:_PID3_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_PID1_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_PID2_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_PID3_", cast: true)
         ActiveFedora::SolrService.reify_solr_results(@sample_solr_hits)
       end
     end
     describe ".lazy_reify_solr_results" do
       it "should lazily reify solr results" do
-        AudioRecord.should_receive(:find).with("my:_PID1_", cast: true)
-        AudioRecord.should_receive(:find).with("my:_PID2_", cast: true)
-        AudioRecord.should_receive(:find).with("my:_PID3_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_PID1_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_PID2_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_PID3_", cast: true)
         ActiveFedora::SolrService.lazy_reify_solr_results(@sample_solr_hits).each {|r| r}
       end
     end
@@ -77,11 +77,11 @@ describe ActiveFedora::SolrService do
   
   describe '#construct_query_for_pids' do
     it "should generate a useable solr query from an array of Fedora pids" do
-      ActiveFedora::SolrService.construct_query_for_pids(["my:_PID1_", "my:_PID2_", "my:_PID3_"]).should == '_query_:"{!raw f=id}my:_PID1_" OR _query_:"{!raw f=id}my:_PID2_" OR _query_:"{!raw f=id}my:_PID3_"'
+      expect(ActiveFedora::SolrService.construct_query_for_pids(["my:_PID1_", "my:_PID2_", "my:_PID3_"])).to eq '_query_:"{!raw f=id}my:_PID1_" OR _query_:"{!raw f=id}my:_PID2_" OR _query_:"{!raw f=id}my:_PID3_"'
 
     end
     it "should return a valid solr query even if given an empty array as input" do
-      ActiveFedora::SolrService.construct_query_for_pids([""]).should == "id:NEVER_USE_THIS_ID"
+      expect(ActiveFedora::SolrService.construct_query_for_pids([""])).to eq "id:NEVER_USE_THIS_ID"
       
     end
   end
@@ -90,32 +90,32 @@ describe ActiveFedora::SolrService do
     it "should call solr" do 
       mock_conn = double("Connection")
       stub_result = double("Result")
-      mock_conn.should_receive(:get).with('select', :params=>{:q=>'querytext', :qt=>'standard'}).and_return(stub_result)
+      expect(mock_conn).to receive(:get).with('select', :params=>{:q=>'querytext', :qt=>'standard'}).and_return(stub_result)
       ActiveFedora::SolrService.stub(:instance =>double("instance", :conn=>mock_conn))
-      ActiveFedora::SolrService.query('querytext', :raw=>true).should == stub_result
+      expect(ActiveFedora::SolrService.query('querytext', :raw=>true)).to eq stub_result
     end
   end
   describe ".count" do
     it "should return a count of matching records" do 
       mock_conn = double("Connection")
       stub_result = {'response' => {'numFound'=>'7'}}
-      mock_conn.should_receive(:get).with('select', :params=>{:rows=>0, :q=>'querytext', :qt=>'standard'}).and_return(stub_result)
+      expect(mock_conn).to receive(:get).with('select', :params=>{:rows=>0, :q=>'querytext', :qt=>'standard'}).and_return(stub_result)
       ActiveFedora::SolrService.stub(:instance =>double("instance", :conn=>mock_conn))
-      ActiveFedora::SolrService.count('querytext').should == 7 
+      expect(ActiveFedora::SolrService.count('querytext')).to eq 7 
     end
     it "should accept query args" do
       mock_conn = double("Connection")
       stub_result = {'response' => {'numFound'=>'7'}}
-      mock_conn.should_receive(:get).with('select', :params=>{:rows=>0, :q=>'querytext', :qt=>'standard', :fq=>'filter'}).and_return(stub_result)
+      expect(mock_conn).to receive(:get).with('select', :params=>{:rows=>0, :q=>'querytext', :qt=>'standard', :fq=>'filter'}).and_return(stub_result)
       ActiveFedora::SolrService.stub(:instance =>double("instance", :conn=>mock_conn))
-      ActiveFedora::SolrService.count('querytext', :fq=>'filter', :rows=>10).should == 7 
+      expect(ActiveFedora::SolrService.count('querytext', :fq=>'filter', :rows=>10)).to eq 7 
     end
   end
   describe ".add" do
     it "should call solr" do 
       mock_conn = double("Connection")
       doc = {'id' => '1234'}
-      mock_conn.should_receive(:add).with(doc, {:params=>{}})
+      expect(mock_conn).to receive(:add).with(doc, {:params=>{}})
       ActiveFedora::SolrService.stub(:instance =>double("instance", :conn=>mock_conn))
       ActiveFedora::SolrService.add(doc)
     end
@@ -124,7 +124,7 @@ describe ActiveFedora::SolrService do
     it "should call solr" do 
       mock_conn = double("Connection")
       doc = {'id' => '1234'}
-      mock_conn.should_receive(:commit)
+      expect(mock_conn).to receive(:commit)
       ActiveFedora::SolrService.stub(:instance =>double("instance", :conn=>mock_conn))
       ActiveFedora::SolrService.commit()
     end

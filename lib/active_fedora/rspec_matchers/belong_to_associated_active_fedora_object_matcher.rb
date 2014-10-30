@@ -5,7 +5,7 @@ RSpec::Matchers.define :belong_to_associated_active_fedora_object do |associatio
     if @association_name.nil? || @expected_object.nil?
       raise(
         ArgumentError,
-        "subject.should belong_to_associated_active_fedora_object(<association_name>).with_object(<object>)"
+        "expect(subject).to belong_to_associated_active_fedora_object(<association_name>).with_object(<object>)"
       )
     end
 

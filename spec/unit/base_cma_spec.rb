@@ -9,8 +9,8 @@ describe ActiveFedora::Base do
   describe '.save' do
 
     it "should add hasModel relationship that points to the CModel if @new_object" do
-      @test_object.stub(:update_index)
-      @test_object.should_receive(:refresh)
+      allow(@test_object).to receive(:update_index)
+      expect(@test_object).to receive(:refresh)
       @test_object.save
     end
   end

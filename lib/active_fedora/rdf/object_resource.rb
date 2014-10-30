@@ -1,7 +1,7 @@
 module ActiveFedora::Rdf
   ##
   # A class of RdfResources to act as the primary/root resource associated
-  # with a Datastream and ActiveFedora::Base object.
+  # with a ActiveFedora::File and ActiveFedora::Base object.
   #
   # @see ActiveFedora::RDFDatastream
   class ObjectResource < ActiveTriples::Resource

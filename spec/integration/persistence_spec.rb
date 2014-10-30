@@ -16,7 +16,7 @@ describe "persisting objects" do
 
   describe "#create!" do
     it "should validate" do
-      lambda { MockAFBaseRelationship.create!}.should raise_error ActiveFedora::RecordInvalid, "Validation failed: Name can't be blank"
+      expect { MockAFBaseRelationship.create!}.to raise_error ActiveFedora::RecordInvalid, "Validation failed: Name can't be blank"
     end
   end
 end

@@ -48,6 +48,7 @@ module ActiveFedora #:nodoc:
   eager_autoload do
     autoload :AssociationRelation
     autoload :Associations
+    autoload :AttachedFiles
     autoload :AttributeMethods
     autoload :Attributes
     autoload :AutosaveAssociation
@@ -56,12 +57,13 @@ module ActiveFedora #:nodoc:
     autoload :Config
     autoload :Core
     autoload :Datastream
-    autoload :DatastreamAttribute
-    autoload :DatastreamHash
     autoload :Datastreams
+    autoload :DelegatedAttribute
     autoload :Fedora
     autoload :FedoraAttributes
+    autoload :File
     autoload :FileConfigurator
+    autoload :FilesHash
     autoload :Indexing
     autoload :LdpResource
     autoload :LoadableFromJson
@@ -198,7 +200,7 @@ module ActiveFedora #:nodoc:
     end
 
     def root
-      File.expand_path('../..', __FILE__)
+      ::File.expand_path('../..', __FILE__)
     end
 
     def version
@@ -235,6 +237,6 @@ module ActiveFedora #:nodoc:
 end
 
 
-I18n.load_path << File.dirname(__FILE__) + '/active_fedora/locale/en.yml'
+I18n.load_path << ::File.dirname(__FILE__) + '/active_fedora/locale/en.yml'
 
 require 'active_fedora/railtie' if defined?(Rails)

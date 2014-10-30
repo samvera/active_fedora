@@ -20,23 +20,23 @@ describe ActiveFedora::Base do
     describe "called on a concrete class" do
       let(:relation) { ActiveFedora::Relation.new(SpecModel::Basic) }
       it "should query solr for all objects with :has_model_s of self.class" do
-        relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return("Fake Object1")
-        relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return("Fake Object2")
+        expect(relation).to receive(:load_from_fedora).with("changeme:30", nil).and_return("Fake Object1")
+        expect(relation).to receive(:load_from_fedora).with("changeme:22", nil).and_return("Fake Object2")
         mock_docs = [{"id" => "changeme:30"}, {"id" => "changeme:22"}]
-        mock_docs.should_receive(:has_next?).and_return(false)
-        ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
-        SpecModel::Basic.all.should == ["Fake Object1", "Fake Object2"]
+        expect(mock_docs).to receive(:has_next?).and_return(false)
+        expect(ActiveFedora::SolrService.instance.conn).to receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
+        expect(SpecModel::Basic.all).to eq ["Fake Object1", "Fake Object2"]
       end
     end
     describe "called without a specific class" do
       let(:relation) { ActiveFedora::Relation.new(ActiveFedora::Base) }
       it "should specify a q parameter" do
-        relation.should_receive(:load_from_fedora).with("changeme:30", true).and_return("Fake Object1")
-        relation.should_receive(:load_from_fedora).with("changeme:22", true).and_return("Fake Object2")
+        expect(relation).to receive(:load_from_fedora).with("changeme:30", true).and_return("Fake Object1")
+        expect(relation).to receive(:load_from_fedora).with("changeme:22", true).and_return("Fake Object2")
         mock_docs = [{"id" => "changeme:30"},{"id" => "changeme:22"}]
-        mock_docs.should_receive(:has_next?).and_return(false)
-        ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>'*:*', :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
-        ActiveFedora::Base.all.should == ["Fake Object1", "Fake Object2"]
+        expect(mock_docs).to receive(:has_next?).and_return(false)
+        expect(ActiveFedora::SolrService.instance.conn).to receive(:paginate).with(1, 1000, 'select', :params=>{:q=>'*:*', :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
+        expect(ActiveFedora::Base.all).to eq ["Fake Object1", "Fake Object2"]
       end
     end
   end
@@ -62,29 +62,29 @@ describe ActiveFedora::Base do
       let(:mock_docs) { [{"id" => "changeme:30"},{"id" => "changeme:22"}] }
 
       it "should filter by the provided fields" do
-        relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return("Fake Object1")
-        relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return("Fake Object2")
+        expect(relation).to receive(:load_from_fedora).with("changeme:30", nil).and_return("Fake Object1")
+        expect(relation).to receive(:load_from_fedora).with("changeme:22", nil).and_return("Fake Object2")
 
-        mock_docs.should_receive(:has_next?).and_return(false)
+        expect(mock_docs).to receive(:has_next?).and_return(false)
         expect(solr).to receive(:paginate).with(1, 1000, 'select', expected_params).and_return('response'=>{'docs'=>mock_docs})
-        SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}).should == ["Fake Object1", "Fake Object2"]
+        expect(SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']})).to eq ["Fake Object1", "Fake Object2"]
       end
 
       it "should correctly query for empty strings" do
-        SpecModel::Basic.find( :active_fedora_model_ssi => '').count.should == 0
+        expect(SpecModel::Basic.find( :active_fedora_model_ssi => '').count).to eq 0
       end
 
       it 'should correctly query for empty arrays' do
-        SpecModel::Basic.find( :active_fedora_model_ssi => []).count.should == 0
+        expect(SpecModel::Basic.find( :active_fedora_model_ssi => []).count).to eq 0
       end
 
       it "should add options" do
-        relation.should_receive(:load_from_fedora).with("changeme:30", nil).and_return("Fake Object1")
-        relation.should_receive(:load_from_fedora).with("changeme:22", nil).and_return("Fake Object2")
+        expect(relation).to receive(:load_from_fedora).with("changeme:30", nil).and_return("Fake Object1")
+        expect(relation).to receive(:load_from_fedora).with("changeme:22", nil).and_return("Fake Object2")
 
-        mock_docs.should_receive(:has_next?).and_return(false)
+        expect(mock_docs).to receive(:has_next?).and_return(false)
         expect(solr).to receive(:paginate).with(1, 1000, 'select', expected_params).and_return('response'=>{'docs'=>mock_docs})
-        SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}, :sort=>'title_t desc').should == ["Fake Object1", "Fake Object2"]
+        expect(SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}, :sort=>'title_t desc')).to eq ["Fake Object1", "Fake Object2"]
       end
     end
   end
@@ -95,8 +95,8 @@ describe ActiveFedora::Base do
     let(:relation) { ActiveFedora::Relation.new(SpecModel::Basic) }
     it "should query solr for all objects with :active_fedora_model_s of self.class" do
       mock_docs = [{"id" => "changeme-30"},{"id" => "changeme-22"}]
-      mock_docs.should_receive(:has_next?).and_return(false)
-      ActiveFedora::SolrService.instance.conn.should_receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
+      expect(mock_docs).to receive(:has_next?).and_return(false)
+      expect(ActiveFedora::SolrService.instance.conn).to receive(:paginate).with(1, 1000, 'select', :params=>{:q=>@model_query, :qt => 'standard', :sort => [@sort_query], :fl=> 'id', }).and_return('response'=>{'docs'=>mock_docs})
 
       allow(relation).to receive(:load_from_fedora).with("changeme-30", nil).and_return(SpecModel::Basic.new('changeme-30'))
       allow(relation).to receive(:load_from_fedora).with("changeme-22", nil).and_return(SpecModel::Basic.new('changeme-22'))
@@ -110,10 +110,10 @@ describe ActiveFedora::Base do
       let(:mock_docs) { [{"id" => "changeme-30"}, {"id" => "changeme-22"}] }
 
       it "should filter by the provided fields" do
-        relation.should_receive(:load_from_fedora).with("changeme-30", nil).and_return(SpecModel::Basic.new('changeme-30'))
-        relation.should_receive(:load_from_fedora).with("changeme-22", nil).and_return(SpecModel::Basic.new('changeme-22'))
+        expect(relation).to receive(:load_from_fedora).with("changeme-30", nil).and_return(SpecModel::Basic.new('changeme-30'))
+        expect(relation).to receive(:load_from_fedora).with("changeme-22", nil).and_return(SpecModel::Basic.new('changeme-22'))
 
-        mock_docs.should_receive(:has_next?).and_return(false)
+        expect(mock_docs).to receive(:has_next?).and_return(false)
         expect(solr).to receive(:paginate).with(1, 1000, 'select', expected_params).and_return('response'=>{'docs'=>mock_docs})
         SpecModel::Basic.find_each({:foo=>'bar', :baz=>['quix','quack']}){|obj| obj.class == SpecModel::Basic }
       end
@@ -128,11 +128,11 @@ describe ActiveFedora::Base do
       let(:mock_docs) { double('docs') }
 
       it "should filter by the provided fields" do
-        mock_docs.should_receive(:has_next?).and_return(false)
+        expect(mock_docs).to receive(:has_next?).and_return(false)
         expect(solr).to receive(:paginate).with(1, 1002, 'select', expected_params).and_return('response'=>{'docs'=>mock_docs})
         yielded = double("yielded method")
-        yielded.should_receive(:run).with(mock_docs)
-        SpecModel::Basic.find_in_batches({:foo=>'bar', :baz=>['quix','quack']}, {:batch_size=>1002, :fl=>'id'}){|group| yielded.run group }.should
+        expect(yielded).to receive(:run).with(mock_docs)
+        SpecModel::Basic.find_in_batches({:foo=>'bar', :baz=>['quix','quack']}, {:batch_size=>1002, :fl=>'id'}){|group| yielded.run group }
       end
     end
   end
@@ -141,19 +141,19 @@ describe ActiveFedora::Base do
     
     it "should return a count" do
       mock_result = {'response'=>{'numFound'=>7}}
-      ActiveFedora::SolrService.should_receive(:query).with(@model_query, :rows=>0, :raw=>true).and_return(mock_result)
-      SpecModel::Basic.count.should == 7
+      expect(ActiveFedora::SolrService).to receive(:query).with(@model_query, :rows=>0, :raw=>true).and_return(mock_result)
+      expect(SpecModel::Basic.count).to eq 7
     end
     it "should allow conditions" do
       mock_result = {'response'=>{'numFound'=>7}}
-      ActiveFedora::SolrService.should_receive(:query).with("#{@model_query} AND (foo:bar)", :rows=>0, :raw=>true).and_return(mock_result)
-      SpecModel::Basic.count(:conditions=>'foo:bar').should == 7
+      expect(ActiveFedora::SolrService).to receive(:query).with("#{@model_query} AND (foo:bar)", :rows=>0, :raw=>true).and_return(mock_result)
+      expect(SpecModel::Basic.count(:conditions=>'foo:bar')).to eq 7
     end
 
     it "should count without a class specified" do
       mock_result = {'response'=>{'numFound'=>7}}
-      ActiveFedora::SolrService.should_receive(:query).with("(foo:bar)", :rows=>0, :raw=>true).and_return(mock_result)
-      ActiveFedora::Base.count(:conditions=>'foo:bar').should == 7 
+      expect(ActiveFedora::SolrService).to receive(:query).with("(foo:bar)", :rows=>0, :raw=>true).and_return(mock_result)
+      expect(ActiveFedora::Base.count(:conditions=>'foo:bar')).to eq 7 
     end
   end
 

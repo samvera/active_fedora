@@ -1,8 +1,8 @@
 def mock_yaml(hash, path)
   mock_file = double(path.split("/")[-1])
-  File.stub(:exist?).with(path).and_return(true)
-  File.stub(:open).with(path).and_return(mock_file)
-  Psych.stub(:load).and_return(hash)
+  allow(File).to receive(:exist?).with(path).and_return(true)
+  allow(File).to receive(:open).with(path).and_return(mock_file)
+  allow(Psych).to receive(:load).and_return(hash)
 end
 
 def default_predicate_mapping_file
@@ -19,7 +19,7 @@ end
 def unstub_rails
   Object.send(:remove_const,:Rails) if defined?(Rails)
 end
-    
+
 def setup_pretest_env
   ENV['RAILS_ENV']='test'
   ENV['environment']='test'

@@ -38,16 +38,16 @@ describe ActiveFedora::Model do
     subject { ModelIntegrationSpec::Basic.where(bar: 'Peanuts') }
 
     it "should map" do
-      subject.map(&:id).should == [instance2.id, instance3.id]
+      expect(subject.map(&:id)).to eq [instance2.id, instance3.id]
     end
 
     it "should collect" do
-      subject.collect(&:id).should == [instance2.id, instance3.id]
+      expect(subject.collect(&:id)).to eq [instance2.id, instance3.id]
     end
 
     it "should have each" do
       t = double
-      t.should_receive(:foo).twice
+      expect(t).to receive(:foo).twice
       subject.each { t.foo }
     end
 

@@ -36,26 +36,30 @@ describe ActiveFedora::Base do
   end
 
   it "Should have after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
-    CallbackStub.any_instance.should_receive(:a_init)
-    CallbackStub.any_instance.should_receive :b_create
-    CallbackStub.any_instance.should_receive :a_create
-    CallbackStub.any_instance.should_receive(:b_save)
-    CallbackStub.any_instance.should_receive(:a_save)
+    allow_any_instance_of(CallbackStub).to receive(:a_init)
+    allow_any_instance_of(CallbackStub).to receive :b_create
+    allow_any_instance_of(CallbackStub).to receive :a_create
+    allow_any_instance_of(CallbackStub).to receive(:b_save)
+    allow_any_instance_of(CallbackStub).to receive(:a_save)
     @cb = CallbackStub.new 'test:123'
     @cb.save
   end
 
   it "Should have after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
-    CallbackStub.any_instance.stub({a_init: true, b_create: true, a_create: true, b_save: true, a_save: true})
+    allow_any_instance_of(CallbackStub).to receive(:a_init)
+    allow_any_instance_of(CallbackStub).to receive(:b_create)
+    allow_any_instance_of(CallbackStub).to receive(:a_create)
+    allow_any_instance_of(CallbackStub).to receive(:b_save)
+    allow_any_instance_of(CallbackStub).to receive(:a_save)
     @cb = CallbackStub.new 'test:123'
     @cb.save
-    CallbackStub.any_instance.should_receive(:a_init)
-    CallbackStub.any_instance.should_receive(:b_save)
-    CallbackStub.any_instance.should_receive(:a_save)
-    CallbackStub.any_instance.should_receive(:a_find)
-    CallbackStub.any_instance.should_receive(:b_update)
-    CallbackStub.any_instance.should_receive(:a_update)
-    CallbackStub.any_instance.should_receive(:do_stuff)
+    allow_any_instance_of(CallbackStub).to receive(:a_init)
+    allow_any_instance_of(CallbackStub).to receive(:b_save)
+    allow_any_instance_of(CallbackStub).to receive(:a_save)
+    allow_any_instance_of(CallbackStub).to receive(:a_find)
+    allow_any_instance_of(CallbackStub).to receive(:b_update)
+    allow_any_instance_of(CallbackStub).to receive(:a_update)
+    allow_any_instance_of(CallbackStub).to receive(:do_stuff)
 
     @cb = CallbackStub.find('test:123')
     @cb.save!

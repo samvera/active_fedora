@@ -11,17 +11,17 @@ describe RSpec::Matchers, "have_predicate_matcher" do
   let(:predicate) { :predicate }
 
   it 'should match when relationship is "what we have in Fedora"' do
-    subject.class.should_receive(:find).with(pid).and_return(subject)
-    subject.should_receive(:relationships).with(predicate).and_return([object1,object2])
-    subject.should have_predicate(predicate).with_objects([object1, object2])
+    expect(subject.class).to receive(:find).with(pid).and_return(subject)
+    expect(subject).to receive(:relationships).with(predicate).and_return([object1,object2])
+    expect(subject).to have_predicate(predicate).with_objects([object1, object2])
   end
 
   it 'should not match when relationship is different' do
-    subject.class.should_receive(:find).with(pid).and_return(subject)
-    subject.should_receive(:relationships).with(predicate).and_return([object1,object3])
-    lambda {
-      subject.should have_predicate(predicate).with_objects([object1, object2])
-    }.should (
+    expect(subject.class).to receive(:find).with(pid).and_return(subject)
+    expect(subject).to receive(:relationships).with(predicate).and_return([object1,object3])
+    expect {
+      expect(subject).to have_predicate(predicate).with_objects([object1, object2])
+    }.to (
       raise_error(
         RSpec::Expectations::ExpectationNotMetError,
         /expected #{subject.class} PID=#{pid} relationship: #{predicate.inspect}/
@@ -30,12 +30,12 @@ describe RSpec::Matchers, "have_predicate_matcher" do
   end
 
   it 'should require :with_objects option' do
-    lambda {
-      subject.should have_predicate(predicate)
-    }.should(
+    expect {
+      expect(subject).to have_predicate(predicate)
+    }.to(
       raise_error(
         ArgumentError,
-        "subject.should have_predicate(<predicate>).with_objects(<objects[]>)"
+          "expect(subject).to have_predicate(<predicate>).with_objects(<objects[]>)"
       )
     )
   end

@@ -64,11 +64,11 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
   it "should solrize even when the object is not new" do
     foo = RdfTest.new
-    foo.should_receive(:update_index).once
+    expect(foo).to receive(:update_index).once
     foo.title = "title1"
     foo.save
     foo = RdfTest.find(foo.pid)
-    foo.should_receive(:update_index).once
+    expect(foo).to receive(:update_index).once
     foo.title = "The Work2"
     foo.save
   end
@@ -76,13 +76,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "serializing" do
     it "should handle dates" do
       subject.date_uploaded = [Date.parse('2012-11-02')]
-      subject.date_uploaded.first.should be_kind_of Date
+      expect(subject.date_uploaded.first).to be_kind_of Date
       solr_document = subject.to_solr
       expect(solr_document[ActiveFedora::SolrService.solr_name('rdf__date_uploaded', type: :date)]).to eq ['2012-11-02T00:00:00Z']
     end
     it "should handle integers" do
       subject.size = 12345
-      subject.size.should be_kind_of Fixnum
+      expect(subject.size).to be_kind_of Fixnum
       solr_document = subject.to_solr
       expect(solr_document[ActiveFedora::SolrService.solr_name('rdf__size', :stored_sortable, type: :integer)]).to eq '12345'
     end
@@ -97,7 +97,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
   it "should set and recall values" do
     @subject.title = 'War and Peace'
-    @subject.rdf.should be_changed
+    expect(@subject.rdf).to be_changed
     @subject.based_near = ["Moscow, Russia"]
     @subject.related_url = ["http://en.wikipedia.org/wiki/War_and_Peace"]
     @subject.part = ["this is a part"]
@@ -185,8 +185,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.related_url << "http://projecthydra.org/"
 
     expect(@subject.title).to eq "Hamlet"
-    @subject.related_url.should include("http://psu.edu/")
-    @subject.related_url.should include("http://projecthydra.org/")
+    expect(@subject.related_url).to include("http://psu.edu/")
+    expect(@subject.related_url).to include("http://projecthydra.org/")
 
     @subject.title = "" #empty string can be meaningful, don't assume delete.
     expect(@subject.title).to eq ''
@@ -194,7 +194,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.title = nil
     @subject.related_url.delete("http://projecthydra.org/")
 
-    @subject.title.should be_nil
+    expect(@subject.title).to be_nil
     expect(@subject.related_url).to eq ["http://psu.edu/"]
   end
   it "should delete multiple values at once" do
@@ -233,7 +233,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       expect(@subject.title.count).to eq 3
     end
     it "should iterate over multiple values" do
-      @subject.title.should respond_to(:each)
+      expect(@subject.title).to respond_to(:each)
     end
     it "should get the first value" do
       expect(@subject.title.first).to eq "title1"

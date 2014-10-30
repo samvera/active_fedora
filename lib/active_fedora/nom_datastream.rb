@@ -1,22 +1,22 @@
 require  "nom"
 
 module ActiveFedora
-  class NomDatastream < Datastream
+  class NomDatastream < File
 
-      include Datastreams::NokogiriDatastreams
+    include Datastreams::NokogiriDatastreams
 
-      def self.set_terminology(options = {}, &block)
-        @terminology_options = options || {}
-        @terminology = block
-      end
+    def self.set_terminology(options = {}, &block)
+      @terminology_options = options || {}
+      @terminology = block
+    end
 
-      def self.terminology_options
-        @terminology_options
-      end
+    def self.terminology_options
+      @terminology_options
+    end
 
-      def self.terminology
-        @terminology
-      end
+    def self.terminology
+      @terminology
+    end
 
     def self.default_attributes
       super.merge(:mimeType => 'text/xml')
@@ -27,7 +27,7 @@ module ActiveFedora
       xml.nom!
       xml
     end
-    
+
     def serialize!
        self.content = @ng_xml.to_s if @ng_xml
     end
@@ -48,7 +48,7 @@ module ActiveFedora
         end
       end
 
-      solr_doc 
+      solr_doc
     end
 
     def method_missing method, *args, &block

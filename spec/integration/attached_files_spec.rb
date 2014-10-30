@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ActiveFedora::Datastreams do
+describe ActiveFedora::AttachedFiles do
   describe "serializing datastreams" do
     before do
       class TestingMetadataSerializing < ActiveFedora::Base
@@ -53,9 +53,9 @@ describe ActiveFedora::Datastreams do
   describe "Datastreams synched together" do
     before do
       class DSTest < ActiveFedora::Base
-        def load_datastreams
+        def load_attached_files
           super
-          unless self.datastreams.keys.include? 'test_ds'
+          unless attached_files.keys.include? 'test_ds'
             add_file_datastream("XXX", dsid: 'test_ds', mime_type: 'text/html')
           end
         end
@@ -81,7 +81,7 @@ describe ActiveFedora::Datastreams do
       end
 
       it "Should update datastream" do
-        expect(DSTest.find(file.pid).datastreams['test_ds'].content).to eq 'Foobar'
+        expect(DSTest.find(file.pid).attached_files['test_ds'].content).to eq 'Foobar'
         expect(DSTest.find(file.pid).test_ds.content).to eq 'Foobar'
       end
     end
@@ -90,10 +90,11 @@ describe ActiveFedora::Datastreams do
 
   describe "an instance of ActiveFedora::Base" do
     let(:obj) { ActiveFedora::Base.new }
-    describe ".datastreams" do
-      subject {obj.datastreams}
+
+    describe ".attached_files" do
+      subject { obj.attached_files }
       it "should return a Hash of datastreams from fedora" do
-        expect(subject).to be_a_kind_of(ActiveFedora::DatastreamHash)
+        expect(subject).to be_a_kind_of(ActiveFedora::FilesHash)
         expect(subject).to be_empty
       end
 
@@ -108,10 +109,10 @@ describe ActiveFedora::Datastreams do
       let(:mds1) { ActiveFedora::SimpleDatastream.new(obj, "md1") }
       let(:mds2) { ActiveFedora::QualifiedDublinCoreDatastream.new(obj, "qdc") }
       before do
-        fds = ActiveFedora::Datastream.new(obj, "fds")
-        obj.add_datastream(mds1)
-        obj.add_datastream(mds2)
-        obj.add_datastream(fds)
+        fds = ActiveFedora::File.new(obj, "fds")
+        obj.attach_file(mds1)
+        obj.attach_file(mds2)
+        obj.attach_file(fds)
       end
 
       it "should return all of the datastreams from the object that are kinds of OmDatastream " do
@@ -127,23 +128,23 @@ describe ActiveFedora::Datastreams do
       end
 
       it "should set the correct mime_type if :mime_type is passed in and path does not contain correct extension" do
-        expect(obj.reload.datastreams["DS1"].mime_type).to eq "image/jpeg"
+        expect(obj.reload.attached_files["DS1"].mime_type).to eq "image/jpeg"
       end
     end
 
-    describe '.add_datastream' do
-      let(:ds) { ActiveFedora::Datastream.new(obj, 'DS1') }
+    describe '.attach_file' do
+      let(:ds) { ActiveFedora::File.new(obj, 'DS1') }
 
       it "should be able to add datastreams" do
-        expect(obj.add_datastream(ds)).to eq 'DS1'
+        expect(obj.attach_file(ds)).to eq 'DS1'
       end
 
       it "adding and saving should add the datastream to the datastreams array" do
         ds.content = fixture('dino.jpg').read
-        expect(obj.datastreams).to_not have_key("DS1")
-        obj.add_datastream(ds)
+        expect(obj.attached_files).to_not have_key("DS1")
+        obj.attach_file(ds)
         obj.save
-        expect(obj.datastreams).to have_key("DS1")
+        expect(obj.attached_files).to have_key("DS1")
       end
 
     end
@@ -152,11 +153,11 @@ describe ActiveFedora::Datastreams do
       let(:obj) { ActiveFedora::Base.create }
       after { obj.destroy }
 
-      let(:ds) { ActiveFedora::Datastream.new(obj, 'DS1').tap {|ds| ds.content = "foo"; ds.save } }
+      let(:ds) { ActiveFedora::File.new(obj, 'DS1').tap {|ds| ds.content = "foo"; ds.save } }
 
       it "should retrieve blobs that match the saved blobs" do
-        obj.add_datastream(ds)
-        expect(obj.reload.datastreams["DS1"].content).to eq "foo"
+        obj.attach_file(ds)
+        expect(obj.reload.attached_files["DS1"].content).to eq "foo"
       end
     end
   end

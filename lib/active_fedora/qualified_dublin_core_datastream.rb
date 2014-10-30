@@ -1,27 +1,26 @@
 module ActiveFedora
-  #This class represents a Qualified Dublin Core Datastream. A special case of ActiveFedora::MetdataDatastream
+  #This class represents a Qualified Dublin Core Datastream. A special case of ActiveFedora::OmDatastream
   #The implementation of this class defines the terms from the Qualified Dublin Core specification.
-  #This implementation features customized xml generators and deserialization routines to handle the 
+  #This implementation features customized xml generators and deserialization routines to handle the
   #Fedora Dublin Core XML datastreams structure.
   #
-  #Fields can still be overridden if more specificity is desired (see ActiveFedora::Datastream#fields method).
+  #Fields can still be overridden if more specificity is desired (see ActiveFedora::File#fields method).
   class QualifiedDublinCoreDatastream < OmDatastream
 
     attr_accessor :fields
     class_attribute :class_fields
     self.class_fields = []
-    
-    
-     set_terminology do |t|
-       t.root(:path=>"dc", :xmlns=>"http://purl.org/dc/terms/")
-     end
+
+    set_terminology do |t|
+      t.root(:path=>"dc", :xmlns=>"http://purl.org/dc/terms/")
+    end
 
     define_template :creator do |xml,name|
       xml.creator() do
         xml.text(name)
       end
     end
-    
+
     #A frozen array of Dublincore Terms.
     DCTERMS = [
                :abstract,
@@ -113,8 +112,8 @@ module ActiveFedora
     #
     #There is quite a good example of this class in use in spec/examples/oral_history.rb
     #
-    #!! Careful: If you declare two fields that correspond to the same xml node without any qualifiers to differentiate them, 
-    #you will end up replicating the values in the underlying datastream, resulting in mysterious dubling, quadrupling, etc. 
+    #!! Careful: If you declare two fields that correspond to the same xml node without any qualifiers to differentiate them,
+    #you will end up replicating the values in the underlying datastream, resulting in mysterious dubling, quadrupling, etc.
     #whenever you edit the field's values.
     def field(name, tupe=nil, opts={})
       fields ||= {}
@@ -128,9 +127,9 @@ module ActiveFedora
         self.class.terminology.add_term(term)
         term.generate_xpath_queries!
       end
-      
+
     end
-    
+
     def update_indexed_attributes(params={}, opts={})
       # if the params are just keys, not an array, make then into an array.
       new_params = {}
@@ -143,7 +142,7 @@ module ActiveFedora
       end
       super(new_params, opts)
     end
-    
+
 
     def self.xml_template
        Nokogiri::XML::Document.parse("<dc xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'/>")
@@ -152,10 +151,10 @@ module ActiveFedora
     def to_solr(solr_doc = Hash.new) # :nodoc:
       @fields.each do |field_key, field_info|
         things = send(field_key)
-        if things 
+        if things
           field_symbol = ActiveFedora::SolrService.solr_name(field_key, type: field_info[:type])
-          things.val.each do |val|    
-            ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val )         
+          things.val.each do |val|
+            ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val )
           end
         end
       end

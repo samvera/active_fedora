@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ActiveFedora::Datastreams do
+describe ActiveFedora::AttachedFiles do
   subject { ActiveFedora::Base.new }
   describe "contains" do
     before do
@@ -78,20 +78,20 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should have reasonable defaults" do
-      expect(FooHistory.child_resource_reflections['dsid'].klass).to eq ActiveFedora::Datastream
-      expect(FooHistory.child_resource_reflections['another'].klass).to eq ActiveFedora::Datastream
+      expect(FooHistory.child_resource_reflections['dsid'].klass).to eq ActiveFedora::File
+      expect(FooHistory.child_resource_reflections['another'].klass).to eq ActiveFedora::File
     end
   end
 
-  describe "#serialize_datastreams" do
-    it "should touch each datastream" do
+  describe "#serialize_attached_files" do
+    it "should touch each file" do
       m1 = double()
       m2 = double()
 
       expect(m1).to receive(:serialize!)
       expect(m2).to receive(:serialize!)
-      allow(subject).to receive(:datastreams).and_return(:m1 => m1, :m2 => m2)
-      subject.serialize_datastreams
+      allow(subject).to receive(:attached_files).and_return(:m1 => m1, :m2 => m2)
+      subject.serialize_attached_files
     end
   end
 
@@ -113,14 +113,14 @@ describe ActiveFedora::Datastreams do
     end
   end
 
-  describe "#datastreams" do
+  describe "#attached_files" do
     it "should return the datastream hash proxy" do
       allow(subject).to receive(:load_datastreams)
-      expect(subject.datastreams).to be_a_kind_of(ActiveFedora::DatastreamHash)
+      expect(subject.attached_files).to be_a_kind_of(ActiveFedora::FilesHash)
     end
 
     it "should round-trip to/from YAML" do
-      expect(YAML.load(subject.datastreams.to_yaml).inspect).to eq subject.datastreams.inspect
+      expect(YAML.load(subject.attached_files.to_yaml).inspect).to eq subject.attached_files.inspect
     end
   end
 
@@ -136,16 +136,16 @@ describe ActiveFedora::Datastreams do
     end
   end
 
-  describe "#add_datastream" do
+  describe "#attach_file" do
     it "should add the datastream to the object" do
       ds = double(:dsid => 'Abc')
-      subject.add_datastream(ds)
-      expect(subject.datastreams['Abc']).to eq ds
+      subject.attach_file(ds)
+      expect(subject.attached_files['Abc']).to eq ds
     end
 
     it "should mint a dsid" do
-      ds = ActiveFedora::Datastream.new(subject)
-      expect(subject.add_datastream(ds)).to eq 'DS1'
+      ds = ActiveFedora::File.new(subject)
+      expect(subject.attach_file(ds)).to eq 'DS1'
     end
   end
 
@@ -155,7 +155,7 @@ describe ActiveFedora::Datastreams do
       ds2 = double(:metadata? => true)
       ds3 = double(:metadata? => true)
       file_ds = double(:metadata? => false)
-      allow(subject).to receive(:datastreams).and_return(:a => ds1, :b => ds2, :c => ds3, :e => file_ds)
+      allow(subject).to receive(:attached_files).and_return(:a => ds1, :b => ds2, :c => ds3, :e => file_ds)
       expect(subject.metadata_streams).to include(ds1, ds2, ds3)
       expect(subject.metadata_streams).to_not include(file_ds)
     end
@@ -163,12 +163,12 @@ describe ActiveFedora::Datastreams do
 
   describe "#create_datastream" do
     it "should mint a DSID" do
-      ds = subject.create_datastream(ActiveFedora::Datastream, nil, {})
+      ds = subject.create_datastream(ActiveFedora::File, nil, {})
       expect(ds.dsid).to eq 'DS1'
     end
 
     it "should raise an argument error if the supplied dsid is nonsense" do
-      expect { subject.create_datastream(ActiveFedora::Datastream, 0) }.to raise_error(ArgumentError)
+      expect { subject.create_datastream(ActiveFedora::File, 0) }.to raise_error(ArgumentError)
     end
   end
 

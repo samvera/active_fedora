@@ -17,16 +17,16 @@ describe ActiveFedora::Base do
 
   it "doesn't overwrite stream specs" do
     f = Foo.new
-    f.datastreams.size.should == 2
-    streams = f.datastreams.values.map{|x| x.class.to_s}.sort
-    streams.pop.should == "ActiveFedora::SimpleDatastream"
-    streams.pop.should == "ActiveFedora::QualifiedDublinCoreDatastream"
+    expect(f.attached_files.size).to eq 2
+    streams = f.attached_files.values.map{|x| x.class.to_s}.sort
+    expect(streams.pop).to eq "ActiveFedora::SimpleDatastream"
+    expect(streams.pop).to eq "ActiveFedora::QualifiedDublinCoreDatastream"
   end
 
   it "should work for multiple types" do
     b = Foo.new
     f = Bar.new
-    b.class.ds_specs.should_not == f.class.ds_specs
+    expect(b.class.ds_specs).to_not eq f.class.ds_specs
   end
   after do
     Object.send(:remove_const, :Bar)

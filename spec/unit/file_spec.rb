@@ -37,7 +37,7 @@ describe ActiveFedora::Datastream do
 
   describe "#generate_dsid" do
     let(:parent) { double('inner object', uri: "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234", id: '1234',
-                          new_record?: true, datastreams: datastreams) }
+                          new_record?: true, attached_files: datastreams) }
 
     subject { ActiveFedora::Datastream.new(parent, nil, prefix: 'FOO') }
 

@@ -137,7 +137,7 @@ describe ActiveFedora::Base do
         expect(FooAdaptation.datastream_class_for_name('someData')).to eq ActiveFedora::OmDatastream
       end
       it "should return the specifed class" do
-        expect(FooAdaptation.datastream_class_for_name('content')).to eq ActiveFedora::Datastream
+        expect(FooAdaptation.datastream_class_for_name('content')).to eq ActiveFedora::File
       end
     end
 
@@ -179,24 +179,28 @@ describe ActiveFedora::Base do
     ### End ActiveModel::Naming
 
 
-    describe ".datastreams" do
+    describe ".attached_files" do
       let(:test_history) { FooHistory.new }
+
       it "should create accessors for datastreams declared with has_metadata" do
-        expect(test_history.withText).to eq test_history.datastreams['withText']
+        expect(test_history.withText).to eq test_history.attached_files['withText']
       end
+
       describe "dynamic accessors" do
         before do
-          test_history.add_datastream(ds)
+          test_history.attach_file(ds)
           test_history.class.build_datastream_accessor(ds.dsid)
         end
-        describe "when the datastream is named with dash" do
-          let(:ds) {double('datastream', :dsid=>'eac-cpf')}
+
+        describe "when the file is named with dash" do
+          let(:ds) {double(:dsid=>'eac-cpf')}
           it "should convert dashes to underscores" do
             expect(test_history.eac_cpf).to eq ds
           end
         end
-        describe "when the datastream is named with underscore" do
-          let (:ds) { double('datastream', :dsid=>'foo_bar') }
+
+        describe "when the file is named with underscore" do
+          let (:ds) { double(:dsid=>'foo_bar') }
           it "should preserve the underscore" do
             expect(test_history.foo_bar).to eq ds
           end
@@ -219,7 +223,7 @@ describe ActiveFedora::Base do
     describe '.save' do
       it "should create a new record" do
         allow(@test_object).to receive(:new_record?).and_return(true)
-        expect(@test_object).to receive(:serialize_datastreams)
+        expect(@test_object).to receive(:serialize_attached_files)
         expect(@test_object).to receive(:assign_rdf_subject)
         expect(@test_object.orm).to receive(:create)
         expect(@test_object).to receive(:refresh)
@@ -231,7 +235,7 @@ describe ActiveFedora::Base do
 
         it "should update" do
           allow(@test_object).to receive(:new_record?).and_return(false)
-          expect(@test_object).to receive(:serialize_datastreams)
+          expect(@test_object).to receive(:serialize_attached_files)
           allow_any_instance_of(Ldp::Orm).to receive(:save) { true }
           expect(@test_object).to receive(:refresh)
           expect(@test_object).to receive(:update_index)
@@ -316,7 +320,7 @@ describe ActiveFedora::Base do
         mock2 = double("ds2")
         expect(mock2).to receive(:to_solr).and_return({})
 
-        allow(@test_object).to receive(:datastreams).and_return(ds1: mock1, ds2: mock2)
+        allow(@test_object).to receive(:attached_files).and_return(ds1: mock1, ds2: mock2)
         expect(@test_object).to receive(:solrize_relationships)
         @test_object.to_solr
       end
