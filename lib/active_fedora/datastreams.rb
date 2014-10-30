@@ -9,21 +9,17 @@ module ActiveFedora
     autoload :NokogiriDatastreams, 'active_fedora/datastreams/nokogiri_datastreams'
 
     included do
-      class_attribute :child_resource_reflections
-      self.child_resource_reflections = {}
       class << self
         def inherited_with_datastreams(kls) #:nodoc:
           ## Do some inheritance logic that doesn't override Base.inherited
           inherited_without_datastreams kls
-          # each subclass should get a copy of the parent's datastream definitions, it should not add to the parent's definition table.
-          kls.child_resource_reflections = kls.child_resource_reflections.dup
         end
         alias_method_chain :inherited, :datastreams
       end
     end
 
     def ds_specs
-      child_resource_reflections
+      self.class.child_resource_reflections
     end
     deprecation_deprecate :ds_specs
 
@@ -47,29 +43,14 @@ module ActiveFedora
       @datastreams = nil
     end
 
-    def configure_datastream(ds, reflection=nil)
-      reflection ||= child_resource_reflections[ds.dsid]
-      if reflection
-        # If you called has_metadata with a block, pass the block into the Datastream class
-        if reflection.options[:block].class == Proc
-          reflection.options[:block].call(ds)
-        end
+    def configure_datastream(ds, reflection)
+      return unless reflection
+      # If you called has_metadata with a block, pass the block into the Datastream class
+      if reflection.options[:block].class == Proc
+        reflection.options[:block].call(ds)
       end
     end
 
-    def datastream_object_for reflection, options={}
-      # ds_spec is nil when called from Rubydora for existing datastreams, so it should not be autocreated
-      reflection.type.new(self, reflection.name, options).tap do |ds|
-        ds.default_attributes = {}
-        if ds.new_record? && reflection.options[:autocreate]
-          ds.datastream_will_change!
-        end
-      end
-    end
-
-    def datastream_from_reflection(reflection)
-      datastream_object_for reflection, {load_graph: false}
-    end
 
     def datastream_assertions
       resource.query(subject: resource, predicate: Ldp.contains).objects.map(&:to_s)
@@ -78,16 +59,16 @@ module ActiveFedora
     # TODO it looks like calling load_datastreams causes all the datastreams properties to load eagerly
     # Because Datastream#new triggers a load of the graph.
     def load_datastreams
-      local_ds_specs = child_resource_reflections.dup
+      local_ds_specs = self.class.child_resource_reflections.dup
       datastream_assertions.each do |ds_uri|
         dsid = ds_uri.to_s.sub(uri + '/', '')
         reflection = local_ds_specs.delete(dsid)
-        ds = reflection ? datastream_from_reflection(reflection) : Datastream.new(self, dsid)
-        datastreams[dsid] = ds
-        configure_datastream(datastreams[dsid])
+        ds = reflection ? reflection.build_datastream(self) : Datastream.new(self, dsid)
+        add_datastream(ds)
+        configure_datastream(datastreams[dsid], reflection)
       end
       local_ds_specs.each do |name, reflection|
-        ds = datastream_from_reflection(reflection)
+        ds = reflection.build_datastream(self)
         add_datastream(ds)
         configure_datastream(ds, reflection)
       end
@@ -153,24 +134,27 @@ module ActiveFedora
       # @param [String] dsid the datastream id
       # @return [Class] the class of the datastream
       def datastream_class_for_name(dsid)
-        child_resource_reflections[dsid] ? child_resource_reflections[dsid].type : ActiveFedora::Datastream
+        reflection = reflect_on_association(dsid)
+        reflection ? reflection.klass : ActiveFedora::Datastream
       end
 
       # This method is used to specify the details of a contained resource.
       # Pass the name as the first argument and a hash of options as the second argument
       # Note that this method doesn't actually execute the block, but stores it, to be executed
-      # by any the implementation of the datastream(specified as :type)
+      # by any the implementation of the datastream(specified as :class_name)
       #
       # @param [String] :name the handle to refer to this child as
-      # @param [Hash] args
-      # @option args [Class] :type The class that will represent this child, should extend ``Datastream''
-      # @option args [String] :url
-      # @option args [Boolean] :autocreate Always create this datastream on new objects
+      # @param [Hash] options
+      # @option options [Class] :class_name The class that will represent this child, should extend ``Datastream''
+      # @option options [String] :url
+      # @option options [Boolean] :autocreate Always create this datastream on new objects
       # @yield block executed by some types of child resources
-      def contains(name, args, &block)
-        type = args.delete(:type)
-        build_child_resource(name, type, args, &block)
+      def contains(name, options, &block)
+        options[:block] = block if block
+        create_reflection(:child_resource, name, options, self)
+        build_datastream_accessor(name)
       end
+
 
       # This method is used to specify the details of a datastream.
       # You can pass the name as the first argument and a hash of options as the second argument
@@ -185,11 +169,6 @@ module ActiveFedora
       # @option args [Boolean] :autocreate Always create this datastream on new objects
       # @yield block executed by some kinds of datastreams
       def has_metadata(*args, &block)
-        defaults = {
-          :autocreate => false,
-          :type=>nil,
-          :url=>"",
-        }
         if args.first.is_a? String
           name = args.first
           args = args[1] || {}
@@ -197,9 +176,10 @@ module ActiveFedora
         else
           args = args.first || {}
         end
-        spec = defaults.merge(args)
-        name = spec.delete(:name)
-        contains(name, spec, &block)
+        name = args.delete(:name)
+        args[:class_name] = args.delete(:type)
+        raise ArgumentError, "You must provide a :type property for the datastream '#{name}'" unless args[:class_name]
+        contains(name, args, &block)
       end
       deprecation_deprecate :has_metadata
 
@@ -224,9 +204,9 @@ module ActiveFedora
         else
           args = args.first || {}
         end
-        spec = { type: ActiveFedora::Datastream }.merge(args)
-        name = spec.delete(:name)
-        contains(name, spec)
+        name = args.delete(:name)
+        args[:class_name] = args.delete(:type)
+        contains(name, args)
       end
       deprecation_deprecate :has_file_datastream
 
@@ -240,34 +220,11 @@ module ActiveFedora
 
       private
 
-        # Creates a datastream spec combining the given args and default values
-        # @param [String] name  handl of the resource
-        # @param [Hash] args
-        # @param defaults [Hash] the default values for the datastream spec
-        # @yield block executed by some kinds of datastreams
-        def build_child_resource(name, type, args, &block)
-          args[:block] = block if block
-          child_resource_reflections[name]= ChildResourceReflection.new(name, type, args)
-          build_datastream_accessor(name)
-        end
-
         ## Given a dsid return a standard name
         def name_for_dsid(dsid)
           dsid.gsub('-', '_')
         end
 
     end
-
-    class ChildResourceReflection
-      attr_reader :name, :type, :options
-      def initialize(name, type, options)
-        raise ArgumentError, "You must provide a name (dsid) for the datastream" unless name
-        raise ArgumentError, "You must provide a :type property for the datastream '#{name}'" unless type
-        @name = name
-        @type = type
-        @options = options
-      end
-    end
-
   end
 end

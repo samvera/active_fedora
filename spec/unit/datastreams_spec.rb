@@ -5,8 +5,8 @@ describe ActiveFedora::Datastreams do
   describe "contains" do
     before do
       class FooHistory < ActiveFedora::Base
-         contains 'dsid', type: ActiveFedora::SimpleDatastream
-         contains 'complex_ds', autocreate: true, type: 'Z'
+         contains 'dsid', class_name: ActiveFedora::SimpleDatastream
+         contains 'complex_ds', autocreate: true, class_name: 'Z'
       end
     end
     after do
@@ -19,7 +19,7 @@ describe ActiveFedora::Datastreams do
 
     it "should let you override defaults" do
       expect(FooHistory.child_resource_reflections['complex_ds'].options).to include(autocreate: true)
-      expect(FooHistory.child_resource_reflections['complex_ds'].type).to eq 'Z'
+      expect(FooHistory.child_resource_reflections['complex_ds'].class_name).to eq 'Z'
     end
 
     it "should raise an error if you don't give a dsid" do
@@ -47,12 +47,12 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should have reasonable defaults" do
-      expect(FooHistory.child_resource_reflections['dsid'].options).to include(autocreate: false)
+      expect(FooHistory.child_resource_reflections['dsid'].options).to include(class_name: ActiveFedora::SimpleDatastream)
     end
 
     it "should let you override defaults" do
       expect(FooHistory.child_resource_reflections['complex_ds'].options).to include(autocreate: true)
-      expect(FooHistory.child_resource_reflections['complex_ds'].type).to eq 'Z'
+      expect(FooHistory.child_resource_reflections['complex_ds'].class_name).to eq 'Z'
     end
 
     it "should raise an error if you don't give a type" do
@@ -78,8 +78,8 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should have reasonable defaults" do
-      expect(FooHistory.child_resource_reflections['dsid'].type).to eq ActiveFedora::Datastream
-      expect(FooHistory.child_resource_reflections['another'].type).to eq ActiveFedora::Datastream
+      expect(FooHistory.child_resource_reflections['dsid'].klass).to eq ActiveFedora::Datastream
+      expect(FooHistory.child_resource_reflections['another'].klass).to eq ActiveFedora::Datastream
     end
   end
 
@@ -125,35 +125,14 @@ describe ActiveFedora::Datastreams do
   end
 
   describe "#configure_datastream" do
-    it "should look up the ds_spec" do
-      mock_dsspec = double(type: nil, options: {})
-      allow(subject).to receive(:child_resource_reflections).and_return('abc' => mock_dsspec)
-      subject.configure_datastream(double(:dsid => 'abc'))
-    end
-
-    it "should be ok if there is no ds spec" do
-      mock_dsspec = double()
-      allow(subject).to receive(:child_resource_reflections).and_return({})
-      subject.configure_datastream(double(:dsid => 'abc'))
-    end
-
     it "should run a Proc" do
       ds = double(:dsid => 'abc')
       @count = 0
       reflection = double(options: { block: lambda { |x| @count += 1 } })
-      allow(subject).to receive(:child_resource_reflections).and_return('abc' => reflection)
 
       expect {
-        subject.configure_datastream(ds)
+        subject.configure_datastream(ds, reflection)
       }.to change { @count }.by(1)
-    end
-  end
-
-  describe "#datastream_from_reflection" do
-    it "should fetch the datastream" do
-      reflection = double(name: 'dsid')
-      expect(subject).to receive(:datastream_object_for).with(reflection, {load_graph: false})
-      subject.datastream_from_reflection(reflection)
     end
   end
 

@@ -30,7 +30,7 @@ module ActiveFedora::Rdf::Identifiable
     def resource_datastream(ds=nil)
       @resource_datastream ||= ds ? ds : nil
       return @resource_datastream unless @resource_datastream.nil?
-      return :descMetadata if child_resource_reflections['descMetadata'] && child_resource_reflections['descMetadata'].type.respond_to?(:rdf_subject)
+      return :descMetadata if child_resource_reflections['descMetadata'] && reflect_on_association('descMetadata').klass.respond_to?(:rdf_subject)
       child_resource_reflections.each do |dsid, conf|
         return dsid.to_sym if conf.type.respond_to? :rdf_subject
       end
@@ -47,7 +47,7 @@ module ActiveFedora::Rdf::Identifiable
       begin
         find(pid_from_subject(uri))
       rescue ActiveFedora::ObjectNotFoundError, Ldp::Gone
-        child_resource_reflections[resource_datastream.to_s].type.resource_class.new(uri)
+        reflect_on_association(resource_datastream.to_s).klass.resource_class.new(uri)
       end
     end
 
