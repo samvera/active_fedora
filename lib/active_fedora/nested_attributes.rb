@@ -64,7 +64,7 @@ module ActiveFedora
         attr_names.each do |association_name|
           if reflection = reflect_on_association(association_name)
             reflection.options[:autosave] = true
-            # add_autosave_association_callbacks(reflection)
+            add_autosave_association_callbacks(reflection)
             ## TODO this ought to work, but doesn't seem to do the class inheritance right
 
             nested_attributes_options = self.nested_attributes_options.dup
@@ -81,8 +81,6 @@ module ActiveFedora
 
               def #{association_name}_attributes=(attributes)
                 assign_nested_attributes_for_#{type}_association(:#{association_name}, attributes)
-                ## in lieu of autosave_association_callbacks just save all of em.
-                send(:#{association_name}).each {|obj| obj.marked_for_destruction? ? obj.destroy : obj.save}
               end
             eoruby
           else
