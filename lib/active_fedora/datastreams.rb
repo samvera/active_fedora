@@ -4,26 +4,24 @@ module ActiveFedora
   module Datastreams
     extend ActiveSupport::Concern
     extend Deprecation
+    self.deprecation_horizon = 'active-fedora version 9.0'
 
     autoload :NokogiriDatastreams, 'active_fedora/datastreams/nokogiri_datastreams'
 
     included do
-      class_attribute :ds_specs
-      self.ds_specs = {}
       class << self
         def inherited_with_datastreams(kls) #:nodoc:
           ## Do some inheritance logic that doesn't override Base.inherited
           inherited_without_datastreams kls
-          # each subclass should get a copy of the parent's datastream definitions, it should not add to the parent's definition table.
-          kls.ds_specs = kls.ds_specs.dup
         end
         alias_method_chain :inherited, :datastreams
       end
     end
 
     def ds_specs
-      self.class.ds_specs
+      self.class.child_resource_reflections
     end
+    deprecation_deprecate :ds_specs
 
     def serialize_datastreams
       datastreams.each {|k, ds| ds.serialize! }
@@ -45,20 +43,14 @@ module ActiveFedora
       @datastreams = nil
     end
 
-    def configure_datastream(ds, ds_spec=nil)
-      ds_spec ||= self.ds_specs[ds.dsid]
-      if ds_spec
-        # If you called has_metadata with a block, pass the block into the Datastream class
-        if ds_spec[:block].class == Proc
-          ds_spec[:block].call(ds)
-        end
+    def configure_datastream(ds, reflection)
+      return unless reflection
+      # If you called has_metadata with a block, pass the block into the Datastream class
+      if reflection.options[:block].class == Proc
+        reflection.options[:block].call(ds)
       end
     end
 
-    include ActiveFedora::DatastreamBootstrap
-    def datastream_from_spec(ds_spec, name)
-      datastream_object_for name, {load_graph: false}, ds_spec
-    end
 
     def datastream_assertions
       resource.query(subject: resource, predicate: Ldp.contains).objects.map(&:to_s)
@@ -67,18 +59,18 @@ module ActiveFedora
     # TODO it looks like calling load_datastreams causes all the datastreams properties to load eagerly
     # Because Datastream#new triggers a load of the graph.
     def load_datastreams
-      local_ds_specs = self.ds_specs.dup
+      local_ds_specs = self.class.child_resource_reflections.dup
       datastream_assertions.each do |ds_uri|
-        dsid = ds_uri.to_s.sub(self.uri + '/', '')
-        spec = local_ds_specs.delete(dsid)
-        ds = spec ? datastream_from_spec(spec, dsid) : Datastream.new(self, dsid)
-        self.datastreams[dsid] = ds
-        configure_datastream(datastreams[dsid])
+        dsid = ds_uri.to_s.sub(uri + '/', '')
+        reflection = local_ds_specs.delete(dsid)
+        ds = reflection ? reflection.build_datastream(self) : Datastream.new(self, dsid)
+        add_datastream(ds)
+        configure_datastream(datastreams[dsid], reflection)
       end
-      local_ds_specs.each do |name, ds_spec|
-        ds = datastream_from_spec(ds_spec, name)
-        self.add_datastream(ds)
-        configure_datastream(ds, ds_spec)
+      local_ds_specs.each do |name, reflection|
+        ds = reflection.build_datastream(self)
+        add_datastream(ds)
+        configure_datastream(ds, reflection)
       end
     end
 
@@ -131,11 +123,38 @@ module ActiveFedora
     end
 
     module ClassMethods
+      extend Deprecation
+      self.deprecation_horizon = 'active-fedora version 9.0'
+
+      def ds_specs
+        child_resource_reflections
+      end
+      deprecation_deprecate :ds_specs
+
       # @param [String] dsid the datastream id
       # @return [Class] the class of the datastream
       def datastream_class_for_name(dsid)
-        ds_specs[dsid] ? ds_specs[dsid].fetch(:type, ActiveFedora::Datastream) : ActiveFedora::Datastream
+        reflection = reflect_on_association(dsid)
+        reflection ? reflection.klass : ActiveFedora::Datastream
       end
+
+      # This method is used to specify the details of a contained resource.
+      # Pass the name as the first argument and a hash of options as the second argument
+      # Note that this method doesn't actually execute the block, but stores it, to be executed
+      # by any the implementation of the datastream(specified as :class_name)
+      #
+      # @param [String] :name the handle to refer to this child as
+      # @param [Hash] options
+      # @option options [Class] :class_name The class that will represent this child, should extend ``Datastream''
+      # @option options [String] :url
+      # @option options [Boolean] :autocreate Always create this datastream on new objects
+      # @yield block executed by some types of child resources
+      def contains(name, options, &block)
+        options[:block] = block if block
+        create_reflection(:child_resource, name, options, self)
+        build_datastream_accessor(name)
+      end
+
 
       # This method is used to specify the details of a datastream.
       # You can pass the name as the first argument and a hash of options as the second argument
@@ -150,14 +169,19 @@ module ActiveFedora
       # @option args [Boolean] :autocreate Always create this datastream on new objects
       # @yield block executed by some kinds of datastreams
       def has_metadata(*args, &block)
-        @metadata_ds_defaults ||= {
-          :autocreate => false,
-          :type=>nil,
-          :url=>"",
-          :name=>nil
-        }
-        spec_datastream(args, @metadata_ds_defaults, &block)
+        if args.first.is_a? String
+          name = args.first
+          args = args[1] || {}
+          args[:name] = name
+        else
+          args = args.first || {}
+        end
+        name = args.delete(:name)
+        args[:class_name] = args.delete(:type)
+        raise ArgumentError, "You must provide a :type property for the datastream '#{name}'" unless args[:class_name]
+        contains(name, args, &block)
       end
+      deprecation_deprecate :has_metadata
 
 
       # @overload has_file_datastream(name, args)
@@ -173,29 +197,6 @@ module ActiveFedora
       #     @option args :type (ActiveFedora::Datastream) The class the datastream should have
       #     @option args [Boolean] :autocreate Always create this datastream on new objects
       def has_file_datastream(*args)
-        @file_ds_defaults ||= {
-          :autocreate => false,
-          :type=>ActiveFedora::Datastream,
-          :name=>"content"
-        }
-        spec_datastream(args, @file_ds_defaults)
-      end
-
-      def build_datastream_accessor(dsid)
-        name = name_for_dsid(dsid)
-        define_method name do
-          datastreams[dsid]
-        end
-        end
-
-
-      private
-
-      # Creates a datastream spec combining the given args and default values
-      # @param args [Array] either [String, Hash] or [Hash]; the latter must .has_key? :name
-      # @param defaults [Hash] the default values for the datastream spec
-      # @yield block executed by some kinds of datastreams
-      def spec_datastream(args, defaults, &block)
         if args.first.is_a? String
           name = args.first
           args = args[1] || {}
@@ -203,14 +204,21 @@ module ActiveFedora
         else
           args = args.first || {}
         end
-        spec = defaults.merge(args.select {|key, value| defaults.has_key? key})
-        name = spec.delete(:name)
-        raise ArgumentError, "You must provide a name (dsid) for the datastream" unless name
-        raise ArgumentError, "You must provide a :type property for the datastream '#{name}'" unless spec[:type]
-        spec[:block] = block if block
-        build_datastream_accessor(name)
-        ds_specs[name]= spec
+        name = args.delete(:name)
+        args[:class_name] = args.delete(:type)
+        contains(name, args)
       end
+      deprecation_deprecate :has_file_datastream
+
+      def build_datastream_accessor(dsid)
+        name = name_for_dsid(dsid)
+        define_method name do
+          datastreams[dsid]
+        end
+      end
+
+
+      private
 
         ## Given a dsid return a standard name
         def name_for_dsid(dsid)
@@ -218,6 +226,5 @@ module ActiveFedora
         end
 
     end
-
   end
 end
