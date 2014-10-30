@@ -49,7 +49,7 @@ module ActiveFedora
       @association_cache = {}
       datastream_keys = self.class.child_resource_reflections.keys
       datastream_keys.each do |key|
-        datastreams[key] = SolrBackedMetadataFile.new
+        attached_files[key] = SolrBackedMetadataFile.new
       end
       @resource = SolrBackedResource.new
       self.attributes = attrs.except(datastream_keys)
