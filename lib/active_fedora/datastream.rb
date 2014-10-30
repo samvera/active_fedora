@@ -195,8 +195,7 @@ module ActiveFedora
     end
 
     def fetch_original_name_from_headers
-      # TODO the HEAD didn't have Content-Disposition. Could this be a Fedora bug?
-      m = ldp_source.get.headers['Content-Disposition'].match(/filename="(?<filename>[^"]*)";/)
+      m = ldp_source.head.headers['Content-Disposition'].match(/filename="(?<filename>[^"]*)";/)
       m[:filename]
     end
 
