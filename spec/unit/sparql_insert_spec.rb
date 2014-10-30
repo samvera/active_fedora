@@ -33,7 +33,7 @@ describe ActiveFedora::SparqlInsert do
 
 
     it "should return the string" do
-      expect(subject.build).to eq "DELETE { \n<> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> ?wild .\n<> <http://purl.org/dc/terms/title> ?wild .\n}\nWHERE { \n<> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> ?wild .\n<> <http://purl.org/dc/terms/title> ?wild .\n} ;INSERT { \n<> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> <http://localhost:8983/fedora/rest/test/foo> .\n<> <http://purl.org/dc/terms/title> \"bar\" .\n}\n WHERE { }"
+      expect(subject.build).to eq "DELETE { \n<> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> ?a0 .\n<> <http://purl.org/dc/terms/title> ?a1 .\n}\nWHERE { \n<> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> ?a0 .\n<> <http://purl.org/dc/terms/title> ?a1 .\n} ;INSERT { \n<> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> <http://localhost:8983/fedora/rest/test/foo> .\n<> <http://purl.org/dc/terms/title> \"bar\" .\n}\n WHERE { }"
     end
     it { should_not be_empty }
   end

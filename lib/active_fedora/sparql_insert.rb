@@ -33,8 +33,11 @@ module ActiveFedora
     def build
       subject = RDF::URI.new(nil)
 
+      index = 0
       patterns = changes.map do |key, _|
-        RDF::Query::Pattern.new(subject, key, :wild).to_s
+        RDF::Query::Pattern.new(subject, key, "a#{index}".to_sym).to_s.tap do
+          index += 1
+        end
       end.join("\n")
 
       query = "DELETE { \n"
