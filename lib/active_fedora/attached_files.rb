@@ -160,7 +160,7 @@ module ActiveFedora
       # @option options [String] :url
       # @option options [Boolean] :autocreate Always create this datastream on new objects
       # @yield block executed by some types of child resources
-      def contains(name, options, &block)
+      def contains(name, options = {}, &block)
         options[:block] = block if block
         create_reflection(:child_resource, name, options, self)
         build_datastream_accessor(name)
