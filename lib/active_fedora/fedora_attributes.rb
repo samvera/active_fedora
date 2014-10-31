@@ -1,11 +1,11 @@
 module ActiveFedora
   module FedoraAttributes
     extend ActiveSupport::Concern
-    include Rdf::Identifiable
 
     included do
       include Rdf::Indexing
-      extend ActiveTriples::Properties
+      include ActiveTriples::Properties
+      include ActiveTriples::Reflection
       delegate :rdf_subject,  :get_values, to: :resource
 
       property :has_model, predicate: RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel")
@@ -54,11 +54,12 @@ module ActiveFedora
     def resource
       @resource ||= begin
                       r = @orm.graph
-                      r.singleton_class.properties = self.class.properties
-                      r.singleton_class.properties.keys.each do |property|
-                        r.singleton_class.send(:register_property, property)
+                      r.class.properties.merge(self.class.properties).each do |property, config|
+                        r.class.property(config.term,
+                                   predicate: config.predicate, 
+                                   class_name: config.class_name, 
+                                   multivalue: config.multivalue)
                       end
-                      # r.singleton_class.accepts_nested_attributes_for(*nested_attributes_options.keys) unless nested_attributes_options.blank?
                       r
                     end
     end

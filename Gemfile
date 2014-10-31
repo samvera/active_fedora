@@ -4,8 +4,6 @@ source "https://rubygems.org"
 
 gemspec path: File.expand_path('..', __FILE__)
 
-
-gem 'active-triples', github: 'no-reply/ActiveTriples', ref: '4bec618710f7c87369e4e0960742d3943dec0fab'
 gem 'ldp', github: 'cbeer/ldp', ref: '4877dc2'
 gem 'byebug' unless ENV['TRAVIS']
 

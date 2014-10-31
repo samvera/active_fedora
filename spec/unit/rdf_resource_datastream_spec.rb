@@ -165,32 +165,6 @@ describe ActiveFedora::RDFDatastream do
     end
   end
 
-  context "with a custom id_to_uri mapping function" do
-    before do
-      class AssetWithMap < ActiveFedora::Base
-        class << self
-          def id_to_uri(id)
-            "#{ActiveFedora.fedora.host}/foobar/#{id}"
-          end
-
-          def uri_to_id(uri)
-            uri.to_s.split('/')[-1]
-          end
-        end
-
-        has_metadata  'descMetadata', type: DummyResource
-        has_attributes :title, :license, datastream: 'descMetadata', multiple: true
-      end
-    end
-    subject { AssetWithMap.new(pid: '12345', title: ['my title']) }
-
-    it "should set the subject of the datastream using the uri" do
-      subject.save
-      expect(subject.descMetadata.content).to eq "<http://localhost:8983/fedora/rest/foobar/12345> <http://purl.org/dc/terms/title> \"my title\" .\n"
-    end
-
-  end
-
   describe "relationships" do
     before do
       @new_object = DummyAsset.new
@@ -209,6 +183,7 @@ describe ActiveFedora::RDFDatastream do
       subject.reload
       expect(subject.descMetadata.creator.first).to be_kind_of(ActiveFedora::Base)
     end
+
     context "when the AF:Base object is deleted" do
       before do
         subject.save
@@ -266,19 +241,6 @@ describe ActiveFedora::RDFDatastream do
 
       it "should be retrievable" do
         expect(subject.descMetadata.creator.first.title).to eq ["subbla"]
-      end
-    end
-
-    context 'when the object has no Rdf::Resource' do
-      before do
-        subject.title = ["bla"]
-        subject.descMetadata.creator = @new_object
-        subject.save
-        subject.reload
-      end
-
-      it "should let me get to an AF:Base object" do
-        expect(subject.descMetadata.creator.first).to be_kind_of(ActiveFedora::Base)
       end
     end
   end
