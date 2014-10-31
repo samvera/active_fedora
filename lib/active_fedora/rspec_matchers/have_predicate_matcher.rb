@@ -9,7 +9,7 @@ RSpec::Matchers.define :have_predicate do |predicate|
         "expect(subject).to have_predicate(<predicate>).with_objects(<objects[]>)"
       )
     end
-    @subject = subject.class.find(subject.pid)
+    @subject = subject.class.find(subject.id)
     @actual_objects = @subject.relationships(predicate)
 
     if @expected_objects
@@ -18,7 +18,7 @@ RSpec::Matchers.define :have_predicate do |predicate|
       if actual_count != expected_count
         raise(
           RSpec::Expectations::ExpectationNotMetError,
-          "#{@subject.class} PID=#{@subject.pid} relationship: #{@predicate.inspect} count <Expected Count: #{expected_count}> <Actual: #{actual_count}>"
+          "#{@subject.class} ID=#{@subject.id} relationship: #{@predicate.inspect} count <Expected Count: #{expected_count}> <Actual: #{actual_count}>"
         )
       end
       intersection = @actual_objects & @expected_objects
@@ -31,15 +31,15 @@ RSpec::Matchers.define :have_predicate do |predicate|
 
 
   description do
-    "#{@subject.class} PID=#{@subject.pid} relationship: #{@predicate.inspect} matches Fedora"
+    "#{@subject.class} ID=#{@subject.id} relationship: #{@predicate.inspect} matches Fedora"
   end
 
   failure_message do |text|
-    "expected #{@subject.class} PID=#{@subject.pid} relationship: #{@predicate.inspect} to match"
+    "expected #{@subject.class} ID=#{@subject.id} relationship: #{@predicate.inspect} to match"
   end
 
   failure_message_when_negated do |text|
-    "expected #{@subject.class} PID=#{@subject.pid} relationship: #{@predicate.inspect} to NOT match"
+    "expected #{@subject.class} ID=#{@subject.id} relationship: #{@predicate.inspect} to NOT match"
   end
 
 end

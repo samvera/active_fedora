@@ -34,7 +34,7 @@ module ActiveFedora
       def ids_reader
         if loaded?
           load_target.map do |record|
-            record.pid
+            record.id
           end
         else
           load_from_solr.map do |solr_record|

@@ -37,33 +37,33 @@ describe ActiveFedora::SolrService do
   describe "reify solr results" do
     before(:all) do
       class AudioRecord
-        attr_accessor :pid
-        def self.connection_for_pid(pid)
+        attr_accessor :id
+        def self.connection_for_id(id)
         end
       end
-      @sample_solr_hits = [{"id"=>"my:_PID1_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["AudioRecord"]},
-                           {"id"=>"my:_PID2_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["AudioRecord"]},
-                           {"id"=>"my:_PID3_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["AudioRecord"]}]
+      @sample_solr_hits = [{"id"=>"my:_ID1_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["AudioRecord"]},
+                           {"id"=>"my:_ID2_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["AudioRecord"]},
+                           {"id"=>"my:_ID3_", ActiveFedora::SolrService.solr_name("has_model", :symbol)=>["AudioRecord"]}]
     end
     describe ".reify_solr_result" do
       it "should use .find to instantiate objects" do
-        expect(AudioRecord).to receive(:find).with("my:_PID1_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_ID1_", cast: true)
         ActiveFedora::SolrService.reify_solr_result(@sample_solr_hits.first)
       end
     end
     describe ".reify_solr_results" do
       it "should use AudioRecord.find to instantiate objects" do
-        expect(AudioRecord).to receive(:find).with("my:_PID1_", cast: true)
-        expect(AudioRecord).to receive(:find).with("my:_PID2_", cast: true)
-        expect(AudioRecord).to receive(:find).with("my:_PID3_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_ID1_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_ID2_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_ID3_", cast: true)
         ActiveFedora::SolrService.reify_solr_results(@sample_solr_hits)
       end
     end
     describe ".lazy_reify_solr_results" do
       it "should lazily reify solr results" do
-        expect(AudioRecord).to receive(:find).with("my:_PID1_", cast: true)
-        expect(AudioRecord).to receive(:find).with("my:_PID2_", cast: true)
-        expect(AudioRecord).to receive(:find).with("my:_PID3_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_ID1_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_ID2_", cast: true)
+        expect(AudioRecord).to receive(:find).with("my:_ID3_", cast: true)
         ActiveFedora::SolrService.lazy_reify_solr_results(@sample_solr_hits).each {|r| r}
       end
     end
@@ -71,17 +71,17 @@ describe ActiveFedora::SolrService do
 
   describe "raw_query" do
     it "should generate a raw query clause" do
-      expect(ActiveFedora::SolrService.raw_query('id', "my:_PID1_")).to eq '_query_:"{!raw f=id}my:_PID1_"'
+      expect(ActiveFedora::SolrService.raw_query('id', "my:_ID1_")).to eq '_query_:"{!raw f=id}my:_ID1_"'
     end
   end
   
-  describe '#construct_query_for_pids' do
-    it "should generate a useable solr query from an array of Fedora pids" do
-      expect(ActiveFedora::SolrService.construct_query_for_pids(["my:_PID1_", "my:_PID2_", "my:_PID3_"])).to eq '_query_:"{!raw f=id}my:_PID1_" OR _query_:"{!raw f=id}my:_PID2_" OR _query_:"{!raw f=id}my:_PID3_"'
+  describe '#construct_query_for_ids' do
+    it "should generate a useable solr query from an array of Fedora ids" do
+      expect(ActiveFedora::SolrService.construct_query_for_ids(["my:_ID1_", "my:_ID2_", "my:_ID3_"])).to eq '_query_:"{!raw f=id}my:_ID1_" OR _query_:"{!raw f=id}my:_ID2_" OR _query_:"{!raw f=id}my:_ID3_"'
 
     end
     it "should return a valid solr query even if given an empty array as input" do
-      expect(ActiveFedora::SolrService.construct_query_for_pids([""])).to eq "id:NEVER_USE_THIS_ID"
+      expect(ActiveFedora::SolrService.construct_query_for_ids([""])).to eq "id:NEVER_USE_THIS_ID"
       
     end
   end

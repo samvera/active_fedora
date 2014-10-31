@@ -31,7 +31,7 @@ module ActiveFedora
     # Returns an Array of objects of the Class that +find+ is being 
     # called on
     #
-    # @param[String,Hash] args either a pid or a hash of conditions
+    # @param[String,Hash] args either an id or a hash of conditions
     # @option args [Integer] :rows when :all is passed, the maximum number of rows to load from solr
     # @option args [Boolean] :cast when true, examine the model and cast it to the first known cModel
     def find(*args)
@@ -55,7 +55,7 @@ module ActiveFedora
         options = {conditions: options}
         apply_finder_options(options)
       else
-        raise ArgumentError, "#{self}.find() expects a pid. You provided `#{args.inspect}'" unless args.is_a? Array
+        raise ArgumentError, "#{self}.find() expects an id. You provided `#{args.inspect}'" unless args.is_a? Array
         find_with_ids(args, cast)
       end
     end
@@ -79,9 +79,9 @@ module ActiveFedora
       end
     end
 
-    # Returns true if object having the pid or matching the conditions exists in the repository
+    # Returns true if object having the id or matching the conditions exists in the repository
     # Returns false if param is false (or nil) 
-    # @param[ActiveFedora::Base, String, Hash] object, pid or hash of conditions
+    # @param[ActiveFedora::Base, String, Hash] object, id or hash of conditions
     # @return[boolean]
     def exists?(conditions)
       conditions = conditions.id if Base === conditions
@@ -166,18 +166,18 @@ module ActiveFedora
       end while docs.has_next?
     end
 
-    # Retrieve the Fedora object with the given pid, explore the returned object
+    # Retrieve the Fedora object with the given id, explore the returned object
     # Raises a ObjectNotFoundError if the object is not found.
-    # @param [String] pid of the object to load
+    # @param [String] id of the object to load
     # @param [Boolean] cast when true, cast the found object to the class of the first known model defined in it's RELS-EXT
     #
     # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel http://fedora.info/definitions/v4/model#Dataset), return a Dataset object (not a Book).
     #   Book.find_one("hydra:dataset1")
-    def find_one(pid, cast=nil)
+    def find_one(id, cast=nil)
       if where_values.empty?
-        load_from_fedora(pid, cast)
+        load_from_fedora(id, cast)
       else
-        conditions = where_values + [ActiveFedora::SolrService.raw_query(SOLR_DOCUMENT_ID, pid)]
+        conditions = where_values + [ActiveFedora::SolrService.raw_query(SOLR_DOCUMENT_ID, id)]
         query = conditions.join(" AND ".freeze)
         to_enum(:find_each, query, {}).to_a.first
       end
@@ -266,7 +266,7 @@ module ActiveFedora
         elsif value.is_a? Array
           value.map { |val| "#{key}:#{RSolr.escape(val)}" }
         else
-          key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
+          key = SOLR_DOCUMENT_ID if (key === :id || key === :id)
           "#{key}:#{RSolr.escape(value)}"
         end
       end

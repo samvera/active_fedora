@@ -191,7 +191,7 @@ module ActiveFedora
       format_dsid(prefix, val)
     end
 
-    ### Provided so that an application can override how generated pids are formatted (e.g DS01 instead of DS1)
+    ### Provided so that an application can override how generated ids are formatted (e.g DS01 instead of DS1)
     def format_dsid(prefix, suffix)
       sprintf("%s%i", prefix,suffix)
     end
@@ -265,8 +265,8 @@ module ActiveFedora
           when 404
             # TODO
             # this happens because rdf_datastream calls datastream_content.
-            # which happens because it needs a PID even though it isn't saved.
-            # which happens because we don't know if something exists if you give it a pid
+            # which happens because it needs a ID even though it isn't saved.
+            # which happens because we don't know if something exists if you give it an id
             #raise ActiveFedora::ObjectNotFoundError, "Unable to find content at #{uri}"
             ''
           else

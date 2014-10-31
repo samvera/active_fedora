@@ -22,7 +22,7 @@ module ActiveFedora
         # Solrizer.set_field(solr_doc, 'object_state', state, :stored_sortable)
         Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.inspect, :stored_sortable)
         solr_doc.merge!(SolrService::HAS_MODEL_SOLR_FIELD => has_model)
-        solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid)
+        solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => id)
         solr_doc.merge!(ActiveFedora::Base.profile_solr_name => to_json)
       end
       attached_files.each_value do |ds|
@@ -53,7 +53,7 @@ module ActiveFedora
     # Updates Solr index with self.
     def update_index
       if defined?( Solrizer::Fedora::Solrizer )
-        #logger.info("Trying to solrize pid: #{pid}")
+        #logger.info("Trying to solrize id: #{id}")
         solrizer = Solrizer::Fedora::Solrizer.new
         solrizer.solrize( self )
       else
@@ -74,7 +74,7 @@ module ActiveFedora
       # This method can be used instead of ActiveFedora::Model::ClassMethods.find.
       # It works similarly except it populates an object from Solr instead of Fedora.
       # It is most useful for objects used in read-only displays in order to speed up loading time.  If only
-      # a pid is passed in it will query solr for a corresponding solr document and then use it
+      # a id is passed in it will query solr for a corresponding solr document and then use it
       # to populate this object.
       #
       # If a value is passed in for optional parameter solr_doc it will not query solr again and just use the
@@ -82,8 +82,8 @@ module ActiveFedora
       #
       # It will anything stored within solr such as metadata and relationships.  Non-metadata attached files will not
       # be loaded and if needed you should use find instead.
-      def load_instance_from_solr(pid, solr_doc=nil)
-        SolrInstanceLoader.new(self, pid, solr_doc).object
+      def load_instance_from_solr(id, solr_doc=nil)
+        SolrInstanceLoader.new(self, id, solr_doc).object
       end
 
       def get_descendent_uris(uri)

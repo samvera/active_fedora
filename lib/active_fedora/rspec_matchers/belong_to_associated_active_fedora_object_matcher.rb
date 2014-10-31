@@ -9,7 +9,7 @@ RSpec::Matchers.define :belong_to_associated_active_fedora_object do |associatio
       )
     end
 
-    @subject = subject.class.find(subject.pid)
+    @subject = subject.class.find(subject.id)
     @actual_object = @subject.send(@association_name)
 
     @expected_object == @actual_object
@@ -19,15 +19,15 @@ RSpec::Matchers.define :belong_to_associated_active_fedora_object do |associatio
 
 
   description do
-    "#{@subject.class} PID=#{@subject.pid} association: #{@association_name.inspect} matches ActiveFedora"
+    "#{@subject.class} ID=#{@subject.id} association: #{@association_name.inspect} matches ActiveFedora"
   end
 
   failure_message do |text|
-    "expected #{@subject.class} PID=#{@subject.pid} association: #{@association_name.inspect} to match"
+    "expected #{@subject.class} ID=#{@subject.id} association: #{@association_name.inspect} to match"
   end
 
   failure_message_when_negated do |text|
-    "expected #{@subject.class} PID=#{@subject.pid} association: #{@association_name.inspect} to NOT match"
+    "expected #{@subject.class} ID=#{@subject.id} association: #{@association_name.inspect} to NOT match"
   end
 
 end

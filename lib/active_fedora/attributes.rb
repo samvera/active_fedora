@@ -30,7 +30,7 @@ module ActiveFedora
 
     # Calling inspect may trigger a bunch of datastream loads, but it's mainly for debugging, so no worries.
     def inspect
-      values = ["pid: #{pid.inspect}"]
+      values = ["id: #{id.inspect}"]
       values << self.class.attribute_names.map { |attr| "#{attr}: #{self[attr].inspect}" }
       "#<#{self.class} #{values.flatten.join(', ')}>"
     end

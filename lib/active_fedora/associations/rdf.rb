@@ -54,7 +54,7 @@ module ActiveFedora
       def filter_by_class(candidate_uris)
         return [] if candidate_uris.empty?
         ids = candidate_uris.map {|uri| ActiveFedora::Base.uri_to_id(uri) }
-        results = ActiveFedora::SolrService.query(ActiveFedora::SolrService.construct_query_for_pids(ids), rows: 10000)
+        results = ActiveFedora::SolrService.query(ActiveFedora::SolrService.construct_query_for_ids(ids), rows: 10000)
 
         docs = results.select do |result|
           ActiveFedora::SolrService.classes_from_solr_document(result).any? { |klass|

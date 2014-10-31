@@ -50,7 +50,7 @@ describe ActiveFedora::Base do
         end
         @book.save
         expect(@book.topics.count).to eq 12
-        book2 = Book.find(@book.pid)
+        book2 = Book.find(@book.id)
         expect(book2.topics.count).to eq 12
       end
 
@@ -81,18 +81,18 @@ describe ActiveFedora::Base do
         expect(book.topics).to eq [topic1]
         expect(book['topic_ids']).to eq [topic1.id]
         expect(topic1['book_ids']).to eq [book.id]
-        expect(Topic.find(topic1.pid).books).to eq [book] #Can't have saved it because book isn't saved yet.
+        expect(Topic.find(topic1.id).books).to eq [book] #Can't have saved it because book isn't saved yet.
       end
 
       it "should save new child objects" do
         book.topics << Topic.new
-        expect(book.topics.first.pid).to_not be_nil
+        expect(book.topics.first.id).to_not be_nil
       end
 
       it "should clear out the old associtions" do
         book.topics = [topic1]
         book.topics = [topic2]
-        expect(book.topic_ids).to eq [topic2.pid]
+        expect(book.topic_ids).to eq [topic2.id]
       end
 
       context "with members" do
@@ -143,7 +143,7 @@ describe ActiveFedora::Base do
         expect(collection['book_ids']).to be_empty
       end
       it "should load the collections" do
-        reloaded = Book.find(book.pid)
+        reloaded = Book.find(book.id)
         expect(reloaded.collections).to eq [collection]
       end
 
@@ -193,7 +193,7 @@ describe ActiveFedora::Base do
         book.save!
         book.reload
         expect(book.collections).to eq [collection2]
-        expect(Collection.find(collection1.pid)).to_not be_nil
+        expect(Collection.find(collection1.id)).to_not be_nil
       end
 
       it "destroy should cause the entries to be removed from RELS-EXT, but not destroy the original record" do
@@ -203,7 +203,7 @@ describe ActiveFedora::Base do
         book.save!
         book.reload
         expect(book.collections).to eq [collection2]
-        expect(Collection.find(collection1.pid)).to_not be_nil
+        expect(Collection.find(collection1.id)).to_not be_nil
       end
     end
 

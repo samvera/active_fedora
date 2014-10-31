@@ -7,7 +7,7 @@ describe ActiveFedora::Model do
       
       class Base < ActiveFedora::Base
         include ActiveFedora::Model
-        def self.pid_namespace
+        def self.id_namespace
           "foo"
         end
         has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream, :autocreate => true 
@@ -39,16 +39,16 @@ describe ActiveFedora::Model do
   end
 
   describe '#find' do
-    describe "#find with a valid pid without cast" do
-      subject { ActiveFedora::Base.find(@test_instance.pid) }
+    describe "#find with a valid id without cast" do
+      subject { ActiveFedora::Base.find(@test_instance.id) }
       it { should be_instance_of ModelIntegrationSpec::Basic }
     end
-    describe "#find with a valid pid with cast of false" do
-      subject { ActiveFedora::Base.find(@test_instance.pid, cast: false) }
+    describe "#find with a valid id with cast of false" do
+      subject { ActiveFedora::Base.find(@test_instance.id, cast: false) }
       it { should be_instance_of ActiveFedora::Base }
     end
-    describe "#find with a valid pid without cast on a model extending Base" do
-      subject { ModelIntegrationSpec::Basic.find(@test_instance.pid) }
+    describe "#find with a valid id without cast on a model extending Base" do
+      subject { ModelIntegrationSpec::Basic.find(@test_instance.id) }
       it { should be_instance_of ModelIntegrationSpec::Basic }
     end
   end

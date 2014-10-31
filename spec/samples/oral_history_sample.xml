@@ -9,7 +9,7 @@
 		<rights>rights</rights>
 		<publisher>publisher</publisher>
 		<creation_date>creation date</creation_date>
-		<identifier>jwa:sample_pid</identifier>
+		<identifier>jwa:sample_id</identifier>
 		<format>format</format>
 		<extent>extent</extent>
 		<language>language</language>

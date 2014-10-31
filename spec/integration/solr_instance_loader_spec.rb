@@ -13,7 +13,7 @@ describe ActiveFedora::SolrInstanceLoader do
     end
   end
 
-  let!(:obj) { Foo.create!(pid: 'test-123', foo: ["baz"], bar: 'quix', title: ['My Title']) }
+  let!(:obj) { Foo.create!(id: 'test-123', foo: ["baz"], bar: 'quix', title: ['My Title']) }
 
   after do
     # obj.destroy
@@ -25,7 +25,7 @@ describe ActiveFedora::SolrInstanceLoader do
     subject { loader.object }
 
     context "with context" do
-      let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj.pid) }
+      let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj.id) }
 
       it "should find the document in solr" do
         expect(subject).to be_instance_of Foo
@@ -34,7 +34,7 @@ describe ActiveFedora::SolrInstanceLoader do
     end
 
     context "without context" do
-      let(:loader) { ActiveFedora::SolrInstanceLoader.new(ActiveFedora::Base, obj.pid) }
+      let(:loader) { ActiveFedora::SolrInstanceLoader.new(ActiveFedora::Base, obj.id) }
 
       it "should find the document in solr" do
         expect_any_instance_of(ActiveFedora::Datastream).to_not receive(:retrieve_content)
@@ -57,7 +57,7 @@ describe ActiveFedora::SolrInstanceLoader do
   context "with a solr doc" do
     let(:profile) { { "foo"=>["baz"], "bar"=>"quix", "title"=>["My Title"]}.to_json }
     let(:doc) { { 'id' => 'test-123', 'has_model_ssim'=>['Foo'], 'object_profile_ssm' => profile } }
-    let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj.pid, doc) }
+    let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj.id, doc) }
 
     subject { loader.object }
 

@@ -47,7 +47,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
   end
 
   it "should save content properly upon save" do
-    foo = RdfTest.new('test:1') #Pid needs to match the subject in the loaded file
+    foo = RdfTest.new('test:1') #ID needs to match the subject in the loaded file
     foo.title = 'Hamlet'
     foo.save
     expect(foo.title).to eq 'Hamlet'
@@ -67,7 +67,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     expect(foo).to receive(:update_index).once
     foo.title = "title1"
     foo.save
-    foo = RdfTest.find(foo.pid)
+    foo = RdfTest.find(foo.id)
     expect(foo).to receive(:update_index).once
     foo.title = "The Work2"
     foo.save
@@ -115,7 +115,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.part = ["this is a part"]
     @subject.save
 
-    loaded = RdfTest.find(@subject.pid)
+    loaded = RdfTest.find(@subject.id)
     expect(loaded.title).to eq 'War and Peace'
     expect(loaded.based_near).to eq ['Moscow, Russia']
     expect(loaded.related_url).to eq ['http://en.wikipedia.org/wiki/War_and_Peace']
@@ -126,7 +126,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.part = ["part 1", "part 2"]
     @subject.save
 
-    loaded = RdfTest.find(@subject.pid)
+    loaded = RdfTest.find(@subject.id)
     expect(loaded.part).to eq ['part 1', 'part 2']
   end
 

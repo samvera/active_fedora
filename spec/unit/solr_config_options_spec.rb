@@ -22,7 +22,7 @@ describe ActiveFedora do
       SOLR_DOCUMENT_ID = "id"
     end
     it "should be used by ActiveFedora::Base.to_solr" do
-      @test_object.stub(pid: 'changeme:123')
+      @test_object.stub(id: 'changeme:123')
       SOLR_DOCUMENT_ID = "MY_SAMPLE_ID"
       expect(@test_object.to_solr[SOLR_DOCUMENT_ID.to_sym]).to eq 'changeme:123'
       expect(@test_object.to_solr[:id]).to be_nil
@@ -54,7 +54,7 @@ describe ActiveFedora do
       @test_object.save
     end
     it "should prevent Base.delete from deleting the corresponding Solr document if false" do
-      expect(ActiveFedora::SolrService.instance.conn).to receive(:delete).with(@test_object.pid).never
+      expect(ActiveFedora::SolrService.instance.conn).to receive(:delete).with(@test_object.id).never
       expect(@test_object).to receive(:delete)
       @test_object.delete
     end

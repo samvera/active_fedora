@@ -42,7 +42,7 @@ module ActiveFedora
           candidate_classes = klass.descendants.select {|d| d.name }
           candidate_classes += [klass] unless klass == ActiveFedora::Base
           model_pairs = candidate_classes.inject([]) { |arr, klass| arr << [:has_model, klass.to_class_uri]; arr }
-          '(' + ActiveFedora::SolrService.construct_query_for_pids(ids) + ') AND (' +
+          '(' + ActiveFedora::SolrService.construct_query_for_ids(ids) + ') AND (' +
               ActiveFedora::SolrService.construct_query_for_rel(model_pairs, 'OR') + ')'
         end
 

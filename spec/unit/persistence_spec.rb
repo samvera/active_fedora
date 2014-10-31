@@ -45,9 +45,9 @@ describe ActiveFedora::Persistence do
 
   describe "destroy" do
     subject { ActiveFedora::Base.create! }
-    it "should not clear the pid" do
+    it "should not clear the id" do
       subject.destroy
-      expect(subject.pid).not_to be_nil
+      expect(subject.id).not_to be_nil
     end
   end
 

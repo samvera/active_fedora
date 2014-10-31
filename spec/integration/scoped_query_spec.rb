@@ -113,18 +113,18 @@ describe "scoped queries" do
     end
 
     describe "when one of the objects in solr isn't in fedora" do
-      let!(:pid) { test_instance2.pid }
+      let!(:id) { test_instance2.id }
       before { test_instance2.orm.delete }
       after do
         ActiveFedora::SolrService.instance.conn.tap do |conn|
-          conn.delete_by_query "id:\"#{pid}\""
+          conn.delete_by_query "id:\"#{id}\""
           conn.commit
         end
         test_instance1.delete
         test_instance3.delete
       end
       it "should log an error" do
-        expect(ActiveFedora::Base.logger).to receive(:error).with("Although #{pid} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
+        expect(ActiveFedora::Base.logger).to receive(:error).with("Although #{id} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
         expect(ModelIntegrationSpec::Basic.all).to eq [test_instance1, test_instance3]
       end
     end

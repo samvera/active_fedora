@@ -66,7 +66,7 @@ describe ActiveFedora::Base do
     END
     sample_narrator = 'Addelson, Frances'
     sample_bio = <<-END
-    Rochelle Ruthchild interviewed Frances Addleson on October 18, November 14, and December 10, 1997.   The interview thoroughly examined the trajectory of Frances\' life from birth until the time of the interview. As a young child, Frances\' father died during the influenza epidemic, and her mother was not equipped to care for her and her siblings.  Consequently, they were placed in a Jewish foster home. Although her experience was mostly positive, this experience would leave life-long effects.  Frances attended Radcliffe upon the urging of a mentor and later obtained her Master\'s degree in social work from Simmons College in 1954.  In the 1940\'s, she returned to work while her children were still young; a rather unusual event for that time period.  While working as a social worker at Beth Israel Hospital in the early 1970\'s, she helped counsel countless women who came to the hospital seeking abortions before the procedure was officially legalized during the landmark Roe vs. Wade decision in 1973.  Frances would later write two articles that were published in medical journals about her experience during this time.  Although not a very religious person, Frances felt connected to the Jewish notion of social justice and remained very active until an accident in the late 1990\'s.
+    Rochelle Ruthchild interviewed Frances Addleson on October 18, November 14, and December 10, 1997.   The interview thoroughly examined the trajectory of Frances\' life from birth until the time of the interview. As a young child, Frances\' father died during the influenza eidemic, and her mother was not equipped to care for her and her siblings.  Consequently, they were placed in a Jewish foster home. Although her experience was mostly positive, this experience would leave life-long effects.  Frances attended Radcliffe upon the urging of a mentor and later obtained her Master\'s degree in social work from Simmons College in 1954.  In the 1940\'s, she returned to work while her children were still young; a rather unusual event for that time period.  While working as a social worker at Beth Israel Hospital in the early 1970\'s, she helped counsel countless women who came to the hospital seeking abortions before the procedure was officially legalized during the landmark Roe vs. Wade decision in 1973.  Frances would later write two articles that were published in medical journals about her experience during this time.  Although not a very religious person, Frances felt connected to the Jewish notion of social justice and remained very active until an accident in the late 1990\'s.
     END
     sample_interviewer = "Ruthchild, & Rochelle"
 
@@ -78,7 +78,7 @@ describe ActiveFedora::Base do
                                     :notes => sample_notes, :hard_copy_availability => sample_hard_copy_availability, :hard_copy_location => "Archives", :other_contributor => sample_other_contributor,
                                     :restrictions => "None", :series => "My Series", :location => sample_location]
 
-    @dublin_core_sample_values = Hash[:creator => 'Matt && McClain', :publisher => "Jewish Womens's Archive", :description => "description", :identifier => "jwa:sample_pid", 
+    @dublin_core_sample_values = Hash[:creator => 'Matt && McClain', :publisher => "Jewish Womens's Archive", :description => "description", :identifier => "jwa:sample_id", 
                                     :title => "title", 
                                     #:alt_title => "alt_title", :subject => "subject", 
                                     #:subject_heading => "subject heading", 
@@ -92,7 +92,7 @@ describe ActiveFedora::Base do
                                     :format => "format", :medium => "medium"]
     @signigicant_passages_sample_values = {}
     @sensitive_passages_sample_values = {}
-    @sample_xml = "<xml><fields><system_create_date>REMOVED</system_create_date><system_modified_date>REMOVED</system_modified_date><active_fedora_model_s>OralHistory</active_fedora_model_s><id>changeme:14527</id><subject_heading>subject heading</subject_heading><type>type</type><rights>rights</rights><publisher>publisher</publisher><creation_date>creation date</creation_date><identifier>jwa:sample_pid</identifier><format>format</format><extent>extent</extent><language>language</language><description>description</description><title>title</title><medium>medium</medium><spatial_coverage>spatial coverage</spatial_coverage><alt_title>alt_title</alt_title><temporal_coverage>temporal coverage</temporal_coverage><subject>subject</subject><creator>creator</creator><abstract>abstract</abstract><other_contributor>Sally Ride</other_contributor><transcript_editor>Transcript Editor</transcript_editor><restrictions>None</restrictions><bio>Biographic info</bio><series>My Series</series><notes>My Note</notes><location>location</location><hard_copy_availability>Yes</hard_copy_availability><narrator>Narrator</narrator><hard_copy_location>Archives</hard_copy_location><interviewer>Interviewer</interviewer></fields><content/></xml>"
+    @sample_xml = "<xml><fields><system_create_date>REMOVED</system_create_date><system_modified_date>REMOVED</system_modified_date><active_fedora_model_s>OralHistory</active_fedora_model_s><id>changeme:14527</id><subject_heading>subject heading</subject_heading><type>type</type><rights>rights</rights><publisher>publisher</publisher><creation_date>creation date</creation_date><identifier>jwa:sample_id</identifier><format>format</format><extent>extent</extent><language>language</language><description>description</description><title>title</title><medium>medium</medium><spatial_coverage>spatial coverage</spatial_coverage><alt_title>alt_title</alt_title><temporal_coverage>temporal coverage</temporal_coverage><subject>subject</subject><creator>creator</creator><abstract>abstract</abstract><other_contributor>Sally Ride</other_contributor><transcript_editor>Transcript Editor</transcript_editor><restrictions>None</restrictions><bio>Biographic info</bio><series>My Series</series><notes>My Note</notes><location>location</location><hard_copy_availability>Yes</hard_copy_availability><narrator>Narrator</narrator><hard_copy_location>Archives</hard_copy_location><interviewer>Interviewer</interviewer></fields><content/></xml>"
 
   end
 
@@ -138,7 +138,7 @@ describe ActiveFedora::Base do
 
     @test_history.save
 
-    @solr_result = OralHistory.find_with_conditions(:id=>@test_history.pid)[0]
+    @solr_result = OralHistory.find_with_conditions(:id=>@test_history.id)[0]
     @properties_sample_values.each_pair do |field, value|
       next if field == :hard_copy_availability #FIXME HYDRA-824
       next if field == :location #FIXME HYDRA-825

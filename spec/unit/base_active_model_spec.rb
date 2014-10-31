@@ -46,7 +46,7 @@ describe ActiveFedora::Base do
     describe "update_attributes" do
       it "should set attributes and save " do
         @n.update_attributes(:fubar=>"baz", :duck=>"Quack")
-        @q = BarHistory.find(@n.pid)
+        @q = BarHistory.find(@n.id)
         expect(@q.fubar).to eq "baz"
         expect(@q.duck).to eq "Quack"
       end

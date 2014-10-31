@@ -58,16 +58,16 @@ module ActiveFedora
         end
       end
 
-      pid = self.pid ## cache so it's still available after delete
+      id = self.id ## cache so it's still available after delete
       # Clear out the ETag  -- Remove when this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
       orm.resource.instance_variable_set :@get, nil
       begin
         @orm.resource.delete
       rescue Ldp::NotFound
-        raise ObjectNotFoundError, "Unable to find #{pid} in the repository"
+        raise ObjectNotFoundError, "Unable to find #{id} in the repository"
       end
 
-      ActiveFedora::SolrService.delete(pid) if ENABLE_SOLR_UPDATES
+      ActiveFedora::SolrService.delete(id) if ENABLE_SOLR_UPDATES
       freeze
     end
 
@@ -76,7 +76,7 @@ module ActiveFedora
     end
 
     def eradicate
-      self.class.eradicate(self.pid)
+      self.class.eradicate(self.id)
     end
 
     module ClassMethods
@@ -188,12 +188,12 @@ module ActiveFedora
     end
 
 
-    def assign_pid
+    def assign_id
     end
 
     def assign_rdf_subject
-      if !pid && new_pid = assign_pid
-        @orm = Ldp::Orm.new(LdpResource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_pid), @resource))
+      if !id && new_id = assign_id
+        @orm = Ldp::Orm.new(LdpResource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_id), @resource))
       else
         @orm = Ldp::Orm.new(LdpResource.new(ActiveFedora.fedora.connection, @orm.resource.subject, @resource, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
       end

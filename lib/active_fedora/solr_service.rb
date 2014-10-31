@@ -84,12 +84,12 @@ module ActiveFedora
         best_model_match || ActiveFedora::Base
       end
 
-      # Construct a solr query for a list of pids
-      # This is used to get a solr response based on the list of pids in an object's RELS-EXT relationhsips
-      # If the pid_array is empty, defaults to a query of "id:NEVER_USE_THIS_ID", which will return an empty solr response
-      # @param [Array] pid_array the pids that you want included in the query
-      def construct_query_for_pids(pid_array)
-        q = pid_array.reject { |x| x.blank? }.map { |pid| raw_query(SOLR_DOCUMENT_ID, pid) }
+      # Construct a solr query for a list of ids
+      # This is used to get a solr response based on the list of ids in an object's RELS-EXT relationhsips
+      # If the id_array is empty, defaults to a query of "id:NEVER_USE_THIS_ID", which will return an empty solr response
+      # @param [Array] id_array the ids that you want included in the query
+      def construct_query_for_ids(id_array)
+        q = id_array.reject { |x| x.blank? }.map { |id| raw_query(SOLR_DOCUMENT_ID, id) }
         q.empty? ? "id:NEVER_USE_THIS_ID" : q.join(" OR ".freeze)
       end
 

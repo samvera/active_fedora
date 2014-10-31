@@ -81,8 +81,8 @@ describe ActiveFedora::AttachedFiles do
       end
 
       it "Should update datastream" do
-        expect(DSTest.find(file.pid).attached_files['test_ds'].content).to eq 'Foobar'
-        expect(DSTest.find(file.pid).test_ds.content).to eq 'Foobar'
+        expect(DSTest.find(file.id).attached_files['test_ds'].content).to eq 'Foobar'
+        expect(DSTest.find(file.id).test_ds.content).to eq 'Foobar'
       end
     end
 
