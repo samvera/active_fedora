@@ -7,6 +7,7 @@ describe ActiveFedora::AttachedFiles do
       class FooHistory < ActiveFedora::Base
          contains 'dsid', class_name: ActiveFedora::SimpleDatastream
          contains 'complex_ds', autocreate: true, class_name: 'Z'
+         contains 'thumbnail'
       end
     end
     after do
@@ -15,6 +16,7 @@ describe ActiveFedora::AttachedFiles do
 
     it "should have a child_resource_reflection" do
       expect(FooHistory.child_resource_reflections).to have_key('dsid')
+      expect(FooHistory.child_resource_reflections).to have_key('thumbnail')
     end
 
     it "should let you override defaults" do
