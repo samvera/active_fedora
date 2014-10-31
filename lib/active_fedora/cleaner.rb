@@ -9,7 +9,10 @@ module ActiveFedora
     def self.cleanout_fedora
       tombstone_path = ActiveFedora.fedora.base_path.sub('/', '') + "/fcr:tombstone"
       begin
-        ActiveFedora.fedora.connection.delete(ActiveFedora.fedora.base_path.sub('/', ''))
+        begin
+          ActiveFedora.fedora.connection.delete(ActiveFedora.fedora.base_path.sub('/', ''))
+        rescue Ldp::Gone
+        end
         ActiveFedora.fedora.connection.delete(tombstone_path)
       rescue Ldp::HttpError => exception
 
