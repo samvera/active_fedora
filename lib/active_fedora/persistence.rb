@@ -75,6 +75,10 @@ module ActiveFedora
       delete
     end
 
+    def eradicate
+      self.class.eradicate(self.pid)
+    end
+
     module ClassMethods
       # Creates an object (or multiple objects) and saves it to the repository, if validations pass.
       # The resulting object is returned whether the object was saved successfully to the repository or not.
@@ -108,6 +112,29 @@ module ActiveFedora
           object
         end
       end
+
+      # Removes an object's tombstone so another object with the same uri may be created.
+      # NOTE: this is in violation of the linked data platform and is only here as a convience
+      # method. It shouldn't be used in the general course of repository operations.
+      def eradicate(uri)
+        gone?(uri) ? delete_tombstone(uri) : false
+      end
+
+      private 
+      
+      def gone? uri
+        ActiveFedora::Base.find(uri)
+        false
+      rescue Ldp::Gone
+        true
+      end
+
+      def delete_tombstone uri
+        tombstone = ActiveFedora::Base.id_to_uri(uri) + "/fcr:tombstone"
+        ActiveFedora.fedora.connection.delete(tombstone)
+        true
+      end
+    
     end
 
   protected
