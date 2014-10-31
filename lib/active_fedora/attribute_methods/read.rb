@@ -24,7 +24,7 @@ module ActiveFedora
         def method_body(method_name, const_name)
           <<-EOMETHOD
           def #{method_name}
-            name = ::FedoraLens::AttributeMethods::AttrNames::ATTR_#{const_name}
+            name = ::ActiveFedora::AttributeMethods::AttrNames::ATTR_#{const_name}
             read_attribute(name) { |n| missing_attribute(n, caller) }
           end
           EOMETHOD

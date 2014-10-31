@@ -4,7 +4,6 @@ source "https://rubygems.org"
 
 gemspec path: File.expand_path('..', __FILE__)
 
-gem 'ldp', github: 'cbeer/ldp', ref: '4877dc2'
 gem 'byebug' unless ENV['TRAVIS']
 
 group :test do

@@ -57,8 +57,7 @@ module ActiveFedora
 
     # Returns a hash of all the attributes with their names as keys and the values of the attributes as values.
     #
-    #   class Person
-    #     include FedoraLens
+    #   class Person < ActiveFedora::Base
     #   end
     #
     #   person = Person.create(name: 'Francesco', age: 22)
@@ -95,8 +94,7 @@ module ActiveFedora
     # Updates the attribute identified by <tt>attr_name</tt> with the specified +value+.
     # (Alias for the protected <tt>write_attribute</tt> method).
     #
-    #   class Person
-    #     include FedoraLens
+    #   class Person < ActiveFedora::Base
     #   end
     #
     #   person = Person.new
