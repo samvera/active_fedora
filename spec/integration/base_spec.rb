@@ -44,6 +44,14 @@ describe "A base object with metadata" do
         expect(ActiveFedora::SolrService.query("id:\"#{@release.pid}\"", :fl=>"id #{person_field}").first).to eq("id"=>@release.pid, person_field =>['frank'])
       end
     end
+    describe "when trying to create it again" do
+      it "should raise an error" do
+        expect { MockAFBaseRelationship.create(pid: @release.pid) }.to raise_error(ActiveFedora::IllegalOperation)
+        @release.reload
+        expect(@release.foo.person).to include('test foo content')
+      end
+
+    end
   end
 
   describe '#reload' do

@@ -31,30 +31,8 @@ module ActiveFedora
     # +:namespace+ value to Fedora::Repository.nextid to generate the next pid available within
     # the given namespace.
     def initialize(attributes_or_resource_or_url = nil)
-      case attributes_or_resource_or_url
-        when Ldp::Resource::RdfSource
-          @orm = Ldp::Orm.new(subject_or_data)
-          attributes = get_attributes_from_orm(@orm)
-        when String
-          @orm = Ldp::Orm.new(build_ldp_resource(attributes_or_resource_or_url))
-          @attributes = {}.with_indifferent_access
-        when Hash
-          attributes = attributes_or_resource_or_url
-          pid = attributes.delete(:pid)
-          attributes = attributes.with_indifferent_access if attributes
-          @orm = if pid
-            Ldp::Orm.new(build_ldp_resource(pid))
-          else
-            Ldp::Orm.new(build_ldp_resource)
-          end
-        when NilClass
-          @orm = Ldp::Orm.new(build_ldp_resource)
-          attributes = {}.with_indifferent_access
-        else
-          raise ArgumentError, "#{attributes_or_resource_or_url.class} is not acceptable"
-
-      end
-
+      attributes = initialize_orm_and_attributes(attributes_or_resource_or_url)
+      raise IllegalOperation, "Attempting to recreate existing orm" unless @orm.new?
       @association_cache = {}
       assert_content_model
       load_attached_files
@@ -64,13 +42,7 @@ module ActiveFedora
 
     # Reloads the object from Fedora.
     def reload
-      unless persisted?
-        if destroyed?
-          raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that has been destroyed"
-        else
-          raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved"
-        end
-      end
+      check_persistence unless persisted?
       clear_association_cache
       clear_attached_files
       @orm = Ldp::Orm.new(LdpResource.new(conn, uri))
@@ -188,6 +160,40 @@ module ActiveFedora
         else
           LdpResource.new(conn, nil, nil, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
         end
+      end
+
+      def check_persistence
+        if destroyed?
+          raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that has been destroyed"
+        else
+          raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved"
+        end
+      end
+
+      def initialize_orm_and_attributes attributes_or_resource_or_url
+        case attributes_or_resource_or_url
+          when Ldp::Resource::RdfSource
+            @orm = Ldp::Orm.new(subject_or_data)
+            attributes = get_attributes_from_orm(@orm)
+          when String
+            @orm = Ldp::Orm.new(build_ldp_resource(attributes_or_resource_or_url))
+            @attributes = {}.with_indifferent_access
+          when Hash
+            attributes = attributes_or_resource_or_url
+            pid = attributes.delete(:pid)
+            attributes = attributes.with_indifferent_access if attributes
+            @orm = if pid
+              Ldp::Orm.new(build_ldp_resource(pid))
+            else
+              Ldp::Orm.new(build_ldp_resource)
+            end
+          when NilClass
+            @orm = Ldp::Orm.new(build_ldp_resource)
+            attributes = {}.with_indifferent_access
+          else
+            raise ArgumentError, "#{attributes_or_resource_or_url.class} is not acceptable"
+        end
+        return attributes
       end
 
   end
