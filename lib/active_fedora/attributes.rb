@@ -28,12 +28,6 @@ module ActiveFedora
       attribute_names.each_with_object({"id" => id}) {|key, hash| hash[key] = self[key] }
     end
 
-    # def changed?
-    #   super.tap do |res|
-    #     byebug
-    #   end
-    # end
-
     # Calling inspect may trigger a bunch of datastream loads, but it's mainly for debugging, so no worries.
     def inspect
       values = ["pid: #{pid.inspect}"]
@@ -45,7 +39,7 @@ module ActiveFedora
       if assoc = self.association(key.to_sym)
         # This is for id attributes stored in the rdf graph.
         assoc.reader
-      elsif self.class.properties.key?(key)
+      elsif self.class.properties.key?(key.to_s)
         # The attribute is stored in the RDF graph for this object
         resource[key]
       else
@@ -58,9 +52,9 @@ module ActiveFedora
       if assoc = self.association(key.to_sym)
         # This is for id attributes stored in the rdf graph.
         assoc.replace(value)
-      elsif self.class.properties.key?(key)
+      elsif self.class.properties.key?(key.to_s)
         # The attribute is stored in the RDF graph for this object
-        resource[key]=value
+        self.send(key.to_s+"=", value)
       else
         # The attribute is a delegate to a datastream
         array_setter(key, value)
