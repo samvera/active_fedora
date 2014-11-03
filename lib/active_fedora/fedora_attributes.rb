@@ -52,17 +52,23 @@ module ActiveFedora
     #
     # set_value, get_value, and property accessors are delegated to this object.
     def resource
-      @resource ||= begin
-                      r = @orm.graph
-                      r.class.properties.merge(self.class.properties).each do |property, config|
-                        r.class.property(config.term,
-                                   predicate: config.predicate, 
-                                   class_name: config.class_name, 
-                                   multivalue: config.multivalue)
-                      end
-                      r
-                    end
+      @resource ||= resource_class.new(@orm.graph.rdf_subject, @orm.graph)
     end
 
+    private
+      # We make a unique class, because properties belong to a class.
+      # This keeps properties from different objects separate.
+      def resource_class
+        @generated_resource_class ||= begin
+            klass = self.class.const_set(:GeneratedResourceSchema, Class.new(ActiveTriples::Resource))
+            klass.properties.merge(self.class.properties).each do |property, config|
+              klass.property(config.term,
+                             predicate: config.predicate,
+                             class_name: config.class_name,
+                             multivalue: config.multivalue)
+            end
+            klass
+        end
+      end
   end
 end
