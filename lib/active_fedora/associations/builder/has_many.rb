@@ -10,25 +10,23 @@ module ActiveFedora::Associations::Builder
       reflection
     end
 
+    def self.define_readers(mixin, name)
+      super
+
+      mixin.redefine_method("#{name.to_s.singularize}_ids") do
+        association(name).ids_reader
+      end
+    end
+
+    def self.define_writers(mixin, name)
+      super
+
+      mixin.redefine_method("#{name.to_s.singularize}_ids=") do |ids|
+        association(name).ids_writer(ids)
+      end
+    end
+
     private
-
-      def define_readers
-        super
-
-        name = self.name
-        mixin.redefine_method("#{name.to_s.singularize}_ids") do
-          association(name).ids_reader
-        end
-      end
-
-      def define_writers
-        super
-
-        name = self.name
-        mixin.redefine_method("#{name.to_s.singularize}_ids=") do |ids|
-          association(name).ids_writer(ids)
-        end
-      end
 
       def configure_dependency
         if options[:dependent]
