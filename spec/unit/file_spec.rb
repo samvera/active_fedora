@@ -60,7 +60,8 @@ describe ActiveFedora::Datastream do
     end
   end
 
-  describe ".size" do
+  context "content" do
+    
     let(:mock_conn) do
       Faraday.new do |builder|
         builder.adapter :test, conn_stubs do |stub|
@@ -82,9 +83,46 @@ describe ActiveFedora::Datastream do
       allow(subject).to receive(:ldp_connection).and_return(mock_client)
     end
 
-    it "should load the datastream size attribute from the fedora repository" do
-      expect(subject.size).to eq 9999
+    describe ".size" do
+      it "should load the datastream size attribute from the fedora repository" do
+        expect(subject.size).to eq 9999
+      end
     end
+
+    describe ".empty?" do
+      it "should not be empty" do
+        expect(subject.empty?).to be false
+      end
+    end
+
+    describe ".has_content?" do
+      context "when there's content" do
+        it "should return true" do
+          expect(subject.has_content?).to be true
+        end
+      end
+      context "when content is nil" do
+        let(:conn_stubs) do
+          Faraday::Adapter::Test::Stubs.new do |stub|
+            stub.head('/fedora/rest/test/1234/abcd') { [200] }
+          end
+        end
+        it "should return false" do
+          expect(subject.has_content?).to be false
+        end
+      end
+      context "when content is zero" do
+        let(:conn_stubs) do
+          Faraday::Adapter::Test::Stubs.new do |stub|
+            stub.head('/fedora/rest/test/1234/abcd') { [200, {'Content-Length' => '0' }] }
+          end
+        end
+        it "should return false" do
+          expect(subject.has_content?).to be false
+        end
+      end 
+    end
+  
   end
 
   context "when the datastream has local content" do
