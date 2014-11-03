@@ -10,13 +10,15 @@ describe ActiveFedora::SolrInstanceLoader do
       has_attributes :foo, datastream: 'descMetadata', multiple: true
       has_attributes :bar, datastream: 'descMetadata', multiple: false
       property :title, predicate: RDF::DC.title
+      belongs_to :another, property: :is_part_of, class_name: 'Foo'
     end
   end
 
-  let!(:obj) { Foo.create!(id: 'test-123', foo: ["baz"], bar: 'quix', title: ['My Title']) }
+  let(:another) { Foo.create }
+
+  let!(:obj) { Foo.create!(id: 'test-123', foo: ["baz"], bar: 'quix', title: ['My Title'], another_id: another.id) }
 
   after do
-    # obj.destroy
     Object.send(:remove_const, :Foo)
   end
 
@@ -30,6 +32,7 @@ describe ActiveFedora::SolrInstanceLoader do
       it "should find the document in solr" do
         expect(subject).to be_instance_of Foo
         expect(subject.title).to eq ['My Title']
+        expect(subject.another_id).to eq another.id
       end
     end
 
