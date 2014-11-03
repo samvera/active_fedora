@@ -9,7 +9,7 @@ describe ActiveFedora::SolrService do
     ActiveFedora::SolrService.register(ActiveFedora.solr_config[:url])
   end
   
-  it "should take a narg constructor and configure for localhost" do
+  it "should take a n-arg constructor and configure for localhost" do
     expect(RSolr).to receive(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://localhost:8080/solr')
     ActiveFedora::SolrService.register
   end
@@ -74,7 +74,7 @@ describe ActiveFedora::SolrService do
       expect(ActiveFedora::SolrService.raw_query('id', "my:_ID1_")).to eq '_query_:"{!raw f=id}my:_ID1_"'
     end
   end
-  
+
   describe '#construct_query_for_ids' do
     it "should generate a useable solr query from an array of Fedora ids" do
       expect(ActiveFedora::SolrService.construct_query_for_ids(["my:_ID1_", "my:_ID2_", "my:_ID3_"])).to eq '_query_:"{!raw f=id}my:_ID1_" OR _query_:"{!raw f=id}my:_ID2_" OR _query_:"{!raw f=id}my:_ID3_"'
@@ -82,12 +82,19 @@ describe ActiveFedora::SolrService do
     end
     it "should return a valid solr query even if given an empty array as input" do
       expect(ActiveFedora::SolrService.construct_query_for_ids([""])).to eq "id:NEVER_USE_THIS_ID"
-      
     end
   end
-  
+
+  describe '#construct_query_for_pids' do
+    it "should generate a useable solr query from an array of Fedora ids" do
+      expect(Deprecation).to receive(:warn)
+      expect(ActiveFedora::SolrService.construct_query_for_pids(["my:_ID1_", "my:_ID2_", "my:_ID3_"])).to eq '_query_:"{!raw f=id}my:_ID1_" OR _query_:"{!raw f=id}my:_ID2_" OR _query_:"{!raw f=id}my:_ID3_"'
+
+    end
+  end
+
   describe ".query" do
-    it "should call solr" do 
+    it "should call solr" do
       mock_conn = double("Connection")
       stub_result = double("Result")
       expect(mock_conn).to receive(:get).with('select', :params=>{:q=>'querytext', :qt=>'standard'}).and_return(stub_result)
@@ -96,23 +103,23 @@ describe ActiveFedora::SolrService do
     end
   end
   describe ".count" do
-    it "should return a count of matching records" do 
+    it "should return a count of matching records" do
       mock_conn = double("Connection")
       stub_result = {'response' => {'numFound'=>'7'}}
       expect(mock_conn).to receive(:get).with('select', :params=>{:rows=>0, :q=>'querytext', :qt=>'standard'}).and_return(stub_result)
       ActiveFedora::SolrService.stub(:instance =>double("instance", :conn=>mock_conn))
-      expect(ActiveFedora::SolrService.count('querytext')).to eq 7 
+      expect(ActiveFedora::SolrService.count('querytext')).to eq 7
     end
     it "should accept query args" do
       mock_conn = double("Connection")
       stub_result = {'response' => {'numFound'=>'7'}}
       expect(mock_conn).to receive(:get).with('select', :params=>{:rows=>0, :q=>'querytext', :qt=>'standard', :fq=>'filter'}).and_return(stub_result)
       ActiveFedora::SolrService.stub(:instance =>double("instance", :conn=>mock_conn))
-      expect(ActiveFedora::SolrService.count('querytext', :fq=>'filter', :rows=>10)).to eq 7 
+      expect(ActiveFedora::SolrService.count('querytext', :fq=>'filter', :rows=>10)).to eq 7
     end
   end
   describe ".add" do
-    it "should call solr" do 
+    it "should call solr" do
       mock_conn = double("Connection")
       doc = {'id' => '1234'}
       expect(mock_conn).to receive(:add).with(doc, {:params=>{}})
@@ -121,7 +128,7 @@ describe ActiveFedora::SolrService do
     end
   end
   describe ".commit" do
-    it "should call solr" do 
+    it "should call solr" do
       mock_conn = double("Connection")
       doc = {'id' => '1234'}
       expect(mock_conn).to receive(:commit)
@@ -129,5 +136,4 @@ describe ActiveFedora::SolrService do
       ActiveFedora::SolrService.commit()
     end
   end
-  
 end

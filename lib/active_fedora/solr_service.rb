@@ -1,7 +1,9 @@
 require 'rsolr'
+require 'deprecation'
 
 module ActiveFedora
   class SolrService
+    extend Deprecation
 
     attr_reader :conn
 
@@ -91,6 +93,11 @@ module ActiveFedora
       def construct_query_for_ids(id_array)
         q = id_array.reject { |x| x.blank? }.map { |id| raw_query(SOLR_DOCUMENT_ID, id) }
         q.empty? ? "id:NEVER_USE_THIS_ID" : q.join(" OR ".freeze)
+      end
+
+      def construct_query_for_pids(id_array)
+        Deprecation.warn SolrService, "construct_query_for_pids is deprecated and will be removed in active-fedora 9.0"
+        construct_query_for_ids(id_array)
       end
 
       # Create a raw query clause suitable for sending to solr as an fq element
