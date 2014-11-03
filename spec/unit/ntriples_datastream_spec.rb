@@ -88,7 +88,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "an instance with a custom subject" do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        rdf_subject { |ds| "http://localhost:8983/fedora/rest/test/#{ds.pid}/content" }
+        rdf_subject { |ds| "http://localhost:8983/fedora/rest/test/#{ds.id}/content" }
         property :created, predicate: RDF::DC.created
         property :title, predicate: RDF::DC.title
         property :publisher, predicate: RDF::DC.publisher
@@ -96,7 +96,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
         property :related_url, predicate: RDF::RDFS.seeAlso
       end
       @subject = MyDatastream.new(inner_object, 'mixed_rdf')
-      allow(@subject).to receive(:pid).and_return 'test:1'
+      allow(@subject).to receive(:id).and_return 'test:1'
       allow(@subject).to receive(:new_record?).and_return  false
       allow(@subject).to receive(:datastream_content).and_return datastream_content
     end

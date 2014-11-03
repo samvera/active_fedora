@@ -43,9 +43,9 @@ describe ActiveFedora::Base do
   
   describe '#find' do
     describe "with :cast false" do
-      describe "and a pid is specified" do
+      describe "and an id is specified" do
         it "should raise an exception if it is not found" do
-          expect { SpecModel::Basic.find("_PID_") }.to raise_error ActiveFedora::ObjectNotFoundError
+          expect { SpecModel::Basic.find("_ID_") }.to raise_error ActiveFedora::ObjectNotFoundError
         end
       end
     end
@@ -165,7 +165,7 @@ describe ActiveFedora::Base do
       it 'should return one object' do
         SpecModel::Basic.class == SpecModel::Basic
       end
-      it 'should return the last object sorted by pid' do
+      it 'should return the last object sorted by id' do
         SpecModel::Basic.last == @c
         SpecModel::Basic.last != @a 
       end
@@ -186,7 +186,7 @@ describe ActiveFedora::Base do
       it 'should return one object' do
         SpecModel::Basic.class == SpecModel::Basic
       end
-      it 'should return the last object sorted by pid' do
+      it 'should return the last object sorted by id' do
         SpecModel::Basic.first == @a
         SpecModel::Basic.first != @c 
       end
@@ -249,7 +249,7 @@ describe ActiveFedora::Base do
 
   describe "#load_from_fedora" do
     let(:relation) { ActiveFedora::Relation.new(ActiveFedora::Base) }
-    before { @obj = SpecModel::Basic.create(pid: "test:123") }
+    before { @obj = SpecModel::Basic.create(id: "test:123") }
     after { @obj.destroy }
     it "should cast when klass == ActiveFedora::Base and cast argument is nil" do
       expect(relation.send(:load_from_fedora, "test:123", nil)).to be_a SpecModel::Basic

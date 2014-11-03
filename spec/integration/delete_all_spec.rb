@@ -37,16 +37,16 @@ describe ActiveFedora::Base do
 
     describe "when a model is missing" do
       let(:model3) { SpecModel::Basic.create! }
-      let!(:pid) { model3.pid }
+      let!(:id) { model3.id }
       before { model3.orm.delete }
       after do
         ActiveFedora::SolrService.instance.conn.tap do |conn|
-          conn.delete_by_query "id:\"#{pid}\""
+          conn.delete_by_query "id:\"#{id}\""
           conn.commit
         end
       end
       it "should be able to skip a missing model" do
-        expect(ActiveFedora::Base.logger).to receive(:error).with("Although #{pid} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
+        expect(ActiveFedora::Base.logger).to receive(:error).with("Although #{id} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
         SpecModel::Basic.destroy_all
         expect(SpecModel::Basic.count).to eq 1
       end

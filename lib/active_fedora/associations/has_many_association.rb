@@ -100,7 +100,7 @@ module ActiveFedora
                     end
                     # Check to see if the object still exists (may be already deleted).
                     # In Rails, they do this with an update_all to avoid callbacks and validations, we may need the same.
-                    record.save! if record.class.exists?(record.pid)
+                    record.save! if record.class.exists?(record.id)
                   end
                 end
               end

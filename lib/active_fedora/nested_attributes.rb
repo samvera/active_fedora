@@ -129,7 +129,7 @@ module ActiveFedora
         association.to_a
       else
         attribute_ids = attributes_collection.map {|a| a['id'] || a[:id] }.compact
-        attribute_ids.present? ? association.to_a.select{ |x| attribute_ids.include?(x.pid)} : []
+        attribute_ids.present? ? association.to_a.select{ |x| attribute_ids.include?(x.id)} : []
       end
 
       attributes_collection.each do |attributes|

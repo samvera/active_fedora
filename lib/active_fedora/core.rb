@@ -13,22 +13,22 @@ module ActiveFedora
       ##
       # :singleton-method
       #
-      # Accepts a proc that takes a pid and transforms it to a URI
+      # Accepts a proc that takes an id and transforms it to a URI
       mattr_accessor :translate_id_to_uri, instance_writer: false
 
       ##
       # :singleton-method
       #
-      # Accepts a proc that takes a uri and transforms it to a pid
+      # Accepts a proc that takes a uri and transforms it to an id
       mattr_accessor :translate_uri_to_id, instance_writer: false
 
       attr_reader :orm
     end
 
-    # Constructor.  You may supply a custom +:pid+, or we call the Fedora Rest API for the
-    # next available Fedora pid, and mark as new object.
-    # Also, if +attrs+ does not contain +:pid+ but does contain +:namespace+ it will pass the
-    # +:namespace+ value to Fedora::Repository.nextid to generate the next pid available within
+    # Constructor.  You may supply a custom +:id+, or we call the Fedora Rest API for the
+    # next available Fedora id, and mark as new object.
+    # Also, if +attrs+ does not contain +:id+ but does contain +:namespace+ it will pass the
+    # +:namespace+ value to Fedora::Repository.nextid to generate the next id available within
     # the given namespace.
     def initialize(attributes_or_resource_or_url = nil)
       attributes = initialize_orm_and_attributes(attributes_or_resource_or_url)
@@ -72,7 +72,7 @@ module ActiveFedora
     def ==(comparison_object)
          comparison_object.equal?(self) ||
            (comparison_object.instance_of?(self.class) &&
-             comparison_object.pid == pid &&
+             comparison_object.id == id &&
              !comparison_object.new_record?)
     end
 
@@ -116,7 +116,7 @@ module ActiveFedora
       end
 
       ##
-      # Transforms a pid into a uri
+      # Transforms an id into a uri
       # if translate_id_to_uri is set it uses that proc, otherwise just the default
       def id_to_uri(id)
         if translate_id_to_uri
@@ -129,7 +129,7 @@ module ActiveFedora
       end
 
       ##
-      # Transforms a uri into a pid
+      # Transforms a uri into an id
       # if translate_uri_to_id is set it uses that proc, otherwise just the default
       def uri_to_id(uri)
         if translate_uri_to_id
@@ -162,9 +162,9 @@ module ActiveFedora
         ActiveFedora.fedora.connection
       end
 
-      def build_ldp_resource(pid=nil)
-        if pid
-          LdpResource.new(conn, to_uri(pid))
+      def build_ldp_resource(id=nil)
+        if id
+          LdpResource.new(conn, to_uri(id))
         else
           LdpResource.new(conn, nil, nil, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
         end
@@ -188,10 +188,18 @@ module ActiveFedora
             @attributes = {}.with_indifferent_access
           when Hash
             attributes = attributes_or_resource_or_url
-            pid = attributes.delete(:pid)
+
+            id = attributes.delete(:id)
+
+            # TODO: Remove when we decide using 'pid' is no longer supported.
+            if !id && attributes.has_key?(:pid)
+              Deprecation.warn Core, 'Initializing with :pid is deprecated and will be removed in active-fedora 9.0. Use :id instead'
+              id = attributes.delete(:pid)
+            end
+
             attributes = attributes.with_indifferent_access if attributes
-            @orm = if pid
-              Ldp::Orm.new(build_ldp_resource(pid))
+            @orm = if id
+              Ldp::Orm.new(build_ldp_resource(id))
             else
               Ldp::Orm.new(build_ldp_resource)
             end

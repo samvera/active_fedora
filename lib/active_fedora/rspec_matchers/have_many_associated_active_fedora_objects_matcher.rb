@@ -10,7 +10,7 @@ RSpec::Matchers.define :have_many_associated_active_fedora_objects do |associati
       )
     end
 
-    @subject = subject.class.find(subject.pid)
+    @subject = subject.class.find(subject.id)
     @actual_objects = @subject.send(@association_name)
 
     if @expected_objects
@@ -19,7 +19,7 @@ RSpec::Matchers.define :have_many_associated_active_fedora_objects do |associati
       if actual_count != expected_count
         raise(
           RSpec::Expectations::ExpectationNotMetError,
-          "#{@subject.class} PID=#{@subject.pid} relationship: #{@association_name.inspect} count <Expected Count: #{expected_count}> <Actual: #{actual_count}>"
+          "#{@subject.class} ID=#{@subject.id} relationship: #{@association_name.inspect} count <Expected Count: #{expected_count}> <Actual: #{actual_count}>"
         )
       end
       intersection = @actual_objects & @expected_objects
@@ -31,15 +31,15 @@ RSpec::Matchers.define :have_many_associated_active_fedora_objects do |associati
 
 
   description do
-    "#{@subject.class} PID=#{@subject.pid} association: #{@association_name.inspect} matches ActiveFedora"
+    "#{@subject.class} ID=#{@subject.id} association: #{@association_name.inspect} matches ActiveFedora"
   end
 
   failure_message do |text|
-    "expected #{@subject.class} PID=#{@subject.pid} association: #{@association_name.inspect} to match"
+    "expected #{@subject.class} ID=#{@subject.id} association: #{@association_name.inspect} to match"
   end
 
   failure_message_when_negated do |text|
-    "expected #{@subject.class} PID=#{@subject.pid} association: #{@association_name.inspect} to NOT match"
+    "expected #{@subject.class} ID=#{@subject.id} association: #{@association_name.inspect} to NOT match"
   end
 
 end

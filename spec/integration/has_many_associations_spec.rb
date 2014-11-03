@@ -37,7 +37,7 @@ describe "Collection members" do
     end
 
     it "should read book_ids from solr" do
-      expect(library.book_ids).to eq [book.pid]
+      expect(library.book_ids).to eq [book.id]
     end
     it "should read books from solr" do
       expect(library.books).to eq [book]
@@ -49,7 +49,7 @@ describe "Collection members" do
       expect(library.books).to be_loaded
     end
     it "should load from solr" do
-      expect(library.books.load_from_solr.map {|r| r["id"]}).to eq([book.pid])
+      expect(library.books.load_from_solr.map {|r| r["id"]}).to eq([book.id])
     end
     it "should load from solr with options" do
       expect(library.books.load_from_solr(rows: 0).size).to eq(0)

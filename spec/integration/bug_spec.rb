@@ -30,12 +30,12 @@ describe 'bugs' do
     @test_object.someData.fubar=['initial']
     @test_object.save!
 
-    x = FooHistory.find(@test_object.pid)
+    x = FooHistory.find(@test_object.id)
     x.someData.fubar = ["replacement"] # set a new value
     x.save!
 
 
-    x = FooHistory.find(@test_object.pid)
+    x = FooHistory.find(@test_object.id)
     expect(x.someData.fubar).to eq ["replacement"] # recall the value
     x.save
   end

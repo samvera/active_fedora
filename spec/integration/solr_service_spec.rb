@@ -4,7 +4,7 @@ describe ActiveFedora::SolrService do
   describe "#reify_solr_results" do
     before(:each) do
       class FooObject < ActiveFedora::Base
-        def self.pid_namespace
+        def self.id_namespace
           "foo"
         end
   
@@ -32,7 +32,7 @@ describe ActiveFedora::SolrService do
       Object.send(:remove_const, :FooObject)
     end
     it "should return an array of objects that are of the class stored in active_fedora_model_s" do
-      query = "id\:#{RSolr.escape(@test_object.pid)} OR id\:#{RSolr.escape(@foo_object.pid)}"
+      query = "id\:#{RSolr.escape(@test_object.id)} OR id\:#{RSolr.escape(@foo_object.id)}"
       solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result)
       expect(result.length).to eq 2
@@ -42,7 +42,7 @@ describe ActiveFedora::SolrService do
     end
     
     it 'should #reify a lightweight object as a new instance' do
-      query = "id\:#{RSolr.escape(@foo_object.pid)}"
+      query = "id\:#{RSolr.escape(@foo_object.id)}"
       solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
       expect(result.first).to be_instance_of FooObject

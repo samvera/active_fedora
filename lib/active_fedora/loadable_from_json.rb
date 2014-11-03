@@ -43,9 +43,9 @@ module ActiveFedora
     # @param json [String] json to be parsed into attributes
     def init_with_json(json)
       attrs = JSON.parse(json)
-      pid = attrs.delete('id')
+      id = attrs.delete('id')
 
-      @orm = Ldp::Orm.new(build_ldp_resource(pid))
+      @orm = Ldp::Orm.new(build_ldp_resource(id))
       @association_cache = {}
       datastream_keys = self.class.child_resource_reflections.keys
       datastream_keys.each do |key|

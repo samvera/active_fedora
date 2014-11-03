@@ -8,7 +8,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
         property :publisher, :predicate => RDF::DC.publisher
       end
       @subject = MyRdfxmlDatastream.new(inner_object, 'mixed_rdf')
-      allow(@subject).to receive(:pid).and_return('test:1')
+      allow(@subject).to receive(:id).and_return('test:1')
     end
     after(:each) do
       Object.send(:remove_const, :MyRdfxmlDatastream)

@@ -18,12 +18,12 @@ describe "A base object with metadata" do
     end
 
     it "should save the datastream." do
-      obj = ActiveFedora::Base.find(@obj.pid)
+      obj = ActiveFedora::Base.find(@obj.id)
       expect(obj.foo).to_not be_new_record
       expect(obj.foo.person).to eq ['bob']
       person_field = ActiveFedora::SolrService.solr_name('foo__person', type: :string)
-      solr_result = ActiveFedora::SolrService.query("{!raw f=id}#{@obj.pid}", :fl=>"id #{person_field}").first
-      expect(solr_result).to eq("id"=>@obj.pid, person_field =>['bob'])
+      solr_result = ActiveFedora::SolrService.query("{!raw f=id}#{@obj.id}", :fl=>"id #{person_field}").first
+      expect(solr_result).to eq("id"=>@obj.id, person_field =>['bob'])
     end
   end
 
@@ -39,14 +39,14 @@ describe "A base object with metadata" do
         @release.save!
       end
       it "should save the datastream." do
-        expect(MockAFBaseRelationship.find(@release.pid).foo.person).to eq ['frank']
+        expect(MockAFBaseRelationship.find(@release.id).foo.person).to eq ['frank']
         person_field = ActiveFedora::SolrService.solr_name('foo__person', type: :string)
-        expect(ActiveFedora::SolrService.query("id:\"#{@release.pid}\"", :fl=>"id #{person_field}").first).to eq("id"=>@release.pid, person_field =>['frank'])
+        expect(ActiveFedora::SolrService.query("id:\"#{@release.id}\"", :fl=>"id #{person_field}").first).to eq("id"=>@release.id, person_field =>['frank'])
       end
     end
     describe "when trying to create it again" do
       it "should raise an error" do
-        expect { MockAFBaseRelationship.create(pid: @release.pid) }.to raise_error(ActiveFedora::IllegalOperation)
+        expect { MockAFBaseRelationship.create(id: @release.id) }.to raise_error(ActiveFedora::IllegalOperation)
         @release.reload
         expect(@release.foo.person).to include('test foo content')
       end
@@ -60,7 +60,7 @@ describe "A base object with metadata" do
       @object.foo.person = 'bob'
       @object.save
 
-      @object2 = @object.class.find(@object.pid)
+      @object2 = @object.class.find(@object.id)
 
       @object2.foo.person = 'dave'
       @object2.save
@@ -98,8 +98,8 @@ describe ActiveFedora::Base do
       it { should be_empty }
     end
 
-    describe "pid" do
-      subject { obj.pid }
+    describe "id" do
+      subject { obj.id }
       it { should_not be_nil }
     end
 
@@ -113,7 +113,7 @@ describe ActiveFedora::Base do
 
       it 'updates the modification time field in solr' do
         expect { obj.save }.to change {
-          ActiveFedora::SolrService.query("id:\"#{obj.pid}\"").first['system_modified_dtsi']
+          ActiveFedora::SolrService.query("id:\"#{obj.id}\"").first['system_modified_dtsi']
         }
       end
     end
@@ -132,7 +132,7 @@ describe ActiveFedora::Base do
       it "should delete the object from Fedora and Solr" do
         expect {
           obj.delete
-        }.to change { ActiveFedora::Base.exists?(obj.pid) }.from(true).to(false)
+        }.to change { ActiveFedora::Base.exists?(obj.id) }.from(true).to(false)
       end
     end
   end
@@ -143,10 +143,10 @@ describe ActiveFedora::Base do
     it "should return true for objects that exist" do
       expect(ActiveFedora::Base.exists?(obj)).to be true
     end
-    it "should return true for pids that exist" do
-      expect(ActiveFedora::Base.exists?(obj.pid)).to be true
+    it "should return true for ids that exist" do
+      expect(ActiveFedora::Base.exists?(obj.id)).to be true
     end
-    it "should return false for pids that don't exist" do
+    it "should return false for ids that don't exist" do
       expect(ActiveFedora::Base.exists?('test:missing_object')).to be false
     end
     it "should return false for nil" do

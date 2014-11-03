@@ -1,5 +1,5 @@
 require 'spec_helper'
-@@last_pid = 0
+@@last_id = 0
 
 describe ActiveFedora::Base do
   it_behaves_like "An ActiveModel"
@@ -24,7 +24,7 @@ describe ActiveFedora::Base do
 
     before :each do
       ids.each do |id|
-        ActiveFedora::Base.create pid: id
+        ActiveFedora::Base.create id: id
       end
     end
 
@@ -83,48 +83,48 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :FooInherited)
     end
 
-    def increment_pid
-      @@last_pid += 1
+    def increment_id
+      @@last_id += 1
     end
 
     before do
-      @this_pid = increment_pid.to_s
+      @this_id = increment_id.to_s
       @test_object = ActiveFedora::Base.new
-      allow(@test_object).to receive(:assign_pid).and_return(@this_pid)
+      allow(@test_object).to receive(:assign_id).and_return(@this_id)
     end
 
 
     describe '#new' do
       before do
-        allow_any_instance_of(FooHistory).to receive(:assign_pid).and_return(@this_pid)
+        allow_any_instance_of(FooHistory).to receive(:assign_id).and_return(@this_id)
       end
       context "with no arguments" do
-        it "should not get a pid on init" do
-          expect(FooHistory.new.pid).to be_nil
+        it "should not get an id on init" do
+          expect(FooHistory.new.id).to be_nil
         end
       end
 
-      context "with a pid argument" do
-        it "should be able to create with a custom pid" do
+      context "with an id argument" do
+        it "should be able to create with a custom id" do
           expect(FooHistory).to receive(:id_to_uri).and_call_original
           f = FooHistory.new('baz_1')
           expect(f.id).to eq 'baz_1'
-          expect(f.pid).to eq 'baz_1'
+          expect(f.id).to eq 'baz_1'
         end
       end
 
       context "with a hash argument" do
-        context "that has a pid" do
-          it "should be able to create with a custom pid" do
+        context "that has an id" do
+          it "should be able to create with a custom id" do
             expect(FooHistory).to receive(:id_to_uri).and_call_original
-            f = FooHistory.new(pid: 'baz_1')
+            f = FooHistory.new(id: 'baz_1')
             expect(f.id).to eq 'baz_1'
-            expect(f.pid).to eq 'baz_1'
+            expect(f.id).to eq 'baz_1'
           end
         end
 
-        context "that doesn't have a pid" do
-          it "should be able to create with a custom pid" do
+        context "that doesn't have an id" do
+          it "should be able to create with a custom id" do
             f = FooHistory.new(fubar: ['baz_1'])
             expect(f.id).to be_nil
           end
@@ -243,12 +243,12 @@ describe ActiveFedora::Base do
         end
       end
 
-      context "when assign pid returns a value" do
-        context "an no pid has been set" do
+      context "when assign id returns a value" do
+        context "an no id has been set" do
 
-          it "should set the pid" do
+          it "should set the id" do
             @test_object.save
-            expect(@test_object.pid).to eq @this_pid
+            expect(@test_object.id).to eq @this_id
           end
 
           context "and the object has properties" do
@@ -257,7 +257,7 @@ describe ActiveFedora::Base do
               class WithProperty < ActiveFedora::Base
                 property :title, predicate: RDF::DC.title
               end
-              allow(test_object).to receive(:assign_pid).and_return(@this_pid)
+              allow(test_object).to receive(:assign_id).and_return(@this_id)
               test_object.save
             end
             after do
@@ -265,20 +265,20 @@ describe ActiveFedora::Base do
             end
 
             it "should update the resource" do
-              expect(test_object.resource.rdf_subject).to eq RDF::URI.new("#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/#{@this_pid}")
+              expect(test_object.resource.rdf_subject).to eq RDF::URI.new("#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/#{@this_id}")
               expect(test_object.title).to eq ['foo']
             end
           end
         end
 
-        context "when a pid is set" do
+        context "when an id is set" do
           before do
-            @test_object = ActiveFedora::Base.new(pid: '999')
-            allow(@test_object).to receive(:assign_pid).and_return(@this_pid)
+            @test_object = ActiveFedora::Base.new(id: '999')
+            allow(@test_object).to receive(:assign_id).and_return(@this_id)
           end
-          it "should not set the pid" do
+          it "should not set the id" do
             @test_object.save
-            expect(@test_object.pid).to eq '999'
+            expect(@test_object.id).to eq '999'
           end
         end
       end
@@ -298,10 +298,10 @@ describe ActiveFedora::Base do
         expect(@test_object).to respond_to(:to_solr)
       end
 
-      it "should add pid, system_create_date, system_modified_date from object attributes" do
+      it "should add id, system_create_date, system_modified_date from object attributes" do
         expect(@test_object).to receive(:create_date).and_return(DateTime.parse("2012-03-04T03:12:02Z")).twice
         expect(@test_object).to receive(:modified_date).and_return(DateTime.parse("2012-03-07T03:12:02Z")).twice
-        allow(@test_object).to receive(:pid).and_return('changeme:123')
+        allow(@test_object).to receive(:id).and_return('changeme:123')
         solr_doc = @test_object.to_solr
         expect(solr_doc[ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)]).to eql("2012-03-04T03:12:02Z")
         expect(solr_doc[ActiveFedora::SolrService.solr_name("system_modified", :stored_sortable, type: :date)]).to eql("2012-03-07T03:12:02Z")

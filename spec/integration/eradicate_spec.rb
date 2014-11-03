@@ -16,7 +16,7 @@ describe ActiveFedora::Base do
     let(:ghost) do
       obj = ActiveFedora::Base.create
       obj.destroy
-      obj.pid
+      obj.id
     end
     context "in a typical sitation" do
       specify "it cannot be reused" do
@@ -42,12 +42,12 @@ describe ActiveFedora::Base do
   describe "a model with no tombstones" do
     let(:lazarus) do
       body = ResurrectionModel.create
-      soul = body.pid
+      soul = body.id
       body.destroy
       return soul
     end
     it "should allow reusing a uri" do
-      expect(ResurrectionModel.create(pid: lazarus)).to be_kind_of(ResurrectionModel)
+      expect(ResurrectionModel.create(id: lazarus)).to be_kind_of(ResurrectionModel)
     end
   end
 

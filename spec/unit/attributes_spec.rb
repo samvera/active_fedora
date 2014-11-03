@@ -81,21 +81,21 @@ describe ActiveFedora::Base do
 
       describe "inspect" do
         it "should show the attributes" do
-          expect(subject.inspect).to eq "#<BarHistory2 pid: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil>"
+          expect(subject.inspect).to eq "#<BarHistory2 id: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil>"
         end
 
-        describe "with a pid" do
-          before { allow(subject).to receive(:pid).and_return('test:123') }
+        describe "with a id" do
+          before { allow(subject).to receive(:id).and_return('test:123') }
 
-          it "should show a pid" do
-            expect(subject.inspect).to eq "#<BarHistory2 pid: \"test:123\", cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil>"
+          it "should show a id" do
+            expect(subject.inspect).to eq "#<BarHistory2 id: \"test:123\", cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil>"
           end
         end
 
         describe "with no attributes" do
           subject { ActiveFedora::Base.new }
-          it "should show a pid" do
-            expect(subject.inspect).to eq "#<ActiveFedora::Base pid: nil>"
+          it "should show a id" do
+            expect(subject.inspect).to eq "#<ActiveFedora::Base id: nil>"
           end
         end
 
@@ -115,7 +115,7 @@ describe ActiveFedora::Base do
           end
 
           it "should show the library_id" do
-            expect(subject.inspect).to eq "#<BarHistory3 pid: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil, library_id: \"#{library.pid}\">"
+            expect(subject.inspect).to eq "#<BarHistory3 id: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil, library_id: \"#{library.id}\">"
           end
         end
       end

@@ -12,7 +12,7 @@ describe <%= class_name %> do
     before { subject.save! }
     after { subject.destroy }
     it 'should exist' do
-      expect(<%= class_name %>.exists?(subject.pid)).to be true
+      expect(<%= class_name %>.exists?(subject.id)).to be true
     end
   end
 

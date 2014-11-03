@@ -108,7 +108,7 @@ describe ActiveFedora::RDFDatastream do
 
         context "and it is found again" do
           before do
-            @object = DummyAsset.find(subject.pid)
+            @object = DummyAsset.find(subject.id)
           end
 
           it "should serialize to content" do
@@ -223,7 +223,7 @@ describe ActiveFedora::RDFDatastream do
     context "when the object with a relationship is saved" do
       before do
         subject.save
-        @object = subject.class.find(subject.pid)
+        @object = subject.class.find(subject.id)
       end
 
       it "should be retrievable" do
@@ -234,7 +234,7 @@ describe ActiveFedora::RDFDatastream do
     context "when the object with a relationship is frozen" do
       before do
         subject.save
-        @object = subject.class.find(subject.pid)
+        @object = subject.class.find(subject.id)
         @object.freeze
         subject.freeze
       end

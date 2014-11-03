@@ -37,7 +37,11 @@ module ActiveFedora
       end
     end
 
-    alias pid id
+    # TODO: Remove after we no longer support #pid.
+    def pid
+      Deprecation.warn FedoraAttributes, "#{self.class}#pid is deprecated and will be removed in active-fedora 9.0. Use #{self.class}#id instead."
+      id
+    end
 
     def uri
       # TODO could we return a RDF::URI instead?

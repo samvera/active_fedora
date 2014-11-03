@@ -8,7 +8,7 @@
   <field name="rights_text">rights</field>
   <field name="publisher_field">publisher</field>
   <field name="creation_date">creation date</field>
-  <field name="identifier_field">jwa:sample_pid</field>
+  <field name="identifier_field">jwa:sample_id</field>
   <field name="format_field">format</field>
   <field name="extent_field">extent</field>
   <field name="language_field">language</field>
