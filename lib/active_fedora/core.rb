@@ -100,6 +100,14 @@ module ActiveFedora
       end
 
     module ClassMethods
+      def generated_association_methods
+        @generated_association_methods ||= begin
+          mod = const_set(:GeneratedAssociationMethods, Module.new)
+          include mod
+          mod
+        end
+      end
+
       # Returns a suitable uri object for :has_model
       # Should reverse Model#from_class_uri
       # TODO this is a poorly named method
@@ -131,7 +139,7 @@ module ActiveFedora
           id.start_with?('/') ? id[1..-1] : id
         end
       end
-      
+
       ##
       # Provides the common interface for ActiveTriples::Identifiable
       def from_uri(uri,_)
