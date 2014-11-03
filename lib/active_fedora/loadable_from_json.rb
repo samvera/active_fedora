@@ -27,8 +27,13 @@ module ActiveFedora
         @hash.freeze
       end
 
-      def initialize
+      def initialize(model)
+        @model = model
         @hash = {}
+      end
+
+      def to_s
+        @hash.to_s
       end
 
       def set_value(k, v)
@@ -37,6 +42,46 @@ module ActiveFedora
 
       def get_values(k)
         @hash[k]
+      end
+
+      # FakeQuery exists to adapt the hash to the RDF interface used by RDF associations in ActiveFedora
+      class FakeQuery
+        def initialize(values)
+          @values = values || []
+        end
+
+        def enum_statement
+          @values.map {|v| FakeStatement.new(v) }
+        end
+
+        class FakeStatement
+          def initialize(value)
+            @value = value
+          end
+
+          def object
+            @value
+          end
+        end
+      end
+
+      def query(args={})
+        predicate = args[:predicate]
+        reflection = reflection(predicate)
+        FakeQuery.new(get_values(reflection))
+      end
+
+      def rdf_subject
+        RDF::URI.new(nil)
+      end
+
+      def insert(vals)
+        _, pred, val = vals
+        set_value(reflection(pred), [val])
+      end
+
+      def reflection(predicate)
+        @model.outgoing_reflections.find { |key, reflection| reflection.predicate == predicate }.first
       end
     end
 
@@ -51,7 +96,7 @@ module ActiveFedora
       datastream_keys.each do |key|
         attached_files[key] = SolrBackedMetadataFile.new
       end
-      @resource = SolrBackedResource.new
+      @resource = SolrBackedResource.new(self.class)
       self.attributes = attrs.except(datastream_keys)
       # TODO Should we clear the change tracking, or make this object Read-only?
 
