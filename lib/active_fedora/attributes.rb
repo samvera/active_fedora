@@ -153,6 +153,7 @@ module ActiveFedora
       # @param [Symbol] field the field to query
       # @return [Boolean]
       def multiple?(field)
+        raise UnknownAttributeError, "#{self} does not have an attribute `#{field}'" unless self.delegated_attributes.key?(field)
         delegated_attributes[field].multiple
       end
 
