@@ -1,7 +1,10 @@
 require 'rsolr'
+require 'deprecation'
 
 module ActiveFedora
   class SolrService
+    extend Deprecation
+    self.deprecation_horizon = "active-fedora 9.0"
 
     attr_reader :conn
 
@@ -92,6 +95,11 @@ module ActiveFedora
         q = id_array.reject { |x| x.blank? }.map { |id| raw_query(SOLR_DOCUMENT_ID, id) }
         q.empty? ? "id:NEVER_USE_THIS_ID" : q.join(" OR ".freeze)
       end
+
+      def construct_query_for_pids(id_array)
+        construct_query_for_ids(id_array)
+      end
+      deprecation_deprecate :construct_query_for_pids
 
       # Create a raw query clause suitable for sending to solr as an fq element
       # @param [String] key
