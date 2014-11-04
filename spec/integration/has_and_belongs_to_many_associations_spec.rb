@@ -352,11 +352,23 @@ describe "Autosave" do
   end
 
   describe "From the has_and_belongs_to_many side" do
-    let(:component) { Component.create(items: [Item.new(title: 'my title')]) }
+    describe "dependent records" do
+      let(:component) { Component.create(items: [Item.new(title: 'my title')]) }
 
-    it "should save dependent records" do
-      component.reload
-      expect(component.items.first.title).to eq 'my title'
+      it "should be saved" do
+        component.reload
+        expect(component.items.first.title).to eq 'my title'
+      end
+    end
+
+    describe "shifting" do
+      let(:component) { Component.new }
+      let(:item) { Item.create }
+
+      it "should set item_ids" do
+        component.items << item
+        expect(component.item_ids).to eq [item.id]
+      end
     end
   end
 
