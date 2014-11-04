@@ -133,7 +133,7 @@ describe ActiveFedora::Datastream do
 
     describe "#inspect" do
       subject { datastream.inspect }
-      it { should eq "#<ActiveFedora::Datastream uri=\"http://localhost:8983/fedora/rest/test/1234/abcd\" changed=\"true\" >" }
+      it { should eq "#<ActiveFedora::Datastream uri=\"http://localhost:8983/fedora/rest/test/1234/abcd\" >" }
     end
   end
 

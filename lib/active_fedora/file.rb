@@ -143,7 +143,7 @@ module ActiveFedora
     end
 
     def inspect
-      "#<#{self.class} uri=\"#{uri}\" changed=\"#{changed?}\" >"
+      "#<#{self.class} uri=\"#{uri}\" >"
     end
 
     #compatibility method for rails' url generators. This method will
