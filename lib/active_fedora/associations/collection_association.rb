@@ -154,8 +154,12 @@ module ActiveFedora
       # Add +records+ to this association.  Returns +self+ so method calls may be chained.
       # Since << flattens its argument list and inserts each record, +push+ and +concat+ behave identically.
       def concat(*records)
-        result = true
         load_target unless owner.new_record?
+        concat_records(records)
+      end
+
+      def concat_records(*records)
+        result = true
 
         records.flatten.each do |record|
           raise_on_type_mismatch(record)
@@ -164,7 +168,7 @@ module ActiveFedora
           end
         end
 
-        result && self
+        result && records
       end
 
       # Remove all records from this association

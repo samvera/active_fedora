@@ -30,6 +30,20 @@ module ActiveFedora
         return true
       end
 
+      def concat_records(*records)
+        result = true
+
+        records.flatten.each do |record|
+          raise_on_type_mismatch(record)
+          add_to_target(record) do |r|
+            result &&= insert_record(record)
+          end
+        end
+
+        result && records
+      end
+
+
       def find_target
         page_size = @reflection.options[:solr_page_size]
         page_size ||= 200
