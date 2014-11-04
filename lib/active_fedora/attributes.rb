@@ -107,12 +107,22 @@ module ActiveFedora
 
     module ClassMethods
       def attribute_names
-        @attribute_names ||= delegated_attributes.keys + local_attributes
+        @attribute_names ||= delegated_attributes.keys + association_attributes - system_attributes
       end
 
       # Attributes that are asserted about this RdfSource (not on a datastream)
       def local_attributes
-        outgoing_reflections.values.map { |reflection| reflection.foreign_key.to_s } + properties.keys - ['has_model', 'create_date', 'modified_date']
+        association_attributes + properties.keys - system_attributes
+      end
+
+      # Attributes that are required by ActiveFedora and Fedora
+      def system_attributes
+        ['has_model', 'create_date', 'modified_date']
+      end
+
+      # Attributes that represent associations to other repository objects
+      def association_attributes
+        outgoing_reflections.values.map { |reflection| reflection.foreign_key.to_s }
       end
 
       def defined_attributes
@@ -153,15 +163,21 @@ module ActiveFedora
       # @param [Symbol] field the field to query
       # @return [Boolean]
       def multiple?(field)
-        raise UnknownAttributeError, "#{self} does not have an attribute `#{field}'" unless self.delegated_attributes.key?(field)
+        raise UnknownAttributeError, "#{self} does not have an attribute `#{field}'" unless delegated_attributes.key?(field)
         delegated_attributes[field].multiple
       end
+
+
+      def property name, properties
+        find_or_create_defined_attribute(name, nil, {multiple: true}.merge(properties))
+        super
+      end
+
+      private
 
       def find_or_create_defined_attribute(field, dsid, args)
         delegated_attributes[field] ||= DelegatedAttribute.new(field, dsid, datastream_class_for_name(dsid), args)
       end
-
-      private
 
       def create_attribute_reader(field, dsid, args)
         find_or_create_defined_attribute(field, dsid, args)
