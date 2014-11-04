@@ -6,7 +6,7 @@ describe ActiveFedora::SparqlInsert do
   context "with an unchanged object" do
     let(:base) { ActiveFedora::Base.new }
     it "should return the string" do
-      expect(subject.build).to eq "DELETE { \n\n}\nWHERE { \n\n} ;INSERT { \n\n}\n WHERE { }"
+      expect(subject.build).to eq "INSERT { \n\n}\n WHERE { }"
     end
     it { should be_empty }
   end
@@ -33,7 +33,7 @@ describe ActiveFedora::SparqlInsert do
 
 
     it "should return the string" do
-      expect(subject.build).to eq "DELETE { \n<> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> ?a0 .\n<> <http://purl.org/dc/terms/title> ?a1 .\n}\nWHERE { \n<> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> ?a0 .\n<> <http://purl.org/dc/terms/title> ?a1 .\n} ;INSERT { \n<> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> <http://localhost:8983/fedora/rest/test/foo> .\n<> <http://purl.org/dc/terms/title> \"bar\" .\n}\n WHERE { }"
+      expect(subject.build).to eq "DELETE { <> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> ?change . }\n  WHERE { <> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> ?change . } ;\nDELETE { <> <http://purl.org/dc/terms/title> ?change . }\n  WHERE { <> <http://purl.org/dc/terms/title> ?change . } ;\nINSERT { \n<> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> <http://localhost:8983/fedora/rest/test/foo> .\n<> <http://purl.org/dc/terms/title> \"bar\" .\n}\n WHERE { }"
     end
     it { should_not be_empty }
   end

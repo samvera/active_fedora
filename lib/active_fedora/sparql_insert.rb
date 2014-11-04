@@ -33,20 +33,7 @@ module ActiveFedora
     def build
       subject = RDF::URI.new(nil)
 
-      index = 0
-      patterns = changes.map do |key, _|
-        RDF::Query::Pattern.new(subject, key, "a#{index}".to_sym).to_s.tap do
-          index += 1
-        end
-      end.join("\n")
-
-      query = "DELETE { \n"
-      query += patterns
-      query += "\n}\n"
-      query += "WHERE { \n"
-      query += patterns
-      query += "\n} ;"
-
+      query = deletes(subject).join
       query += "INSERT { \n"
       query +=
         changes.map do |_, result|
@@ -57,6 +44,20 @@ module ActiveFedora
 
       query += "\n}\n WHERE { }"
       query
+    end
+
+    private
+
+    def deletes(subject)
+      patterns(subject).map do |pattern|
+        "DELETE { #{pattern} }\n  WHERE { #{pattern} } ;\n"
+      end
+    end
+
+    def patterns(subject)
+      changes.map do |key, _|
+        RDF::Query::Pattern.new(subject, key, :change).to_s
+      end
     end
   end
 end
