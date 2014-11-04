@@ -56,6 +56,9 @@ describe ActiveFedora::Base do
           has_attributes :horse, datastream: 'xmlish', multiple: true
           has_attributes :duck, datastream: 'xmlish', :at=>[:waterfowl, :ducks, :duck], multiple: true
           has_attributes :animal_id, datastream: 'someData', multiple: false
+
+          property :goose, predicate: RDF::URI.new('http://example.com#hasGoose')
+
         end
       end
 
@@ -68,27 +71,27 @@ describe ActiveFedora::Base do
       describe "#attribute_names" do
         context "on an instance" do
           it "should list the attributes" do
-            expect(subject.attribute_names).to eq ["cow", "fubar", "pig", "horse", "duck", "animal_id"]
+            expect(subject.attribute_names).to eq ["cow", "fubar", "pig", "horse", "duck", "animal_id", "goose"]
           end
         end
 
         context "on a class" do
           it "should list the attributes" do
-            expect(BarHistory2.attribute_names).to eq ["cow", "fubar", "pig", "horse", "duck", "animal_id"]
+            expect(BarHistory2.attribute_names).to eq ["cow", "fubar", "pig", "horse", "duck", "animal_id", "goose"]
           end
         end
       end
 
       describe "inspect" do
         it "should show the attributes" do
-          expect(subject.inspect).to eq "#<BarHistory2 id: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil>"
+          expect(subject.inspect).to eq "#<BarHistory2 id: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil, goose: []>"
         end
 
         describe "with a id" do
           before { allow(subject).to receive(:id).and_return('test:123') }
 
           it "should show a id" do
-            expect(subject.inspect).to eq "#<BarHistory2 id: \"test:123\", cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil>"
+            expect(subject.inspect).to eq "#<BarHistory2 id: \"test:123\", cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil, goose: []>"
           end
         end
 
@@ -115,7 +118,7 @@ describe ActiveFedora::Base do
           end
 
           it "should show the library_id" do
-            expect(subject.inspect).to eq "#<BarHistory3 id: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil, library_id: \"#{library.id}\">"
+            expect(subject.inspect).to eq "#<BarHistory3 id: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil, goose: [], library_id: \"#{library.id}\">"
           end
         end
       end
@@ -191,22 +194,22 @@ describe ActiveFedora::Base do
         end
 
         it "should raise an error on the reader when the field isn't delegated" do
-          expect {subject['goose'] }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `goose'"
+          expect {subject['donkey'] }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `donkey'"
         end
 
         it "should raise an error on the setter when the field isn't delegated" do
-          expect {subject['goose']="honk" }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `goose'"
+          expect {subject['donkey']="bray" }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `donkey'"
         end
       end
 
       describe "attributes=" do
         it "should raise an error on an invalid attribute" do
-          expect {subject.attributes = {'goose'=>"honk" }}.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `goose'"
+          expect {subject.attributes = {'donkey'=>"bray" }}.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `donkey'"
         end
       end
 
       describe "attributes" do
-        let(:vals) { {'cow'=>"moo", 'pig' => 'oink', 'horse' =>['neigh'], "fubar"=>[], 'duck'=>['quack'], 'animal_id'=>'' } }
+        let(:vals) { {'cow'=>"moo", 'pig' => 'oink', 'horse' =>['neigh'], "fubar"=>[], 'duck'=>['quack'], 'animal_id'=>'', 'goose' => [] } }
         before { subject.attributes = vals }
         it "should return a hash" do
           expect(subject.attributes).to eq(vals.merge('id' => nil))
@@ -216,6 +219,10 @@ describe ActiveFedora::Base do
       describe '.multiple?', focus: true do
         it 'returns false if attribute has not been defined as multi-valued' do
           expect(BarHistory2.multiple?(:pig)).to be false
+        end
+
+        it 'returns true if attribute is a ActiveTriples property' do
+          expect(BarHistory2.multiple?(:goose)).to be true
         end
 
         it 'returns true if attribute has been defined as multi-valued' do
