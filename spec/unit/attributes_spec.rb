@@ -213,6 +213,19 @@ describe ActiveFedora::Base do
         end
       end
 
+      describe '.multiple?', focus: true do
+        it 'returns false if attribute has not been defined as multi-valued' do
+          expect(BarHistory2.multiple?(:pig)).to be false
+        end
+
+        it 'returns true if attribute has been defined as multi-valued' do
+          expect(BarHistory2.multiple?(:horse)).to be true
+        end
+
+        it 'raises an error if the attribute does not exist' do
+          expect{BarHistory2.multiple?(:arbitrary_nonexistent_attribute)}.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `arbitrary_nonexistent_attribute'"
+        end
+      end
     end
 
     describe "with a superclass" do
