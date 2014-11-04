@@ -10,13 +10,19 @@ describe ActiveFedora::SolrInstanceLoader do
       has_attributes :foo, datastream: 'descMetadata', multiple: true
       has_attributes :bar, datastream: 'descMetadata', multiple: false
       property :title, predicate: RDF::DC.title
+      property :description, predicate: RDF::DC.description
       belongs_to :another, property: :is_part_of, class_name: 'Foo'
+
+      def title
+        super.first
+      end
     end
   end
 
   let(:another) { Foo.create }
 
-  let!(:obj) { Foo.create!(id: 'test-123', foo: ["baz"], bar: 'quix', title: ['My Title'], another_id: another.id) }
+  let!(:obj) { Foo.create!(id: 'test-123', foo: ["baz"], bar: 'quix', title: 'My Title',
+                           description: ['first desc', 'second desc'], another_id: another.id) }
 
   after do
     Object.send(:remove_const, :Foo)
@@ -31,7 +37,8 @@ describe ActiveFedora::SolrInstanceLoader do
 
       it "should find the document in solr" do
         expect(subject).to be_instance_of Foo
-        expect(subject.title).to eq ['My Title']
+        expect(subject.title).to eq 'My Title'
+        expect(subject.description).to match_array ['first desc', 'second desc']
         expect(subject.another_id).to eq another.id
       end
     end
@@ -44,12 +51,12 @@ describe ActiveFedora::SolrInstanceLoader do
         expect_any_instance_of(Ldp::Client).to_not receive(:get)
         object = loader.object
         expect(object).to be_instance_of Foo
-        expect(object.title).to eq ['My Title'] # object assertion
+        expect(object.title).to eq 'My Title' # object assertion
         expect(object.foo).to eq ['baz'] # datastream assertion
 
         # and it's frozen
         expect { object.title = ['changed'] }.to raise_error RuntimeError, "can't modify frozen Hash"
-        expect(object.title).to eq ['My Title']
+        expect(object.title).to eq 'My Title'
 
         expect { object.foo = ['changed'] }.to raise_error RuntimeError, "can't modify frozen Hash"
         expect(object.foo).to eq ['baz']
@@ -66,7 +73,7 @@ describe ActiveFedora::SolrInstanceLoader do
 
     it "should find the document in solr" do
       expect(subject).to be_instance_of Foo
-      expect(subject.title).to eq ['My Title']
+      expect(subject.title).to eq 'My Title'
     end
   end
 end
