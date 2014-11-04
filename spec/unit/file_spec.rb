@@ -83,9 +83,44 @@ describe ActiveFedora::Datastream do
       allow(subject).to receive(:ldp_connection).and_return(mock_client)
     end
 
-    describe ".size" do
-      it "should load the datastream size attribute from the fedora repository" do
+    describe '#persisted_size' do
+      it 'should load the datastream size attribute from the fedora repository' do
         expect(subject.size).to eq 9999
+      end
+    end
+
+    describe '#dirty_size' do
+      context 'when content has changed from what is currently persisted' do
+        context 'and has been set to something that has a #size method (i.e. string or File)' do
+          it 'returns the size of the dirty content' do
+            dirty_content = double
+            allow(dirty_content).to receive(:size) { '8675309' }
+            subject.content = dirty_content
+            expect(subject.size).to eq dirty_content.size
+          end
+        end
+
+      end
+
+      context 'when content has not changed from what is currently persisted' do
+        it 'returns nil, indicating that the content is not "dirty", but its not necessarily 0 either.' do
+          expect(subject.dirty_size).to be_nil
+        end
+      end
+    end
+
+    describe '#size' do
+      context 'when content has not changed' do
+        it 'returns the value of .persisted_size' do
+          expect(subject.size).to eq subject.persisted_size
+        end
+      end
+
+      context 'when content has changed' do
+        it 'returns the value of .dirty_size' do
+          subject.content = "i have changed!"
+          expect(subject.size).to eq subject.dirty_size
+        end
       end
     end
 
@@ -101,7 +136,8 @@ describe ActiveFedora::Datastream do
           expect(subject.has_content?).to be true
         end
       end
-      context "when content is nil" do
+
+      context "when persisted content is nil" do
         let(:conn_stubs) do
           Faraday::Adapter::Test::Stubs.new do |stub|
             stub.head('/fedora/rest/test/1234/abcd') { [200] }
@@ -110,6 +146,14 @@ describe ActiveFedora::Datastream do
         it "should return false" do
           expect(subject.has_content?).to be false
         end
+
+        context 'but there is unpersisted content' do
+          it 'returns true' do
+            subject.content = "unpersisted content"
+            expect(subject.has_content?).to be true
+          end
+        end
+
       end
       context "when content is zero" do
         let(:conn_stubs) do
@@ -120,7 +164,7 @@ describe ActiveFedora::Datastream do
         it "should return false" do
           expect(subject.has_content?).to be false
         end
-      end 
+      end
     end
   
   end

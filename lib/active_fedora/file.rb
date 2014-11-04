@@ -102,8 +102,16 @@ module ActiveFedora
       @original_name ||= fetch_original_name_from_headers
     end
 
-    def size
+    def persisted_size
       ldp_source.head.headers['Content-Length'].to_i
+    end
+
+    def dirty_size
+      content.size if changed? && content.respond_to?(:size)
+    end
+
+    def size
+      dirty_size || persisted_size
     end
 
     def has_content?
