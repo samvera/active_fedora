@@ -51,7 +51,7 @@ module ActiveFedora
           ActiveFedora::Base.logger.info "Couldn't get #{field} out of solr, because #{e.message}. Trying another way." if ActiveFedora::Base.logger
         end
       end
-      # Load from fedora
+      # Load from fedora (except OmDatastreams, which try to load from solr first)
       ds = datastream_for_attribute(obj, dsid)
       if ds.kind_of?(ActiveFedora::RDFDatastream)
         ds.send(field)
