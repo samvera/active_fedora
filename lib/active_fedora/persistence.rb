@@ -49,7 +49,7 @@ module ActiveFedora
       @destroyed = true
       reflections.each_pair do |name, reflection|
         if reflection.macro == :has_many
-          association(name).delete_all
+          association(name.to_sym).delete_all
         end
       end
 
@@ -181,8 +181,8 @@ module ActiveFedora
     end
 
     def save_attached_files
-      attached_files.select { |_, ds| ds.changed? }.each do |_, ds|
-        ds.save # Don't call save! because if the content_changed? returns false, it'll raise an error.
+      attached_files.select { |_, file| file.changed? }.each do |_, file|
+        file.save # Don't call save! because if the content_changed? returns false, it'll raise an error.
       end
     end
   end

@@ -72,14 +72,18 @@ module ActiveFedora
 
     def uri=(uri)
       super
-      resource.set_subject!(parent_uri) if resource.rdf_subject.value.blank?
+      resource.set_subject!(parent_uri) if empty_or_blank_subject?
     end
 
     def content_changed?
       return false unless instance_variable_defined? :@resource
-      return true if resource.rdf_subject.value.empty? # can't be serialized because a subject hasn't been assigned yet.
+      return true if empty_or_blank_subject? # can't be serialized because a subject hasn't been assigned yet.
       @content = serialize
       super
+    end
+
+    def empty_or_blank_subject?
+      resource.rdf_subject.node? || resource.rdf_subject.value.blank?
     end
 
     def freeze

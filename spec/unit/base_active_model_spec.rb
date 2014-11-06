@@ -23,7 +23,7 @@ describe ActiveFedora::Base do
       has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText" do |m|
         m.field "fubar", :text
       end
-      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel" do |m|
+      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2" do |m|
         m.field "fubar", :text
       end 
 

@@ -132,15 +132,6 @@ describe ActiveFedora::Base do
       end
     end
 
-    describe ".datastream_class_for_name" do
-      it "should return the specifed class" do
-        expect(FooAdaptation.datastream_class_for_name('someData')).to eq ActiveFedora::OmDatastream
-      end
-      it "should return the specifed class" do
-        expect(FooAdaptation.datastream_class_for_name('content')).to eq ActiveFedora::File
-      end
-    end
-
     ### Methods for ActiveModel::Conversions
     context "before saving" do
       context "#to_param" do
@@ -177,38 +168,6 @@ describe ActiveFedora::Base do
       expect(FooHistory.model_name.human).to eq 'Foo history'
     end
     ### End ActiveModel::Naming
-
-
-    describe ".attached_files" do
-      let(:test_history) { FooHistory.new }
-
-      it "should create accessors for datastreams declared with has_metadata" do
-        expect(test_history.withText).to eq test_history.attached_files['withText']
-      end
-
-      describe "dynamic accessors" do
-        before do
-          test_history.attach_file(ds, dsid)
-          test_history.class.build_datastream_accessor(dsid)
-        end
-
-        describe "when the file is named with dash" do
-          let(:dsid) { 'eac-cpf' }
-          let(:ds) { double }
-          it "should convert dashes to underscores" do
-            expect(test_history.eac_cpf).to eq ds
-          end
-        end
-
-        describe "when the file is named with underscore" do
-          let(:dsid) { 'foo_bar' }
-          let (:ds) { double }
-          it "should preserve the underscore" do
-            expect(test_history.foo_bar).to eq ds
-          end
-        end
-      end
-    end
 
     it 'should provide #find' do
       expect(ActiveFedora::Base).to respond_to(:find)

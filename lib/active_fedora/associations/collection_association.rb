@@ -346,7 +346,7 @@ module ActiveFedora
           elsif @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base' && @reflection.macro != :has_and_belongs_to_many
             inverse_relation = @owner.class.to_s.underscore.to_sym
             begin
-            find_class_for_relation(@reflection.class_name.constantize)
+              find_class_for_relation(@reflection.class_name.constantize)
             rescue NameError
               raise "No :property attribute was set or could be inferred for #{@reflection.macro} #{@reflection.name.inspect} on #{@owner.class}"
             end

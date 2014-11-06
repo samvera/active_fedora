@@ -24,7 +24,7 @@ module ActiveFedora
     # Attached files that have been modified in memory are given preference over
     # the copy in Fedora.
     def attached_files
-      @attached_files ||= FilesHash.new
+      @attached_files ||= FilesHash.new(self)
     end
 
     def datastreams
@@ -41,14 +41,6 @@ module ActiveFedora
     end
     deprecation_deprecate :clear_datastreams
 
-    def configure_datastream(ds, reflection)
-      return unless reflection
-      # If you called has_metadata with a block, pass the block into the File class
-      if reflection.options[:block].class == Proc
-        reflection.options[:block].call(ds)
-      end
-    end
-
     def datastream_assertions
       resource.query(subject: resource, predicate: Ldp.contains).objects.map(&:to_s)
     end
@@ -56,26 +48,19 @@ module ActiveFedora
     # TODO it looks like calling load_attached_files causes all the attached_files properties to load eagerly
     # Because File#new triggers a load of the graph.
     def load_attached_files
-      local_ds_specs = self.class.child_resource_reflections.dup
       datastream_assertions.each do |ds_uri|
         dsid = ds_uri.to_s.sub(uri + '/', '')
-        reflection = local_ds_specs.delete(dsid)
-        ds = reflection ? reflection.build_datastream(self) : ActiveFedora::File.new(self, dsid)
-        attach_file(ds, dsid)
-        configure_datastream(attached_files[dsid], reflection)
-      end
-      local_ds_specs.each do |name, reflection|
-        ds = reflection.build_datastream(self)
-        attach_file(ds, name)
-        configure_datastream(ds, reflection)
+        next if association(dsid.to_sym)
+        create_singleton_association(dsid)
       end
     end
 
     # Adds datastream to the object.
     # @return [String] dsid of the added datastream
-    def attach_file(file, dsid, opts={})
-      attached_files[dsid] = file
-      dsid
+    def attach_file(file, file_path, opts={})
+      create_singleton_association(file_path)
+      attached_files[file_path] = file
+      file_path
     end
 
     def add_datastream(datastream, opts={})
@@ -101,27 +86,41 @@ module ActiveFedora
     # @option opts [String] :mime_type The Mime-Type of the file
     # @option opts [String] :original_name The original name of the file (used for Content-Disposition)
     def add_file_datastream(file, opts={})
-      attrs = {blob: file, prefix: opts[:prefix]}
       file_path = FilePathBuilder.build(self, opts[:dsid], opts[:prefix])
-      ds = create_datastream(self.class.datastream_class_for_name(file_path), file_path, attrs)
-      ds.mime_type = if opts[:mimeType]
-        Deprecation.warn AttachedFiles, "The :mimeType option to add_file_datastream is deprecated and will be removed in active-fedora 10.0. Use :mime_type instead", caller
-        opts[:mimeType]
-      else
-        opts[:mime_type]
+      create_singleton_association(file_path)
+      self.send(file_path).tap do |node|
+        node.content = file
+        node.mime_type = if opts[:mimeType]
+          Deprecation.warn AttachedFiles, "The :mimeType option to add_file_datastream is deprecated and will be removed in active-fedora 10.0. Use :mime_type instead", caller
+          opts[:mimeType]
+        else
+          opts[:mime_type]
+        end
+        node.original_name = opts[:original_name]
       end
-      ds.original_name = opts[:original_name] if opts.key?(:original_name)
-      attach_file(ds, file_path)
-      self.class.build_datastream_accessor(file_path) unless respond_to? file_path
     end
 
-    def create_datastream(type, dsid, opts={})
-      klass = type.kind_of?(Class) ? type : type.constantize
-      raise ArgumentError, "Argument dsid must be of type string" if dsid && !dsid.kind_of?(String)
-      ds = klass.new(self, dsid, prefix: opts[:prefix])
-      ds.content = opts[:blob] || ""
-      ds
+    def undeclared_files
+      @undeclared_files ||= []
     end
+
+
+    private
+      # TODO - I believe this is slow.
+      def create_singleton_association(file_path)
+        self.undeclared_files << file_path.to_sym
+        @association_cache[file_path.to_sym] = Associations::ContainsAssociation.new(self, Reflection::AssociationReflection.new(:contains, file_path, {class_name: 'ActiveFedora::File'}, self.class))
+
+        self.singleton_class.send :define_method, accessor_name(file_path) do
+           @association_cache[file_path.to_sym].reader
+        end
+      end
+
+      ## Given a file_path return a standard name
+      def accessor_name(file_path)
+        file_path.gsub('-', '_')
+      end
+
 
     module ClassMethods
       extend Deprecation
@@ -131,30 +130,6 @@ module ActiveFedora
         child_resource_reflections
       end
       deprecation_deprecate :ds_specs
-
-      # @param [String] dsid the datastream id
-      # @return [Class] the class of the datastream
-      def datastream_class_for_name(dsid)
-        reflection = reflect_on_association(dsid)
-        reflection ? reflection.klass : ActiveFedora::File
-      end
-
-      # This method is used to specify the details of a contained resource.
-      # Pass the name as the first argument and a hash of options as the second argument
-      # Note that this method doesn't actually execute the block, but stores it, to be executed
-      # by any the implementation of the datastream(specified as :class_name)
-      #
-      # @param [String] :name the handle to refer to this child as
-      # @param [Hash] options
-      # @option options [Class] :class_name The class that will represent this child, should extend ``ActiveFedora::File''
-      # @option options [String] :url
-      # @option options [Boolean] :autocreate Always create this datastream on new objects
-      # @yield block executed by some types of child resources
-      def contains(name, options = {}, &block)
-        options[:block] = block if block
-        create_reflection(:child_resource, name, options, self)
-        build_datastream_accessor(name)
-      end
 
       # This method is used to specify the details of a datastream.
       # You can pass the name as the first argument and a hash of options as the second argument
@@ -177,8 +152,8 @@ module ActiveFedora
           args = args.first || {}
         end
         name = args.delete(:name)
-        args[:class_name] = args.delete(:type)
-        raise ArgumentError, "You must provide a :type property for the datastream '#{name}'" unless args[:class_name]
+        raise ArgumentError, "You must provide a :type property for the datastream '#{name}'" unless args[:type]
+        args[:class_name] = args.delete(:type).to_s
         contains(name, args, &block)
       end
       deprecation_deprecate :has_metadata
@@ -205,25 +180,10 @@ module ActiveFedora
           args = args.first || {}
         end
         name = args.delete(:name)
-        args[:class_name] = args.delete(:type)
+        args[:class_name] = args.delete(:type).to_s
         contains(name, args)
       end
       deprecation_deprecate :has_file_datastream
-
-      def build_datastream_accessor(path_name)
-        name = method_name_for_path(path_name)
-        define_method name do
-          attached_files[path_name]
-        end
-      end
-
-      private
-
-        ## Given a path_name return a valid method name
-        def method_name_for_path(path_name)
-          path_name.to_s.gsub('-', '_')
-        end
-
     end
   end
 end

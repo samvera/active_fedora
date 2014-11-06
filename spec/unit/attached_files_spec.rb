@@ -5,7 +5,7 @@ describe ActiveFedora::AttachedFiles do
   describe "contains" do
     before do
       class FooHistory < ActiveFedora::Base
-         contains 'dsid', class_name: ActiveFedora::SimpleDatastream
+         contains 'dsid', class_name: 'ActiveFedora::SimpleDatastream'
          contains 'complex_ds', autocreate: true, class_name: 'Z'
          contains 'thumbnail'
       end
@@ -15,13 +15,13 @@ describe ActiveFedora::AttachedFiles do
     end
 
     it "should have a child_resource_reflection" do
-      expect(FooHistory.child_resource_reflections).to have_key('dsid')
-      expect(FooHistory.child_resource_reflections).to have_key('thumbnail')
+      expect(FooHistory.child_resource_reflections).to have_key(:dsid)
+      expect(FooHistory.child_resource_reflections).to have_key(:thumbnail)
     end
 
     it "should let you override defaults" do
-      expect(FooHistory.child_resource_reflections['complex_ds'].options).to include(autocreate: true)
-      expect(FooHistory.child_resource_reflections['complex_ds'].class_name).to eq 'Z'
+      expect(FooHistory.child_resource_reflections[:complex_ds].options).to include(autocreate: true)
+      expect(FooHistory.child_resource_reflections[:complex_ds].class_name).to eq 'Z'
     end
 
     it "should raise an error if you don't give a dsid" do
@@ -45,16 +45,16 @@ describe ActiveFedora::AttachedFiles do
     end
 
     it "should have a child_resource_reflection" do
-      expect(FooHistory.child_resource_reflections).to have_key('dsid')
+      expect(FooHistory.child_resource_reflections).to have_key(:dsid)
     end
 
     it "should have reasonable defaults" do
-      expect(FooHistory.child_resource_reflections['dsid'].options).to include(class_name: ActiveFedora::SimpleDatastream)
+      expect(FooHistory.child_resource_reflections[:dsid].options).to include(class_name: 'ActiveFedora::SimpleDatastream')
     end
 
     it "should let you override defaults" do
-      expect(FooHistory.child_resource_reflections['complex_ds'].options).to include(autocreate: true)
-      expect(FooHistory.child_resource_reflections['complex_ds'].class_name).to eq 'Z'
+      expect(FooHistory.child_resource_reflections[:complex_ds].options).to include(autocreate: true)
+      expect(FooHistory.child_resource_reflections[:complex_ds].class_name).to eq 'Z'
     end
 
     it "should raise an error if you don't give a type" do
@@ -65,6 +65,13 @@ describe ActiveFedora::AttachedFiles do
     it "should raise an error if you don't give a dsid" do
       expect{ FooHistory.has_metadata type: ActiveFedora::SimpleDatastream }.to raise_error ArgumentError,
         "You must provide a name (dsid) for the datastream"
+    end
+
+    describe "creates accessors" do
+      subject { FooHistory.new }
+      it "should exist on the instance" do
+        expect(subject.dsid).to eq subject.attached_files['dsid']
+      end
     end
   end
 
@@ -80,8 +87,8 @@ describe ActiveFedora::AttachedFiles do
     end
 
     it "should have reasonable defaults" do
-      expect(FooHistory.child_resource_reflections['dsid'].klass).to eq ActiveFedora::File
-      expect(FooHistory.child_resource_reflections['another'].klass).to eq ActiveFedora::File
+      expect(FooHistory.child_resource_reflections[:dsid].klass).to eq ActiveFedora::File
+      expect(FooHistory.child_resource_reflections[:another].klass).to eq ActiveFedora::File
     end
   end
 
@@ -97,21 +104,21 @@ describe ActiveFedora::AttachedFiles do
     end
   end
 
-  describe ".method_name_for_path" do
+  describe "#accessor_name" do
     it "should use the name" do
-      expect(ActiveFedora::Base.send(:method_name_for_path, 'abc')).to eq 'abc'
+      expect(subject.send(:accessor_name, 'abc')).to eq 'abc'
     end
 
     it "should use the name" do
-      expect(ActiveFedora::Base.send(:method_name_for_path, 'ARCHIVAL_XML')).to eq 'ARCHIVAL_XML'
+      expect(subject.send(:accessor_name, 'ARCHIVAL_XML')).to eq 'ARCHIVAL_XML'
     end
 
     it "should use the name" do
-      expect(ActiveFedora::Base.send(:method_name_for_path, 'descMetadata')).to eq 'descMetadata'
+      expect(subject.send(:accessor_name, 'descMetadata')).to eq 'descMetadata'
     end
 
     it "should hash-erize underscores" do
-      expect(ActiveFedora::Base.send(:method_name_for_path, 'a-b')).to eq 'a_b'
+      expect(subject.send(:accessor_name, 'a-b')).to eq 'a_b'
     end
   end
 
@@ -120,34 +127,33 @@ describe ActiveFedora::AttachedFiles do
       allow(subject).to receive(:load_datastreams)
       expect(subject.attached_files).to be_a_kind_of(ActiveFedora::FilesHash)
     end
-
-    it "should round-trip to/from YAML" do
-      expect(YAML.load(subject.attached_files.to_yaml).inspect).to eq subject.attached_files.inspect
-    end
-  end
-
-  describe "#configure_datastream" do
-    it "should run a Proc" do
-      ds = double(:dsid => 'abc')
-      @count = 0
-      reflection = double(options: { block: lambda { |x| @count += 1 } })
-
-      expect {
-        subject.configure_datastream(ds, reflection)
-      }.to change { @count }.by(1)
-    end
   end
 
   describe "#attach_file" do
-    it "should add the datastream to the object" do
-      ds = double(:dsid => 'Abc')
-      subject.attach_file(ds, 'Abc')
-      expect(subject.attached_files['Abc']).to eq ds
+    let(:dsid) { 'Abc' }
+    let(:file) { ActiveFedora::File.new }
+    before do
+      subject.attach_file(file, dsid)
     end
 
-    it "should mint a dsid" do
-      ds = ActiveFedora::File.new(subject)
-      expect(subject.attach_file(ds, 'DS1')).to eq 'DS1'
+    it "should add the datastream to the object" do
+      expect(subject.attached_files['Abc']).to eq file
+    end
+
+    describe "dynamic accessors" do
+      context "when the file is named with dash" do
+        let(:dsid) { 'eac-cpf' }
+        it "should convert dashes to underscores" do
+          expect(subject.eac_cpf).to eq file
+        end
+      end
+
+      context "when the file is named with underscore" do
+        let(:dsid) { 'foo_bar' }
+        it "should preserve the underscore" do
+          expect(subject.foo_bar).to eq file
+        end
+      end
     end
   end
 
@@ -161,23 +167,5 @@ describe ActiveFedora::AttachedFiles do
       expect(subject.metadata_streams).to include(ds1, ds2, ds3)
       expect(subject.metadata_streams).to_not include(file_ds)
     end
-  end
-
-  describe "#create_datastream" do
-    it "should raise an argument error if the supplied dsid is nonsense" do
-      expect { subject.create_datastream(ActiveFedora::File, 0) }.to raise_error(ArgumentError)
-    end
-  end
-
-  describe "#additional_attributes_for_external_and_redirect_control_groups" do
-    before(:all) do
-      @behavior = ActiveFedora::Datastreams.deprecation_behavior
-      ActiveFedora::Datastreams.deprecation_behavior = :silence
-    end
-
-    after(:all) do
-      ActiveFedora::Datastreams.deprecation_behavior = @behavior
-    end
-
   end
 end

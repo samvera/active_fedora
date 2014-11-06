@@ -81,8 +81,8 @@ describe ActiveFedora::RDFDatastream do
   describe 'legacy non-utf-8 characters' do
     let(:ds) do
       ActiveFedora::NtriplesRDFDatastream.new(parent, 'descMetadata').tap do |datastream|
-        datastream.stub(:new_record?).and_return(false)
-        datastream.stub(:remote_content).and_return("<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT'))
+        allow(datastream).to receive(:new_record?).and_return(false)
+        allow(datastream).to receive(:remote_content).and_return("<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT'))
       end
     end
     it "should not error on access" do

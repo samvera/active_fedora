@@ -82,9 +82,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
     it "should handle integers" do
       subject.filesize = 12345 
-      subject.filesize.should be_kind_of Fixnum
+      expect(subject.filesize).to be_kind_of Fixnum
       solr_document = subject.to_solr
-      solr_document[ActiveFedora::SolrService.solr_name('rdf__filesize', :stored_sortable, type: :integer)].should == '12345'
+      expect(solr_document[ActiveFedora::SolrService.solr_name('rdf__filesize', :stored_sortable, type: :integer)]).to eq '12345'
     end
   end
 

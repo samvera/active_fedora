@@ -13,21 +13,24 @@ module ActiveFedora
 
     attr_accessor :last_modified
 
-    # @param parent_or_url [ActiveFedora::Base, String, NilClass] the parent resource or the URI of this resource
+    # @param parent_or_url [ActiveFedora::Base, String, Hash, NilClass] the parent resource or the URI of this resource
     # @param path_name [String] the path partial relative to the resource
     # @param options [Hash]
-    def initialize(parent_or_url = nil, dsid=nil, options={})
-      case parent_or_url
+    def initialize(parent_or_url_or_hash = nil, dsid=nil, options={})
+      case parent_or_url_or_hash
+      when Hash
+        content = ''
+        @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, nil, content, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
       when nil, String
       #TODO this is similar to Core#build_ldp_resource
         content = ''
-        @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, parent_or_url, content, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
+        @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, parent_or_url_or_hash, content, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
       when ActiveFedora::Base
         #TODO deprecate this path
-        uri = if parent_or_url.uri.kind_of?(RDF::URI) && parent_or_url.uri.value.empty?
+        uri = if parent_or_url_or_hash.uri.kind_of?(RDF::URI) && parent_or_url_or_hash.uri.value.empty?
           nil
         else
-          "#{parent_or_url.uri}/#{dsid}"
+          "#{parent_or_url_or_hash.uri}/#{dsid}"
         end
         @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, uri, nil, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
 

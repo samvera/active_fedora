@@ -4,17 +4,69 @@ module ActiveFedora
   class FilesHash
     extend Forwardable
 
-    def_delegators :@hash, *(Hash.instance_methods(false))
+    def initialize (model)
+      @base = model
+    end
 
-    def initialize (&block)
-      @hash = Hash.new &block
+    def [] (name)
+      association(name).reader if association(name)
+    end
+
+    def []= (name, object)
+      association(name).writer(object) if association(name)
+    end
+
+    def association(name)
+      @base.association(name.to_sym)
+    end
+
+    def reflections
+      @base.class.child_resource_reflections
+    end
+
+    def each
+      keys.each do |k|
+        yield k, self[k]
+      end
+    end
+
+    def keys
+      reflections.keys + @base.undeclared_files
+    end
+
+    def values
+      keys.map { |k| self[k] }
+    end
+
+    def has_key?(key)
+      keys.include?(key)
+    end
+
+    def size
+      keys.size
+    end
+
+    def empty?
+      reflections.empty?
+    end
+
+    def each_value
+      keys.each do |k|
+        yield self[k]
+      end
+    end
+
+    def select
+      keys.each_with_object({}) do |k, h|
+        val = self[k]
+        h[k] = val if yield k, val
+      end
     end
 
     def freeze
-      each_value do |file|
-        file.freeze
+      keys.each do |name|
+        association(name).reader.freeze if association(name).loaded?
       end
-      @hash.freeze
       super
     end
   end

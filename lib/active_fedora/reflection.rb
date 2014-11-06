@@ -10,12 +10,10 @@ module ActiveFedora
     module ClassMethods
       def create_reflection(macro, name, options, active_fedora)
         klass = case macro
-          when :has_many, :belongs_to, :has_and_belongs_to_many
+          when :has_many, :belongs_to, :has_and_belongs_to_many, :contains
             AssociationReflection
           when :rdf, :singular_rdf
             RdfPropertyReflection
-          when :child_resource
-            ChildResourceReflection
         end
         reflection = klass.new(macro, name, options, active_fedora)
         add_reflection name, reflection
@@ -24,6 +22,7 @@ module ActiveFedora
       end
 
       def add_reflection(name, reflection)
+        # FIXME this is where the problem with association_spec is caused (key is string now)
         self.reflections = self.reflections.merge(name => reflection)
       end
 
@@ -42,7 +41,7 @@ module ActiveFedora
       end
 
       def child_resource_reflections
-        reflections.select { |_, reflection| reflection.kind_of? ChildResourceReflection }
+        reflections.select { |_, reflection| reflection.kind_of?(AssociationReflection) && reflection.macro == :contains }
       end
 
       # Returns the AssociationReflection object for the +association+ (use the symbol).
@@ -233,6 +232,8 @@ module ActiveFedora
 
       def association_class
         case macro
+        when :contains
+          Associations::ContainsAssociation
         when :belongs_to
           Associations::BelongsToAssociation
         when :has_and_belongs_to_many
@@ -276,7 +277,7 @@ module ActiveFedora
       end
 
 
-      # returns either nil or the inverse association name that it finds.
+      # returns either false or the inverse association name that it finds.
       def automatic_inverse_of
         if can_find_inverse_of_automatically?(self)
           inverse_name = ActiveSupport::Inflector.underscore(active_fedora.name).to_sym
@@ -335,32 +336,5 @@ module ActiveFedora
         class_name
       end
     end
-
-    class ChildResourceReflection < AssociationReflection
-
-      def initialize(macro, name, options, active_fedora)
-        super
-        raise ArgumentError, "You must provide a name (dsid) for the datastream" unless name
-      end
-
-      def class_name
-        @class_name ||= (options[:class_name] || 'ActiveFedora::File').to_s
-      end
-
-      def klass
-        @klass ||= class_name.constantize
-      end
-
-      def build_datastream(base_object)
-        klass.new(base_object, name, {load_graph: false}).tap do |ds|
-          ds.default_attributes = {}
-          if ds.new_record? && options[:autocreate]
-            ds.datastream_will_change!
-          end
-        end
-      end
-
-    end
-
   end
 end
