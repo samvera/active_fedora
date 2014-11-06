@@ -271,7 +271,7 @@ describe "a versionable OM datastream" do
 
       context "two times" do
 
-        before do  
+        before do
           subject.title = "Surrender and prepare to be boarded"
           subject.save
           subject.create_version
@@ -299,8 +299,8 @@ describe "a versionable OM datastream" do
             subject.restore_version(first_version)
           end
 
-          it "should still have two unique versions" do          
-            expect(subject.versions.size).to eq 2      
+          it "should still have two unique versions" do
+            expect(subject.versions.size).to eq 2
           end
 
           it "should load the restored datastream's content" do

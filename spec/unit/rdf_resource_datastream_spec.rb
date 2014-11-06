@@ -120,7 +120,7 @@ describe ActiveFedora::RDFDatastream do
           end
 
           it "should have datastream content" do
-            expect(@object.descMetadata.datastream_content).not_to be_blank
+            expect(@object.descMetadata.remote_content).not_to be_blank
           end
         end
       end

@@ -21,7 +21,7 @@ module ActiveFedora
             ## Load up the template
             xml = self.class.xml_template
           else
-            xml = Nokogiri::XML::Document.parse(datastream_content)
+            xml = Nokogiri::XML::Document.parse(remote_content)
           end
           self.class.decorate_ng_xml xml
         end
@@ -50,7 +50,7 @@ module ActiveFedora
         @ng_xml = nil
       end
 
-      # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods 
+      # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods
       def ng_xml_will_change!
         changed_attributes['ng_xml'] = nil
       end
@@ -58,19 +58,19 @@ module ActiveFedora
       def ng_xml_doesnt_change!
         changed_attributes.delete('ng_xml')
       end
-      
-      # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods 
+
+      # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods
       def ng_xml_changed?
         changed_attributes.has_key? 'ng_xml'
       end
 
-      def datastream_content
+      def remote_content
         @datastream_content ||= Nokogiri::XML(super).to_xml {|config| config.no_declaration}.strip
       end
-      
+
       def content=(new_content)
-        if datastream_content != new_content
-          ng_xml_will_change! 
+        if remote_content != new_content
+          ng_xml_will_change!
           @ng_xml = Nokogiri::XML::Document.parse(new_content)
           super(@ng_xml.to_s.strip)
         end
@@ -102,7 +102,7 @@ module ActiveFedora
               raise "You can only pass instances of Nokogiri::XML::Node into this method.  You passed in #{xml}"
           end
         end
-        
+
         return xml.to_xml.strip
       end
 
@@ -118,7 +118,6 @@ module ActiveFedora
       def xml_loaded
         instance_variable_defined? :@ng_xml
       end
-    
     end
   end
 end

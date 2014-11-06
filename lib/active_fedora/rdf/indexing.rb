@@ -6,7 +6,7 @@ module ActiveFedora
         include Solrizer::Common
       end
 
-      def apply_prefix(name)
+      def apply_prefix(name, file_path)
         name.to_s
       end
 
@@ -20,19 +20,19 @@ module ActiveFedora
               elsif val.kind_of? ActiveTriples::Resource
                 val = val.solrize
               end
-              self.class.create_and_insert_terms(apply_prefix(field_key), val, field_info[:behaviors], solr_doc)
+              self.class.create_and_insert_terms(apply_prefix(field_key, opts[:name]), val, field_info[:behaviors], solr_doc)
             end
           end
         end
       end
 
       # Gives the primary solr name for a column. If there is more than one indexer on the field definition, it gives the first
-      def primary_solr_name(field)
+      def primary_solr_name(field, file_path)
         config = self.class.config_for_term_or_uri(field)
         return nil unless config # punt on index names for deep nodes!
         if behaviors = config.behaviors
           behaviors.each do |behavior|
-            result = ActiveFedora::SolrService.solr_name(apply_prefix(field), behavior, type: config.type)
+            result = ActiveFedora::SolrService.solr_name(apply_prefix(field, file_path), behavior, type: config.type)
             return result if Solrizer::DefaultDescriptors.send(behavior).evaluate_suffix(:text).stored?
           end
           raise RuntimeError "no stored fields were found"

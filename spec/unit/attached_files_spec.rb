@@ -141,13 +141,13 @@ describe ActiveFedora::AttachedFiles do
   describe "#attach_file" do
     it "should add the datastream to the object" do
       ds = double(:dsid => 'Abc')
-      subject.attach_file(ds)
+      subject.attach_file(ds, 'Abc')
       expect(subject.attached_files['Abc']).to eq ds
     end
 
     it "should mint a dsid" do
       ds = ActiveFedora::File.new(subject)
-      expect(subject.attach_file(ds)).to eq 'DS1'
+      expect(subject.attach_file(ds, 'DS1')).to eq 'DS1'
     end
   end
 
@@ -164,11 +164,6 @@ describe ActiveFedora::AttachedFiles do
   end
 
   describe "#create_datastream" do
-    it "should mint a DSID" do
-      ds = subject.create_datastream(ActiveFedora::File, nil, {})
-      expect(ds.dsid).to eq 'DS1'
-    end
-
     it "should raise an argument error if the supplied dsid is nonsense" do
       expect { subject.create_datastream(ActiveFedora::File, 0) }.to raise_error(ArgumentError)
     end

@@ -200,8 +200,8 @@ module ActiveFedora
     end
 
     def assign_uri_to_attached_files
-      attached_files.each do |_, ds|
-        ds.digital_object= self
+      attached_files.each do |name, ds|
+        ds.uri= "#{uri}/#{name}"
       end
     end
 

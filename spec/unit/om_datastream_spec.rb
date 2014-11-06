@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::OmDatastream do
-  let(:mock_inner) { double('inner object', uri: RDF::URI.new(nil), new_record?: false) }
+  let(:mock_inner) { ActiveFedora::Base.new }
 
   subject { ActiveFedora::OmDatastream.new mock_inner, 'descMetadata' }
   it { should be_metadata }
@@ -27,10 +27,10 @@ describe ActiveFedora::OmDatastream do
   describe "#prefix" do
     subject { ActiveFedora::OmDatastream.new(mock_inner, 'descMetadata') }
     it "should reflect the dsid" do
-      expect(subject.send(:prefix)).to eq "desc_metadata__"
+      expect(subject.send(:prefix, 'descMetadata')).to eq "desc_metadata__"
     end
   end
-  
+
   describe '#xml_template' do
     subject { ActiveFedora::OmDatastream.xml_template.to_xml }
     it "should return an empty xml document" do
@@ -52,7 +52,7 @@ describe ActiveFedora::OmDatastream do
             t.title(:index_as=>[:stored_searchable])
           end
 
-          def prefix
+          def prefix(_)
             "foo__"
           end
         end
@@ -91,7 +91,7 @@ describe ActiveFedora::OmDatastream do
     end
     it "should do nothing if field key is a string (must be an array or symbol).  Will not accept xpath queries!" do
       xml_before = @mods_ds.to_xml
-      expect(ActiveFedora::Base.logger).to receive(:warn).with "WARNING: descMetadata ignoring {\"fubar\" => \"the role\"} because \"fubar\" is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it."
+      expect(ActiveFedora::Base.logger).to receive(:warn).with "WARNING: Hydra::ModsArticleDatastream ignoring {\"fubar\" => \"the role\"} because \"fubar\" is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it."
       expect(@mods_ds.update_indexed_attributes( { "fubar"=>"the role" } )).to eq({})
       expect(@mods_ds.to_xml).to eq xml_before
     end
@@ -152,23 +152,32 @@ describe ActiveFedora::OmDatastream do
   end
 
   describe '.save' do
-    let(:client) { double("client") }
-    let(:resp) { double("response", status: 201) }
+    let(:base_path) { '/foo' }
+
+    let(:ldp_source) { Ldp::Resource.new(mock_client, nil, nil, base_path) }
+
+    let(:conn_stubs) do
+      stubs = Faraday::Adapter::Test::Stubs.new do |stub|
+        stub.post(base_path) { [200, {'Last-Modified' => 'Tue, 22 Jul 2014 02:23:32 GMT' }] }
+      end
+    end
+
+    let(:mock_conn) do
+      test = Faraday.new do |builder|
+        builder.adapter :test, conn_stubs do |stub|
+        end
+      end
+    end
+
+    let :mock_client do
+      Ldp::Client.new mock_conn
+    end
 
     before do
-      subject.content="<test_xml/>"
-      allow(ActiveFedora.fedora).to receive(:connection).and_return(client)
-      allow(subject).to receive(:new_record?).and_return(true)
-      allow(subject).to receive(:ng_xml_changed?).and_return(true)
-      allow(subject).to receive(:xml_loaded).and_return(true)
-      allow(subject).to receive(:to_xml).and_return('fake xml')
-      allow(client).to receive(:delete).with("test")
-      allow(client).to receive(:delete).with("test/fcr:tombstone")
-      allow(client).to receive(:put).with("test", "")
+      allow(subject).to receive(:ldp_source).and_return(ldp_source)
     end
 
     it "should persist the product of .to_xml in fedora" do
-      expect(client).to receive(:put).with(nil, 'fake xml', {"Content-Type"=>"text/xml"}).and_return(resp)
       subject.serialize!
       subject.save
       expect(subject.mime_type).to eq 'text/xml'

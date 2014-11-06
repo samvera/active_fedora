@@ -16,11 +16,11 @@ module ActiveFedora
         configure :base_uri => BASE_URI unless base_uri
         attr_accessor :datastream
       end
-     
+
       # Overrides ActiveTriples::Resource
       def persist!
-        return false unless datastream and datastream.respond_to? :digital_object
-        @persisted ||= datastream.digital_object.save
+        return false unless datastream and datastream.respond_to? :save
+        @persisted ||= datastream.save
       end
 
       # Overrides ActiveTriples::Resource

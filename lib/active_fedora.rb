@@ -63,6 +63,7 @@ module ActiveFedora #:nodoc:
     autoload :FedoraAttributes
     autoload :File
     autoload :FileConfigurator
+    autoload :FilePathBuilder
     autoload :FilesHash
     autoload :Indexing
     autoload :LdpResource

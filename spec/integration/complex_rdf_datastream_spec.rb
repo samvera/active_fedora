@@ -203,7 +203,7 @@ END
         Object.send(:remove_const, :SpecDatastream)
       end
 
-      let(:parent) { double('inner object', uri: "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/124", id: '124', new_record?: true) }
+      let(:parent) { ActiveFedora::Base.new id: '124' }
       let (:ds) { SpecDatastream.new(parent, 'descMd') }
 
 

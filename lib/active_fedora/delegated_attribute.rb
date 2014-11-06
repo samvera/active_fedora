@@ -16,7 +16,7 @@ module ActiveFedora
     def primary_solr_name
       @datastream ||= datastream_class.new(ActiveFedora::Base.new, dsid)
       if @datastream.respond_to?(:primary_solr_name)
-        @datastream.primary_solr_name(field)
+        @datastream.primary_solr_name(field, dsid)
       else
         raise NoMethodError, "the datastream '#{datastream_class}' doesn't respond to 'primary_solr_name'"
       end

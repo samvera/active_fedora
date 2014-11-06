@@ -154,8 +154,8 @@ module Hydra
       return builder.doc
     end
 
-    def prefix
-      "#{dsid.underscore}__"
+    def prefix(name)
+      "#{name.underscore}__"
     end
     
     # Generates a new Person node
@@ -509,8 +509,8 @@ module Hydra
         ["data", "supporting file", "profile", "lorem ipsum", "dolor"]
       end
 
-    def to_solr(solr_doc=Hash.new)
-      solr_doc = super(solr_doc)
+    def to_solr(solr_doc=Hash.new, opts={})
+      solr_doc = super
             
       ::Solrizer::Extractor.insert_solr_field_value(solr_doc, Solrizer.default_field_mapper.solr_name('object_type', :facetable), "Article")
       ::Solrizer::Extractor.insert_solr_field_value(solr_doc, Solrizer.default_field_mapper.solr_name('mods_journal_title_info', :facetable), "Unknown") if solr_doc["mods_journal_title_info_facet"].nil? 

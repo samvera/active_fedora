@@ -148,7 +148,7 @@ module ActiveFedora
        Nokogiri::XML::Document.parse("<dc xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'/>")
     end
 
-    def to_solr(solr_doc = Hash.new) # :nodoc:
+    def to_solr(solr_doc = Hash.new, opts = {}) # :nodoc:
       @fields.each do |field_key, field_info|
         things = send(field_key)
         if things

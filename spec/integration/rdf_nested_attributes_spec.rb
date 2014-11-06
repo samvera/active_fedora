@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "Nesting attribute behavior of RDFDatastream" do
   describe ".attributes=" do
-    let(:parent) { double('inner object', uri: "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234", id: '1234', new_record?: true) }
+    let(:parent) { ActiveFedora::Base.new(id: '1234') }
 
     describe "complex properties" do
       before do

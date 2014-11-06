@@ -78,7 +78,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
     end
 
     describe "a new instance" do
-      subject { MyDatastream.new(double('parent object', uri: "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/123", new_record?: true), 'descMetadata', about: "http://library.ucsd.edu/ark:/20775/") }
+      subject { MyDatastream.new(ActiveFedora::Base.new(id: '123'), 'descMetadata', about: "http://library.ucsd.edu/ark:/20775/") }
       it "should have a subject" do
         expect(subject.rdf_subject.to_s).to eq "http://library.ucsd.edu/ark:/20775/"
       end
@@ -86,7 +86,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
     end
 
     describe "an instance with content" do
-      let(:parent) { double('parent object', uri: "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/234", id: 'foo',  new_record?: true) }
+      let(:parent) {ActiveFedora::Base.new(id: '234') }
       subject do
         subject = MyDatastream.new(parent, 'descMetadata', about: "http://library.ucsd.edu/ark:/20775/")
         subject.content = File.new('spec/fixtures/damsObjectModel.xml').read
@@ -97,9 +97,6 @@ describe ActiveFedora::RdfxmlRDFDatastream do
       end
       it "should have mimeType" do
         expect(subject.mime_type).to eq 'text/xml'
-      end
-      it "should have dsid" do
-        expect(subject.dsid).to eq 'descMetadata'
       end
       it "should have fields" do
         expect(subject.resource_type).to eq ["image"]

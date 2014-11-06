@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ActiveFedora::SimpleDatastream do
 
-  let(:digital_object) { double(new_record?: false, uri: "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/foo123") }
+  let(:digital_object) { ActiveFedora::Base.new(id: 'foo123')}
   let(:sample_xml) { "<fields><coverage>coverage1</coverage><coverage>coverage2</coverage><creation_date>2012-01-15</creation_date><mydate>fake-date</mydate><publisher>publisher1</publisher></fields>" }
 
   before do

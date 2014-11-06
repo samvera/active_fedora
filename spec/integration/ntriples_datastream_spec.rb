@@ -155,7 +155,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     before do
       # reopening existing class
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        rdf_subject { |ds| RDF::URI.new("http://oregondigital.org/ns/#{ds.digital_object.id.split(':')[1]}") }
+        rdf_subject { |ds| RDF::URI.new("http://oregondigital.org/ns/#{parent_uri(ds).split('/')[-1].split(':')[1]}") }
         property :dctype, predicate: RDF::DC.type
       end
       subject.rdf.dctype = "Frog"
