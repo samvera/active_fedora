@@ -103,7 +103,7 @@ module ActiveFedora
     end
 
     def persisted_size
-      ldp_source.head.headers['Content-Length'].to_i
+      ldp_source.head.headers['Content-Length'].to_i unless new_record?
     end
 
     def dirty_size
@@ -111,7 +111,7 @@ module ActiveFedora
     end
 
     def size
-      dirty_size || persisted_size
+      (dirty_size || persisted_size).to_i
     end
 
     def has_content?
