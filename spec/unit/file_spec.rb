@@ -87,6 +87,12 @@ describe ActiveFedora::Datastream do
       it 'should load the datastream size attribute from the fedora repository' do
         expect(subject.size).to eq 9999
       end
+
+      it 'returns nil without making a head request to Ldp::Resource::BinarySource if it is a new record' do
+        allow(subject).to receive(:new_record?).and_return(true)
+        expect(subject.ldp_source).not_to receive(:head)
+        expect(subject.persisted_size).to eq nil
+      end
     end
 
     describe '#dirty_size' do
@@ -94,7 +100,7 @@ describe ActiveFedora::Datastream do
         context 'and has been set to something that has a #size method (i.e. string or File)' do
           it 'returns the size of the dirty content' do
             dirty_content = double
-            allow(dirty_content).to receive(:size) { '8675309' }
+            allow(dirty_content).to receive(:size) { 8675309 }
             subject.content = dirty_content
             expect(subject.size).to eq dirty_content.size
           end
@@ -121,6 +127,12 @@ describe ActiveFedora::Datastream do
           subject.content = "i have changed!"
           expect(subject.size).to eq subject.dirty_size
         end
+      end
+
+      it 'returns integer 0 even when #persisted_size and #dirty_size return nil' do
+        allow(subject).to receive(:persisted_size) { nil }
+        allow(subject).to receive(:dirty_size) { nil }
+        expect(subject.size).to eq 0
       end
     end
 
