@@ -6,16 +6,6 @@ module ActiveFedora
     extend Deprecation
     self.deprecation_horizon = "active-fedora 9.0"
 
-    included do
-      class << self
-        def inherited_with_datastreams(kls) #:nodoc:
-          ## Do some inheritance logic that doesn't override Base.inherited
-          inherited_without_datastreams kls
-        end
-        alias_method_chain :inherited, :datastreams
-      end
-    end
-
     def ds_specs
       self.class.child_resource_reflections
     end

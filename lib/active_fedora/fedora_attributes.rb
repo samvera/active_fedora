@@ -12,17 +12,13 @@ module ActiveFedora
       property :create_date, predicate: ActiveFedora::Rdf::Fcrepo.created
       property :modified_date, predicate: ActiveFedora::Rdf::Fcrepo.lastModified
 
-      # Hack until https://github.com/no-reply/ActiveTriples/pull/37 is merged
-      def create_date_with_first
-        create_date_without_first.first
+      def create_date
+        super.first
       end
-      alias_method_chain :create_date, :first
 
-      # Hack until https://github.com/no-reply/ActiveTriples/pull/37 is merged
-      def modified_date_with_first
-        modified_date_without_first.first
+      def modified_date
+        super.first
       end
-      alias_method_chain :modified_date, :first
     end
 
     def set_value(*args)
