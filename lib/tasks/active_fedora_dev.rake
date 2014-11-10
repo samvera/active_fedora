@@ -1,7 +1,7 @@
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/../../")
 
 require 'jettywrapper'
-JETTY_ZIP_BASENAME = 'fedora-4/edge'
+JETTY_ZIP_BASENAME = 'fedora-4/b4'
 Jettywrapper.url = "https://github.com/projecthydra/hydra-jetty/archive/#{JETTY_ZIP_BASENAME}.zip"
 
 namespace :active_fedora do
