@@ -8,7 +8,7 @@ module ActiveFedora
     end
 
     def persisted?
-      !(new_record? || destroyed?)
+      !(destroyed? || new_record?)
     end
 
     # Returns true if this object has been destroyed, otherwise returns false.
@@ -59,8 +59,8 @@ module ActiveFedora
       end
 
       id = self.id ## cache so it's still available after delete
-      # Clear out the ETag  -- Remove when this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
-      @ldp_source.instance_variable_set :@get, nil
+      # Clear out the ETag
+      @ldp_source = LdpResource.new(conn, uri)
       begin
         @ldp_source.delete
       rescue Ldp::NotFound
@@ -166,16 +166,10 @@ module ActiveFedora
 
     def update_record(options = {})
       serialize_attached_files
-
-      # Clear out the ETag  -- Remove when this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
-      @ldp_source.instance_variable_set :@get, nil
-      result = execute_sparql_update
-      # result = orm.save
-      # Need to wait until this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
-      raise "ERR #{orm.last_response} when updating #{uri}." unless result
+      execute_sparql_update
       should_update_index = update_needs_index? && options.fetch(:update_index, true)
       persist(should_update_index)
-      return result
+      true
     end
 
     def execute_sparql_update
