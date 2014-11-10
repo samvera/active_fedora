@@ -211,6 +211,7 @@ module ActiveFedora
     end
 
     def fetch_original_name_from_headers
+      return if new_record?
       m = ldp_source.head.headers['Content-Disposition'].match(/filename="(?<filename>[^"]*)";/)
       m[:filename]
     end

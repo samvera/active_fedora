@@ -188,8 +188,14 @@ describe ActiveFedora::Datastream do
     subject { datastream.original_name }
 
     context "on a new datastream" do
-      before { datastream.original_name = "my_image.png" }
-      it { should eq "my_image.png" }
+      context "that has a name set locally" do
+        before { datastream.original_name = "my_image.png" }
+        it { is_expected.to eq "my_image.png" }
+      end
+
+      context "that doesn't have a name set locally" do
+        it { is_expected.to be_nil }
+      end
     end
 
     context "when it's saved" do
