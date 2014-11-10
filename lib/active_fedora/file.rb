@@ -111,11 +111,11 @@ module ActiveFedora
     end
 
     def size
-      (dirty_size || persisted_size).to_i
+      dirty_size || persisted_size
     end
 
     def has_content?
-      size > 0
+      size && size > 0
     end
 
     def empty?

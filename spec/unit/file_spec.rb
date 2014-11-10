@@ -129,10 +129,10 @@ describe ActiveFedora::Datastream do
         end
       end
 
-      it 'returns integer 0 even when #persisted_size and #dirty_size return nil' do
+      it 'returns nil when #persisted_size and #dirty_size return nil' do
         allow(subject).to receive(:persisted_size) { nil }
         allow(subject).to receive(:dirty_size) { nil }
-        expect(subject.size).to eq 0
+        expect(subject.size).to be_nil
       end
     end
 
@@ -144,41 +144,32 @@ describe ActiveFedora::Datastream do
 
     describe ".has_content?" do
       context "when there's content" do
+        before do
+          allow(subject).to receive(:size).and_return(10)
+        end
         it "should return true" do
           expect(subject.has_content?).to be true
         end
       end
 
-      context "when persisted content is nil" do
-        let(:conn_stubs) do
-          Faraday::Adapter::Test::Stubs.new do |stub|
-            stub.head('/fedora/rest/test/1234/abcd') { [200] }
-          end
+      context "when size is nil" do
+        before do
+          allow(subject).to receive(:size).and_return(nil)
         end
-        it "should return false" do
-          expect(subject.has_content?).to be false
+        it "should not have content" do
+          expect(subject).to_not have_content
         end
-
-        context 'but there is unpersisted content' do
-          it 'returns true' do
-            subject.content = "unpersisted content"
-            expect(subject.has_content?).to be true
-          end
-        end
-
       end
+
       context "when content is zero" do
-        let(:conn_stubs) do
-          Faraday::Adapter::Test::Stubs.new do |stub|
-            stub.head('/fedora/rest/test/1234/abcd') { [200, {'Content-Length' => '0' }] }
-          end
+        before do
+          allow(subject).to receive(:size).and_return(0)
         end
         it "should return false" do
           expect(subject.has_content?).to be false
         end
       end
     end
-  
   end
 
   context "when the datastream has local content" do
