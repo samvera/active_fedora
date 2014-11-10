@@ -18,10 +18,11 @@ describe "fedora_solr_sync_issues" do
   end
 
   let(:parent) { ParentThing.create }
-  subject { ChildThing.create :parent => parent }
+  subject { ChildThing.create parent: parent }
+
+  before { Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, subject.uri).delete }
 
   it "should not go into an infinite loop" do
-    subject.orm.delete
     parent.reload
     expect(ActiveFedora::Base.logger).to receive(:error).with("Solr and Fedora may be out of sync:\n")
     expect(parent.things).to eq []

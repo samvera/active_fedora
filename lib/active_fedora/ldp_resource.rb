@@ -22,6 +22,5 @@ module ActiveFedora
       # forces a cast to FedoraRdfResource
       graph_without_inlined_resources(original_graph, inlined_resources)
     end
-    
   end
 end

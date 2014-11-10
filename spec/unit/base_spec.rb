@@ -225,7 +225,7 @@ describe ActiveFedora::Base do
         allow(@test_object).to receive(:new_record?).and_return(true)
         expect(@test_object).to receive(:serialize_attached_files)
         expect(@test_object).to receive(:assign_rdf_subject)
-        expect(@test_object.orm).to receive(:create)
+        expect(@test_object.ldp_source).to receive(:create)
         expect(@test_object).to receive(:refresh)
         expect(@test_object).to receive(:update_index)
         @test_object.save

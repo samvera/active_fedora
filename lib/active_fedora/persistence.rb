@@ -4,7 +4,7 @@ module ActiveFedora
     extend ActiveSupport::Concern
 
     def new_record?
-      @orm.resource.new?
+      @ldp_source.new?
     end
 
     def persisted?
@@ -41,7 +41,7 @@ module ActiveFedora
     alias update_attributes update
 
     def refresh
-      @orm = Ldp::Orm.new(LdpResource.new(conn, uri))
+      @ldp_source = LdpResource.new(conn, uri)
       @resource = nil
     end
 
@@ -60,9 +60,9 @@ module ActiveFedora
 
       id = self.id ## cache so it's still available after delete
       # Clear out the ETag  -- Remove when this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
-      orm.resource.instance_variable_set :@get, nil
+      @ldp_source.instance_variable_set :@get, nil
       begin
-        @orm.resource.delete
+        @ldp_source.delete
       rescue Ldp::NotFound
         raise ObjectNotFoundError, "Unable to find #{id} in the repository"
       end
@@ -120,8 +120,8 @@ module ActiveFedora
         gone?(uri) ? delete_tombstone(uri) : false
       end
 
-      private 
-      
+      private
+
       def gone? uri
         ActiveFedora::Base.find(uri)
         false
@@ -134,7 +134,6 @@ module ActiveFedora
         ActiveFedora.fedora.connection.delete(tombstone)
         true
       end
-    
     end
 
   protected
@@ -157,7 +156,7 @@ module ActiveFedora
     def create_record(options = {})
       assign_rdf_subject
       serialize_attached_files
-      @orm = orm.create
+      @ldp_source = @ldp_source.create
       @resource = nil
       assign_uri_to_attached_files
       should_update_index = create_needs_index? && options.fetch(:update_index, true)
@@ -169,7 +168,7 @@ module ActiveFedora
       serialize_attached_files
 
       # Clear out the ETag  -- Remove when this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
-      orm.resource.instance_variable_set :@get, nil
+      @ldp_source.instance_variable_set :@get, nil
       result = execute_sparql_update
       # result = orm.save
       # Need to wait until this bug is fixed: https://github.com/fcrepo4/fcrepo4/issues/442
@@ -192,10 +191,10 @@ module ActiveFedora
     end
 
     def assign_rdf_subject
-      if !id && new_id = assign_id
-        @orm = Ldp::Orm.new(LdpResource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_id), @resource))
+      @ldp_source = if !id && new_id = assign_id
+        LdpResource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_id), @resource)
       else
-        @orm = Ldp::Orm.new(LdpResource.new(ActiveFedora.fedora.connection, @orm.resource.subject, @resource, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path))
+        LdpResource.new(ActiveFedora.fedora.connection, @ldp_source.subject, @resource, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
       end
     end
 
