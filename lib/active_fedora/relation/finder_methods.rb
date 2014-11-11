@@ -52,6 +52,7 @@ module ActiveFedora
 
       if options.present?
         options = args.first unless args.empty?
+        Deprecation.warn(ActiveFedora::Base, "Calling .find with a hash has been deprecated and will not be allowed in active-fedora 10.0. Use .where instead")
         options = {conditions: options}
         apply_finder_options(options)
       else
