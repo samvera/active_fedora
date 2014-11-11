@@ -105,6 +105,7 @@ module ActiveFedora #:nodoc:
     autoload :Predicates
     autoload :Validations
     autoload :Versionable
+    autoload :WithMetadata
   end
 
   module AttributeMethods
