@@ -54,6 +54,7 @@ module ActiveFedora #:nodoc:
     autoload :AutosaveAssociation
     autoload :Base
     autoload :Callbacks
+    autoload :ChangeSet
     autoload :Config
     autoload :Core
     autoload :Datastream
