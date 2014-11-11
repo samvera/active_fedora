@@ -193,7 +193,7 @@ module ActiveFedora
 
             # TODO: Remove when we decide using 'pid' is no longer supported.
             if !id && attributes.has_key?(:pid)
-              Deprecation.warn Core, 'Initializing with :pid is deprecated and will be removed in active-fedora 9.0. Use :id instead'
+              Deprecation.warn Core, 'Initializing with :pid is deprecated and will be removed in active-fedora 10.0. Use :id instead'
               id = attributes.delete(:pid)
             end
 

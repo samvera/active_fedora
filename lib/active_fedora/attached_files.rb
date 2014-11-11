@@ -4,7 +4,7 @@ module ActiveFedora
   module AttachedFiles
     extend ActiveSupport::Concern
     extend Deprecation
-    self.deprecation_horizon = "active-fedora 9.0"
+    self.deprecation_horizon = "active-fedora 10.0"
 
     def ds_specs
       self.class.child_resource_reflections
@@ -105,7 +105,7 @@ module ActiveFedora
       file_path = FilePathBuilder.build(self, opts[:dsid], opts[:prefix])
       ds = create_datastream(self.class.datastream_class_for_name(file_path), file_path, attrs)
       ds.mime_type = if opts[:mimeType]
-        Deprecation.warn AttachedFiles, "The :mimeType option to add_file_datastream is deprecated and will be removed in active-fedora 9.0. Use :mime_type instead", caller
+        Deprecation.warn AttachedFiles, "The :mimeType option to add_file_datastream is deprecated and will be removed in active-fedora 10.0. Use :mime_type instead", caller
         opts[:mimeType]
       else
         opts[:mime_type]
@@ -125,7 +125,7 @@ module ActiveFedora
 
     module ClassMethods
       extend Deprecation
-      self.deprecation_horizon = 'active-fedora version 9.0'
+      self.deprecation_horizon = 'active-fedora version 10.0'
 
       def ds_specs
         child_resource_reflections
