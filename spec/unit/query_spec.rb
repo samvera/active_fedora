@@ -49,43 +49,52 @@ describe ActiveFedora::Base do
         end
       end
     end
-
-    describe "with conditions" do
+    describe "using an options hash" do
       before do
-        ActiveFedora::Base.stub(:relation => relation)
-        relation.stub(clone: relation)
+        Deprecation.default_deprecation_behavior = :raise
       end
-      let(:relation) { ActiveFedora::Relation.new(SpecModel::Basic) }
-      let(:solr) { ActiveFedora::SolrService.instance.conn }
-      let(:expected_query) { "#{@model_query} AND foo:bar AND baz:quix AND baz:quack" }
-      let(:expected_params) { { params: { sort: [@sort_query], fl: 'id', q: expected_query, qt: 'standard' } } }
-      let(:mock_docs) { [{"id" => "changeme:30"},{"id" => "changeme:22"}] }
-
-      it "should filter by the provided fields" do
-        expect(relation).to receive(:load_from_fedora).with("changeme:30", nil).and_return("Fake Object1")
-        expect(relation).to receive(:load_from_fedora).with("changeme:22", nil).and_return("Fake Object2")
-
-        expect(mock_docs).to receive(:has_next?).and_return(false)
-        expect(solr).to receive(:paginate).with(1, 1000, 'select', expected_params).and_return('response'=>{'docs'=>mock_docs})
-        expect(SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']})).to eq ["Fake Object1", "Fake Object2"]
+      it "should be deprecated" do
+        expect { SpecModel::Basic.find(id: "_ID_") }.to raise_error RuntimeError
       end
+    end
+  end
 
-      it "should correctly query for empty strings" do
-        expect(SpecModel::Basic.find( :active_fedora_model_ssi => '').count).to eq 0
-      end
+  describe "#where" do
+    before do
+      ActiveFedora::Base.stub(:relation => relation)
+      relation.stub(clone: relation)
+    end
+    let(:relation) { ActiveFedora::Relation.new(SpecModel::Basic) }
+    let(:solr) { ActiveFedora::SolrService.instance.conn }
+    let(:expected_query) { "#{@model_query} AND foo:bar AND baz:quix AND baz:quack" }
+    let(:expected_params) { { params: { sort: [@sort_query], fl: 'id', q: expected_query, qt: 'standard' } } }
+    let(:expected_sort_params) { { params: { sort: ["title_t desc"], fl: 'id', q: expected_query, qt: 'standard' } } }
+    let(:mock_docs) { [{"id" => "changeme:30"},{"id" => "changeme:22"}] }
 
-      it 'should correctly query for empty arrays' do
-        expect(SpecModel::Basic.find( :active_fedora_model_ssi => []).count).to eq 0
-      end
+    it "should filter by the provided fields" do
+      expect(relation).to receive(:load_from_fedora).with("changeme:30", nil).and_return("Fake Object1")
+      expect(relation).to receive(:load_from_fedora).with("changeme:22", nil).and_return("Fake Object2")
 
-      it "should add options" do
-        expect(relation).to receive(:load_from_fedora).with("changeme:30", nil).and_return("Fake Object1")
-        expect(relation).to receive(:load_from_fedora).with("changeme:22", nil).and_return("Fake Object2")
+      expect(mock_docs).to receive(:has_next?).and_return(false)
+      expect(solr).to receive(:paginate).with(1, 1000, 'select', expected_params).and_return('response'=>{'docs'=>mock_docs})
+      expect(SpecModel::Basic.where({:foo=>'bar', :baz=>['quix','quack']})).to eq ["Fake Object1", "Fake Object2"]
+    end
 
-        expect(mock_docs).to receive(:has_next?).and_return(false)
-        expect(solr).to receive(:paginate).with(1, 1000, 'select', expected_params).and_return('response'=>{'docs'=>mock_docs})
-        expect(SpecModel::Basic.find({:foo=>'bar', :baz=>['quix','quack']}, :sort=>'title_t desc')).to eq ["Fake Object1", "Fake Object2"]
-      end
+    it "should correctly query for empty strings" do
+      expect(SpecModel::Basic.where( :active_fedora_model_ssi => '').count).to eq 0
+    end
+
+    it 'should correctly query for empty arrays' do
+      expect(SpecModel::Basic.where( :active_fedora_model_ssi => []).count).to eq 0
+    end
+
+    it "should add options" do
+      expect(relation).to receive(:load_from_fedora).with("changeme:30", nil).and_return("Fake Object1")
+      expect(relation).to receive(:load_from_fedora).with("changeme:22", nil).and_return("Fake Object2")
+
+      expect(mock_docs).to receive(:has_next?).and_return(false)
+      expect(solr).to receive(:paginate).with(1, 1000, 'select', expected_sort_params).and_return('response'=>{'docs'=>mock_docs})
+      expect(SpecModel::Basic.where(:foo=>'bar', :baz=>['quix','quack']).order('title_t desc')).to eq ["Fake Object1", "Fake Object2"]
     end
   end
 
