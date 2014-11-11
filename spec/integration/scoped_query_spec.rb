@@ -114,7 +114,7 @@ describe "scoped queries" do
 
     describe "when one of the objects in solr isn't in fedora" do
       let!(:id) { test_instance2.id }
-      before { test_instance2.orm.delete }
+      before { Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, test_instance2.uri).delete }
       after do
         ActiveFedora::SolrService.instance.conn.tap do |conn|
           conn.delete_by_query "id:\"#{id}\""

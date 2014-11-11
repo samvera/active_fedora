@@ -41,7 +41,7 @@ module ActiveFedora
 
     def uri
       # TODO could we return a RDF::URI instead?
-      uri = @orm.try(:resource).try(:subject_uri)
+      uri = @ldp_source.try(:subject_uri)
       uri.value == '' ? uri : uri.to_s
     end
 
@@ -52,7 +52,7 @@ module ActiveFedora
     #
     # set_value, get_value, and property accessors are delegated to this object.
     def resource
-      @resource ||= self.class.resource_class.new(@orm.graph.rdf_subject, @orm.graph)
+      @resource ||= self.class.resource_class.new(@ldp_source.graph.rdf_subject, @ldp_source.graph)
     end
 
     module ClassMethods

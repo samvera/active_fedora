@@ -92,7 +92,7 @@ module ActiveFedora
       attrs = JSON.parse(json)
       id = attrs.delete('id')
 
-      @orm = Ldp::Orm.new(build_ldp_resource(id))
+      @ldp_source = build_ldp_resource(id)
       @association_cache = {}
       datastream_keys = self.class.child_resource_reflections.keys
       datastream_keys.each do |key|

@@ -22,7 +22,10 @@ module ActiveFedora
       # Accepts a proc that takes a uri and transforms it to an id
       mattr_accessor :translate_uri_to_id, instance_writer: false
 
-      attr_reader :orm
+    end
+
+    def ldp_source
+      @ldp_source
     end
 
     # Constructor.  You may supply a custom +:id+, or we call the Fedora Rest API for the
@@ -31,8 +34,8 @@ module ActiveFedora
     # +:namespace+ value to Fedora::Repository.nextid to generate the next id available within
     # the given namespace.
     def initialize(attributes_or_resource_or_url = nil)
-      attributes = initialize_orm_and_attributes(attributes_or_resource_or_url)
-      raise IllegalOperation, "Attempting to recreate existing orm" unless @orm.new?
+      attributes = initialize_resource_and_attributes(attributes_or_resource_or_url)
+      raise IllegalOperation, "Attempting to recreate existing ldp_source" unless @ldp_source.new?
       @association_cache = {}
       assert_content_model
       load_attached_files
@@ -45,7 +48,7 @@ module ActiveFedora
       check_persistence unless persisted?
       clear_association_cache
       clear_attached_files
-      @orm = Ldp::Orm.new(LdpResource.new(conn, uri))
+      @ldp_source = LdpResource.new(conn, uri)
       @resource = nil
       load_attached_files
       self
@@ -61,7 +64,7 @@ module ActiveFedora
     #   post.init_with_resource(Ldp::Resource.new('http://example.com/post/1'))
     #   post.title # => 'hello world'
     def init_with_resource(rdf_resource)
-      @orm = Ldp::Orm.new(rdf_resource)
+      @ldp_source = rdf_resource
       @association_cache = {}
       load_attached_files
       run_callbacks :find
@@ -178,13 +181,10 @@ module ActiveFedora
         end
       end
 
-      def initialize_orm_and_attributes attributes_or_resource_or_url
+      def initialize_resource_and_attributes attributes_or_resource_or_url
         case attributes_or_resource_or_url
-          when Ldp::Resource::RdfSource
-            @orm = Ldp::Orm.new(subject_or_data)
-            attributes = get_attributes_from_orm(@orm)
           when String
-            @orm = Ldp::Orm.new(build_ldp_resource(attributes_or_resource_or_url))
+            @ldp_source = build_ldp_resource(attributes_or_resource_or_url)
             @attributes = {}.with_indifferent_access
           when Hash
             attributes = attributes_or_resource_or_url
@@ -198,13 +198,13 @@ module ActiveFedora
             end
 
             attributes = attributes.with_indifferent_access if attributes
-            @orm = if id
-              Ldp::Orm.new(build_ldp_resource(id))
+            @ldp_source = if id
+              build_ldp_resource(id)
             else
-              Ldp::Orm.new(build_ldp_resource)
+              build_ldp_resource
             end
           when NilClass
-            @orm = Ldp::Orm.new(build_ldp_resource)
+            @ldp_source = build_ldp_resource
             attributes = {}.with_indifferent_access
           else
             raise ArgumentError, "#{attributes_or_resource_or_url.class} is not acceptable"
