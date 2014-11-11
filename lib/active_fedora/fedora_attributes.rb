@@ -35,7 +35,7 @@ module ActiveFedora
 
     # TODO: Remove after we no longer support #pid.
     def pid
-      Deprecation.warn FedoraAttributes, "#{self.class}#pid is deprecated and will be removed in active-fedora 9.0. Use #{self.class}#id instead."
+      Deprecation.warn FedoraAttributes, "#{self.class}#pid is deprecated and will be removed in active-fedora 10.0. Use #{self.class}#id instead."
       id
     end
 
