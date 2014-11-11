@@ -97,21 +97,21 @@ describe ActiveFedora::AttachedFiles do
     end
   end
 
-  describe ".name_for_dsid" do
+  describe ".method_name_for_path" do
     it "should use the name" do
-      expect(ActiveFedora::Base.send(:name_for_dsid, 'abc')).to eq 'abc'
+      expect(ActiveFedora::Base.send(:method_name_for_path, 'abc')).to eq 'abc'
     end
 
     it "should use the name" do
-      expect(ActiveFedora::Base.send(:name_for_dsid, 'ARCHIVAL_XML')).to eq 'ARCHIVAL_XML'
+      expect(ActiveFedora::Base.send(:method_name_for_path, 'ARCHIVAL_XML')).to eq 'ARCHIVAL_XML'
     end
 
     it "should use the name" do
-      expect(ActiveFedora::Base.send(:name_for_dsid, 'descMetadata')).to eq 'descMetadata'
+      expect(ActiveFedora::Base.send(:method_name_for_path, 'descMetadata')).to eq 'descMetadata'
     end
 
     it "should hash-erize underscores" do
-      expect(ActiveFedora::Base.send(:name_for_dsid, 'a-b')).to eq 'a_b'
+      expect(ActiveFedora::Base.send(:method_name_for_path, 'a-b')).to eq 'a_b'
     end
   end
 
