@@ -25,8 +25,8 @@ module ActiveFedora
         solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => id)
         solr_doc.merge!(ActiveFedora::Base.profile_solr_name => to_json)
       end
-      attached_files.each_value do |ds|
-        solr_doc.merge! ds.to_solr()
+      attached_files.each do |name, ds|
+        solr_doc.merge! ds.to_solr(solr_doc, name: name )
       end
       solr_doc = solrize_relationships(solr_doc) unless opts[:model_only]
       solr_doc

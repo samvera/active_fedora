@@ -34,7 +34,6 @@ module ActiveFedora
     def create_version
       resp = ActiveFedora.fedora.connection.post(versions_url, nil, {slug: version_name})
       @versions_graph = nil
-      reload
       resp.success?
     end
 

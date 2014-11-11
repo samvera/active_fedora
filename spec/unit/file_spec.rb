@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::Datastream do
-  let(:parent) { double('inner object', uri: "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234", id: '1234', new_record?: true) }
+  let(:parent) { ActiveFedora::Base.new(id: '1234') }
   let(:datastream) { ActiveFedora::Datastream.new(parent, 'abcd') }
 
   subject { datastream }
@@ -35,33 +35,16 @@ describe ActiveFedora::Datastream do
     end
   end
 
-  describe "#generate_dsid" do
-    let(:parent) { double('inner object', uri: "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234", id: '1234',
-                          new_record?: true, attached_files: datastreams) }
-
-    subject { ActiveFedora::Datastream.new(parent, nil, prefix: 'FOO') }
-
-    let(:datastreams) { { } }
-
-    it "should set the dsid" do
-      expect(subject.dsid).to eq 'FOO1'
-    end
+  describe "#uri" do
+    let(:parent) { ActiveFedora::Base.new(id: '1234') }
+    subject { ActiveFedora::Datastream.new(parent, 'FOO1') }
 
     it "should set the uri" do
       expect(subject.uri).to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234/FOO1"
     end
-
-    context "when some datastreams exist" do
-      let(:datastreams) { {'FOO56' => double} }
-
-      it "should start from the highest existing dsid" do
-        expect(subject.dsid).to eq 'FOO57'
-      end
-    end
   end
 
   context "content" do
-    
     let(:mock_conn) do
       Faraday.new do |builder|
         builder.adapter :test, conn_stubs do |stub|
@@ -75,12 +58,16 @@ describe ActiveFedora::Datastream do
 
     let(:conn_stubs) do
       Faraday::Adapter::Test::Stubs.new do |stub|
-        stub.head('/fedora/rest/test/1234/abcd') { [200, {'Content-Length' => '9999' }] }
+        stub.head(path) { [200, {'Content-Length' => '9999' }] }
       end
     end
 
+    let(:path) { '/fedora/rest/test/1234/abcd' }
+
+    let(:ldp_source) { Ldp::Resource.new(mock_client, path) }
+
     before do
-      allow(subject).to receive(:ldp_connection).and_return(mock_client)
+      allow(subject).to receive(:ldp_source).and_return(ldp_source)
     end
 
     describe '#persisted_size' do

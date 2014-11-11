@@ -26,9 +26,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
     it "should have mime_type" do
       expect(@subject.mime_type).to eq 'text/plain'
     end
-    it "should have dsid" do
-      expect(@subject.dsid).to eq 'descMetadata'
-    end
     it "should have fields" do
       expect(@subject.created).to eq [Date.parse('2010-12-31')]
       expect(@subject.title).to eq ["Title of work"]
@@ -80,8 +77,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @two = ActiveFedora::RDFDatastream.new(inner_object, 'myQuix')
     end
     it "should generate predictable prexies" do
-      expect(@one.apply_prefix("baz")).to eq 'my_foobar__baz'
-      expect(@two.apply_prefix("baz")).to eq 'my_quix__baz'
+      expect(@one.apply_prefix("baz", 'myFoobar')).to eq 'my_foobar__baz'
+      expect(@two.apply_prefix("baz", 'myQuix')).to eq 'my_quix__baz'
     end
   end
 
@@ -98,10 +95,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject = MyDatastream.new(inner_object, 'mixed_rdf')
       allow(@subject).to receive(:id).and_return 'test:1'
       allow(@subject).to receive(:new_record?).and_return  false
-      allow(@subject).to receive(:datastream_content).and_return datastream_content
+      allow(@subject).to receive(:remote_content).and_return remote_content
     end
 
-    let(:datastream_content) do
+    let(:remote_content) do
       File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
 
@@ -175,28 +172,14 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
 
     it "should have a solr_name method" do
-      expect(MyDatastream.new(inner_object, 'descMetadata').primary_solr_name(:based_near)).to eq 'desc_metadata__based_near_tesim'
-      expect(MyDatastream.new(inner_object, 'props').primary_solr_name(:title)).to eq 'props__title_tesim'
+      expect(MyDatastream.new(inner_object, 'descMetadata').primary_solr_name(:based_near, 'descMetadata')).to eq 'desc_metadata__based_near_tesim'
+      expect(MyDatastream.new(inner_object, 'props').primary_solr_name(:title, 'props')).to eq 'props__title_tesim'
     end
 
     it "should optionally allow you to provide the Solr::Document to add fields to and return that document when done" do
       doc = Hash.new
       expect(@subject.to_solr(doc)).to eq doc
     end
-    it "should iterate through @fields hash" do
-      solr_doc = @subject.to_solr
-      expect(solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", type: :string)]).to eq ["publisher1"]
-      expect(solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :sortable)]).to eq "publisher1"
-      expect(solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :facetable)]).to eq ["publisher1"]
-      expect(solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", type: :string)]).to eq ["coverage1", "coverage2"]
-      expect(solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :facetable)]).to eq ["coverage1", "coverage2"]
-      expect(solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__created", :sortable, type: :date)]).to eq "2009-10-10T00:00:00Z"
-      expect(solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__created", :displayable)]).to eq ["2009-10-10"]
-      expect(solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__title", type: :string)]).to eq ["fake-title"]
-      expect(solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__title", :sortable)]).to eq "fake-title"
-      expect(solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string)]).to eq ["http://example.org/"]
-    end
-
     describe "with an actual object" do
       before(:each) do
         class Foo < ActiveFedora::Base
@@ -230,9 +213,11 @@ describe ActiveFedora::NtriplesRDFDatastream do
           expect(fields[:created][:type]).to eq :date
         end
       end
+
       describe ".to_solr()" do
+        subject { @obj.to_solr({}, name: 'solrRdf') }
         it "should return the right fields" do
-          expect(@obj.to_solr.keys).to include(ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string),
+          expect(subject.keys).to include(ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string),
                 ActiveFedora::SolrService.solr_name("solr_rdf__publisher", type: :string),
                 ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :sortable),
                 ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :facetable),
@@ -246,8 +231,12 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
 
         it "should return the right values" do
-          expect(@obj.to_solr[ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string)]).to eq ["http://example.org/blogtastic/"]
-          expect(@obj.to_solr[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", type: :string)]).to eq ["Tacoma, WA","Renton, WA"]
+          expect(subject[ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string)]).to eq ["http://example.org/blogtastic/"]
+          expect(subject[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", type: :string)]).to eq ["Tacoma, WA","Renton, WA"]
+          expect(subject[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :facetable)]).to eq ["Tacoma, WA","Renton, WA"]
+          expect(subject[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", type: :string)]).to eq ["Bob's Blogtastic Publishing"]
+          expect(subject[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :sortable)]).to eq "Bob's Blogtastic Publishing"
+          expect(subject[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :facetable)]).to eq ["Bob's Blogtastic Publishing"]
         end
       end
     end

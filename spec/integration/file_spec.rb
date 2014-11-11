@@ -4,6 +4,13 @@ require 'active_fedora'
 require "rexml/document"
 
 describe ActiveFedora::File do
+  context "stand alone operation" do
+    it "should save" do
+      subject.content = "some stuff"
+      subject.save
+      expect(subject).not_to be_new_record
+    end
+  end
 
   context "when autocreate is true" do
     before(:all) do
@@ -27,11 +34,6 @@ describe ActiveFedora::File do
     describe "the datastream" do
       subject { descMetadata }
       it { should be_a_kind_of(ActiveFedora::File) }
-    end
-
-    describe "dsid" do
-      subject { descMetadata.dsid }
-      it { should eql("descMetadata") }
     end
 
     describe "#content" do
@@ -64,7 +66,7 @@ describe ActiveFedora::File do
       let(:datastream) { ActiveFedora::File.new(test_object, dsid).tap { |ds| ds.content = content } }
 
       before do
-        test_object.attach_file(datastream)
+        test_object.attach_file(datastream, dsid)
         test_object.save
       end
 

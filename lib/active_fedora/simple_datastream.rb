@@ -81,7 +81,7 @@ module ActiveFedora
        Nokogiri::XML::Document.parse("<fields/>")
     end
 
-    def to_solr(solr_doc = Hash.new) # :nodoc:
+    def to_solr(solr_doc = Hash.new, opts = {}) # :nodoc:
       @fields.each do |field_key, field_info|
         next if field_key == :location ## FIXME HYDRA-825
         things = send(field_key)

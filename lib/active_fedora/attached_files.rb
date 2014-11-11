@@ -61,21 +61,21 @@ module ActiveFedora
         dsid = ds_uri.to_s.sub(uri + '/', '')
         reflection = local_ds_specs.delete(dsid)
         ds = reflection ? reflection.build_datastream(self) : ActiveFedora::File.new(self, dsid)
-        attach_file(ds)
+        attach_file(ds, dsid)
         configure_datastream(attached_files[dsid], reflection)
       end
       local_ds_specs.each do |name, reflection|
         ds = reflection.build_datastream(self)
-        attach_file(ds)
+        attach_file(ds, name)
         configure_datastream(ds, reflection)
       end
     end
 
     # Adds datastream to the object.
     # @return [String] dsid of the added datastream
-    def attach_file(file, opts={})
-      attached_files[file.dsid] = file
-      file.dsid
+    def attach_file(file, dsid, opts={})
+      attached_files[dsid] = file
+      dsid
     end
 
     def add_datastream(datastream, opts={})
@@ -102,7 +102,8 @@ module ActiveFedora
     # @option opts [String] :original_name The original name of the file (used for Content-Disposition)
     def add_file_datastream(file, opts={})
       attrs = {blob: file, prefix: opts[:prefix]}
-      ds = create_datastream(self.class.datastream_class_for_name(opts[:dsid]), opts[:dsid], attrs)
+      file_path = FilePathBuilder.build(self, opts[:dsid], opts[:prefix])
+      ds = create_datastream(self.class.datastream_class_for_name(file_path), file_path, attrs)
       ds.mime_type = if opts[:mimeType]
         Deprecation.warn AttachedFiles, "The :mimeType option to add_file_datastream is deprecated and will be removed in active-fedora 9.0. Use :mime_type instead", caller
         opts[:mimeType]
@@ -110,9 +111,8 @@ module ActiveFedora
         opts[:mime_type]
       end
       ds.original_name = opts[:original_name] if opts.key?(:original_name)
-      attach_file(ds).tap do |dsid|
-        self.class.build_datastream_accessor(dsid) unless respond_to? dsid
-      end
+      attach_file(ds, file_path)
+      self.class.build_datastream_accessor(file_path) unless respond_to? file_path
     end
 
     def create_datastream(type, dsid, opts={})

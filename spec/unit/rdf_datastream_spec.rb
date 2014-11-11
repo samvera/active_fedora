@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::RDFDatastream do
-  let(:parent) { double(new_record?: true, uri: "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/test:1", id: 'test:1') }
+  let(:parent) { ActiveFedora::Base.new(id: 'test-1') }
   describe "a new instance" do
     subject { ActiveFedora::RDFDatastream.new(parent, 'descMetadata') }
     it { should be_metadata }
@@ -82,7 +82,7 @@ describe ActiveFedora::RDFDatastream do
     let(:ds) do
       ActiveFedora::NtriplesRDFDatastream.new(parent, 'descMetadata').tap do |datastream|
         datastream.stub(:new_record?).and_return(false)
-        datastream.stub(:datastream_content).and_return("<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT'))
+        datastream.stub(:remote_content).and_return("<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT'))
       end
     end
     it "should not error on access" do

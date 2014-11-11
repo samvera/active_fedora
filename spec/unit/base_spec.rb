@@ -188,19 +188,21 @@ describe ActiveFedora::Base do
 
       describe "dynamic accessors" do
         before do
-          test_history.attach_file(ds)
-          test_history.class.build_datastream_accessor(ds.dsid)
+          test_history.attach_file(ds, dsid)
+          test_history.class.build_datastream_accessor(dsid)
         end
 
         describe "when the file is named with dash" do
-          let(:ds) {double(:dsid=>'eac-cpf')}
+          let(:dsid) { 'eac-cpf' }
+          let(:ds) { double }
           it "should convert dashes to underscores" do
             expect(test_history.eac_cpf).to eq ds
           end
         end
 
         describe "when the file is named with underscore" do
-          let (:ds) { double(:dsid=>'foo_bar') }
+          let(:dsid) { 'foo_bar' }
+          let (:ds) { double }
           it "should preserve the underscore" do
             expect(test_history.foo_bar).to eq ds
           end

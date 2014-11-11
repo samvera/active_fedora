@@ -29,8 +29,8 @@ module ActiveFedora
 
     # Return a hash suitable for indexing in solr. Every field name is prefixed with the
     # value returned by the +prefix+ method.
-    def to_solr(solr_doc = {})
-      prefix = self.prefix
+    def to_solr(solr_doc = {}, opts = {})
+      prefix = self.prefix(opts[:name])
       solr_doc.merge super({}).each_with_object({}) { |(key, value), new| new[[prefix,key].join] = value }
     end
 
@@ -87,16 +87,16 @@ module ActiveFedora
     #     </mods:role>
     #     </mods:name>
     #   </mods>
-    def update_indexed_attributes(params={}, opts={})    
+    def update_indexed_attributes(params={}, opts={})
       if self.class.terminology.nil?
         raise "No terminology is set for this OmDatastream class.  Cannot perform update_indexed_attributes"
       end
-      # remove any fields from params that this datastream doesn't recognize    
+      # remove any fields from params that this datastream doesn't recognize
       # make sure to make a copy of params so not to modify hash that might be passed to other methods
       current_params = params.clone
-      current_params.delete_if do |term_pointer,new_values| 
+      current_params.delete_if do |term_pointer,new_values|
         if term_pointer.kind_of?(String)
-          ActiveFedora::Base.logger.warn "WARNING: #{dsid} ignoring {#{term_pointer.inspect} => #{new_values.inspect}} because #{term_pointer.inspect} is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it." if ActiveFedora::Base.logger
+          ActiveFedora::Base.logger.warn "WARNING: #{self.class.name} ignoring {#{term_pointer.inspect} => #{new_values.inspect}} because #{term_pointer.inspect} is a String (only valid OM Term Pointers will be used).  Make sure your html has the correct field_selector tags in it." if ActiveFedora::Base.logger
           true
         else
           !self.class.terminology.has_term?(*OM.destringify(term_pointer))

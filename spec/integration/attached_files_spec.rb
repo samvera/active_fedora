@@ -110,9 +110,9 @@ describe ActiveFedora::AttachedFiles do
       let(:mds2) { ActiveFedora::QualifiedDublinCoreDatastream.new(obj, "qdc") }
       before do
         fds = ActiveFedora::File.new(obj, "fds")
-        obj.attach_file(mds1)
-        obj.attach_file(mds2)
-        obj.attach_file(fds)
+        obj.attach_file(mds1, 'md1')
+        obj.attach_file(mds2, 'qdc')
+        obj.attach_file(fds, 'fds')
       end
 
       it "should return all of the datastreams from the object that are kinds of OmDatastream " do
@@ -136,13 +136,13 @@ describe ActiveFedora::AttachedFiles do
       let(:ds) { ActiveFedora::File.new(obj, 'DS1') }
 
       it "should be able to add datastreams" do
-        expect(obj.attach_file(ds)).to eq 'DS1'
+        expect(obj.attach_file(ds, 'DS1')).to eq 'DS1'
       end
 
       it "adding and saving should add the datastream to the datastreams array" do
         ds.content = fixture('dino.jpg').read
         expect(obj.attached_files).to_not have_key("DS1")
-        obj.attach_file(ds)
+        obj.attach_file(ds, 'DS1')
         obj.save
         expect(obj.attached_files).to have_key("DS1")
       end
@@ -156,7 +156,7 @@ describe ActiveFedora::AttachedFiles do
       let(:ds) { ActiveFedora::File.new(obj, 'DS1').tap {|ds| ds.content = "foo"; ds.save } }
 
       it "should retrieve blobs that match the saved blobs" do
-        obj.attach_file(ds)
+        obj.attach_file(ds, 'DS1')
         expect(obj.reload.attached_files["DS1"].content).to eq "foo"
       end
     end

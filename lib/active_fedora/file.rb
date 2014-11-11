@@ -2,7 +2,7 @@ module ActiveFedora
 
   #This class represents a Fedora datastream
   class File
-    include AttributeMethods
+    include AttributeMethods # allows 'content' to be tracked
     include ActiveModel::Dirty
     extend ActiveTriples::Properties
     generate_method 'content'
@@ -11,68 +11,65 @@ module ActiveFedora
     define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, only: :after
 
-    attr_reader :digital_object, :dsid, :uri
     attr_accessor :last_modified
 
-    # @param digital_object [DigitalObject] the digital object that this object belongs to
-    # @param dsid [String] the datastream id, if this is nil, a datastream id will be generated.
+    # @param parent_or_url [ActiveFedora::Base, String, NilClass] the parent resource or the URI of this resource
+    # @param path_name [String] the path partial relative to the resource
     # @param options [Hash]
-    # @option options [String,IO] :content the content for the datastream
-    # @option options [String] :prefix the prefix for the auto-generated DSID (not to be confused with the solr prefix)
-    def initialize(digital_object, dsid=nil, options={})
-      raise ArgumentError, "Digital object is nil" unless digital_object
-      @digital_object = digital_object
-      initialize_dsid(dsid, options.delete(:prefix))
+    def initialize(parent_or_url = nil, dsid=nil, options={})
+      case parent_or_url
+      when nil, String
+      #TODO this is similar to Core#build_ldp_resource
+        content = ''
+        @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, parent_or_url, content, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
+      when ActiveFedora::Base
+        #TODO deprecate this path
+        uri = if parent_or_url.uri.kind_of?(RDF::URI) && parent_or_url.uri.value.empty?
+          nil
+        else
+          "#{parent_or_url.uri}/#{dsid}"
+        end
+        @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, uri, nil, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
 
-      #TODO if digital_object.uri is empty, then this resource is not valid:
-      @uri = if digital_object.uri.kind_of?(RDF::URI) && digital_object.uri.value.empty?
-        nil
       else
-        "#{digital_object.uri}/#{@dsid}"
+        raise "The first argument to #{self} must be a String or an ActiveFedora::Base. You provided a #{parent_or_url.class}"
       end
 
       @attributes = {}.with_indifferent_access
-      unless digital_object.new_record?
-        @new_record = false
-      end
-    end
-
-    def resource
-
     end
 
     def ldp_source
-      @ldp_source ||= Ldp::Resource::BinarySource.new(ldp_connection, uri)
+      @ldp_source || raise("NO source")
     end
 
     def ldp_connection
       ActiveFedora.fedora.connection
     end
 
-    def new_record?
-      uri.nil? || ldp_source.new?
+    # TODO this is like FedoraAttributes#uri
+    def uri
+      ldp_source.subject
     end
 
-    def digital_object=(digital_object)
-      raise ArgumentError, "must be a new record to assign a parent object" unless new_record?
-      @uri = "#{digital_object.uri}/#{@dsid}"
-      # resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
-      # init_core(resource)
+    def new_record?
+      ldp_source.new?
+    end
+
+    def uri= uri
+      @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, uri, '', ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
     end
 
     # When restoring from previous versions, we need to reload certain attributes from Fedora
     def reload
       return if new_record?
-      @ldp_source = nil
-      @original_name = nil
-      @mime_type = nil
+      reset
     end
 
-    def initialize_dsid(dsid, prefix)
-      prefix  ||= 'DS'
-      dsid = nil if dsid == ''
-      dsid ||= generate_dsid(digital_object, prefix)
-      @dsid = dsid
+    def reset
+      @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, uri)
+      @original_name = nil
+      @mime_type = nil
+      @content = nil
     end
 
     def datastream_will_change!
@@ -87,7 +84,7 @@ module ActiveFedora
       end
     end
 
-    def datastream_content
+    def remote_content
       return if new_record?
       @ds_content ||= retrieve_content
     end
@@ -190,24 +187,10 @@ module ActiveFedora
       'text/plain'
     end
 
-    # return a valid dsid that is not currently in use.  Uses a prefix (default "DS") and an auto-incrementing integer
-    # Example: if there are already datastreams with IDs DS1 and DS2, this method will return DS3.  If you specify FOO as the prefix, it will return FOO1.
-    def generate_dsid(digital_object, prefix)
-      return unless digital_object
-      matches = digital_object.attached_files.keys.map {|d| data = /^#{prefix}(\d+)$/.match(d); data && data[1].to_i}.compact
-      val = matches.empty? ? 1 : matches.max + 1
-      format_dsid(prefix, val)
-    end
-
-    ### Provided so that an application can override how generated ids are formatted (e.g DS01 instead of DS1)
-    def format_dsid(prefix, suffix)
-      sprintf("%s%i", prefix,suffix)
-    end
-
     # The string to prefix all solr fields with. Override this method if you want
     # a prefix other than the default
-    def prefix
-      "#{dsid.underscore}__"
+    def prefix(dsid)
+      dsid ? "#{dsid.underscore}__" : ''
     end
 
     def fetch_original_name_from_headers
@@ -218,10 +201,6 @@ module ActiveFedora
 
     def fetch_mime_type
       ldp_source.head.headers['Content-Type']
-    end
-
-    def reset_attributes
-      @content = nil
     end
 
     private
@@ -244,42 +223,25 @@ module ActiveFedora
 
       def save(*)
         return unless content_changed?
-        raise "Can't generate uri because the parent object isn't saved" if digital_object.new_record?
         payload = behaves_like_io?(content) ? content.read : content
         headers = { 'Content-Type' => mime_type }
         headers['Content-Disposition'] = "attachment; filename=\"#{@original_name}\"" if @original_name
-        resp = ActiveFedora.fedora.connection.put @uri, payload, headers
-        reset_attributes
-        case resp.status
-          when 201, 204
-            changed_attributes.clear
-          when 404
-            raise ActiveFedora::ObjectNotFoundError, "Unable to add content at #{@container_resource.content_path}"
-          else
-            raise "unexpected return value #{resp.status}\n\t#{resp.body[0,200]}"
+        ldp_source.content = payload
+        if new_record?
+          ldp_source.create do |req|
+            req.headers = headers
+          end
+        else
+          ldp_source.update do |req|
+            req.headers = headers
+          end
         end
+        reset
+        changed_attributes.clear
       end
 
       def retrieve_content
-        return '' if uri.nil?
-        begin
-          resp = ActiveFedora.fedora.connection.get(uri)
-        rescue Ldp::NotFound
-          return nil
-        end
-        case resp.status
-          when 200, 201
-            resp.body
-          when 404
-            # TODO
-            # this happens because rdf_datastream calls datastream_content.
-            # which happens because it needs a ID even though it isn't saved.
-            # which happens because we don't know if something exists if you give it an id
-            #raise ActiveFedora::ObjectNotFoundError, "Unable to find content at #{uri}"
-            ''
-          else
-            raise "unexpected return value #{resp.status} for when getting datastream content at #{uri}"
-        end
+        ldp_source.get.body
       end
 
       # @param range [String] the Range HTTP header
@@ -305,7 +267,7 @@ module ActiveFedora
       def local_or_remote_content(ensure_fetch = true)
         return @content if new_record?
 
-        @content ||= ensure_fetch ? datastream_content : @ds_content
+        @content ||= ensure_fetch ? remote_content : @ds_content
 
         if behaves_like_io?(@content)
           begin
