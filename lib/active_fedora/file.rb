@@ -42,6 +42,11 @@ module ActiveFedora
       @ldp_source || raise("NO source")
     end
 
+    def described_by
+      raise "#{self} isn't persisted yet" if new_record?
+      links['describedby'].first
+    end
+
     def ldp_connection
       ActiveFedora.fedora.connection
     end
@@ -204,6 +209,11 @@ module ActiveFedora
     end
 
     private
+
+    def links
+      @links ||= Ldp::Response.links(ldp_source.head)
+    end
+
 
     # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
     def behaves_like_io?(obj)
