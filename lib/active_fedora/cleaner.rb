@@ -7,30 +7,56 @@ module ActiveFedora
     end
 
     def self.cleanout_fedora
-      tombstone_path = ActiveFedora.fedora.base_path.sub('/', '') + "/fcr:tombstone"
       begin
-        begin
-          ActiveFedora.fedora.connection.delete(ActiveFedora.fedora.base_path.sub('/', ''))
-        rescue Ldp::Gone
-        end
-        ActiveFedora.fedora.connection.delete(tombstone_path)
+        delete_root_resource
+        delete_tombstone
       rescue Ldp::HttpError => exception
-
-        ActiveFedora::Base.logger.debug "#cleanout_fedora in spec_helper.rb raised #{exception}"
+        log "#cleanout_fedora in spec_helper.rb raised #{exception}"
       end
     end
 
+    def self.delete_root_resource
+      begin
+        connection.delete(root_resource_path)
+      rescue Ldp::Gone
+      end
+    end
+
+    def self.delete_tombstone
+      connection.delete(tombstone_path)
+    end
+
+    def self.tombstone_path
+      root_resource_path + "/fcr:tombstone"
+    end
+
+    def self.root_resource_path
+      ActiveFedora.fedora.base_path.sub('/', '')
+    end
+
+    def self.connection
+      ActiveFedora.fedora.connection
+    end
+
+    def self.solr_connection
+      ActiveFedora::SolrService.instance && ActiveFedora::SolrService.instance.conn
+    end
+
     def self.cleanout_solr
-      restore_spec_configuration if ActiveFedora::SolrService.instance.nil? || ActiveFedora::SolrService.instance.conn.nil?
-      ActiveFedora::SolrService.instance.conn.delete_by_query('*:*', params: {'softCommit' => true})
+      restore_spec_configuration if solr_connection.nil?
+      solr_connection.delete_by_query('*:*', params: {'softCommit' => true})
     end
 
     def self.reinitialize_repo
       begin
-        ActiveFedora.fedora.connection.put(ActiveFedora.fedora.base_path.sub('/', ''),"")
+        ActiveFedora.fedora.connection.put(root_resource_path, "")
       rescue Ldp::HttpError => exception
-        ActiveFedora::Base.logger.debug "#reinitialize_repo in spec_helper.rb raised #{exception}"
+        log "#reinitialize_repo in spec_helper.rb raised #{exception}"
       end
+    end
+
+    def self.log(message)
+      ActiveFedora::Base.logger.debug message if ActiveFedora::Base.logger
     end
   end
 end
