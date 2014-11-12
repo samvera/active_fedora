@@ -28,6 +28,7 @@ module ActiveFedora
 
     include Core
     include Persistence
+    include Indexing
     include Scoping
     include ActiveModel::Conversion
     include Callbacks
@@ -39,7 +40,6 @@ module ActiveFedora
     include Reflection
     include Serialization
 
-    include Indexing
     include AttachedFiles
     include FedoraAttributes
     include AttributeMethods
