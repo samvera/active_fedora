@@ -2,52 +2,16 @@ module ActiveFedora
   module Indexing
     extend ActiveSupport::Concern
 
-    included do
-      class_attribute :profile_solr_name
-      self.profile_solr_name = ActiveFedora::SolrService.solr_name("object_profile", :displayable)
-    end
-
     # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.
     # @param [Hash] solr_doc (optional) Hash to insert the fields into
     # @param [Hash] opts (optional)
     # If opts[:model_only] == true, the base object metadata and the RELS-EXT datastream will be omitted.  This is mainly to support shelver, which calls .to_solr for each model an object subscribes to.
     def to_solr(solr_doc = Hash.new, opts={})
-      unless opts[:model_only]
-        c_time = create_date.present? ? create_date : DateTime.now
-        c_time = DateTime.parse(c_time) unless c_time.is_a?(DateTime)
-        m_time = modified_date.present? ? modified_date : DateTime.now
-        m_time = DateTime.parse(m_time) unless m_time.is_a?(DateTime)
-        Solrizer.set_field(solr_doc, 'system_create', c_time, :stored_sortable)
-        Solrizer.set_field(solr_doc, 'system_modified', m_time, :stored_sortable)
-        # Solrizer.set_field(solr_doc, 'object_state', state, :stored_sortable)
-        Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.inspect, :stored_sortable)
-        solr_doc.merge!(SolrService::HAS_MODEL_SOLR_FIELD => has_model)
-        solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => id)
-        solr_doc.merge!(ActiveFedora::Base.profile_solr_name => to_json)
-      end
-      attached_files.each do |name, ds|
-        solr_doc.merge! ds.to_solr(solr_doc, name: name )
-      end
-      solr_doc = solrize_relationships(solr_doc) unless opts[:model_only]
-      solr_doc
+      indexing_service.generate_solr_document
     end
 
-    def solr_name(*args)
-      ActiveFedora::SolrService.solr_name(*args)
-    end
-
-    # Serialize the datastream's RDF relationships to solr
-    # @param [Hash] solr_doc @deafult an empty Hash
-    def solrize_relationships(solr_doc = Hash.new)
-      self.class.outgoing_reflections.values.each do |reflection|
-        value = Array(self[reflection.foreign_key]).compact
-        # TODO make reflection.options[:property] a method
-        solr_key = solr_name(reflection.options[:property], :symbol)
-        value.each do |v|
-          ::Solrizer::Extractor.insert_solr_field_value(solr_doc, solr_key, v )
-        end
-      end
-      solr_doc
+    def indexing_service
+      @indexing_service ||= self.class.indexer.new(self)
     end
 
     # Updates Solr index with self.
@@ -63,6 +27,10 @@ module ActiveFedora
 
 
     module ClassMethods
+
+      def indexer
+        IndexingService
+      end
 
       def reindex_everything
         get_descendent_uris(ActiveFedora::Base.id_to_uri('')).each do |uri|

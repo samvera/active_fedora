@@ -67,6 +67,7 @@ module ActiveFedora #:nodoc:
     autoload :FilePathBuilder
     autoload :FilesHash
     autoload :Indexing
+    autoload :IndexingService
     autoload :LdpResource
     autoload :LoadableFromJson
     autoload :Model
