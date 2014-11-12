@@ -77,6 +77,10 @@ module ActiveFedora
       @content = nil
     end
 
+    def check_fixity
+      FixityService.new(@ldp_source.subject).check
+    end
+
     def datastream_will_change!
       attribute_will_change! :profile
     end
