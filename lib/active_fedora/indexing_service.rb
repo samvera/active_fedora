@@ -1,0 +1,72 @@
+module ActiveFedora
+  class IndexingService
+    attr_reader :object
+    # Object must respond to
+    #   create_date
+    #   modified_date
+    #   has_model
+    #   id
+    #   to_json
+    #   attached_files
+    #   []
+    # and it's class must respond to
+    #   inspect
+    #   outgoing_reflections
+    def initialize(obj)
+      @object = obj
+    end
+
+    def self.profile_solr_name
+      ActiveFedora::SolrService.solr_name("object_profile", :displayable)
+    end
+
+
+    def generate_solr_document
+      solr_doc = {}
+      Solrizer.set_field(solr_doc, 'system_create', c_time, :stored_sortable)
+      Solrizer.set_field(solr_doc, 'system_modified', m_time, :stored_sortable)
+      Solrizer.set_field(solr_doc, 'active_fedora_model', object.class.inspect, :stored_sortable)
+      solr_doc.merge!(SolrService::HAS_MODEL_SOLR_FIELD => object.has_model)
+      solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => object.id)
+      solr_doc.merge!(self.class.profile_solr_name => object.to_json)
+      object.attached_files.each do |name, file|
+        solr_doc.merge! file.to_solr(solr_doc, name: name )
+      end
+      solr_doc = solrize_relationships(solr_doc)
+      solr_doc
+    end
+
+    protected
+
+    def c_time
+      c_time = object.create_date.present? ? object.create_date : DateTime.now
+      c_time = DateTime.parse(c_time) unless c_time.is_a?(DateTime)
+      c_time
+    end
+
+    def m_time
+      m_time = object.modified_date.present? ? object.modified_date : DateTime.now
+      m_time = DateTime.parse(m_time) unless m_time.is_a?(DateTime)
+      m_time
+    end
+
+    # Serialize the datastream's RDF relationships to solr
+    # @param [Hash] solr_doc @deafult an empty Hash
+    def solrize_relationships(solr_doc = Hash.new)
+      object.class.outgoing_reflections.values.each do |reflection|
+        value = Array(object[reflection.foreign_key]).compact
+        # TODO make reflection.options[:property] a method
+        solr_key = solr_name(reflection.options[:property], :symbol)
+        value.each do |v|
+          ::Solrizer::Extractor.insert_solr_field_value(solr_doc, solr_key, v )
+        end
+      end
+      solr_doc
+    end
+
+    def solr_name(*args)
+      ActiveFedora::SolrService.solr_name(*args)
+    end
+
+  end
+end

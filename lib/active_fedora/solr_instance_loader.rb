@@ -55,7 +55,7 @@ module ActiveFedora
 
     def profile_json
       @profile_json ||= begin
-        profile_json = Array(solr_doc[ActiveFedora::Base.profile_solr_name]).first
+        profile_json = Array(solr_doc[ActiveFedora::IndexingService.profile_solr_name]).first
         unless profile_json.present?
           raise ActiveFedora::ObjectNotFoundError, "Object #{id} does not contain a solrized profile"
         end

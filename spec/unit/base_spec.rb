@@ -323,7 +323,7 @@ describe ActiveFedora::Base do
         expect(mock2).to receive(:to_solr).and_return({})
 
         allow(@test_object).to receive(:attached_files).and_return(ds1: mock1, ds2: mock2)
-        expect(@test_object).to receive(:solrize_relationships)
+        expect(@test_object.indexing_service).to receive(:solrize_relationships)
         @test_object.to_solr
       end
     end
@@ -349,22 +349,6 @@ describe ActiveFedora::Base do
         expect(m).to receive(:baz=).with('stuff')
         expect(m).to receive(:save)
         m.update(att)
-      end
-    end
-
-    describe ".solrize_relationships" do
-      let(:person_reflection) { double('person', foreign_key: 'person_id', options: {property: :is_member_of}, kind_of?: true) }
-      let(:location_reflection) { double('location', foreign_key: 'location_id', options: {property: :is_part_of}, kind_of?: true) }
-      let(:reflections) { { 'person' => person_reflection, 'location' => location_reflection } }
-
-      it "should serialize the relationships into a Hash" do
-
-        expect(@test_object).to receive(:[]).with('person_id').and_return('info:fedora/demo:10')
-        expect(@test_object).to receive(:[]).with('location_id').and_return('info:fedora/demo:11')
-        expect(@test_object.class).to receive(:reflections).and_return(reflections)
-        solr_doc = @test_object.solrize_relationships
-        expect(solr_doc[ActiveFedora::SolrService.solr_name("is_member_of", :symbol)]).to eq "info:fedora/demo:10"
-        expect(solr_doc[ActiveFedora::SolrService.solr_name("is_part_of", :symbol)]).to eq "info:fedora/demo:11"
       end
     end
   end

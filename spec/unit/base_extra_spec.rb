@@ -13,20 +13,8 @@ describe ActiveFedora::Base do
       allow(ActiveFedora::SolrService).to receive(:instance).and_return(mock_ss)
     end
 
-    it "should call .to_solr on all Datastreams and pass the resulting document to solr" do
-      # Actually uses self.to_solr internally to gather solr info from all metadata datastreams
-      mock1 = double("ds1", :to_solr => {})
-      mock2 = double("ds2", :to_solr => {})
-
-      mock_datastreams = {:ds1 => mock1, :ds2 => mock2}
-      expect(mock1).to receive(:to_solr).and_return({})
-      expect(mock2).to receive(:to_solr).and_return({})
-      expect(subject).to receive(:attached_files).and_return(mock_datastreams)
-      expect(subject).to receive(:solrize_relationships)
-      subject.update_index
-    end
-
-    it "should retrieve a solr Connection and call Connection.add" do
+    it "should make the solr_document with to_solr and add it" do
+      expect(subject).to receive(:to_solr)
       subject.update_index
     end
 
