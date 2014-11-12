@@ -40,11 +40,6 @@ module ActiveFedora
 
     alias update_attributes update
 
-    def refresh
-      @ldp_source = LdpResource.new(conn, uri)
-      @resource = nil
-    end
-
     #Deletes a Base object, also deletes the info indexed in Solr, and
     #the underlying inner_object.  If this object is held in any relationships (ie inbound relationships
     #outside of this object it will remove it from those items rels-ext as well
@@ -136,20 +131,6 @@ module ActiveFedora
       end
     end
 
-  protected
-
-    # Determines whether a create operation causes a solr index of this object by default.
-    # Override this if you need different behavior.
-    def create_needs_index?
-      ENABLE_SOLR_UPDATES
-    end
-
-    # Determines whether an update operation causes a solr index of this object by default.
-    # Override this if you need different behavior
-    def update_needs_index?
-      ENABLE_SOLR_UPDATES
-    end
-
   private
 
     # Deals with preparing new object to be saved to Fedora, then pushes it and its attached files into Fedora.
@@ -159,17 +140,20 @@ module ActiveFedora
       @ldp_source = @ldp_source.create
       @resource = nil
       assign_uri_to_attached_files
-      should_update_index = create_needs_index? && options.fetch(:update_index, true)
-      persist(should_update_index)
-      true
+      save_attached_files
+      refresh
     end
 
     def update_record(options = {})
       serialize_attached_files
       execute_sparql_update
-      should_update_index = update_needs_index? && options.fetch(:update_index, true)
-      persist(should_update_index)
-      true
+      save_attached_files
+      refresh
+    end
+
+    def refresh
+      @ldp_source = LdpResource.new(conn, uri)
+      @resource = nil
     end
 
     def execute_sparql_update
@@ -196,13 +180,10 @@ module ActiveFedora
       end
     end
 
-    def persist(should_update_index)
+    def save_attached_files
       attached_files.select { |_, ds| ds.changed? }.each do |_, ds|
         ds.save # Don't call save! because if the content_changed? returns false, it'll raise an error.
       end
-
-      refresh
-      update_index if should_update_index
     end
   end
 end

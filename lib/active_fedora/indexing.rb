@@ -25,6 +25,35 @@ module ActiveFedora
       end
     end
 
+    protected
+
+      # Determines whether a create operation causes a solr index of this object by default.
+      # Override this if you need different behavior.
+      def create_needs_index?
+        ENABLE_SOLR_UPDATES
+      end
+
+      # Determines whether an update operation causes a solr index of this object by default.
+      # Override this if you need different behavior
+      def update_needs_index?
+        ENABLE_SOLR_UPDATES
+      end
+
+    private
+
+      # index the record after it has been persisted to Fedora
+      def create_record(options = {})
+        super
+        update_index if create_needs_index? && options.fetch(:update_index, true)
+        true
+      end
+
+      # index the record after it has been updated in Fedora
+      def update_record(options = {})
+        super
+        update_index if update_needs_index? && options.fetch(:update_index, true)
+        true
+      end
 
     module ClassMethods
 

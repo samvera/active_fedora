@@ -1,28 +1,6 @@
 require 'spec_helper'
 
 describe ActiveFedora::Persistence do
-  context "internal methods" do
-    before :all do
-      class SpecNode
-        include ActiveFedora::Persistence
-      end
-    end
-    after :all do
-      Object.send(:remove_const, :SpecNode)
-    end
-
-    subject { SpecNode.new }
-
-    describe "#create_needs_index?" do
-      subject { SpecNode.new.send(:create_needs_index?) }
-      it { should be true }
-    end
-
-    describe "#update_needs_index?" do
-      subject { SpecNode.new.send(:update_needs_index?) }
-      it { should be true }
-    end
-  end
 
   describe "an unsaved object" do
     subject { ActiveFedora::Base.new }
@@ -57,7 +35,7 @@ describe ActiveFedora::Persistence do
     context "when called with option update_index: false" do
       context "on a new record" do
         it "should not update the index" do
-          expect(subject).to receive(:persist).with(false)
+          expect(subject).to_not receive(:update_index)
           subject.save(update_index: false)
         end
       end
@@ -70,7 +48,7 @@ describe ActiveFedora::Persistence do
         end
 
         it "should not update the index" do
-          expect(subject).to receive(:persist).with(false)
+          expect(subject).to_not receive(:update_index)
           subject.save(update_index: false)
         end
       end
@@ -81,7 +59,7 @@ describe ActiveFedora::Persistence do
         before { allow(subject).to receive(:create_needs_index?) { false } }
 
         it "should not override `create_needs_index?'" do
-          expect(subject).to receive(:persist).with(false)
+          expect(subject).to_not receive(:update_index)
           subject.save(update_index: true)
         end
       end
@@ -95,7 +73,7 @@ describe ActiveFedora::Persistence do
         end
 
         it "should not override `update_needs_index?'" do
-          expect(subject).to receive(:persist).with(false)
+          expect(subject).to_not receive(:update_index)
           subject.save(update_index: true)
         end
       end
