@@ -198,4 +198,26 @@ describe ActiveFedora::Datastream do
       end
     end
   end
+
+  context "digest" do
+    subject { datastream.digest }
+
+    context "on a new datastream" do
+      it { should be_empty }
+    end
+
+    context "when it's saved" do
+      let(:parent) { ActiveFedora::Base.create }
+      before do
+        p = parent
+        p.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm')
+        parent.save!
+      end
+
+      it "should have digest" do
+        expect(parent.reload.abcd.digest.first).to be_kind_of RDF::URI
+      end
+    end
+  end  
+
 end

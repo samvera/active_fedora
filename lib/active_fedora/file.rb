@@ -75,6 +75,7 @@ module ActiveFedora
       @original_name = nil
       @mime_type = nil
       @content = nil
+      @digest = nil
     end
 
     def check_fixity
@@ -106,6 +107,10 @@ module ActiveFedora
 
     def original_name
       @original_name ||= fetch_original_name_from_headers
+    end
+
+    def digest
+      @digest ||= fetch_digest_from_description
     end
 
     def persisted_size
@@ -210,6 +215,12 @@ module ActiveFedora
 
     def fetch_mime_type
       ldp_source.head.headers['Content-Type']
+    end
+
+    def fetch_digest_from_description
+      description = ActiveFedora::WithMetadata::MetadataNode.new(self)
+      response = description.ldp_source.graph.query(:predicate => RDF::URI.new("http://fedora.info/definitions/v4/repository#digest"))
+      response.map(&:object)
     end
 
     private
