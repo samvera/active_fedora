@@ -1,15 +1,8 @@
 require 'spec_helper'
 
 describe ActiveFedora::SparqlInsert do
-  subject { ActiveFedora::SparqlInsert.new(base) }
-
-  context "with an unchanged object" do
-    let(:base) { ActiveFedora::Base.new }
-    it "should return the string" do
-      expect(subject.build).to eq "INSERT { \n\n}\n WHERE { }"
-    end
-    it { should be_empty }
-  end
+  let(:change_set) { ActiveFedora::ChangeSet.new(base, base.resource, base.changed_attributes.keys) }
+  subject { ActiveFedora::SparqlInsert.new(change_set.changes) }
 
   context "with a changed object" do
     before do
@@ -35,6 +28,5 @@ describe ActiveFedora::SparqlInsert do
     it "should return the string" do
       expect(subject.build).to eq "DELETE { <> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> ?change . }\n  WHERE { <> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> ?change . } ;\nDELETE { <> <http://purl.org/dc/terms/title> ?change . }\n  WHERE { <> <http://purl.org/dc/terms/title> ?change . } ;\nINSERT { \n<> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> <http://localhost:8983/fedora/rest/test/foo> .\n<> <http://purl.org/dc/terms/title> \"bar\" .\n}\n WHERE { }"
     end
-    it { should_not be_empty }
   end
 end

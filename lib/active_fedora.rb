@@ -54,6 +54,7 @@ module ActiveFedora #:nodoc:
     autoload :AutosaveAssociation
     autoload :Base
     autoload :Callbacks
+    autoload :ChangeSet
     autoload :Config
     autoload :Core
     autoload :Datastream
@@ -104,6 +105,7 @@ module ActiveFedora #:nodoc:
     autoload :Predicates
     autoload :Validations
     autoload :Versionable
+    autoload :WithMetadata
   end
 
   module AttributeMethods

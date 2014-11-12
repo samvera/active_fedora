@@ -173,11 +173,9 @@ module ActiveFedora
     end
 
     def execute_sparql_update
-      insert = SparqlInsert.new(self)
-      return true if insert.empty?
-      result = ActiveFedora.fedora.connection.patch(uri, insert.build, "Content-Type" => "application/sparql-update")
-      return true if result.status == 204
-      raise "Problem updating #{result.status} #{result.body}"
+      change_set = ChangeSet.new(self, self.resource, self.changed_attributes.keys)
+      return true if change_set.empty?
+      SparqlInsert.new(change_set.changes).execute(uri)
     end
 
 

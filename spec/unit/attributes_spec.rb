@@ -171,10 +171,18 @@ describe ActiveFedora::Base do
         expect(subject.duck).to eq ["Quack", "Peep"]
       end
 
-      it "should be able to track change status" do
-        expect {
-          subject.fubar = ["Meow"]
-        }.to change { subject.fubar_changed? }.from(false).to(true)
+      context "change tracking" do
+        it "should work for delegated attributes" do
+          expect {
+            subject.fubar = ["Meow"]
+          }.to change { subject.fubar_changed? }.from(false).to(true)
+        end
+
+        it "should work for properties" do
+          expect {
+            subject.goose = ["honk!"]
+          }.to change { subject.goose_changed? }.from(false).to(true)
+        end
       end
 
       describe "array getters and setters" do

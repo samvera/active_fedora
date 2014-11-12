@@ -41,6 +41,11 @@ describe ActiveFedora::File do
       it { should_not be_nil }
     end
 
+    describe "#described_by" do
+      subject { descMetadata.described_by }
+      it { should eq descMetadata.uri + '/fcr:metadata' }
+    end
+
 
     context "an XML datastream" do
       let(:xml_content) { Nokogiri::XML::Document.parse(descMetadata.content) }

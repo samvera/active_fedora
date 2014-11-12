@@ -12,7 +12,7 @@ module ActiveFedora
     deprecation_deprecate :ds_specs
 
     def serialize_attached_files
-      attached_files.each {|k, ds| ds.serialize! }
+      attached_files.each_value {|file| file.serialize! }
     end
 
     #
@@ -210,18 +210,18 @@ module ActiveFedora
       end
       deprecation_deprecate :has_file_datastream
 
-      def build_datastream_accessor(dsid)
-        name = name_for_dsid(dsid)
+      def build_datastream_accessor(path_name)
+        name = method_name_for_path(path_name)
         define_method name do
-          attached_files[dsid]
+          attached_files[path_name]
         end
       end
 
       private
 
-        ## Given a dsid return a standard name
-        def name_for_dsid(dsid)
-          dsid.gsub('-', '_')
+        ## Given a path_name return a valid method name
+        def method_name_for_path(path_name)
+          path_name.to_s.gsub('-', '_')
         end
 
     end
