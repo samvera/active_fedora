@@ -22,7 +22,7 @@ describe ActiveFedora::Model do
     end
 
   end
-  
+
   after(:all) do
     Object.send(:remove_const, :ModelIntegrationSpec)
   end
@@ -32,8 +32,6 @@ describe ActiveFedora::Model do
     let!(:instance1){ ModelIntegrationSpec::Basic.create!(foo: ['Beta'], bar: ['Chips'])}
     let!(:instance2){ ModelIntegrationSpec::Basic.create!(foo: ['Alpha'], bar: ['Peanuts'])}
     let!(:instance3){ ModelIntegrationSpec::Basic.create!(foo: ['Sigma'], bar: ['Peanuts'])}
-
-    after { ModelIntegrationSpec::Basic.delete_all }
 
     subject { ModelIntegrationSpec::Basic.where(bar: 'Peanuts') }
 

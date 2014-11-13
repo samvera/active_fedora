@@ -179,6 +179,13 @@ module ActiveFedora
         delegated_attributes[field] ||= DelegatedAttribute.new(field, dsid, datastream_class_for_name(dsid), args)
       end
 
+      # @param [String] dsid the datastream id
+      # @return [Class] the class of the datastream
+      def datastream_class_for_name(dsid)
+        reflection = reflect_on_association(dsid)
+        reflection ? reflection.klass : ActiveFedora::File
+      end
+
       def create_attribute_reader(field, dsid, args)
         find_or_create_defined_attribute(field, dsid, args)
 

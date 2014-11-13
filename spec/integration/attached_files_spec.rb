@@ -55,7 +55,7 @@ describe ActiveFedora::AttachedFiles do
       class DSTest < ActiveFedora::Base
         def load_attached_files
           super
-          unless attached_files.keys.include? 'test_ds'
+          unless attached_files.keys.include? :test_ds
             add_file_datastream("XXX", dsid: 'test_ds', mime_type: 'text/html')
           end
         end
@@ -68,7 +68,6 @@ describe ActiveFedora::AttachedFiles do
     subject { ds.content }
 
     after do
-      file.destroy
       Object.send(:remove_const, :DSTest)
     end
 
@@ -141,10 +140,10 @@ describe ActiveFedora::AttachedFiles do
 
       it "adding and saving should add the datastream to the datastreams array" do
         ds.content = fixture('dino.jpg').read
-        expect(obj.attached_files).to_not have_key("DS1")
+        expect(obj.attached_files).to_not have_key(:DS1)
         obj.attach_file(ds, 'DS1')
         obj.save
-        expect(obj.attached_files).to have_key("DS1")
+        expect(obj.attached_files).to have_key(:DS1)
       end
 
     end

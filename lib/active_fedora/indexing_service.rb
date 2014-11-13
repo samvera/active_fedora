@@ -30,7 +30,7 @@ module ActiveFedora
       solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => object.id)
       solr_doc.merge!(self.class.profile_solr_name => object.to_json)
       object.attached_files.each do |name, file|
-        solr_doc.merge! file.to_solr(solr_doc, name: name )
+        solr_doc.merge! file.to_solr(solr_doc, name: name.to_s)
       end
       solr_doc = solrize_relationships(solr_doc)
       solr_doc

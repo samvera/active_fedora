@@ -4,7 +4,7 @@ describe "Checking fixity" do
 
   before(:all) do
     class MockAFBase < ActiveFedora::Base
-      contains "data", type: ActiveFedora::File, autocreate: true
+      contains "data", autocreate: true
     end
   end
 

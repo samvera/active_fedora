@@ -161,10 +161,6 @@ describe ActiveFedora::Base do
 
         end
 
-        after do
-          @book.delete
-          @book2.delete
-        end
       end
 
       describe "of belongs to" do
@@ -183,10 +179,6 @@ describe ActiveFedora::Base do
           expect(@book.library.id).to eq @library.id
           @book.attributes= {:library_id => nil }
           expect(@book.library_id).to be_nil
-        end
-        after do
-          @library.delete
-          @book.delete
         end
       end
     end
@@ -258,17 +250,6 @@ describe ActiveFedora::Base do
             @book.library = @library2
             @book.save
             expect(Book.find(@book.id).library_id).to eq @library2.id
-          end
-          after do
-            @library2.delete
-          end
-        end
-
-
-        after do
-          [@library, @book, @person, @publisher].each do |var|
-            var.reload
-            var.delete
           end
         end
       end
@@ -348,14 +329,6 @@ describe ActiveFedora::Base do
         expect(Book.find(@book.id).library_id).to eq @library.id
       end
 
-      after do
-        @library.delete
-        @book.delete
-        @author.delete
-        @publisher.delete
-        @library2.delete if @library2
-        @publisher2.delete if @publisher2
-      end
     end
   end
 
@@ -442,7 +415,7 @@ describe ActiveFedora::Base do
         class Page < ActiveFedora::Base
           has_many :library_books, :property=>:is_part_of
         end
-          
+
       end
       after :all do
         Object.send(:remove_const, :LibraryBook)

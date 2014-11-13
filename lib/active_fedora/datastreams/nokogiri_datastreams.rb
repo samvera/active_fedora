@@ -69,7 +69,7 @@ module ActiveFedora
       end
 
       def content=(new_content)
-        if remote_content != new_content
+        if remote_content != new_content.to_s
           ng_xml_will_change!
           @ng_xml = Nokogiri::XML::Document.parse(new_content)
           super(@ng_xml.to_s.strip)

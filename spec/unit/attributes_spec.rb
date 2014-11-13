@@ -45,7 +45,7 @@ describe ActiveFedora::Base do
           has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText" do |m|
             m.field "fubar", :text
           end
-          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel" do |m|
+          has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2" do |m|
             m.field "fubar", :text
           end
 
@@ -241,6 +241,12 @@ describe ActiveFedora::Base do
           expect{BarHistory2.multiple?(:arbitrary_nonexistent_attribute)}.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `arbitrary_nonexistent_attribute'"
         end
       end
+
+      describe ".datastream_class_for_name" do
+        it "should return the specifed class" do
+          expect(BarHistory2.send(:datastream_class_for_name, 'someData')).to eq ActiveFedora::SimpleDatastream
+        end
+      end
     end
 
     describe "with a superclass" do
@@ -329,6 +335,7 @@ describe ActiveFedora::Base do
     end
   end
 
+
   context "when an unknown datastream is specified" do
     before :all do
       class BarHistory4 < ActiveFedora::Base
@@ -348,6 +355,12 @@ describe ActiveFedora::Base do
 
     it "should raise an error on set" do
       expect { subject.description = ['Neat'] }.to raise_error(ArgumentError, "Undefined datastream id: `rdfish' in has_attributes")
+    end
+
+    describe ".datastream_class_for_name" do
+      it "should return the default class" do
+        expect(BarHistory4.send(:datastream_class_for_name, 'content')).to eq ActiveFedora::File
+      end
     end
   end
 

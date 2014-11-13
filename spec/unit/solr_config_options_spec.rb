@@ -22,7 +22,7 @@ describe ActiveFedora do
       SOLR_DOCUMENT_ID = "id"
     end
     it "should be used by ActiveFedora::Base.to_solr" do
-      @test_object.stub(id: 'changeme:123')
+      allow(@test_object).to receive(:id).and_return('changeme:123')
       SOLR_DOCUMENT_ID = "MY_SAMPLE_ID"
       expect(@test_object.to_solr[SOLR_DOCUMENT_ID.to_sym]).to eq 'changeme:123'
       expect(@test_object.to_solr[:id]).to be_nil

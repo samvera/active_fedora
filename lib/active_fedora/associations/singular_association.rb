@@ -18,7 +18,6 @@ module ActiveFedora
         replace(record)
       end
 
-
       def create(attributes = {})
         new_record(:create, attributes)
       end

@@ -23,6 +23,7 @@ module ActiveFedora
     autoload :HasManyAssociation,             'active_fedora/associations/has_many_association'
     autoload :BelongsToAssociation,           'active_fedora/associations/belongs_to_association'
     autoload :HasAndBelongsToManyAssociation, 'active_fedora/associations/has_and_belongs_to_many_association'
+    autoload :ContainsAssociation,            'active_fedora/associations/contains_association'
 
     module Builder
       autoload :Association,             'active_fedora/associations/builder/association'
@@ -32,6 +33,7 @@ module ActiveFedora
       autoload :BelongsTo,           'active_fedora/associations/builder/belongs_to'
       autoload :HasMany,             'active_fedora/associations/builder/has_many'
       autoload :HasAndBelongsToMany, 'active_fedora/associations/builder/has_and_belongs_to_many'
+      autoload :Contains,            'active_fedora/associations/builder/contains'
 
       autoload :Property,         'active_fedora/associations/builder/property'
       autoload :SingularProperty, 'active_fedora/associations/builder/singular_property'
@@ -64,7 +66,8 @@ module ActiveFedora
 
       # Returns the specified association instance if it responds to :loaded?, nil otherwise.
       def association_instance_get(name)
-        @association_cache[name.to_sym]
+        raise "use a symbol" if name.is_a? String
+        @association_cache[name]
       end
 
       # Set the specified association instance.
@@ -78,6 +81,22 @@ module ActiveFedora
         Builder::HasMany.build(self, name, options)
       end
 
+      # This method is used to specify the details of a contained resource.
+      # Pass the name as the first argument and a hash of options as the second argument
+      # Note that this method doesn't actually execute the block, but stores it, to be executed
+      # by any the implementation of the datastream(specified as :class_name)
+      #
+      # @param [String] :name the handle to refer to this child as
+      # @param [Hash] options
+      # @option options [Class] :class_name The class that will represent this child, should extend ``ActiveFedora::File''
+      # @option options [String] :url
+      # @option options [Boolean] :autocreate Always create this datastream on new objects
+      # @yield block executed by some types of child resources
+      def contains(name, options = {}, &block)
+        options[:block] = block if block
+        raise ArgumentError, "You must provide a name (dsid) for the datastream" unless name
+        Associations::Builder::Contains.build(self, name.to_sym, options)
+      end
 
       # Specifies a one-to-one association with another class. This method should only be used
       # if this class contains the foreign key.

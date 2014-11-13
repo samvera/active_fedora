@@ -16,7 +16,7 @@ describe ActiveFedora::Base do
   end
 
   describe ":all" do
-    before { ActiveFedora::Base.stub(:relation => relation) }
+    before { allow(ActiveFedora::Base).to receive(:relation).and_return(relation) }
     describe "called on a concrete class" do
       let(:relation) { ActiveFedora::Relation.new(SpecModel::Basic) }
       it "should query solr for all objects with :has_model_s of self.class" do
@@ -100,7 +100,7 @@ describe ActiveFedora::Base do
 
 
   describe '#find_each' do
-    before { ActiveFedora::Base.stub(:relation => relation) }
+    before { allow(ActiveFedora::Base).to receive(:relation).and_return(relation) }
     let(:relation) { ActiveFedora::Relation.new(SpecModel::Basic) }
     it "should query solr for all objects with :active_fedora_model_s of self.class" do
       mock_docs = [{"id" => "changeme-30"},{"id" => "changeme-22"}]
