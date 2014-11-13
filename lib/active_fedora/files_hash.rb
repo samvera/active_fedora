@@ -17,7 +17,9 @@ module ActiveFedora
     end
 
     def association(name)
-      @base.association(name.to_sym)
+      # Check to see if the key exists before casting to a symbol, because symbols
+      # are not garbage collected in earlier versions of Ruby
+      @base.association(name.to_sym) if key?(name)
     end
 
     def reflections
@@ -32,6 +34,13 @@ module ActiveFedora
 
     def keys
       reflections.keys + @base.undeclared_files
+    end
+
+    # Check that the key exists with indifferent access (symbol or string) in a
+    # manner that avoids generating extra symbols. Symbols are not garbage collected
+    # in earlier versions of ruby.
+    def key?(key)
+      keys.include?(key) || keys.map(&:to_s).include?(key)
     end
 
     def values
