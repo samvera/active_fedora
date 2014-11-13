@@ -448,3 +448,33 @@ describe "a versionable binary datastream" do
     end
   end
 end
+
+describe "a non-versionable resource" do 
+  before(:all) do
+    class NotVersionableWithVersions < ActiveFedora::Base
+      # explicitly don't call has_many_versions 
+      property :title, predicate: RDF::DC.title
+    end
+  end
+
+  after(:all) do
+    Object.send(:remove_const, :NotVersionableWithVersions)
+  end
+
+  subject { NotVersionableWithVersions.new }
+
+  context "saved with no versions" do
+    it "should not have versions" do
+      subject.update(title: "Greetings Earthlings")
+      expect(subject).not_to have_versions
+    end
+  end
+
+  context "saved with versions" do
+    it "should have versions" do
+      subject.update(title: "Greetings Earthlings")
+      subject.create_version
+      expect(subject).to have_versions
+    end
+  end
+end

@@ -37,6 +37,15 @@ module ActiveFedora
       resp.success?
     end
 
+    # This method does not rely on the internal versionable flag of the object, instead
+    # it queries Fedora directly to figure out if there are versions for the resource.
+    def has_versions?
+      ActiveFedora.fedora.connection.head(versions_url) 
+      true
+    rescue Ldp::NotFound
+      false
+    end
+
     def restore_version label
       resp = ActiveFedora.fedora.connection.patch(version_url(label), nil)
       @versions_graph = nil
