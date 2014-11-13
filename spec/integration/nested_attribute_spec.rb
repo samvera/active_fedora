@@ -41,6 +41,14 @@ describe "NestedAttribute behavior" do
       accepts_nested_attributes_for :bars, :limit => 1
     end
   end
+  after do
+    Object.send(:remove_const, :Bar)
+    Object.send(:remove_const, :CarAllBlank)
+    Object.send(:remove_const, :CarProc)
+    Object.send(:remove_const, :CarSymbol)
+    Object.send(:remove_const, :CarWithLimit)
+    Object.send(:remove_const, :Car)
+  end
 
   it "should have _destroy" do
     expect(Bar.new._destroy).to be_nil

@@ -61,8 +61,8 @@ describe ActiveFedora::Base do
 
   describe "#where" do
     before do
-      ActiveFedora::Base.stub(:relation => relation)
-      relation.stub(clone: relation)
+      allow(ActiveFedora::Base).to receive(:relation).and_return(relation)
+      allow(relation).to receive(:clone).and_return(relation)
     end
     let(:relation) { ActiveFedora::Relation.new(SpecModel::Basic) }
     let(:solr) { ActiveFedora::SolrService.instance.conn }

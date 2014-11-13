@@ -45,8 +45,6 @@ module ActiveFedora
       resource.query(subject: resource, predicate: Ldp.contains).objects.map(&:to_s)
     end
 
-    # TODO it looks like calling load_attached_files causes all the attached_files properties to load eagerly
-    # Because File#new triggers a load of the graph.
     def load_attached_files
       datastream_assertions.each do |ds_uri|
         dsid = ds_uri.to_s.sub(uri + '/', '')
@@ -86,9 +84,7 @@ module ActiveFedora
     # @option opts [String] :mime_type The Mime-Type of the file
     # @option opts [String] :original_name The original name of the file (used for Content-Disposition)
     def add_file_datastream(file, opts={})
-      file_path = FilePathBuilder.build(self, opts[:dsid], opts[:prefix])
-      create_singleton_association(file_path)
-      self.send(file_path).tap do |node|
+      find_or_create_child_resource(opts).tap do |node|
         node.content = file
         node.mime_type = if opts[:mimeType]
           Deprecation.warn AttachedFiles, "The :mimeType option to add_file_datastream is deprecated and will be removed in active-fedora 10.0. Use :mime_type instead", caller
@@ -106,14 +102,24 @@ module ActiveFedora
 
 
     private
-      # TODO - I believe this is slow.
       def create_singleton_association(file_path)
         self.undeclared_files << file_path.to_sym
-        @association_cache[file_path.to_sym] = Associations::ContainsAssociation.new(self, Reflection::AssociationReflection.new(:contains, file_path, {class_name: 'ActiveFedora::File'}, self.class))
+        association = Associations::ContainsAssociation.new(self, Reflection::AssociationReflection.new(:contains, file_path, {class_name: 'ActiveFedora::File'}, self.class))
+        @association_cache[file_path.to_sym] = association
 
         self.singleton_class.send :define_method, accessor_name(file_path) do
            @association_cache[file_path.to_sym].reader
         end
+        association
+      end
+
+      def find_or_create_child_resource(opts)
+        association = association(opts[:dsid].to_sym) if opts[:dsid]
+        association ||= begin
+          file_path = FilePathBuilder.build(self, opts[:dsid], opts[:prefix])
+          create_singleton_association(file_path)
+        end
+        association.reader
       end
 
       ## Given a file_path return a standard name
