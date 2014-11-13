@@ -63,7 +63,7 @@ describe "Objects should be serialized to JSON" do
       Object.send(:remove_const, "DummySubnode")
     end
 
-    let(:obj) { DummyAsset.new.tap { |a| a.relation = 'Great Grandchild' } }
+    let(:obj) { DummyAsset.new { |a| a.relation = 'Great Grandchild' } }
     before { allow(obj).to receive(:id).and_return('test-123') }
 
     subject { JSON.parse(obj.to_json)}

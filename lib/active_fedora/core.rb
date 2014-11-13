@@ -33,13 +33,15 @@ module ActiveFedora
     # Also, if +attrs+ does not contain +:id+ but does contain +:namespace+ it will pass the
     # +:namespace+ value to Fedora::Repository.nextid to generate the next id available within
     # the given namespace.
-    def initialize(attributes_or_resource_or_url = nil)
+    def initialize(attributes_or_resource_or_url = nil, &block)
       attributes = initialize_resource_and_attributes(attributes_or_resource_or_url)
       raise IllegalOperation, "Attempting to recreate existing ldp_source" unless @ldp_source.new?
       @association_cache = {}
       assert_content_model
       load_attached_files
       self.attributes = attributes if attributes
+
+      yield self if block_given?
       run_callbacks :initialize
     end
 
