@@ -24,9 +24,14 @@ describe "Checking fixity" do
       expect(subject.check_fixity).to be true
     end
   end
+  context "when no uri has been set" do
+    subject { ActiveFedora::File.new }
+    it "should raise an error" do
+      expect { subject.check_fixity }.to raise_error(ArgumentError, "You must provide a uri")
+    end
+  end
   context "with missing resource" do
-    let(:parent) { ActiveFedora::Base.new(id: '1234') }
-    subject { ActiveFedora::File.new(parent, 'abcd') }
+    subject { ActiveFedora::File.new(ActiveFedora::Base.id_to_uri('123')) }
     it "should raise an error" do
       expect { subject.check_fixity }.to raise_error(Ldp::NotFound)
     end

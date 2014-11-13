@@ -1,8 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::Datastream do
-  let(:parent) { ActiveFedora::Base.new(id: '1234') }
-  let(:datastream) { ActiveFedora::Datastream.new(parent, 'abcd') }
+  let(:datastream) { ActiveFedora::Datastream.new }
 
   subject { datastream }
 
@@ -37,6 +36,7 @@ describe ActiveFedora::Datastream do
 
   describe "#uri" do
     let(:parent) { ActiveFedora::Base.new(id: '1234') }
+    before { allow(Deprecation).to receive(:warn) }
     subject { ActiveFedora::Datastream.new(parent, 'FOO1') }
 
     it "should set the uri" do
@@ -162,6 +162,7 @@ describe ActiveFedora::Datastream do
   context "when the datastream has local content" do
 
     before do
+      datastream.uri = "http://localhost:8983/fedora/rest/test/1234/abcd"
       datastream.content = "hi there"
     end
 
@@ -188,8 +189,7 @@ describe ActiveFedora::Datastream do
     context "when it's saved" do
       let(:parent) { ActiveFedora::Base.create }
       before do
-        p = parent
-        p.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm', original_name: "my_image.png")
+        parent.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm', original_name: "my_image.png")
         parent.save!
       end
 
@@ -209,8 +209,7 @@ describe ActiveFedora::Datastream do
     context "when it's saved" do
       let(:parent) { ActiveFedora::Base.create }
       before do
-        p = parent
-        p.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm')
+        parent.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm')
         parent.save!
       end
 
@@ -218,6 +217,5 @@ describe ActiveFedora::Datastream do
         expect(parent.reload.abcd.digest.first).to be_kind_of RDF::URI
       end
     end
-  end  
-
+  end
 end

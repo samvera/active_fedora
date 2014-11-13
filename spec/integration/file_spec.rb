@@ -68,7 +68,7 @@ describe ActiveFedora::File do
     context "a blob datastream" do
       let(:dsid) { "ds#{Time.now.to_i}" }
       let(:content) { fixture('dino.jpg') }
-      let(:datastream) { ActiveFedora::File.new(test_object, dsid).tap { |ds| ds.content = content } }
+      let(:datastream) { ActiveFedora::File.new.tap { |ds| ds.content = content } }
 
       before do
         test_object.attach_file(datastream, dsid)

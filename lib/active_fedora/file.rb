@@ -4,6 +4,7 @@ module ActiveFedora
   class File
     include AttributeMethods # allows 'content' to be tracked
     include ActiveModel::Dirty
+    extend Deprecation
     extend ActiveTriples::Properties
     generate_method 'content'
 
@@ -26,7 +27,7 @@ module ActiveFedora
         content = ''
         @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, parent_or_url_or_hash, content, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
       when ActiveFedora::Base
-        #TODO deprecate this path
+        Deprecation.warn File, "Initializing a file by passing a container is deprecated. Initialize with a uri instead. This capability will be removed in active-fedora 10.0"
         uri = if parent_or_url_or_hash.uri.kind_of?(RDF::URI) && parent_or_url_or_hash.uri.value.empty?
           nil
         else

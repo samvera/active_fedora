@@ -2,7 +2,6 @@ require 'spec_helper'
 
 describe "Nesting attribute behavior of RDFDatastream" do
   describe ".attributes=" do
-    let(:parent) { ActiveFedora::Base.new(id: '1234') }
 
     describe "complex properties" do
       before do
@@ -64,7 +63,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
         Object.send(:remove_const, :ComplexRDFDatastream)
         Object.send(:remove_const, :DummyMADS)
       end
-      subject { ComplexRDFDatastream.new(parent, 'descMetadata') }
+      subject { ComplexRDFDatastream.new }
       let(:params) do
         { myResource:
           {
@@ -160,7 +159,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
       after(:each) do
         Object.send(:remove_const, :SpecDatastream)
       end
-      subject { SpecDatastream.new(parent, 'descMetadata') }
+      subject { SpecDatastream.new }
       before do
         subject.attributes = { parts_attributes: [
                                   {label: 'Alternator'},

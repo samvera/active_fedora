@@ -2,7 +2,6 @@ require 'spec_helper'
 
 describe ActiveFedora::QualifiedDublinCoreDatastream do
   DC_ELEMENTS = [:contributor, :coverage, :creator, :date, :description, :identifier, :language, :publisher, :relation, :rights, :source]
-  let(:inner_object) { ActiveFedora::Base.new('/test:1') }
 
   before(:all) do
     # Load Sample OralHistory Model
@@ -39,7 +38,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
         </dc>"
   end
   before do
-     @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new(inner_object, 'descMetadata')
+     @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new
      @test_ds.content = sample_xml
   end
 
@@ -79,7 +78,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   describe '.to_xml' do
     it 'should output the fields hash as Qualified Dublin Core XML' do
       sample_xml = "<dc xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'><dcterms:title>title1</dcterms:title><dcterms:publisher>publisher1</dcterms:publisher><dcterms:creator>creator1</dcterms:creator><dcterms:creator>creator2</dcterms:creator></dc>"
-      @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new(inner_object, 'qdc' )
+      @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new
 
       @test_ds.field :publisher
       @test_ds.field :creator
@@ -101,7 +100,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
 
   describe "#to_solr" do
     it "should have title" do
-      @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new(inner_object, 'qdc' )
+      @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new
       @test_ds.title = "War and Peace"
       solr = @test_ds.to_solr
       expect(solr[ActiveFedora::SolrService.solr_name('title', type: :string)]).to eq "War and Peace"
@@ -110,7 +109,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   end
 
   describe 'custom fields' do
-    subject { ActiveFedora::QualifiedDublinCoreDatastream.new(inner_object, 'qdc' ) }
+    subject { ActiveFedora::QualifiedDublinCoreDatastream.new }
     it 'should grab the term' do
       sample_xml = "<dc xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'><dcterms:cust>custom</dcterms:cust></dc>"
       subject.content = sample_xml
@@ -120,7 +119,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   end
 
   describe "#field should accept :path option" do
-    subject { ActiveFedora::QualifiedDublinCoreDatastream.new(inner_object, 'qdc' ) }
+    subject { ActiveFedora::QualifiedDublinCoreDatastream.new }
     it "should be able to map :dc_type to the path 'type'" do
       subject.content = sample_xml
       subject.field :dc_type, :string, path: "type", multiple: true

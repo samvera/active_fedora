@@ -1,8 +1,6 @@
 require 'spec_helper'
 
 describe ActiveFedora::NtriplesRDFDatastream do
-  let(:inner_object) { ActiveFedora::Base.new('/test:1') }
-
   describe "an instance with content" do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
@@ -14,7 +12,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
         property :based_near, predicate: RDF::FOAF.based_near
         property :related_url, predicate: RDF::RDFS.seeAlso
       end
-      @subject = MyDatastream.new(inner_object, 'descMetadata')
+      @subject = MyDatastream.new(ActiveFedora::Base.id_to_uri '/test:1/descMetadata')
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
     after do
@@ -73,8 +71,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
   describe "some dummy instances" do
     before do
-      @one = ActiveFedora::RDFDatastream.new(inner_object, 'myFoobar')
-      @two = ActiveFedora::RDFDatastream.new(inner_object, 'myQuix')
+      @one = ActiveFedora::RDFDatastream.new
+      @two = ActiveFedora::RDFDatastream.new
     end
     it "should generate predictable prexies" do
       expect(@one.apply_prefix("baz", 'myFoobar')).to eq 'my_foobar__baz'
@@ -92,9 +90,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
         property :based_near, predicate: RDF::FOAF.based_near
         property :related_url, predicate: RDF::RDFS.seeAlso
       end
-      @subject = MyDatastream.new(inner_object, 'mixed_rdf')
+      @subject = MyDatastream.new
       allow(@subject).to receive(:id).and_return 'test:1'
-      allow(@subject).to receive(:new_record?).and_return  false
+      allow(@subject).to receive(:new_record?).and_return false
       allow(@subject).to receive(:remote_content).and_return remote_content
     end
 
@@ -120,7 +118,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         property :publisher, predicate: RDF::DC.publisher
       end
-      @subject = MyDatastream.new(inner_object, 'mixed_rdf')
+      @subject = MyDatastream.new
     end
     after(:each) do
       Object.send(:remove_const, :MyDatastream)
@@ -158,22 +156,25 @@ describe ActiveFedora::NtriplesRDFDatastream do
         property :rights, predicate: RDF::DC.rights
       end
     end
+
     after(:all) do
       Object.send(:remove_const, :MyDatastream)
     end
+
     before(:each) do
-      @subject = MyDatastream.new(inner_object, 'solr_rdf')
+      @subject = MyDatastream.new
       @subject.content = File.new('spec/fixtures/solr_rdf_descMetadata.nt').read
       @subject.serialize
     end
+
     it "should provide .to_solr and return a SolrDocument" do
       expect(@subject).to respond_to(:to_solr)
       expect(@subject.to_solr).to be_kind_of(Hash)
     end
 
     it "should have a solr_name method" do
-      expect(MyDatastream.new(inner_object, 'descMetadata').primary_solr_name(:based_near, 'descMetadata')).to eq 'desc_metadata__based_near_tesim'
-      expect(MyDatastream.new(inner_object, 'props').primary_solr_name(:title, 'props')).to eq 'props__title_tesim'
+      expect(MyDatastream.new.primary_solr_name(:based_near, 'descMetadata')).to eq 'desc_metadata__based_near_tesim'
+      expect(MyDatastream.new.primary_solr_name(:title, 'props')).to eq 'props__title_tesim'
     end
 
     it "should optionally allow you to provide the Solr::Document to add fields to and return that document when done" do
@@ -186,7 +187,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
           has_metadata "descMetadata", type: MyDatastream
           has_attributes :created, :title, :publisher, :based_near, :related_url, :rights, datastream: :descMetadata, multiple: true
         end
-        @obj = MyDatastream.new(inner_object, 'solr_rdf')
+        @obj = MyDatastream.new
         @obj.created = Date.parse("2012-03-04")
         @obj.title = "Of Mice and Men, The Sequel"
         @obj.publisher = "Bob's Blogtastic Publishing"
