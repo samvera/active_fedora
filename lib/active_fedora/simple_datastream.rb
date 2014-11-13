@@ -1,12 +1,12 @@
 module ActiveFedora
-  #This class represents a simple xml datastream. 
+  #This class represents a simple xml datastream.
   class SimpleDatastream < OmDatastream
 
     class_attribute :class_fields
     attr_accessor :fields
     self.class_fields = []
-    
-    
+
+
      set_terminology do |t|
        t.root(:path=>"fields", :xmlns=>nil)
      end
@@ -16,7 +16,7 @@ module ActiveFedora
         xml.text(name)
       end
     end
-    
+
 
     #Constructor. this class will call self.field for each DCTERM. In short, all DCTERMS fields will already exist
     #when this method returns. Each term is marked as a multivalue string.

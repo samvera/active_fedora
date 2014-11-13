@@ -2,9 +2,8 @@
 require 'spec_helper'
 
 describe ActiveFedora::RDFDatastream do
-  let(:parent) { ActiveFedora::Base.new(id: 'test-1') }
   describe "a new instance" do
-    subject { ActiveFedora::RDFDatastream.new(parent, 'descMetadata') }
+    subject { ActiveFedora::RDFDatastream.new }
     it { should be_metadata }
     it { should_not be_content_changed }
   end
@@ -59,7 +58,7 @@ describe ActiveFedora::RDFDatastream do
   end
 
   describe "deserialize" do
-    subject { ActiveFedora::NtriplesRDFDatastream.new(parent, 'descMetadata') }
+    subject { ActiveFedora::NtriplesRDFDatastream.new }
     it "should be able to handle non-utf-8 characters" do
       # see https://github.com/ruby-rdf/rdf/issues/142
       data = "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT')
@@ -70,7 +69,7 @@ describe ActiveFedora::RDFDatastream do
   end
 
   describe 'content=' do
-    let(:ds) {ActiveFedora::NtriplesRDFDatastream.new(parent, 'descMetadata')}
+    let(:ds) {ActiveFedora::NtriplesRDFDatastream.new }
     it "should be able to handle non-utf-8 characters" do
       data = "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT')
       ds.content = data
@@ -80,7 +79,7 @@ describe ActiveFedora::RDFDatastream do
 
   describe 'legacy non-utf-8 characters' do
     let(:ds) do
-      ActiveFedora::NtriplesRDFDatastream.new(parent, 'descMetadata').tap do |datastream|
+      ActiveFedora::NtriplesRDFDatastream.new.tap do |datastream|
         allow(datastream).to receive(:new_record?).and_return(false)
         allow(datastream).to receive(:remote_content).and_return("<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT'))
       end

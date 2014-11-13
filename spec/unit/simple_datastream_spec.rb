@@ -2,11 +2,10 @@ require 'spec_helper'
 
 describe ActiveFedora::SimpleDatastream do
 
-  let(:digital_object) { ActiveFedora::Base.new(id: 'foo123')}
   let(:sample_xml) { "<fields><coverage>coverage1</coverage><coverage>coverage2</coverage><creation_date>2012-01-15</creation_date><mydate>fake-date</mydate><publisher>publisher1</publisher></fields>" }
 
   before do
-    @test_ds = ActiveFedora::SimpleDatastream.new(digital_object, 'test_ds')
+    @test_ds = ActiveFedora::SimpleDatastream.new
     allow(@test_ds).to receive(:retrieve_content).and_return('') # DS grabs the old content to compare against the new
     @test_ds.content = sample_xml
     @test_ds.field :coverage

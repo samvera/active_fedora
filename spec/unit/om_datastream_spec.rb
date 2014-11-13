@@ -1,9 +1,8 @@
 require 'spec_helper'
 
 describe ActiveFedora::OmDatastream do
-  let(:mock_inner) { ActiveFedora::Base.new }
 
-  subject { ActiveFedora::OmDatastream.new mock_inner, 'descMetadata' }
+  subject { ActiveFedora::OmDatastream.new }
   it { should be_metadata }
 
   it "should include the Solrizer::XML::TerminologyBasedSolrizer for .to_solr support" do
@@ -12,20 +11,20 @@ describe ActiveFedora::OmDatastream do
 
   describe '#new' do
     it 'should load xml from blob if provided' do
-      test_ds1 = ActiveFedora::OmDatastream.new(mock_inner, 'ds1')
+      test_ds1 = ActiveFedora::OmDatastream.new
       test_ds1.content="<xml><foo/></xml>"
       expect(test_ds1.ng_xml.to_xml).to be_equivalent_to("<?xml version=\"1.0\"?>\n<xml>\n  <foo/>\n</xml>\n")
     end
 
     it "should initialize from #xml_template if no xml is provided" do
       expect(ActiveFedora::OmDatastream).to receive(:xml_template).and_return("<fake template/>")
-      n = ActiveFedora::OmDatastream.new(mock_inner, 'ds1')
+      n = ActiveFedora::OmDatastream.new
       expect(n.ng_xml).to be_equivalent_to("<fake template/>")
     end
   end
 
   describe "#prefix" do
-    subject { ActiveFedora::OmDatastream.new(mock_inner, 'descMetadata') }
+    subject { ActiveFedora::OmDatastream.new }
     it "should reflect the dsid" do
       expect(subject.send(:prefix, 'descMetadata')).to eq "desc_metadata__"
     end
@@ -40,7 +39,7 @@ describe ActiveFedora::OmDatastream do
 
   describe "to_solr" do
     describe "with a dsid" do
-      subject { ActiveFedora::OmDatastream.new(mock_inner, "descMetadata").to_solr }
+      subject { ActiveFedora::OmDatastream.new.to_solr }
       it { should be_empty }
     end
 
@@ -61,7 +60,7 @@ describe ActiveFedora::OmDatastream do
       after do
         Object.send(:remove_const, :MyDatastream)
       end
-      subject { MyDatastream.new(mock_inner, 'descMetadata') }
+      subject { MyDatastream.new }
       it "should use the prefix" do
         expect(subject.to_solr).to have_key('foo__title_tesim')
       end
@@ -74,7 +73,7 @@ describe ActiveFedora::OmDatastream do
   describe ".update_indexed_attributes" do
     
     before(:each) do
-      @mods_ds = Hydra::ModsArticleDatastream.new(mock_inner, 'descMetadata')
+      @mods_ds = Hydra::ModsArticleDatastream.new
       @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
     end
     
@@ -136,7 +135,7 @@ describe ActiveFedora::OmDatastream do
   describe ".get_values" do
     
     before(:each) do
-      @mods_ds = Hydra::ModsArticleDatastream.new(mock_inner, 'modsDs')
+      @mods_ds = Hydra::ModsArticleDatastream.new
       @mods_ds.content=fixture(File.join("mods_articles","mods_article1.xml")).read
     end
     
@@ -185,7 +184,7 @@ describe ActiveFedora::OmDatastream do
   end
 
   describe 'setting content' do
-    subject { ActiveFedora::OmDatastream.new(mock_inner, "descMetadata") }
+    subject { ActiveFedora::OmDatastream.new }
     before { subject.content = "<a />" }
 
     it "should update the content" do
@@ -201,15 +200,11 @@ describe ActiveFedora::OmDatastream do
       expect(subject.xml_loaded).to be true
     end
   end
-  
+
   describe 'ng_xml=' do
     let(:sample_raw_xml) { "<foo><xmlelement/></foo>" }
 
-    subject { ActiveFedora::OmDatastream.new(mock_inner, "descMetadata") }
-
-    before do
-      allow(mock_inner).to receive(:new_record?).and_return(true)
-    end
+    subject { ActiveFedora::OmDatastream.new }
 
     it "should parse raw xml for you" do
       subject.ng_xml = sample_raw_xml
@@ -229,7 +224,7 @@ describe ActiveFedora::OmDatastream do
       }.to change { subject.changed? }.from(false).to(true)
     end
   end
-  
+
   describe '.to_xml' do
     let(:doc) { Nokogiri::XML::Document.parse("<text_document/>") }
 
@@ -299,7 +294,7 @@ describe ActiveFedora::OmDatastream do
 
   describe '.update_values' do
 
-    subject { ActiveFedora::OmDatastream.new(mock_inner, 'descMetadata') }
+    subject { ActiveFedora::OmDatastream.new }
 
     before { subject.content= fixture(File.join("mods_articles","mods_article1.xml")).read }
 

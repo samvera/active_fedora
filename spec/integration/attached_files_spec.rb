@@ -105,10 +105,11 @@ describe ActiveFedora::AttachedFiles do
     end
 
     describe ".metadata_streams" do
-      let(:mds1) { ActiveFedora::SimpleDatastream.new(obj, "md1") }
-      let(:mds2) { ActiveFedora::QualifiedDublinCoreDatastream.new(obj, "qdc") }
+      let(:mds1) { ActiveFedora::SimpleDatastream.new }
+      let(:mds2) { ActiveFedora::QualifiedDublinCoreDatastream.new }
+      let(:fds) { ActiveFedora::File.new }
       before do
-        fds = ActiveFedora::File.new(obj, "fds")
+        fds = ActiveFedora::File.new
         obj.attach_file(mds1, 'md1')
         obj.attach_file(mds2, 'qdc')
         obj.attach_file(fds, 'fds')
@@ -132,7 +133,7 @@ describe ActiveFedora::AttachedFiles do
     end
 
     describe '.attach_file' do
-      let(:ds) { ActiveFedora::File.new(obj, 'DS1') }
+      let(:ds) { ActiveFedora::File.new }
 
       it "should be able to add datastreams" do
         expect(obj.attach_file(ds, 'DS1')).to eq 'DS1'
@@ -152,7 +153,7 @@ describe ActiveFedora::AttachedFiles do
       let(:obj) { ActiveFedora::Base.create }
       after { obj.destroy }
 
-      let(:ds) { ActiveFedora::File.new(obj, 'DS1').tap {|ds| ds.content = "foo"; ds.save } }
+      let(:ds) { ActiveFedora::File.new(obj.uri+'/DS1').tap {|ds| ds.content = "foo"; ds.save } }
 
       it "should retrieve blobs that match the saved blobs" do
         obj.attach_file(ds, 'DS1')

@@ -18,8 +18,7 @@ describe "Nested Rdf Objects" do
     end
 
     let(:ds) do
-      test_obj = ActiveFedora::Base.new('test:124')
-      ds = SpecDatastream.new(test_obj, 'descMd')
+      ds = SpecDatastream.new('http://localhost:8983/fedora/rest/test/test:124/descMd')
     end
 
     describe "#new_record?" do
@@ -144,8 +143,7 @@ END
       after(:each) do
         Object.send(:remove_const, :SpecDatastream)
       end
-      let(:mock_obj) { ActiveFedora::Base.new('test:124') }
-      let (:ds) { SpecDatastream.new(mock_obj, 'descMd') }
+      let (:ds) { SpecDatastream.new('http://localhost:8983/fedora/rest/test/test:124/descMd') }
 
 
       it "should store the type of complex objects when type is specified" do
@@ -182,6 +180,10 @@ END
           property :title
         end
 
+        class Container < ActiveFedora::Base
+          contains :info, class_name: 'SpecDatastream'
+        end
+
         class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
           property :series, predicate: EbuCore.isEpisodeOf, class_name: 'Series'
           property :program, predicate: EbuCore.isEpisodeOf, class_name: 'Program'
@@ -201,30 +203,31 @@ END
 
       after(:each) do
         Object.send(:remove_const, :SpecDatastream)
+        Object.send(:remove_const, :Container)
       end
 
-      let(:parent) { ActiveFedora::Base.new id: '124' }
-      let (:ds) { SpecDatastream.new(parent, 'descMd') }
+      let(:parent) { Container.new id: '124' }
+      let (:file) { parent.info }
 
 
       it "should store the type of complex objects when type is specified" do
-        series = SpecDatastream::Series.new ds.graph
+        series = SpecDatastream::Series.new file.graph
         series.title = ["renovating bathrooms"]
-        ds.series = series
+        file.series = series
 
-        program = SpecDatastream::Program.new ds.graph
+        program = SpecDatastream::Program.new file.graph
         program.title = ["This old House"]
-        ds.program = program
+        file.program = program
 
-        expect(ds.program.first.type.size).to eq 1
-        expect(ds.program.first.type.first.to_s).to eq 'http://www.ebu.ch/metadata/ontologies/ebucore#Programme'
-        expect(ds.series.first.type.size).to eq 1
-        expect(ds.series.first.type.first.to_s).to eq 'http://www.ebu.ch/metadata/ontologies/ebucore#Series'
+        expect(file.program.first.type.size).to eq 1
+        expect(file.program.first.type.first.to_s).to eq 'http://www.ebu.ch/metadata/ontologies/ebucore#Programme'
+        expect(file.series.first.type.size).to eq 1
+        expect(file.series.first.type.first.to_s).to eq 'http://www.ebu.ch/metadata/ontologies/ebucore#Series'
       end
 
       it "should create an object of the correct type" do
-        expect(ds.program.build).to be_kind_of SpecDatastream::Program
-        expect(ds.series.build).to be_kind_of SpecDatastream::Series
+        expect(file.program.build).to be_kind_of SpecDatastream::Program
+        expect(file.series.build).to be_kind_of SpecDatastream::Series
       end
     end
   end

@@ -1,18 +1,17 @@
 require 'spec_helper'
 
 describe ActiveFedora::NomDatastream do
-  let(:inner_object) { ActiveFedora::Base.new('/test:1') }
   describe "test" do
     subject {
       class MyNomDatastream < ActiveFedora::NomDatastream
-       
+
         set_terminology do |t|
           t.a :path => '//a', :accessor => lambda { |x| x.text }, :index => 'a_s'
           t.b :path => '//b', :index => 'b_s'
         end
-      end 
+      end
 
-      MyNomDatastream.new(inner_object, 'descMetadata')
+      MyNomDatastream.new
     }
     before do
       subject.content = '<root><a>123</a><b><c>asdf</c></b></root>'
@@ -41,9 +40,9 @@ describe ActiveFedora::NomDatastream do
         end
       end
 
-      TerminologyOptions.new(inner_object, 'descMetadata')
+      TerminologyOptions.new
     }
-    
+
     before do
       subject.content = %(
         <root

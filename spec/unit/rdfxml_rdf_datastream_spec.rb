@@ -1,18 +1,19 @@
 require 'spec_helper'
 
 describe ActiveFedora::RdfxmlRDFDatastream do
-  let(:inner_object) { ActiveFedora::Base.new('/test:1') }
   describe "a new instance" do
     before(:each) do
       class MyRdfxmlDatastream < ActiveFedora::RdfxmlRDFDatastream
         property :publisher, :predicate => RDF::DC.publisher
       end
-      @subject = MyRdfxmlDatastream.new(inner_object, 'mixed_rdf')
+      @subject = MyRdfxmlDatastream.new
       allow(@subject).to receive(:id).and_return('test:1')
     end
+
     after(:each) do
       Object.send(:remove_const, :MyRdfxmlDatastream)
     end
+
     it "should save and reload" do
       @subject.publisher = ["St. Martin's Press"]
       expect(@subject.serialize).to match /<rdf:RDF/
@@ -56,9 +57,9 @@ describe ActiveFedora::RdfxmlRDFDatastream do
 
         rdf_subject { |ds| RDF::URI.new(ds.about) }
 
-        attr_reader :about
+        attr_accessor :about
 
-        def initialize(digital_object=nil, dsid=nil, options={})
+        def initialize(options={})
           @about = options.delete(:about)
           super
         end
@@ -78,7 +79,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
     end
 
     describe "a new instance" do
-      subject { MyDatastream.new(ActiveFedora::Base.new(id: '123'), 'descMetadata', about: "http://library.ucsd.edu/ark:/20775/") }
+      subject { MyDatastream.new(about: "http://library.ucsd.edu/ark:/20775/") }
       it "should have a subject" do
         expect(subject.rdf_subject.to_s).to eq "http://library.ucsd.edu/ark:/20775/"
       end
@@ -86,9 +87,8 @@ describe ActiveFedora::RdfxmlRDFDatastream do
     end
 
     describe "an instance with content" do
-      let(:parent) {ActiveFedora::Base.new(id: '234') }
       subject do
-        subject = MyDatastream.new(parent, 'descMetadata', about: "http://library.ucsd.edu/ark:/20775/")
+        subject = MyDatastream.new(about: "http://library.ucsd.edu/ark:/20775/")
         subject.content = File.new('spec/fixtures/damsObjectModel.xml').read
         subject
       end

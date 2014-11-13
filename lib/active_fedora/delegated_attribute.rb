@@ -14,7 +14,7 @@ module ActiveFedora
 
     # Gives the primary solr name for a column. If there is more than one indexer on the field definition, it gives the first
     def primary_solr_name
-      @datastream ||= datastream_class.new(ActiveFedora::Base.new, dsid)
+      @datastream ||= datastream_class.new
       if @datastream.respond_to?(:primary_solr_name)
         @datastream.primary_solr_name(field, dsid)
       else
