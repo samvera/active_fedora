@@ -92,6 +92,38 @@ describe ActiveFedora::AttachedFiles do
     end
   end
 
+  describe "#add_file_datastream" do
+    before do
+      class Bar < ActiveFedora::File; end
+
+      class FooHistory < ActiveFedora::Base
+         contains :content, class_name: 'Bar'
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :Bar)
+      Object.send(:remove_const, :FooHistory)
+    end
+    let(:container) { FooHistory.new }
+
+    context "a reflection matches the :dsid property" do
+      it "should build the reflection" do
+        container.add_file_datastream('blah', dsid: 'content')
+        expect(container.content).to be_instance_of Bar
+        expect(container.content.content).to eq 'blah'
+      end
+    end
+
+    context "no reflection matches the :dsid property" do
+      it "should create a singleton reflection and build it" do
+        container.add_file_datastream('blah', dsid: 'fizz')
+        expect(container.fizz).to be_instance_of ActiveFedora::File
+        expect(container.fizz.content).to eq 'blah'
+      end
+    end
+  end
+
   describe "#serialize_attached_files" do
     it "should touch each file" do
       m1 = double()
