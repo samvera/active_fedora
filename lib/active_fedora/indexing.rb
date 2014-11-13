@@ -16,13 +16,7 @@ module ActiveFedora
 
     # Updates Solr index with self.
     def update_index
-      if defined?( Solrizer::Fedora::Solrizer )
-        #logger.info("Trying to solrize id: #{id}")
-        solrizer = Solrizer::Fedora::Solrizer.new
-        solrizer.solrize( self )
-      else
-        SolrService.add(self.to_solr, softCommit: true)
-      end
+      SolrService.add(to_solr, softCommit: true)
     end
 
     protected
