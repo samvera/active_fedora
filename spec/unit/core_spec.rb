@@ -31,6 +31,14 @@ describe ActiveFedora::Base do
     expect(subject.has_model).to eq ['Book']
   end
 
+  describe "initialize with a block" do
+    subject { Book.new { |b| b.title= "The Sun also Rises" } }
+
+    it "should have set the title" do
+      expect(subject.title).to eq "The Sun also Rises"
+    end
+  end
+
 
   describe "#freeze" do
     before { subject.freeze }

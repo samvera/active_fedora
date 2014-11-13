@@ -9,6 +9,15 @@ describe ActiveFedora::Persistence do
     end
   end
 
+  describe ".create" do
+    context "when a block is provided" do
+      it "should pass the block to initialize" do
+        expect_any_instance_of(ActiveFedora::Base).to receive(:save)
+        expect { |b| ActiveFedora::Base.create(&b) }.to yield_with_args(an_instance_of ActiveFedora::Base)
+      end
+    end
+  end
+
   describe "a saved object" do
     subject { ActiveFedora::Base.create! }
     describe "that is deleted" do

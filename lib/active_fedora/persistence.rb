@@ -101,8 +101,7 @@ module ActiveFedora
         if attributes.is_a?(Array)
           attributes.collect { |attr| create(attr, &block) }
         else
-          object = new(attributes)
-          yield(object) if block_given?
+          object = new(attributes, &block)
           object.save
           object
         end
