@@ -34,17 +34,6 @@ end
 module ActiveFedora #:nodoc:
   extend ActiveSupport::Autoload
 
-  class ObjectNotFoundError < RuntimeError; end # :nodoc:
-  class PredicateMappingsNotFoundError < RuntimeError; end # :nodoc:
-  class UnknownAttributeError < NoMethodError; end; # :nodoc:
-  class ConfigurationError < RuntimeError; end # :nodoc:
-  class AssociationTypeMismatch < RuntimeError; end # :nodoc:
-  class UnregisteredPredicateError < RuntimeError; end # :nodoc:
-  class RecordNotSaved < RuntimeError; end # :nodoc:
-  class IllegalOperation < RuntimeError; end # :nodoc:
-  class Rollback < RuntimeError; end # :nodoc:
-
-
   eager_autoload do
     autoload :AssociationRelation
     autoload :Associations
