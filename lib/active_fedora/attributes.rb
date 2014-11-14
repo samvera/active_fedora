@@ -49,6 +49,7 @@ module ActiveFedora
     end
 
     def []=(key, value)
+      raise ReadOnlyRecord if readonly?
       if assoc = self.association(key.to_sym)
         # This is for id attributes stored in the rdf graph.
         assoc.replace(value)

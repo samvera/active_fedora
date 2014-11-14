@@ -19,6 +19,7 @@ module ActiveFedora
     def object
       return @object if @object
       @object = allocate_object
+      @object.readonly!
       @object.freeze
       @object
     end

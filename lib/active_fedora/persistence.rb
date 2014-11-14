@@ -24,7 +24,7 @@ module ActiveFedora
     # @option options [Boolean] :update_index (true) set false to skip indexing
     # @return [Boolean] true if save was successful, otherwise false
     def save(options={})
-      # If it's a new object, set the conformsTo relationship for Fedora CMA
+      raise ReadOnlyRecord if readonly?
       new_record? ? create_record(options) : update_record(options)
     end
 
@@ -67,6 +67,7 @@ module ActiveFedora
     end
 
     def destroy
+      raise ReadOnlyRecord if readonly?
       delete
     end
 

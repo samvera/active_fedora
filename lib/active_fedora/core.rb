@@ -34,9 +34,9 @@ module ActiveFedora
     # +:namespace+ value to Fedora::Repository.nextid to generate the next id available within
     # the given namespace.
     def initialize(attributes_or_resource_or_url = nil, &block)
+      init_internals
       attributes = initialize_resource_and_attributes(attributes_or_resource_or_url)
-      raise IllegalOperation, "Attempting to recreate existing ldp_source" unless @ldp_source.new?
-      @association_cache = {}
+      raise IllegalOperation, "Attempting to recreate existing ldp_source" unless ldp_source.new?
       assert_content_model
       load_attached_files
       self.attributes = attributes if attributes
@@ -66,8 +66,8 @@ module ActiveFedora
     #   post.init_with_resource(Ldp::Resource.new('http://example.com/post/1'))
     #   post.title # => 'hello world'
     def init_with_resource(rdf_resource)
+      init_internals
       @ldp_source = rdf_resource
-      @association_cache = {}
       load_attached_files
       run_callbacks :find
       run_callbacks :initialize
@@ -90,6 +90,17 @@ module ActiveFedora
 
     def frozen?
       attached_files.frozen?
+    end
+
+    # Returns +true+ if the record is read only. Records loaded through joins with piggy-back
+    # attributes will be marked as read only since they cannot be saved.
+    def readonly?
+      @readonly
+    end
+
+    # Marks this record as read only.
+    def readonly!
+      @readonly = true
     end
 
     def to_uri(id)
@@ -163,6 +174,13 @@ module ActiveFedora
     end
 
     private
+
+      def init_internals
+        @resource          = nil
+        @readonly          = false
+        @association_cache = {}
+      end
+
       def conn
         ActiveFedora.fedora.connection
       end

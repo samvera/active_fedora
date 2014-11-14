@@ -41,6 +41,10 @@ describe ActiveFedora::SolrInstanceLoader do
         expect(subject.description).to match_array ['first desc', 'second desc']
         expect(subject.another_id).to eq another.id
       end
+
+      it "should not be mutable" do
+        expect { subject.title = 'Foo' }.to raise_error ActiveFedora::ReadOnlyRecord
+      end
     end
 
     context "without context" do
@@ -55,10 +59,10 @@ describe ActiveFedora::SolrInstanceLoader do
         expect(object.foo).to eq ['baz'] # datastream assertion
 
         # and it's frozen
-        expect { object.title = ['changed'] }.to raise_error RuntimeError, "can't modify frozen Hash"
+        expect { object.title = ['changed'] }.to raise_error ActiveFedora::ReadOnlyRecord
         expect(object.title).to eq 'My Title'
 
-        expect { object.foo = ['changed'] }.to raise_error RuntimeError, "can't modify frozen Hash"
+        expect { object.foo = ['changed'] }.to raise_error ActiveFedora::ReadOnlyRecord
         expect(object.foo).to eq ['baz']
       end
     end
