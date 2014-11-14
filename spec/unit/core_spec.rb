@@ -3,12 +3,12 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   before do
     class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-      property :publisher, :predicate => RDF::DC.publisher
+      property :publisher, predicate: RDF::DC.publisher
     end
     class Library < ActiveFedora::Base
     end
     class Book < ActiveFedora::Base
-      belongs_to :library, property: :has_constituent
+      belongs_to :library, predicate: ActiveFedora::Rdf::RelsExt.hasConstituent
       has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
         m.field "title", :string
       end

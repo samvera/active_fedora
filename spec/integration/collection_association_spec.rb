@@ -2,11 +2,11 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
   before do
-    class Library < ActiveFedora::Base 
+    class Library < ActiveFedora::Base
       has_many :books
     end
     class Book < ActiveFedora::Base
-      belongs_to :library, property: :has_member
+      belongs_to :library, predicate: ActiveFedora::Rdf::RelsExt.hasMember
     end
   end
   let(:library) { Library.create! }

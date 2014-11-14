@@ -54,10 +54,8 @@ module ActiveFedora
     # @param [Hash] solr_doc @deafult an empty Hash
     def solrize_relationships(solr_doc = Hash.new)
       object.class.outgoing_reflections.values.each do |reflection|
-        value = Array(object[reflection.foreign_key]).compact
-        # TODO make reflection.options[:property] a method
-        solr_key = solr_name(reflection.options[:property], :symbol)
-        value.each do |v|
+        solr_key = reflection.solr_key
+        Array(object[reflection.foreign_key]).compact.each do |v|
           ::Solrizer::Extractor.insert_solr_field_value(solr_doc, solr_key, v )
         end
       end

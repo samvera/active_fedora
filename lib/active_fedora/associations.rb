@@ -132,7 +132,6 @@ module ActiveFedora
       #   belongs_to :firm, :property => :client_of
       #   belongs_to :author, :class_name => "Person", :property => :author_of
       def belongs_to(name, options = {})
-        raise "You must specify a property name for #{name}" if !options[:property]
         Builder::BelongsTo.build(self, name, options)
 
         Builder::SingularProperty.build(self, name, options)
@@ -203,7 +202,7 @@ module ActiveFedora
       #   has_and_belongs_to_many :topics, :property=>:has_topic, :inverse_of=>:is_topic_of
       def has_and_belongs_to_many(name, options = {})
         Builder::HasAndBelongsToMany.build(self, name, options)
-        Builder::Property.build(self, name, options.slice(:property, :class_name))
+        Builder::Property.build(self, name, options.slice(:property, :class_name, :predicate))
       end
     end
   end
