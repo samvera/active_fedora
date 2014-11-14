@@ -98,7 +98,7 @@ describe ActiveFedora::SolrService do
       mock_conn = double("Connection")
       stub_result = double("Result")
       expect(mock_conn).to receive(:get).with('select', :params=>{:q=>'querytext', :qt=>'standard'}).and_return(stub_result)
-      ActiveFedora::SolrService.stub(:instance =>double("instance", :conn=>mock_conn))
+      allow(ActiveFedora::SolrService).to receive(:instance).and_return(double("instance", conn: mock_conn))
       expect(ActiveFedora::SolrService.query('querytext', :raw=>true)).to eq stub_result
     end
   end
@@ -107,14 +107,14 @@ describe ActiveFedora::SolrService do
       mock_conn = double("Connection")
       stub_result = {'response' => {'numFound'=>'7'}}
       expect(mock_conn).to receive(:get).with('select', :params=>{:rows=>0, :q=>'querytext', :qt=>'standard'}).and_return(stub_result)
-      ActiveFedora::SolrService.stub(:instance =>double("instance", :conn=>mock_conn))
+      allow(ActiveFedora::SolrService).to receive(:instance).and_return(double("instance", conn: mock_conn))
       expect(ActiveFedora::SolrService.count('querytext')).to eq 7
     end
     it "should accept query args" do
       mock_conn = double("Connection")
       stub_result = {'response' => {'numFound'=>'7'}}
       expect(mock_conn).to receive(:get).with('select', :params=>{:rows=>0, :q=>'querytext', :qt=>'standard', :fq=>'filter'}).and_return(stub_result)
-      ActiveFedora::SolrService.stub(:instance =>double("instance", :conn=>mock_conn))
+      allow(ActiveFedora::SolrService).to receive(:instance).and_return(double("instance", conn: mock_conn))
       expect(ActiveFedora::SolrService.count('querytext', :fq=>'filter', :rows=>10)).to eq 7
     end
   end
@@ -123,7 +123,7 @@ describe ActiveFedora::SolrService do
       mock_conn = double("Connection")
       doc = {'id' => '1234'}
       expect(mock_conn).to receive(:add).with(doc, {:params=>{}})
-      ActiveFedora::SolrService.stub(:instance =>double("instance", :conn=>mock_conn))
+      allow(ActiveFedora::SolrService).to receive(:instance).and_return(double("instance", conn: mock_conn))
       ActiveFedora::SolrService.add(doc)
     end
   end
@@ -132,7 +132,7 @@ describe ActiveFedora::SolrService do
       mock_conn = double("Connection")
       doc = {'id' => '1234'}
       expect(mock_conn).to receive(:commit)
-      ActiveFedora::SolrService.stub(:instance =>double("instance", :conn=>mock_conn))
+      allow(ActiveFedora::SolrService).to receive(:instance).and_return(double("instance", conn: mock_conn))
       ActiveFedora::SolrService.commit()
     end
   end
