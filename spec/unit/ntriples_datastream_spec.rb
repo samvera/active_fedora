@@ -4,13 +4,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "an instance with content" do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :created, predicate: RDF::DC.created
-        property :title, predicate: RDF::DC.title
-        property :publisher, predicate: RDF::DC.publisher
-        property :creator, predicate: RDF::DC.creator
-        property :educationLevel, predicate: RDF::DC.educationLevel
-        property :based_near, predicate: RDF::FOAF.based_near
-        property :related_url, predicate: RDF::RDFS.seeAlso
+        property :created, predicate: ::RDF::DC.created
+        property :title, predicate: ::RDF::DC.title
+        property :publisher, predicate: ::RDF::DC.publisher
+        property :creator, predicate: ::RDF::DC.creator
+        property :educationLevel, predicate: ::RDF::DC.educationLevel
+        property :based_near, predicate: ::RDF::FOAF.based_near
+        property :related_url, predicate: ::RDF::RDFS.seeAlso
       end
       @subject = MyDatastream.new(ActiveFedora::Base.id_to_uri '/test:1/descMetadata')
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
@@ -84,11 +84,11 @@ describe ActiveFedora::NtriplesRDFDatastream do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         rdf_subject { |ds| "http://localhost:8983/fedora/rest/test/#{ds.id}/content" }
-        property :created, predicate: RDF::DC.created
-        property :title, predicate: RDF::DC.title
-        property :publisher, predicate: RDF::DC.publisher
-        property :based_near, predicate: RDF::FOAF.based_near
-        property :related_url, predicate: RDF::RDFS.seeAlso
+        property :created, predicate: ::RDF::DC.created
+        property :title, predicate: ::RDF::DC.title
+        property :publisher, predicate: ::RDF::DC.publisher
+        property :based_near, predicate: ::RDF::FOAF.based_near
+        property :related_url, predicate: ::RDF::RDFS.seeAlso
       end
       @subject = MyDatastream.new
       allow(@subject).to receive(:id).and_return 'test:1'
@@ -116,7 +116,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "a new instance" do
     before(:each) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :publisher, predicate: RDF::DC.publisher
+        property :publisher, predicate: ::RDF::DC.publisher
       end
       @subject = MyDatastream.new
     end
@@ -135,25 +135,25 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "solr integration" do
     before(:all) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :created, predicate: RDF::DC.created do |index|
+        property :created, predicate: ::RDF::DC.created do |index|
           index.as :sortable, :displayable
           index.type :date
         end
-        property :title, predicate: RDF::DC.title do |index|
+        property :title, predicate: ::RDF::DC.title do |index|
           index.as :stored_searchable, :sortable
           index.type :text
         end
-        property :publisher, predicate: RDF::DC.publisher do |index|
+        property :publisher, predicate: ::RDF::DC.publisher do |index|
           index.as :facetable, :sortable, :stored_searchable
         end
-        property :based_near, predicate: RDF::FOAF.based_near do |index|
+        property :based_near, predicate: ::RDF::FOAF.based_near do |index|
           index.as :facetable, :stored_searchable
           index.type :text
         end
-        property :related_url, predicate: RDF::RDFS.seeAlso do |index|
+        property :related_url, predicate: ::RDF::RDFS.seeAlso do |index|
           index.as :stored_searchable
         end
-        property :rights, predicate: RDF::DC.rights
+        property :rights, predicate: ::RDF::DC.rights
       end
     end
 

@@ -1,6 +1,6 @@
 module ActiveFedora
   module Associations
-    class SingularRdf < Rdf #:nodoc:
+    class SingularRDF < RDF #:nodoc:
 
       def replace(value)
         super(Array(value))

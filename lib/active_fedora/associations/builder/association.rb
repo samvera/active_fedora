@@ -34,7 +34,7 @@ module ActiveFedora::Associations::Builder
     # Returns the RDF predicate as defined by the :property attribute
     def predicate
       predicate = options[:property]
-      return predicate if predicate.kind_of? RDF::URI
+      return predicate if predicate.kind_of? ::RDF::URI
       ActiveFedora::Predicates.find_graph_predicate(predicate)
     end
 

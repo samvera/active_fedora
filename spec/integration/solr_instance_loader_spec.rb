@@ -9,9 +9,9 @@ describe ActiveFedora::SolrInstanceLoader do
       end
       has_attributes :foo, datastream: 'descMetadata', multiple: true
       has_attributes :bar, datastream: 'descMetadata', multiple: false
-      property :title, predicate: RDF::DC.title
-      property :description, predicate: RDF::DC.description
-      belongs_to :another, predicate: ActiveFedora::Rdf::RelsExt.isPartOf, class_name: 'Foo'
+      property :title, predicate: ::RDF::DC.title
+      property :description, predicate: ::RDF::DC.description
+      belongs_to :another, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'Foo'
 
       def title
         super.first

@@ -10,7 +10,7 @@ describe ActiveFedora::WithMetadata do
       include ActiveFedora::WithMetadata
 
       metadata do
-        property :title, predicate: RDF::DC.title
+        property :title, predicate: ::RDF::DC.title
       end
     end
   end

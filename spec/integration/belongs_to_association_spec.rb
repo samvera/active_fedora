@@ -7,7 +7,7 @@ describe ActiveFedora::Base do
     end
 
     class Book < ActiveFedora::Base
-      belongs_to :library, predicate: ActiveFedora::Rdf::RelsExt.hasConstituent
+      belongs_to :library, predicate: ActiveFedora::RDF::RelsExt.hasConstituent
     end
     class SpecialInheritedBook < Book
     end
@@ -86,23 +86,23 @@ describe ActiveFedora::Base do
   describe "casting inheritance detailed test cases" do
     before :all do
       class SimpleObject < ActiveFedora::Base
-        belongs_to :simple_collection, predicate: ActiveFedora::Rdf::RelsExt.isPartOf, class_name: 'SimpleCollection'
-        belongs_to :complex_collection, predicate: ActiveFedora::Rdf::RelsExt.isPartOf, class_name: 'ComplexCollection'
+        belongs_to :simple_collection, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'SimpleCollection'
+        belongs_to :complex_collection, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'ComplexCollection'
       end
 
       class ComplexObject < SimpleObject
-        belongs_to :simple_collection, predicate: ActiveFedora::Rdf::RelsExt.isPartOf, class_name: 'SimpleCollection'
-        belongs_to :complex_collection, predicate: ActiveFedora::Rdf::RelsExt.isPartOf, class_name: 'ComplexCollection'
+        belongs_to :simple_collection, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'SimpleCollection'
+        belongs_to :complex_collection, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'ComplexCollection'
       end
 
       class SimpleCollection < ActiveFedora::Base
-        has_many :objects, predicate: ActiveFedora::Rdf::RelsExt.isPartOf, class_name: 'SimpleObject', autosave: true
-        has_many :complex_objects, predicate: ActiveFedora::Rdf::RelsExt.isPartOf, class_name: 'ComplexObject', autosave: true
+        has_many :objects, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'SimpleObject', autosave: true
+        has_many :complex_objects, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'ComplexObject', autosave: true
       end
 
       class ComplexCollection < SimpleCollection
-        has_many :objects, predicate: ActiveFedora::Rdf::RelsExt.isPartOf, class_name: 'SimpleObject', autosave: true
-        has_many :complex_objects, predicate: ActiveFedora::Rdf::RelsExt.isPartOf, class_name: 'ComplexObject', autosave: true
+        has_many :objects, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'SimpleObject', autosave: true
+        has_many :complex_objects, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'ComplexObject', autosave: true
       end
 
     end

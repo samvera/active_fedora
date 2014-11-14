@@ -4,7 +4,7 @@ describe "a versionable class" do
   before do
     class WithVersions < ActiveFedora::Base
       has_many_versions
-      property :title, predicate: RDF::DC.title
+      property :title, predicate: ::RDF::DC.title
     end
   end
 
@@ -24,12 +24,12 @@ describe "a versionable class" do
     end
 
     it "should set model_type to versionable" do
-      expect(subject.reload.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
+      expect(subject.reload.model_type).to include ::RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
     end
 
     it "should have one version" do
       expect(subject.versions.size).to eq 1
-      expect(subject.versions.first).to be_kind_of RDF::Literal
+      expect(subject.versions.first).to be_kind_of ::RDF::Literal
     end
 
     context "two times" do
@@ -42,7 +42,7 @@ describe "a versionable class" do
       it "should have two versions" do
         expect(subject.versions.size).to eq 2
         subject.versions.each do |version|
-          expect(version).to be_kind_of RDF::Literal
+          expect(version).to be_kind_of ::RDF::Literal
         end
       end
 
@@ -78,7 +78,7 @@ describe "a versionable rdf datastream" do
   before(:all) do
     class VersionableDatastream < ActiveFedora::NtriplesRDFDatastream
       has_many_versions
-      property :title, predicate: RDF::DC.title
+      property :title, predicate: ::RDF::DC.title
     end
 
     class MockAFBase < ActiveFedora::Base
@@ -126,7 +126,7 @@ describe "a versionable rdf datastream" do
       end
 
       it "should have one version" do
-        expect(subject.versions.first).to be_kind_of RDF::Literal
+        expect(subject.versions.first).to be_kind_of ::RDF::Literal
       end
 
       it "should have a title" do
@@ -147,7 +147,7 @@ describe "a versionable rdf datastream" do
         it "should have two versions" do
           expect(subject.versions.size).to eq 2
           subject.versions.each do |version|
-            expect(version).to be_kind_of RDF::Literal
+            expect(version).to be_kind_of ::RDF::Literal
           end
         end
 
@@ -256,7 +256,7 @@ describe "a versionable OM datastream" do
 
       it "should have one version" do
         expect(subject.versions.size).to eq 1
-        expect(subject.versions.first).to be_kind_of RDF::Literal
+        expect(subject.versions.first).to be_kind_of ::RDF::Literal
       end
 
       it "should have a title" do
@@ -278,7 +278,7 @@ describe "a versionable OM datastream" do
         it "should have two unique versions" do
           expect(subject.versions.size).to eq 2
           subject.versions.each do |version|
-            expect(version).to be_kind_of RDF::Literal
+            expect(version).to be_kind_of ::RDF::Literal
           end
         end
 
@@ -384,7 +384,7 @@ describe "a versionable binary datastream" do
         expect(subject.versions.size).to eq 1
         expect(subject.original_name).to eql(first_name)
         expect(subject.content.size).to eq first_file.size
-        expect(subject.versions.first).to be_kind_of RDF::Literal
+        expect(subject.versions.first).to be_kind_of ::RDF::Literal
       end
 
       context "two times" do
@@ -402,7 +402,7 @@ describe "a versionable binary datastream" do
           expect(subject.original_name).to eql(second_name)
           expect(subject.content.size).to eq second_file.size
           subject.versions.each do |version|
-            expect(version).to be_kind_of RDF::Literal
+            expect(version).to be_kind_of ::RDF::Literal
           end
         end
 
@@ -436,7 +436,7 @@ describe "a versionable binary datastream" do
               expect(subject.versions.size).to eq 3
               expect(subject.original_name).to eql(first_name)
               expect(subject.content.size).to eq first_file.size
-              expect(subject.versions.first).to be_kind_of RDF::Literal
+              expect(subject.versions.first).to be_kind_of ::RDF::Literal
             end
 
           end
@@ -450,7 +450,7 @@ describe "a non-versionable resource" do
   before(:all) do
     class NotVersionableWithVersions < ActiveFedora::Base
       # explicitly don't call has_many_versions 
-      property :title, predicate: RDF::DC.title
+      property :title, predicate: ::RDF::DC.title
     end
   end
 

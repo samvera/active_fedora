@@ -1,13 +1,13 @@
 module ActiveFedora
   module Associations
-    class Rdf < SingularAssociation #:nodoc:
+    class RDF < SingularAssociation #:nodoc:
 
       def replace(values)
         raise "can't modify frozen #{owner.class}" if owner.frozen?
         destroy
         values.each do |value|
           uri = ActiveFedora::Base.id_to_uri(value)
-          owner.resource.insert [owner.rdf_subject, reflection.predicate, RDF::URI.new(uri)]
+          owner.resource.insert [owner.rdf_subject, reflection.predicate, ::RDF::URI.new(uri)]
         end
         owner.send(:attribute_will_change!, reflection.name)
       end
@@ -62,7 +62,7 @@ module ActiveFedora
           }
         end
 
-        docs.map {|doc| RDF::URI.new(ActiveFedora::Base.id_to_uri(doc['id']))}
+        docs.map {|doc| ::RDF::URI.new(ActiveFedora::Base.id_to_uri(doc['id']))}
       end
 
       ##

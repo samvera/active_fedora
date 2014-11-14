@@ -28,7 +28,7 @@ module ActiveFedora
         @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, parent_or_url_or_hash, content, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
       when ActiveFedora::Base
         Deprecation.warn File, "Initializing a file by passing a container is deprecated. Initialize with a uri instead. This capability will be removed in active-fedora 10.0"
-        uri = if parent_or_url_or_hash.uri.kind_of?(RDF::URI) && parent_or_url_or_hash.uri.value.empty?
+        uri = if parent_or_url_or_hash.uri.kind_of?(::RDF::URI) && parent_or_url_or_hash.uri.value.empty?
           nil
         else
           "#{parent_or_url_or_hash.uri}/#{dsid}"
@@ -118,7 +118,7 @@ module ActiveFedora
     end
 
     def digest
-      response = metadata.ldp_source.graph.query(:predicate => RDF::URI.new("http://fedora.info/definitions/v4/repository#digest"))
+      response = metadata.ldp_source.graph.query(:predicate => ::RDF::URI.new("http://fedora.info/definitions/v4/repository#digest"))
       response.map(&:object)
     end
 

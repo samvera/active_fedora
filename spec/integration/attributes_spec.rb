@@ -17,7 +17,7 @@ describe "delegating attributes" do
     class RdfObject < ActiveFedora::Base
       contains 'foo', class_name: 'PropertiesDatastream'
       has_attributes :depositor, datastream: :foo, multiple: false
-      property :resource_type, predicate: RDF::DC.type do |index|
+      property :resource_type, predicate: ::RDF::DC.type do |index|
         index.as :stored_searchable, :facetable
       end
     end

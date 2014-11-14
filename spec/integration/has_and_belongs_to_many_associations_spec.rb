@@ -306,7 +306,7 @@ describe "create" do
     end
 
     class Collection < ActiveFedora::Base
-      property :title, predicate: RDF::DC.title
+      property :title, predicate: ::RDF::DC.title
     end
   end
 

@@ -79,7 +79,7 @@ module ActiveFedora
 
       def get_descendent_uris(uri)
         resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
-        immediate_descendent_uris = resource.graph.query(predicate: RDF::LDP.contains).map { |descendent| descendent.object.to_s }
+        immediate_descendent_uris = resource.graph.query(predicate: ::RDF::LDP.contains).map { |descendent| descendent.object.to_s }
         all_descendents_uris = [uri]
         immediate_descendent_uris.each do |descendent_uri|
           all_descendents_uris += get_descendent_uris(descendent_uri)

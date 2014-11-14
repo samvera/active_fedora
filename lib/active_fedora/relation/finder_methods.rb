@@ -204,7 +204,7 @@ module ActiveFedora
 
     # TODO just use has_model
     def has_model_value(resource)
-      Ldp::Orm.new(resource).value(RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel")).first.to_s
+      Ldp::Orm.new(resource).value(::RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel")).first.to_s
     end
 
     def find_with_ids(ids, cast)

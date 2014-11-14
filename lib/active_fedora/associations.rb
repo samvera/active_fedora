@@ -15,8 +15,8 @@ module ActiveFedora
     autoload :Association,           'active_fedora/associations/association'
     autoload :AssociationScope,      'active_fedora/associations/association_scope'
     autoload :SingularAssociation,   'active_fedora/associations/singular_association'
-    autoload :Rdf,                   'active_fedora/associations/rdf'
-    autoload :SingularRdf,           'active_fedora/associations/singular_rdf'
+    autoload :RDF,                   'active_fedora/associations/rdf'
+    autoload :SingularRDF,           'active_fedora/associations/singular_rdf'
     autoload :CollectionAssociation, 'active_fedora/associations/collection_association'
     autoload :CollectionProxy,       'active_fedora/associations/collection_proxy'
 

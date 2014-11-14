@@ -29,11 +29,11 @@ module ActiveFedora
     end
 
     def fixity_graph
-      RDF::Graph.new << RDF::Reader.for(:ttl).new(response.body)
+      ::RDF::Graph.new << ::RDF::Reader.for(:ttl).new(response.body)
     end
 
     def status_url
-      RDF::URI("http://fedora.info/definitions/v4/repository#status")
+      ::RDF::URI("http://fedora.info/definitions/v4/repository#status")
     end
 
   end

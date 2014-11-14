@@ -15,7 +15,7 @@ module ActiveFedora
 
       def metadata_uri
         @metadata_uri ||= if file.new_record?
-          RDF::URI.new nil
+          ::RDF::URI.new nil
         else
           raise "#{file} must respond_to described_by" unless file.respond_to? :described_by
           file.described_by
@@ -38,7 +38,7 @@ module ActiveFedora
       def save
         raise "Save the file first" if file.new_record?
         change_set = ChangeSet.new(self, self, changed_attributes.keys)
-        SparqlInsert.new(change_set.changes, RDF::URI.new(file.uri)).execute(metadata_uri)
+        SparqlInsert.new(change_set.changes, ::RDF::URI.new(file.uri)).execute(metadata_uri)
         @ldp_source = nil
         true
       end

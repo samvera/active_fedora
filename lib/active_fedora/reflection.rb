@@ -13,7 +13,7 @@ module ActiveFedora
           when :has_many, :belongs_to, :has_and_belongs_to_many, :contains
             AssociationReflection
           when :rdf, :singular_rdf
-            RdfPropertyReflection
+            RDFPropertyReflection
         end
         reflection = klass.new(macro, name, options, active_fedora)
         add_reflection name, reflection
@@ -37,7 +37,7 @@ module ActiveFedora
       end
 
       def outgoing_reflections
-        reflections.select { |_, reflection| reflection.kind_of? RdfPropertyReflection }
+        reflections.select { |_, reflection| reflection.kind_of? RDFPropertyReflection }
       end
 
       def child_resource_reflections
@@ -190,7 +190,7 @@ module ActiveFedora
       # TODO this is dupliacate code from Associations::Builder::Association
       def predicate
         predicate = options[:predicate] || options[:property]
-        return predicate if predicate.kind_of? RDF::URI
+        return predicate if predicate.kind_of? ::RDF::URI
         ActiveFedora::Predicates.find_graph_predicate(predicate)
       end
 
@@ -253,9 +253,9 @@ module ActiveFedora
         when :has_many
           Associations::HasManyAssociation
         when :singular_rdf
-          Associations::SingularRdf
+          Associations::SingularRDF
         when :rdf
-          Associations::Rdf
+          Associations::RDF
         end
       end
 
@@ -328,7 +328,7 @@ module ActiveFedora
       end
     end
 
-    class RdfPropertyReflection < AssociationReflection
+    class RDFPropertyReflection < AssociationReflection
 
       def derive_foreign_key
         name

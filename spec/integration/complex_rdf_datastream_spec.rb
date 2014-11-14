@@ -4,10 +4,10 @@ describe "Nested Rdf Objects" do
   describe "without type" do
     before do
       class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :parts, predicate: RDF::DC.hasPart, class_name: 'Component'
+        property :parts, predicate: ::RDF::DC.hasPart, class_name: 'Component'
 
         class Component < ActiveTriples::Resource
-          property :label, predicate: RDF::DC.title
+          property :label, predicate: ::RDF::DC.title
         end
       end
 
@@ -131,11 +131,11 @@ END
     describe "one class per assertion" do
       before(:each) do
         class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
-          property :mediator, predicate: RDF::DC.mediator, class_name: 'MediatorUser'
+          property :mediator, predicate: ::RDF::DC.mediator, class_name: 'MediatorUser'
 
           class MediatorUser < ActiveTriples::Resource
-            configure type: RDF::DC.AgentClass
-            property :title, predicate: RDF::DC.title
+            configure type: ::RDF::DC.AgentClass
+            property :title, predicate: ::RDF::DC.title
           end
         end
       end
@@ -150,7 +150,7 @@ END
         comp = SpecDatastream::MediatorUser.new ds.graph
         comp.title = ["Doctor"]
         ds.mediator = comp
-        expect(ds.mediator.first.type.first).to be_instance_of RDF::URI
+        expect(ds.mediator.first.type.first).to be_instance_of ::RDF::URI
         expect(ds.mediator.first.type.first.to_s).to eq "http://purl.org/dc/terms/AgentClass"
         expect(ds.mediator.first.title.first).to eq 'Doctor'
       end

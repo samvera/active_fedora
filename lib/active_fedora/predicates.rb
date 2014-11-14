@@ -6,7 +6,7 @@ module ActiveFedora
         namespace = match[1]
         predicate = match[2]
         Predicates.predicate_mappings[namespace].invert[predicate]
-      elsif predicate.kind_of? RDF::URI
+      elsif predicate.kind_of? ::RDF::URI
         predicate.to_s.split('/', 4).last.gsub(/(\/|#)/, '_').underscore
       else
         raise "Unable to parse predicate: #{predicate}"
@@ -44,7 +44,7 @@ module ActiveFedora
     def self.vocabularies(vocabs = {})
       @vocabularies ||= vocabs
       predicate_mappings.keys.each do |ns| 
-        @vocabularies[ns] = RDF::Vocabulary.new(ns) unless @vocabularies.has_key? ns
+        @vocabularies[ns] = ::RDF::Vocabulary.new(ns) unless @vocabularies.has_key? ns
       end
       @vocabularies
     end

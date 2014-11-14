@@ -74,7 +74,7 @@ module ActiveFedora
       end
 
       def rdf_subject
-        RDF::URI.new(nil)
+        ::RDF::URI.new(nil)
       end
 
       def insert(vals)

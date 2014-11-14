@@ -10,8 +10,8 @@ describe ActiveFedora::SparqlInsert do
       end
 
       class Book < ActiveFedora::Base
-        belongs_to :library, predicate: ActiveFedora::Rdf::RelsExt.hasConstituent
-        property :title, predicate: RDF::DC.title
+        belongs_to :library, predicate: ActiveFedora::RDF::RelsExt.hasConstituent
+        property :title, predicate: ::RDF::DC.title
       end
 
       base.library_id = 'foo'

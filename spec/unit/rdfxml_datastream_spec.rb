@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe ActiveFedora::RdfxmlRDFDatastream do
+describe ActiveFedora::RDFXMLDatastream do
   describe "a new instance" do
     before(:each) do
-      class MyRdfxmlDatastream < ActiveFedora::RdfxmlRDFDatastream
-        property :publisher, :predicate => RDF::DC.publisher
+      class MyRdfxmlDatastream < ActiveFedora::RDFXMLDatastream
+        property :publisher, predicate: ::RDF::DC.publisher
       end
       @subject = MyRdfxmlDatastream.new
       allow(@subject).to receive(:id).and_return('test:1')
@@ -51,9 +51,9 @@ describe ActiveFedora::RdfxmlRDFDatastream do
         end
       end
 
-      class MyDatastream < ActiveFedora::RdfxmlRDFDatastream
-        property :resource_type, :predicate => DAMS.typeOfResource
-        property :title, :predicate => DAMS.title, :class_name => 'Description'
+      class MyDatastream < ActiveFedora::RDFXMLDatastream
+        property :resource_type, predicate: DAMS.typeOfResource
+        property :title, predicate: DAMS.title, :class_name => 'Description'
 
         rdf_subject { |ds| RDF::URI.new(ds.about) }
 
@@ -66,7 +66,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
 
         class Description < ActiveTriples::Resource
           configure :type => DAMS.Description
-          property :value, :predicate => RDF.value do |index|
+          property :value, predicate: ::RDF.value do |index|
               index.as :searchable
           end
         end
