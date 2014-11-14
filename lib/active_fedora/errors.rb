@@ -45,6 +45,10 @@ module ActiveFedora #:nodoc:
   class RecordNotSaved < ActiveFedoraError
   end
 
+  # Raised on attempt to update record that is instantiated as read only.
+  class ReadOnlyRecord < ActiveFedoraError
+  end
+
   # Raised when trying to initialize a record that already exists. ActiveFedora::Base.find should
   # be used instead
   class IllegalOperation < ActiveFedoraError

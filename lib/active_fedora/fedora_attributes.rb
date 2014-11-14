@@ -21,7 +21,9 @@ module ActiveFedora
       end
     end
 
+    # Override ActiveTriples method for setting properties
     def set_value(*args)
+      raise ReadOnlyRecord if readonly?
       resource.set_value(*args)
     end
 
