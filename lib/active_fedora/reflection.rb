@@ -186,6 +186,18 @@ module ActiveFedora
         @foreign_key ||= options[:foreign_key] || derive_foreign_key
       end
 
+      # Returns the RDF predicate as defined by the :property attribute
+      # TODO this is dupliacate code from Associations::Builder::Association
+      def predicate
+        predicate = options[:predicate] || options[:property]
+        return predicate if predicate.kind_of? RDF::URI
+        ActiveFedora::Predicates.find_graph_predicate(predicate)
+      end
+
+      def solr_key
+        ActiveFedora::SolrService.solr_name(predicate.to_s, :symbol)
+      end
+
       def check_validity!
         check_validity_of_inverse!
       end
@@ -317,14 +329,6 @@ module ActiveFedora
     end
 
     class RdfPropertyReflection < AssociationReflection
-
-      # Returns the RDF predicate as defined by the :property attribute
-      # TODO this is dupliacate code from Associations::Builder::Association
-      def predicate
-        predicate = options[:predicate] || options[:property]
-        return predicate if predicate.kind_of? RDF::URI
-        ActiveFedora::Predicates.find_graph_predicate(predicate)
-      end
 
       def derive_foreign_key
         name

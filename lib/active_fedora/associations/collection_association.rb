@@ -332,7 +332,7 @@ module ActiveFedora
         def construct_query
 
           #TODO use primary_key instead of id
-          clauses = {find_predicate => @owner.id}
+          clauses = {find_predicate.to_s => @owner.id}
           clauses[:has_model] = @reflection.class_name.constantize.to_class_uri if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base'
           @counter_query = @finder_query = ActiveFedora::SolrService.construct_query_for_rel(clauses)
         end
@@ -341,8 +341,9 @@ module ActiveFedora
       private
 
         def find_predicate
-          if @reflection.options[:property]
-            @reflection.options[:property]
+          # Using :property is deprecated
+          if @reflection.options[:predicate] || @reflection.options[:property]
+            reflection.predicate.to_s
           elsif @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base' && @reflection.macro != :has_and_belongs_to_many
             inverse_relation = @owner.class.to_s.underscore.to_sym
             begin
@@ -357,10 +358,10 @@ module ActiveFedora
           raise "Unable to lookup the :property attribute for #{@reflection.macro} #{@reflection.name.inspect} on #{@owner.class} because #{klass} specifies \"class_name: 'ActiveFedora::Base'\".  Either specify a specific class_name in #{klass} or set :property in the #{@reflection.macro} declaration on #{@owner.class}" if inverse_relation == :'active_fedora/base'
           if klass.reflections.key?(inverse_relation)
             # Try it singular
-            return klass.reflections[inverse_relation].options[:property]
+            return klass.reflections[inverse_relation].predicate
           elsif klass.reflections.key?(inverse_relation.to_s.pluralize.to_sym)
             # Try it plural
-            return klass.reflections[inverse_relation.to_s.pluralize.to_sym].options[:property]
+            return klass.reflections[inverse_relation.to_s.pluralize.to_sym].predicate
           end
           find_class_for_relation(klass, @owner.class.superclass.to_s.underscore.to_sym)
         end

@@ -22,7 +22,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       allow(ActiveFedora::SolrService).to receive(:query).and_return([])
     end
 
-    let(:reflection) { Book.create_reflection(:has_many, 'pages', { property: 'predicate'}, Book) }
+    let(:reflection) { Book.create_reflection(:has_many, 'pages', { predicate: ActiveFedora::Rdf::RelsExt.isPartOf }, Book) }
     let(:association) { ActiveFedora::Associations::HasManyAssociation.new(book, reflection) }
 
     it "should set the book_id attribute" do
@@ -36,10 +36,10 @@ describe ActiveFedora::Associations::HasManyAssociation do
 
     before do
       # :books must come first, so that we can test that is being passed over in favor of :contents
-      Page.has_many :books, property: :is_part_of, class_name: 'ActiveFedora::Base'
-      Page.has_and_belongs_to_many :contents, property: :is_part_of, class_name: 'ActiveFedora::Base'
+      Page.has_many :books, predicate: ActiveFedora::Rdf::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+      Page.has_and_belongs_to_many :contents, predicate: ActiveFedora::Rdf::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
     end
-    let(:book_reflection) { Book.create_reflection(:has_many, 'pages', {property: :is_part_of}, Book) }
+    let(:book_reflection) { Book.create_reflection(:has_many, 'pages', { predicate: ActiveFedora::Rdf::RelsExt.isPartOf }, Book) }
     let(:association) { ActiveFedora::Associations::HasManyAssociation.new(book, book_reflection) }
 
     subject { association.send(:find_polymorphic_inverse, page) }

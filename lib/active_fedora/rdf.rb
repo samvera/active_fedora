@@ -8,5 +8,6 @@ module ActiveFedora
     autoload :Identifiable
     autoload :ObjectResource
     autoload :Persistence
+    autoload :RelsExt
   end
 end

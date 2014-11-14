@@ -1,7 +1,7 @@
 module ActiveFedora::Associations::Builder
   class Association #:nodoc:
     class_attribute :valid_options
-    self.valid_options = [:class_name, :property]
+    self.valid_options = [:class_name, :property, :predicate]
 
     # Set by subclasses
     class_attribute :macro
