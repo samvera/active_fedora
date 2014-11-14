@@ -82,7 +82,7 @@ describe ActiveFedora::Base do
   describe "a saved object" do
     before do
       class Book < ActiveFedora::Base
-        property :title, predicate: RDF::DC.title
+        property :title, predicate: ::RDF::DC.title
       end
     end
 
@@ -103,11 +103,9 @@ describe ActiveFedora::Base do
       it { should_not be_nil }
     end
 
-    describe "that is updated" do
+    context "when updated with changes after one second" do
       before do
-        # Give something to save
-        obj.title = ['sample']#resource.insert([obj.rdf_subject, RDF::DC.title, 'sample'])
-        # Make sure the modification time changes by at least 1 second
+        obj.title = ['sample']
         sleep 1
       end
 

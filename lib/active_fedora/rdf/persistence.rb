@@ -1,11 +1,11 @@
 module ActiveFedora
-  module Rdf
+  module RDF
     #
     # Mixin for adding datastream persistence to an ActiveTriples::Resource 
     # descendant so that it may be used to back an ActiveFedora::RDFDatastream.
     #
     # @see ActiveFedora::RDFDatastream.resource_class
-    # @see ActiveFedora::Rdf::ObjectResource
+    # @see ActiveFedora::RDF::ObjectResource
     #
     module Persistence
       extend ActiveSupport::Concern

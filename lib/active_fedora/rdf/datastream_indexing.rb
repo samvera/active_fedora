@@ -1,4 +1,4 @@
-module ActiveFedora::Rdf
+module ActiveFedora::RDF
   module DatastreamIndexing
     extend ActiveSupport::Concern
     include Indexing

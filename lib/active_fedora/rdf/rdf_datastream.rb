@@ -1,7 +1,7 @@
 module ActiveFedora
   class RDFDatastream < File
     include ActiveTriples::NestedAttributes
-    include Rdf::DatastreamIndexing
+    include RDF::DatastreamIndexing
     include ActiveTriples::Properties
     include ActiveTriples::Reflection
 
@@ -22,13 +22,13 @@ module ActiveFedora
         if m
           m[1]
         else
-          RDF::URI.new(nil)
+          ::RDF::URI.new(nil)
         end
       end
 
       ##
       # @param [Class] an object to set as the resource class, Must be a descendant of 
-      # ActiveTriples::Resource and include ActiveFedora::Rdf::Persistence.
+      # ActiveTriples::Resource and include ActiveFedora::RDF::Persistence.
       #
       # @return [Class] the object resource class
       def resource_class(klass=nil)
@@ -39,7 +39,7 @@ module ActiveFedora
 
         @resource_class ||= begin
                               klass = Class.new(klass || ActiveTriples::Resource)
-                              klass.send(:include, Rdf::Persistence)
+                              klass.send(:include, RDF::Persistence)
                               klass
                             end
       end
@@ -144,14 +144,14 @@ module ActiveFedora
     end
 
     def deserialize(data=nil)
-      return RDF::Graph.new if new_record? && data.nil?
+      return ::RDF::Graph.new if new_record? && data.nil?
       data ||= remote_content
 
       # Because datastream_content can return nil, we should check that here.
-      return RDF::Graph.new if data.nil?
+      return ::RDF::Graph.new if data.nil?
 
       data.force_encoding('utf-8')
-      RDF::Graph.new << RDF::Reader.for(serialization_format).new(data)
+      ::RDF::Graph.new << ::RDF::Reader.for(serialization_format).new(data)
     end
 
     def serialization_format

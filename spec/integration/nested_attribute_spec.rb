@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "NestedAttribute behavior" do
   before do
     class Bar < ActiveFedora::Base
-      belongs_to :car, predicate: ActiveFedora::Rdf::RelsExt.hasMember
+      belongs_to :car, predicate: ActiveFedora::RDF::RelsExt.hasMember
       has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
         m.field "uno", :string
         m.field "dos", :string
@@ -13,7 +13,7 @@ describe "NestedAttribute behavior" do
 
     # base Car class, used in test for association updates and :allow_destroy flag
     class Car < ActiveFedora::Base
-      has_many :bars, predicate: ActiveFedora::Rdf::RelsExt.hasMember
+      has_many :bars, predicate: ActiveFedora::RDF::RelsExt.hasMember
       accepts_nested_attributes_for :bars, :allow_destroy=>true
     end
 

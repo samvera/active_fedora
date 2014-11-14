@@ -216,7 +216,7 @@ describe ActiveFedora::Base do
             let(:test_object) { WithProperty.new(title: 'foo') }
             before do
               class WithProperty < ActiveFedora::Base
-                property :title, predicate: RDF::DC.title
+                property :title, predicate: ::RDF::DC.title
               end
               allow(test_object).to receive(:assign_id).and_return(@this_id)
               test_object.save
@@ -226,7 +226,7 @@ describe ActiveFedora::Base do
             end
 
             it "should update the resource" do
-              expect(test_object.resource.rdf_subject).to eq RDF::URI.new("#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/#{@this_id}")
+              expect(test_object.resource.rdf_subject).to eq ::RDF::URI.new("#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/#{@this_id}")
               expect(test_object.title).to eq ['foo']
             end
           end

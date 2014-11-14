@@ -16,19 +16,19 @@ module ActiveFedora
     # under fcr:metadata
     def model_type
       if self.respond_to?(:metadata)
-        metadata.ldp_source.graph.query(predicate: RDF.type).objects
+        metadata.ldp_source.graph.query(predicate: ::RDF.type).objects
       else
-        resource.query(subject: resource.rdf_subject, predicate: RDF.type).objects
+        resource.query(subject: resource.rdf_subject, predicate: ::RDF.type).objects
       end
     end
 
     def versions
-      results = versions_graph.query([nil, RDF::URI.new('http://fedora.info/definitions/v4/repository#hasVersionLabel'), nil])
+      results = versions_graph.query([nil, ::RDF::URI.new('http://fedora.info/definitions/v4/repository#hasVersionLabel'), nil])
       results.map(&:object)
     end
 
     def versions_graph
-      @versions_graph ||= RDF::Graph.new << RDF::Reader.for(:ttl).new(versions_request)
+      @versions_graph ||= ::RDF::Graph.new << ::RDF::Reader.for(:ttl).new(versions_request)
     end
 
     def versions_url

@@ -1,5 +1,5 @@
 require 'rdf'
-class ActiveFedora::Rdf::RelsExt < RDF::StrictVocabulary("http://fedora.info/definitions/v4/rels-ext#")
+class ActiveFedora::RDF::RelsExt < RDF::StrictVocabulary("http://fedora.info/definitions/v4/rels-ext#")
   property :hasAnnotation
   property :hasCollectionMember
   property :hasConstituent

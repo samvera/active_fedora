@@ -14,7 +14,7 @@ describe "Objects should be serialized to JSON" do
         end
         has_attributes :foo, datastream: 'descMetadata', multiple: true
         has_attributes :bar, datastream: 'descMetadata', multiple: false
-        property :title, predicate: RDF::DC.title
+        property :title, predicate: ::RDF::DC.title
       end
     end
 
@@ -39,11 +39,11 @@ describe "Objects should be serialized to JSON" do
   context "with nested nodes" do
     before do
       class DummySubnode < ActiveTriples::Resource
-        property :relation, predicate:  RDF::DC[:relation]
+        property :relation, predicate: ::RDF::DC[:relation]
       end
 
       class DummyResource < ActiveFedora::RDFDatastream
-        property :license, predicate:  RDF::DC[:license], class_name: DummySubnode do |index|
+        property :license, predicate: ::RDF::DC[:license], class_name: DummySubnode do |index|
           index.as :searchable, :displayable
         end
         def serialization_format

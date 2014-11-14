@@ -3,18 +3,18 @@ require 'spec_helper'
 describe ActiveFedora::RDFDatastream do
   before do
     class DummySubnode < ActiveTriples::Resource
-      property :title, predicate:  RDF::DC[:title], class_name: RDF::Literal
-      property :relation, predicate:  RDF::DC[:relation]
+      property :title, predicate: ::RDF::DC[:title], class_name: ::RDF::Literal
+      property :relation, predicate: ::RDF::DC[:relation]
     end
 
     class DummyResource < ActiveFedora::RDFDatastream
-      property :title, predicate:  RDF::DC[:title], class_name: RDF::Literal do |index|
+      property :title, predicate: ::RDF::DC[:title], class_name: ::RDF::Literal do |index|
         index.as :searchable, :displayable
       end
-      property :license, predicate:  RDF::DC[:license], class_name: DummySubnode do |index|
+      property :license, predicate: ::RDF::DC[:license], class_name: DummySubnode do |index|
         index.as :searchable, :displayable
       end
-      property :creator, predicate: RDF::DC[:creator], class_name: 'DummyAsset' do |index|
+      property :creator, predicate: ::RDF::DC[:creator], class_name: 'DummyAsset' do |index|
         index.as :searchable
       end
       def serialization_format

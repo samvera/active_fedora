@@ -3,14 +3,14 @@ module ActiveFedora
     extend ActiveSupport::Concern
 
     included do
-      include Rdf::Indexing
+      include RDF::Indexing
       include ActiveTriples::Properties
       include ActiveTriples::Reflection
       delegate :rdf_subject,  :get_values, to: :resource
 
-      property :has_model, predicate: RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel")
-      property :create_date, predicate: ActiveFedora::Rdf::Fcrepo.created
-      property :modified_date, predicate: ActiveFedora::Rdf::Fcrepo.lastModified
+      property :has_model, predicate: ::RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel")
+      property :create_date, predicate: ActiveFedora::RDF::Fcrepo.created
+      property :modified_date, predicate: ActiveFedora::RDF::Fcrepo.lastModified
 
       def create_date
         super.first
@@ -28,7 +28,7 @@ module ActiveFedora
     end
 
     def id
-      if uri.kind_of?(RDF::URI) && uri.value.blank?
+      if uri.kind_of?(::RDF::URI) && uri.value.blank?
         nil
       elsif uri.present?
         self.class.uri_to_id(URI.parse(uri))

@@ -1,5 +1,5 @@
 module ActiveFedora
-  module Rdf
+  module RDF
     extend ActiveSupport::Autoload
     autoload :DatastreamIndexing
     autoload :Fcrepo

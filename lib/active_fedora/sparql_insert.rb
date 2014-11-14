@@ -3,7 +3,7 @@ module ActiveFedora
 
     attr_reader :changes, :subject
 
-    def initialize(changes, subject = RDF::URI.new(nil))
+    def initialize(changes, subject = ::RDF::URI.new(nil))
       @changes = changes
       @subject = subject
     end
@@ -20,7 +20,7 @@ module ActiveFedora
       query +=
         changes.map do |_, result|
           result.map do |statement|
-            RDF::Query::Pattern.new(subject: subject, predicate: statement.predicate, object: statement.object).to_s
+            ::RDF::Query::Pattern.new(subject: subject, predicate: statement.predicate, object: statement.object).to_s
           end.join("\n")
         end.join("\n")
 
@@ -38,7 +38,7 @@ module ActiveFedora
 
     def patterns(subject)
       changes.map do |key, _|
-        RDF::Query::Pattern.new(subject, key, :change).to_s
+        ::RDF::Query::Pattern.new(subject, key, :change).to_s
       end
     end
   end

@@ -57,7 +57,7 @@ describe ActiveFedora::Base do
           has_attributes :duck, datastream: 'xmlish', :at=>[:waterfowl, :ducks, :duck], multiple: true
           has_attributes :animal_id, datastream: 'someData', multiple: false
 
-          property :goose, predicate: RDF::URI.new('http://example.com#hasGoose')
+          property :goose, predicate: ::RDF::URI.new('http://example.com#hasGoose')
 
         end
       end
@@ -105,7 +105,7 @@ describe ActiveFedora::Base do
         describe "with relationships" do
           before do
             class BarHistory3 < BarHistory2
-              belongs_to :library, predicate: ActiveFedora::Rdf::RelsExt.hasConstituent, class_name: 'BarHistory2'
+              belongs_to :library, predicate: ActiveFedora::RDF::RelsExt.hasConstituent, class_name: 'BarHistory2'
             end
             subject.library = library
           end
@@ -282,8 +282,8 @@ describe ActiveFedora::Base do
   context "with a RDF datastream" do
     before :all do
       class BarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :title, :predicate => RDF::DC.title
-        property :description, :predicate => RDF::DC.description
+        property :title, predicate: ::RDF::DC.title
+        property :description, predicate: ::RDF::DC.description
       end
       class BarHistory4 < ActiveFedora::Base
         has_metadata 'rdfish', :type=>BarRdfDatastream
@@ -367,8 +367,8 @@ describe ActiveFedora::Base do
   context "when a datastream is specified as a symbol" do
     before :all do
       class BarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :title, :predicate => RDF::DC.title
-        property :description, :predicate => RDF::DC.description
+        property :title, predicate: ::RDF::DC.title
+        property :description, predicate: ::RDF::DC.description
       end
       class BarHistory4 < ActiveFedora::Base
         has_metadata 'rdfish', :type=>BarRdfDatastream
@@ -391,7 +391,7 @@ describe ActiveFedora::Base do
   context "when properties are defined on an object" do
     before :all do
       class BarHistory4 < ActiveFedora::Base
-        property :title, predicate: RDF::DC.title do |index|
+        property :title, predicate: ::RDF::DC.title do |index|
           index.as :symbol
         end
       end

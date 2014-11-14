@@ -1,5 +1,5 @@
 module ActiveFedora
-  module Rdf
+  module RDF
     module Indexing
       extend ActiveSupport::Concern
       included do
@@ -15,7 +15,7 @@ module ActiveFedora
           fields.each do |field_key, field_info|
             values = resource.get_values(field_key)
             Array(values).each do |val|
-              if val.kind_of? RDF::URI
+              if val.kind_of? ::RDF::URI
                 val = val.to_s
               elsif val.kind_of? ActiveTriples::Resource
                 val = val.solrize

@@ -1,7 +1,7 @@
 require 'rdf/rdfxml'
 
 module ActiveFedora
-  class RdfxmlRDFDatastream < RDFDatastream
+  class RDFXMLDatastream < RDFDatastream
     def serialization_format
       :rdfxml 
     end
