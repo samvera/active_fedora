@@ -122,7 +122,6 @@ describe "a versionable rdf datastream" do
       end
 
       it "should set model_type to versionable" do
-        pending "This isn't getting saved because it should probaly go on fcr:metadata"
         expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
       end
 
@@ -252,7 +251,6 @@ describe "a versionable OM datastream" do
       end
 
       it "should set model_type to versionable" do
-        pending "This isn't getting saved because it should probaly go on fcr:metadata"
         expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
       end
 
@@ -379,7 +377,6 @@ describe "a versionable binary datastream" do
       end
 
       it "should set model_type to versionable" do
-        pending "This isn't getting saved because it should probaly go on fcr:metadata"
         expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
       end
 
