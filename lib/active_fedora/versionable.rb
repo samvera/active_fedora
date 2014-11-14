@@ -15,7 +15,11 @@ module ActiveFedora
     # TODO: This only applies to objects. If we want the same for child resources, it would need to go
     # under fcr:metadata
     def model_type
-      resource.query(subject: resource.rdf_subject, predicate: RDF.type).objects
+      if self.respond_to?(:metadata)
+        metadata.ldp_source.graph.query(predicate: RDF.type).objects
+      else
+        resource.query(subject: resource.rdf_subject, predicate: RDF.type).objects
+      end
     end
 
     def versions
