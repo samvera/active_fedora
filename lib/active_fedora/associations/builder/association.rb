@@ -1,7 +1,7 @@
 module ActiveFedora::Associations::Builder
   class Association #:nodoc:
     class_attribute :valid_options
-    self.valid_options = [:class_name, :property, :predicate]
+    self.valid_options = [:class_name, :predicate]
 
     # Set by subclasses
     class_attribute :macro
@@ -18,6 +18,7 @@ module ActiveFedora::Associations::Builder
 
     def initialize(model, name, options)
       @model, @name, @options = model, name, options
+      translate_property_to_predicate
       validate_options
     end
 
@@ -26,16 +27,21 @@ module ActiveFedora::Associations::Builder
       model.create_reflection(self.class.macro, name, options, model)
     end
 
+    def translate_property_to_predicate
+      return unless options[:property]
+      Deprecation.warn Association, "the :property option to `#{model}.#{macro} :#{name}' is deprecated and will be removed in active-fedora 10.0. Use :predicate instead", caller(5)
+      options[:predicate] = predicate(options.delete(:property))
+    end
+
     def validate_options
       options.assert_valid_keys(self.class.valid_options)
     end
 
 
     # Returns the RDF predicate as defined by the :property attribute
-    def predicate
-      predicate = options[:property]
-      return predicate if predicate.kind_of? ::RDF::URI
-      ActiveFedora::Predicates.find_graph_predicate(predicate)
+    def predicate(property)
+      return property if property.kind_of? RDF::URI
+      ActiveFedora::Predicates.find_graph_predicate(property)
     end
 
     def self.define_callbacks(model, reflection)

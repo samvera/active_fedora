@@ -4,8 +4,8 @@ module ActiveFedora
 
     attr_reader :object, :graph, :changed_attributes
 
-    # @param [ActiveFedor::Base] object The resource that has associations and properties
-    # @param [Rdf::Graph] graph The RDF graph that holds the current state
+    # @param [ActiveFedora::Base] object The resource that has associations and properties
+    # @param [RDF::Graph] graph The RDF graph that holds the current state
     # @param [Array] changed_attributes A list of properties that have changed
     def initialize(object, graph, changed_attributes)
       @object = object

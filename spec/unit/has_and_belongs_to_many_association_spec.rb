@@ -24,7 +24,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     context "a one way relationship " do
       describe "adding memeber" do
         it "should set the relationship attribute" do
-          reflection = Book.create_reflection(:has_and_belongs_to_many, :pages, {property: 'predicate'}, Book)
+          reflection = Book.create_reflection(:has_and_belongs_to_many, :pages, {predicate: ActiveFedora::RDF::RelsExt.isMemberOfCollection}, Book)
           allow(ActiveFedora::SolrService).to receive(:query).and_return([])
           ac = ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, reflection)
           expect(ac).to receive(:callback).twice
@@ -46,7 +46,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
         let(:query2) { ids.slice(10,10).map {|i| "_query_:\"{!raw f=id}#{i}\""}.join(" OR ") }
 
         it "should call solr query multiple times" do
-          reflection = Book.create_reflection(:has_and_belongs_to_many, :pages, { property: 'predicate', solr_page_size: 10}, Book)
+          reflection = Book.create_reflection(:has_and_belongs_to_many, :pages, { predicate: ActiveFedora::RDF::RelsExt.isMemberOfCollection, solr_page_size: 10}, Book)
           expect(subject).to receive(:[]).with('page_ids').and_return(ids)
           expect(ActiveFedora::SolrService).to receive(:query).with(query1, rows: 10).and_return([])
           expect(ActiveFedora::SolrService).to receive(:query).with(query2, rows: 10).and_return([])
@@ -58,8 +58,8 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     end
 
     context "with an inverse reflection" do
-      let!(:inverse) { Page.create_reflection(:has_and_belongs_to_many, :books, { property: 'inverse_predicate' }, Page) }
-      let(:reflection) { Book.create_reflection(:has_and_belongs_to_many, :pages, { property: 'predicate', inverse_of: 'books'}, Book) }
+      let!(:inverse) { Page.create_reflection(:has_and_belongs_to_many, :books, { predicate: ActiveFedora::RDF::RelsExt.isMemberOfCollection }, Page) }
+      let(:reflection) { Book.create_reflection(:has_and_belongs_to_many, :pages, { predicate: ActiveFedora::RDF::RelsExt.hasCollectionMember, inverse_of: 'books'}, Book) }
       let(:ac) { ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, reflection) }
       let(:object) { Page.new }
 
@@ -84,13 +84,13 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
   context "class with association" do
     before do
       class Collection < ActiveFedora::Base
-        has_and_belongs_to_many :members, property: :has_collection_member, class_name: "ActiveFedora::Base", after_remove: :remove_member
+        has_and_belongs_to_many :members, predicate: ActiveFedora::RDF::RelsExt.hasCollectionMember, class_name: "ActiveFedora::Base", after_remove: :remove_member
         def remove_member (m)
         end
       end
 
       class Thing < ActiveFedora::Base
-        has_many :collections, property: :has_collection_member, class_name: "ActiveFedora::Base"
+        has_many :collections, predicate: ActiveFedora::RDF::RelsExt.hasCollectionMember, class_name: "ActiveFedora::Base"
       end
     end
 

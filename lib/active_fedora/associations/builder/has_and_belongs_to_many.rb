@@ -4,6 +4,15 @@ module ActiveFedora::Associations::Builder
 
     self.valid_options += [:inverse_of, :solr_page_size]
 
+    def validate_options
+      super
+      if !options[:predicate]
+        raise "You must specify a predicate for #{name}"
+      elsif !options[:predicate].kind_of?(RDF::URI)
+        raise ArgumentError, "Predicate must be a kind of RDF::URI"
+      end
+    end
+
     def build
       reflection = super
       define_destroy_hook
