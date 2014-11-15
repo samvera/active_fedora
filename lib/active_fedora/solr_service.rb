@@ -117,11 +117,12 @@ module ActiveFedora
       # @example
       #   construct_query_for_rel [[:has_model, "info:fedora/afmodel:ComplexCollection"], [:has_model, "info:fedora/afmodel:ActiveFedora_Base"]], 'OR'
       #   # => _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ComplexCollection" OR _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ActiveFedora_Base"
+      #
+      #   construct_query_for_rel [[Book.reflect_on_association(:library), "foo/bar/baz"]]
       def construct_query_for_rel(field_pairs, join_with = 'AND')
         field_pairs = field_pairs.to_a if field_pairs.kind_of? Hash
 
-        clauses = field_pairs.reject{ |_, target_uri| target_uri.blank? }.
-          map { |predicate, target_uri| raw_query(solr_name(predicate, :symbol), target_uri) }
+        clauses = pairs_to_clauses(field_pairs.reject { |_, target_uri| target_uri.blank? })
         clauses.empty? ? "id:NEVER_USE_THIS_ID" : clauses.join(" #{join_with} ".freeze)
       end
 
@@ -157,6 +158,26 @@ module ActiveFedora
       def commit
         SolrService.instance.conn.commit
       end
+
+      private
+        # Given an list of 2 element lists, transform to a list of solr clauses
+        def pairs_to_clauses(pairs)
+          pairs.map do |field, target_uri|
+            raw_query(solr_field(field), target_uri)
+          end
+        end
+
+        # @param [String, ActiveFedora::Relation] field
+        # @return [String] the corresponding solr field for the string
+        def solr_field(field)
+          case field
+          when ActiveFedora::Reflection::AssociationReflection
+            field.solr_key
+          else
+            solr_name(field, :symbol)
+          end
+        end
+
     end
 
     HAS_MODEL_SOLR_FIELD = solr_name("has_model", :symbol).freeze

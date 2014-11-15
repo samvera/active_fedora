@@ -8,7 +8,6 @@ module ActiveFedora
         construct_query
       end
 
-
       # Implements the reader method, e.g. foo.items for Foo.has_many :items
       # @param opts [Boolean, Hash] if true, force a reload
       # @option opts [Symbol] :response_format can be ':solr' to return a solr result.
@@ -332,7 +331,7 @@ module ActiveFedora
         def construct_query
 
           #TODO use primary_key instead of id
-          clauses = {find_predicate.to_s => @owner.id}
+          clauses = { find_reflection => @owner.id }
           clauses[:has_model] = @reflection.class_name.constantize.to_class_uri if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base'
           @counter_query = @finder_query = ActiveFedora::SolrService.construct_query_for_rel(clauses)
         end
@@ -340,29 +339,30 @@ module ActiveFedora
 
       private
 
-        def find_predicate
-          if @reflection.options[:predicate]
-            reflection.predicate.to_s
-          elsif @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base' && @reflection.macro != :has_and_belongs_to_many
+        def find_reflection
+          return reflection if @reflection.options[:predicate]
+          if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base' && @reflection.macro != :has_and_belongs_to_many
             inverse_relation = @owner.class.to_s.underscore.to_sym
             begin
-              find_class_for_relation(@reflection.class_name.constantize)
+              find_reflection_for_relation(@reflection.class_name.constantize)
             rescue NameError
               raise "No :predicate attribute was set or could be inferred for #{@reflection.macro} #{@reflection.name.inspect} on #{@owner.class}"
             end
+          else
+            raise "Couldn't find reflection"
           end
         end
 
-        def find_class_for_relation(klass, inverse_relation=@owner.class.to_s.underscore.to_sym)
+        def find_reflection_for_relation(klass, inverse_relation=@owner.class.to_s.underscore.to_sym)
           raise "Unable to lookup the :predicate attribute for #{@reflection.macro} #{@reflection.name.inspect} on #{@owner.class} because #{klass} specifies \"class_name: 'ActiveFedora::Base'\".  Either specify a specific class_name in #{klass} or set :predicate in the #{@reflection.macro} declaration on #{@owner.class}" if inverse_relation == :'active_fedora/base'
           if klass.reflections.key?(inverse_relation)
             # Try it singular
-            return klass.reflections[inverse_relation].predicate
+            return klass.reflections[inverse_relation]
           elsif klass.reflections.key?(inverse_relation.to_s.pluralize.to_sym)
             # Try it plural
-            return klass.reflections[inverse_relation.to_s.pluralize.to_sym].predicate
+            return klass.reflections[inverse_relation.to_s.pluralize.to_sym]
           end
-          find_class_for_relation(klass, @owner.class.superclass.to_s.underscore.to_sym)
+          find_reflection_for_relation(klass, @owner.class.superclass.to_s.underscore.to_sym)
         end
 
         def create_record(attributes, raise = false)

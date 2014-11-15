@@ -483,8 +483,8 @@ describe ActiveFedora::Base do
         Object.send(:remove_const, :MediaObject)
       end
 
-      it "it should find the predicate" do
-        expect(MediaObject.new.association(:baubles).send(:find_predicate)).to eq 'http://fedora.info/definitions/v4/rels-ext#isPartOf'
+      it "it should find the reflection that bears the predicate" do
+        expect(MediaObject.new.association(:baubles).send(:find_reflection)).to eq Bauble.reflect_on_association(:media_object)
       end
     end
 
@@ -503,8 +503,8 @@ describe ActiveFedora::Base do
         Object.send(:remove_const, :MediaObject)
       end
 
-      it "it should find the predicate" do
-        expect(MediaObject.new.association(:parts).send(:find_predicate)).to eq 'http://fedora.info/definitions/v4/rels-ext#isPartOf'
+      it "it should find the reflection that bears the predicate" do
+        expect(MediaObject.new.association(:parts).send(:find_reflection)).to eq MasterFile.reflect_on_association(:media_object)
       end
     end
 
@@ -523,8 +523,8 @@ describe ActiveFedora::Base do
         Object.send(:remove_const, :MediaObject)
       end
 
-      it "it should find the predicate" do
-        expect(MediaObject.new.association(:baubles).send(:find_predicate)).to eq 'http://fedora.info/definitions/v4/rels-ext#hasEquivalent'
+      it "it should find the reflection that bears the predicate" do
+        expect(MediaObject.new.association(:baubles).send(:find_reflection)).to eq MediaObject.reflect_on_association(:baubles)
       end
     end
 

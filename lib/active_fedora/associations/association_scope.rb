@@ -25,7 +25,7 @@ module ActiveFedora
             scope = scope.where( ActiveFedora::SolrService.construct_query_for_ids([owner[reflection.foreign_key]]))
           elsif reflection.source_macro == :has_and_belongs_to_many
           else
-            scope = scope.where( ActiveFedora::SolrService.construct_query_for_rel(association.send(:find_predicate) => owner.id))
+            scope = scope.where( ActiveFedora::SolrService.construct_query_for_rel(association.send(:find_reflection) => owner.id))
           end
 
           is_first_chain = i == 0
