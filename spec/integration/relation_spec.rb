@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
   before :all do
-    class Library < ActiveFedora::Base 
-      has_many :books, property: :has_member
+    class Library < ActiveFedora::Base
+      has_many :books, predicate: ActiveFedora::RDF::RelsExt.isPartOf
     end
     class Book < ActiveFedora::Base; end
   end
@@ -12,7 +12,7 @@ describe ActiveFedora::Base do
     Object.send(:remove_const, :Book)
   end
 
-  subject { Library.all } 
+  subject { Library.all }
 
   it "should be a relation" do
     expect(subject.class).to be ActiveFedora::Relation

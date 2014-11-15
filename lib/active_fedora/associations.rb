@@ -121,7 +121,7 @@ module ActiveFedora
       #
       # === Options
       #
-      # [:property]
+      # [:predicate]
       #   the association predicate to use when storing the association +REQUIRED+
       # [:class_name]
       #   Specify the class name of the association. Use it only if that name can't be inferred
@@ -129,8 +129,8 @@ module ActiveFedora
       #   if the real class name is Person, you'll have to specify it with this option.
       #
       # Option examples:
-      #   belongs_to :firm, :property => :client_of
-      #   belongs_to :author, :class_name => "Person", :property => :author_of
+      #   belongs_to :firm, predicate: OurVocab.clientOf
+      #   belongs_to :author, class_name: "Person", predicate: OurVocab.authorOf
       def belongs_to(name, options = {})
         Builder::BelongsTo.build(self, name, options)
 
@@ -191,18 +191,18 @@ module ActiveFedora
       #   Specify the class name of the association. Use it only if that name can't be inferred
       #   from the association name. So <tt>has_and_belongs_to_many :projects</tt> will by default be linked to the
       #   Project class, but if the real class name is SuperProject, you'll have to specify it with this option.
-      # [:property]
+      # [:predicate]
       #   <b>REQUIRED</b> Specify the predicate to use when storing the relationship.
       # [:inverse_of]
       #   Specify the predicate to use when storing the relationship on the foreign object. If it is not provided, the relationship will not set the foriegn association.
       #
       # Option examples:
-      #   has_and_belongs_to_many :projects, :property=>:works_on
-      #   has_and_belongs_to_many :nations, :class_name => "Country", :property=>:is_citizen_of
-      #   has_and_belongs_to_many :topics, :property=>:has_topic, :inverse_of=>:is_topic_of
+      #   has_and_belongs_to_many :projects, predicate: OurVocab.worksOn
+      #   has_and_belongs_to_many :nations, class_name: "Country", predicate: OurVocab.isCitizenOf
+      #   has_and_belongs_to_many :topics, predicate: RDF::FOAF.isPrimaryTopicOf, inverse_of: :is_topic_of
       def has_and_belongs_to_many(name, options = {})
         Builder::HasAndBelongsToMany.build(self, name, options)
-        Builder::Property.build(self, name, options.slice(:property, :class_name, :predicate))
+        Builder::Property.build(self, name, options.slice(:class_name, :predicate))
       end
     end
   end

@@ -186,12 +186,9 @@ module ActiveFedora
         @foreign_key ||= options[:foreign_key] || derive_foreign_key
       end
 
-      # Returns the RDF predicate as defined by the :property attribute
-      # TODO this is dupliacate code from Associations::Builder::Association
+      # Returns the RDF predicate as defined by the :predicate option
       def predicate
-        predicate = options[:predicate] || options[:property]
-        return predicate if predicate.kind_of? ::RDF::URI
-        ActiveFedora::Predicates.find_graph_predicate(predicate)
+        options[:predicate]
       end
 
       def solr_key

@@ -545,7 +545,7 @@ describe ActiveFedora::Base do
       end
 
       it "it should find the predicate" do
-        expect { MediaObject.new.shoes.send(:find_predicate) }.to raise_error RuntimeError, "No :property attribute was set or could be inferred for has_many :shoes on MediaObject"
+        expect { MediaObject.new.shoes.send(:find_predicate) }.to raise_error RuntimeError, "No :predicate attribute was set or could be inferred for has_many :shoes on MediaObject"
       end
     end
   end
