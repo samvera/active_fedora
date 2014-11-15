@@ -74,7 +74,6 @@ module ActiveFedora
         def delete_records(records, method)
           if method == :destroy
             records.each { |r| r.destroy }
-            #update_counter(-records.length) unless inverse_updates_counter_cache?
           else
             # Find all the records that point to this and nullify them
             # keys  = records.map { |r| r[reflection.association_primary_key] }
