@@ -55,4 +55,13 @@ describe ActiveFedora::Base do
       end
     end
   end
+
+  # TODO: Bug described in issue #609
+  describe "#select" do
+    it "should choose a subset of objects in the relationship" do
+      pending "method has private visibility"
+      expect(library.books.select([:id])).to include(book1.id)
+    end
+  end
+
 end
