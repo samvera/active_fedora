@@ -1,3 +1,3 @@
 module ActiveFedora
-  VERSION = "8.0.0.alpha"
+  VERSION = "9.0.0.beta1"
 end
