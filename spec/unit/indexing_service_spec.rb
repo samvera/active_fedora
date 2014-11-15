@@ -15,8 +15,8 @@ describe ActiveFedora::IndexingService do
       expect(object).to receive(:[]).with('person_id').and_return('info:fedora/demo:10')
       expect(object).to receive(:[]).with('location_id').and_return('info:fedora/demo:11')
       expect(object.class).to receive(:reflections).and_return(reflections)
-      expect(subject[ActiveFedora::SolrService.solr_name("http://fedora.info/definitions/v4/rels-ext#isMemberOf", :symbol)]).to eq "info:fedora/demo:10"
-      expect(subject[ActiveFedora::SolrService.solr_name("http://fedora.info/definitions/v4/rels-ext#isPartOf", :symbol)]).to eq "info:fedora/demo:11"
+      expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("http://fedora.info/definitions/v4/rels-ext#isMemberOf", :symbol)]).to eq "info:fedora/demo:10"
+      expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("http://fedora.info/definitions/v4/rels-ext#isPartOf", :symbol)]).to eq "info:fedora/demo:11"
     end
   end
 

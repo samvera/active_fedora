@@ -15,7 +15,7 @@ describe "scoped queries" do
 
         def to_solr(doc = {})
           doc = super
-          doc[ActiveFedora::SolrService.solr_name('foo', :sortable)] = doc[ActiveFedora::SolrService.solr_name('foo', type: :string)]
+          doc[ActiveFedora::SolrQueryBuilder.solr_name('foo', :sortable)] = doc[ActiveFedora::SolrQueryBuilder.solr_name('foo', type: :string)]
           doc
         end
 
@@ -66,12 +66,12 @@ describe "scoped queries" do
       end
 
       it "should query" do
-        field = ActiveFedora::SolrService.solr_name('foo', type: :string)
+        field = ActiveFedora::SolrQueryBuilder.solr_name('foo', type: :string)
         expect(ModelIntegrationSpec::Basic.where(field => 'Beta')).to eq [test_instance1]
         expect(ModelIntegrationSpec::Basic.where('foo' => 'Beta')).to eq [test_instance1]
       end
       it "should order" do
-        expect(ModelIntegrationSpec::Basic.order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc')).to eq [test_instance2, test_instance1, test_instance3]
+        expect(ModelIntegrationSpec::Basic.order(ActiveFedora::SolrQueryBuilder.solr_name('foo', :sortable) + ' asc')).to eq [test_instance2, test_instance1, test_instance3]
       end
       it "should limit" do
         expect(ModelIntegrationSpec::Basic.limit(1)).to eq [test_instance1]
@@ -81,7 +81,7 @@ describe "scoped queries" do
       end
 
       it "should chain queries" do
-        expect(ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc').limit(1)).to eq [test_instance2]
+        expect(ModelIntegrationSpec::Basic.where(ActiveFedora::SolrQueryBuilder.solr_name('bar', type: :string) => 'Peanuts').order(ActiveFedora::SolrQueryBuilder.solr_name('foo', :sortable) + ' asc').limit(1)).to eq [test_instance2]
       end
 
       it "should wrap string conditions with parentheses" do
@@ -89,26 +89,26 @@ describe "scoped queries" do
       end
 
       it "should chain where queries" do
-        expect(ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').where("#{ActiveFedora::SolrService.solr_name('foo', type: :string)}:bar").where_values).to eq ["#{ActiveFedora::SolrService.solr_name('bar', type: :string)}:Peanuts", "(#{ActiveFedora::SolrService.solr_name('foo', type: :string)}:bar)"]
+        expect(ModelIntegrationSpec::Basic.where(ActiveFedora::SolrQueryBuilder.solr_name('bar', type: :string) => 'Peanuts').where("#{ActiveFedora::SolrQueryBuilder.solr_name('foo', type: :string)}:bar").where_values).to eq ["#{ActiveFedora::SolrQueryBuilder.solr_name('bar', type: :string)}:Peanuts", "(#{ActiveFedora::SolrQueryBuilder.solr_name('foo', type: :string)}:bar)"]
       end
 
       it "should chain count" do
-        expect(ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts').count).to eq 2
+        expect(ModelIntegrationSpec::Basic.where(ActiveFedora::SolrQueryBuilder.solr_name('bar', type: :string) => 'Peanuts').count).to eq 2
       end
 
       it "calling first should not affect the relation's ability to get all results later" do
-        relation = ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts')
+        relation = ModelIntegrationSpec::Basic.where(ActiveFedora::SolrQueryBuilder.solr_name('bar', type: :string) => 'Peanuts')
         expect {relation.first}.not_to change {relation.to_a.size}
       end
 
       it "calling where should not affect the relation's ability to get all results later" do
-        relation = ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', type: :string) => 'Peanuts')
-        expect {relation.where(ActiveFedora::SolrService.solr_name('foo', type: :string) => 'bar')}.not_to change {relation.to_a.size}
+        relation = ModelIntegrationSpec::Basic.where(ActiveFedora::SolrQueryBuilder.solr_name('bar', type: :string) => 'Peanuts')
+        expect {relation.where(ActiveFedora::SolrQueryBuilder.solr_name('foo', type: :string) => 'bar')}.not_to change {relation.to_a.size}
       end
 
       it "calling order should not affect the original order of the relation later" do
-        relation = ModelIntegrationSpec::Basic.order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' asc')
-        expect {relation.order(ActiveFedora::SolrService.solr_name('foo', :sortable) + ' desc')}.not_to change {relation.to_a}
+        relation = ModelIntegrationSpec::Basic.order(ActiveFedora::SolrQueryBuilder.solr_name('foo', :sortable) + ' asc')
+        expect {relation.order(ActiveFedora::SolrQueryBuilder.solr_name('foo', :sortable) + ' desc')}.not_to change {relation.to_a}
       end
     end
 

@@ -218,26 +218,26 @@ describe ActiveFedora::NtriplesRDFDatastream do
       describe ".to_solr()" do
         subject { @obj.to_solr({}, name: 'solrRdf') }
         it "should return the right fields" do
-          expect(subject.keys).to include(ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string),
-                ActiveFedora::SolrService.solr_name("solr_rdf__publisher", type: :string),
-                ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :sortable),
-                ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :facetable),
-                ActiveFedora::SolrService.solr_name("solr_rdf__created", :sortable, type: :date),
-                ActiveFedora::SolrService.solr_name("solr_rdf__created", :displayable),
-                ActiveFedora::SolrService.solr_name("solr_rdf__title", type: :string),
-                ActiveFedora::SolrService.solr_name("solr_rdf__title", :sortable),
-                ActiveFedora::SolrService.solr_name("solr_rdf__based_near", type: :string),
-                ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :facetable))
+          expect(subject.keys).to include(ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__related_url", type: :string),
+                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", type: :string),
+                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", :sortable),
+                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", :facetable),
+                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__created", :sortable, type: :date),
+                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__created", :displayable),
+                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__title", type: :string),
+                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__title", :sortable),
+                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__based_near", type: :string),
+                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__based_near", :facetable))
 
         end
 
         it "should return the right values" do
-          expect(subject[ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string)]).to eq ["http://example.org/blogtastic/"]
-          expect(subject[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", type: :string)]).to eq ["Tacoma, WA","Renton, WA"]
-          expect(subject[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :facetable)]).to eq ["Tacoma, WA","Renton, WA"]
-          expect(subject[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", type: :string)]).to eq ["Bob's Blogtastic Publishing"]
-          expect(subject[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :sortable)]).to eq "Bob's Blogtastic Publishing"
-          expect(subject[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :facetable)]).to eq ["Bob's Blogtastic Publishing"]
+          expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__related_url", type: :string)]).to eq ["http://example.org/blogtastic/"]
+          expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__based_near", type: :string)]).to eq ["Tacoma, WA","Renton, WA"]
+          expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__based_near", :facetable)]).to eq ["Tacoma, WA","Renton, WA"]
+          expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", type: :string)]).to eq ["Bob's Blogtastic Publishing"]
+          expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", :sortable)]).to eq "Bob's Blogtastic Publishing"
+          expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", :facetable)]).to eq ["Bob's Blogtastic Publishing"]
         end
       end
     end

@@ -263,7 +263,7 @@ module ActiveFedora
       def find_target
         # TODO: don't reify, just store the solr results and lazily reify.
         # For now, we set a hard limit of 1000 results.
-        records = ActiveFedora::SolrService.reify_solr_results(load_from_solr(rows: 1000))
+        records = ActiveFedora::QueryResultBuilder.reify_solr_results(load_from_solr(rows: 1000))
         records.each { |record| set_inverse_instance(record) }
         records
       end
@@ -333,7 +333,7 @@ module ActiveFedora
           #TODO use primary_key instead of id
           clauses = { find_reflection => @owner.id }
           clauses[:has_model] = @reflection.class_name.constantize.to_class_uri if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base'
-          @counter_query = @finder_query = ActiveFedora::SolrService.construct_query_for_rel(clauses)
+          @counter_query = @finder_query = ActiveFedora::SolrQueryBuilder.construct_query_for_rel(clauses)
         end
 
 

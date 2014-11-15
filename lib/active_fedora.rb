@@ -69,6 +69,7 @@ module ActiveFedora #:nodoc:
     autoload :Persistence
     autoload :QualifiedDublinCoreDatastream
     autoload :Querying
+    autoload :QueryResultBuilder
     autoload :RDF
     autoload_under 'rdf' do
       autoload :RDFDatastream
@@ -91,6 +92,7 @@ module ActiveFedora #:nodoc:
     autoload :Serialization
     autoload :SimpleDatastream
     autoload :SolrInstanceLoader
+    autoload :SolrQueryBuilder
     autoload :SolrService
     autoload :SparqlInsert
     autoload :Predicates

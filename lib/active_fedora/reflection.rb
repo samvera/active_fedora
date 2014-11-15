@@ -192,7 +192,7 @@ module ActiveFedora
       end
 
       def solr_key
-        ActiveFedora::SolrService.solr_name(predicate.to_s, :symbol)
+        ActiveFedora::SolrQueryBuilder.solr_name(predicate.to_s, :symbol)
       end
 
       def check_validity!

@@ -9,7 +9,7 @@ module ActiveFedora
     end
 
     def default_sort_params
-      [ActiveFedora::SolrService.solr_name(:system_create, :stored_sortable, type: :date)+' asc']
+      [ActiveFedora::SolrQueryBuilder.solr_name(:system_create, :stored_sortable, type: :date)+' asc']
     end
 
   end

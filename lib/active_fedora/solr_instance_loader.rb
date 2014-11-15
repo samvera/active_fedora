@@ -51,7 +51,7 @@ module ActiveFedora
     end
 
     def active_fedora_class
-      @active_fedora_class ||= ActiveFedora::SolrService.class_from_solr_document(solr_doc)
+      @active_fedora_class ||= ActiveFedora::QueryResultBuilder.class_from_solr_document(solr_doc)
     end
 
     def profile_json
