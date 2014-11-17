@@ -270,7 +270,7 @@ describe ActiveFedora::RDFDatastream do
     context 'when the object has no Rdf::Resource' do
       before do
         class DummyOmAsset < ActiveFedora::Base
-          has_metadata :name => 'descMetadata', :type => OmDatastream
+          has_metadata :name => 'descMetadata', :type => ActiveFedora::OmDatastream
         end
 
         @new_object = DummyOmAsset.new
@@ -293,6 +293,56 @@ describe ActiveFedora::RDFDatastream do
         expect{@new_object.resource << RDF::Statement.new(RDF::Node.new, RDF::DC.title, 'title')
 }.to raise_error TypeError
       end
+    end    
+  end
+
+  context 'with custom resource' do
+    before do
+
+      class DummyATResource < ActiveTriples::Resource
+        configure :base_uri => 'http://example.org/at/obj#', :type => RDF::OWL.Thing
+        property :title, :predicate => RDF::DC.alternative
+        property :my_special_property, :predicate => RDF::DC.spatial
+      end
+
+      DummyResource.resource_class DummyATResource
+    end
+
+    after do
+      Object.send(:remove_const, "DummyATResource")
+    end
+
+    it 'lets me specify a resource class' do
+      expect(DummyResource.resource_class < DummyATResource).to be_true
+    end
+
+    it 'creates underlying resource of type resource_class' do
+      expect(subject.resource).to be_a DummyATResource
+    end
+
+    it 'has properties from resource_class' do
+      expect(subject.resource.class.properties).to include :my_special_property.to_s
+    end
+
+    it 'favors property configuration from datastream' do
+      expect(subject.resource.class.properties['title'].predicate).to eq RDF::DC.title
+    end
+
+    it 'exposes resource propreties to parent object via datastream' do
+      subject.resource.title = 'Wizard of Oz'
+      expect(subject.title).to eq subject.resource.title
+    end
+
+    it 'applies base_uri from resource class' do
+      expect(subject.resource.class.base_uri).to eq DummyATResource.base_uri
+    end
+
+    it 'applies rdf type from resource class' do
+      expect(subject.resource.class.type).to eq DummyATResource.type
+    end
+
+    it 'refuses to change resource_class once set' do
+      expect { DummyResource.resource_class(ActiveTriples::Resource) }.to raise_error ArgumentError
     end
   end
 end
