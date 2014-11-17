@@ -10,6 +10,10 @@ describe "Loading from solr" do
         index.type :date
         index.as :stored_searchable, :sortable
       end
+      property :date_modified, predicate: RDF::DC.dateSubmitted do |index|
+        index.type :date
+        index.as :stored_sortable
+      end
       property :identifier, predicate: RDF::DC.identifier do |index|
         index.type :integer
         index.as :stored_searchable, :sortable
@@ -28,6 +32,7 @@ describe "Loading from solr" do
       has_metadata 'rdf', type: MyRdfDatastream
       has_metadata 'om', type: MyOmDatastream
       has_attributes :based_near, :related_url, :part, :date_uploaded, datastream: 'rdf', multiple: true
+      has_attributes :date_modified, datastream: 'rdf', multiple: false
       has_attributes :title, :identifier, datastream: 'rdf', multiple: false
       has_attributes :duck, datastream: 'om', multiple: false
     end
@@ -35,6 +40,7 @@ describe "Loading from solr" do
 
   let!(:original) { RdfTest.create!(title: "PLAN 9 FROM OUTER SPACE",
                                     date_uploaded: Date.parse('1959-01-01'),
+                                    date_modified: Date.parse('1959-01-01'),
                                     duck: "quack",
                                    identifier: 12345) }
 
@@ -50,6 +56,7 @@ describe "Loading from solr" do
     obj = RdfTest.load_instance_from_solr original.pid
     expect(obj.title).to eq "PLAN 9 FROM OUTER SPACE"
     expect(obj.date_uploaded).to eq [Date.parse('1959-01-01')]
+    expect(obj.date_modified).to eq Date.parse('1959-01-01')
     expect(obj.identifier).to eq 12345
     expect{obj.part}.to raise_error KeyError, "Tried to fetch `part' from solr, but it isn't indexed."
     expect(ActiveFedora::Base.logger).to receive(:info).with "Couldn't get duck out of solr, because the datastream 'MyOmDatastream' doesn't respond to 'primary_solr_name'. Trying another way."
