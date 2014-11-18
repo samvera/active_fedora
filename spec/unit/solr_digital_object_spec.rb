@@ -47,10 +47,10 @@ describe ActiveFedora::SolrDigitalObject do
       expect(subject.fetch('author')).to be_empty
     end
     it "should grab values" do
-      expect(subject.fetch('title')).to eq 'foo'
+      expect(subject.fetch('title')).to eq ['foo']
     end
     it "should grab values" do
-      expect(subject.fetch('title')).to eq 'foo'
+      expect(subject.fetch('title')).to eq ['foo']
     end
 
     it "should raise an error if the field isn't indexed" do
