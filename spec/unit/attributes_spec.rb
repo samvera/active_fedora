@@ -105,7 +105,7 @@ describe ActiveFedora::Base do
         describe "with relationships" do
           before do
             class BarHistory3 < BarHistory2
-              belongs_to :library, predicate: ActiveFedora::RDF::RelsExt.hasConstituent, class_name: 'BarHistory2'
+              belongs_to :library, predicate: ActiveFedora::RDF::FedoraRelsExt.hasConstituent, class_name: 'BarHistory2'
             end
             subject.library = library
           end

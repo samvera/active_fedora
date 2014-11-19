@@ -4,11 +4,11 @@ require 'timeout'
 describe "fedora_solr_sync_issues" do
   before :all do
     class ParentThing < ActiveFedora::Base
-      has_many :things, :class_name=>'ChildThing', predicate: ActiveFedora::RDF::RelsExt.isPartOf
+      has_many :things, :class_name=>'ChildThing', predicate: ActiveFedora::RDF::FedoraRelsExt.isPartOf
     end
 
     class ChildThing < ActiveFedora::Base
-      belongs_to :parent, :class_name=>'ParentThing', predicate: ActiveFedora::RDF::RelsExt.isPartOf
+      belongs_to :parent, :class_name=>'ParentThing', predicate: ActiveFedora::RDF::FedoraRelsExt.isPartOf
     end
   end
 
