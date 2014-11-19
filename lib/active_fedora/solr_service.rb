@@ -63,7 +63,6 @@ module ActiveFedora
           model_value = Model.from_class_uri(value)
 
           if model_value
-
             # Set as the first model in case opts[:class] was nil
             best_model_match ||= model_value
 
