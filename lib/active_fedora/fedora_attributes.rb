@@ -9,8 +9,8 @@ module ActiveFedora
       delegate :rdf_subject,  :get_values, to: :resource
 
       property :has_model, predicate: ::RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel")
-      property :create_date, predicate: ActiveFedora::RDF::Fcrepo.created
-      property :modified_date, predicate: ActiveFedora::RDF::Fcrepo.lastModified
+      property :create_date, predicate: ActiveFedora::RDF::Fcrepo4.created
+      property :modified_date, predicate: ActiveFedora::RDF::Fcrepo4.lastModified
 
       def create_date
         super.first
