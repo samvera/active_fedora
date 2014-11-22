@@ -2,13 +2,37 @@ development:
   user: fedoraAdmin
   password: fedoraAdmin
   url: http://127.0.0.1:8983/fedora
+  ########
+  # optional parameters available for active fedora uncomment to send values
+  ########
+  # timeout: 60
+  # open_timeout: nil
+  # ssl_client_cert: <ssl certificate>
+  # ssl_client_key:  <ssl key>
+  # validateChecksum: false
 test: &TEST  
   user: fedoraAdmin
   password: fedoraAdmin
   url: <%= "http://127.0.0.1:#{ENV['TEST_JETTY_PORT'] || 8983}/fedora-test" %>
+  ########
+  # optional parameters available for active fedora uncomment to send values
+  ########
+  # timeout: 60
+  # open_timeout: nil
+  # ssl_client_cert: <ssl certificate>
+  # ssl_client_key:  <ssl key>
+  # validateChecksum: false
 production:
   user: fedoraAdmin
   password: fedoraAdmin
   url: http://your.production.server:8080/fedora
+  ########
+  # optional parameters available for active fedora uncomment to send values
+  ########
+  # timeout: 60
+  # open_timeout: nil
+  # ssl_client_cert: <ssl certificate>
+  # ssl_client_key:  <ssl key>
+  # validateChecksum: false
 cucumber:
   <<: *TEST
