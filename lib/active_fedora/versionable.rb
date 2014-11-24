@@ -12,8 +12,6 @@ module ActiveFedora
       end
     end
 
-    # TODO: This only applies to objects. If we want the same for child resources, it would need to go
-    # under fcr:metadata
     def model_type
       if self.respond_to?(:metadata)
         metadata.ldp_source.graph.query(predicate: ::RDF.type).objects
@@ -22,9 +20,11 @@ module ActiveFedora
       end
     end
 
+    # Returns an array of RDF::Literal objects where the version label matches
+    # our own version label and excludes auto-snapshot versions from Fedora.
     def versions
       results = versions_graph.query([nil, ::RDF::URI.new('http://fedora.info/definitions/v4/repository#hasVersionLabel'), nil])
-      results.map(&:object)
+      numbered_versions(results)
     end
 
     def versions_graph
@@ -84,6 +84,13 @@ module ActiveFedora
         else
           "version" + (versions.count + 1).to_s
         end
+      end
+
+      def numbered_versions statements, literals = Array.new
+        statements.each do |statement|
+          literals << statement.object unless statement.object.to_s.match("auto-snapshot")
+        end
+        return literals
       end
 
   end
