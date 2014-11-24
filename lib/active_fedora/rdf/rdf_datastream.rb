@@ -2,7 +2,7 @@ module ActiveFedora
   class RDFDatastream < ActiveFedora::Datastream
     include Solrizer::Common
     include ActiveTriples::NestedAttributes
-    include Rdf::Indexing
+    include RDF::Indexing
     include ActiveTriples::Properties
     include ActiveTriples::Reflection
 
@@ -30,7 +30,7 @@ module ActiveFedora
         
         @resource_class ||= begin
                               klass = Class.new(klass || ActiveTriples::Resource)
-                              klass.send(:include, Rdf::Persistence)
+                              klass.send(:include, RDF::Persistence)
                               klass
                             end
       end                                                    
@@ -117,7 +117,7 @@ module ActiveFedora
     end
 
     def deserialize(data=nil)
-      return RDF::Graph.new if new? && data.nil?
+      return ::RDF::Graph.new if new? && data.nil?
 
       if data.nil?
         data = datastream_content
@@ -126,10 +126,10 @@ module ActiveFedora
       end
 
       # Because datastream_content can return nil, we should check that here.
-      return RDF::Graph.new if data.nil?
+      return ::RDF::Graph.new if data.nil?
 
       data.force_encoding('utf-8')
-      RDF::Graph.new << RDF::Reader.for(serialization_format).new(data)
+      ::RDF::Graph.new << ::RDF::Reader.for(serialization_format).new(data)
     end
 
     def serialization_format

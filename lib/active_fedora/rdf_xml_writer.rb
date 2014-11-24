@@ -5,7 +5,7 @@ module ActiveFedora
 # with an rdf:Description container for the properties
 # the default behavior for RDF:RDFXML::Writer is to change that element if
 # an rdf:type assertion is present; this is incompatible with Fedora 3
-  class RDFXMLWriter < RDF::RDFXML::Writer
+  class RDFXMLWriter < ::RDF::RDFXML::Writer
     # Display a subject.
     #
     # If the Haml template contains an entry matching the subject's rdf:type URI, that entry will be used as the template for this subject and it's properties.
@@ -32,7 +32,7 @@ module ActiveFedora
       subject_done(subject)
 
       properties = properties_for_subject(subject)
-      typeof = type_of(properties[RDF.type.to_s], subject)
+      typeof = type_of(properties[::RDF.type.to_s], subject)
       prop_list = order_properties(properties)
 
       add_debug {"subject: #{curie.inspect}, typeof: #{typeof.inspect}, props: #{prop_list.inspect}"}

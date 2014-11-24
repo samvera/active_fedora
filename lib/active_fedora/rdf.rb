@@ -1,12 +1,14 @@
 module ActiveFedora
-  module Rdf
+  module RDF
     extend ActiveSupport::Autoload
+    autoload :Fcrepo
     autoload :Indexing
     autoload :Identifiable
     autoload :ObjectResource
     autoload :Persistence
+    autoload :ProjectHydra
 
-    # Aliases for deprecated ActiveFedora::Rdf Classes/Modules
+    # Aliases for deprecated ActiveFedora::RDF Classes/Modules
     # TODO: Remove in 8.0.0
     Resource = ActiveSupport::Deprecation::DeprecatedConstantProxy.new('ActiveFedora::Rdf::Resource', 'ActiveTriples::Resource')
     Term = ActiveSupport::Deprecation::DeprecatedConstantProxy.new('ActiveFedora::Rdf::Term', 'ActiveTriples::Term')
@@ -17,4 +19,5 @@ module ActiveFedora
     NodeConfig = ActiveSupport::Deprecation::DeprecatedConstantProxy.new('ActiveFedora::Rdf::NodeConfig', 'ActiveTriples::NodeConfig')
     NestedAttributes = ActiveSupport::Deprecation::DeprecatedConstantProxy.new('ActiveFedora::Rdf::NestedAttributes', 'ActiveTriples::NestedAttributes')
   end
+  Rdf = ActiveSupport::Deprecation::DeprecatedConstantProxy.new('ActiveFedora::Rdf', 'ActiveFedora::RDF')
 end

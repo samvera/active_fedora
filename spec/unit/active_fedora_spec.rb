@@ -112,8 +112,8 @@ describe ActiveFedora do
     end
     it "should return class constants based on strings" do
       ActiveFedora.class_from_string("Om").should == Om
-      ActiveFedora.class_from_string("ActiveFedora::Rdf::Indexing").should == ActiveFedora::Rdf::Indexing
-      ActiveFedora.class_from_string("Indexing", ActiveFedora::Rdf).should == ActiveFedora::Rdf::Indexing
+      ActiveFedora.class_from_string("ActiveFedora::RDF::Indexing").should == ActiveFedora::RDF::Indexing
+      ActiveFedora.class_from_string("Indexing", ActiveFedora::RDF).should == ActiveFedora::RDF::Indexing
     end
 
     it "should find sibling classes" do
