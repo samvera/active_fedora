@@ -17,7 +17,7 @@ module ActiveFedora
       unless has_predicate? uri
         relationships[uri] = []
       end
-      object = RDF::Literal.new(object) if literal
+      object = ::RDF::Literal.new(object) if literal
       unless relationships[uri].include?(object)
         @dirty = true
         relationships[uri] << object
@@ -54,8 +54,8 @@ module ActiveFedora
     
     def to_graph(subject_uri)
       # need to destroy relationships and rewrite it.
-      subject =  RDF::URI.new(subject_uri)
-      graph = RDF::Graph.new
+      subject =  ::RDF::URI.new(subject_uri)
+      graph = ::RDF::Graph.new
       relationships.each do |predicate, values|
         values.each do |object|
           graph.insert build_statement(subject,  predicate, object)
@@ -72,8 +72,8 @@ module ActiveFedora
     def build_statement(uri, predicate, target)
       raise "Not allowed anymore" if uri == :self
       target = target.internal_uri if target.respond_to? :internal_uri
-      subject =  RDF::URI.new(uri)  #TODO cache
-      if target.is_a? RDF::Literal or target.is_a? RDF::Resource
+      subject =  ::RDF::URI.new(uri)  #TODO cache
+      if target.is_a? ::RDF::Literal or target.is_a? ::RDF::Resource
         object = target
       else
         begin
@@ -87,14 +87,14 @@ module ActiveFedora
         rescue URI::InvalidURIError
           raise ArgumentError, "Invalid target \"#{target}\". Target must be specified as a literal, or be a valid URI."
         end
-        object = RDF::URI.new(target)
+        object = ::RDF::URI.new(target)
       end
-      RDF::Statement.new(subject, uri_predicate(predicate), object)
+      ::RDF::Statement.new(subject, uri_predicate(predicate), object)
     
     end
 
     def uri_predicate(predicate)
-      return predicate if predicate.kind_of? RDF::URI
+      return predicate if predicate.kind_of? ::RDF::URI
       ActiveFedora::Predicates.find_graph_predicate(predicate)
     end
   end

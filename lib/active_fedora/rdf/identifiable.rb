@@ -7,7 +7,7 @@
 #   subject.descMetadata.set = base
 #   subject.descMetadata.set # => <ActiveFedora::Base>
 #   subject.descMetadata.set.title # => 'test'
-module ActiveFedora::Rdf::Identifiable
+module ActiveFedora::RDF::Identifiable
   extend ActiveSupport::Concern
   delegate :parent, :dump, :query, :rdf_type, :to => :resource
 
@@ -18,8 +18,8 @@ module ActiveFedora::Rdf::Identifiable
   def resource
     return self.send(self.class.resource_datastream).resource unless self.class.resource_datastream.nil?
     klass = Class.new(ActiveTriples::Resource)
-    klass.send(:include, ActiveFedora::Rdf::Persistence)
-    klass.new(ActiveFedora::Rdf::Persistence::BASE_URI + self.pid).freeze
+    klass.send(:include, ActiveFedora::RDF::Persistence)
+    klass.new(ActiveFedora::RDF::Persistence::BASE_URI + self.pid).freeze
   end
 
   module ClassMethods
@@ -59,7 +59,7 @@ module ActiveFedora::Rdf::Identifiable
     # @param [RDF::URI] uri URI to convert to pid
     def pid_from_subject(uri)
       base_uri = self.ds_specs[resource_datastream.to_s][:type].resource_class.base_uri if resource_datastream
-      base_uri = base_uri || ActiveFedora::Rdf::Persistence::BASE_URI
+      base_uri = base_uri || ActiveFedora::RDF::Persistence::BASE_URI
       uri.to_s.gsub(base_uri, "")
     end
   end

@@ -1,5 +1,5 @@
 module ActiveFedora
-  module Rdf
+  module RDF
     #
     # Mixin for adding datastream persistence to an ActiveTriples::Resource 
     # descendant so that it may be used to back an ActiveFedora::RDFDatastream.

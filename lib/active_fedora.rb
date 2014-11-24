@@ -53,7 +53,7 @@ module ActiveFedora #:nodoc:
     autoload :Persistence
     autoload :QualifiedDublinCoreDatastream
     autoload :Querying
-    autoload :Rdf
+    autoload :RDF
     autoload_under 'rdf' do
       autoload :RDFDatastream
       autoload :RdfxmlRDFDatastream

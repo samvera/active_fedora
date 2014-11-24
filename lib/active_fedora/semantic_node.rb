@@ -30,9 +30,9 @@ module ActiveFedora
     end
 
     def relationships=(xml)
-      RDF::RDFXML::Reader.new(xml) do |reader|
+      ::RDF::RDFXML::Reader.new(xml) do |reader|
         reader.each_statement do |statement|
-          literal = statement.object.kind_of?(RDF::Literal)
+          literal = statement.object.kind_of?(::RDF::Literal)
           object = literal ? statement.object.value : statement.object.to_str
           object_relations.add(statement.predicate, object, literal)
         end
@@ -121,7 +121,7 @@ module ActiveFedora
 
     def ids_for_outbound(predicate)
       (object_relations[predicate] || []).map do |o|
-        o = o.to_s if o.kind_of? RDF::Literal
+        o = o.to_s if o.kind_of? ::RDF::Literal
         o.kind_of?(String) ? self.class.pid_from_uri(o) : o.pid
       end
     end
