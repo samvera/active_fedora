@@ -16,7 +16,7 @@ describe ActiveFedora::ChangeSet do
       end
 
       class Book < ActiveFedora::Base
-        belongs_to :library, predicate: ActiveFedora::RDF::RelsExt.hasConstituent
+        belongs_to :library, predicate: ActiveFedora::RDF::FedoraRelsExt.hasConstituent
         property :title, predicate: ::RDF::DC.title
       end
 

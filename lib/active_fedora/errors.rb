@@ -27,7 +27,7 @@ module ActiveFedora #:nodoc:
   #   end
   #
   #   class Patch < ActiveFedora::Base
-  #     belongs_to :ticket, predicate: ActiveFedora::RDF::RelsExt.isComponentOf
+  #     belongs_to :ticket, predicate: ActiveFedora::RDF::FedoraRelsExt.isComponentOf
   #   end
   #
   #   # Comments are not patches, this assignment raises AssociationTypeMismatch.

@@ -6,7 +6,7 @@ describe ActiveFedora::Base do
       has_many :books
     end
     class Book < ActiveFedora::Base
-      belongs_to :library, predicate: ActiveFedora::RDF::RelsExt.hasMember
+      belongs_to :library, predicate: ActiveFedora::RDF::FedoraRelsExt.hasMember
     end
   end
   let(:library) { Library.create! }

@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   before :all do
     class Library < ActiveFedora::Base
-      has_many :books, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+      has_many :books, predicate: ActiveFedora::RDF::FedoraRelsExt.isPartOf
     end
     class Book < ActiveFedora::Base; end
   end

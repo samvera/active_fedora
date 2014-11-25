@@ -3,11 +3,12 @@ module ActiveFedora
     extend ActiveSupport::Autoload
     autoload :DatastreamIndexing
     autoload :Fcrepo
-    autoload :Ldp
-    autoload :Indexing
+    autoload :FedoraRelsExt
+    autoload :HydraRelsExt
     autoload :Identifiable
+    autoload :Indexing
+    autoload :Ldp
     autoload :ObjectResource
     autoload :Persistence
-    autoload :RelsExt
   end
 end

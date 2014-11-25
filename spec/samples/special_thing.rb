@@ -37,8 +37,8 @@ class SpecialThing < ActiveFedora::Base
 
   # This is an example of how you can add a custom relationship to a model
   # This will allow you to call .derivation on instances of the model to get the _outbound_ "hasDerivation" relationship in the RELS-EXT datastream
-  belongs_to :derivation, predicate: ActiveFedora::RDF::RelsExt.hasDerivation, class_name: 'SpecialThing'
+  belongs_to :derivation, predicate: ActiveFedora::RDF::FedoraRelsExt.hasDerivation, class_name: 'SpecialThing'
 
   # This will allow you to call .inspirations on instances of the model to get a list of all of the objects that assert "hasDerivation" relationships pointing at this object
-  has_many :inspirations, predicate: ActiveFedora::RDF::RelsExt.hasDerivation, class_name: 'SpecialThing'
+  has_many :inspirations, predicate: ActiveFedora::RDF::FedoraRelsExt.hasDerivation, class_name: 'SpecialThing'
 end
