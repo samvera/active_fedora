@@ -3,7 +3,6 @@ module ActiveFedora
     extend ActiveSupport::Concern
     extend ActiveSupport::Autoload
     include ActiveModel::Dirty
-    extend Deprecation
     
     autoload :Serializers
 
@@ -63,6 +62,7 @@ module ActiveFedora
     end
 
     private
+
     def array_reader(field, *args)
       if md = /^(.+)_id$/.match(field)
         # a belongs_to association reader
@@ -71,7 +71,8 @@ module ActiveFedora
       end
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
 
-      self.class.defined_attributes[field].reader(self, *args)
+      value = self.class.defined_attributes[field].reader(self, *args)
+      self.class.multiple?(field) ? value : value.first      
     end
 
     def array_setter(field, args)
@@ -81,6 +82,13 @@ module ActiveFedora
         return association.id_writer(args) if association
       end
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
+      if self.class.multiple?(field)
+        unless args.nil? || args.respond_to?(:each)
+          raise ArgumentError, "Cannot set the multi-valued attribute `#{field}' to a scalar value."
+        end
+      elsif args.respond_to?(:each) # unique
+        raise ArgumentError, "Cannot set the single-valued attribute `#{field}' to an enumerable value."
+      end
       self.class.defined_attributes[field].writer(self, args)
     end
 
@@ -131,22 +139,15 @@ module ActiveFedora
         find_or_create_defined_attribute(field, dsid, args)
 
         define_method field do |*opts|
-          val = array_reader(field, *opts)
-          self.class.multiple?(field) ? val : val.first
+          array_reader(field, *opts)
         end
       end
 
       def create_attribute_setter(field, dsid, args)
         find_or_create_defined_attribute(field, dsid, args)
+
         define_method "#{field}=".to_sym do |v|
-          if self.class.multiple?(field)
-            unless v.nil? || v.respond_to?(:each)
-              Deprecation.warn(ActiveFedora::Attributes, "You attempted to set the attribute `#{field}' on `#{self.class}' to a scalar value. However, this attribute is declared as being multivalued. This behavior is deprecated and will raise an ArgumentError in active-fedora 8.0.0")
-            end
-          elsif v.respond_to?(:each) # unique
-            Deprecation.warn(ActiveFedora::Attributes, "You attempted to set the attribute `#{field}' on `#{self.class}' to an enumerable value. However, this attribute is declared as being singular. This behavior is deprecated and will raise an ArgumentError in active-fedora 8.0.0")
-          end
-          self[field]=v
+          self[field] = v
         end
       end
     end

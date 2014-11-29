@@ -1,7 +1,6 @@
 module ActiveFedora
   module SemanticNode 
     extend ActiveSupport::Concern
-    extend Deprecation
 
     attr_accessor :relationships_loaded
     attr_accessor :load_from_solr, :subject
@@ -132,17 +131,6 @@ module ActiveFedora
     end
 
     module ClassMethods
-      # @param [String,Array] uris a single uri (as a string) or a list of uris to convert to pids
-      # @return [String] the pid component of the URI
-      def pids_from_uris(uris) 
-        Deprecation.warn(SemanticNode, "pids_from_uris has been deprecated and will be removed in active-fedora 8.0.0", caller)
-        if uris.kind_of? String
-          pid_from_uri(uris)
-        else
-          Array(uris).map {|uri| pid_from_uri(uri)}
-        end
-      end
-
       # Returns a suitable uri object for :has_model
       # Should reverse Model#from_class_uri
       def to_class_uri(attrs = {})

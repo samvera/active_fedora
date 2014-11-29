@@ -24,14 +24,14 @@ describe ActiveFedora::Base do
 
   describe "a valid object" do
     before do
-      subject.attributes={ fubar:'here', swank:'long enough'}
+      subject.attributes = { fubar: ['here'], swank: 'long enough' }
     end
     
     it { should be_valid}
   end
   describe "an invalid object" do
     before do
-      subject.attributes={ swank:'smal'}
+      subject.attributes = { swank: 'smal' }
     end
     it "should have errors" do
       subject.should_not be_valid
@@ -42,8 +42,8 @@ describe ActiveFedora::Base do
 
   describe "required terms" do
     it "should be required" do
-       subject.required?(:fubar).should be_true
-       subject.required?(:swank).should be_false
+       subject.required?(:fubar).should be true
+       subject.required?(:swank).should be false
     end
   end
 

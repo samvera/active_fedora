@@ -52,8 +52,6 @@ module ActiveFedora
       solr_doc.merge super({}).each_with_object({}) { |(key, value), new| new[[prefix,key].join] = value }
     end
 
-
-    # ** Experimental **
     # This method is called by +get_values+ if this datastream has been initialized by calling from_solr method via
     # ActiveFedora::Base.load_instance_from_solr. This method retrieves values from a preinitialized @internal_solr_doc instead of xml.
     # This makes the datastream read-only and this method is not intended to be used in any other case.
@@ -186,10 +184,9 @@ module ActiveFedora
     end
 
     def generate_solr_symbol(base, data_type)
-      ActiveFedora::SolrService.solr_name([prefix,base].join, type: data_type)
+      ActiveFedora::SolrService.solr_name([prefix, base].join, type: data_type)
     end
 
-    # ** Experimental **
     #@return [Boolean] true if either the key for name exists in solr or if its string value exists
     #@param [String] name Name of key to look for
     #@param [Solr::Document] solr_doc Solr doc to query
@@ -197,7 +194,6 @@ module ActiveFedora
       !solr_doc[name].nil? || !solr_doc[name.to_s].nil?
     end
 
-    # ** Experimental **
     #@return true if the term_pointer contains an index
     # ====Example:
     #     [:image, {:title_set=>1}, :title] return true

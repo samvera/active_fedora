@@ -99,52 +99,35 @@ describe ActiveFedora::Base do
       end
     end
 
-    describe "deprecated behavior" do
-      before(:all) do
-        @behavior = ActiveFedora::Attributes.deprecation_behavior
-        ActiveFedora::Attributes.deprecation_behavior = :raise
-      end
-      after(:all) do
-        ActiveFedora::Attributes.deprecation_behavior = @behavior
-      end
-      it "should deprecate passing a string to a multiple attribute writer" do
-        expect { subject.fubar = "Quack" }.to raise_error
-        expect { subject.fubar = ["Quack"] }.not_to raise_error
-        expect { subject.fubar = nil }.not_to raise_error
-      end
-      it "should deprecate passing an enumerable to a unique attribute writer" do
-        expect { subject.cow = "Low" }.not_to raise_error
-        expect { subject.cow = ["Low"] }.to raise_error
-        expect { subject.cow = nil }.not_to raise_error
-      end
+    it "should raise an exception when passing a string to a multiple attribute writer" do
+      expect { subject.fubar = "Quack" }.to raise_error
+    end
+
+    it "should raise an exception when passing an enumerable to a unique attribute writer" do
+      expect { subject.cow = ["Low"] }.to raise_error
     end
 
     it "should reveal the unique properties" do
-      BarHistory2.unique?(:horse).should be_false
-      BarHistory2.unique?(:pig).should be_true
-      BarHistory2.unique?(:cow).should be_true
+      BarHistory2.unique?(:horse).should be false
+      BarHistory2.unique?(:pig).should be true
+      BarHistory2.unique?(:cow).should be true
     end
 
     it "should save a delegated property uniquely" do
-      subject.fubar="Quack"
+      subject.fubar = ["Quack"]
       subject.fubar.should == ["Quack"]
       subject.withText.get_values(:fubar).first.should == 'Quack'
-      subject.cow="Low"
+      subject.cow = "Low"
       subject.cow.should == "Low"
       subject.xmlish.term_values(:cow).first.should == 'Low'
 
-      subject.pig="Oink"
+      subject.pig = "Oink"
       subject.pig.should == "Oink"
     end
 
     it "should allow passing parameters to the delegate accessor" do
-      subject.cow=["one", "two"]
-      subject.cow(1).should == 'two'
-    end
-
-    it "should return a single value if not marked as multiple" do
-      subject.cow=["one", "two"]
-      subject.cow.should == "one"
+      subject.fubar = ["one", "two"]
+      subject.fubar(1).should == ['two']
     end
 
     it "should return an array if marked as multiple" do
@@ -153,49 +136,49 @@ describe ActiveFedora::Base do
     end
 
     it "should be able to delegate deeply into the terminology" do
-      subject.duck=["Quack", "Peep"]
+      subject.duck = ["Quack", "Peep"]
       subject.duck.should == ["Quack", "Peep"]
     end
 
     it "should be able to track change status" do
-      subject.fubar_changed?.should be_false
-      subject.fubar = "Meow"
-      subject.fubar_changed?.should be_true
+      subject.fubar_changed?.should be false
+      subject.fubar = ["Meow"]
+      subject.fubar_changed?.should be true
     end
 
     describe "array getters and setters" do
       it "should accept symbol keys" do
-        subject[:duck]= ["Cluck", "Gobble"]
+        subject[:duck] = ["Cluck", "Gobble"]
         subject[:duck].should == ["Cluck", "Gobble"]
       end
 
       it "should accept string keys" do
-        subject['duck']= ["Cluck", "Gobble"]
+        subject['duck'] = ["Cluck", "Gobble"]
         subject['duck'].should == ["Cluck", "Gobble"]
       end
 
       it "should accept field names with _id that are not associations" do
-        subject['animal_id'] = ["lemur"]
-        subject['animal_id'].should == ["lemur"]
+        subject['animal_id'] = "lemur"
+        subject['animal_id'].should == "lemur"
       end
 
       it "should raise an error on the reader when the field isn't delegated" do
-        expect {subject['goose'] }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `goose'"
+        expect { subject['goose'] }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `goose'"
       end
 
       it "should raise an error on the setter when the field isn't delegated" do
-        expect {subject['goose']="honk" }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `goose'"
+        expect {subject['goose'] = "honk" }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `goose'"
       end
     end
 
     describe "attributes=" do
       it "should raise an error on an invalid attribute" do
-        expect {subject.attributes = {'goose'=>"honk" }}.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `goose'"
+        expect { subject.attributes = { 'goose'=>"honk" } }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `goose'"
       end
     end
 
     describe "attributes" do
-      let(:vals) { {'cow'=>["moo"], 'pig' => ['oink'], 'horse' =>['neigh'], "fubar"=>[], 'duck'=>['quack'], 'animal_id'=>[] } }
+      let(:vals) { {'cow'=>"moo", 'pig'=>'oink', 'horse'=>['neigh'], "fubar"=>[], 'duck'=>['quack'], 'animal_id'=>nil } }
       before { subject.attributes = vals }
       it "should return a hash" do
         expect(subject.attributes).to eq(vals.merge('id' => nil))
@@ -222,14 +205,14 @@ describe ActiveFedora::Base do
     subject { BarHistory3.new }
 
     it "should be able to delegate deeply into the terminology" do
-      subject.donkey=["Bray", "Hee-haw"]
+      subject.donkey = ["Bray", "Hee-haw"]
       subject.donkey.should == ["Bray", "Hee-haw"]
     end
 
     it "should be able to track change status" do
-      subject.cow_changed?.should be_false
+      subject.cow_changed?.should be false
       subject.cow = ["Moo"]
-      subject.cow_changed?.should be_true
+      subject.cow_changed?.should be true
     end 
   end
 
@@ -254,16 +237,16 @@ describe ActiveFedora::Base do
 
     describe "with a multivalued field" do
       it "should be able to track change status" do
-        subject.title_changed?.should be_false
+        subject.title_changed?.should be false
         subject.title = ["Title1", "Title2"]
-        subject.title_changed?.should be_true
+        subject.title_changed?.should be true
       end
     end
     describe "with a single-valued field" do
       it "should be able to track change status" do
-        subject.description_changed?.should be_false
-        subject.description = "A brief description"
-        subject.description_changed?.should be_true
+        subject.description_changed?.should be false
+        subject.description = ["A brief description"]
+        subject.description_changed?.should be true
       end
     end
   end 
@@ -278,10 +261,10 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :BarHistory4)
     end
 
-    subject { BarHistory4}
+    subject { BarHistory4 }
 
     it "should raise an error" do
-      expect {subject.has_attributes :title, :description, multiple: true}.to raise_error
+      expect { subject.has_attributes :title, :description, multiple: true }.to raise_error
     end
   end
 
@@ -303,7 +286,7 @@ describe ActiveFedora::Base do
     end
 
     it "should raise an error on set" do
-      expect {subject.description = 'Neat'}.to raise_error(ArgumentError, "Undefined datastream id: `rdfish' in has_attributes")
+      expect {subject.description = ['Neat']}.to raise_error(ArgumentError, "Undefined datastream id: `rdfish' in has_attributes")
     end
   end
 

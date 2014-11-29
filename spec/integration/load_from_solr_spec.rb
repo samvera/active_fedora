@@ -39,7 +39,7 @@ describe "Loading from solr" do
   end
 
   let!(:original) { RdfTest.create!(title: "PLAN 9 FROM OUTER SPACE",
-                                    date_uploaded: Date.parse('1959-01-01'),
+                                    date_uploaded: [Date.parse('1959-01-01')],
                                     date_modified: Date.parse('1999-01-01'),
                                     duck: "quack",
                                    identifier: 12345) }
