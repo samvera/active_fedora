@@ -17,7 +17,7 @@ module ActiveFedora
     end
 
     def self.profile_solr_name
-      ActiveFedora::SolrService.solr_name("object_profile", :displayable)
+      ActiveFedora::SolrQueryBuilder.solr_name("object_profile", :displayable)
     end
 
 
@@ -26,7 +26,7 @@ module ActiveFedora
       Solrizer.set_field(solr_doc, 'system_create', c_time, :stored_sortable)
       Solrizer.set_field(solr_doc, 'system_modified', m_time, :stored_sortable)
       Solrizer.set_field(solr_doc, 'active_fedora_model', object.class.inspect, :stored_sortable)
-      solr_doc.merge!(SolrService::HAS_MODEL_SOLR_FIELD => object.has_model)
+      solr_doc.merge!(QueryResultBuilder::HAS_MODEL_SOLR_FIELD => object.has_model)
       solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => object.id)
       solr_doc.merge!(self.class.profile_solr_name => object.to_json)
       object.attached_files.each do |name, file|
@@ -63,7 +63,7 @@ module ActiveFedora
     end
 
     def solr_name(*args)
-      ActiveFedora::SolrService.solr_name(*args)
+      ActiveFedora::SolrQueryBuilder.solr_name(*args)
     end
 
   end

@@ -103,7 +103,7 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
       @test_ds = ActiveFedora::QualifiedDublinCoreDatastream.new
       @test_ds.title = "War and Peace"
       solr = @test_ds.to_solr
-      expect(solr[ActiveFedora::SolrService.solr_name('title', type: :string)]).to eq "War and Peace"
+      expect(solr[ActiveFedora::SolrQueryBuilder.solr_name('title', type: :string)]).to eq "War and Peace"
     end
 
   end

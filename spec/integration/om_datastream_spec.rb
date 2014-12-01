@@ -73,7 +73,7 @@ describe ActiveFedora::OmDatastream do
       obj.reload
     end
     it "should solrize terms with :type=>'date' to *_dt solr terms" do
-      expect(obj.to_solr[ActiveFedora::SolrService.solr_name('desc_metadata__journal_issue_publication_date', type: :date)]).to eq ['2012-11-02T00:00:00Z']
+      expect(obj.to_solr[ActiveFedora::SolrQueryBuilder.solr_name('desc_metadata__journal_issue_publication_date', type: :date)]).to eq ['2012-11-02T00:00:00Z']
     end
   end
 end

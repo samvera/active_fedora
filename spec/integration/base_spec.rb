@@ -21,7 +21,7 @@ describe "A base object with metadata" do
       obj = ActiveFedora::Base.find(@obj.id)
       expect(obj.foo).to_not be_new_record
       expect(obj.foo.person).to eq ['bob']
-      person_field = ActiveFedora::SolrService.solr_name('foo__person', type: :string)
+      person_field = ActiveFedora::SolrQueryBuilder.solr_name('foo__person', type: :string)
       solr_result = ActiveFedora::SolrService.query("{!raw f=id}#{@obj.id}", :fl=>"id #{person_field}").first
       expect(solr_result).to eq("id"=>@obj.id, person_field =>['bob'])
     end
@@ -40,7 +40,7 @@ describe "A base object with metadata" do
       end
       it "should save the datastream." do
         expect(MockAFBaseRelationship.find(@release.id).foo.person).to eq ['frank']
-        person_field = ActiveFedora::SolrService.solr_name('foo__person', type: :string)
+        person_field = ActiveFedora::SolrQueryBuilder.solr_name('foo__person', type: :string)
         expect(ActiveFedora::SolrService.query("id:\"#{@release.id}\"", :fl=>"id #{person_field}").first).to eq("id"=>@release.id, person_field =>['frank'])
       end
     end

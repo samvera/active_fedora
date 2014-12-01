@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 describe ActiveFedora::Model do
-  
-  before(:all) do 
+
+  before(:all) do
     module ModelIntegrationSpec
       class Basic < ActiveFedora::Base
         has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream do |m|
@@ -15,7 +15,7 @@ describe ActiveFedora::Model do
 
         def to_solr(doc = {})
           doc = super
-          doc[ActiveFedora::SolrService.solr_name('foo', :sortable)] = doc[ActiveFedora::SolrService.solr_name('foo', type: :string)]
+          doc[ActiveFedora::SolrQueryBuilder.solr_name('foo', :sortable)] = doc[ActiveFedora::SolrQueryBuilder.solr_name('foo', type: :string)]
           doc
         end
       end

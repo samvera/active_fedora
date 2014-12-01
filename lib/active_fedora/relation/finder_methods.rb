@@ -178,7 +178,7 @@ module ActiveFedora
       if where_values.empty?
         load_from_fedora(id, cast)
       else
-        conditions = where_values + [ActiveFedora::SolrService.raw_query(SOLR_DOCUMENT_ID, id)]
+        conditions = where_values + [ActiveFedora::SolrQueryBuilder.raw_query(SOLR_DOCUMENT_ID, id)]
         query = conditions.join(" AND ".freeze)
         to_enum(:find_each, query, {}).to_a.first
       end
@@ -259,7 +259,7 @@ module ActiveFedora
         # if the key is a property name, turn it into a solr field
         if @klass.delegated_attributes.key?(key)
           # TODO Check to see if `key' is a possible solr field for this class, if it isn't try :searchable instead
-          key = ActiveFedora::SolrService.solr_name(key, :stored_searchable, type: :string)
+          key = ActiveFedora::SolrQueryBuilder.solr_name(key, :stored_searchable, type: :string)
         end
 
         if value.empty?
@@ -278,7 +278,7 @@ module ActiveFedora
       # The concrete class could could be any subclass of @klass or @klass itself
       unless @klass == ActiveFedora::Base
         clauses = ([@klass] + @klass.descendants).map do |k|
-          ActiveFedora::SolrService.construct_query_for_rel(has_model: k.to_s)
+          ActiveFedora::SolrQueryBuilder.construct_query_for_rel(has_model: k.to_s)
         end
         clauses.size == 1 ? clauses.first : "(#{clauses.join(" OR ")})"
       end

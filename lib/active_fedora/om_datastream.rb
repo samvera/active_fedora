@@ -34,10 +34,6 @@ module ActiveFedora
       solr_doc.merge super({}).each_with_object({}) { |(key, value), new| new[[prefix,key].join] = value }
     end
 
-    def generate_solr_symbol(base, data_type)
-      ActiveFedora::SolrService.solr_name([prefix,base].join, type: data_type)
-    end
-
     # ** Experimental **
     #@return [Boolean] true if either the key for name exists in solr or if its string value exists
     #@param [String] name Name of key to look for

@@ -262,16 +262,16 @@ describe ActiveFedora::OmDatastream do
   
 
   describe '.has_solr_name?' do
-    let(:name0_role0) { ActiveFedora::SolrService.solr_name("desc_metadata__name_0_role_0_roleTerm", type: :string) }
-    let(:name1_role1) { ActiveFedora::SolrService.solr_name("desc_metadata__name_1_role_1_roleTerm", type: :string) }
+    let(:name0_role0) { ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_0_role_0_roleTerm", type: :string) }
+    let(:name1_role1) { ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_1_role_1_roleTerm", type: :string) }
     let(:solr_doc) do
       {"id"=>"mods_article1",
-      ActiveFedora::SolrService.solr_name("desc_metadata__name_role_roleTerm", type: :string) =>["creator","submitter","teacher"],
-      ActiveFedora::SolrService.solr_name("desc_metadata__name_0_role", type: :string)=>"\r\ncreator\r\nsubmitter\r\n",
-      ActiveFedora::SolrService.solr_name("desc_metadata__name_1_role", type: :string)=>"\r\n teacher \r\n",
+      ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_role_roleTerm", type: :string) =>["creator","submitter","teacher"],
+      ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_0_role", type: :string)=>"\r\ncreator\r\nsubmitter\r\n",
+      ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_1_role", type: :string)=>"\r\n teacher \r\n",
       name0_role0 =>"creator",
-      ActiveFedora::SolrService.solr_name("desc_metadata__name_0_role_1_roleTerm", type: :string)=>"submitter",
-      ActiveFedora::SolrService.solr_name("desc_metadata__name_1_role_0_roleTerm", type: :string)=>["teacher"]}
+      ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_0_role_1_roleTerm", type: :string)=>"submitter",
+      ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_1_role_0_roleTerm", type: :string)=>["teacher"]}
     end
 
     it "should return true if the given key exists in the solr document passed in" do

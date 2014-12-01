@@ -51,10 +51,10 @@ module ActiveFedora
         return [] if ids.blank?
         solr_result = []
         0.step(ids.size,page_size) do |startIdx|
-          query = ActiveFedora::SolrService.construct_query_for_ids(ids.slice(startIdx,page_size))
+          query = ActiveFedora::SolrQueryBuilder.construct_query_for_ids(ids.slice(startIdx,page_size))
           solr_result += ActiveFedora::SolrService.query(query, rows: page_size)
         end
-        return ActiveFedora::SolrService.reify_solr_results(solr_result)
+        return ActiveFedora::QueryResultBuilder.reify_solr_results(solr_result)
       end
 
       # In a HABTM, just look in the RDF, no need to run a count query from solr.

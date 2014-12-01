@@ -192,7 +192,10 @@ module ActiveFedora
       end
 
       def solr_key
-        ActiveFedora::SolrService.solr_name(predicate.to_s, :symbol)
+        @solr_key ||= begin
+          predicate_string = predicate.fragment || predicate.to_s.rpartition(/\//).last
+          ActiveFedora::SolrQueryBuilder.solr_name(predicate_string, :symbol)
+        end
       end
 
       def check_validity!
