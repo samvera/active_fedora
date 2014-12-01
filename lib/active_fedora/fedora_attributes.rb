@@ -6,9 +6,9 @@ module ActiveFedora
       include RDF::Indexing
       include ActiveTriples::Properties
       include ActiveTriples::Reflection
-      delegate :rdf_subject,  :get_values, to: :resource
+      delegate :rdf_subject, :get_values, to: :resource
 
-      property :has_model, predicate: ::RDF::URI.new("http://fedora.info/definitions/v4/rels-ext#hasModel")
+      property :has_model, predicate: ActiveFedora::RDF::Fcrepo::Model.hasModel
       property :create_date, predicate: ActiveFedora::RDF::Fcrepo4.created
       property :modified_date, predicate: ActiveFedora::RDF::Fcrepo4.lastModified
 
