@@ -19,7 +19,7 @@ describe "Objects should be serialized to JSON" do
     after do
       Object.send(:remove_const, :Foo)
     end
-    subject { Foo.new(foo: "baz", bar: 'quix') }
+    subject { Foo.new(foo: ["baz"], bar: 'quix') }
     before { subject.stub(pid: 'test:123') }
     it "should have to_json" do
       json = JSON.parse(subject.to_json)

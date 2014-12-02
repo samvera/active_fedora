@@ -66,7 +66,7 @@ describe ActiveFedora::RDFDatastream do
     end
 
     it "should set values" do
-      subject.title = "blah"
+      subject.title = ["blah"]
       expect(subject.descMetadata.title).to eq ["blah"]
     end
 
@@ -105,7 +105,7 @@ describe ActiveFedora::RDFDatastream do
         end
 
         it "should be persisted" do
-          expect(subject.descMetadata.resource.persisted?).to be_true
+          expect(subject.descMetadata.resource.persisted?).to be true
         end
 
         context "and it's reloaded" do
@@ -146,7 +146,7 @@ describe ActiveFedora::RDFDatastream do
       context "persisted to parent" do
         before do
           dummy = DummySubnode.new
-          dummy.title = 'subbla'
+          dummy.title = ['subbla']
           subject.descMetadata.license = dummy
         end
 
@@ -163,7 +163,7 @@ describe ActiveFedora::RDFDatastream do
           DummySubnode.configure :repository => :default
           DummySubnode.any_instance.stub(:repository).and_return(RDF::Repository.new)
           dummy = DummySubnode.new(RDF::URI('http://example.org/dummy/blah'))
-          dummy.title = 'subbla'
+          dummy.title = ['subbla']
           # We want to have to manually persist to the repository.
           # Parent objects shouldn't be persisting children they share with other parents
           dummy.persist!
@@ -196,9 +196,9 @@ describe ActiveFedora::RDFDatastream do
   describe "relationships" do
     before do
       @new_object = DummyAsset.new
-      @new_object.title = "subbla"
+      @new_object.title = ["subbla"]
       @new_object.save
-      subject.title = "bla"
+      subject.title = ["bla"]
       subject.descMetadata.creator = @new_object
     end
 
@@ -224,7 +224,7 @@ describe ActiveFedora::RDFDatastream do
     end
 
     it "should allow for deep attributes to be set directly" do
-      subject.descMetadata.creator.first.title = "Bla"
+      subject.descMetadata.creator.first.title = ["Bla"]
       expect(subject.descMetadata.creator.first.title).to eq ["Bla"]
     end
 
@@ -275,7 +275,7 @@ describe ActiveFedora::RDFDatastream do
 
         @new_object = DummyOmAsset.new
         @new_object.save
-        subject.title = "bla"
+        subject.title = ["bla"]
         subject.descMetadata.creator = @new_object
         subject.save
         subject.reload
