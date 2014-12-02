@@ -12,6 +12,36 @@ describe ActiveFedora::File do
     end
   end
 
+  context "stand alone operation with UploadedFile" do
+    before(:all) do
+      module ActionDispatch
+        module Http
+          class UploadedFile
+
+            def initialize
+              @content = StringIO.new("hello world")
+            end
+
+            def read(a, b)
+              return @content.read(a, b)
+            end
+            
+            def size
+              @content.length
+            end
+
+          end
+        end
+      end
+    end
+
+    it "should save" do
+      subject.content = ActionDispatch::Http::UploadedFile.new
+      subject.save
+      expect(subject).not_to be_new_record
+    end
+  end
+
   context "when autocreate is true" do
     before(:all) do
       class MockAFBase < ActiveFedora::Base

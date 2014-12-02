@@ -254,6 +254,9 @@ module ActiveFedora
         payload = behaves_like_io?(content) ? content.read : content
         headers = { 'Content-Type' => mime_type }
         headers['Content-Disposition'] = "attachment; filename=\"#{@original_name}\"" if @original_name
+        # Setting the content-length is required until we figure out why Faraday 
+        # is not doing this automatically for files uploaded via ActionDispatch.
+        headers['Content-Length'] = payload.size.to_s if uploaded_file?(payload)
         ldp_source.content = payload
         if new_record?
           ldp_source.create do |req|
@@ -291,6 +294,10 @@ module ActiveFedora
       end
 
       private
+
+      def uploaded_file?(payload)
+        defined?(ActionDispatch::Http::UploadedFile) and payload.instance_of?(ActionDispatch::Http::UploadedFile)
+      end
 
       def local_or_remote_content(ensure_fetch = true)
         return @content if new_record?
