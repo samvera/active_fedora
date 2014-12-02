@@ -20,6 +20,10 @@ module ActiveFedora
           @hash[k.first] = v
         end
       end
+
+      def uri= uri
+        @uri = uri
+      end
     end
 
     class SolrBackedResource

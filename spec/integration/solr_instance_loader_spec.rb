@@ -66,6 +66,14 @@ describe ActiveFedora::SolrInstanceLoader do
         expect(object.foo).to eq ['baz']
       end
     end
+
+    context "with children" do
+      let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj.id) }
+
+      it "should have stub implementation of the children" do
+        expect(subject.descMetadata).to be_kind_of ActiveFedora::LoadableFromJson::SolrBackedMetadataFile
+      end
+    end
   end
 
   context "with a solr doc" do
