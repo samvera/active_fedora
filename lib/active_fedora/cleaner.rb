@@ -31,7 +31,7 @@ module ActiveFedora
     end
 
     def self.root_resource_path
-      ActiveFedora.fedora.base_path.sub('/', '')
+      ActiveFedora.fedora.root_resource_path
     end
 
     def self.connection
@@ -48,11 +48,7 @@ module ActiveFedora
     end
 
     def self.reinitialize_repo
-      begin
-        ActiveFedora.fedora.connection.put(root_resource_path, "")
-      rescue Ldp::HttpError => exception
-        log "#reinitialize_repo in spec_helper.rb raised #{exception}"
-      end
+      ActiveFedora.fedora.init_base_path
     end
 
     def self.log(message)
