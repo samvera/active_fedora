@@ -17,7 +17,7 @@ module ActiveFedora
     end
 
     def self.profile_solr_name
-      ActiveFedora::SolrQueryBuilder.solr_name("object_profile", :displayable)
+      @profile_solr_name ||= ActiveFedora::SolrQueryBuilder.solr_name("object_profile", :displayable)
     end
 
 
@@ -61,10 +61,5 @@ module ActiveFedora
       end
       solr_doc
     end
-
-    def solr_name(*args)
-      ActiveFedora::SolrQueryBuilder.solr_name(*args)
-    end
-
   end
 end
