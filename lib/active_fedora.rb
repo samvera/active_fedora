@@ -19,12 +19,16 @@ module RDF
   class Literal
     class DateTime < Literal
       ALTERNATIVE_FORMAT   = '%Y-%m-%dT%H:%M:%S'.freeze
+      DOT                  = '.'.freeze
+      Z                    = 'Z'.freeze
+      EMPTY                = ''.freeze
 
       def to_s
         @string ||= begin
-          nano = @object.strftime('%N').sub(/0+\Z/, '')
-          nano = '.' + nano unless nano.blank?
-          @object.strftime(ALTERNATIVE_FORMAT) + nano + 'Z'
+          # Show nanoseconds but remove trailing zeros
+          nano = @object.strftime('%N').sub(/0+\Z/, EMPTY)
+          nano = DOT + nano unless nano.blank?
+          @object.strftime(ALTERNATIVE_FORMAT) + nano + Z
         end
       end
     end
@@ -226,6 +230,7 @@ module ActiveFedora #:nodoc:
         end
       end
     end
+
   end
 
   self.configurator ||= ActiveFedora::FileConfigurator.new
