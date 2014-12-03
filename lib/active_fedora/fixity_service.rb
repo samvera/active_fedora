@@ -25,7 +25,7 @@ module ActiveFedora
 
     def get_fixity_response_from_fedora
       uri = target + "/fcr:fixity"
-      ActiveFedora.fedora.connection.get(uri)
+      ActiveFedora.fedora.connection.get(encoded_url(uri))
     end
 
     def fixity_graph
@@ -34,6 +34,14 @@ module ActiveFedora
 
     def status_url
       ::RDF::URI("http://fedora.info/definitions/v4/repository#status")
+    end
+
+    def encoded_url uri
+      if uri.match("fcr:versions")
+        uri.gsub(/fcr:versions/,"fcr%3aversions")
+      else
+        uri
+      end
     end
 
   end
