@@ -6,6 +6,7 @@ describe "delegating attributes" do
       set_terminology do |t|
         t.root(path: "fields")
         t.depositor index_as: [:symbol, :stored_searchable]
+        t.wrangler index_as: [:facetable]
       end
     end
     class TitledObject < ActiveFedora::Base
@@ -17,6 +18,7 @@ describe "delegating attributes" do
     class RdfObject < ActiveFedora::Base
       contains 'foo', class_name: 'PropertiesDatastream'
       has_attributes :depositor, datastream: :foo, multiple: false
+      has_attributes :wrangler, datastream: :foo, multiple: true
       property :resource_type, predicate: ::RDF::DC.type do |index|
         index.as :stored_searchable, :facetable
       end
@@ -47,7 +49,7 @@ describe "delegating attributes" do
     end
   end
 
-  context "with an rdf property" do
+  context "with multiple datastreams" do
 
     subject { RdfObject.create }
 
@@ -71,22 +73,36 @@ describe "delegating attributes" do
     end
 
     describe "setting attributes" do
-      
-      after do
-        expect(subject.depositor).to eql("foo")
-        expect(subject.resource_type).to eql(["bar"])
-      end
+
       specify "using strings for keys" do
         subject["depositor"] = "foo"
         subject["resource_type"] = "bar"
         subject.save
+        expect(subject.depositor).to eql("foo")
+        expect(subject.resource_type).to eql(["bar"])
       end
       specify "using symbols for keys" do
         subject[:depositor] = "foo"
         subject[:resource_type] = "bar"
         subject.save
+        expect(subject.depositor).to eql("foo")
+        expect(subject.resource_type).to eql(["bar"])
       end
 
+      # TODO: bug logged in issue #540
+      describe "using shift", pending: "has_changed? not returning true" do
+        specify "with rdf properties" do
+          subject.resource_type << "bar"
+          subject.save
+          expect(subject.resource_type).to eql(["bar"])
+        end
+        specify "with om terms" do
+          subject.wrangler << "bar"
+          subject.save
+          expect(subject.wrangler).to eql(["bar"])
+        end
+      end
+          
     end
 
   end
