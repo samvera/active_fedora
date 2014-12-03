@@ -29,7 +29,8 @@ describe "a versionable class" do
 
     it "should have one version" do
       expect(subject.versions.size).to eq 1
-      expect(subject.versions.first).to be_kind_of ::RDF::Literal
+      expect(subject.versions.first).to be_kind_of String
+      expect(subject.versions.first).to end_with "version1"
     end
 
     context "two times" do
@@ -41,8 +42,8 @@ describe "a versionable class" do
 
       it "should have two versions" do
         expect(subject.versions.size).to eq 2
-        subject.versions.each do |version|
-          expect(version).to be_kind_of ::RDF::Literal
+        subject.versions.each_index do |index|
+          expect(subject.versions[index]).to end_with "version"+(index+1).to_s
         end
       end
 
@@ -126,7 +127,7 @@ describe "a versionable rdf datastream" do
       end
 
       it "should have one version" do
-        expect(subject.versions.first).to be_kind_of ::RDF::Literal
+        expect(subject.versions.first).to end_with "version1"
       end
 
       it "should have a title" do
@@ -146,8 +147,8 @@ describe "a versionable rdf datastream" do
 
         it "should have two versions" do
           expect(subject.versions.size).to eq 2
-          subject.versions.each do |version|
-            expect(version).to be_kind_of ::RDF::Literal
+          subject.versions.each_index do |index|
+            expect(subject.versions[index]).to end_with "version"+(index+1).to_s
           end
         end
 
@@ -255,8 +256,7 @@ describe "a versionable OM datastream" do
       end
 
       it "should have one version" do
-        expect(subject.versions.size).to eq 1
-        expect(subject.versions.first).to be_kind_of ::RDF::Literal
+        expect(subject.versions.first).to end_with "version1"
       end
 
       it "should have a title" do
@@ -277,8 +277,8 @@ describe "a versionable OM datastream" do
 
         it "should have two unique versions" do
           expect(subject.versions.size).to eq 2
-          subject.versions.each do |version|
-            expect(version).to be_kind_of ::RDF::Literal
+          subject.versions.each_index do |index|
+            expect(subject.versions[index]).to end_with "version"+(index+1).to_s
           end
         end
 
@@ -384,7 +384,7 @@ describe "a versionable binary datastream" do
         expect(subject.versions.size).to eq 1
         expect(subject.original_name).to eql(first_name)
         expect(subject.content.size).to eq first_file.size
-        expect(subject.versions.first).to be_kind_of ::RDF::Literal
+        expect(subject.versions.first).to end_with "version1"
       end
 
       context "two times" do
@@ -401,8 +401,24 @@ describe "a versionable binary datastream" do
           expect(subject.versions.size).to eq 2
           expect(subject.original_name).to eql(second_name)
           expect(subject.content.size).to eq second_file.size
-          subject.versions.each do |version|
-            expect(version).to be_kind_of ::RDF::Literal
+          subject.versions.each_index do |index|
+            expect(subject.versions[index]).to end_with "version"+(index+1).to_s
+          end
+        end
+
+        context "with fixity checking" do
+          let(:results) do
+            results = Array.new
+            subject.versions.each do |uri|
+              results << ActiveFedora::FixityService.new(uri).check
+            end
+            return results
+          end
+
+          it "should report on the fixity of each version" do
+            results.each do |result|
+              expect(result).to be true
+            end
           end
         end
 
@@ -436,7 +452,9 @@ describe "a versionable binary datastream" do
               expect(subject.versions.size).to eq 3
               expect(subject.original_name).to eql(first_name)
               expect(subject.content.size).to eq first_file.size
-              expect(subject.versions.first).to be_kind_of ::RDF::Literal
+              subject.versions.each_index do |index|
+                expect(subject.versions[index]).to end_with "version"+(index+1).to_s
+              end
             end
 
           end
