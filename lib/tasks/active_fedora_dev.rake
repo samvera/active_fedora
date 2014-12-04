@@ -1,8 +1,7 @@
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/../../")
 
 require 'jettywrapper'
-JETTY_ZIP_BASENAME = 'fedora-4/master'
-Jettywrapper.url = "https://github.com/projecthydra/hydra-jetty/archive/#{JETTY_ZIP_BASENAME}.zip"
+Jettywrapper.hydra_jetty_version = "v8.1.0"
 
 namespace :active_fedora do
   # Use yard to build docs
