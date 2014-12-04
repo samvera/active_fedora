@@ -91,7 +91,7 @@ module ActiveFedora #:nodoc:
       autoload :QueryMethods
       autoload :FinderMethods
     end
-
+    
     autoload :Scoping
     autoload :Serialization
     autoload :SimpleDatastream
@@ -102,6 +102,7 @@ module ActiveFedora #:nodoc:
     autoload :Predicates
     autoload :Validations
     autoload :Versionable
+    autoload :VersionsGraph
     autoload :WithMetadata
   end
 

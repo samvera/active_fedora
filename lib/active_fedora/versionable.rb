@@ -20,19 +20,15 @@ module ActiveFedora
       end
     end
 
-    # Returns an array of uris matching our own version label, excluding auto-snapshot versions from Fedora.
+    # Returns an array of ActiveFedora::VersionsGraph::ResourceVersion objects.
+    # Excludes auto-snapshot versions from Fedora.
     def versions
-      results = versions_graph.query([nil, ::RDF::URI.new('http://fedora.info/definitions/v4/repository#hasVersionLabel'), nil])
-      numbered_versions(results).map { |v| version_uri(v.to_s) }
-    end
-
-    def versions_graph
-      @versions_graph ||= ::RDF::Graph.new << ::RDF::Reader.for(:ttl).new(versions_request)
+      @versions ||= ActiveFedora::VersionsGraph.new << ::RDF::Reader.for(:ttl).new(versions_request)
     end
 
     def create_version
       resp = ActiveFedora.fedora.connection.post(versions_uri, nil, {slug: version_name})
-      @versions_graph = nil
+      @versions = nil
       resp.success?
     end
 
@@ -46,8 +42,8 @@ module ActiveFedora
     end
 
     def restore_version label
-      resp = ActiveFedora.fedora.connection.patch(version_uri(label), nil)
-      @versions_graph = nil
+      resp = ActiveFedora.fedora.connection.patch(versions.with_label(label).uri, nil)
+      @versions = nil
       reload
       refresh_attributes if self.respond_to?("refresh_attributes")
       resp.success?
@@ -71,25 +67,14 @@ module ActiveFedora
 
       def versions_uri
         uri + '/fcr:versions'
-      end
-
-      def version_uri label
-        versions_uri + '/' + label
-      end      
+      end     
 
       def version_name
-        if versions.empty?
+        if versions.all.empty?
           "version1"
         else
-          "version" + (versions.count + 1).to_s
+          "version" + (versions.all.count + 1).to_s
         end
-      end
-
-      def numbered_versions statements, literals = Array.new
-        statements.each do |statement|
-          literals << statement.object unless statement.object.to_s.match("auto-snapshot")
-        end
-        return literals
       end
 
   end
