@@ -20,7 +20,7 @@ describe "a versionable class" do
 
   context "after saving" do
     before do
-      subject.title = "Greetings Earthlings"
+      subject.title = ["Greetings Earthlings"]
       subject.save
       subject.create_version
     end
@@ -38,7 +38,7 @@ describe "a versionable class" do
 
     context "two times" do
       before do
-        subject.title = "Surrender and prepare to be boarded"
+        subject.title = ["Surrender and prepare to be boarded"]
         subject.save
         subject.create_version
       end
@@ -63,7 +63,7 @@ describe "a versionable class" do
 
         context "and creating additional versions" do
           before do
-            subject.title = "Now, surrender and prepare to be boarded"
+            subject.title = ["Now, surrender and prepare to be boarded"]
             subject.save!
             subject.create_version
           end
@@ -480,10 +480,10 @@ describe "a versionable binary datastream" do
   end
 end
 
-describe "a non-versionable resource" do 
+describe "a non-versionable resource" do
   before(:all) do
     class NotVersionableWithVersions < ActiveFedora::Base
-      # explicitly don't call has_many_versions 
+      # explicitly don't call has_many_versions
       property :title, predicate: ::RDF::DC.title
     end
   end
@@ -496,14 +496,14 @@ describe "a non-versionable resource" do
 
   context "saved with no versions" do
     it "should not have versions" do
-      subject.update(title: "Greetings Earthlings")
+      subject.update(title: ["Greetings Earthlings"])
       expect(subject).not_to have_versions
     end
   end
 
   context "saved with versions" do
     it "should have versions" do
-      subject.update(title: "Greetings Earthlings")
+      subject.update(title: ["Greetings Earthlings"])
       subject.create_version
       expect(subject).to have_versions
     end

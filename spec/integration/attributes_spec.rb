@@ -24,6 +24,7 @@ describe "delegating attributes" do
       end
     end
   end
+
   after :all do
     Object.send(:remove_const, :TitledObject)
     Object.send(:remove_const, :RdfObject)
@@ -57,7 +58,7 @@ describe "delegating attributes" do
 
       before do
         subject.depositor = "foo"
-        subject.resource_type = "bar"
+        subject.resource_type = ["bar"]
         subject.save
       end
 
@@ -69,21 +70,20 @@ describe "delegating attributes" do
         expect(subject[:depositor]).to eql("foo")
         expect(subject[:resource_type]).to eql(["bar"])
       end
-
     end
 
     describe "setting attributes" do
-
       specify "using strings for keys" do
         subject["depositor"] = "foo"
-        subject["resource_type"] = "bar"
+        subject["resource_type"] = ["bar"]
         subject.save
         expect(subject.depositor).to eql("foo")
         expect(subject.resource_type).to eql(["bar"])
       end
+
       specify "using symbols for keys" do
         subject[:depositor] = "foo"
-        subject[:resource_type] = "bar"
+        subject[:resource_type] = ["bar"]
         subject.save
         expect(subject.depositor).to eql("foo")
         expect(subject.resource_type).to eql(["bar"])
@@ -102,9 +102,6 @@ describe "delegating attributes" do
           expect(subject.wrangler).to eql(["bar"])
         end
       end
-          
     end
-
   end
 end
-
