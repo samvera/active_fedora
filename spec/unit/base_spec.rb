@@ -213,7 +213,7 @@ describe ActiveFedora::Base do
           end
 
           context "and the object has properties" do
-            let(:test_object) { WithProperty.new(title: 'foo') }
+            let(:test_object) { WithProperty.new(title: ['foo']) }
             before do
               class WithProperty < ActiveFedora::Base
                 property :title, predicate: ::RDF::DC.title

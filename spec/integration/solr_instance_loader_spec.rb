@@ -9,13 +9,9 @@ describe ActiveFedora::SolrInstanceLoader do
       end
       has_attributes :foo, datastream: 'descMetadata', multiple: true
       has_attributes :bar, datastream: 'descMetadata', multiple: false
-      property :title, predicate: ::RDF::DC.title
+      property :title, predicate: ::RDF::DC.title, multiple: false
       property :description, predicate: ::RDF::DC.description
       belongs_to :another, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'Foo'
-
-      def title
-        super.first
-      end
     end
   end
 
@@ -27,7 +23,6 @@ describe ActiveFedora::SolrInstanceLoader do
   after do
     Object.send(:remove_const, :Foo)
   end
-
 
   context "without a solr doc" do
     subject { loader.object }
@@ -59,7 +54,7 @@ describe ActiveFedora::SolrInstanceLoader do
         expect(object.foo).to eq ['baz'] # datastream assertion
 
         # and it's frozen
-        expect { object.title = ['changed'] }.to raise_error ActiveFedora::ReadOnlyRecord
+        expect { object.title = 'changed' }.to raise_error ActiveFedora::ReadOnlyRecord
         expect(object.title).to eq 'My Title'
 
         expect { object.foo = ['changed'] }.to raise_error ActiveFedora::ReadOnlyRecord
@@ -77,7 +72,7 @@ describe ActiveFedora::SolrInstanceLoader do
   end
 
   context "with a solr doc" do
-    let(:profile) { { "foo"=>["baz"], "bar"=>"quix", "title"=>["My Title"]}.to_json }
+    let(:profile) { { "foo"=>["baz"], "bar"=>"quix", "title"=>"My Title"}.to_json }
     let(:doc) { { 'id' => 'test-123', 'has_model_ssim'=>['Foo'], 'object_profile_ssm' => profile } }
     let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj.id, doc) }
 

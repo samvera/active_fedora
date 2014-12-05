@@ -153,7 +153,7 @@ describe ActiveFedora::Base do
           expect { subject.fubar = nil }.not_to raise_error
         end
 
-        it "should deprecate passing an enumerable to a unique attribute writer" do
+        it "should not allow passing an enumerable to a unique attribute writer" do
           expect { subject.cow = "Low" }.not_to raise_error
           expect { subject.cow = ["Low"]
             }.to raise_error ArgumentError, "You attempted to set the attribute `cow' on `BarHistory2' to an enumerable value. However, this attribute is declared as being singular."
@@ -394,6 +394,7 @@ describe ActiveFedora::Base do
         property :title, predicate: ::RDF::DC.title do |index|
           index.as :symbol
         end
+        property :abstract, predicate: ::RDF::DC.abstract, multiple: false
       end
     end
 
@@ -413,6 +414,21 @@ describe ActiveFedora::Base do
 
       it "should index the attributes" do
         expect(solr_doc['title_ssim']).to eq ['test1']
+      end
+    end
+
+    describe "when an object of the wrong cardinality is set" do
+      it "should not allow passing a string to a multiple property writer" do
+        expect { subject.title = "Quack" }.to raise_error ArgumentError
+        expect { subject.title = ["Quack"] }.not_to raise_error
+        expect { subject.title = nil }.not_to raise_error
+      end
+
+      it "should not allow an enumerable to a unique attribute writer" do
+        expect { subject.abstract = "Low" }.not_to raise_error
+        expect { subject.abstract = ["Low"]
+          }.to raise_error ArgumentError, "You attempted to set the property `abstract' to an enumerable value. However, this property is declared as singular."
+        expect { subject.abstract = nil }.not_to raise_error
       end
     end
   end

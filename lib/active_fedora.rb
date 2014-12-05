@@ -91,7 +91,7 @@ module ActiveFedora #:nodoc:
       autoload :QueryMethods
       autoload :FinderMethods
     end
-    
+
     autoload :Scoping
     autoload :Serialization
     autoload :SimpleDatastream
@@ -122,6 +122,7 @@ module ActiveFedora #:nodoc:
     eager_autoload do
       autoload :Serializers
       autoload :PrimaryKey
+      autoload :PropertyBuilder
     end
   end
 
