@@ -2,6 +2,7 @@ module ActiveFedora
   class Fedora
     def initialize(config)
       @config = config
+      init_base_path
     end
 
     def host

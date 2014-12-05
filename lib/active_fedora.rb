@@ -159,7 +159,6 @@ module ActiveFedora #:nodoc:
       SolrService.reset!
       Predicates.predicate_config = nil
       configurator.init(options)
-      fedora.init_base_path
     end
 
     def config
