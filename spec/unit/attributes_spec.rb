@@ -146,12 +146,13 @@ describe ActiveFedora::Base do
         expect(subject.fubar(1)).to eq ['two']
       end
 
-      describe "asigning wrong cardinality" do
+      describe "assigning wrong cardinality" do
         it "should not allow passing a string to a multiple attribute writer" do
           expect { subject.fubar = "Quack" }.to raise_error ArgumentError
           expect { subject.fubar = ["Quack"] }.not_to raise_error
           expect { subject.fubar = nil }.not_to raise_error
         end
+
         it "should deprecate passing an enumerable to a unique attribute writer" do
           expect { subject.cow = "Low" }.not_to raise_error
           expect { subject.cow = ["Low"]
@@ -159,7 +160,6 @@ describe ActiveFedora::Base do
           expect { subject.cow = nil }.not_to raise_error
         end
       end
-
 
       it "should return an array if marked as multiple" do
         subject.horse=["neigh", "whinny"]
@@ -185,7 +185,7 @@ describe ActiveFedora::Base do
         end
       end
 
-      describe "array getters and setters" do
+      describe "hash getters and setters" do
         it "should accept symbol keys" do
           subject[:duck]= ["Cluck", "Gobble"]
           expect(subject[:duck]).to eq ["Cluck", "Gobble"]
