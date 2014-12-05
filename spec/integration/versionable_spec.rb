@@ -14,6 +14,8 @@ describe "a versionable class" do
 
   subject { WithVersions.new }
 
+  let(:current_year) { DateTime.now.year.to_s }
+
   it { is_expected.to be_versionable }
 
   context "after saving" do
@@ -28,9 +30,10 @@ describe "a versionable class" do
     end
 
     it "should have one version" do
-      expect(subject.versions.size).to eq 1
-      expect(subject.versions.first).to be_kind_of String
-      expect(subject.versions.first).to end_with "version1"
+      expect(subject.versions).to be_kind_of ActiveFedora::VersionsGraph
+      expect(subject.versions.all.first).to be_kind_of ActiveFedora::VersionsGraph::ResourceVersion
+      expect(subject.versions.all.first.label).to eql "version1"
+      expect(subject.versions.all.first.created).to start_with current_year
     end
 
     context "two times" do
@@ -41,9 +44,10 @@ describe "a versionable class" do
       end
 
       it "should have two versions" do
-        expect(subject.versions.size).to eq 2
-        subject.versions.each_index do |index|
-          expect(subject.versions[index]).to end_with "version"+(index+1).to_s
+        expect(subject.versions.all.size).to eq 2
+        subject.versions.all.each_index do |index|
+          expect(subject.versions.all[index].label).to end_with "version"+(index+1).to_s
+          expect(subject.versions.all[index].created).to start_with current_year
         end
       end
 
@@ -65,7 +69,7 @@ describe "a versionable class" do
           end
 
           it "should have three versions" do
-            expect(subject.versions.size).to eq 3
+            expect(subject.versions.all.size).to eq 3
             expect(subject.title).to eql(["Now, surrender and prepare to be boarded"])
           end
 
@@ -98,6 +102,8 @@ describe "a versionable rdf datastream" do
 
   subject { test_object.descMetadata }
 
+  let(:current_year) { DateTime.now.year.to_s }
+
   context "that exists in the repository" do
     let(:test_object) { MockAFBase.create }
 
@@ -127,7 +133,7 @@ describe "a versionable rdf datastream" do
       end
 
       it "should have one version" do
-        expect(subject.versions.first).to end_with "version1"
+        expect(subject.versions.first.label).to eql "version1"
       end
 
       it "should have a title" do
@@ -146,9 +152,10 @@ describe "a versionable rdf datastream" do
         end
 
         it "should have two versions" do
-          expect(subject.versions.size).to eq 2
-          subject.versions.each_index do |index|
-            expect(subject.versions[index]).to end_with "version"+(index+1).to_s
+          expect(subject.versions.all.size).to eq 2
+          subject.versions.all.each_index do |index|
+            expect(subject.versions.all[index].label).to end_with "version"+(index+1).to_s
+            expect(subject.versions.all[index].created).to start_with current_year
           end
         end
 
@@ -168,7 +175,7 @@ describe "a versionable rdf datastream" do
           end
 
           it "should have two unique versions" do
-            expect(subject.versions.size).to eq 2      
+            expect(subject.versions.all.size).to eq 2      
           end
 
           it "should load the restored datastream's content" do
@@ -187,7 +194,7 @@ describe "a versionable rdf datastream" do
             end
 
             it "should have three unique versions" do
-              expect(subject.versions.size).to eq 3
+              expect(subject.versions.all.size).to eq 3
             end
 
             it "should have a new title" do
@@ -227,6 +234,8 @@ describe "a versionable OM datastream" do
 
   subject { test_object.descMetadata }
 
+  let(:current_year) { DateTime.now.year.to_s }
+
   context "that exists in the repository" do
     let(:test_object) { MockAFBase.create }
 
@@ -256,7 +265,8 @@ describe "a versionable OM datastream" do
       end
 
       it "should have one version" do
-        expect(subject.versions.first).to end_with "version1"
+        expect(subject.versions.first.label).to eql "version1"
+        expect(subject.versions.first.created).to start_with current_year
       end
 
       it "should have a title" do
@@ -276,9 +286,10 @@ describe "a versionable OM datastream" do
         end
 
         it "should have two unique versions" do
-          expect(subject.versions.size).to eq 2
-          subject.versions.each_index do |index|
-            expect(subject.versions[index]).to end_with "version"+(index+1).to_s
+          expect(subject.versions.all.size).to eq 2
+          subject.versions.all.each_index do |index|
+            expect(subject.versions.all[index].label).to end_with "version"+(index+1).to_s
+            expect(subject.versions.all[index].created).to start_with current_year
           end
         end
 
@@ -298,7 +309,7 @@ describe "a versionable OM datastream" do
           end
 
           it "should still have two unique versions" do
-            expect(subject.versions.size).to eq 2
+            expect(subject.versions.all.size).to eq 2
           end
 
           it "should load the restored datastream's content" do
@@ -317,7 +328,7 @@ describe "a versionable OM datastream" do
             end
 
             it "should have three unique versions" do
-              expect(subject.versions.size).to eq 3
+              expect(subject.versions.all.size).to eq 3
             end
 
             it "should have a new title" do
@@ -353,6 +364,8 @@ describe "a versionable binary datastream" do
 
   subject { test_object.content }
 
+  let(:current_year) { DateTime.now.year.to_s }
+
   context "that exists in the repository" do
     let(:test_object) { MockAFBase.create }
 
@@ -381,10 +394,11 @@ describe "a versionable binary datastream" do
       end
 
       it "should have one version" do
-        expect(subject.versions.size).to eq 1
+        expect(subject.versions.all.size).to eq 1
         expect(subject.original_name).to eql(first_name)
         expect(subject.content.size).to eq first_file.size
-        expect(subject.versions.first).to end_with "version1"
+        expect(subject.versions.first.label).to eql "version1"
+        expect(subject.versions.first.created).to start_with current_year
       end
 
       context "two times" do
@@ -398,19 +412,20 @@ describe "a versionable binary datastream" do
         end
 
         it "should have two unique versions" do
-          expect(subject.versions.size).to eq 2
+          expect(subject.versions.all.size).to eq 2
           expect(subject.original_name).to eql(second_name)
           expect(subject.content.size).to eq second_file.size
-          subject.versions.each_index do |index|
-            expect(subject.versions[index]).to end_with "version"+(index+1).to_s
+          subject.versions.all.each_index do |index|
+            expect(subject.versions.all[index].label).to end_with "version"+(index+1).to_s
+            expect(subject.versions.all[index].created).to start_with current_year
           end
         end
 
         context "with fixity checking" do
           let(:results) do
             results = Array.new
-            subject.versions.each do |uri|
-              results << ActiveFedora::FixityService.new(uri).check
+            subject.versions.all.each do |version|
+              results << ActiveFedora::FixityService.new(version.uri).check
             end
             return results
           end
@@ -429,7 +444,7 @@ describe "a versionable binary datastream" do
           end
 
           it "should still have two unique versions" do
-            expect(subject.versions.size).to eq 2
+            expect(subject.versions.all.size).to eq 2
           end
 
           it "should load the restored datastream's content" do
@@ -449,11 +464,12 @@ describe "a versionable binary datastream" do
             end
 
             it "should have three unique versions" do
-              expect(subject.versions.size).to eq 3
+              expect(subject.versions.all.size).to eq 3
               expect(subject.original_name).to eql(first_name)
               expect(subject.content.size).to eq first_file.size
-              subject.versions.each_index do |index|
-                expect(subject.versions[index]).to end_with "version"+(index+1).to_s
+              subject.versions.all.each_index do |index|
+                expect(subject.versions.all[index].label).to end_with "version"+(index+1).to_s
+                expect(subject.versions.all[index].created).to start_with current_year
               end
             end
 

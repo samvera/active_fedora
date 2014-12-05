@@ -1,7 +1,7 @@
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/../../")
 
 require 'jettywrapper'
-Jettywrapper.hydra_jetty_version = "v8.1.0"
+Jettywrapper.hydra_jetty_version = "v8.1.1"
 
 namespace :active_fedora do
   # Use yard to build docs
