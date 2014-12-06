@@ -15,10 +15,13 @@ module ActiveFedora
           fields.each do |field_key, field_info|
             values = resource.get_values(field_key)
             Array(values).each do |val|
-              if val.kind_of? ::RDF::URI
-                val = val.to_s
-              elsif val.kind_of? ActiveTriples::Resource
-                val = val.solrize
+              val = case val
+                when ::RDF::URI, ActiveTriples::Term
+                  val.to_s
+                when ActiveTriples::Resource
+                  val.solrize
+                else
+                  val
               end
               self.class.create_and_insert_terms(apply_prefix(field_key, opts[:name]), val, field_info[:behaviors], solr_doc)
             end
