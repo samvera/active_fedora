@@ -66,8 +66,7 @@ module ActiveFedora
             klass.properties.merge(self.properties).each do |property, config|
               klass.property(config.term,
                              predicate: config.predicate,
-                             class_name: config.class_name,
-                             multivalue: config.multivalue)
+                             class_name: config.class_name)
             end
             klass
         end

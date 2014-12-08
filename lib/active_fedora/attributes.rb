@@ -169,10 +169,10 @@ module ActiveFedora
       end
 
       def property name, properties={}, &block
-        find_or_create_defined_attribute(name, nil, {multiple: true}.merge(properties))
+        properties = { multiple: true }.merge(properties)
+        find_or_create_defined_attribute(name, nil, properties)
         raise ArgumentError, "#{name} is a keyword and not an acceptable property name." if protected_property_name? name
-        properties = properties.merge(multivalue: false) if properties[:multiple] == false
-        reflection = ActiveFedora::Attributes::PropertyBuilder.build(self, name, properties.except(:multiple), &block)
+        reflection = ActiveFedora::Attributes::PropertyBuilder.build(self, name, properties, &block)
         # reflection = ActiveTriple::PropertyBuilder.build(self, name, properties, &block)
         ActiveTriples::Reflection.add_reflection self, name, reflection
       end

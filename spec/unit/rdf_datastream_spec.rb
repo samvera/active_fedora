@@ -12,7 +12,7 @@ describe ActiveFedora::RDFDatastream do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         property :title, predicate: ::RDF::DC.title
-        property :description, predicate: ::RDF::DC.description, :multivalue => false
+        property :description, predicate: ::RDF::DC.description
       end
       class MyObj < ActiveFedora::Base
         has_metadata 'descMetadata', type: MyDatastream
@@ -37,13 +37,6 @@ describe ActiveFedora::RDFDatastream do
     it "should allow asserting an empty string" do
       subject.title = ['']
       expect(subject.title).to eq ['']
-    end
-
-    describe "when multivalue: false" do
-      it "should return single values" do
-        subject.description = 'my description'
-        expect(subject.description).to eq 'my description'
-      end
     end
 
     it "should clear stuff" do
