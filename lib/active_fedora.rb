@@ -123,6 +123,7 @@ module ActiveFedora #:nodoc:
       autoload :Serializers
       autoload :PrimaryKey
       autoload :PropertyBuilder
+      autoload :NodeConfig
     end
   end
 

@@ -4,8 +4,13 @@ module ActiveFedora::Attributes
     def self.define_accessors(model, reflection)
       mixin = model.generated_property_methods
       name = reflection.term
-      define_readers(mixin, name)
-      reflection.multivalue ? define_writers(mixin, name) : define_singular_writers(mixin, name)
+      if reflection.multiple?
+        define_readers(mixin, name)
+        define_writers(mixin, name)
+      else
+        define_singular_readers(mixin, name)
+        define_singular_writers(mixin, name)
+      end
     end
 
     def self.define_writers(mixin, name)
@@ -19,6 +24,14 @@ module ActiveFedora::Attributes
       CODE
     end
 
+    def self.define_singular_readers(mixin, name)
+      mixin.class_eval <<-CODE, __FILE__, __LINE__ + 1
+        def #{name}(*args)
+          get_values(:#{name}).first
+        end
+      CODE
+    end
+
     def self.define_singular_writers(mixin, name)
       mixin.class_eval <<-CODE, __FILE__, __LINE__ + 1
         def #{name}=(value)
@@ -28,6 +41,12 @@ module ActiveFedora::Attributes
           set_value(:#{name}, value)
         end
       CODE
+    end
+
+    def build(&block)
+      NodeConfig.new(name, options[:predicate], options.except(:predicate)) do |config|
+        config.with_index(&block) if block_given?
+      end
     end
   end
 end

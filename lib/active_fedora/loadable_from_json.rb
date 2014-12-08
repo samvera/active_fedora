@@ -43,7 +43,7 @@ module ActiveFedora
       # It is expected that the singular filter gets applied after fetching the value from this
       # resource, so cast everything back to an array.
       def set_value(k, v)
-        @hash[k] = v
+        @hash[k] = Array(v)
       end
 
       def get_values(k)

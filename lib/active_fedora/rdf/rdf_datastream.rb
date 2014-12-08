@@ -102,8 +102,7 @@ module ActiveFedora
                       klass.properties.merge(self.class.properties).each do |prop, config|
                         klass.property(config.term,
                                        predicate: config.predicate,
-                                       class_name: config.class_name,
-                                       multivalue: config.multivalue)
+                                       class_name: config.class_name)
                       end
                       klass.accepts_nested_attributes_for(*nested_attributes_options.keys) unless nested_attributes_options.blank?
                       uri_stub = self.class.rdf_subject.call(self)
