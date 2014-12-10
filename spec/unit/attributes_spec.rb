@@ -405,8 +405,24 @@ describe ActiveFedora::Base do
     let(:obj) { BarHistory4.new(title: ['test1']) }
     subject { obj }
 
-    it "should be able to access the attributes" do
-      expect(subject.title).to eq ['test1']
+    describe "accessing attributes" do
+      context "using generated methods" do
+        it "should return values" do
+          expect(subject.title).to eq ['test1']
+        end
+      end
+
+      context "using hash accessors" do
+        context "on single value fields" do
+          it "should have a default value" do
+            expect(subject[:abstract]).to be_nil
+          end
+
+          it "should return values" do
+            expect(subject[:title]).to eq ['test1']
+          end
+        end
+      end
     end
 
     context "indexing" do

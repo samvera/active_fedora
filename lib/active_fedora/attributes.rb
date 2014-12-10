@@ -40,8 +40,8 @@ module ActiveFedora
         # This is for id attributes stored in the rdf graph.
         assoc.reader
       elsif self.class.properties.key?(key.to_s)
-        # The attribute is stored in the RDF graph for this object
-        resource[key]
+        # Use the generated method so that single value assetions are single
+        self.send(key)
       else
         # The attribute is a delegate to a datastream
         array_reader(key)
