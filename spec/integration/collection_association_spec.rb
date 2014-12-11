@@ -9,21 +9,28 @@ describe ActiveFedora::Base do
       belongs_to :library, predicate: ActiveFedora::RDF::RelsExt.hasMember
     end
   end
+
   let(:library) { Library.create! }
   let!(:book1) { Book.create!(library: library) }
   let!(:book2) { Book.create!(library: library) }
+
   after do
-    Book.delete_all
-    Library.delete_all
     Object.send(:remove_const, :Library)
     Object.send(:remove_const, :Book)
   end
+
   describe "load_from_solr" do
     it "should set rows to count, if not specified" do
       expect(library.books(response_format: :solr).size).to eq 2
     end
+
     it "should limit rows returned if option passed" do
       expect(library.books(response_format: :solr, rows: 1).size).to eq 1
+    end
+
+    it "should not query solr if rows is 0" do
+      expect(ActiveFedora::SolrService).not_to receive(:query)
+      expect(library.books(response_format: :solr, rows: 0)).to eq []
     end
   end
 

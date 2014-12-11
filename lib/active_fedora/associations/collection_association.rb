@@ -292,8 +292,9 @@ module ActiveFedora
       # @param opts [Hash] Options that will be passed through to ActiveFedora::SolrService.query.
       def load_from_solr(opts = Hash.new)
         return [] if @finder_query.empty?
-        solr_opts = {rows: opts.delete(:rows) || count}
-        SolrService.query(@finder_query, solr_opts.merge(opts))
+        rows = opts.delete(:rows) { count }
+        return [] if rows == 0
+        SolrService.query(@finder_query, {rows: rows}.merge(opts))
       end
 
       def add_to_target(record, skip_callbacks = false)
