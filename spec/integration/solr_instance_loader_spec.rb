@@ -83,4 +83,13 @@ describe ActiveFedora::SolrInstanceLoader do
       expect(subject.title).to eq 'My Title'
     end
   end
+
+  context "when the model has extra values in its json" do
+    let(:profile) { { "foo"=>["baz"], "bar"=>"quix", "title"=>"My Title", "extra_value"=>"Bonus values!"}.to_json }
+    let(:doc) { { 'id' => 'test-123', 'has_model_ssim'=>['Foo'], 'object_profile_ssm' => profile } }
+    let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj.id, doc) }
+    it "should load the object without trouble" do
+      expect(loader.object).to be_instance_of Foo
+    end
+  end
 end

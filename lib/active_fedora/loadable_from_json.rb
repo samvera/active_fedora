@@ -103,7 +103,7 @@ module ActiveFedora
         attached_files[key] = SolrBackedMetadataFile.new
       end
       @resource = SolrBackedResource.new(self.class)
-      self.attributes = attrs.except(datastream_keys)
+      self.attributes = attrs.slice(*self.class.attribute_names)
       # TODO Should we clear the change tracking, or make this object Read-only?
 
       run_callbacks :find
