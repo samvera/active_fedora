@@ -20,6 +20,10 @@ module ActiveFedora
       @profile_solr_name ||= ActiveFedora::SolrQueryBuilder.solr_name("object_profile", :displayable)
     end
 
+    def profile_service
+      ProfileIndexingService
+    end
+
 
     def generate_solr_document
       solr_doc = {}
@@ -28,7 +32,7 @@ module ActiveFedora
       Solrizer.set_field(solr_doc, 'active_fedora_model', object.class.inspect, :stored_sortable)
       solr_doc.merge!(QueryResultBuilder::HAS_MODEL_SOLR_FIELD => object.has_model)
       solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => object.id)
-      solr_doc.merge!(self.class.profile_solr_name => object.to_json)
+      solr_doc.merge!(self.class.profile_solr_name => profile_service.new(object).export)
       object.attached_files.each do |name, file|
         solr_doc.merge! file.to_solr(solr_doc, name: name.to_s)
       end

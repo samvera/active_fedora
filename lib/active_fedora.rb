@@ -69,8 +69,9 @@ module ActiveFedora #:nodoc:
     autoload :NomDatastream
     autoload :NullRelation
     autoload :OmDatastream
-    autoload :Property
     autoload :Persistence
+    autoload :ProfileIndexingService
+    autoload :Property
     autoload :QualifiedDublinCoreDatastream
     autoload :Querying
     autoload :QueryResultBuilder
