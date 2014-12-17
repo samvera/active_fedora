@@ -50,7 +50,8 @@ module ActiveFedora
       end
 
       def fedora_versions
-        resources.map { |statement| version_from_resource(statement) }
+        list = resources.map { |statement| version_from_resource(statement) }
+        list.sort_by(&:created)
       end
 
   end
