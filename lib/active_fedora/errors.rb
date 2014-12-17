@@ -54,6 +54,20 @@ module ActiveFedora #:nodoc:
   class IllegalOperation < ActiveFedoraError
   end
 
+  # Raised when the data has more than one statement for a predicate, but our constraints say it's singular
+  # This helps to prevent overwriting multiple values with a single value when round tripping:
+  #   class Book < ActiveFedora::Base
+  #     property :title, predicate: RDF::DC.title, multiple: false
+  #   end
+  #
+  #   b = Book.new
+  #   b.resource.title = ['foo', 'bar']
+  #   b.title # Raises ConstraintError
+  #   # which prevents us from doing:
+  #   b.title = b.title
+  class ConstraintError < ActiveFedoraError
+  end
+
   # Used to rollback a transaction in a deliberate way without raising an exception.
   # Transactions are currently incomplete
   class Rollback < ActiveFedoraError

@@ -418,6 +418,17 @@ describe ActiveFedora::Base do
             expect(subject[:abstract]).to be_nil
           end
 
+          context "when there are two assertions for the predicate" do
+            before do
+              subject.resource[:abstract] = ['foo', 'bar']
+            end
+            it "should raise an error if just returning the first value would cause data loss" do
+              expect { subject[:abstract] }.to raise_error ActiveFedora::ConstraintError, "Expected \"abstract\" to have 0-1 statements, but there are 2"
+            end
+          end
+        end
+
+        context "multiple values" do
           it "should return values" do
             expect(subject[:title]).to eq ['test1']
           end
