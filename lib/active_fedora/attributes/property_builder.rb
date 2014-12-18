@@ -27,7 +27,9 @@ module ActiveFedora::Attributes
     def self.define_singular_readers(mixin, name)
       mixin.class_eval <<-CODE, __FILE__, __LINE__ + 1
         def #{name}(*args)
-          get_values(:#{name}).first
+          vals = get_values(:#{name})
+          raise ActiveFedora::ConstraintError, "Expected \\"#{name}\\" to have 0-1 statements, but there are \#{vals.size}" if vals.size > 1
+          vals.first
         end
       CODE
     end
