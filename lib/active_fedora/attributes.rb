@@ -1,7 +1,9 @@
+require 'active_model/forbidden_attributes_protection'
 module ActiveFedora
   module Attributes
     extend ActiveSupport::Concern
     include ActiveModel::Dirty
+    include ActiveModel::ForbiddenAttributesProtection
 
     included do
       include Serializers
@@ -15,7 +17,7 @@ module ActiveFedora
     end
 
     def attributes=(properties)
-      properties.each do |k, v|
+      sanitize_for_mass_assignment(properties).each do |k, v|
         respond_to?(:"#{k}=") ? send(:"#{k}=", v) : raise(UnknownAttributeError, "#{self.class} does not have an attribute `#{k}'")
       end
     end
