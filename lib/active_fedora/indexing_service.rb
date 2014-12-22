@@ -25,6 +25,9 @@ module ActiveFedora
     end
 
 
+    # Creates a solr document hash for the {#object}
+    # @yield [Hash] yields the solr document
+    # @return [Hash] the solr document
     def generate_solr_document
       solr_doc = {}
       Solrizer.set_field(solr_doc, 'system_create', c_time, :stored_sortable)
@@ -37,6 +40,7 @@ module ActiveFedora
         solr_doc.merge! file.to_solr(solr_doc, name: name.to_s)
       end
       solr_doc = solrize_relationships(solr_doc)
+      yield(solr_doc) if block_given?
       solr_doc
     end
 
