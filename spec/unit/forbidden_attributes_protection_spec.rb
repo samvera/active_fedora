@@ -44,7 +44,7 @@ describe "Mass assignment protection" do
 
   context "permitted attributes" do
     let(:params) { ProtectedParams.new(first_name: 'Guille', gender: 'm').permit! }
-    it "cannot be used for mass assignment" do
+    it "can be used for mass assignment" do
       expect { Person.new(params) }.not_to raise_error
     end
   end
