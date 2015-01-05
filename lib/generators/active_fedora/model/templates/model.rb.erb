@@ -1,28 +1,46 @@
 # Generated via
-#  `rails generate active_fedora::model <%= class_name %>`
+#  `rails generate active_fedora:model <%= class_name %>`
 class <%= class_name %> < ActiveFedora::Base
-  <% if options['descMetadata'] %>
-  has_metadata "descMetadata", type: <%= options['descMetadata'] %>
+  <% if options['datastream'] %>
+  contains :descMetadata, class_name: "<%= options['datastream'] %>"
   <% else %>
-  # Creating a #descMetadata method that returns the datastream. 
+  # Define some properties to store:
   #
-  has_metadata "descMetadata", type: <%= class_name %>Metadata
+  property :title, predicate: RDF::DC.title do |index|
+    index.as :stored_searchable, :facetable
+  end
+  property :creator, predicate: RDF::DC.creator do |index|
+    index.as :stored_searchable, :facetable
+  end
+  property :contributor, predicate: RDF::DC.contributor do |index|
+    index.as :stored_searchable, :facetable
+  end
+  property :description, predicate: RDF::DC.description do |index|
+    index.as :stored_searchable
+  end
   <%- end -%>
-  <% if options['has_file_datastream'] %>
-  has_file_datastream "<%= options['has_file_datastream'] %>"
+  <% if options['contains'] %>
+  contains :<%= options['contains'] %>"
   <% else %>
-  # Uncomment the following lines to add an #attachment method that is a
-  #   file_datastream:
+  # Uncomment the following lines to add an #attachment method that is a file
   #
-  # has_file_datastream "attachment"
+  # contains "attachment"
   <% end %>
-  # "If you need to add additional attributes to the SOLR document, define the
-  # #to_solr method and make sure to use super"
   #
-  # def to_solr(solr_document={}, options={})
-  #   super(solr_document, options)
-  #   solr_document["my_attribute_s"] = my_attribute
-  #   return solr_document
+  # If you need to add additional attributes to the SOLR document, extend the default indexer:
+  #
+  # def indexer
+  #   MyApp::IndexingService
   # end
-
+  #
+  # This can go into app/services/my_app/indexing_service.rb
+  # module MyApp
+  #   class IndexingService < ActiveFedora::IndexingService
+  #     def generate_solr_document
+  #       super.tap do |solr_doc|
+  #         solr_document["my_attribute_s"] = object.my_attribute
+  #       end
+  #     end
+  #   end
+  # end
 end
