@@ -4,10 +4,11 @@ require 'config_helper'
 # For testing Module-level methods like ActiveFedora.init
 
 describe ActiveFedora do
-  
-  before(:each) do
+
+  before do
     restore_spec_configuration
   end
+
   after :all do
     unstub_rails
     # Restore to default fedora configs
@@ -51,10 +52,10 @@ describe ActiveFedora do
       end
     end
   end
-  
+
   describe ".init" do
-    
-    after(:each) do
+
+    after do
       # Restore to default fedora configs
       ActiveFedora.init(:environment => "test", :fedora_config_path => File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml"))
     end
@@ -94,7 +95,7 @@ describe ActiveFedora do
         describe "with no explicit config path" do
           it "should look for the file in the path defined at Rails.root" do
             allow(ActiveFedora::SolrService).to receive(:load_mappings) #necessary or else it will load the solrizer config and it breaks other tests in the suite.
-            
+
             stub_rails(:root=>File.join(File.dirname(__FILE__),"../fixtures/rails_root"))
             ActiveFedora.init()
             expect(ActiveFedora.config.credentials[:url]).to eq "http://testhost.com:8983/fedora"
@@ -103,7 +104,7 @@ describe ActiveFedora do
       end
     end
   end
-  
+
   describe "#class_from_string" do
     before do
       module ParentClass
@@ -115,8 +116,8 @@ describe ActiveFedora do
     end
     it "should return class constants based on strings" do
       expect(ActiveFedora.class_from_string("Om")).to eq Om
-      expect(ActiveFedora.class_from_string("ActiveFedora::RDF::Indexing")).to eq ActiveFedora::RDF::Indexing
-      expect(ActiveFedora.class_from_string("Indexing", ActiveFedora::RDF)).to eq ActiveFedora::RDF::Indexing
+      expect(ActiveFedora.class_from_string("ActiveFedora::RDF::IndexingService")).to eq ActiveFedora::RDF::IndexingService
+      expect(ActiveFedora.class_from_string("IndexingService", ActiveFedora::RDF)).to eq ActiveFedora::RDF::IndexingService
     end
 
     it "should find sibling classes" do

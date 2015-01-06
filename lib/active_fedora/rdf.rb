@@ -5,7 +5,7 @@ module ActiveFedora
     autoload :Fcrepo
     autoload :Fcrepo4
     autoload :Ldp
-    autoload :Indexing
+    autoload :IndexingService
     autoload :Identifiable
     autoload :Persistence
     autoload :RelsExt

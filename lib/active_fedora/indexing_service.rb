@@ -24,6 +24,9 @@ module ActiveFedora
       ProfileIndexingService
     end
 
+    def rdf_service
+      RDF::IndexingService
+    end
 
     # Creates a solr document hash for the {#object}
     # @yield [Hash] yields the solr document
@@ -40,6 +43,7 @@ module ActiveFedora
         solr_doc.merge! file.to_solr(solr_doc, name: name.to_s)
       end
       solr_doc = solrize_relationships(solr_doc)
+      solr_doc = solrize_rdf_assertions(solr_doc)
       yield(solr_doc) if block_given?
       solr_doc
     end
@@ -68,6 +72,12 @@ module ActiveFedora
         end
       end
       solr_doc
+    end
+
+    # Serialize the resource's RDF relationships to solr
+    # @param [Hash] solr_doc @deafult an empty Hash
+    def solrize_rdf_assertions(solr_doc = Hash.new)
+      solr_doc.merge rdf_service.new(object).generate_solr_document
     end
   end
 end
