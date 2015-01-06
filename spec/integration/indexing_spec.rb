@@ -2,7 +2,7 @@ require 'spec_helper'
 @@last_id = 0
 
 describe ActiveFedora::Base do
-  describe "get_descendent_uris" do
+  describe "descendent_uris" do
 
     before :each do
       ids.each do |id|
@@ -19,7 +19,7 @@ describe ActiveFedora::Base do
       let(:ids) { ['foo'] }
 
       it 'returns an array containing only the URI passed to it' do
-        expect(ActiveFedora::Base.get_descendent_uris(root_uri(ids))).to eq ids.map {|id| ActiveFedora::Base.id_to_uri(id) }
+        expect(ActiveFedora::Base.descendent_uris(root_uri(ids))).to eq ids.map {|id| ActiveFedora::Base.id_to_uri(id) }
       end
     end
 
@@ -28,7 +28,7 @@ describe ActiveFedora::Base do
       let(:ids) { ['foo', 'foo/bar', 'foo/bar/chu'] }
 
       it 'returns an array containing the URI passed to it, as well as all descendent URIs' do
-        expect(ActiveFedora::Base.get_descendent_uris(root_uri(ids))).to eq ids.map {|id| ActiveFedora::Base.id_to_uri(id) }
+        expect(ActiveFedora::Base.descendent_uris(root_uri(ids))).to eq ids.map {|id| ActiveFedora::Base.id_to_uri(id) }
       end
     end
 
@@ -42,7 +42,7 @@ describe ActiveFedora::Base do
       end
 
       it "should not put the datastream in the decendants list" do
-        expect(ActiveFedora::Base.get_descendent_uris(root_uri(ids))).not_to include datastream.uri
+        expect(ActiveFedora::Base.descendent_uris(root_uri(ids))).not_to include datastream.uri
       end
     end
   end
