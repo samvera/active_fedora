@@ -8,7 +8,6 @@ require 'equivalent-xml/rspec_matchers'
 require 'support/mock_fedora'
 require 'samples/samples'
 
-
 logger.level = Logger::WARN if logger.respond_to? :level ###MediaShelf StubLogger doesn't have a level= method
 $VERBOSE=nil
 

@@ -1,6 +1,6 @@
 require "active-fedora"
 module Hydra
-  
+
   # This is an example of a OmDatastream that defines an OM terminology for MODS xml
   # It focuses on the aspects of MODS that deal with descriptive metadata for published articles
   # This is not the hydra-head plugin version of this OM Terminology; See https://github.com/projecthydra/hydra-head/blob/master/lib/hydra/mods_article.rb
@@ -11,14 +11,14 @@ module Hydra
   # * Defines a term lang_code that maps to "languageTerm[@type=code]"
   # * Defines a variety of terms, date, last_name, first_name & terms_of_address, that all map to mods:namePart but use varying attributes to distinguish themselves
   # * Uses proxy terms to define familar terms like start_page and end_page that map to non-intuitive xml structures "extent[@unit=pages]/start" and "extent[@unit=pages]/end"
-  # * Uses proxy terms, publication_url, peer_reviewed, and title, to allow convenient access to frequently used terms 
+  # * Uses proxy terms, publication_url, peer_reviewed, and title, to allow convenient access to frequently used terms
   #
   # Things to note about the additional methods it defines:
-  # 
+  #
   # * Defines a series of templates, person_template, organization_template, etc. for generating a whole set of xml nodes to insert into the document (note: the new OM::TemplateRegistry provides an even better way to do this)
   # * Defines a custom method, insert_contributor, that uses the Terminology to manipulate xml documents in specialized ways
   # * Defines a series of relator_term Hashes that can then be used when generating views, etc.  In this case, the Hashes are hard-coded into the Class.  Ideally, they might be read from a configuration file or mixed into the class using a module
-  class ModsArticleDatastream < ActiveFedora::OmDatastream       
+  class ModsArticleDatastream < ActiveFedora::OmDatastream
 
     set_terminology do |t|
       t.root(:path=>"mods", :xmlns=>"http://www.loc.gov/mods/v3", :schema=>"http://www.loc.gov/standards/mods/v3/mods-3-2.xsd")
@@ -27,15 +27,15 @@ module Hydra
       t.title_info(:path=>"titleInfo") {
         t.main_title(:index_as=>[:facetable],:path=>"title", :label=>"title")
         t.language(:index_as=>[:facetable],:path=>{:attribute=>"lang"})
-      } 
+      }
       t.language{
         t.lang_code(:index_as=>[:facetable], :path=>"languageTerm", :attributes=>{:type=>"code"})
       }
-      t.abstract   
+      t.abstract
       t.subject {
         t.topic(:index_as=>[:facetable])
-      }      
-      t.topic_tag(:proxy=>[:subject, :topic])    
+      }
+      t.topic_tag(:proxy=>[:subject, :topic])
       # t.topic_tag(:index_as=>[:facetable],:path=>"subject", :default_content_path=>"topic")
       # This is a mods:name.  The underscore is purely to avoid namespace conflicts.
       t.name_(:index_as=>[:searchable]) {
@@ -53,7 +53,7 @@ module Hydra
         t.terms_of_address(:path=>"namePart", :attributes=>{:type=>"termsOfAddress"})
         t.computing_id
       }
-      # lookup :person, :first_name        
+      # lookup :person, :first_name
       t.person(:ref=>:name, :attributes=>{:type=>"personal"}, :index_as=>[:facetable, :searchable])
       t.department(:proxy=>[:person,:description],:index_as=>[:facetable])
       t.organization(:ref=>:name, :attributes=>{:type=>"corporate"}, :index_as=>[:facetable])
@@ -92,7 +92,7 @@ module Hydra
       t.title(:proxy=>[:title_info, :main_title])
       t.journal_title(:proxy=>[:journal, :title_info, :main_title])
     end
-    
+
     # Generates an empty Mods Article (used when you call ModsArticle.new without passing in existing xml)
     def self.xml_template
       builder = Nokogiri::XML::Builder.new do |xml|
@@ -153,7 +153,7 @@ module Hydra
       end
       return builder.doc
     end
-    
+
     # Generates a new Person node
     def self.person_template
       builder = Nokogiri::XML::Builder.new do |xml|
@@ -186,12 +186,12 @@ module Hydra
           xml.namePart
           xml.role {
             xml.roleTerm(:authority=>"marcrelator", :type=>"text")
-          }                          
+          }
         }
       end
       return builder.doc.root
     end
-    
+
     # Generates a new Conference node
     def self.conference_template
       builder = Nokogiri::XML::Builder.new do |xml|
@@ -199,16 +199,16 @@ module Hydra
           xml.namePart
           xml.role {
             xml.roleTerm(:authority=>"marcrelator", :type=>"text")
-          }                          
+          }
         }
       end
       return builder.doc.root
     end
-    
+
     # Inserts a new contributor (mods:name) into the mods document
     # creates contributors of type :person, :organization, or :conference
     def insert_contributor(type, opts={})
-      case type.to_sym 
+      case type.to_sym
       when :person
         node = Hydra::ModsArticleDatastream.person_template
         nodeset = self.find_by_terms(:person)
@@ -223,7 +223,7 @@ module Hydra
         node = nil
         index = nil
       end
-      
+
       unless nodeset.nil?
         if nodeset.empty?
           self.ng_xml.root.add_child(node)
@@ -234,16 +234,16 @@ module Hydra
         end
         self.dirty = true
       end
-      
+
       return node, index
     end
-    
+
     # Remove the contributor entry identified by @contributor_type and @index
     def remove_contributor(contributor_type, index)
       self.find_by_terms( {contributor_type.to_sym => index.to_i} ).first.remove
       self.dirty = true
     end
-    
+
     def self.common_relator_terms
        {"aut" => "Author",
         "clb" => "Collaborator",
@@ -256,7 +256,7 @@ module Hydra
         "trl" => "Translator",
         }
     end
-    
+
     def self.person_relator_terms
       {"aut" => "Author",
        "clb" => "Collaborator",
@@ -271,20 +271,20 @@ module Hydra
        "trl" => "Translator"
        }
     end
-    
+
     def self.conference_relator_terms
       {
         "hst" => "Host"
       }
     end
-    
+
     def self.organization_relator_terms
       {
         "fnd" => "Funder",
         "hst" => "Host"
       }
     end
-    
+
     def self.dc_relator_terms
        {"acp" => "Art copyist",
         "act" => "Actor",
@@ -500,16 +500,16 @@ module Hydra
         "wde" => "Wood -engraver",
         "wit" => "Witness"}
       end
-    
+
       def self.valid_child_types
         ["data", "supporting file", "profile", "lorem ipsum", "dolor"]
       end
 
     def to_solr(solr_doc=Hash.new)
       super(solr_doc)
-            
+
       ::Solrizer::Extractor.insert_solr_field_value(solr_doc, Solrizer.default_field_mapper.solr_name('object_type', :string, :facetable), "Article")
-      ::Solrizer::Extractor.insert_solr_field_value(solr_doc, Solrizer.default_field_mapper.solr_name('mods_journal_title_info', :string, :facetable), "Unknown") if solr_doc["mods_journal_title_info_facet"].nil? 
+      ::Solrizer::Extractor.insert_solr_field_value(solr_doc, Solrizer.default_field_mapper.solr_name('mods_journal_title_info', :string, :facetable), "Unknown") if solr_doc["mods_journal_title_info_facet"].nil?
 
       solr_doc
     end

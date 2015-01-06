@@ -1,48 +1,48 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-  
+
   before(:each) do
     @test_object = ActiveFedora::Base.new
   end
 
   describe ".update_index" do
     before do
-      mock_conn = mock("SolrConnection")
-      mock_conn.should_receive(:add)
-      mock_conn.should_receive(:commit)
-      mock_ss = mock("SolrService")
-      mock_ss.stub(:conn).and_return(mock_conn)
-      ActiveFedora::SolrService.stub(:instance).and_return(mock_ss)
+      mock_conn = double("SolrConnection")
+      expect(mock_conn).to receive(:add)
+      expect(mock_conn).to receive(:commit)
+      mock_ss = double("SolrService")
+      allow(mock_ss).to receive(:conn).and_return(mock_conn)
+      allow(ActiveFedora::SolrService).to receive(:instance).and_return(mock_ss)
     end
-    
+
     it "should call .to_solr on all SimpleDatastreams AND RelsExtDatastreams and pass the resulting document to solr" do
       # Actually uses self.to_solr internally to gather solr info from all metadata datastreams
-      mock1 = mock("ds1", :to_solr => {})
-      mock2 = mock("ds2", :to_solr => {})
-      mock3 = mock("RELS-EXT", :to_solr => {})
-      
+      mock1 = double("ds1", :to_solr => {})
+      mock2 = double("ds2", :to_solr => {})
+      mock3 = double("RELS-EXT", :to_solr => {})
+
       mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
-      mock1.should_receive(:solrize_profile).and_return({})
-      mock2.should_receive(:solrize_profile).and_return({})
-      mock3.should_receive(:solrize_profile).and_return({})
-      @test_object.should_receive(:datastreams).twice.and_return(mock_datastreams)
-      @test_object.should_receive(:solrize_relationships)
+      expect(mock1).to receive(:solrize_profile).and_return({})
+      expect(mock2).to receive(:solrize_profile).and_return({})
+      expect(mock3).to receive(:solrize_profile).and_return({})
+      expect(@test_object).to receive(:datastreams).twice.and_return(mock_datastreams)
+      expect(@test_object).to receive(:solrize_relationships)
       @test_object.update_index
     end
 
     it "should call .to_solr on all RDFDatastreams and pass the resulting document to solr" do
       # Actually uses self.to_solr internally to gather solr info from all metadata datastreams
-      mock1 = mock("ds1", :to_solr => {})
-      mock2 = mock("ds2", :to_solr => {})
-      mock3 = mock("RELS-EXT", :to_solr => {})
-      
+      mock1 = double("ds1", :to_solr => {})
+      mock2 = double("ds2", :to_solr => {})
+      mock3 = double("RELS-EXT", :to_solr => {})
+
       mock_datastreams = {:ds1 => mock1, :ds2 => mock2, :rels_ext => mock3}
-      mock1.should_receive(:solrize_profile).and_return({})
-      mock2.should_receive(:solrize_profile).and_return({})
-      mock3.should_receive(:solrize_profile).and_return({})
-      @test_object.should_receive(:datastreams).twice.and_return(mock_datastreams)
-      @test_object.should_receive(:solrize_relationships)
+      expect(mock1).to receive(:solrize_profile).and_return({})
+      expect(mock2).to receive(:solrize_profile).and_return({})
+      expect(mock3).to receive(:solrize_profile).and_return({})
+      expect(@test_object).to receive(:datastreams).twice.and_return(mock_datastreams)
+      expect(@test_object).to receive(:solrize_relationships)
       @test_object.update_index
     end
 
@@ -51,31 +51,26 @@ describe ActiveFedora::Base do
     end
 
   end
-  
+
   describe ".delete" do
-    
-    before(:each) do
-    end
-    
     it "should delete object from repository and index" do
-      @test_object.inner_object.stub(:delete)
-      mock_conn = mock("SolrConnection")
-      mock_conn.should_receive(:delete_by_id).with("__DO_NOT_USE__") 
-      mock_conn.should_receive(:commit)
-      mock_ss = mock("SolrService")
-      mock_ss.stub(:conn).and_return(mock_conn)
-      ActiveFedora::SolrService.stub(:instance).and_return(mock_ss)
+      allow(@test_object.inner_object).to receive(:delete)
+      mock_conn = double("SolrConnection")
+      expect(mock_conn).to receive(:delete_by_id).with("__DO_NOT_USE__")
+      expect(mock_conn).to receive(:commit)
+      mock_ss = double("SolrService")
+      allow(mock_ss).to receive(:conn).and_return(mock_conn)
+      allow(ActiveFedora::SolrService).to receive(:instance).and_return(mock_ss)
       @test_object.delete
     end
-
   end
-  
-  describe '#pids_from_uris' do 
-    it "should strip the info:fedora/ out of a given string" do 
-      ActiveFedora::Base.pids_from_uris("info:fedora/FOOBAR").should == "FOOBAR"
+
+  describe '#pids_from_uris' do
+    it "should strip the info:fedora/ out of a given string" do
+      expect(ActiveFedora::Base.pids_from_uris("info:fedora/FOOBAR")).to eq("FOOBAR")
     end
-    it "should accept an array of strings"do 
-      ActiveFedora::Base.pids_from_uris(["info:fedora/FOOBAR", "info:fedora/BAZFOO"]).should == ["FOOBAR", "BAZFOO"]
+    it "should accept an array of strings"do
+      expect(ActiveFedora::Base.pids_from_uris(["info:fedora/FOOBAR", "info:fedora/BAZFOO"])).to eq(["FOOBAR", "BAZFOO"])
     end
   end
 

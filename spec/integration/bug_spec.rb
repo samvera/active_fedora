@@ -30,22 +30,22 @@ describe 'bugs' do
   end
   it "should not clobber everything when setting a value" do
     ds = @test_object.datastreams["someData"]
-    ds.fubar.should == []
-    ds.should_not be_nil
+    expect(ds.fubar).to eq([])
+    expect(ds).not_to be_nil
     ds.fubar=['bar']
-    ds.fubar.should == ['bar']
+    expect(ds.fubar).to eq(['bar'])
     @test_object.save
 
-    @test_object.pid.should_not be_nil
+    expect(@test_object.pid).not_to be_nil
 
     x = FooHistory.find(@test_object.pid)
     ds2 = x.datastreams["someData"]
-    ds2.fubar.should == ['bar']
+    expect(ds2.fubar).to eq(['bar'])
     ds2.fubar = ["meh"]
-    ds2.fubar.should == ["meh"]
+    expect(ds2.fubar).to eq(["meh"])
     x.save
     x = FooHistory.find(@test_object.pid)
-    x.datastreams['someData'].fubar.should == ["meh"]
+    expect(x.datastreams['someData'].fubar).to eq(["meh"])
     x.save
   end
 end

@@ -1,8 +1,8 @@
 require 'spec_helper'
 
-describe "When two or more relationships share the same property" do 
+describe "When two or more relationships share the same property" do
   before do
-    class Book < ActiveFedora::Base 
+    class Book < ActiveFedora::Base
       has_many :collections, :property=>:is_part_of, :class_name=>'Collection'
       has_many :people, :property=>:is_part_of
     end
@@ -27,14 +27,14 @@ describe "When two or more relationships share the same property" do
 
   it "Should only return relationships of the correct class" do
     @book.reload
-    @book.people.should == [@person1, @person2]
-    @book.collections.should == []
+    expect(@book.people).to eq([@person1, @person2])
+    expect(@book.collections).to eq([])
   end
 end
 
 describe "When relationship is restricted to AF::Base" do
   before do
-    class Email < ActiveFedora::Base 
+    class Email < ActiveFedora::Base
       has_many :attachments, :property=>:is_part_of, :class_name=>'ActiveFedora::Base'
     end
 
@@ -50,15 +50,15 @@ describe "When relationship is restricted to AF::Base" do
     @image = Image.create!(:email=>@book)
     @pdf = PDF.create!(:email=>@book)
   end
+
   after do
       Object.send(:remove_const, :Image)
       Object.send(:remove_const, :PDF)
       Object.send(:remove_const, :Email)
   end
 
-
   it "Should not restrict relationships " do
     @book.reload
-    @book.attachments.should == [@image, @pdf]
+    expect(@book.attachments).to eq([@image, @pdf])
   end
 end

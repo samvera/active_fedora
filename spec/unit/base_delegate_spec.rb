@@ -2,12 +2,12 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
 
-  describe "first level delegation" do 
-    class BarStream2 < ActiveFedora::OmDatastream 
+  describe "first level delegation" do
+    class BarStream2 < ActiveFedora::OmDatastream
       set_terminology do |t|
         t.root(:path=>"animals", :xmlns=>"urn:zoobar")
         t.waterfowl do
-          t.ducks do 
+          t.ducks do
             t.duck
           end
         end
@@ -16,7 +16,7 @@ describe ActiveFedora::Base do
       end
 
       def self.xml_template
-            Nokogiri::XML::Document.parse '<animals xmlns="urn:zoobar"> 
+            Nokogiri::XML::Document.parse '<animals xmlns="urn:zoobar">
               <waterfowl>
                 <ducks>
                   <duck/>
@@ -39,7 +39,7 @@ describe ActiveFedora::Base do
       end
       has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel" do |m|
         m.field "fubar", :text
-      end 
+      end
 
       has_metadata :type=>BarStream2, :name=>"xmlish"
       delegate :fubar, :to=>'withText', :unique=>true
@@ -52,21 +52,21 @@ describe ActiveFedora::Base do
     end
     it "should save a delegated property uniquely" do
       @n.fubar="Quack"
-      @n.fubar.should == "Quack"
-      @n.withText.get_values(:fubar).first.should == 'Quack'
+      expect(@n.fubar).to eq("Quack")
+      expect(@n.withText.get_values(:fubar).first).to eq('Quack')
       @n.donkey="Bray"
-      @n.donkey.should == "Bray"
-      @n.xmlish.term_values(:donkey).first.should == 'Bray'
+      expect(@n.donkey).to eq("Bray")
+      expect(@n.xmlish.term_values(:donkey).first).to eq('Bray')
     end
     it "should return an array if not marked as unique" do
       ### Metadata datastream does not appear to support multiple value setting
       @n.cow=["one", "two"]
-      @n.cow.should == ["one", "two"]
+      expect(@n.cow).to eq(["one", "two"])
     end
 
     it "should be able to delegate deeply into the terminology" do
       @n.duck=["Quack", "Peep"]
-      @n.duck.should == ["Quack", "Peep"]
+      expect(@n.duck).to eq(["Quack", "Peep"])
     end
 
   end

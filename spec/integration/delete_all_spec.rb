@@ -1,12 +1,12 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-  
+
   before(:all) do
     module SpecModel
       class Basic < ActiveFedora::Base
         class_attribute :callback_counter
-        
+
         before_destroy :inc_counter
 
         def inc_counter
@@ -15,7 +15,7 @@ describe ActiveFedora::Base do
       end
     end
   end
-  
+
   after(:all) do
     Object.send(:remove_const, :SpecModel)
   end
@@ -27,21 +27,20 @@ describe ActiveFedora::Base do
     @count = SpecModel::Basic.count
   end
 
-
   describe ".destroy_all" do
-    it "should remove both and run callbacks" do 
+    it "should remove both and run callbacks" do
       SpecModel::Basic.destroy_all
-      SpecModel::Basic.count.should == @count - 2
-      SpecModel::Basic.callback_counter.should == 2
+      expect(SpecModel::Basic.count).to eq(@count - 2)
+      expect(SpecModel::Basic.callback_counter).to eq(2)
     end
 
   end
 
   describe ".delete_all" do
-    it "should remove both and not run callbacks" do 
+    it "should remove both and not run callbacks" do
       SpecModel::Basic.delete_all
-      SpecModel::Basic.count.should == @count - 2
-      SpecModel::Basic.callback_counter.should == 0
+      expect(SpecModel::Basic.count).to eq(@count - 2)
+      expect(SpecModel::Basic.callback_counter).to eq(0)
     end
   end
 end

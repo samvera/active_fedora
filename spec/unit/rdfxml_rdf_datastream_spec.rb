@@ -16,12 +16,12 @@ describe ActiveFedora::RdfxmlRDFDatastream do
     end
     it "should save and reload" do
       @subject.publisher = ["St. Martin's Press"]
-      @subject.serialize.should =~ /<rdf:RDF/
+      expect(@subject.serialize).to match(/<rdf:RDF/)
     end
   end
 
   describe "a complex data model" do
-    before do 
+    before do
       class DAMS < RDF::Vocabulary("http://library.ucsd.edu/ontology/dams#")
         property :title
         property :relatedTitle
@@ -46,7 +46,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
 
       module RDF
         # This enables RDF to respond_to? :value
-        def self.value 
+        def self.value
           self[:value]
         end
       end
@@ -93,34 +93,34 @@ describe ActiveFedora::RdfxmlRDFDatastream do
     end
 
     describe "a new instance" do
-      subject { MyDatastream.new(stub('inner object', :pid=>'test:1', :new? =>true), 'descMetadata', about:"http://library.ucsd.edu/ark:/20775/") }
+      subject { MyDatastream.new(double('inner object', :pid=>'test:1', :new? =>true), 'descMetadata', about:"http://library.ucsd.edu/ark:/20775/") }
       it "should have a subject" do
-        subject.rdf_subject.to_s.should == "http://library.ucsd.edu/ark:/20775/"
+        expect(subject.rdf_subject.to_s).to eq("http://library.ucsd.edu/ark:/20775/")
       end
-      
+
     end
 
     describe "an instance with content" do
       subject do
-        subject = MyDatastream.new(stub('inner object', :pid=>'test:1', :new? =>true), 'descMetadata')
+        subject = MyDatastream.new(double('inner object', :pid=>'test:1', :new? =>true), 'descMetadata')
         subject.content = File.new('spec/fixtures/damsObjectModel.xml').read
         subject
       end
       it "should have a subject" do
-        subject.rdf_subject.to_s.should == "http://library.ucsd.edu/ark:/20775/"
+        expect(subject.rdf_subject.to_s).to eq("http://library.ucsd.edu/ark:/20775/")
       end
       it "should have controlGroup" do
-        subject.controlGroup.should == 'X'
+        expect(subject.controlGroup).to eq('X')
       end
       it "should have mimeType" do
-        subject.mimeType.should == 'text/xml'
+        expect(subject.mimeType).to eq('text/xml')
       end
       it "should have dsid" do
-        subject.dsid.should == 'descMetadata'
+        expect(subject.dsid).to eq('descMetadata')
       end
       it "should have fields" do
-        subject.resource_type.should == ["image"]
-        subject.title.first.value.should == ["example title"]
+        expect(subject.resource_type).to eq(["image"])
+        expect(subject.title.first.value).to eq(["example title"])
       end
     end
   end

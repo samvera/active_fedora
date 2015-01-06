@@ -33,7 +33,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency("RedCloth") # for RDoc formatting
   s.add_development_dependency("rake")
   s.add_development_dependency("jettywrapper", ">=1.2.0")
-  s.add_development_dependency("rspec", "~> 2.9")
+  s.add_development_dependency("rspec", "~> 3.1")
   s.add_development_dependency("equivalent-xml")
   
   s.files         = `git ls-files`.split("\n")

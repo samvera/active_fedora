@@ -2,9 +2,9 @@ require 'active-fedora'
 
 class OralHistory < ActiveFedora::Base
     # Imitating DataMapper ...
-    
+
     has_many :parts, :property=>:is_part_of
-    
+
     # These are all the properties that don't quite fit into Qualified DC
     # Put them on the object itself (in the properties datastream) for now.
     has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream do |m|
@@ -19,7 +19,7 @@ class OralHistory < ActiveFedora::Base
       field "other_contributors", :string
       field "restrictions", :text
     end
-        
+
     has_metadata :name => "dublin_core", :type => ActiveFedora::QualifiedDublinCoreDatastream do |m|
       # Default :multiple => true
       #
@@ -28,9 +28,8 @@ class OralHistory < ActiveFedora::Base
       #
       # aimint to use method-missing to support calling methods like
       # my_oral_history.subjects  OR   my_oral_history.titles  OR EVEN my_oral_history.title whenever possible
-      
+
       #field :name => "subject_heading", :string, {:xml_node => "subject", :encoding => "LCSH"}
     end
 
-  
 end

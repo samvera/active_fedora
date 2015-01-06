@@ -1,8 +1,8 @@
 def mock_yaml(hash, path)
-  mock_file = mock(path.split("/")[-1])
-  File.stub(:exist?).with(path).and_return(true)
-  File.stub(:open).with(path).and_return(mock_file)
-  YAML.stub(:load).and_return(hash)
+  mock_file = double(path.split("/")[-1])
+  allow(File).to receive(:exist?).with(path).and_return(true)
+  allow(File).to receive(:open).with(path).and_return(mock_file)
+  allow(YAML).to receive(:load).and_return(hash)
 end
 
 def default_predicate_mapping_file

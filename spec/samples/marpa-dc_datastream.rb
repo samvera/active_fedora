@@ -11,7 +11,7 @@ module Marpa
   # * Does not override or extend to_solr, so the default solrization approach will be used (Solrizer::XML::TerminologyBasedSolrizer)
   #
   class DcDatastream < ActiveFedora::OmDatastream
-  
+
     set_terminology do |t|
       t.root(:path=>"dc", :xmlns=>'http://purl.org/dc/terms/')
       t.tibetan_title(:path=>"title", :attributes=>{:language=>"tibetan"})
@@ -82,16 +82,16 @@ module Marpa
       t.type
       t.valid
     end
-  
+
     def self.xml_template
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.dc("xmlns"=>'http://purl.org/dc/terms/',
-          "xmlns:dcterms"=>'http://purl.org/dc/terms/', 
+          "xmlns:dcterms"=>'http://purl.org/dc/terms/',
           "xmlns:xsi"=>'http://www.w3.org/2001/XMLSchema-instance') {
         }
       end
       return builder.doc
     end
-  
+
   end
 end

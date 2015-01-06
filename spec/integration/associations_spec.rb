@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-class Library < ActiveFedora::Base 
+class Library < ActiveFedora::Base
   has_many :books, :property=>:has_constituent
 end
 
-class Book < ActiveFedora::Base 
+class Book < ActiveFedora::Base
   belongs_to :library, :property=>:has_constituent
   belongs_to :author, :property=>:has_member, :class_name=>'Person'
   has_and_belongs_to_many :topics, :property=>:has_topic, :inverse_of=>:is_topic_of
@@ -17,7 +17,7 @@ end
 class Collection < ActiveFedora::Base
 end
 
-class Topic < ActiveFedora::Base 
+class Topic < ActiveFedora::Base
   has_and_belongs_to_many :books, :property=>:is_topic_of
 end
 
@@ -34,71 +34,71 @@ describe ActiveFedora::Base do
 
       it "should build child" do
         new_book = @library.books.build({})
-        new_book.should be_new_record
-        new_book.should be_kind_of Book
-        new_book.library.should be_nil
-        @library.books.should == [new_book]
-        #TODO save the associated children too, requires something like ActiveRecord::AutosaveAssociation (ver 3.0.12) 
+        expect(new_book).to be_new_record
+        expect(new_book).to be_kind_of Book
+        expect(new_book.library).to be_nil
+        expect(@library.books).to eq([new_book])
+        #TODO save the associated children too, requires something like ActiveRecord::AutosaveAssociation (ver 3.0.12)
         #@library.save
         #new_book.library.should == @library
       end
 
       it "should not create children if the parent isn't saved" do
-        lambda {@library.books.create({})}.should raise_error ActiveFedora::RecordNotSaved, "You cannot call create unless the parent is saved"
+        expect {@library.books.create({})}.to raise_error ActiveFedora::RecordNotSaved, "You cannot call create unless the parent is saved"
       end
 
       it "should create children" do
         @library.save!
         new_book = @library.books.create({})
-        new_book.should_not be_new_record
-        new_book.should be_kind_of Book
-        new_book.library.should == @library
+        expect(new_book).not_to be_new_record
+        expect(new_book).to be_kind_of Book
+        expect(new_book.library).to eq(@library)
       end
 
       it "should build parent" do
         new_library = @book.build_library({})
-        new_library.should be_new_record
-        new_library.should be_kind_of Library
-        @book.library.should == new_library
+        expect(new_library).to be_new_record
+        expect(new_library).to be_kind_of Library
+        expect(@book.library).to eq(new_library)
       end
 
       it "should create parent" do
         new_library = @book.create_library({})
-        new_library.should_not be_new_record
-        new_library.should be_kind_of Library
-        @book.library.should == new_library
+        expect(new_library).not_to be_new_record
+        expect(new_library).to be_kind_of Library
+        expect(@book.library).to eq(new_library)
       end
 
       it "should let you shift onto the association" do
-        @library.new_record?.should be_true
+        expect(@library.new_record?).to be_truthy
         @library.books.size == 0
-        @library.books.should == []
-        @library.book_ids.should ==[]
+        expect(@library.books).to eq([])
+        expect(@library.book_ids).to eq([])
         @library.books << @book
-        @library.books.should == [@book]
-        @library.book_ids.should ==[@book.pid]
+        expect(@library.books).to eq([@book])
+        expect(@library.book_ids).to eq([@book.pid])
 
       end
 
       it "should let you set an array of objects" do
         @library.books = [@book, @book2]
-        @library.books.should == [@book, @book2]
+        expect(@library.books).to eq([@book, @book2])
         @library.save
 
         @library.books = [@book]
-        @library.books.should == [@book]
-      
+        expect(@library.books).to eq([@book])
+
       end
       it "should let you set an array of object ids" do
         @library.book_ids = [@book.pid, @book2.pid]
-        @library.books.should == [@book, @book2]
+        expect(@library.books).to eq([@book, @book2])
       end
 
       it "setter should wipe out previously saved relations" do
         @library.book_ids = [@book.pid, @book2.pid]
         @library.book_ids = [@book2.pid]
-        @library.books.should == [@book2]
-        
+        expect(@library.books).to eq([@book2])
+
       end
 
       it "saving the parent should save the relationships on the children" do
@@ -106,7 +106,7 @@ describe ActiveFedora::Base do
         @library.books = [@book, @book2]
         @library.save
         @library = Library.find(@library.pid)
-        @library.books.should == [@book, @book2]
+        expect(@library.books).to eq([@book, @book2])
       end
 
 
@@ -118,13 +118,13 @@ describe ActiveFedora::Base do
         @book2.save
 
         @library = Library.find(@library.pid)
-        @library.books.should == [@book, @book2]
-      
+        expect(@library.books).to eq([@book, @book2])
+
         solr_resp =  @library.books(:response_format=>:solr)
-        solr_resp.size.should == 2
-        solr_resp[0]['id'].should == @book.pid 
-        solr_resp[1]['id'].should == @book2.pid 
-      
+        expect(solr_resp.size).to eq(2)
+        expect(solr_resp[0]['id']).to eq(@book.pid)
+        expect(solr_resp[1]['id']).to eq(@book2.pid)
+
       end
 
 
@@ -147,10 +147,10 @@ describe ActiveFedora::Base do
       end
       it "should be settable from the book side" do
         @book.library_id = @library.pid
-        @book.library.should == @library
-        @book.library.pid.should == @library.pid
+        expect(@book.library).to eq(@library)
+        expect(@book.library.pid).to eq(@library.pid)
         @book.attributes= {:library_id => ""}
-        @book.library_id.should be_nil
+        expect(@book.library_id).to be_nil
       end
       after do
         @library.delete
@@ -168,8 +168,8 @@ describe ActiveFedora::Base do
       it "habtm should set relationships bidirectionally" do
         @book = Book.new
         @book.topics << @topic1
-        @book.topics.map(&:pid).should == [@topic1.pid]
-        Topic.find(@topic1.pid).books.should == [] #Can't have saved it because @book isn't saved yet.
+        expect(@book.topics.map(&:pid)).to eq([@topic1.pid])
+        expect(Topic.find(@topic1.pid).books).to eq([]) #Can't have saved it because @book isn't saved yet.
       end
       after do
         @topic1.delete
@@ -178,7 +178,7 @@ describe ActiveFedora::Base do
     end
   end
 
-  
+
 
 
   describe "a saved instance" do
@@ -194,16 +194,16 @@ describe ActiveFedora::Base do
       it "should have many books once it has been saved" do
         @library.books << @book
 
-        @book.library.pid.should == @library.pid
+        expect(@book.library.pid).to eq(@library.pid)
         @library.books.reload
-        @library.books.should == [@book]
+        expect(@library.books).to eq([@book])
 
         @library2 = Library.find(@library.pid)
-        @library2.books.should == [@book]
+        expect(@library2.books).to eq([@book])
       end
 
       it "should have a count once it has been saved" do
-        @library.books << @book << Book.create 
+        @library.books << @book << Book.create
         @library.save
 
         # @book.library.pid.should == @library.pid
@@ -211,14 +211,14 @@ describe ActiveFedora::Base do
         # @library.books.should == [@book]
 
         @library2 = Library.find(@library.pid)
-        @library2.books.size.should == 2
+        expect(@library2.books.size).to eq(2)
       end
 
       it "should respect the :class_name parameter" do
         @book.author = @person
         @book.save
-        Book.find(@book.id).author_id.should == @person.pid
-        Book.find(@book.id).author.send(:find_target).should be_kind_of Person
+        expect(Book.find(@book.id).author_id).to eq(@person.pid)
+        expect(Book.find(@book.id).author.send(:find_target)).to be_kind_of Person
       end
 
       describe "when changing the belonger" do
@@ -228,10 +228,10 @@ describe ActiveFedora::Base do
           @library2 = Library.create
         end
         it "should replace an existing instance" do
-          @book.library_id.should == @library.id
+          expect(@book.library_id).to eq(@library.id)
           @book.library = @library2
           @book.save
-          Book.find(@book.id).library_id.should == @library2.id
+          expect(Book.find(@book.id).library_id).to eq(@library2.id)
         end
         after do
           @library2.delete
@@ -257,20 +257,20 @@ describe ActiveFedora::Base do
         end
         it "should set relationships bidirectionally" do
           @book.topics << @topic1
-          @book.topics.should == [@topic1]
-          @book.relationships(:has_topic).should == [@topic1.internal_uri]
-          @topic1.relationships(:has_topic).should == []
-          @topic1.relationships(:is_topic_of).should == [@book.internal_uri]
-          Topic.find(@topic1.pid).books.should == [@book] #Can't have saved it because @book isn't saved yet.
+          expect(@book.topics).to eq([@topic1])
+          expect(@book.relationships(:has_topic)).to eq([@topic1.internal_uri])
+          expect(@topic1.relationships(:has_topic)).to eq([])
+          expect(@topic1.relationships(:is_topic_of)).to eq([@book.internal_uri])
+          expect(Topic.find(@topic1.pid).books).to eq([@book]) #Can't have saved it because @book isn't saved yet.
         end
         it "should save new child objects" do
           @book.topics << Topic.new
-          @book.topics.first.pid.should_not be_nil
+          expect(@book.topics.first.pid).not_to be_nil
         end
         it "should clear out the old associtions" do
           @book.topics = [@topic1]
           @book.topics = [@topic2]
-          @book.topic_ids.should == [@topic2.pid]
+          expect(@book.topic_ids).to eq([@topic2.pid])
         end
         after do
           @topic1.delete
@@ -287,15 +287,15 @@ describe ActiveFedora::Base do
           @c.delete
         end
         it "should have a collection" do
-          @book.relationships(:is_member_of_collection).should == [@c.internal_uri]
-          @book.collections.should == [@c]
+          expect(@book.relationships(:is_member_of_collection)).to eq([@c.internal_uri])
+          expect(@book.collections).to eq([@c])
         end
         it "habtm should not set foreign relationships if :inverse_of is not specified" do
-           @c.relationships(:is_member_of_collection).should == []
+           expect(@c.relationships(:is_member_of_collection)).to eq([])
         end
         it "should load the collections" do
           reloaded = Book.find(@book.pid)
-          reloaded.collections.should == [@c]
+          expect(reloaded.collections).to eq([@c])
         end
       end
     end
@@ -309,20 +309,20 @@ describe ActiveFedora::Base do
     end
     it "should set the association" do
       @book.library = @library
-      @book.library.pid.should == @library.pid
+      expect(@book.library.pid).to eq(@library.pid)
       @book.save
 
 
-      Book.find(@book.pid).library.pid.should == @library.pid
-      
+      expect(Book.find(@book.pid).library.pid).to eq(@library.pid)
+
     end
     it "should clear the association" do
       @book.library = @library
       @book.library = nil
       @book.save
 
-      Book.find(@book.pid).library.should be_nil 
-      
+      expect(Book.find(@book.pid).library).to be_nil
+
     end
 
     it "should replace the association" do
@@ -332,16 +332,16 @@ describe ActiveFedora::Base do
       @book.save
       @book.library = @library2
       @book.save
-      Book.find(@book.pid).library.pid.should == @library2.pid 
+      expect(Book.find(@book.pid).library.pid).to eq(@library2.pid)
 
     end
 
     it "should be able to be set by id" do
       @book.library_id = @library.pid
-      @book.library_id.should == @library.pid
-      @book.library.pid.should == @library.pid
+      expect(@book.library_id).to eq(@library.pid)
+      expect(@book.library.pid).to eq(@library.pid)
       @book.save
-      Book.find(@book.pid).library_id.should == @library.pid
+      expect(Book.find(@book.pid).library_id).to eq(@library.pid)
     end
 
     after do
@@ -359,7 +359,7 @@ describe ActiveFedora::Base do
       class Page < ActiveFedora::Base
         has_many :library_books, :property=>:is_part_of
       end
-        
+
     end
     after :all do
       Object.send(:remove_const, :LibraryBook)
@@ -377,7 +377,7 @@ describe ActiveFedora::Base do
 
       it "should load the association stored in the parent" do
         @reloaded_book = LibraryBook.find(@book.pid)
-        @reloaded_book.pages.should == [@p1, @p2]
+        expect(@reloaded_book.pages).to eq([@p1, @p2])
       end
 
       it "should allow a parent to be deleted from the has_many association" do
@@ -386,18 +386,18 @@ describe ActiveFedora::Base do
         @reloaded_book.save
 
         @reloaded_book = LibraryBook.find(@book.pid)
-        @reloaded_book.pages.should == [@p2]
+        expect(@reloaded_book.pages).to eq([@p2])
       end
 
       it "should allow a child to be deleted from the has_and_belongs_to_many association" do
-        pending "This isn't working and we ought to fix it"
+        skip "This isn't working and we ought to fix it"
         @reloaded_book = LibraryBook.find(@book.pid)
         @reloaded_book.pages.delete(@p1)
         @reloaded_book.save
         @p1.save
 
         @reloaded_book = LibraryBook.find(@book.pid)
-        @reloaded_book.pages.should == [@p2]
+        expect(@reloaded_book.pages).to eq([@p2])
       end
     end
   end
@@ -426,7 +426,7 @@ describe ActiveFedora::Base do
     it "should also remove the relationships that point at that object" do
       @media.delete
       @master = MasterFile.find(@master.pid)
-      @master.relationships(:is_part_of).should == []
+      expect(@master.relationships(:is_part_of)).to eq([])
     end
   end
 

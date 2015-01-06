@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-  
+
   before(:each) do
     class  FileMgmt < ActiveFedora::Base
       include ActiveFedora::FileManagement
@@ -10,15 +10,15 @@ describe ActiveFedora::Base do
     @test_container.add_relationship(:has_collection_member, "info:fedora/foo:2")
     @test_container.save
   end
-  
+
   after(:each) do
     @test_container.delete
     Object.send(:remove_const, :FileMgmt)
   end
-  
+
   it "should persist and re-load collection members" do
     container_copy = FileMgmt.find(@test_container.pid)
-    container_copy.collection_members(:response_format=>:id_array).should == ["foo:2"]
+    expect(container_copy.collection_members(:response_format=>:id_array)).to eq(["foo:2"])
   end
-    
+
 end

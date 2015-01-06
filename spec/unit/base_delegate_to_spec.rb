@@ -46,21 +46,21 @@ describe ActiveFedora::Base do
     end
     it "should save a delegated property uniquely" do
       @n.donkey="Bray"
-      @n.donkey.should == "Bray"
-      @n.xmlish.term_values(:donkey).first.should == 'Bray'
+      expect(@n.donkey).to eq("Bray")
+      expect(@n.xmlish.term_values(:donkey).first).to eq('Bray')
       @n.horse="Winee"
-      @n.horse.should == "Winee"
-      @n.xmlish.term_values(:horse).first.should == 'Winee'
+      expect(@n.horse).to eq("Winee")
+      expect(@n.xmlish.term_values(:horse).first).to eq('Winee')
     end
     it "should return an array if not marked as unique" do
       ### Metadata datastream does not appear to support multiple value setting
       @n.cow=["one", "two"]
-      @n.cow.should == ["one", "two"]
+      expect(@n.cow).to eq(["one", "two"])
     end
 
     it "should be able to delegate deeply into the terminology" do
       @n.duck=["Quack", "Peep"]
-      @n.duck.should == ["Quack", "Peep"]
+      expect(@n.duck).to eq(["Quack", "Peep"])
     end
 
   end

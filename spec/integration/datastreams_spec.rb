@@ -20,8 +20,8 @@ describe ActiveFedora::Datastreams do
 
     it "should work" do
       subject.save(:validate => false)
-      subject.nokogiri_autocreate_on.should_not be_new
-      subject.nokogiri_autocreate_off.should be_new
+      expect(subject.nokogiri_autocreate_on).not_to be_new
+      expect(subject.nokogiri_autocreate_off).to be_new
     end
   end
 
@@ -44,32 +44,32 @@ describe ActiveFedora::Datastreams do
       @test = HasMetadata.new(:pid=>"test:has_metadata_model")
       @test.save
     end
-    
+
     after :each do
       @base.delete
       @test.delete
     end
-    
+
     it "should create datastreams from the spec on new objects" do
-      @test.without_versions.versionable.should be_false
-      @test.with_versions.versionable.should be_true
-      @test.with_versions.dsLabel.should == "Versioned DS"
+      expect(@test.without_versions.versionable).to be_falsey
+      expect(@test.with_versions.versionable).to be_truthy
+      expect(@test.with_versions.dsLabel).to eq("Versioned DS")
       @test.without_versions.content= "blah blah blah"
       @test.save
-      HasMetadata.find(@test.pid).without_versions.versionable.should be_false
+      expect(HasMetadata.find(@test.pid).without_versions.versionable).to be_falsey
     end
-    
+
     it "should use ds_specs and preserve existing datastreams on migrated objects" do
       test_obj = HasMetadata.find(@base.pid)
-      test_obj.datastreams["testDS"].dsLabel.should == "Test DS"
-      test_obj.datastreams["testDS"].new?.should be_false
-      test_obj.with_versions.dsLabel.should == "Versioned DS"
-      test_obj.without_versions.versionable.should be_false
-      test_obj.with_versions.new?.should be_true
+      expect(test_obj.datastreams["testDS"].dsLabel).to eq("Test DS")
+      expect(test_obj.datastreams["testDS"].new?).to be_falsey
+      expect(test_obj.with_versions.dsLabel).to eq("Versioned DS")
+      expect(test_obj.without_versions.versionable).to be_falsey
+      expect(test_obj.with_versions.new?).to be_truthy
     end
-    
+
   end
-  
+
   describe "#has_file_datastream" do
     before :all do
       class HasFile < ActiveFedora::Base
@@ -90,45 +90,45 @@ describe ActiveFedora::Datastreams do
       @has_file = HasFile.new(:pid=>"test:ds_versionable_has_file")
       @has_file.save
     end
-    
+
     after :each do
       @base.delete
       @base2.delete
       @has_file.delete
     end
-    
+
     it "should create datastreams from the spec on new objects" do
-      @has_file.file_ds.versionable.should be_false
+      expect(@has_file.file_ds.versionable).to be_falsey
       @has_file.file_ds.content = "blah blah blah"
-      @has_file.file_ds.changed?.should be_true
-      @has_file.file_ds2.changed?.should be_false # no autocreate
-      @has_file.file_ds2.new?.should be_true
+      expect(@has_file.file_ds.changed?).to be_truthy
+      expect(@has_file.file_ds2.changed?).to be_falsey # no autocreate
+      expect(@has_file.file_ds2.new?).to be_truthy
       @has_file.save
-      @has_file.file_ds.versionable.should be_false
+      expect(@has_file.file_ds.versionable).to be_falsey
       test_obj = HasFile.find(@has_file.pid)
-      test_obj.file_ds.versionable.should be_false
-      test_obj.dc.changed?.should be_false
-      test_obj.rels_ext.changed?.should be_false
-      test_obj.file_ds.changed?.should be_false
-      test_obj.file_ds2.changed?.should be_false
-      test_obj.file_ds2.new?.should be_true
+      expect(test_obj.file_ds.versionable).to be_falsey
+      expect(test_obj.dc.changed?).to be_falsey
+      expect(test_obj.rels_ext.changed?).to be_falsey
+      expect(test_obj.file_ds.changed?).to be_falsey
+      expect(test_obj.file_ds2.changed?).to be_falsey
+      expect(test_obj.file_ds2.new?).to be_truthy
     end
-    
+
     it "should use ds_specs on migrated objects" do
       test_obj = HasFile.find(@base.pid)
-      test_obj.dc.changed?.should be_false
-      test_obj.file_ds.versionable.should be_false
-      test_obj.file_ds.new?.should be_true
+      expect(test_obj.dc.changed?).to be_falsey
+      expect(test_obj.file_ds.versionable).to be_falsey
+      expect(test_obj.file_ds.new?).to be_truthy
       test_obj.file_ds.content = "blah blah blah"
       test_obj.save
-      test_obj.file_ds.versionable.should be_false
+      expect(test_obj.file_ds.versionable).to be_falsey
       # look it up again to check datastream profile
       test_obj = HasFile.find(@base.pid)
-      test_obj.file_ds.versionable.should be_false
-      test_obj.file_ds.dsLabel.should == "File Datastream"
+      expect(test_obj.file_ds.versionable).to be_falsey
+      expect(test_obj.file_ds.dsLabel).to eq("File Datastream")
       test_obj = HasFile.find(@base2.pid)
-      test_obj.file_ds.versionable.should be_true
-      test_obj.file_ds.dsLabel.should == "Pre-existing DS"
+      expect(test_obj.file_ds.versionable).to be_truthy
+      expect(test_obj.file_ds.dsLabel).to eq("Pre-existing DS")
     end
   end
 end

@@ -9,7 +9,7 @@ describe "initializing active-fedora in a rails 3 app" do
       railtie_loaded = false
     end
 
-    railtie_loaded.should be_true
-      
+    expect(railtie_loaded).to be_truthy
+
   end
 end

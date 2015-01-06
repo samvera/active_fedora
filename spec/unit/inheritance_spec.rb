@@ -6,7 +6,7 @@ describe ActiveFedora::Base do
       has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"foostream" do|m|
         m.field "foostream", :string
       end
-      has_metadata :type=>ActiveFedora::QualifiedDublinCoreDatastream, :name=>"dcstream" 
+      has_metadata :type=>ActiveFedora::QualifiedDublinCoreDatastream, :name=>"dcstream"
     end
     class Bar  < ActiveFedora::Base
       has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"barstream" do |m|
@@ -17,17 +17,17 @@ describe ActiveFedora::Base do
 
   it "doesn't overwrite stream specs" do
     f = Foo.new
-    f.datastreams.size.should == 3
+    expect(f.datastreams.size).to eq(3)
     streams = f.datastreams.values.map{|x| x.class.to_s}.sort
-    streams.pop.should == "ActiveFedora::SimpleDatastream"
-    streams.pop.should == "ActiveFedora::RelsExtDatastream"
-    streams.pop.should == "ActiveFedora::QualifiedDublinCoreDatastream"
+    expect(streams.pop).to eq("ActiveFedora::SimpleDatastream")
+    expect(streams.pop).to eq("ActiveFedora::RelsExtDatastream")
+    expect(streams.pop).to eq("ActiveFedora::QualifiedDublinCoreDatastream")
   end
 
   it "should work for multiple types" do
     b = Foo.new
     f = Bar.new
-    b.class.ds_specs.should_not == f.class.ds_specs
+    expect(b.class.ds_specs).not_to eq(f.class.ds_specs)
   end
   after do
     Object.send(:remove_const, :Bar)
@@ -35,4 +35,4 @@ describe ActiveFedora::Base do
   end
 
 end
-  
+

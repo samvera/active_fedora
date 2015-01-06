@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 describe ActiveFedora::Model do
-  
-  before(:each) do 
+
+  before(:each) do
     module ModelIntegrationSpec
       class Basic < ActiveFedora::Base
         has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream do |m|
@@ -18,12 +18,12 @@ describe ActiveFedora::Model do
           doc[ActiveFedora::SolrService.solr_name('foo', :string, :sortable)] = doc[ActiveFedora::SolrService.solr_name('foo', :string, :searchable)]
           doc
         end
-      
+
       end
     end
 
   end
-  
+
   after(:each) do
     Object.send(:remove_const, :ModelIntegrationSpec)
   end
@@ -39,22 +39,22 @@ describe ActiveFedora::Model do
       @test_instance.delete
     end
 
-    
+
     describe ".all" do
       it "should return an array of instances of the calling Class" do
         result = ModelIntegrationSpec::Basic.all
-        result.should be_instance_of(Array)
+        expect(result).to be_instance_of(Array)
         # this test is meaningless if the array length is zero
-        result.length.should > 0
+        expect(result.length).to be > 0
         result.each do |obj|
-          obj.class.should == ModelIntegrationSpec::Basic
+          expect(obj.class).to eq(ModelIntegrationSpec::Basic)
         end
       end
     end
 
     describe ".first" do
       it "should return one instance of the calling class" do
-        ModelIntegrationSpec::Basic.first.should == @test_instance
+        expect(ModelIntegrationSpec::Basic.first).to eq(@test_instance)
       end
     end
   end
@@ -71,18 +71,18 @@ describe ActiveFedora::Model do
       @test_instance3.delete
     end
     it "should query" do
-      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('foo', :string, :searchable)=> 'Beta').should == [@test_instance1]
-      ModelIntegrationSpec::Basic.where('foo' => 'Beta').should == [@test_instance1]
+      expect(ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('foo', :string, :searchable)=> 'Beta')).to eq([@test_instance1])
+      expect(ModelIntegrationSpec::Basic.where('foo' => 'Beta')).to eq([@test_instance1])
     end
     it "should order" do
-      ModelIntegrationSpec::Basic.order(ActiveFedora::SolrService.solr_name('foo', :string, :sortable) + ' asc').should == [@test_instance2, @test_instance1, @test_instance3]
+      expect(ModelIntegrationSpec::Basic.order(ActiveFedora::SolrService.solr_name('foo', :string, :sortable) + ' asc')).to eq([@test_instance2, @test_instance1, @test_instance3])
     end
     it "should limit" do
-      ModelIntegrationSpec::Basic.limit(1).should == [@test_instance1]
+      expect(ModelIntegrationSpec::Basic.limit(1)).to eq([@test_instance1])
     end
 
     it "should chain them" do
-      ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', :string, :searchable) => 'Peanuts').order(ActiveFedora::SolrService.solr_name('foo', :string, :sortable) + ' asc').limit(1).should == [@test_instance2]
+      expect(ModelIntegrationSpec::Basic.where(ActiveFedora::SolrService.solr_name('bar', :string, :searchable) => 'Peanuts').order(ActiveFedora::SolrService.solr_name('foo', :string, :sortable) + ' asc').limit(1)).to eq([@test_instance2])
     end
   end
 end

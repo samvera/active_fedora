@@ -2,7 +2,7 @@ require 'spec_helper'
 require "solrizer"
 
 describe ActiveFedora::OmDatastream do
-  
+
   before(:all) do
     class HydrangeaArticle2 < ActiveFedora::Base
       # Uses the Hydra MODS Article profile for tracking most of the descriptive metadata
@@ -26,7 +26,7 @@ describe ActiveFedora::OmDatastream do
       @test_object = HydrangeaArticle2.find(@pid)
 
       @test_object.descMetadata.ng_xml = @test_object.descMetadata.ng_xml
-      @test_object.descMetadata.should_not be_changed
+      expect(@test_object.descMetadata).not_to be_changed
     end
 
 
@@ -35,9 +35,9 @@ describe ActiveFedora::OmDatastream do
       obj = HydrangeaArticle2.new
       obj.descMetadata.content = "<a>1</a>"
       obj.save
-      obj.descMetadata.should_not be_changed
+      expect(obj.descMetadata).not_to be_changed
       obj.descMetadata.content = "<a>1</a>\n"
-      obj.descMetadata.should_not be_changed
+      expect(obj.descMetadata).not_to be_changed
 
     end
   end
@@ -62,34 +62,34 @@ describe ActiveFedora::OmDatastream do
     end
 
     it "should return the same values whether getting from solr or Fedora" do
-      @test_solr_object.datastreams["descMetadata"].term_values(:name,:role,:text).should == ["Creator","Contributor","Funder","Host"]
-      @test_solr_object.datastreams["descMetadata"].term_values({:name=>0},:role,:text).should == ["Creator"]
-      @test_solr_object.datastreams["descMetadata"].term_values({:name=>1},:role,:text).should == ["Contributor"]
-      @test_solr_object.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text).should == ["Creator"]
-      @test_solr_object.datastreams["descMetadata"].term_values({:name=>1},{:role=>0},:text).should == ["Contributor"]
-      @test_solr_object.datastreams["descMetadata"].term_values({:name=>1},{:role=>1},:text).should == []
+      expect(@test_solr_object.datastreams["descMetadata"].term_values(:name,:role,:text)).to eq(["Creator","Contributor","Funder","Host"])
+      expect(@test_solr_object.datastreams["descMetadata"].term_values({:name=>0},:role,:text)).to eq(["Creator"])
+      expect(@test_solr_object.datastreams["descMetadata"].term_values({:name=>1},:role,:text)).to eq(["Contributor"])
+      expect(@test_solr_object.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text)).to eq(["Creator"])
+      expect(@test_solr_object.datastreams["descMetadata"].term_values({:name=>1},{:role=>0},:text)).to eq(["Contributor"])
+      expect(@test_solr_object.datastreams["descMetadata"].term_values({:name=>1},{:role=>1},:text)).to eq([])
       ar = @test_solr_object.datastreams["descMetadata"].term_values(:name,{:role=>0},:text)
-      ar.length.should == 4
-      ar.include?("Creator").should == true
-      ar.include?("Contributor").should == true
-      ar.include?("Funder").should == true
-      ar.include?("Host").should == true
+      expect(ar.length).to eq(4)
+      expect(ar.include?("Creator")).to eq(true)
+      expect(ar.include?("Contributor")).to eq(true)
+      expect(ar.include?("Funder")).to eq(true)
+      expect(ar.include?("Host")).to eq(true)
 
-      @test_object.datastreams["descMetadata"].term_values(:name,:role,:text).should == ["Creator","Contributor","Funder","Host"]
-      @test_object.datastreams["descMetadata"].term_values({:name=>0},:role,:text).should == ["Creator"]
-      @test_object.datastreams["descMetadata"].term_values({:name=>1},:role,:text).should == ["Contributor"]
-      @test_object.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text).should == ["Creator"]
-      @test_object.datastreams["descMetadata"].term_values({:name=>1},{:role=>0},:text).should == ["Contributor"]
-      @test_object.datastreams["descMetadata"].term_values({:name=>1},{:role=>1},:text).should == []
+      expect(@test_object.datastreams["descMetadata"].term_values(:name,:role,:text)).to eq(["Creator","Contributor","Funder","Host"])
+      expect(@test_object.datastreams["descMetadata"].term_values({:name=>0},:role,:text)).to eq(["Creator"])
+      expect(@test_object.datastreams["descMetadata"].term_values({:name=>1},:role,:text)).to eq(["Contributor"])
+      expect(@test_object.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text)).to eq(["Creator"])
+      expect(@test_object.datastreams["descMetadata"].term_values({:name=>1},{:role=>0},:text)).to eq(["Contributor"])
+      expect(@test_object.datastreams["descMetadata"].term_values({:name=>1},{:role=>1},:text)).to eq([])
       ar = @test_object.datastreams["descMetadata"].term_values(:name,{:role=>0},:text)
-      ar.length.should == 4
-      ar.include?("Creator").should == true
-      ar.include?("Contributor").should == true
-      ar.include?("Funder").should == true
-      ar.include?("Host").should == true
+      expect(ar.length).to eq(4)
+      expect(ar.include?("Creator")).to eq(true)
+      expect(ar.include?("Contributor")).to eq(true)
+      expect(ar.include?("Funder")).to eq(true)
+      expect(ar.include?("Host")).to eq(true)
     end
   end
-  
+
   describe '.update_values' do
     before do
       @pid = "hydrangea:fixture_mods_article2"
@@ -101,11 +101,11 @@ describe ActiveFedora::OmDatastream do
 
     it "should not be dirty after .update_values is saved" do
       @test_object.datastreams["descMetadata"].update_values([{:name=>0},{:role=>0},:text] =>"Funder")
-      @test_object.datastreams["descMetadata"].should be_changed
+      expect(@test_object.datastreams["descMetadata"]).to be_changed
       @test_object.save
-      @test_object.datastreams["descMetadata"].should_not be_changed
-      @test_object.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text).should == ["Funder"]
-    end    
+      expect(@test_object.datastreams["descMetadata"]).not_to be_changed
+      expect(@test_object.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text)).to eq(["Funder"])
+    end
   end
 
 
@@ -118,7 +118,7 @@ describe ActiveFedora::OmDatastream do
 
     end
     it "should solrize terms with :type=>'date' to *_dt solr terms" do
-      @test_object.to_solr[ActiveFedora::SolrService.solr_name('mods_journal_issue_publication_date', :date)].should == ['2012-11-02T00:00:00Z']
+      expect(@test_object.to_solr[ActiveFedora::SolrService.solr_name('mods_journal_issue_publication_date', :date)]).to eq(['2012-11-02T00:00:00Z'])
     end
   end
 end

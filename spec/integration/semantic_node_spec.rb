@@ -9,12 +9,12 @@ describe ActiveFedora::SemanticNode do
         ActiveFedora::Relationships.deprecation_behavior = :silence
         ActiveFedora::Relationships::ClassMethods.deprecation_behavior = :silence
       end
-  
+
       after :all do
         ActiveFedora::Relationships.deprecation_behavior = @behavior
         ActiveFedora::Relationships::ClassMethods.deprecation_behavior = @c_behavior
       end
-  before(:all) do 
+  before(:all) do
     class SNSpecNode < ActiveFedora::Base
       include ActiveFedora::FileManagement
     end
@@ -37,24 +37,24 @@ describe ActiveFedora::SemanticNode do
 
     @test_object = SNSpecModel.new
     @test_object.save
-    
+
     @part1 = ActiveFedora::Base.new()
     @part1.add_relationship(:is_part_of, @test_object)
     @part1.save
     @part2 = ActiveFedora::Base.new()
     @part2.add_relationship(:is_part_of, @test_object)
     @part2.save
-    
-    
+
+
     @container1 = ActiveFedora::Base.new()
     @container1.save
-    @container2 = ActiveFedora::Base.new()    
+    @container2 = ActiveFedora::Base.new()
     @container2.save
-    @container3 = ActiveFedora::Base.new()    
+    @container3 = ActiveFedora::Base.new()
     @container3.save
-    @container4 = ActiveFedora::Base.new()    
+    @container4 = ActiveFedora::Base.new()
     @container4.save
-    
+
     @test_object.add_relationship(:is_member_of, @container1)
     @test_object.add_relationship(:is_member_of, @container2)
     @test_object.add_relationship(:is_member_of, @container3)
@@ -99,14 +99,14 @@ describe ActiveFedora::SemanticNode do
     @special_part.add_relationship(:has_model, SpecialPart.to_class_uri)
     @special_part.add_relationship(:is_part_of, @test_object_query)
     @special_part.save
-    
+
     @special_container_query = "#{ActiveFedora::SolrService.solr_name("has_model", :symbol)}:#{solr_uri("info:fedora/afmodel:SpecialContainer")}"
     @special_part_query = "#{ActiveFedora::SolrService.solr_name("has_model", :symbol)}:#{solr_uri("info:fedora/afmodel:SpecialPart")}"
   end
-  
+
   after(:all) do
     begin
-    @part1.delete 
+    @part1.delete
     rescue
     end
     begin
@@ -152,20 +152,20 @@ describe ActiveFedora::SemanticNode do
     Object.send(:remove_const, :SNSpecModel)
 
   end
-  
+
   describe '#has_relationship' do
     it "should create useable finders" do
       spec_node = SNSpecNode.new
-      spec_node.collection_members.should == []
-      
+      expect(spec_node.collection_members).to eq([])
+
       spec_node.add_relationship(:has_collection_member, @test_object.pid)
       collection_members = spec_node.collection_members
-      collection_members.length.should == 1
-      collection_members.first.pid.should == @test_object.pid
-      collection_members.first.class.should == @test_object.class
+      expect(collection_members.length).to eq(1)
+      expect(collection_members.first.pid).to eq(@test_object.pid)
+      expect(collection_members.first.class).to eq(@test_object.class)
     end
   end
-  
+
   describe "inbound relationship finders" do
     describe "when inheriting from parents" do
       before do
@@ -173,7 +173,7 @@ describe ActiveFedora::SemanticNode do
           include ActiveFedora::FileManagement
         end
         @part4 = Test1.new()
-        @part4.parts 
+        @part4.parts
 
         class Test2 < ActiveFedora::Base
           include ActiveFedora::FileManagement
@@ -191,47 +191,47 @@ describe ActiveFedora::SemanticNode do
         class Test5 < Test4
           include ActiveFedora::Relationships
           has_relationship "testing_inbound", :is_part_of, :inbound=>true
-        end 
- 
+        end
+
         @test_object2 = Test2.new
         @test_object2.save
       end
       it "should have relationships defined" do
-        Test1.relationships_desc.should have_key(:inbound)
-        Test2.relationships_desc.should have_key(:inbound)
-        Test2.relationships_desc[:inbound]["parts_inbound"].should == {:inbound=>true, :predicate=>:is_part_of, :singular=>nil}
+        expect(Test1.relationships_desc).to have_key(:inbound)
+        expect(Test2.relationships_desc).to have_key(:inbound)
+        expect(Test2.relationships_desc[:inbound]["parts_inbound"]).to eq({:inbound=>true, :predicate=>:is_part_of, :singular=>nil})
       end
 
       it "should have relationships defined from more than one ancestor class" do
-        Test4.relationships_desc[:self].should have_key("collection_members")
-        Test4.relationships_desc[:self].should have_key("testing")
-        Test4.relationships_desc[:inbound].should have_key("testing_inbound")
+        expect(Test4.relationships_desc[:self]).to have_key("collection_members")
+        expect(Test4.relationships_desc[:self]).to have_key("testing")
+        expect(Test4.relationships_desc[:inbound]).to have_key("testing_inbound")
       end
 
       it "should override a parents relationship description if defined in the child" do
         #check parent description
-        Test4.relationships_desc[:inbound]["testing_inbound"][:predicate].should == :is_member_of
+        expect(Test4.relationships_desc[:inbound]["testing_inbound"][:predicate]).to eq(:is_member_of)
         #check child with overwritten relationship description has different predicate
-        Test5.relationships_desc[:inbound]["testing_inbound"][:predicate].should == :is_part_of
+        expect(Test5.relationships_desc[:inbound]["testing_inbound"][:predicate]).to eq(:is_part_of)
       end
 
       it "should not have relationships bleeding over from other sibling classes" do
-        SpecNodeSolrFilterQuery.relationships_desc[:inbound].should have_key("bi_special_containers_inbound")
-        Test1.relationships_desc[:inbound].should_not have_key("bi_special_containers_inbound")
-        Test2.relationships_desc[:inbound].should_not have_key("bi_special_containers_inbound")
+        expect(SpecNodeSolrFilterQuery.relationships_desc[:inbound]).to have_key("bi_special_containers_inbound")
+        expect(Test1.relationships_desc[:inbound]).not_to have_key("bi_special_containers_inbound")
+        expect(Test2.relationships_desc[:inbound]).not_to have_key("bi_special_containers_inbound")
       end
       it "should return an empty set" do
-        @test_object2.parts.should == []
-        @test_object2.parts_outbound.should == []
+        expect(@test_object2.parts).to eq([])
+        expect(@test_object2.parts_outbound).to eq([])
       end
       it "should return stuff" do
         @part4.add_relationship(:is_part_of, @test_object2)
         @test_object2.add_relationship(:has_part, @test_object)
         @part4.save
-        @test_object2.parts_inbound.map(&:pid).should == [@part4.pid]
-        @test_object2.parts_outbound.map(&:pid).should == [@test_object.pid]
-        @test_object2.parts.map(&:pid).should == [@part4.pid, @test_object.pid]
-      end 
+        expect(@test_object2.parts_inbound.map(&:pid)).to eq([@part4.pid])
+        expect(@test_object2.parts_outbound.map(&:pid)).to eq([@test_object.pid])
+        expect(@test_object2.parts.map(&:pid)).to eq([@part4.pid, @test_object.pid])
+      end
       after do
         @test_object2.delete
         begin
@@ -243,37 +243,37 @@ describe ActiveFedora::SemanticNode do
     it "should return an array of Base objects" do
       parts = @test_object.parts
       parts.each do |part|
-        part.should be_kind_of(ActiveFedora::Base)
-      end  
+        expect(part).to be_kind_of(ActiveFedora::Base)
+      end
     end
     it "_ids should return an array of pids" do
       ids = @test_object.parts_ids
-      ids.size.should == 2
-      ids.include?(@part1.pid).should == true
-      ids.include?(@part2.pid).should == true
+      expect(ids.size).to eq(2)
+      expect(ids.include?(@part1.pid)).to eq(true)
+      expect(ids.include?(@part2.pid)).to eq(true)
     end
     it "should return an array of Base objects with some filtered out if using solr_fq" do
-      @test_object_query.special_parts_ids.should == [@special_part.pid]
+      expect(@test_object_query.special_parts_ids).to eq([@special_part.pid])
     end
 
     it "should return an array of all Base objects with relationship if not using solr_fq" do
-      @test_object_query.parts_ids.size.should == 2
-      @test_object_query.parts_ids.include?(@special_part.pid).should == true
-      @test_object_query.parts_ids.include?(@part3.pid).should == true
+      expect(@test_object_query.parts_ids.size).to eq(2)
+      expect(@test_object_query.parts_ids.include?(@special_part.pid)).to eq(true)
+      expect(@test_object_query.parts_ids.include?(@part3.pid)).to eq(true)
     end
 
     it "should return a solr query for an inbound relationship" do
-      @test_object_query.special_parts_query.should == "#{ActiveFedora::SolrService.solr_name(@test_object_query.relationship_predicates[:inbound]['special_parts'], :symbol)}:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_part_query}"
+      expect(@test_object_query.special_parts_query).to eq("#{ActiveFedora::SolrService.solr_name(@test_object_query.relationship_predicates[:inbound]['special_parts'], :symbol)}:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_part_query}")
     end
   end
 
   describe "inbound relationship query" do
     it "should return a properly formatted query for a relationship that has a solr filter query defined" do
-      SpecNodeSolrFilterQuery.inbound_relationship_query(@test_object_query.pid,"special_parts").should == "#{ActiveFedora::SolrService.solr_name(@test_object_query.relationship_predicates[:inbound]['special_parts'], :symbol)}:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_part_query}"
+      expect(SpecNodeSolrFilterQuery.inbound_relationship_query(@test_object_query.pid,"special_parts")).to eq("#{ActiveFedora::SolrService.solr_name(@test_object_query.relationship_predicates[:inbound]['special_parts'], :symbol)}:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_part_query}")
     end
 
     it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
-      SpecNodeSolrFilterQuery.inbound_relationship_query(@test_object_query.pid,"parts").should == "#{ActiveFedora::SolrService.solr_name('is_part_of', :symbol)}:#{solr_uri(@test_object_query.internal_uri)}"
+      expect(SpecNodeSolrFilterQuery.inbound_relationship_query(@test_object_query.pid,"parts")).to eq("#{ActiveFedora::SolrService.solr_name('is_part_of', :symbol)}:#{solr_uri(@test_object_query.internal_uri)}")
     end
   end
 
@@ -284,7 +284,7 @@ describe ActiveFedora::SemanticNode do
         expected_string << " OR " if index > 0
         expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND #{@special_container_query})"
       end
-      SpecNodeSolrFilterQuery.outbound_relationship_query("special_containers",@test_object_query.containers_ids).should == expected_string
+      expect(SpecNodeSolrFilterQuery.outbound_relationship_query("special_containers",@test_object_query.containers_ids)).to eq(expected_string)
     end
 
     it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
@@ -293,7 +293,7 @@ describe ActiveFedora::SemanticNode do
         expected_string << " OR " if index > 0
         expected_string << "id:" + id.gsub(/(:)/, '\\:')
       end
-      SpecNodeSolrFilterQuery.outbound_relationship_query("containers",@test_object_query.containers_ids).should == expected_string
+      expect(SpecNodeSolrFilterQuery.outbound_relationship_query("containers",@test_object_query.containers_ids)).to eq(expected_string)
     end
   end
 
@@ -306,7 +306,7 @@ describe ActiveFedora::SemanticNode do
       end
       expected_string << " OR "
       expected_string << "(#{ActiveFedora::SolrService.solr_name(@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound'], :symbol)}:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_container_query})"
-      SpecNodeSolrFilterQuery.bidirectional_relationship_query(@test_object_query.pid,"bi_special_containers",@test_object_query.bi_containers_outbound_ids).should == expected_string
+      expect(SpecNodeSolrFilterQuery.bidirectional_relationship_query(@test_object_query.pid,"bi_special_containers",@test_object_query.bi_containers_outbound_ids)).to eq(expected_string)
     end
 
     it "should return a properly formatted query for a relationship that does not have a solr filter query defined" do
@@ -317,62 +317,62 @@ describe ActiveFedora::SemanticNode do
       end
       expected_string << " OR "
       expected_string << "(#{ActiveFedora::SolrService.solr_name(@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound'], :symbol)}:#{solr_uri(@test_object_query.internal_uri)})"
-      SpecNodeSolrFilterQuery.bidirectional_relationship_query(@test_object_query.pid,"bi_containers",@test_object_query.bi_containers_outbound_ids).should == expected_string
+      expect(SpecNodeSolrFilterQuery.bidirectional_relationship_query(@test_object_query.pid,"bi_containers",@test_object_query.bi_containers_outbound_ids)).to eq(expected_string)
     end
   end
 
   describe "outbound relationship finders" do
     it "should return an array of Base objects" do
       containers = @test_object.containers
-      containers.length.should > 0
+      expect(containers.length).to be > 0
       containers.each do |container|
-        container.should be_kind_of(ActiveFedora::Base)
-      end  
+        expect(container).to be_kind_of(ActiveFedora::Base)
+      end
     end
     it "_ids should return an array of pids" do
       ids = @test_object.containers_ids
-      ids.size.should == 3
-      ids.include?(@container1.pid).should == true
-      ids.include?(@container2.pid).should == true
-      ids.include?(@container3.pid).should == true
-      ids.include?(@container4.pid).should == false
+      expect(ids.size).to eq(3)
+      expect(ids.include?(@container1.pid)).to eq(true)
+      expect(ids.include?(@container2.pid)).to eq(true)
+      expect(ids.include?(@container3.pid)).to eq(true)
+      expect(ids.include?(@container4.pid)).to eq(false)
     end
 
     it "should return an array of Base objects with some filtered out if using solr_fq" do
-      @test_object_query.special_containers_ids.size.should == 3
-      @test_object_query.special_containers_ids.include?(@container3.pid).should == false
-      @test_object_query.special_containers_ids.include?(@special_container.pid).should == true
-      @test_object_query.special_containers_ids.include?(@special_container3.pid).should == true
-      @test_object_query.special_containers_ids.include?(@special_container4.pid).should == true
+      expect(@test_object_query.special_containers_ids.size).to eq(3)
+      expect(@test_object_query.special_containers_ids.include?(@container3.pid)).to eq(false)
+      expect(@test_object_query.special_containers_ids.include?(@special_container.pid)).to eq(true)
+      expect(@test_object_query.special_containers_ids.include?(@special_container3.pid)).to eq(true)
+      expect(@test_object_query.special_containers_ids.include?(@special_container4.pid)).to eq(true)
     end
 
     it "should return an array of all Base objects with relationship if not using solr_fq" do
-      @test_object_query.containers_ids.size.should == 4
-      @test_object_query.containers_ids.include?(@special_container2.pid).should == false
-      @test_object_query.containers_ids.include?(@special_container.pid).should == true
-      @test_object_query.containers_ids.include?(@container3.pid).should == true
-      @test_object_query.containers_ids.include?(@special_container3.pid).should == true
-      @test_object_query.containers_ids.include?(@special_container4.pid).should == true
+      expect(@test_object_query.containers_ids.size).to eq(4)
+      expect(@test_object_query.containers_ids.include?(@special_container2.pid)).to eq(false)
+      expect(@test_object_query.containers_ids.include?(@special_container.pid)).to eq(true)
+      expect(@test_object_query.containers_ids.include?(@container3.pid)).to eq(true)
+      expect(@test_object_query.containers_ids.include?(@special_container3.pid)).to eq(true)
+      expect(@test_object_query.containers_ids.include?(@special_container4.pid)).to eq(true)
     end
 
     it "should return a solr query for an outbound relationship" do
     end
 
     it "should return an array of Base objects with some filtered out if using solr_fq" do
-      @test_object_query.special_containers_ids.size.should == 3
-      @test_object_query.special_containers_ids.include?(@container3.pid).should == false
-      @test_object_query.special_containers_ids.include?(@special_container.pid).should == true
-      @test_object_query.special_containers_ids.include?(@special_container3.pid).should == true
-      @test_object_query.special_containers_ids.include?(@special_container4.pid).should == true
+      expect(@test_object_query.special_containers_ids.size).to eq(3)
+      expect(@test_object_query.special_containers_ids.include?(@container3.pid)).to eq(false)
+      expect(@test_object_query.special_containers_ids.include?(@special_container.pid)).to eq(true)
+      expect(@test_object_query.special_containers_ids.include?(@special_container3.pid)).to eq(true)
+      expect(@test_object_query.special_containers_ids.include?(@special_container4.pid)).to eq(true)
     end
 
     it "should return an array of all Base objects with relationship if not using solr_fq" do
-      @test_object_query.containers_ids.size.should == 4
-      @test_object_query.containers_ids.include?(@special_container2.pid).should == false
-      @test_object_query.containers_ids.include?(@special_container.pid).should == true
-      @test_object_query.containers_ids.include?(@container3.pid).should == true
-      @test_object_query.containers_ids.include?(@special_container3.pid).should == true
-      @test_object_query.containers_ids.include?(@special_container4.pid).should == true
+      expect(@test_object_query.containers_ids.size).to eq(4)
+      expect(@test_object_query.containers_ids.include?(@special_container2.pid)).to eq(false)
+      expect(@test_object_query.containers_ids.include?(@special_container.pid)).to eq(true)
+      expect(@test_object_query.containers_ids.include?(@container3.pid)).to eq(true)
+      expect(@test_object_query.containers_ids.include?(@special_container3.pid)).to eq(true)
+      expect(@test_object_query.containers_ids.include?(@special_container4.pid)).to eq(true)
     end
 
     it "should return a solr query for an outbound relationship" do
@@ -381,43 +381,43 @@ describe ActiveFedora::SemanticNode do
         expected_string << " OR " if index > 0
         expected_string << "(id:" + id.gsub(/(:)/, '\\:') + " AND #{@special_container_query})"
       end
-      @test_object_query.special_containers_query.should == expected_string
-    end 
-  end  
+      expect(@test_object_query.special_containers_query).to eq(expected_string)
+    end
+  end
 
   describe "bidirectional relationship finders" do
     it "should return an array of Base objects" do
       containers = @test_object.bi_containers
-      containers.length.should > 0
+      expect(containers.length).to be > 0
       containers.each do |container|
-        container.should be_kind_of(ActiveFedora::Base)
-      end  
+        expect(container).to be_kind_of(ActiveFedora::Base)
+      end
     end
     it "_ids should return an array of pids" do
       ids = @test_object.bi_containers_ids
-      ids.size.should == 4
-      ids.include?(@container1.pid).should == true
-      ids.include?(@container2.pid).should == true
-      ids.include?(@container3.pid).should == true
-      ids.include?(@container4.pid).should == true
+      expect(ids.size).to eq(4)
+      expect(ids.include?(@container1.pid)).to eq(true)
+      expect(ids.include?(@container2.pid)).to eq(true)
+      expect(ids.include?(@container3.pid)).to eq(true)
+      expect(ids.include?(@container4.pid)).to eq(true)
     end
 
     it "should return an array of Base objects with some filtered out if using solr_fq" do
       ids = @test_object_query.bi_special_containers_ids
-      ids.size.should == 4
-      ids.include?(@container1.pid).should == false
-      ids.include?(@container2.pid).should == false
-      ids.include?(@container3.pid).should == false
-      ids.include?(@special_container.pid).should == true
-      ids.include?(@special_container2.pid).should == true
-      ids.include?(@special_container3.pid).should == true
-      ids.include?(@special_container4.pid).should == true
+      expect(ids.size).to eq(4)
+      expect(ids.include?(@container1.pid)).to eq(false)
+      expect(ids.include?(@container2.pid)).to eq(false)
+      expect(ids.include?(@container3.pid)).to eq(false)
+      expect(ids.include?(@special_container.pid)).to eq(true)
+      expect(ids.include?(@special_container2.pid)).to eq(true)
+      expect(ids.include?(@special_container3.pid)).to eq(true)
+      expect(ids.include?(@special_container4.pid)).to eq(true)
     end
 
     it "should return an array of all Base objects with relationship if not using solr_fq" do
-      @test_object_query.bi_containers_ids.should include @container3.pid, @special_container.pid, @special_container2.pid, @special_container3.pid, @special_container4.pid
+      expect(@test_object_query.bi_containers_ids).to include @container3.pid, @special_container.pid, @special_container2.pid, @special_container3.pid, @special_container4.pid
 
-      @test_object_query.bi_containers_ids.size.should == 5
+      expect(@test_object_query.bi_containers_ids.size).to eq(5)
     end
 
     it "should return a solr query for a bidirectional relationship" do
@@ -428,7 +428,7 @@ describe ActiveFedora::SemanticNode do
       end
       expected_string << " OR "
       expected_string << "(#{ActiveFedora::SolrService.solr_name(@test_object_query.relationship_predicates[:inbound]['bi_special_containers_inbound'], :symbol)}:#{solr_uri(@test_object_query.internal_uri)} AND #{@special_container_query})"
-      @test_object_query.bi_special_containers_query.should == expected_string
+      expect(@test_object_query.bi_special_containers_query).to eq(expected_string)
     end
   end
 
@@ -447,11 +447,11 @@ describe ActiveFedora::SemanticNode do
       @test_object2 = MockSemNamedRelationships.new
       @test_object2.add_relationship(:has_model, MockSemNamedRelationships.to_class_uri)
       #should return expected named relationships
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[],"testing2"=>[], "collection_members"=>[], "part_of"=>[], "parts_outbound"=>[]}}
+      expect(@test_object2.relationships_by_name).to eq({:self=>{"testing"=>[],"testing2"=>[], "collection_members"=>[], "part_of"=>[], "parts_outbound"=>[]}})
       @test_object2.add_relationship(:has_part, @test_object.internal_uri)
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[@test_object.internal_uri],"testing2"=>[], "collection_members"=>[], "part_of"=>[],  "parts_outbound"=>[@test_object.internal_uri]}}
+      expect(@test_object2.relationships_by_name).to eq({:self=>{"testing"=>[@test_object.internal_uri],"testing2"=>[], "collection_members"=>[], "part_of"=>[],  "parts_outbound"=>[@test_object.internal_uri]}})
       @test_object2.add_relationship(:has_member, "3", true)
-      @test_object2.relationships_by_name.should == {:self=>{"testing"=>[@test_object.internal_uri],"testing2"=>["3"], "collection_members"=>[], "part_of"=>[],  "parts_outbound"=>[@test_object.internal_uri]}}
+      expect(@test_object2.relationships_by_name).to eq({:self=>{"testing"=>[@test_object.internal_uri],"testing2"=>["3"], "collection_members"=>[], "part_of"=>[],  "parts_outbound"=>[@test_object.internal_uri]}})
     end
   end
 end

@@ -2,33 +2,42 @@ require 'spec_helper'
 
 class SpecModelBasic < ActiveFedora::Base
 end
-module SpecModel
-  class CamelCased
-    include ActiveFedora::Model
+
+describe ActiveFedora::Model do
+
+  describe '.solr_query_handler' do
+    after do
+      SpecModelBasic.solr_query_handler = 'standard'  # reset to default
+    end
+    it "should have a default" do
+      expect(SpecModelBasic.solr_query_handler).to eq('standard')
+    end
+    it "should be settable" do
+      SpecModelBasic.solr_query_handler = 'search'
+      expect(SpecModelBasic.solr_query_handler).to eq('search')
+    end
+  end
+
+  describe ".classname_from_uri" do
+    it "should turn an afmodel URI into a Model class name" do
+      expect(ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:SpecModel_CamelCased')).to eq(['SpecModel::CamelCased', 'afmodel'])
+    end
+    it "should not change plurality" do
+      expect(ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:MyMetadata')).to eq(['MyMetadata', 'afmodel'])
+    end
+    it "should capitalize the first letter" do
+      expect(ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:image')).to eq(['Image', 'afmodel'])
+    end
   end
 end
 
 describe ActiveFedora::Model do
-  
-  after(:all) do
-    Object.send(:remove_const, :SpecModel)
-  end
-  
-  before :each do
-    @cc = SpecModel::CamelCased.new
-  end
 
-  describe '.solr_query_handler' do
-    after do
-      # reset to default
-      SpecModelBasic.solr_query_handler = 'standard'
-    end
-    it "should have a default" do
-      SpecModelBasic.solr_query_handler.should == 'standard'
-    end
-    it "should be settable" do
-      SpecModelBasic.solr_query_handler = 'search'
-      SpecModelBasic.solr_query_handler.should == 'search'
+  before :each do
+    module SpecModel
+      class CamelCased
+        include ActiveFedora::Model
+      end
     end
   end
 
@@ -39,7 +48,7 @@ describe ActiveFedora::Model do
   end
 
   describe "URI translation" do
-    before :each do 
+    before :each do
       allow(SpecModel::CamelCased).to receive(:pid_namespace).and_return("test-cModel")
     end
     it "with the namespace declared in the model" do
@@ -53,18 +62,6 @@ describe ActiveFedora::Model do
     end
     it "with the suffix declared in the model" do
       expect(SpecModel::CamelCased.to_class_uri).to eq 'info:fedora/afmodel:SpecModel_CamelCased-TEST-SUFFIX'
-    end
-  end
-
-  describe ".classname_from_uri" do
-    it "should turn an afmodel URI into a Model class name" do
-      ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:SpecModel_CamelCased').should == ['SpecModel::CamelCased', 'afmodel']
-    end
-    it "should not change plurality" do
-      ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:MyMetadata').should == ['MyMetadata', 'afmodel']
-    end
-    it "should capitalize the first letter" do
-      ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:image').should == ['Image', 'afmodel']
     end
   end
 

@@ -5,7 +5,7 @@ require "rexml/document"
 
 
 describe ActiveFedora::RelsExtDatastream do
-  
+
   before(:all) do
     @sample_relationships_hash = Hash.new(:is_member_of => ["info:fedora/demo:5", "info:fedora/demo:10"])
     @sample_xml_string = <<-EOS
@@ -16,17 +16,17 @@ describe ActiveFedora::RelsExtDatastream do
       </rdf:Description>
     </rdf:RDF>
     EOS
-  
+
     @sample_xml = REXML::Document.new(@sample_xml_string)
   end
-  
+
   before(:each) do
     @test_object = ActiveFedora::Base.new
     @test_datastream = ActiveFedora::RelsExtDatastream.new(@test_object.inner_object, 'RELS-EXT')
     @test_datastream.model = @test_object
     @test_object.save
   end
-  
+
   after(:each) do
     begin
     @test_object.delete
@@ -49,10 +49,10 @@ describe ActiveFedora::RelsExtDatastream do
     rescue
     end
   end
-  
-  
+
+
   describe '#serialize!' do
-    
+
     it "should generate new rdf/xml as the datastream content" do
       @test_object.add_datastream(@test_datastream)
       @test_object.add_relationship(:is_member_of, "info:fedora/demo:5")
@@ -60,41 +60,41 @@ describe ActiveFedora::RelsExtDatastream do
       rexml1 = REXML::Document.new(@test_datastream.to_rels_ext())
       @test_datastream.serialize!
       rexml2 = REXML::Document.new(@test_object.datastreams["RELS-EXT"].content)
-      rexml1.root.elements["rdf:Description"].inspect.should eql(rexml2.root.elements["rdf:Description"].inspect)
+      expect(rexml1.root.elements["rdf:Description"].inspect).to eql(rexml2.root.elements["rdf:Description"].inspect)
     end
-  
+
   end
-  
+
   it "should load relationships from fedora into parent object" do
     class SpecNode; include ActiveFedora::SemanticNode; end
-    ActiveFedora::Predicates.predicate_mappings[ActiveFedora::Predicates.default_predicate_namespace].each_key do |p| 
+    ActiveFedora::Predicates.predicate_mappings[ActiveFedora::Predicates.default_predicate_namespace].each_key do |p|
       @test_object.add_relationship(p, "info:fedora/demo:#{rand(100)}")
     end
     @test_object.save
     # make sure that _something_ was actually added to the object's relationships hash
-    @test_object.ids_for_outbound(:is_member_of).size.should == 1
+    expect(@test_object.ids_for_outbound(:is_member_of).size).to eq(1)
     new_rels = ActiveFedora::Base.find(@test_object.pid).relationships
 
     new_rels.to_a.each do |stmt|
-      @test_object.relationships.should have_statement(stmt)
+      expect(@test_object.relationships).to have_statement(stmt)
     end
 
 
     @test_object.relationships.to_a.each do |stmt|
-      new_rels.should have_statement(stmt)
+      expect(new_rels).to have_statement(stmt)
     end
 
  #   new_rels.should == @test_object.relationships
   end
 
-  describe '#from_solr' do     
+  describe '#from_solr' do
    before(:all) do
         @behavior = ActiveFedora::Relationships.deprecation_behavior
         @c_behavior = ActiveFedora::Relationships::ClassMethods.deprecation_behavior
         ActiveFedora::Relationships.deprecation_behavior = :silence
         ActiveFedora::Relationships::ClassMethods.deprecation_behavior = :silence
       end
-  
+
       after :all do
         ActiveFedora::Relationships.deprecation_behavior = @behavior
         ActiveFedora::Relationships::ClassMethods.deprecation_behavior = @c_behavior
@@ -109,9 +109,9 @@ describe ActiveFedora::RelsExtDatastream do
       end
     end
     it "should respond_to from_solr" do
-      @test_datastream.respond_to?(:from_solr).should be_true
+      expect(@test_datastream.respond_to?(:from_solr)).to be_truthy
     end
-    
+
     it 'should populate the relationships hash based on data in solr only for any possible fedora predicates' do
       @test_object2 = MockAFRelsSolr.new
       #@test_object2.new_object = true
@@ -147,22 +147,22 @@ describe ActiveFedora::RelsExtDatastream do
       solr_doc = MockAFRelsSolr.find_with_conditions(:id=>@test_object5.pid).first
       test_from_solr_object5 = MockAFRelsSolr.new
       test_from_solr_object5.rels_ext.from_solr(solr_doc)
-      
-      test_from_solr_object2.object_relations[:has_part].should include @test_object3.internal_uri
-      test_from_solr_object2.object_relations[:has_member].should include @test_object4.internal_uri
-      test_from_solr_object2.object_relations[:has_model].should include model_rel
 
-      test_from_solr_object2.relationships_by_name.should == {:self=>{"testing"=>[@test_object3.internal_uri],"testing2"=>[@test_object4.internal_uri], "collection_members"=>[], "part_of"=>[], "parts_outbound"=>[@test_object3.internal_uri]}}
-      test_from_solr_object3.object_relations[:has_model].should include model_rel
-      test_from_solr_object3.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}}
-      test_from_solr_object4.object_relations[:has_model].should include model_rel
-      test_from_solr_object4.relationships_by_name.should == {:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}}
+      expect(test_from_solr_object2.object_relations[:has_part]).to include @test_object3.internal_uri
+      expect(test_from_solr_object2.object_relations[:has_member]).to include @test_object4.internal_uri
+      expect(test_from_solr_object2.object_relations[:has_model]).to include model_rel
 
-      test_from_solr_object5.object_relations[:has_model].should include model_rel
-      test_from_solr_object5.object_relations[:has_part].should include @test_object2.internal_uri
-      test_from_solr_object5.object_relations[:has_member].should include @test_object3.internal_uri
+      expect(test_from_solr_object2.relationships_by_name).to eq({:self=>{"testing"=>[@test_object3.internal_uri],"testing2"=>[@test_object4.internal_uri], "collection_members"=>[], "part_of"=>[], "parts_outbound"=>[@test_object3.internal_uri]}})
+      expect(test_from_solr_object3.object_relations[:has_model]).to include model_rel
+      expect(test_from_solr_object3.relationships_by_name).to eq({:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}})
+      expect(test_from_solr_object4.object_relations[:has_model]).to include model_rel
+      expect(test_from_solr_object4.relationships_by_name).to eq({:self=>{"testing2"=>[], "collection_members"=>[], "part_of"=>[], "testing"=>[], "parts_outbound"=>[]}})
 
-      test_from_solr_object5.relationships_by_name.should == {:self=>{"testing2"=>[@test_object3.internal_uri], "collection_members"=>[], "part_of"=>[], "testing"=>[@test_object2.internal_uri], "parts_outbound"=>[@test_object2.internal_uri]}} 
+      expect(test_from_solr_object5.object_relations[:has_model]).to include model_rel
+      expect(test_from_solr_object5.object_relations[:has_part]).to include @test_object2.internal_uri
+      expect(test_from_solr_object5.object_relations[:has_member]).to include @test_object3.internal_uri
+
+      expect(test_from_solr_object5.relationships_by_name).to eq({:self=>{"testing2"=>[@test_object3.internal_uri], "collection_members"=>[], "part_of"=>[], "testing"=>[@test_object2.internal_uri], "parts_outbound"=>[@test_object2.internal_uri]}})
     end
   end
 end

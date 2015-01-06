@@ -28,13 +28,10 @@ describe "NestedAttribute behavior" do
 
   it "should update the child objects" do
     @car.attributes = {:bars_attributes=>[{:id=>@bar1.pid, :uno=>"bar1 uno"}, {:uno=>"newbar uno"}, {:id=>@bar2.pid, :_destroy=>'1', :uno=>'bar2 uno'}]}
-    Bar.find(@bar1.pid).uno.should == 'bar1 uno'
+    expect(Bar.find(@bar1.pid).uno).to eq('bar1 uno')
     # pending the fix of nested_attributes_options
     #Bar.find(@bar2.pid).should be_nil
 
   end
-
-    
-
 
 end

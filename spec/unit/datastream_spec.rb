@@ -4,22 +4,25 @@ require 'active_fedora'
 require "nokogiri"
 
 describe ActiveFedora::Datastream do
-  
+
   before(:each) do
     @test_object = ActiveFedora::Base.new
     @test_datastream = ActiveFedora::Datastream.new(@test_object.inner_object, 'abcd')
     @test_datastream.content = "hi there"
   end
 
-  its(:metadata?) { should be_false}
+  describe '#metadata?' do
+    subject { super().metadata? }
+    it { is_expected.to be_falsey}
+  end
 
   it "should escape dots in  to_param" do
-    @test_datastream.stub(:dsid).and_return('foo.bar')
-    @test_datastream.to_param.should == 'foo%2ebar'
+    allow(@test_datastream).to receive(:dsid).and_return('foo.bar')
+    expect(@test_datastream.to_param).to eq('foo%2ebar')
   end
-  
+
   it "should be inspectable" do
-    @test_datastream.inspect.should match /#<ActiveFedora::Datastream @pid=\"__DO_NOT_USE__\" @dsid=\"abcd\" @controlGroup=\"M\" changed=\"true\" @mimeType=\"\" >/
+    expect(@test_datastream.inspect).to match /#<ActiveFedora::Datastream @pid=\"__DO_NOT_USE__\" @dsid=\"abcd\" @controlGroup=\"M\" changed=\"true\" @mimeType=\"\" >/
   end
 
   describe '#validate_content_present' do
@@ -31,54 +34,54 @@ describe ActiveFedora::Datastream do
     it "should expect content on an Inline (X) datastream" do
       @test_datastream.controlGroup = 'X'
       @test_datastream.dsLocation = "http://example.com/test/content/abcd"
-      @test_datastream.validate_content_present.should be_false
+      expect(@test_datastream.validate_content_present).to be_falsey
       @test_datastream.content = "<foo><xmlelement/></foo>"
-      @test_datastream.validate_content_present.should be_true
+      expect(@test_datastream.validate_content_present).to be_truthy
     end
 
     it "should expect content on a Managed (M) datastream" do
       @test_datastream.controlGroup = 'M'
       @test_datastream.dsLocation = "http://example.com/test/content/abcd"
-      @test_datastream.validate_content_present.should be_false
+      expect(@test_datastream.validate_content_present).to be_falsey
       @test_datastream.content = "<foo><xmlelement/></foo>"
-      @test_datastream.validate_content_present.should be_true
+      expect(@test_datastream.validate_content_present).to be_truthy
     end
 
     it "should expect a dsLocation on an External (E) datastream" do
       @test_datastream.controlGroup = 'E'
       @test_datastream.content = "<foo><xmlelement/></foo>"
-      @test_datastream.validate_content_present.should be_false
+      expect(@test_datastream.validate_content_present).to be_falsey
       @test_datastream.dsLocation = "http://example.com/test/content/abcd"
-      @test_datastream.validate_content_present.should be_true
+      expect(@test_datastream.validate_content_present).to be_truthy
     end
 
     it "should expect a dsLocation on a Redirect (R) datastream" do
       @test_datastream.controlGroup = 'R'
       @test_datastream.content = "<foo><xmlelement/></foo>"
-      @test_datastream.validate_content_present.should be_false
+      expect(@test_datastream.validate_content_present).to be_falsey
       @test_datastream.dsLocation = "http://example.com/test/content/abcd"
-      @test_datastream.validate_content_present.should be_true
+      expect(@test_datastream.validate_content_present).to be_truthy
     end
   end
-  
+
   it "should have mimeType accessors" do
     ds1 = ActiveFedora::Datastream.new
     ds1.mimeType = "text/foo"
-    ds1.mimeType.should == "text/foo"
+    expect(ds1.mimeType).to eq("text/foo")
     ds2 = ActiveFedora::Datastream.new
     ds2.mimeType = "text/bar"
-    ds2.mimeType.should == "text/bar"
+    expect(ds2.mimeType).to eq("text/bar")
   end
 
   describe ".size" do
     it "should lazily load the datastream size attribute from the fedora repository" do
       ds_profile = <<-EOS
-        <datastreamProfile 
-            xmlns=\"http://www.fedora.info/definitions/1/0/management/\"  
-            xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" 
-            xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" 
-            xsi:schemaLocation=\"http://www.fedora.info/definitions/1/0/management/ http://www.fedora.info/definitions/1/0/datastreamProfile.xsd\" 
-            pid=\"#{@test_object.pid}\" 
+        <datastreamProfile
+            xmlns=\"http://www.fedora.info/definitions/1/0/management/\"
+            xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"
+            xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+            xsi:schemaLocation=\"http://www.fedora.info/definitions/1/0/management/ http://www.fedora.info/definitions/1/0/datastreamProfile.xsd\"
+            pid=\"#{@test_object.pid}\"
             dsID=\"#{@test_datastream.dsid}\" >
          <dsLabel></dsLabel>
          <dsVersionID>#{@test_datastream.dsid}.1</dsVersionID>
@@ -97,17 +100,17 @@ describe ActiveFedora::Datastream do
          </datastreamProfile>"
       EOS
 
-      mock_repo = mock('repository', :config=>{})
-      @test_object.inner_object.stub(:repository).and_return(mock_repo)
-      mock_repo.should_receive(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).and_return(ds_profile)
-      @test_datastream.size.should == 9999
+      mock_repo = double('repository', :config=>{})
+      allow(@test_object.inner_object).to receive(:repository).and_return(mock_repo)
+      expect(mock_repo).to receive(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).and_return(ds_profile)
+      expect(@test_datastream.size).to eq(9999)
     end
 
     it "should default to an empty string if ds has not been saved" do
-      @test_datastream.size.should be_nil
+      expect(@test_datastream.size).to be_nil
     end
   end
-  
+
   describe ".from_xml" do
     it "should load a FOXML datastream node" do
       ds_xml = <<-EOS
@@ -128,7 +131,7 @@ describe ActiveFedora::Datastream do
       EOS
       ds_node = Nokogiri::XML(ds_xml).root
       ds = ActiveFedora::Datastream.from_xml(@test_datastream, ds_node)
-      ds.should be_a(ActiveFedora::Datastream)
+      expect(ds).to be_a(ActiveFedora::Datastream)
     end
   end
 
