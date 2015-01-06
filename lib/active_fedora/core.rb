@@ -36,7 +36,7 @@ module ActiveFedora
     def initialize(attributes_or_resource_or_url = nil, &block)
       init_internals
       attributes = initialize_resource_and_attributes(attributes_or_resource_or_url)
-      raise IllegalOperation, "Attempting to recreate existing ldp_source" unless ldp_source.new?
+      raise IllegalOperation, "Attempting to recreate existing ldp_source: `#{ldp_source.subject}'" unless ldp_source.new?
       assert_content_model
       load_attached_files
       self.attributes = attributes if attributes

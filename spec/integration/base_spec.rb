@@ -46,7 +46,7 @@ describe "A base object with metadata" do
     end
     describe "when trying to create it again" do
       it "should raise an error" do
-        expect { MockAFBaseRelationship.create(id: @release.id) }.to raise_error(ActiveFedora::IllegalOperation)
+        expect { MockAFBaseRelationship.create(id: @release.id) }.to raise_error(ActiveFedora::IllegalOperation, "Attempting to recreate existing ldp_source: `#{@release.uri}'")
         @release.reload
         expect(@release.foo.person).to include('test foo content')
       end
