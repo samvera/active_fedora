@@ -56,7 +56,7 @@ module ActiveFedora
       end
 
       def reindex_everything
-        get_descendent_uris(ActiveFedora::Base.id_to_uri('')).each do |uri|
+        descendent_uris(ActiveFedora::Base.id_to_uri('')).each do |uri|
           logger.debug "Re-index everything ... #{uri}"
           ActiveFedora::Base.find(LdpResource.new(ActiveFedora.fedora.connection, uri)).update_index
         end
@@ -77,7 +77,7 @@ module ActiveFedora
         SolrInstanceLoader.new(self, id, solr_doc).object
       end
 
-      def get_descendent_uris(uri)
+      def descendent_uris(uri)
         resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
         # GET could be slow if it's a big resource, we're using HEAD to avoid this problem,
         # but this causes more requests to Fedora.
@@ -85,7 +85,7 @@ module ActiveFedora
         immediate_descendent_uris = resource.graph.query(predicate: ::RDF::LDP.contains).map { |descendent| descendent.object.to_s }
         all_descendents_uris = [uri]
         immediate_descendent_uris.each do |descendent_uri|
-          all_descendents_uris += get_descendent_uris(descendent_uri)
+          all_descendents_uris += descendent_uris(descendent_uri)
         end
         all_descendents_uris
       end
