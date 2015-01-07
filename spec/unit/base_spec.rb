@@ -10,18 +10,8 @@ describe ActiveFedora::Base do
     end
   end
 
-  describe "reindex_everything" do
-    it "should call update_index on every object represented in the sitemap" do
-      allow(ActiveFedora::Base).to receive(:descendent_uris) { ['http://localhost/test/XXX', 'http://localhost/test/YYY', 'http://localhost/test/ZZZ'] }
-      mock_update = double(:mock_obj)
-      expect(mock_update).to receive(:update_index).exactly(3).times
-      expect(ActiveFedora::Base).to receive(:find).with(instance_of ActiveFedora::LdpResource ).and_return(mock_update).exactly(3).times
-      ActiveFedora::Base.reindex_everything
-    end
-  end
-
   describe "With a test class" do
-    before :each do
+    before do
       class FooHistory < ActiveFedora::Base
         has_metadata 'someData', type: ActiveFedora::SimpleDatastream, autocreate: true do |m|
           m.field "fubar", :string
@@ -46,7 +36,7 @@ describe ActiveFedora::Base do
       end
     end
 
-    after :each do
+    after do
       Object.send(:remove_const, :FooHistory)
       Object.send(:remove_const, :FooAdaptation)
       Object.send(:remove_const, :FooInherited)
