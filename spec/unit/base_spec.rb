@@ -160,13 +160,13 @@ describe ActiveFedora::Base do
     ### Methods for ActiveModel::Conversions
     it "should have to_param once it's saved" do
       expect(@test_object.to_param).to be_nil
-      @test_object.inner_object.stub(:new? => false)
+      allow(@test_object.inner_object).to receive(:new?).and_return(false)
       expect(@test_object.to_param).to eq(@test_object.pid)
     end
 
     it "should have to_key once it's saved" do
       expect(@test_object.to_key).to be_nil
-      @test_object.inner_object.stub(:new? => false)
+      allow(@test_object.inner_object).to receive(:new?).and_return(false)
       expect(@test_object.to_key).to eq([@test_object.pid])
     end
 
@@ -219,7 +219,7 @@ describe ActiveFedora::Base do
 
     describe '.rels_ext' do
       it 'should return the RelsExtDatastream object from the datastreams array' do
-        @test_object.stub(:datastreams => {"RELS-EXT" => "foo"})
+        allow(@test_object).to receive(:datastreams).and_return({"RELS-EXT" => "foo"})
         expect(@test_object.rels_ext).to eq("foo")
       end
     end
@@ -269,9 +269,9 @@ describe ActiveFedora::Base do
     describe '#remove_relationship' do
       it 'should remove a relationship from the relationships hash' do
         @test_object3 = ActiveFedora::Base.new()
-        @test_object3.stub(:pid=>'7')
         @test_object4 = ActiveFedora::Base.new()
-        @test_object4.stub(:pid=>'8')
+        allow(@test_object3).to receive(:pid).and_return('7')
+        allow(@test_object4).to receive(:pid).and_return('8')
         @test_object.add_relationship(:has_part,@test_object3)
         @test_object.add_relationship(:has_part,@test_object4)
         #check both are there
@@ -307,14 +307,14 @@ describe ActiveFedora::Base do
 
     describe '.save' do
       it "should create a new record" do
-        @test_object.stub(:new_record? => true)
+        allow(@test_object).to receive(:new_record?).and_return(true)
         expect(@test_object).to receive(:create)
         expect(@test_object).to receive(:update_index)
         @test_object.save
       end
 
       it "should update an existing record" do
-        @test_object.stub(:new_record? => false)
+        allow(@test_object).to receive(:new_record?).and_return(false)
         expect(@test_object).to receive(:update)
         expect(@test_object).to receive(:update_index)
         @test_object.save

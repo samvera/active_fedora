@@ -78,7 +78,7 @@ describe ActiveFedora::FileConfigurator do
 
       it "should look in ./config/fedora.yml if neither rails.root nor :fedora_config_path are set" do
         expect(subject).to receive(:config_options).and_return({})
-        Dir.stub(:getwd => "/current/working/directory")
+        allow(Dir).to receive(:getwd).and_return("/current/working/directory")
         expect(File).to receive(:file?).with("/current/working/directory/config/fedora.yml").and_return(true)
         expect(subject.get_config_path(:fedora)).to eql("/current/working/directory/config/fedora.yml")
       end
@@ -95,7 +95,7 @@ describe ActiveFedora::FileConfigurator do
 
     describe "get_config_path(:solr)" do
       it "should return the solr_config_path if set in config_options hash" do
-        subject.stub(:config_options => {:solr_config_path => "/path/to/solr.yml"})
+        allow(subject).to receive(:config_options).and_return({:solr_config_path => "/path/to/solr.yml"})
         expect(File).to receive(:file?).with("/path/to/solr.yml").and_return(true)
         expect(subject.get_config_path(:solr)).to eql("/path/to/solr.yml")
       end
@@ -109,7 +109,7 @@ describe ActiveFedora::FileConfigurator do
       context "no solr.yml in same directory as fedora.yml and fedora.yml does not contain solr url" do
 
         before :each do
-          subject.stub(:config_options => {})
+          allow(subject).to receive(:config_options).and_return({})
           expect(subject).to receive(:path).and_return("/path/to/fedora/config/fedora.yml")
           expect(File).to receive(:file?).with("/path/to/fedora/config/solr.yml").and_return(false)
         end
@@ -124,13 +124,13 @@ describe ActiveFedora::FileConfigurator do
         end
 
         it "should look in ./config/solr.yml if no rails root" do
-          Dir.stub(:getwd => "/current/working/directory")
+          allow(Dir).to receive(:getwd).and_return("/current/working/directory")
           expect(File).to receive(:file?).with("/current/working/directory/config/solr.yml").and_return(true)
           expect(subject.get_config_path(:solr)).to eql("/current/working/directory/config/solr.yml")
         end
 
         it "should return the default solr.yml file that ships with active-fedora if no other option is set" do
-          Dir.stub(:getwd => "/current/working/directory")
+          allow(Dir).to receive(:getwd).and_return("/current/working/directory")
           expect(File).to receive(:file?).with("/current/working/directory/config/solr.yml").and_return(false)
           expect(File).to receive(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"),'config','solr.yml'))).and_return(true)
           expect(logger).to receive(:warn).with("Using the default solr.yml that comes with active-fedora.  If you want to override this, pass the path to solr.yml to ActiveFedora - ie. ActiveFedora.init(:solr_config_path => '/path/to/solr.yml') - or set Rails.root and put solr.yml into \#{Rails.root}/config.")

@@ -42,7 +42,7 @@ describe ActiveFedora::Base do
       ds = ActiveFedora::Datastream.new(@test_object.inner_object, nil)
       expect(ds.dsid).to eq(nil)
       ds_emptystringid = ActiveFedora::Datastream.new(@test_object.inner_object, '')
-      @test_object.stub(:generate_dsid => 'foo')
+      allow(@test_object).to receive(:generate_dsid).and_return('foo')
      # ds.should_receive(:dsid=).with("foo")
       expect(@test_object.add_datastream(ds)).to eq('foo')
       expect(@test_object.add_datastream(ds_emptystringid)).to eq('foo')
@@ -50,7 +50,7 @@ describe ActiveFedora::Base do
     it "should accept a prefix option and apply it to automatically assigned dsids" do
       ds = ActiveFedora::Datastream.new(@test_object.inner_object, nil)
       expect(ds.dsid).to eq(nil)
-      @test_object.stub(:generate_dsid => "FOO")
+      allow(@test_object).to receive(:generate_dsid).and_return("FOO")
       expect(@test_object.add_datastream(ds, :prefix => "FOO")).to eq('FOO')
     end
   end

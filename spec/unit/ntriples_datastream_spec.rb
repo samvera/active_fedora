@@ -100,8 +100,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
       end
       @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
-      @subject.stub(:pid => 'test:1')
-      @subject.stub(:new? => false)
+      allow(@subject).to receive(:pid ).and_return('test:1')
+      allow(@subject).to receive(:new?).and_return(false)
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
 
@@ -126,7 +126,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
         end
       end
       @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
-      @subject.stub(:pid => 'test:1', :repository => ActiveFedora::Base.connection_for_pid(0))
+      allow(@subject).to receive(:pid).and_return('test:1')
+      allow(@subject).to receive(:repository).and_return(ActiveFedora::Base.connection_for_pid(0))
     end
     after(:each) do
       Object.send(:remove_const, :MyDatastream)
@@ -172,7 +173,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       Object.send(:remove_const, :MyDatastream)
     end
     before(:each) do
-      @subject.stub(:pid => 'test:1')
+      allow(@subject).to receive(:pid).and_return('test:1')
     end
     it "should provide .to_solr and return a SolrDocument" do
       expect(@subject).to respond_to(:to_solr)
@@ -203,24 +204,25 @@ describe ActiveFedora::NtriplesRDFDatastream do
       before(:each) do
         class Foo < ActiveFedora::Base
           has_metadata :name => "descMetadata", :type => MyDatastream
-          delegate :created, :to => :descMetadata
-          delegate :title, :to => :descMetadata
-          delegate :publisher, :to => :descMetadata
-          delegate :based_near, :to => :descMetadata
+          delegate :created,     :to => :descMetadata
+          delegate :title,       :to => :descMetadata
+          delegate :publisher,   :to => :descMetadata
+          delegate :based_near,  :to => :descMetadata
           delegate :related_url, :to => :descMetadata
-          delegate :rights, :to => :descMetadata
+          delegate :rights,      :to => :descMetadata
         end
         @obj = MyDatastream.new(@inner_object, 'solr_rdf')
         repository = double()
-          @obj.stub(:repository => repository, :pid => 'test:1')
+          allow(@obj).to receive(:repository).and_return(repository)
+          allow(@obj).to receive(:pid       ).and_return('test:1')
           allow(repository).to receive(:modify_datastream)
           allow(repository).to receive(:add_datastream)
-        @obj.created = "2012-03-04"
-        @obj.title = "Of Mice and Men, The Sequel"
-        @obj.publisher = "Bob's Blogtastic Publishing"
-        @obj.based_near = ["Tacoma, WA", "Renton, WA"]
+        @obj.created     = "2012-03-04"
+        @obj.title       = "Of Mice and Men, The Sequel"
+        @obj.publisher   = "Bob's Blogtastic Publishing"
+        @obj.based_near  = ["Tacoma, WA", "Renton, WA"]
         @obj.related_url = "http://example.org/blogtastic/"
-        @obj.rights = "Totally open, y'all"
+        @obj.rights      = "Totally open, y'all"
         @obj.save
       end
 
@@ -253,7 +255,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
                 ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :string, :searchable),
                 ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :string, :facetable),
                 ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :string, :displayable))
-
         end
 
         it "should return the right values" do

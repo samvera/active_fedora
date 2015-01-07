@@ -287,7 +287,7 @@ describe ActiveFedora::Relationships do
         it "(:response_format => :id_array) should return an array of fedora PIDs" do
           SpecNode.create_outbound_relationship_finders("containers", :is_member_of)
           local_node = SpecNode.new
-          local_node.stub(:rels_ext => double("rels_ext", :content_will_change! => true, :content=>''))
+          allow(local_node).to receive(:rels_ext).and_return double("rels_ext", :content_will_change! => true, :content=>'')
           local_node.add_relationship(:is_member_of, "demo:10")
           result = local_node.containers_ids
           expect(result).to be_instance_of(Array)
@@ -377,9 +377,9 @@ describe ActiveFedora::Relationships do
         @local_node2 = SpecNode.new
         @local_node2.pid = "mypid2"
         model_def = SpecNode.to_class_uri
-        @local_node.stub(:rels_ext => double("rels_ext", :content_will_change! => true, :content=>''))
+        allow(@local_node).to receive(:rels_ext).and_return double("rels_ext", :content_will_change! => true, :content=>'')
         @local_node.add_relationship(:has_model, model_def)
-        @local_node2.stub(:rels_ext => double("rels_ext", :content_will_change! => true, :content=>''))
+        allow(@local_node2).to receive(:rels_ext).and_return double("rels_ext", :content_will_change! => true, :content=>'')
         @local_node2.add_relationship(:has_model, model_def)
         @local_node.add_relationship(:has_part, @local_node2)
         @local_node2.add_relationship(:has_part, @local_node)
@@ -455,8 +455,8 @@ describe ActiveFedora::Relationships do
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_model),  RDF::URI.new(MockRelationshipNames.to_class_uri))
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_member),  RDF::URI.new(@test_object4.internal_uri))
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:has_part),  RDF::URI.new(@test_object3.internal_uri))
-      @test_object2.stub(:relationships =>graph)
-     expect(@test_object2.find_relationship_by_name("testing")).to eq([@test_object3.internal_uri])
+      allow(@test_object2).to receive(:relationships).and_return graph
+      expect(@test_object2.find_relationship_by_name("testing")).to eq([@test_object3.internal_uri])
     end
   end
 
@@ -833,8 +833,6 @@ describe ActiveFedora::Relationships do
         expect(MockInboundNamedRelationshipQuery.inbound_relationship_query("changeme:1","testing_inbound_no_solr_fq")).to eq("#{ActiveFedora::SolrService.solr_name('is_part_of', :symbol)}:info\\:fedora\\/changeme\\:1")
       end
     end
-
-
 
 
     describe "outbound_relationship_query" do

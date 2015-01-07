@@ -16,7 +16,8 @@ describe ActiveFedora::RelsExtDatastream do
   before(:each) do
       mock_inner = double('inner object')
       @mock_repo = double('repository')
-      @mock_repo.stub(:datastream_dissemination=>'My Content', :config=>{})
+      allow(@mock_repo).to receive(:datastream_dissemination).and_return('My Content')
+      allow(@mock_repo).to receive(:config).and_return({})
       allow(mock_inner).to receive(:repository).and_return(@mock_repo)
       allow(mock_inner).to receive(:pid).and_return(@pid)
       @test_ds = ActiveFedora::RelsExtDatastream.new(mock_inner, "RELS-EXT")
@@ -52,7 +53,10 @@ describe ActiveFedora::RelsExtDatastream do
       subject = RDF::URI.new "info:fedora/test:sample_pid"
       graph.insert RDF::Statement.new(subject, ActiveFedora::Predicates.find_graph_predicate(:is_member_of),  RDF::URI.new('demo:10'))
 
-      @test_ds.stub(:new? => true, :relationships_are_dirty? =>true, :relationships => graph, :model => double(:relationships_are_dirty= => true))
+      allow(@test_ds).to receive(:new?).and_return true
+      allow(@test_ds).to receive(:relationships_are_dirty?).and_return true
+      allow(@test_ds).to receive(:relationships).and_return graph
+      allow(@test_ds).to receive(:model).and_return double(:relationships_are_dirty= => true)
       @test_ds.serialize!
       expect(EquivalentXml.equivalent?(@test_ds.content, "<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>\n        <rdf:Description rdf:about='info:fedora/test:sample_pid'>\n        <isMemberOf rdf:resource='demo:10' xmlns='info:fedora/fedora-system:def/relations-external#'/></rdf:Description>\n      </rdf:RDF>")).to be_truthy
     end

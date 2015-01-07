@@ -20,18 +20,17 @@ describe ActiveFedora::OmDatastream do
 
   before(:each) do
     @mock_inner = double('inner object')
-    @mock_repo = double('repository')
-    @mock_repo.stub(:datastream_dissemination=>'My Content', :config=>{}, :datastream=>'')
+    @mock_repo = double('repository', :config => {})
+    allow(@mock_repo ).to receive(:datastream_dissemination).and_return('My Content')
+    allow(@mock_repo ).to receive(:datastream).and_return('')
     allow(@mock_inner).to receive(:repository).and_return(@mock_repo)
     allow(@mock_inner).to receive(:pid)
-    @mock_inner.stub(:new? => false)
+    allow(@mock_inner).to receive(:new?).and_return(false)
     @test_ds = ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata")
-    @test_ds.stub(:new? => false, :profile => {}, :datastream_content => '<test_xml/>')
+    allow(@test_ds).to receive(:new?   ).and_return(false)
+    allow(@test_ds).to receive(:profile).and_return({})
+    allow(@test_ds).to receive(:datastream_content).and_return('<test_xml/>')
     @test_ds.content="<test_xml/>"
-    @test_ds.stub(:new? => false)
-  end
-
-  after(:each) do
   end
 
   describe '#metadata?' do
@@ -176,11 +175,20 @@ describe ActiveFedora::OmDatastream do
       expect(@test_ds).to respond_to(:save)
     end
     it "should persist the product of .to_xml in fedora" do
-      allow(@mock_repo).to receive(:datastream).and_return('')
-      @test_ds.stub(:new? => true)
-      @test_ds.stub(:ng_xml_changed? => true)
-      @test_ds.stub(:to_xml => "fake xml")
-      expect(@mock_repo).to receive(:add_datastream).with(:pid => nil, :dsid => 'descMetadata', :versionable => true, :content => 'fake xml', :controlGroup => 'X', :dsState => 'A', :mimeType=>'text/xml')
+      allow(@test_ds).to receive(:new?).and_return(true)
+      allow(@test_ds).to receive(:ng_xml_changed?).and_return(true)
+      allow(@test_ds).to receive(:to_xml).and_return("fake xml")
+      allow(@mock_repo).to receive(:add_datastream) { |hash| 
+        expect(hash).to include(
+            :content      => 'fake xml',
+            :controlGroup => 'X',
+            :dsState      => 'A',
+            :dsid         => 'descMetadata',
+            :mimeType     => 'text/xml',
+            :pid          => nil,
+            :versionable  => true
+        )
+      }
 
       @test_ds.serialize!
       @test_ds.save
@@ -191,19 +199,20 @@ describe ActiveFedora::OmDatastream do
   describe 'setting content' do
     subject { ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata") }
     it "should update the content" do
-      subject.stub(:new? => false )
+      allow(subject).to receive(:new?).and_return(false)
       subject.content = "<a />"
       expect(subject.content).to eq('<a/>')
     end
 
     it "should mark the object as changed" do
-      subject.stub(:new? => false, :controlGroup => 'M')
+      allow(subject).to receive(:new?).and_return(false)
+      allow(subject).to receive(:controlGroup).and_return('M')
       subject.content = "<a />"
       expect(subject).to be_changed
     end
 
     it "update ngxml and mark the xml as loaded" do
-      subject.stub(:new? => false )
+      allow(subject).to receive(:new?).and_return(false)
       subject.content = "<a />"
       expect(subject.ng_xml.to_xml).to match(/<a\/>/)
       expect(subject.xml_loaded).to be_truthy
@@ -212,7 +221,7 @@ describe ActiveFedora::OmDatastream do
 
   describe 'ng_xml=' do
     before do
-      @mock_inner.stub(:new? => true)
+      allow(@mock_inner).to receive(:new?).and_return(true)
       @test_ds2 = ActiveFedora::OmDatastream.new(@mock_inner, "descMetadata")
     end
     it "should parse raw xml for you" do
@@ -227,7 +236,8 @@ describe ActiveFedora::OmDatastream do
       expect(@test_ds2.ng_xml.to_xml).to be_equivalent_to("<xmlelement/>")
     end
     it "should mark the datastream as changed" do
-      @test_ds2.stub(:new? => false, :controlGroup => 'M')
+      allow(@test_ds2).to receive(:new?).and_return(false)
+      allow(@test_ds2).to receive(:controlGroup).and_return('M')
       expect(@test_ds2).not_to be_changed
       @test_ds2.ng_xml = @sample_raw_xml
       expect(@test_ds2).to be_changed
@@ -240,7 +250,7 @@ describe ActiveFedora::OmDatastream do
     end
 
     it "should ng_xml.to_xml" do
-      @test_ds.stub(:ng_xml => Nokogiri::XML::Document.parse("<text_document/>"))
+      allow(@test_ds).to receive(:ng_xml).and_return(Nokogiri::XML::Document.parse("<text_document/>"))
       expect(@test_ds.to_xml).to eq("<text_document/>")
     end
 

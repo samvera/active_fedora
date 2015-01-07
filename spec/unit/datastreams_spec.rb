@@ -42,22 +42,21 @@ describe ActiveFedora::Datastreams do
     it "should touch each datastream" do
       m1 = double()
       m2 = double()
-
       expect(m1).to receive(:serialize!)
       expect(m2).to receive(:serialize!)
-       subject.stub(:datastreams => { :m1 => m1, :m2 => m2})
+       allow(subject).to receive(:datastreams).and_return({:m1 => m1, :m2 => m2})
        subject.serialize_datastreams
     end
   end
 
   describe "#add_disseminator_location_to_datastreams" do
     it "should infer dsLocations for E datastreams without hitting Fedora" do
-
       mock_specs = {:e => { :disseminator => 'xyz' }}
       mock_ds = double(:controlGroup => 'E')
-      ActiveFedora::Base.stub(:ds_specs => mock_specs)
-      ActiveFedora.stub(:config_for_environment => { :url => 'http://localhost'})
-      subject.stub(:pid => 'test:1', :datastreams => {:e => mock_ds})
+      allow(ActiveFedora::Base).to receive(:ds_specs).and_return(mock_specs)
+      allow(ActiveFedora).to receive(:config_for_environment).and_return({:url => 'http://localhost'})
+      allow(subject).to receive(:pid        ).and_return('test:1')
+      allow(subject).to receive(:datastreams).and_return({:e => mock_ds})
       expect(mock_ds).to receive(:dsLocation=).with("http://localhost/objects/test:1/methods/xyz")
       subject.add_disseminator_location_to_datastreams
     end
@@ -65,7 +64,7 @@ describe ActiveFedora::Datastreams do
 
   describe "#corresponding_datastream_name" do
     before(:each) do
-      subject.stub(:datastreams => { 'abc' => double(), 'a_b_c' => double(), 'a-b' => double()})
+      allow(subject).to receive(:datastreams).and_return({ 'abc' => double(), 'a_b_c' => double(), 'a-b' => double()})
     end
 
     it "should use the name, if it exists" do
@@ -91,23 +90,21 @@ describe ActiveFedora::Datastreams do
   describe "#configure_datastream" do
     it "should look up the ds_spec" do
       mock_dsspec = { :type => nil }
-      subject.stub(:ds_specs => {'abc' => mock_dsspec})
+      allow(subject).to receive(:ds_specs).and_return({'abc' => mock_dsspec})
       subject.configure_datastream(double(:dsid => 'abc'))
     end
 
     it "should be ok if there is no ds spec" do
       mock_dsspec = double()
-      subject.stub(:ds_specs => {})
+      allow(subject).to receive(:ds_specs).and_return({})
       subject.configure_datastream(double(:dsid => 'abc'))
     end
 
     it "should configure RelsExtDatastream" do
       mock_dsspec = { :type => ActiveFedora::RelsExtDatastream }
-      subject.stub(:ds_specs => {'abc' => mock_dsspec})
-
+      allow(subject).to receive(:ds_specs).and_return({'abc' => mock_dsspec})
       ds = double(:dsid => 'abc')
       expect(ds).to receive(:model=).with(subject)
-
       subject.configure_datastream(ds)
     end
 
@@ -115,11 +112,9 @@ describe ActiveFedora::Datastreams do
       ds = double(:dsid => 'abc')
       @count = 0
       mock_dsspec = { :block => lambda { |x| @count += 1 } }
-      subject.stub(:ds_specs => {'abc' => mock_dsspec})
-
-
+      allow(subject).to receive(:ds_specs).and_return({'abc' => mock_dsspec})
       expect {
-      subject.configure_datastream(ds)
+        subject.configure_datastream(ds)
       }.to change { @count }.by(1)
     end
   end
@@ -157,7 +152,7 @@ describe ActiveFedora::Datastreams do
       ds3 = double(:metadata? => true)
       relsextds = ActiveFedora::RelsExtDatastream.new
       file_ds = double(:metadata? => false)
-      subject.stub(:datastreams => {:a => ds1, :b => ds2, :c => ds3, :d => relsextds, :e => file_ds})
+      allow(subject).to receive(:datastreams).and_return({:a => ds1, :b => ds2, :c => ds3, :d => relsextds, :e => file_ds})
       expect(subject.metadata_streams).to include(ds1, ds2, ds3)
       expect(subject.metadata_streams).not_to include(relsextds)
       expect(subject.metadata_streams).not_to include(file_ds)
@@ -170,7 +165,7 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should start from the highest existin dsid" do
-      subject.stub(:datastreams => {'FOO56' => double()})
+      allow(subject).to receive(:datastreams).and_return({'FOO56' => double()})
       expect(subject.generate_dsid('FOO')).to eq('FOO57')
     end
   end
@@ -178,22 +173,20 @@ describe ActiveFedora::Datastreams do
   describe "#dc" do
     it "should be the DC datastream" do
       m = double
-      subject.stub(:datastreams => { 'DC' => m})
+      allow(subject).to receive(:datastreams).and_return({'DC' => m})
       expect(subject.dc).to eq(m)
     end
   end
 
-
   describe "#relsext" do
     it "should be the RELS-EXT datastream" do
       m = double
-      subject.stub(:datastreams => { 'RELS-EXT' => m})
+      allow(subject).to receive(:datastreams).and_return({'RELS-EXT' => m})
       expect(subject.rels_ext).to eq(m)
     end
 
     it "should make one up otherwise" do
-      subject.stub(:datastreams => {})
-
+      allow(subject).to receive(:datastreams).and_return({})
       expect(subject.rels_ext).to be_a_kind_of(ActiveFedora::RelsExtDatastream)
     end
   end

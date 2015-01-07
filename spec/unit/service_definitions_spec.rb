@@ -40,7 +40,6 @@ describe ActiveFedora::ServiceDefinitions do
     it "should call the appropriate rubydora rest api method" do
       expect(@repository).to receive(:dissemination).with({:pid=>'monkey:99',:sdef=>'test:12', :method=>'getDocumentStyle1'})
       #@mock_client.stub(:[]).with('objects/monkey%3A99/methods/test%3A12/getDocumentStyle1')
-
       subject.document_style_1
     end
     it "should call the appropriate rubydora rest api method with parameters" do
