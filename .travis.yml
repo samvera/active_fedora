@@ -2,12 +2,16 @@ language: ruby
 cache: bundler
 sudo: false
 rvm:
-  - 2.1
+  - 2.2
 
 gemfile:
   - gemfiles/rails4.1.gemfile
-  - gemfiles/rails4.2.beta.gemfile
+  - gemfiles/rails4.2.gemfile
 
+matrix:
+  include:
+    - rvm: 2.1
+      gemfile: gemfiles/rails4.2.gemfile
 
 notifications:
   irc: "irc.freenode.org#projecthydra"
