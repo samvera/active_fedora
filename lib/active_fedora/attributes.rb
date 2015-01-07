@@ -83,11 +83,13 @@ module ActiveFedora
       end
       raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.defined_attributes.key?(field)
       if self.class.multiple?(field)
-        unless args.nil? || args.respond_to?(:each)
-          raise ArgumentError, "Cannot set the multi-valued attribute `#{field}' to a scalar value."
+        unless args.nil? || ( args.respond_to?(:each) && !args.kind_of?(ActiveTriples::Resource) )
+          raise ArgumentError, "Cannot set the multi-valued attribute `#{field}' to a single value."
         end
       elsif args.respond_to?(:each) # unique
-        raise ArgumentError, "Cannot set the single-valued attribute `#{field}' to an enumerable value."
+        unless args.kind_of?(ActiveTriples::Resource)
+          raise ArgumentError, "Cannot set the single-valued attribute `#{field}' to multiple values."
+        end
       end
       self.class.defined_attributes[field].writer(self, args)
     end

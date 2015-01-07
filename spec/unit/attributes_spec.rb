@@ -220,17 +220,27 @@ describe ActiveFedora::Base do
     before :all do
       class BarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
         property :title, :predicate => RDF::DC.title
-        property :description, :predicate => RDF::DC.description, :multivalue => false
+        property :description, :predicate => RDF::DC.description
+        property :author, :predicate => RDF::FOAF.Person
+        property :editor, :predicate => RDF::FOAF.Person
       end
       class BarHistory4 < ActiveFedora::Base
         has_metadata 'rdfish', :type=>BarRdfDatastream
-        has_attributes :title, :description, datastream: 'rdfish', multiple: true
+        has_attributes :title, datastream: 'rdfish', multiple: true
+        has_attributes :description, datastream: 'rdfish', multiple: false
+        has_attributes :author, datastream: 'rdfish', multiple: false
+        has_attributes :editor, datastream: 'rdfish', multiple: true
+      end
+      class PersonResource < ActiveTriples::Resource
+        configure type: RDF::FOAF.Person
+        property :person_name, predicate: RDF::FOAF.name
       end
     end
 
     after :all do
       Object.send(:remove_const, :BarHistory4)
       Object.send(:remove_const, :BarRdfDatastream)
+      Object.send(:remove_const, :PersonResource)
     end
 
     subject { BarHistory4.new }
@@ -241,12 +251,26 @@ describe ActiveFedora::Base do
         subject.title = ["Title1", "Title2"]
         subject.title_changed?.should be true
       end
+      it "should not accept a single literal value" do
+        expect { subject.title = "Title1" }.to raise_error
+      end
+      it "should not accept a single ActiveTriples::Resource" do
+        editor = PersonResource.new.tap { |p| p.person_name = "Sally" }
+        expect { subject.editor = editor }.to raise_error
+      end
     end
     describe "with a single-valued field" do
       it "should be able to track change status" do
         subject.description_changed?.should be false
-        subject.description = ["A brief description"]
+        subject.description = "A brief description"
         subject.description_changed?.should be true
+      end
+      it "should not accept an array of literal values" do
+        expect { subject.description = ["A brief description", "A longer description"] }.to raise_error
+      end
+      it "should accept an ActiveTriples::Resource" do
+        author = PersonResource.new.tap { |p| p.person_name = "Bob" }
+        expect { subject.author = author }.not_to raise_error
       end
     end
   end 
