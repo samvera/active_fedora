@@ -3,7 +3,6 @@ module ActiveFedora
     extend ActiveSupport::Concern
 
     included do
-      include RDF::Indexing
       include ActiveTriples::Properties
       include ActiveTriples::Reflection
       delegate :rdf_subject, :get_values, to: :resource

@@ -75,8 +75,8 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @two = ActiveFedora::RDFDatastream.new
     end
     it "should generate predictable prexies" do
-      expect(@one.apply_prefix("baz", 'myFoobar')).to eq 'my_foobar__baz'
-      expect(@two.apply_prefix("baz", 'myQuix')).to eq 'my_quix__baz'
+      expect(@one.send(:apply_prefix, "baz", 'myFoobar')).to eq 'my_foobar__baz'
+      expect(@two.send(:apply_prefix, "baz", 'myQuix')).to eq 'my_quix__baz'
     end
   end
 
@@ -197,22 +197,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
       end
       after do
         Object.send(:remove_const, :Foo)
-      end
-
-
-      describe ".fields()" do
-        it "should return the right fields" do
-          expect(@obj.send(:fields).keys).to eq ["created", "title", "publisher", "based_near", "related_url"]
-        end
-        it "should return the right values" do
-          fields = @obj.send(:fields)
-          expect(fields[:related_url][:values]).to eq ["http://example.org/blogtastic/"]
-          expect(fields[:based_near][:values]).to eq ["Tacoma, WA", "Renton, WA"]
-        end
-        it "should return the right type information" do
-          fields = @obj.send(:fields)
-          expect(fields[:created][:type]).to eq :date
-        end
       end
 
       describe ".to_solr()" do
