@@ -171,15 +171,22 @@ module ActiveFedora
       end
 
       def property name, properties={}, &block
+        warn_duplicate_predicates name, properties
         properties = { multiple: true }.merge(properties)
         find_or_create_defined_attribute(name, nil, properties)
         raise ArgumentError, "#{name} is a keyword and not an acceptable property name." if protected_property_name? name
         reflection = ActiveFedora::Attributes::PropertyBuilder.build(self, name, properties, &block)
-        # reflection = ActiveTriple::PropertyBuilder.build(self, name, properties, &block)
         ActiveTriples::Reflection.add_reflection self, name, reflection
       end
 
       private
+
+      def warn_duplicate_predicates new_name, new_properties
+        new_predicate = new_properties[:predicate]
+        self.properties.select{|k, existing| existing.predicate == new_predicate}.each do |key, value| 
+          ActiveFedora::Base.logger.warn "Same predicate (#{new_predicate}) used for properties #{key} and #{new_name}"
+        end
+      end
 
       def find_or_create_defined_attribute(field, dsid, args)
         delegated_attributes[field] ||= DelegatedAttribute.new(field, dsid, datastream_class_for_name(dsid), args)
