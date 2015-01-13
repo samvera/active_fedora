@@ -27,9 +27,13 @@ describe "Nesting attribute behavior of RDF resources" do
 
   before { subject.topic_attributes = params }
 
-  it "should store the attributes" do
+  it "should set the attributes" do
     expect(subject.topic.size).to eq 2
     expect(subject.topic.map(&:subject)).to eq [['Foo'], ['Bar']]
+  end
+
+  it "should mark the attributes as changed" do
+    expect(subject.changed_attributes).to eq('topic' => [])
   end
 
 end
