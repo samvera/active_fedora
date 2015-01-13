@@ -83,6 +83,17 @@ module ActiveFedora
                 assign_nested_attributes_for_#{type}_association(:#{association_name}, attributes)
               end
             eoruby
+          elsif reflection = reflect_on_property(association_name)
+            resource_class.accepts_nested_attributes_for(association_name)
+
+            # Delegate the setter to the resource.
+            class_eval <<-eoruby, __FILE__, __LINE__ + 1
+              remove_possible_method(:#{association_name}_attributes=)
+
+              def #{association_name}_attributes=(attributes)
+                resource.#{association_name}_attributes=(attributes)
+              end
+            eoruby
           else
             raise ArgumentError, "No association found for name `#{association_name}'. Has it been defined yet?"
           end
