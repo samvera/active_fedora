@@ -91,6 +91,7 @@ module ActiveFedora
               remove_possible_method(:#{association_name}_attributes=)
 
               def #{association_name}_attributes=(attributes)
+                attribute_will_change!(:#{association_name})
                 resource.#{association_name}_attributes=(attributes)
               end
             eoruby
