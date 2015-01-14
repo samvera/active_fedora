@@ -84,7 +84,7 @@ module ActiveFedora
               end
             eoruby
           elsif reflection = reflect_on_property(association_name)
-            resource_class.accepts_nested_attributes_for(association_name)
+            resource_class.accepts_nested_attributes_for(association_name, options)
 
             # Delegate the setter to the resource.
             class_eval <<-eoruby, __FILE__, __LINE__ + 1

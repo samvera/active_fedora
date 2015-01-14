@@ -8,7 +8,6 @@ describe "Nesting attribute behavior of RDF resources" do
 
     class ComplexResource < ActiveFedora::Base
       property :topic, predicate: DummyMADS.Topic, class_name: "Topic"
-      accepts_nested_attributes_for :topic
 
       class Topic < ActiveTriples::Resource
         property :subject, predicate: ::RDF::DC.subject
@@ -25,15 +24,32 @@ describe "Nesting attribute behavior of RDF resources" do
 
   let(:params) { [{ subject: 'Foo' }, { subject: 'Bar' }] }
 
-  before { subject.topic_attributes = params }
-
-  it "should set the attributes" do
-    expect(subject.topic.size).to eq 2
-    expect(subject.topic.map(&:subject)).to eq [['Foo'], ['Bar']]
+  before do
+    ComplexResource.accepts_nested_attributes_for *args
+    subject.topic_attributes = params
   end
 
-  it "should mark the attributes as changed" do
-    expect(subject.changed_attributes).to eq('topic' => [])
+  context "when no options are set" do
+    let(:args) { [:topic] }
+
+    it "should set the attributes" do
+      expect(subject.topic.size).to eq 2
+      expect(subject.topic.map(&:subject)).to eq [['Foo'], ['Bar']]
+    end
+
+    it "should mark the attributes as changed" do
+      expect(subject.changed_attributes).to eq('topic' => [])
+    end
+  end
+
+  context "when reject_if is set" do
+    let(:args) { [:topic, reject_if: reject_proc] }
+    let(:reject_proc) { lambda { |attributes| attributes[:subject] == 'Bar' } }
+    let(:params) { [{ subject: 'Foo' }, { subject: 'Bar' }] }
+
+    it "should not add terms for which the proc is true" do
+      expect(subject.topic.map(&:subject)).to eq [['Foo']]
+    end
   end
 
 end
