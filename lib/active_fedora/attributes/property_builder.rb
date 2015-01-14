@@ -1,14 +1,14 @@
 module ActiveFedora::Attributes
   class PropertyBuilder < ActiveTriples::PropertyBuilder #:nodoc:
 
-    def self.define_accessors(model, reflection)
-      mixin = model.generated_property_methods
-      name = reflection.term
+    def self.define_accessors(model, reflection, options={})
       if reflection.multiple?
-        define_readers(mixin, name)
-        define_writers(mixin, name)
+        super
       else
+        mixin = model.generated_property_methods
+        name = reflection.term
         define_singular_readers(mixin, name)
+        define_singular_id_reader(mixin, name) unless options[:cast] == false
         define_singular_writers(mixin, name)
       end
     end
@@ -30,6 +30,14 @@ module ActiveFedora::Attributes
           vals = get_values(:#{name})
           raise ActiveFedora::ConstraintError, "Expected \\"#{name}\\" to have 0-1 statements, but there are \#{vals.size}" if vals.size > 1
           vals.first
+        end
+      CODE
+    end
+
+    def self.define_singular_id_reader(mixin, name)
+      mixin.class_eval <<-CODE, __FILE__, __LINE__ + 1
+        def #{name}_id(*args)
+          get_values(:#{name}, :cast => false)
         end
       CODE
     end
