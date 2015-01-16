@@ -118,7 +118,7 @@ module ActiveFedora
     end
 
     def digest
-      response = metadata.ldp_source.graph.query(:predicate => ::RDF::URI.new("http://fedora.info/definitions/v4/repository#digest"))
+      response = metadata.ldp_source.graph.query(predicate: ActiveFedora::RDF::Fcrepo4.digest)
       response.map(&:object)
     end
 
