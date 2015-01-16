@@ -18,7 +18,7 @@ module ActiveFedora
     end
 
     def status
-      fixity_graph.query(predicate: status_url).map(&:object).first.to_s
+      fixity_graph.query(predicate: ActiveFedora::RDF::Fcrepo4.status).map(&:object).first.to_s
     end
 
     private
@@ -32,10 +32,7 @@ module ActiveFedora
       ::RDF::Graph.new << ::RDF::Reader.for(:ttl).new(response.body)
     end
 
-    def status_url
-      ::RDF::URI("http://fedora.info/definitions/v4/repository#status")
-    end
-
+    # See https://jira.duraspace.org/browse/FCREPO-1247
     def encoded_url uri
       if uri.match("fcr:versions")
         uri.gsub(/fcr:versions/,"fcr%3aversions")
