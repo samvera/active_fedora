@@ -1,5 +1,6 @@
 default:
+  startup_wait: 90
   jetty_port: 8983
   java_opts:
-    - "-XX:MaxPermSize=128m" 
-    - "-Xmx256m"
+    - "-Xmx512m"
+    - "-XX:MaxPermSize=128m"
