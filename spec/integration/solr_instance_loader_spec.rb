@@ -35,6 +35,7 @@ describe ActiveFedora::SolrInstanceLoader do
         expect(subject.title).to eq 'My Title'
         expect(subject.description).to match_array ['first desc', 'second desc']
         expect(subject.another_id).to eq another.id
+        expect(subject.bar).to eq 'quix'
       end
 
       it "should not be mutable" do

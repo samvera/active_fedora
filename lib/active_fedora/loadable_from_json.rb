@@ -15,9 +15,11 @@ module ActiveFedora
         @hash.fetch(terminology.first, [])
       end
 
+      # It is expected that the singular filter gets applied after fetching the value from this
+      # resource, so cast everything back to an array.
       def update_indexed_attributes hash
         hash.each do |k, v|
-          @hash[k.first] = v
+          @hash[k.first] = Array(v)
         end
       end
 
