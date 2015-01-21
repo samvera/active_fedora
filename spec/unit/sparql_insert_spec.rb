@@ -10,7 +10,7 @@ describe ActiveFedora::SparqlInsert do
       end
 
       class Book < ActiveFedora::Base
-        belongs_to :library, predicate: ActiveFedora::RDF::RelsExt.hasConstituent
+        belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
         property :title, predicate: ::RDF::DC.title
       end
 
@@ -26,7 +26,7 @@ describe ActiveFedora::SparqlInsert do
 
 
     it "should return the string" do
-      expect(subject.build).to eq "DELETE { <> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> ?change . }\n  WHERE { <> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> ?change . } ;\nDELETE { <> <http://purl.org/dc/terms/title> ?change . }\n  WHERE { <> <http://purl.org/dc/terms/title> ?change . } ;\nINSERT { \n<> <http://fedora.info/definitions/v4/rels-ext#hasConstituent> <http://localhost:8983/fedora/rest/test/foo> .\n<> <http://purl.org/dc/terms/title> \"bar\" .\n}\n WHERE { }"
+      expect(subject.build).to eq "DELETE { <> <info:fedora/fedora-system:def/relations-external#hasConstituent> ?change . }\n  WHERE { <> <info:fedora/fedora-system:def/relations-external#hasConstituent> ?change . } ;\nDELETE { <> <http://purl.org/dc/terms/title> ?change . }\n  WHERE { <> <http://purl.org/dc/terms/title> ?change . } ;\nINSERT { \n<> <info:fedora/fedora-system:def/relations-external#hasConstituent> <http://localhost:8983/fedora/rest/test/foo> .\n<> <http://purl.org/dc/terms/title> \"bar\" .\n}\n WHERE { }"
     end
   end
 end

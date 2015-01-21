@@ -5,7 +5,7 @@ describe ActiveFedora::Base do
     before do
       class Book < ActiveFedora::Base
         has_and_belongs_to_many :topics, predicate: ::RDF::FOAF.primaryTopic, inverse_of: :books
-        has_and_belongs_to_many :collections, predicate: ActiveFedora::RDF::RelsExt.isMemberOfCollection
+        has_and_belongs_to_many :collections, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection
       end
 
       class SpecialInheritedBook < Book
@@ -113,11 +113,11 @@ describe ActiveFedora::Base do
   describe "when inverse is not specified" do
     before do
       class Book < ActiveFedora::Base
-        has_and_belongs_to_many :collections, predicate: ActiveFedora::RDF::RelsExt.isMemberOfCollection
+        has_and_belongs_to_many :collections, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection
       end
 
       class Collection < ActiveFedora::Base
-        has_and_belongs_to_many :books, predicate: ActiveFedora::RDF::RelsExt.isMemberOfCollection
+        has_and_belongs_to_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection
       end
     end
 
@@ -166,7 +166,7 @@ describe ActiveFedora::Base do
     describe "without callbacks" do
       before do
         class Book < ActiveFedora::Base
-          has_and_belongs_to_many :collections, predicate: ActiveFedora::RDF::RelsExt.isMemberOfCollection
+          has_and_belongs_to_many :collections, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection
         end
 
         class Collection < ActiveFedora::Base
@@ -211,7 +211,7 @@ describe ActiveFedora::Base do
       before do
         class Book < ActiveFedora::Base
           has_and_belongs_to_many :collections,
-                                  predicate: ActiveFedora::RDF::RelsExt.isMemberOfCollection,
+                                  predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection,
                                   before_remove: :foo, after_remove: :bar
         end
 
@@ -258,7 +258,7 @@ describe ActiveFedora::Base do
       before do
         class Book < ActiveFedora::Base
           has_and_belongs_to_many :collections,
-                                  predicate: ActiveFedora::RDF::RelsExt.isMemberOfCollection,
+                                  predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection,
                                   before_add: :foo, after_add: :bar
         end
 
@@ -302,7 +302,7 @@ end
 describe "create" do
   before do
     class Book < ActiveFedora::Base
-      has_and_belongs_to_many :collections, predicate: ActiveFedora::RDF::RelsExt.isMemberOfCollection
+      has_and_belongs_to_many :collections, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection
     end
 
     class Collection < ActiveFedora::Base
@@ -338,7 +338,7 @@ describe "Autosave" do
     end
 
     class Component < ActiveFedora::Base
-      has_and_belongs_to_many :items, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+      has_and_belongs_to_many :items, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
       has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
         m.field "description", :string
       end

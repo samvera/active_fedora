@@ -28,13 +28,13 @@ describe ActiveFedora::Base do
   describe "complex example" do
     before do
       class Library < ActiveFedora::Base
-        has_many :books, predicate: ActiveFedora::RDF::RelsExt.hasConstituent
+        has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
       end
 
       class Book < ActiveFedora::Base
-        belongs_to :library, predicate: ActiveFedora::RDF::RelsExt.hasConstituent
-        belongs_to :author, predicate: ActiveFedora::RDF::RelsExt.hasMember, class_name: 'Person'
-        belongs_to :publisher, predicate: ActiveFedora::RDF::RelsExt.hasMember
+        belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
+        belongs_to :author, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasMember, class_name: 'Person'
+        belongs_to :publisher, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasMember
       end
 
       class Person < ActiveFedora::Base
@@ -335,10 +335,10 @@ describe ActiveFedora::Base do
   describe "single direction habtm" do
     before :all do
       class Course < ActiveFedora::Base
-        has_and_belongs_to_many :textbooks, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+        has_and_belongs_to_many :textbooks, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
       end
       class Textbook < ActiveFedora::Base
-        has_many :courses, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+        has_many :courses, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
       end
 
     end
@@ -395,7 +395,7 @@ describe ActiveFedora::Base do
     describe "for habtm" do
       before :all do
         class LibraryBook < ActiveFedora::Base
-          has_and_belongs_to_many :pages, predicate: ActiveFedora::RDF::RelsExt.isPartOf, after_remove: :after_hook, before_remove: :before_hook
+          has_and_belongs_to_many :pages, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, after_remove: :after_hook, before_remove: :before_hook
 
           def before_hook(m)
             say_hi(m)
@@ -413,7 +413,7 @@ describe ActiveFedora::Base do
 
         end
         class Page < ActiveFedora::Base
-          has_many :library_books, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+          has_many :library_books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         end
 
       end
@@ -441,11 +441,11 @@ describe ActiveFedora::Base do
     describe "for has_many" do
       before :all do
         class LibraryBook < ActiveFedora::Base
-          has_many :pages, predicate: ActiveFedora::RDF::RelsExt.isPartOf, after_remove: :say_hi
+          has_many :pages, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, after_remove: :say_hi
 
         end
         class Page < ActiveFedora::Base
-          belongs_to :library_book, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+          belongs_to :library_book, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         end
       end
 
@@ -472,7 +472,7 @@ describe ActiveFedora::Base do
     describe "when an object doesn't have a property, and the class_name is predictable" do
       before (:all) do
         class Bauble < ActiveFedora::Base
-          belongs_to :media_object, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+          belongs_to :media_object, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         end
         class MediaObject < ActiveFedora::Base
           has_many :baubles
@@ -491,7 +491,7 @@ describe ActiveFedora::Base do
     describe "when an object doesn't have a property, but has a class_name" do
       before :all do
         class MasterFile < ActiveFedora::Base
-          belongs_to :media_object, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+          belongs_to :media_object, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         end
         class MediaObject < ActiveFedora::Base
           has_many :parts, class_name: 'MasterFile'
@@ -511,10 +511,10 @@ describe ActiveFedora::Base do
     describe "an object has an explicity property" do
       before :all do
         class Bauble < ActiveFedora::Base
-          belongs_to :media_object, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+          belongs_to :media_object, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         end
         class MediaObject < ActiveFedora::Base
-          has_many :baubles, predicate: ActiveFedora::RDF::RelsExt.hasEquivalent
+          has_many :baubles, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasEquivalent
         end
       end
 
@@ -531,7 +531,7 @@ describe ActiveFedora::Base do
     describe "an object doesn't have a property" do
       before :all do
         class Bauble < ActiveFedora::Base
-          belongs_to :media_object, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+          belongs_to :media_object, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         end
 
         class MediaObject < ActiveFedora::Base
@@ -554,16 +554,16 @@ describe ActiveFedora::Base do
     describe "for habtm" do
       before :all do
         class Novel < ActiveFedora::Base
-          has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+          has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
         end
         class TextBook < ActiveFedora::Base
-          has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+          has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
         end
         class Text < ActiveFedora::Base
-          has_many :books, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+          has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
         end
         class Image < ActiveFedora::Base
-          has_many :books, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+          has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
         end
       end
 

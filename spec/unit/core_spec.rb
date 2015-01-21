@@ -8,7 +8,7 @@ describe ActiveFedora::Base do
     class Library < ActiveFedora::Base
     end
     class Book < ActiveFedora::Base
-      belongs_to :library, predicate: ActiveFedora::RDF::RelsExt.hasConstituent
+      belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
       has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
         m.field "title", :string
       end

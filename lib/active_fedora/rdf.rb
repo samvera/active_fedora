@@ -8,7 +8,6 @@ module ActiveFedora
     autoload :IndexingService
     autoload :Identifiable
     autoload :Persistence
-    autoload :RelsExt
     autoload :ProjectHydra
   end
 end

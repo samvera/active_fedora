@@ -11,7 +11,7 @@ describe ActiveFedora::SolrInstanceLoader do
       has_attributes :bar, datastream: 'descMetadata', multiple: false
       property :title, predicate: ::RDF::DC.title, multiple: false
       property :description, predicate: ::RDF::DC.description
-      belongs_to :another, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'Foo'
+      belongs_to :another, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'Foo'
     end
   end
 
