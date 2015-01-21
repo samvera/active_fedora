@@ -1,7 +1,7 @@
-:default_namespace: http://fedora.info/definitions/v4/rels-ext#
+:default_namespace: info:fedora/fedora-system:def/relations-external#
 
 :predicate_mapping:
-  http://fedora.info/definitions/v4/rels-ext#: 
+  info:fedora/fedora-system:def/relations-external#: 
     :is_derivation_of: isDerivationOf
     :is_metadata_for: isMetadataFor
     :is_member_of_collection: isMemberOfCollection

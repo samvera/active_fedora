@@ -1,5 +1,5 @@
 # The default namespace maps to the default namespace for generating relationships from solr
-:default_namespace: http://fedora.info/definitions/v4/rels-ext#
+:default_namespace: info:fedora/fedora-system:def/relations-external#
 
 # namespace mappings--- 
 # you can add specific mappings for your institution by providing the following:
@@ -14,7 +14,7 @@
 #   :oai_item_id => ["info:fedora/oai:example.edu:changeme:500"]
 #
 :predicate_mapping:
-  http://fedora.info/definitions/v4/rels-ext#:
+  info:fedora/fedora-system:def/relations-external#:
     :conforms_to: conformsTo
     :has_annotation: hasAnnotation
     :has_collection_member: hasCollectionMember

@@ -10,8 +10,8 @@ describe ActiveFedora::IndexingService do
     let(:location_reflection) { double('location', foreign_key: 'location_id', kind_of?: true, solr_key: part_of) }
     let(:reflections) { { 'person' => person_reflection, 'location' => location_reflection } }
 
-    let(:member_of) { ActiveFedora::SolrQueryBuilder.solr_name("http://fedora.info/definitions/v4/rels-ext#isMemberOf", :symbol) }
-    let(:part_of) { ActiveFedora::SolrQueryBuilder.solr_name("http://fedora.info/definitions/v4/rels-ext#isPartOf", :symbol) }
+    let(:member_of) { ActiveFedora::SolrQueryBuilder.solr_name("info:fedora/fedora-system:def/relations-external#isMemberOf", :symbol) }
+    let(:part_of) { ActiveFedora::SolrQueryBuilder.solr_name("info:fedora/fedora-system:def/relations-external#isPartOf", :symbol) }
 
     before do
       expect(object).to receive(:[]).with('person_id').and_return('info:fedora/demo:10')

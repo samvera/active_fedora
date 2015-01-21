@@ -18,9 +18,9 @@ describe ActiveFedora::FileConfigurator do
       :fedora_config => { :url => 'http://codeconfig.example.edu/fedora/', :user => 'fedoraAdmin', :password => 'configurator', :cert_file => '/path/to/cert/file' },
       :solr_config => { :url => 'http://codeconfig.example.edu/solr/' },
       :predicate_config => { 
-        :default_namespace => 'http://fedora.info/definitions/v4/rels-ext#',
+        :default_namespace => 'info:fedora/fedora-system:def/relations-external#',
         :predicate_mapping => {
-          'http://fedora.info/definitions/v4/rels-ext#' => { :has_part => 'hasPart' } 
+          'info:fedora/fedora-system:def/relations-external#' => { :has_part => 'hasPart' } 
         }
       }
     }
@@ -45,7 +45,7 @@ describe ActiveFedora::FileConfigurator do
     ActiveFedora.init(@config_params)
     expect(ActiveFedora.fedora_config.credentials).to eq @config_params[:fedora_config]
     expect(ActiveFedora.solr_config).to eq @config_params[:solr_config]
-    expect(ActiveFedora::Predicates.predicate_mappings['http://fedora.info/definitions/v4/rels-ext#'].length).to eq 1
+    expect(ActiveFedora::Predicates.predicate_mappings['info:fedora/fedora-system:def/relations-external#'].length).to eq 1
   end
   
 end

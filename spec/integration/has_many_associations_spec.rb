@@ -7,7 +7,7 @@ describe "Collection members" do
     end
 
     class Book < ActiveFedora::Base
-      belongs_to :library, predicate: ActiveFedora::RDF::RelsExt.hasConstituent
+      belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
     end
   end
   after :all do
@@ -69,7 +69,7 @@ describe "After save callbacks" do
     end
 
     class Book < ActiveFedora::Base
-      belongs_to :library, predicate: ActiveFedora::RDF::RelsExt.hasConstituent
+      belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
       after_save :find_self
       attr_accessor :library_books
 
@@ -101,11 +101,11 @@ describe "When two or more relationships share the same property" do
     end
 
     class Person < ActiveFedora::Base
-      belongs_to :book, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+      belongs_to :book, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
     end
 
     class Collection < ActiveFedora::Base
-      belongs_to :book, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+      belongs_to :book, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
     end
 
     @book = Book.create!
@@ -128,14 +128,14 @@ end
 describe "with an polymorphic association" do
   before do
     class Permissionable1 < ActiveFedora::Base
-      has_many :permissions, predicate: ActiveFedora::RDF::RelsExt.isPartOf, inverse_of: :access_to
+      has_many :permissions, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, inverse_of: :access_to
     end
     class Permissionable2 < ActiveFedora::Base
-      has_many :permissions, predicate: ActiveFedora::RDF::RelsExt.isPartOf, inverse_of: :access_to
+      has_many :permissions, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, inverse_of: :access_to
     end
 
     class Permission < ActiveFedora::Base
-      belongs_to :access_to, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+      belongs_to :access_to, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
     end
   end
 
@@ -155,15 +155,15 @@ end
 describe "When relationship is restricted to AF::Base" do
   before do
     class Email < ActiveFedora::Base
-      has_many :attachments, predicate: ActiveFedora::RDF::RelsExt.isPartOf, :class_name=>'ActiveFedora::Base'
+      has_many :attachments, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, :class_name=>'ActiveFedora::Base'
     end
 
     class Image < ActiveFedora::Base
-      belongs_to :email, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+      belongs_to :email, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
     end
 
     class PDF < ActiveFedora::Base
-      belongs_to :email, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+      belongs_to :email, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
     end
   end
 
@@ -211,7 +211,7 @@ describe "Deleting a dependent relationship" do
       has_many :components
     end
     class Component < ActiveFedora::Base
-      belongs_to :item, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+      belongs_to :item, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
     end
   end
 
@@ -279,7 +279,7 @@ describe "Autosave" do
         has_attributes :title, datastream: 'foo'
       end
       class Component < ActiveFedora::Base
-        belongs_to :item, predicate: ActiveFedora::RDF::RelsExt.isPartOf
+        belongs_to :item, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
           m.field "description", :string
         end
@@ -315,11 +315,11 @@ describe "Autosave" do
     context "with ActiveFedora::Base as classes" do
       before do
         class Novel < ActiveFedora::Base
-          has_many :books, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
-          has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+          has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+          has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
         end
         class Text < ActiveFedora::Base
-          has_many :books, predicate: ActiveFedora::RDF::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+          has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
         end
       end
       let(:text) { Text.create}
