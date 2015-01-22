@@ -188,7 +188,7 @@ module ActiveFedora
 
     def load_from_fedora(id, cast)
       raise ActiveFedora::ObjectNotFoundError if id.empty?
-      resource = LdpResource.new(ActiveFedora.fedora.connection, klass.id_to_uri(id))
+      resource = ActiveFedora.fedora.ldp_resource_service.get(klass, id)
       raise ActiveFedora::ObjectNotFoundError if resource.new?
       class_to_load(resource, cast).allocate.init_with_resource(resource) # Triggers the find callback
     end

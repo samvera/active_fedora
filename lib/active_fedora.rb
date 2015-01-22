@@ -63,6 +63,7 @@ module ActiveFedora #:nodoc:
     autoload :Indexing
     autoload :IndexingService
     autoload :LdpResource
+    autoload :LdpResourceService
     autoload :LoadableFromJson
     autoload :Model
     autoload :NestedAttributes

@@ -17,6 +17,10 @@ module ActiveFedora
       @connection ||= Ldp::Client.new(host)
     end
 
+    def ldp_resource_service
+      @service ||= LdpResourceService.new(connection)
+    end
+
     SLASH = '/'.freeze
     BLANK = ''.freeze
 
