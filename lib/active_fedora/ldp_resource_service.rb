@@ -6,7 +6,7 @@ module ActiveFedora
       @connection = conn
     end
 
-    def get(klass, id)
+    def build(klass, id)
       if id
         LdpResource.new(connection, to_uri(klass, id))
       else
@@ -14,9 +14,14 @@ module ActiveFedora
       end
     end
 
+    def update(change_set, klass, id)
+      SparqlInsert.new(change_set.changes).execute(to_uri(klass, id))
+    end
+
     private
       def to_uri(klass, id)
         klass.id_to_uri(id)
       end
+
   end
 end

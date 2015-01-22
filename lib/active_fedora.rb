@@ -46,6 +46,7 @@ module ActiveFedora #:nodoc:
     autoload :Attributes
     autoload :AutosaveAssociation
     autoload :Base
+    autoload :CachingConnection
     autoload :Callbacks
     autoload :ChangeSet
     autoload :Config
@@ -62,6 +63,7 @@ module ActiveFedora #:nodoc:
     autoload :FixityService
     autoload :Indexing
     autoload :IndexingService
+    autoload :LdpCache
     autoload :LdpResource
     autoload :LdpResourceService
     autoload :LoadableFromJson

@@ -20,6 +20,7 @@ require 'byebug' unless ENV['TRAVIS']
 
 ActiveFedora::Base.logger = Logger.new(STDERR)
 ActiveFedora::Base.logger.level = Logger::WARN
+# require 'http_logger'
 # HttpLogger.logger = Logger.new(STDOUT)
 # HttpLogger.ignore = [/localhost:8983\/solr/]
 # HttpLogger.colorize = false

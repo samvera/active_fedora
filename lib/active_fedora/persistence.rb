@@ -152,16 +152,14 @@ module ActiveFedora
     end
 
     def refresh
-      # TODO break the cache
       @ldp_source = build_ldp_resource(id)
       @resource = nil
     end
 
-    # TODO break the cache.
     def execute_sparql_update
       change_set = ChangeSet.new(self, self.resource, self.changed_attributes.keys)
       return true if change_set.empty?
-      SparqlInsert.new(change_set.changes).execute(uri)
+      ActiveFedora.fedora.ldp_resource_service.update(change_set, self.class, id)
     end
 
     # Override to tie in an ID minting service

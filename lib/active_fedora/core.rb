@@ -177,7 +177,7 @@ module ActiveFedora
       end
 
       def build_ldp_resource(id=nil)
-        ActiveFedora.fedora.ldp_resource_service.get(self.class, id)
+        ActiveFedora.fedora.ldp_resource_service.build(self.class, id)
       end
 
       def check_persistence
