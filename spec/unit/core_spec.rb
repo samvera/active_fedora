@@ -104,6 +104,20 @@ describe ActiveFedora::Base do
 
       it { should eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/foo/123456w" }
     end
+
+    context "with an empty base path" do
+      it "should produce a valid URI" do
+        allow(ActiveFedora.fedora).to receive(:base_path).and_return("/")    
+        expect(subject).to eq("#{ActiveFedora.fedora.host}/#{id}")
+      end
+    end
+
+    context "with a really empty base path" do
+      it "should produce a valid URI" do
+        allow(ActiveFedora.fedora).to receive(:base_path).and_return("")    
+        expect(subject).to eq("#{ActiveFedora.fedora.host}/#{id}")
+      end
+    end
   end
 
   describe "uri_to_id" do
@@ -123,4 +137,5 @@ describe ActiveFedora::Base do
       it { should eq '123456w' }
     end
   end
+
 end

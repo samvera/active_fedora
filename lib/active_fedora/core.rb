@@ -116,6 +116,9 @@ module ActiveFedora
       end
 
     module ClassMethods
+
+      SLASH = '/'.freeze
+
       def generated_association_methods
         @generated_association_methods ||= begin
           mod = const_set(:GeneratedAssociationMethods, Module.new)
@@ -138,8 +141,10 @@ module ActiveFedora
         if translate_id_to_uri
           translate_id_to_uri.call(id)
         else
-          id = "/#{id}" unless id.start_with? '/'
-          id = ActiveFedora.fedora.base_path + id unless id.start_with? "#{ActiveFedora.fedora.base_path}/"
+          id = "/#{id}" unless id.start_with? SLASH
+          unless ActiveFedora.fedora.base_path == SLASH || id.start_with?("#{ActiveFedora.fedora.base_path}/")
+            id = ActiveFedora.fedora.base_path + id 
+          end
           ActiveFedora.fedora.host + id
         end
       end
