@@ -189,12 +189,23 @@ describe ActiveFedora::Datastream do
     context "when it's saved" do
       let(:parent) { ActiveFedora::Base.create }
       before do
-        parent.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm', original_name: "my_image.png")
+        parent.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm', original_name: 'my image.png')
         parent.save!
       end
 
       it "should have original_name" do
-        expect(parent.reload.abcd.original_name).to eq 'my_image.png'
+        expect(parent.reload.abcd.original_name).to eq 'my image.png'
+      end      
+    end
+
+    context "with special characters" do 
+      let(:parent) { ActiveFedora::Base.create }
+      before do
+        parent.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm', original_name:'my "image".png')
+        parent.save!
+      end
+      it "should save OK and preserve name" do
+        expect(parent.reload.abcd.original_name).to eq 'my "image".png'
       end
     end
   end

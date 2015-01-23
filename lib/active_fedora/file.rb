@@ -219,7 +219,7 @@ module ActiveFedora
     def fetch_original_name_from_headers
       return if new_record?
       m = ldp_source.head.headers['Content-Disposition'].match(/filename="(?<filename>[^"]*)";/)
-      m[:filename]
+      URI.decode(m[:filename])
     end
 
     def fetch_mime_type
@@ -253,7 +253,7 @@ module ActiveFedora
         return unless content_changed?
         payload = behaves_like_io?(content) ? content.read : content
         headers = { 'Content-Type' => mime_type }
-        headers['Content-Disposition'] = "attachment; filename=\"#{@original_name}\"" if @original_name
+        headers['Content-Disposition'] = "attachment; filename=\"#{URI.encode(@original_name)}\"" if @original_name
         # Setting the content-length is required until we figure out why Faraday 
         # is not doing this automatically for files uploaded via ActionDispatch.
         headers['Content-Length'] = payload.size.to_s if uploaded_file?(payload)
