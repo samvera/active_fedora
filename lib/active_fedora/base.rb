@@ -2,6 +2,7 @@ SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 require 'active_support/descendants_tracker'
 require 'active_fedora/errors'
+require 'active_fedora/log_subscriber'
 
 module ActiveFedora
 
@@ -26,6 +27,7 @@ module ActiveFedora
   class Base
     extend ActiveModel::Naming
     extend ActiveSupport::DescendantsTracker
+    extend LdpCache::ClassMethods
 
     include Core
     include Persistence

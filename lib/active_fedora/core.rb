@@ -50,8 +50,7 @@ module ActiveFedora
       check_persistence unless persisted?
       clear_association_cache
       clear_attached_files
-      @ldp_source = LdpResource.new(conn, uri)
-      @resource = nil
+      refresh
       load_attached_files
       self
     end
@@ -101,10 +100,6 @@ module ActiveFedora
     # Marks this record as read only.
     def readonly!
       @readonly = true
-    end
-
-    def to_uri(id)
-      self.class.id_to_uri(id)
     end
 
     protected
@@ -186,16 +181,8 @@ module ActiveFedora
         @association_cache = {}
       end
 
-      def conn
-        ActiveFedora.fedora.connection
-      end
-
       def build_ldp_resource(id=nil)
-        if id
-          LdpResource.new(conn, to_uri(id))
-        else
-          LdpResource.new(conn, nil, nil, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
-        end
+        ActiveFedora.fedora.ldp_resource_service.build(self.class, id)
       end
 
       def check_persistence

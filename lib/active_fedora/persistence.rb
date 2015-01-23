@@ -55,7 +55,7 @@ module ActiveFedora
 
       id = self.id ## cache so it's still available after delete
       # Clear out the ETag
-      @ldp_source = LdpResource.new(conn, uri)
+      @ldp_source = build_ldp_resource(id)
       begin
         @ldp_source.delete
       rescue Ldp::NotFound
@@ -152,20 +152,23 @@ module ActiveFedora
     end
 
     def refresh
-      @ldp_source = LdpResource.new(conn, uri)
+      @ldp_source = build_ldp_resource(id)
       @resource = nil
     end
 
     def execute_sparql_update
       change_set = ChangeSet.new(self, self.resource, self.changed_attributes.keys)
       return true if change_set.empty?
-      SparqlInsert.new(change_set.changes).execute(uri)
+      ActiveFedora.fedora.ldp_resource_service.update(change_set, self.class, id)
     end
 
-
+    # Override to tie in an ID minting service
     def assign_id
     end
 
+    # This is only used when creating a new record. If the object doesn't have an id
+    # and assign_id can mint an id for the object, then assign it to the resource.
+    # Otherwise the resource will have the id assigned by the LDP server
     def assign_rdf_subject
       @ldp_source = if !id && new_id = assign_id
         LdpResource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_id), @resource)

@@ -188,7 +188,7 @@ module ActiveFedora
 
     def load_from_fedora(id, cast)
       raise ActiveFedora::ObjectNotFoundError if id.empty?
-      resource = LdpResource.new(ActiveFedora.fedora.connection, klass.id_to_uri(id))
+      resource = ActiveFedora.fedora.ldp_resource_service.build(klass, id)
       raise ActiveFedora::ObjectNotFoundError if resource.new?
       class_to_load(resource, cast).allocate.init_with_resource(resource) # Triggers the find callback
     end
@@ -202,9 +202,8 @@ module ActiveFedora
       end
     end
 
-    # TODO just use has_model
     def has_model_value(resource)
-      Ldp::Orm.new(resource).value(ActiveFedora::RDF::Fcrepo::Model.hasModel).first.to_s
+      resource.graph.query([nil, ActiveFedora::RDF::Fcrepo::Model.hasModel, nil]).first.object.to_s
     end
 
     def find_with_ids(ids, cast)

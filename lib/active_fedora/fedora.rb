@@ -14,7 +14,11 @@ module ActiveFedora
     end
 
     def connection
-      @connection ||= Ldp::Client.new(host)
+      @connection ||= CachingConnection.new(host)
+    end
+
+    def ldp_resource_service
+      @service ||= LdpResourceService.new(connection)
     end
 
     SLASH = '/'.freeze
