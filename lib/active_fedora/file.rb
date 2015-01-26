@@ -12,8 +12,6 @@ module ActiveFedora
     define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, only: :after
 
-    attr_accessor :last_modified
-
     # @param parent_or_url [ActiveFedora::Base, String, Hash, NilClass] the parent resource or the URI of this resource
     # @param path_name [String] the path partial relative to the resource
     # @param options [Hash]
