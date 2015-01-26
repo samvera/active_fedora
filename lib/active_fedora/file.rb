@@ -251,13 +251,10 @@ module ActiveFedora
 
       def save(*)
         return unless content_changed?
-        payload = behaves_like_io?(content) ? content.read : content
-        headers = { 'Content-Type' => mime_type }
-        headers['Content-Disposition'] = "attachment; filename=\"#{URI.encode(@original_name)}\"" if @original_name
-        # Setting the content-length is required until we figure out why Faraday 
-        # is not doing this automatically for files uploaded via ActionDispatch.
-        headers['Content-Length'] = payload.size.to_s if uploaded_file?(payload)
-        ldp_source.content = payload
+        headers = { 'Content-Type'.freeze => mime_type, 'Content-Length'.freeze => content.size.to_s }
+        headers['Content-Disposition'.freeze] = "attachment; filename=\"#{URI.encode(@original_name)}\"" if @original_name
+
+        ldp_source.content = content
         if new_record?
           ldp_source.create do |req|
             req.headers = headers
