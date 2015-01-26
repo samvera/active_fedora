@@ -4,60 +4,58 @@ require 'active_fedora'
 require "rexml/document"
 
 describe ActiveFedora::File do
-  context "stand alone operation" do
-    it "should save" do
-      subject.content = "some stuff"
-      subject.save
-      expect(subject).not_to be_new_record
-    end
-  end
-
-  context "stand alone operation with UploadedFile" do
-    before(:all) do
-      module ActionDispatch
-        module Http
-          class UploadedFile
-
-            def initialize
-              @content = StringIO.new("hello world")
-            end
-
-            def read(a, b)
-              return @content.read(a, b)
-            end
-            
-            def size
-              @content.length
-            end
-
-          end
-        end
+  describe "#save" do
+    context "with a string" do
+      it "should save" do
+        subject.content = "some stuff"
+        subject.save
+        expect(subject).not_to be_new_record
       end
     end
 
-    it "should save" do
-      subject.content = ActionDispatch::Http::UploadedFile.new
-      subject.save
-      expect(subject).not_to be_new_record
+    context "with UploadedFile" do
+      before do
+        module ActionDispatch
+          module Http
+            class UploadedFile
+
+              def initialize
+                @content = StringIO.new("hello world")
+              end
+
+              def read(a, b)
+                return @content.read(a, b)
+              end
+
+              def size
+                @content.length
+              end
+
+            end
+          end
+        end
+      end
+
+      it "should save" do
+        subject.content = ActionDispatch::Http::UploadedFile.new
+        subject.save
+        expect(subject).not_to be_new_record
+      end
     end
   end
 
   context "when autocreate is true" do
-    before(:all) do
+    before do
       class MockAFBase < ActiveFedora::Base
         has_metadata "descMetadata", type: ActiveFedora::QualifiedDublinCoreDatastream, autocreate: true
       end
     end
 
-    after(:all) do
+    after do
       Object.send(:remove_const, :MockAFBase)
     end
 
     let(:test_object) { MockAFBase.create }
-
-    after do
-      test_object.destroy
-    end
 
     let(:descMetadata) {  test_object.attached_files["descMetadata"] }
 
