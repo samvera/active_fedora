@@ -270,24 +270,6 @@ module ActiveFedora
         ldp_source.get.body
       end
 
-      # @param range [String] the Range HTTP header
-      # @yield [chunk] a block that receives chunked content
-      def stream(range = nil, &block)
-        uri = URI.parse(self.uri)
-
-        headers = {}
-        headers['Range'] = range if range
-        Net::HTTP.start(uri.host, uri.port) do |http|
-          request = Net::HTTP::Get.new uri, headers
-          http.request request do |response|
-            raise "Couldn't get data from Fedora (#{uri}). Response: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
-            response.read_body do |chunk|
-              block.call(chunk)
-            end
-          end
-        end
-      end
-
       private
 
       def uploaded_file?(payload)
@@ -313,7 +295,40 @@ module ActiveFedora
       end
     end
 
+    module Streaming
+      # @param range [String] the Range HTTP header
+      # @returns [Stream] an object that responds to each
+      def stream(range = nil)
+        uri = URI.parse(self.uri)
+        headers = {}
+        headers['Range'] = range if range
+        FileBody.new(uri, headers)
+      end
+
+      class FileBody
+        attr_reader :uri, :headers
+        def initialize(uri, headers)
+          @uri = uri
+          @headers = headers
+        end
+
+        def each
+          Net::HTTP.start(uri.host, uri.port) do |http|
+            request = Net::HTTP::Get.new uri, headers
+            http.request request do |response|
+
+              raise "Couldn't get data from Fedora (#{uri}). Response: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
+              response.read_body do |chunk|
+                yield chunk
+              end
+            end
+          end
+        end
+      end
+    end
+
     include ActiveFedora::File::Persistence
+    include ActiveFedora::File::Streaming
     include ActiveFedora::Versionable
   end
 
