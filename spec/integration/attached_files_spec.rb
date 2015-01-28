@@ -56,7 +56,7 @@ describe ActiveFedora::AttachedFiles do
         def load_attached_files
           super
           unless attached_files.keys.include? :test_ds
-            add_file_datastream("XXX", dsid: 'test_ds', mime_type: 'text/html')
+            add_file("XXX", path: 'test_ds', mime_type: 'text/html')
           end
         end
       end
@@ -120,10 +120,10 @@ describe ActiveFedora::AttachedFiles do
       end
     end
 
-    describe '.add_file_datastream' do
+    describe '#add_file' do
       before do
         f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
-        obj.add_file_datastream(f, mime_type: "image/jpeg")
+        obj.add_file(f, mime_type: "image/jpeg")
         obj.save
       end
 

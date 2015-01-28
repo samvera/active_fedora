@@ -27,13 +27,6 @@ describe ActiveFedora::Datastream do
     end
   end
 
-  describe "to_param" do
-    before { allow(subject).to receive(:dsid).and_return('foo.bar') }
-    it "should escape dots" do
-      expect(subject.to_param).to eq 'foo%2ebar'
-    end
-  end
-
   describe "#uri" do
     let(:parent) { ActiveFedora::Base.new(id: '1234') }
     before { allow(Deprecation).to receive(:warn) }
@@ -189,19 +182,19 @@ describe ActiveFedora::Datastream do
     context "when it's saved" do
       let(:parent) { ActiveFedora::Base.create }
       before do
-        parent.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm', original_name: 'my image.png')
+        parent.add_file('one1two2threfour', path: 'abcd', mime_type: 'video/webm', original_name: 'my image.png')
         parent.save!
       end
 
       it "should have original_name" do
         expect(parent.reload.abcd.original_name).to eq 'my image.png'
-      end      
+      end
     end
 
-    context "with special characters" do 
+    context "with special characters" do
       let(:parent) { ActiveFedora::Base.create }
       before do
-        parent.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm', original_name:'my "image".png')
+        parent.add_file('one1two2threfour', path: 'abcd', mime_type: 'video/webm', original_name:'my "image".png')
         parent.save!
       end
       it "should save OK and preserve name" do
@@ -220,7 +213,7 @@ describe ActiveFedora::Datastream do
     context "when it's saved" do
       let(:parent) { ActiveFedora::Base.create }
       before do
-        parent.add_file_datastream('one1two2threfour', dsid: 'abcd', mime_type: 'video/webm')
+        parent.add_file('one1two2threfour', path: 'abcd', mime_type: 'video/webm')
         parent.save!
       end
 

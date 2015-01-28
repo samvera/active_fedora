@@ -121,7 +121,7 @@ describe ActiveFedora::File do
 
         context "with a range request" do
           before do
-            test_object.add_file_datastream('one1two2threfour', dsid: 'webm', mime_type: 'video/webm')
+            test_object.add_file('one1two2threfour', path: 'webm', mime_type: 'video/webm')
             test_object.save!
           end
           subject { str = ''; test_object.webm.stream(range) {|chunk| str << chunk }; str }
