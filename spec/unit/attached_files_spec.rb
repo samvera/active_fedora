@@ -92,7 +92,7 @@ describe ActiveFedora::AttachedFiles do
     end
   end
 
-  describe "#add_file_datastream" do
+  describe "#add_file" do
     before do
       class Bar < ActiveFedora::File; end
 
@@ -107,17 +107,35 @@ describe ActiveFedora::AttachedFiles do
     end
     let(:container) { FooHistory.new }
 
-    context "a reflection matches the :dsid property" do
+    describe "#add_file_datastream" do
+      context "a reflection matches the :dsid property" do
+        it "should build the reflection" do
+          expect(Deprecation).to receive(:warn)
+          container.add_file_datastream('blah', path: 'content')
+          expect(container.content).to be_instance_of Bar
+          expect(container.content.content).to eq 'blah'
+        end
+      end
+    end
+    context "with the deprecated :dsid property" do
       it "should build the reflection" do
-        container.add_file_datastream('blah', dsid: 'content')
+        expect(Deprecation).to receive(:warn)
+        container.add_file('blah', dsid: 'content')
+        expect(container.content).to be_instance_of Bar
+        expect(container.content.content).to eq 'blah'
+      end
+    end
+    context "a reflection matches the :path property" do
+      it "should build the reflection" do
+        container.add_file('blah', path: 'content')
         expect(container.content).to be_instance_of Bar
         expect(container.content.content).to eq 'blah'
       end
     end
 
-    context "no reflection matches the :dsid property" do
+    context "no reflection matches the :path property" do
       it "should create a singleton reflection and build it" do
-        container.add_file_datastream('blah', dsid: 'fizz')
+        container.add_file('blah', path: 'fizz')
         expect(container.fizz).to be_instance_of ActiveFedora::File
         expect(container.fizz.content).to eq 'blah'
       end

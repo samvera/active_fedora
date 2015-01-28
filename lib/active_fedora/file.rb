@@ -15,7 +15,7 @@ module ActiveFedora
     # @param parent_or_url [ActiveFedora::Base, String, Hash, NilClass] the parent resource or the URI of this resource
     # @param path_name [String] the path partial relative to the resource
     # @param options [Hash]
-    def initialize(parent_or_url_or_hash = nil, dsid=nil, options={})
+    def initialize(parent_or_url_or_hash = nil, path=nil, options={})
       case parent_or_url_or_hash
       when Hash
         content = ''
@@ -29,7 +29,7 @@ module ActiveFedora
         uri = if parent_or_url_or_hash.uri.kind_of?(::RDF::URI) && parent_or_url_or_hash.uri.value.empty?
           nil
         else
-          "#{parent_or_url_or_hash.uri}/#{dsid}"
+          "#{parent_or_url_or_hash.uri}/#{path}"
         end
         @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, uri, nil, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
 
@@ -172,13 +172,6 @@ module ActiveFedora
       "#<#{self.class} uri=\"#{uri}\" >"
     end
 
-    #compatibility method for rails' url generators. This method will
-    #urlescape escape dots, which are apparently
-    #invalid characters in a dsid.
-    def to_param
-      dsid.gsub(/\./, '%2e')
-    end
-
     # @abstract Override this in your concrete datastream class.
     # @return [boolean] does this datastream contain metadata (not file data)
     def metadata?
@@ -210,8 +203,8 @@ module ActiveFedora
 
     # The string to prefix all solr fields with. Override this method if you want
     # a prefix other than the default
-    def prefix(dsid)
-      dsid ? "#{dsid.underscore}__" : ''
+    def prefix(path)
+      path ? "#{path.underscore}__" : ''
     end
 
     def fetch_original_name_from_headers

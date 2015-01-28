@@ -41,20 +41,20 @@ module ActiveFedora
     end
     deprecation_deprecate :clear_datastreams
 
-    def datastream_assertions
+    def contains_assertions
       resource.query(subject: resource, predicate: Ldp.contains).objects.map(&:to_s)
     end
 
     def load_attached_files
-      datastream_assertions.each do |ds_uri|
-        dsid = ds_uri.to_s.sub(uri + '/', '')
-        next if association(dsid.to_sym)
-        create_singleton_association(dsid)
+      contains_assertions.each do |file_uri|
+        path = file_uri.to_s.sub(uri + '/', '')
+        next if association(path.to_sym)
+        create_singleton_association(path)
       end
     end
 
     # Adds datastream to the object.
-    # @return [String] dsid of the added datastream
+    # @return [String] path of the added datastream
     def attach_file(file, file_path, opts={})
       create_singleton_association(file_path)
       attached_files[file_path] = file
@@ -75,19 +75,29 @@ module ActiveFedora
     # File Management
     #
 
+    def add_file_datastream(file, opts={})
+      Deprecation.warn AttachedFiles, "add_file_datastream is deprecated and will be removed in active-fedora 10.0. Use add_file instead"
+      add_file(file, opts)
+    end
+
     # Attach the given file to object
     #
     # @param [File] file the file to add
     # @param [Hash] opts options: :dsid, :prefix, :mime_type
-    # @option opts [String] :dsid The datastream id
-    # @option opts [String] :prefix The datastream prefix (for auto-generated dsid)
+    # @option opts [String] :path The file path
+    # @option opts [String] :prefix The path prefix (for auto-generated path)
     # @option opts [String] :mime_type The Mime-Type of the file
     # @option opts [String] :original_name The original name of the file (used for Content-Disposition)
-    def add_file_datastream(file, opts={})
-      find_or_create_child_resource(opts).tap do |node|
+    def add_file(file, opts={})
+      if opts[:dsid]
+        Deprecation.warn AttachedFiles, "The :dsid option to add_file is deprecated and will be removed in active-fedora 10.0. Use :path instead", caller
+        opts[:path] = opts[:dsid]
+      end
+
+      find_or_create_child_resource(opts[:path], opts[:prefix]).tap do |node|
         node.content = file
         node.mime_type = if opts[:mimeType]
-          Deprecation.warn AttachedFiles, "The :mimeType option to add_file_datastream is deprecated and will be removed in active-fedora 10.0. Use :mime_type instead", caller
+          Deprecation.warn AttachedFiles, "The :mimeType option to add_file is deprecated and will be removed in active-fedora 10.0. Use :mime_type instead", caller
           opts[:mimeType]
         else
           opts[:mime_type]
@@ -113,10 +123,10 @@ module ActiveFedora
         association
       end
 
-      def find_or_create_child_resource(opts)
-        association = association(opts[:dsid].to_sym) if opts[:dsid]
+      def find_or_create_child_resource(path, prefix)
+        association = association(path.to_sym) if path
         association ||= begin
-          file_path = FilePathBuilder.build(self, opts[:dsid], opts[:prefix])
+          file_path = FilePathBuilder.build(self, path, prefix)
           create_singleton_association(file_path)
         end
         association.reader
