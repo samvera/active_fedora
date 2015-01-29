@@ -2,39 +2,43 @@ require 'spec_helper'
 
 describe ActiveFedora::Persistence do
 
-  describe "an unsaved object" do
-    subject { ActiveFedora::Base.new }
-    it "should be deleteable (nop) and return the object" do
-      expect(subject.delete).to eq subject
+  describe '.delete' do
+    context 'with an unsaved object' do
+      subject { ActiveFedora::Base.new }
+      before { subject.delete }
+      it { is_expected.to eq subject }
+    end
+
+    context 'with a saved object' do
+      subject { ActiveFedora::Base.create! }
+      before { subject.delete }
+      it { is_expected.to be_frozen }
     end
   end
 
-  describe ".create" do
-    context "when a block is provided" do
-      it "should pass the block to initialize" do
+  describe '.create' do
+    context 'when a block is provided' do
+      it 'passes the block to initialize' do
         expect_any_instance_of(ActiveFedora::Base).to receive(:save)
         expect { |b| ActiveFedora::Base.create(&b) }.to yield_with_args(an_instance_of ActiveFedora::Base)
       end
     end
   end
 
-  describe "a saved object" do
+  describe '.destroy' do
     subject { ActiveFedora::Base.create! }
-    describe "that is deleted" do
-      before do
-        subject.delete
-      end
-      it "should be frozen" do
-        expect(subject).to be_frozen
+    context 'with no options' do
+      before { subject.destroy }
+      it 'does not clear the id' do
+        expect(subject.id).not_to be_nil
       end
     end
-  end
 
-  describe "destroy" do
-    subject { ActiveFedora::Base.create! }
-    it "should not clear the id" do
-      subject.destroy
-      expect(subject.id).not_to be_nil
+    context 'with option eradicate: true' do
+      it 'deletes the tombstone' do
+        expect(subject.class).to receive(:eradicate).with(subject.id).and_return(true)
+        subject.destroy(eradicate: true)
+      end
     end
   end
 

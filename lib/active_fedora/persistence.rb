@@ -43,7 +43,7 @@ module ActiveFedora
     #Deletes a Base object, also deletes the info indexed in Solr, and
     #the underlying inner_object.  If this object is held in any relationships (ie inbound relationships
     #outside of this object it will remove it from those items rels-ext as well
-    def delete
+    def delete(opts = {})
       return self if new_record?
 
       @destroyed = true
@@ -63,12 +63,15 @@ module ActiveFedora
       end
 
       ActiveFedora::SolrService.delete(id) if ENABLE_SOLR_UPDATES
+      if opts[:eradicate]
+        self.class.eradicate(id)
+      end
       freeze
     end
 
-    def destroy
+    def destroy(*args)
       raise ReadOnlyRecord if readonly?
-      delete
+      delete(*args)
     end
 
     def eradicate
