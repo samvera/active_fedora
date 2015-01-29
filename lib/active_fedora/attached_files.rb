@@ -88,7 +88,14 @@ module ActiveFedora
     # @option opts [String] :prefix The path prefix (for auto-generated path)
     # @option opts [String] :mime_type The Mime-Type of the file
     # @option opts [String] :original_name The original name of the file (used for Content-Disposition)
-    def add_file(file, opts={})
+    def add_file(file, *args)
+      opts = if args.size == 1
+        args.first
+      else
+        Deprecation.warn AttachedFiles, "The second option to add_file should be a hash. Passing the file path is deprecated and will be removed in active-fedora 10.0.", caller
+        { path: args[0], original_name: args[1], mime_type: args[2] }
+      end
+
       if opts[:dsid]
         Deprecation.warn AttachedFiles, "The :dsid option to add_file is deprecated and will be removed in active-fedora 10.0. Use :path instead", caller
         opts[:path] = opts[:dsid]
