@@ -18,7 +18,7 @@ module ActiveFedora
   # * (5) <tt>after_create</tt>
   # * (6) <tt>after_save</tt>
   #
-  # Lastly an <tt>after_find</tt> and <tt>after_initialize</tt> callback is triggered for each object that 
+  # Lastly an <tt>after_find</tt> and <tt>after_initialize</tt> callback is triggered for each object that
   # is found and instantiated by a finder, with <tt>after_initialize</tt> being triggered after new objects
   # are instantiated as well.
   #
@@ -191,23 +191,23 @@ module ActiveFedora
   # methods on the model, which are called last.
   #
   # == Debugging callbacks
-  # 
-  # The callback chain is accessible via the <tt>_*_callbacks</tt> method on an object. ActiveModel Callbacks support 
+  #
+  # The callback chain is accessible via the <tt>_*_callbacks</tt> method on an object. ActiveModel Callbacks support
   # <tt>:before</tt>, <tt>:after</tt> and <tt>:around</tt> as values for the <tt>kind</tt> property. The <tt>kind</tt> property
   # defines what part of the chain the callback runs in.
-  # 
-  # To find all callbacks in the before_save callback chain: 
-  # 
+  #
+  # To find all callbacks in the before_save callback chain:
+  #
   #   Topic._save_callbacks.select { |cb| cb.kind.eql?(:before) }
-  # 
+  #
   # Returns an array of callback objects that form the before_save chain.
-  # 
+  #
   # To further check if the before_save chain contains a proc defined as <tt>rest_when_dead</tt> use the <tt>filter</tt> property of the callback object:
-  # 
+  #
   #   Topic._save_callbacks.select { |cb| cb.kind.eql?(:before) }.collect(&:filter).include?(:rest_when_dead)
-  # 
+  #
   # Returns true or false depending on whether the proc is contained in the before_save callback chain on a Topic model.
-  # 
+  #
   module Callbacks
     extend ActiveSupport::Concern
 
@@ -226,7 +226,7 @@ module ActiveFedora
       define_model_callbacks :save, :create, :update, :destroy
     end
 
-    def destroy #:nodoc:
+    def destroy(*) #:nodoc:
       run_callbacks(:destroy) { super }
     end
 
@@ -239,10 +239,9 @@ module ActiveFedora
     end
 
     def update_record(*) #:nodoc:
-      run_callbacks(:update) { 
+      run_callbacks(:update) {
         run_callbacks(:save) { super }
       }
     end
   end
 end
-
