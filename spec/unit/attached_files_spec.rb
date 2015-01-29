@@ -133,6 +133,24 @@ describe ActiveFedora::AttachedFiles do
       end
     end
 
+    context "the deprecated 3 args erasure" do
+      it "should build the reflection" do
+        expect(Deprecation).to receive(:warn)
+        container.add_file('blah', 'content', 'name.png')
+        expect(container.content).to be_instance_of Bar
+        expect(container.content.content).to eq 'blah'
+      end
+    end
+
+    context "the deprecated 4 args erasure" do
+      it "should build the reflection" do
+        expect(Deprecation).to receive(:warn)
+        container.add_file('blah', 'content', 'name.png', 'image/png')
+        expect(container.content).to be_instance_of Bar
+        expect(container.content.content).to eq 'blah'
+      end
+    end
+
     context "no reflection matches the :path property" do
       it "should create a singleton reflection and build it" do
         container.add_file('blah', path: 'fizz')
