@@ -12,7 +12,7 @@ describe ActiveFedora::Base do
 
       validates_presence_of :fubar
       validates_length_of :swank, :minimum=>5
-      
+
     end
   end
 
@@ -26,7 +26,7 @@ describe ActiveFedora::Base do
     before do
       subject.attributes={ fubar: ['here'], swank:'long enough'}
     end
-    
+
     it { should be_valid}
   end
   describe "an invalid object" do
@@ -43,5 +43,15 @@ describe ActiveFedora::Base do
   describe "required terms" do
     it { should be_required(:fubar) }
     it { should_not be_required(:swank) }
+  end
+
+
+  describe "#save!" do
+    before { allow(subject).to receive(:create_record) } #prevent saving to Fedora/Solr
+
+    it "should validate only once" do
+      expect(subject).to receive(:perform_validations).once.and_return(true)
+      subject.save!
+    end
   end
 end

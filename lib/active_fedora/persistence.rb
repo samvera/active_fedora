@@ -23,13 +23,12 @@ module ActiveFedora
     # @param [Hash] options
     # @option options [Boolean] :update_index (true) set false to skip indexing
     # @return [Boolean] true if save was successful, otherwise false
-    def save(options={})
-      raise ReadOnlyRecord if readonly?
-      new_record? ? create_record(options) : update_record(options)
+    def save(*args)
+      create_or_update(*args)
     end
 
-    def save!(options={})
-      save(options)
+    def save!(*args)
+      create_or_update(*args)
     end
 
     # Pushes the object and all of its new or dirty attached files into Fedora
@@ -135,6 +134,11 @@ module ActiveFedora
     end
 
   private
+
+    def create_or_update(*args)
+      raise ReadOnlyRecord if readonly?
+      new_record? ? create_record(*args) : update_record(*args)
+    end
 
     # Deals with preparing new object to be saved to Fedora, then pushes it and its attached files into Fedora.
     def create_record(options = {})

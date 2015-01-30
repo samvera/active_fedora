@@ -69,7 +69,7 @@ module ActiveFedora
       output = super(context)
       errors.empty? && output
     end
-    
+
     # Test to see if the given field is required
     # @param [Symbol] key a field
     # @return [Boolean] is it required or not
@@ -85,5 +85,3 @@ module ActiveFedora
     end
   end
 end
-
-
