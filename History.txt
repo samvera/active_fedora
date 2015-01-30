@@ -1,3 +1,1057 @@
+v9.0.0
+  2015-01-30: When save! is called only validate once [Justin Coyne]
+
+  2015-01-29: Add 'eradicate' option to ActiveFedora::Base#destroy [Michael J.
+  Giarlo]
+
+  2015-01-29: Deprecate the three and four arg constructor to add_file This gives
+  a helpful migration path instead of an error when add_file is called with 3 or 4
+  arguments instead of the expected 2 [Justin Coyne]
+
+  2015-01-28: File#stream should return a FileBody object instead of yielding
+  directly. Attempting to follow this pattern:
+  https://github.com/rails/rails/blob/08754f12e65a9ec79633a605e986d0f1ffa4b251/actionpack/lib/action_controller/metal/data_streaming.rb#L81-L96
+  which should let us set `self.response_body = file.stream` in a controller
+  [Justin Coyne]
+
+  2015-01-28: Deprecate File#add_file_datastream and the dsid parameter use
+  #add_file and :path as the parameter instead [Justin Coyne]
+
+  2015-01-26: File#last_modified removed [Justin Coyne]
+
+  2015-01-26: Don't read streams into a string before saving [Justin Coyne]
+
+  2015-01-22: Add caching for lookups from LDP. Also added Instrumentation and a
+  log subscriber [Justin Coyne]
+
+  2015-01-23: Encodes file name in HTTP header to allow for special characters in
+  file names [Hector Correa]
+
+  2015-01-22: Fixes bug that prevented ActiveFedora from deserializing classes
+  correctly when the base_path setting in fedora.yaml was not set [Hector Correa]
+
+  2015-01-22: Add LdpResourceService [Justin Coyne]
+
+  2015-01-21: Removed ActiveFedora::RDF::RelsExt That URI was only used in beta
+  development for Fedora 4, but has now been unpublished.  Use the traditional
+  predicates at ActiveFedora::RDF::Fcrepo::RelsExt instead. [Justin Coyne]
+
+  2015-01-20: Load singular datastream attributes from solr Previously only the
+  first character of singular datastream attributes was being returned when the
+  object was loaded from solr. [Justin Coyne]
+
+  2015-01-16: Jetty should wait a bit longer before unblocking [Michael J. Giarlo]
+
+  2015-01-16: Use Fcrepo4 class repository definitions [Adam Wead]
+
+  2015-01-14: Pass nested attribute options to the resource [Justin Coyne]
+
+  2015-01-14: Upgrade ActiveTriples to 0.6.0 [Justin Coyne]
+
+  2015-01-13: After setting nested rdf attributes, mark the attributes as changed.
+  Fixes #685 [Justin Coyne]
+
+  2015-01-13: Warn user when initial connection to Fedora fails and the URL does
+  not end with /rest [Hector Correa]
+
+  2015-01-13: Support nested attributes for RDF properties. Fixes #682 [Justin
+  Coyne]
+
+  2015-01-09: Warn when the same predicate is used in more than one property in
+  the same class [Hector Correa]
+
+  2015-01-07: Fix reindex_everything. Fixes #678 [Justin Coyne]
+
+  2015-01-07: Bumping to 9.0.0.rc2, which contains a fix to the fedora generator
+  [Michael J. Giarlo]
+
+  2015-01-07: Use the File class in the root namespace Otherwise it's trying to
+  call ActiveFedora::File.expand_path which is not a method [Justin Coyne]
+
+  2015-01-07: Can assign single ActiveTriples::Resource to single-valued attribute
+  (fixes #653) [David Chandek-Stark]
+
+  2015-01-06: Create an indexing service for RDF properties [Justin Coyne]
+
+  2015-01-07: Test on rails 4.2 and Ruby 2.2 [Justin Coyne]
+
+  2015-01-07: Remove cucumber from the solr template [Justin Coyne]
+
+  2015-01-06: Renamed Base.get_descendent_uris to Base.descendent_uris [Justin
+  Coyne]
+
+  2015-01-06: Provide the URI as part of the error message when object recreation
+  is attempted [Justin Coyne]
+
+  2015-01-05: Generate tests for model with RDF predicates [Justin Coyne]
+
+  2015-01-05: Updates to model generator templates to work with latest version of
+  rspec-rails [Justin Coyne]
+
+  2015-01-05: Update the model generator. Fixes #665 [Justin Coyne]
+
+  2015-01-02: reindex_everything should ignore non-RDF sources Because they don't
+  have parsable graphs. [Justin Coyne]
+
+  2014-12-23: Fix a typo [ci skip] [Justin Coyne]
+
+  2014-12-22: IndexingService#generate_solr_document should yield the solr
+  document [Justin Coyne]
+
+  2014-12-22: Restore the generator for fedora.yml [Justin Coyne]
+
+  2014-12-19: Add strong parameters validation [Justin Coyne]
+
+  2014-12-17: Filter out gemfiles/ from coverage stats [Justin Coyne]
+
+  2014-12-17: Add a service object for indexing profile json documents Fixes #654
+  This allows implementers to override to_json without impacting the structure of
+  how the profile is stored in solr. [Justin Coyne]
+
+  2014-12-17: Use Travis' new container based arch [Justin Coyne]
+
+  2014-12-17: fixes #648 Bug: LoadableFromJson raises error when you have extra
+  fields in the object profile (from calling .as_json) [Matt Zumwalt]
+
+  2014-12-09: Reload and sort versions [Adam Wead]
+
+  2014-12-16: Raise an error if data could be lost from singularizing a list When
+  a property is set to `multiple: false` and we find more than one statement for
+  the predicate, then raise an ActiveFedora::ConstraintError. [Justin Coyne]
+
+  2014-12-11: Bump ldp dependency to 0.2 [Justin Coyne]
+
+  2014-12-10: PERF: Don't query solr again if we know there will be no results
+  [Justin Coyne]
+
+  2014-12-10: Single valued properties accessed via the Hash accessor should be
+  singular [Justin Coyne]
+
+  2014-12-08: Enable single-value rdf fields withought depending on ActiveTriples
+  [Justin Coyne]
+
+  2014-12-05: Support indexing single value RDF properties [Justin Coyne]
+
+  2014-12-05: Init the base path when the Fedora object is initialized [Justin
+  Coyne]
+
+  2014-12-05: Allow generated property methods to validate the cardinality of
+  values [Justin Coyne]
+
+  2014-12-04: Interface to versions [Adam Wead]
+
+  2014-12-04: Fix typos [ci skip] [Justin Coyne]
+
+  2014-12-04: Bump ldp dependency to ~> 0.1.0 [Justin Coyne]
+
+  2014-12-04: point to FCRepo 3.x stable branch [Benjamin Armintor]
+
+  2014-12-04: Update to hydra-jetty 8.1.1 [Adam Wead]
+
+  2013-02-28: github issue 48 tests and YARD [Benjamin Armintor]
+
+  2014-12-04: Pin to hydra-jetty 8.1.0 [Adam Wead]
+
+  2014-12-03: Return array of version uris [Adam Wead]
+
+  2014-12-02: Automatically init the base path if it doesn't exist [Justin Coyne]
+
+  2014-12-02: Add ActiveFedora.fedora.init_base_path [Justin Coyne]
+
+  2014-12-02: Optimize string allocation [Justin Coyne]
+
+  2014-12-02: Ensure that documents loaded from solr have contained file stubs
+  [Justin Coyne]
+
+  2014-12-02: Optimize the IndexingService [Justin Coyne]
+
+  2014-12-02: Increase Jetty's heap size [Justin Coyne]
+
+  2014-11-15: Describing bugs with pending tests [Adam Wead]
+
+  2014-12-02: Adds fix for content-lenght value missing for files uploaded via
+  ActionDispatch:Http::UploadedFile [Hector Correa]
+
+  2014-12-01: Switch to using the Fcrepo predicate for has_model [Justin Coyne]
+
+  2014-12-01: Removed unused property predicates [Justin Coyne]
+
+  2014-11-19: add RDF::Vocabulary subclasses for Fcrepo and ProjectHydra Cherry
+  picked out of #616 [Justin Coyne]
+
+  2014-12-01: Don't use predicate uri as a solr key, colins and slashes are not
+  supported [Justin Coyne]
+
+  2014-11-15: Extract query building and result processing from SolrService
+  [Justin Coyne]
+
+  2014-11-15: Refactor the lookup of solr fields for a predicate Now all of the
+  mapping from predicate to solr_field is consolidated in the Reflection.
+  Previously this logic was in two different places. [Justin Coyne]
+
+  2014-11-25: Preparing for 9.0.0.beta2 release [Adam Wead]
+
+  2014-11-19: add RDF::Vocabulary subclasses for Fcrepo and ProjectHydra [Benjamin
+  Armintor]
+
+  2014-11-24: rename ActiveFedora::Rdf to ActiveFedora::RDF [Benjamin Armintor]
+
+  2014-11-24: Exclude auto-snapshot versions [Adam Wead]
+
+  2014-11-21: Adding optional yml paramters as comments so people know they exist
+  [Carolyn Cole]
+
+  2014-11-18: Makes sure all values are handled as arrays [Hector Correa]
+
+  2014-11-14: Remove counte_cache and touch options from belongs_to association
+  [Justin Coyne]
+
+  2014-11-14: Remove deprecated rspec should_receive [Justin Coyne]
+
+  2014-11-14: Translate property to predicate in Builder::Association Fixes #597
+  [Justin Coyne]
+
+  2014-11-14: Consistent use of RDF constant [Adam Wead]
+
+  2014-11-14: Removed deprecated method  from tests [Justin Coyne]
+
+  2014-11-14: Objects loaded from Solr should be read-only. Fixes #555 [Justin
+  Coyne]
+
+  2014-11-14: Query File for RDF.type fixes #599 [Adam Wead]
+
+  2014-11-14: Extract errors to their own file. Add documentation [Justin Coyne]
+
+  2014-11-13: Deprecate property, require predicate on associations. Fixes #483
+  [Justin Coyne]
+
+  2014-11-13: Use hydra-jetty fedora-4/master [Adam Wead]
+
+  2014-11-13: Clean up after the test is over [Justin Coyne]
+
+  2014-11-13: Removed a hash rocket [Justin Coyne]
+
+  2014-11-13: Implements Versionable.has_versions? Updated to use HTTP HEAD
+  instead HTTP GET [Hector Correa]
+
+  2014-11-13: add_file_datastream should check for a reflection. Fixes #594
+  [Justin Coyne]
+
+  2014-11-13: FilesHash should behave like a HashWithIndifferentAccess [Justin
+  Coyne]
+
+  2014-11-13: ActiveFedora::Base.new should yield a block. Fixes #589 [Justin
+  Coyne]
+
+  2014-11-12: Deprecate File.new taking a Base as an argument [Justin Coyne]
+
+  2014-11-06: Move the 'contains' logic into an association [Justin Coyne]
+
+  2014-11-12: Remove Solrizer-Fedora integration [Justin Coyne]
+
+  2014-11-12: Fetch digest uri from a resource [Adam Wead]
+
+  2014-11-12: Support fixity calls to Fedora [Adam Wead]
+
+  2014-11-11: Added File.metadata to define metadata properties This writes the
+  properties to ./fcr:metadata relative to the files URI Fixes #499 [Justin Coyne]
+
+  2014-11-12: Separate the indexing concerns out of the Persistence module [Justin
+  Coyne]
+
+  2014-11-11: Create an IndexingService responsible for indexing resources [Justin
+  Coyne]
+
+  2014-11-11: Added test for change tracking on properties [Justin Coyne]
+
+  2014-11-11: Renamed name_for_dsid to method_name_for_path [Justin Coyne]
+
+  2014-11-11: Add File#described_by [Justin Coyne]
+
+  2014-11-11: Refactor SparqlInsert [Justin Coyne]
+
+  2014-11-11: Deprecate calling .find with hash [Adam Wead]
+
+  2014-11-11: Refactor ActiveFedora::Cleaner [Justin Coyne]
+
+  2014-11-10: Removed workaround for fcrepo4/fcrepo4#442 Also removed the skipped
+  concurrent write spec because we are now doing SPARQL insert which doesn't have
+  the version conflict problem. [Justin Coyne]
+
+  2014-11-11: Change deprecation horizon to 10.0 [Adam Wead]
+
+  2014-11-10: Don't get the HEAD of a non-existant resource [Justin Coyne]
+
+  2014-11-10: Factor out the Ldp::Orm class [Justin Coyne]
+
+  2014-11-10: Switch to fcrepo 4 beta 4 [Justin Coyne]
+
+  2014-11-10: Use the headers to get Content-Disposition Previously Fedora-4
+  didn't return Content-Disposition on the HEAD, but it does now. [Justin Coyne]
+
+  2014-11-10: Allow size to be nil if there is no content This matches the API of
+  ActiveFedora 7. [Justin Coyne]
+
+  2014-11-06: Files should be independent of the ActiveFedora::Base object. This
+  enables files to be created and saved without a container. [Justin Coyne]
+
+  2014-11-06: Remove alias_method_chain [Justin Coyne]
+
+  2014-11-06: Changed ActiveFedora::File#persisted_size to simply return 0 if
+  we're looking at a new record, rather than attempt a head request on the
+  Ldp::Resource::BinarySource object. [Andrew Myers]
+
+  2014-11-05: Revert "clarified a comment" [Adam Wead]
+
+  2014-11-04: Refactors ActiveFedora::File#size to use two new methods,
+  ActiveFedora::File#persisted_size and ActiveFedora::File#dirty_size. This fixes
+  #560 where has_content? was returning false when there was unpersisted content,
+  b/c it was only checking the size of persisted content. [Andrew Myers]
+
+  2014-11-04: clarified a comment [Brian Maddy]
+
+  2014-11-04: ActiveTriples properties should know that they are multiple. Fixes
+  #547 [Justin Coyne]
+
+  2014-11-04: Separate the SPARQL deletes so if one doesn't match the others still
+  work. Fixes #564 [Justin Coyne]
+
+  2014-11-04: Shifting onto a HABTM should immediately set the ids [Justin Coyne]
+
+  2014-11-04: Should be able to call first on an attribute for a document loaded
+  from Solr [Justin Coyne]
+
+  2014-11-03: Removed changed? from AF::File#inspect [Justin Coyne]
+
+  2014-11-03: Adds tests for ActiveFedora::Attributes::ClassMethods.multiple?
+  Raises an ActiveFedora::UnknwonAttributeError when attribute does not exist.
+  [Andrew Myers]
+
+  2014-11-03: Deprecate SolrService#construct_query_for_pids [Justin Coyne]
+
+  2014-11-03: Make resource_class a class method to avoid multiple declarations of
+  GeneratedResourceSchema [Justin Coyne]
+
+  2014-11-03: load_instance_from_solr should be able to handle object associations
+  Fixes #542 [Justin Coyne]
+
+  2014-10-31: Deprecates usage of #pid in favor of #id. The method is defined in
+  ActiveFedora::FedoraAttributes and includedin ActiveFedora::Base. Replaces
+  references to "pid" in other method names and comments with "id". [Andrew Myers]
+
+  2014-11-03: Convenience methods from Rubydora [Adam Wead]
+
+  2014-11-03: Refactor the associations to follow developments in ActiveRecord
+  [Justin Coyne]
+
+  2014-11-03: Create a separate resource class for each ActiveFedora::Base
+  subclass This ensures that the schemas from different AF::Base subclasses don't
+  end up merged onto the ActiveTriples::Resource class [Justin Coyne]
+
+  2014-11-01: Raise error unless orm.new? fixes #409 [Adam Wead]
+
+  2014-11-01: Use a string for class property keys [Adam Wead]
+
+  2014-10-31: Remove FedoraLens dependency [Justin Coyne]
+
+  2014-10-31: When cleaning, handle the case where the base_path is 410 [Justin
+  Coyne]
+
+  2014-10-02: Remove ObjectResource from RdfDatastream [Tom Johnson]
+
+  2014-09-22: Factors out behavior from ActiveFedora::Rdf::ObjectResource to mixin
+  ActiveFedora::Rdf::Persistence. [Tom Johnson]
+
+  2014-10-30: Use .eradiate for tombstones [Adam Wead]
+
+  2014-10-30: Bump test grid to rails 4.2.0.beta4 [Justin Coyne]
+
+  2014-10-30: The contains method can now be called with a single argument (name)
+  [Justin Coyne]
+
+  2014-10-30: Use the namespaced (root) File model in solr config generator
+  [Justin Coyne]
+
+  2014-10-30: Use the namespaced (root) File module for the model generator
+  [Justin Coyne]
+
+  2014-10-30: Rely on autosave associations when setting nested attributes This
+  brings us closer to parity with ActiveRecord and fixes a problem present in
+  https://github.com/projecthydra/hydra-head/pull/211 [Justin Coyne]
+
+  2014-10-30: Use attached_files rather than the deprecated datastreams method
+  [Justin Coyne]
+
+  2014-10-29: Rename Datastream to File. Fixes #518 [Justin Coyne]
+
+  2014-10-30: On a SPARQL insert each predicate should have its own independent
+  variable [Justin Coyne]
+
+  2014-10-30: Grab the file name from the HEAD request now that fcrepo is fixed
+  [Justin Coyne]
+
+  2014-10-29: Use reflections for storing information about child resources
+  [Justin Coyne]
+
+  2014-10-29: Consolidate has_metadata and has_file_datastream into contains.
+  Fixes #508 [Justin Coyne]
+
+  2014-10-29: Updates to Versionable [Adam Wead]
+
+  2014-10-29: Extract cleanup logic from spec_helper into ActiveFedora::Cleaner
+  [Justin Coyne]
+
+  2014-10-29: Removed unused ActiveTriples predicates [Justin Coyne]
+
+  2014-10-29: Mark failing versionable tests as pending [Justin Coyne]
+
+  2014-10-29: Removed unused method SingularAssociation#check_record [Justin
+  Coyne]
+
+  2014-10-29: Exclude the spec/ directory from coverage [Justin Coyne]
+
+  2014-10-29: Add Coveralls badge [ci skip] [Justin Coyne]
+
+  2014-10-29: Added Coveralls. Fixes #511 [Justin Coyne]
+
+  2014-10-29: Pin activesupport to >= 4.1 [Justin Coyne]
+
+  2014-10-28: Replaces ActiveFedora::Base.url_from_sitemap_index with
+  ActiveFedora::Base.get_descendent_uris. This was necessary because the
+  '/sitemap' resource has gone away, and there is no longer a sitemap to compile a
+  list of urls. [Andrew Myers]
+
+  2014-10-28: Refactor CollectionAssociation#build [Justin Coyne]
+
+  2014-10-28: Get rid of
+  CollectionAssociation#add_record_to_target_with_callbacks. Fixes #510 [Justin
+  Coyne]
+
+  2014-10-28: Rename defined_attributes to delegated_attributes. Fixes #513
+  [Justin Coyne]
+
+  2014-10-28: Remove Persistence#reload_managed_properties, it was dangerous
+  [Justin Coyne]
+
+  2014-10-28: Do dirty tracking on attributes and update using SPARQL [Justin
+  Coyne]
+
+  2014-10-28: A 410 Gone resource should still have an ActiveTriples resource
+  [Justin Coyne]
+
+  2014-10-28: Trap for Ldp::Gone when loading association [Justin Coyne]
+
+  2014-10-28: Set inverse as an array if the inverse is a HABTM [Justin Coyne]
+
+  2014-10-28: Remove ReloadOnSave because we always reload now. [Justin Coyne]
+
+  2014-10-28: Only run specs in random order on CI [Justin Coyne]
+
+  2014-10-27: Adjust a unit test expectation [Justin Coyne]
+
+  2014-10-27: Adjust expectation in a unit test [Justin Coyne]
+
+  2014-10-27: Ensure the modified_date is changed after update [Justin Coyne]
+
+  2014-10-27: Exists should rescue Ldp::Gone [Justin Coyne]
+
+  2014-10-27: Rework associations [Justin Coyne]
+
+  2014-10-27: Base.find_each should rescue Ldp::Gone and not
+  ActiveFedora::ObjectNotFoundError [Justin Coyne]
+
+  2014-10-27: Don't attempt reloading managed properties if the node is destroyed
+  [Justin Coyne]
+
+  2014-10-27: Give a better message when trying to reload a destroyed object
+  [Justin Coyne]
+
+  2014-10-27: Upgrade to LDP to a version that raises Ldp::Gone [Justin Coyne]
+
+  2014-10-27: Reload managed properties after removing record from a HABTM
+  association [Justin Coyne]
+
+  2014-10-27: Reload managed properties after removing record from an association
+  [Justin Coyne]
+
+  2014-10-27: Reload the lastModified after an implicit save via
+  HasManyAssociation#concat Fixes an error like this:     RuntimeError:           
+  ERR STATUS: 409 Could not remove triple containing predicate           
+  http://fedora.info/definitions/v4/repository#lastModified to            node    
+         /test/1a/de/75/90/1ade7590-02aa-4e63-8c60-e5c34e11c170...            when
+  updating           
+  http://localhost:8983/fedora/rest/test/1a/de/75/90/1ade7590-02aa-4e63-8c60-e5c34e11c170.
+  [Justin Coyne]
+
+  2014-10-27: Remove Datastream#query_metadata_node as it isn't being used [Justin
+  Coyne]
+
+  2014-10-25: Remove cruft from Datastream#metadata_resource [Justin Coyne]
+
+  2014-10-25: Don't clean fedora both before and after tests. Before is sufficient
+  [Justin Coyne]
+
+  2014-10-25: Revert changes that removed the resources link to a datastream
+  [Justin Coyne]
+
+  2014-10-25: Don't use container_resource inside Datastream#stream [Justin Coyne]
+
+  2014-10-25: For testing, use a URI on our server. Fix rspec deprecations.
+  [Justin Coyne]
+
+  2014-10-25: Adjust expectations broken after refactoring [Justin Coyne]
+
+  2014-10-25: Remove Datastream.has_content? [Justin Coyne]
+
+  2014-10-25: Fetch original file name from headers [Justin Coyne]
+
+  2014-10-25: Get datastream length from the response headers [Justin Coyne]
+
+  2014-10-23: Remove the ContainerResource from Datastream.  Monkeypatch
+  RDF::DateTime to support nanoseconds. [Justin Coyne]
+
+  2014-10-02: Remove ObjectResource from RdfDatastream [Tom Johnson]
+
+  2014-10-22: fcr:content has gone away [Adam Wead]
+
+  2014-10-22: Cleanout Fedora before and after tests [Adam Wead]
+
+  2014-10-21: Pointing to hydra-jetty/fedora-4/edge [Adam Wead]
+
+  2014-10-21: Correction to comment example [Joe Atzberger]
+
+  2014-10-13: Attribute_names should be available via an instance method [Justin
+  Coyne]
+
+  2014-10-13: Enable create on an association to take attributes [Justin Coyne]
+
+  2014-10-10: Allow polymorphic has_many associations [Justin Coyne]
+
+  2014-10-10: Remove duplicate code (set_belongs_to_association_for) [Justin
+  Coyne]
+
+  2014-10-09: Put the ldp dependency in the gemspec [Justin Coyne]
+
+  2014-10-09: Provide a sensible default for base_path This ensures that we don't
+  encounter `no implicit conversion of nil into String` if the value is not set in
+  the fedora.yml [Justin Coyne]
+
+  2014-10-09: Waiting on fixes in ActiveTriples [Adam Wead]
+
+  2014-10-07: Bug #479: Typo in XSD filename value stuck in config generator
+  templates [Joe Atzberger]
+
+  2014-09-30: Reimplement load_instance_from_solr [Justin Coyne]
+
+  2014-09-22: Factors out behavior from ActiveFedora::Rdf::ObjectResource to mixin
+  ActiveFedora::Rdf::Persistence. [David Chandek-Stark]
+
+  2014-09-16: RdfDatastream#deserialize should always return an RDF::Graph. Fixes
+  #471 [Justin Coyne]
+
+  2014-09-11: RSpec 3.1 defaults [Adam Wead]
+
+  2014-09-10: Restore versions [Adam Wead]
+
+  2014-09-04: Use the fedora-4/master branch of hydra-jetty. This includes this
+  commit:
+  https://github.com/fcrepo4/fcrepo4/commit/d1c2a852922787e952e4d02caadb417908ef1c9f
+  which was made post-beta-3 [Justin Coyne]
+
+  2014-09-04: Upgrade to fedora4 beta 3 [Justin Coyne]
+
+  2014-08-23: Use the LDP capabilities better [Justin Coyne]
+
+  2014-08-21: Index the properties defined on the object [Justin Coyne]
+
+  2014-08-21: Assert the content model on init, not save [Justin Coyne]
+
+  2014-08-20: create_date and modified_date should be singular [Justin Coyne]
+
+  2014-08-20: Ensure the properties stick when assign_pid is used [Justin Coyne]
+
+  2014-08-20: OM backed datastreams should be versionable too [Justin Coyne]
+
+  2014-08-20: Ensure that the relationship is clear before the object is frozen
+  and destroyed [Justin Coyne]
+
+  2014-08-20: Use the official ActiveTriples branch [Justin Coyne]
+
+  2014-08-19: Use ActiveTriples for registering properties [Justin Coyne]
+
+  2014-08-18: WIP Add an association for RDF id properties [ci skip] [Justin
+  Coyne]
+
+  2014-08-18: WIP don't set attributes until after datastreams are initialized [ci
+  skip] [Justin Coyne]
+
+  2014-08-15: Set default mimeType for NtriplesRDFDatastream to
+  'application/n-triples' per W3C recommendation.
+  http://www.w3.org/TR/n-triples/#n-triples-mediatype Fixes #464 [David
+  Chandek-Stark]
+
+  2014-08-14: WIP Got versions working. [ci skip] [Justin Coyne]
+
+  2014-08-14: WIP Now able to fetch datastreams. [ci skip] [Justin Coyne]
+
+  2014-08-14: WIP Further work towards activetriples [ci skip] [Justin Coyne]
+
+  2014-08-13: WIP replaced fedora_lens with ActiveTriples [ci skip] [Justin Coyne]
+
+  2014-08-13: Added translate_id_to_uri and translate_uri_to_id configuration
+  parameters [Justin Coyne]
+
+  2014-08-13: RdfDatastream should use the parent's url as the subject, not
+  derived from a pid [Justin Coyne]
+
+  2014-08-12: Only use subclassed versions of uri_to_id [Justin Coyne]
+
+  2014-08-12: Belongs to should use the reflection class for uri_to_id [Justin
+  Coyne]
+
+  2014-08-12: Use id_to_uri on the passed in pid [Justin Coyne]
+
+  2014-08-04: RDFDatastream#content= patched to accept IO, matching
+  Rubydora::Datastream API Fixes #461 [David Chandek-Stark]
+
+  2014-08-01: Don't assign a pid if one already exists [Justin Coyne]
+
+  2014-08-01: Allow pids to be set by overriding assign_pid [Justin Coyne]
+
+  2014-08-01: Datastream should consider Tempfile to behave_like_io? [Justin
+  Coyne]
+
+  2014-07-31: Use the uri_to_id method to set relationships [Justin Coyne]
+
+  2014-07-31: Removed autoload for SolrInstanceLoader, which doesn't exist anymore
+  [Justin Coyne]
+
+  2014-07-30: Allow id_to_uri and uri_to_id to be overridden on a per class basis
+  [Justin Coyne]
+
+  2014-07-30: belongs_to associations should not be invertable [Justin Coyne]
+
+  2014-07-30: Only set ds content in #create_datastream for managed and inline
+  [David Chandek-Stark]
+
+  2014-07-30: RDF datastream should use the base object uri rather than compute a
+  new uri from the id [Justin Coyne]
+
+  2014-07-30: Change the erasure to save so that Versionable works with objects
+  and datastreams [Justin Coyne]
+
+  2014-07-29: Remove unneeded include [Justin Coyne]
+
+  2014-07-29: Use FedoraLens::Core in Datastream too [Justin Coyne]
+
+  2014-07-29: Use FedoraLens::Core [Justin Coyne]
+
+  2014-07-29: A datastream that hasn't been persisted shouldn't have versions
+  [Justin Coyne]
+
+  2014-07-29: Remove a duplicate test [Justin Coyne]
+
+  2014-07-29: Use the uri method internal to the Datastream class [Justin Coyne]
+
+  2014-07-29: Save the versionable property on a datastream [Justin Coyne]
+
+  2014-07-28: Ensure the versionable predicate is set on versionable datastreams
+  [Justin Coyne]
+
+  2014-07-28: Datastreams should be versionable [Justin Coyne]
+
+  2014-07-28: Added versions [Justin Coyne]
+
+  2014-07-24: Passed softCommit as parameter to delete_by_query in the proper way
+  [Justin Coyne]
+
+  2014-07-24: Avoid an unnecessary call to Solr [Justin Coyne]
+
+  2014-07-24: Ensure that when the model_field retreived from solr is nil, it
+  won't cause an NPE [Justin Coyne]
+
+  2014-07-24: Set the stale_state for HABTM associations [Justin Coyne]
+
+  2014-07-24: Give a couple of spec files more appropriate names [Justin Coyne]
+
+  2014-07-24: If a has_and_belongs_to_many assertion is missing the accessor
+  should return [] [Justin Coyne]
+
+  2014-07-24: The inverse of a has_many association should never be another
+  has_many association [Justin Coyne]
+
+  2014-07-24: Allow using has_and_belongs_to_many properties besides :is_part_of
+  [Justin Coyne]
+
+  2014-07-23: Handle case when has_model assertion is blank [Justin Coyne]
+
+  2014-07-23: Add debug for Hydra-head 8 [Justin Coyne]
+
+  2014-07-23: Add debug for Hydra-head 8 [Justin Coyne]
+
+  2014-07-23: Upgrade to rspec 3 [Justin Coyne]
+
+  2014-07-23: Fix expectation for streaming response [Justin Coyne]
+
+  2014-07-23: Fix test expectation for streaming [Justin Coyne]
+
+  2014-07-23: Store the file name by setting Content-Disposition [Justin Coyne]
+
+  2014-07-23: Add range request. Fixes #456 [Justin Coyne]
+
+  2014-07-23: Add Datastream#original_name accessor [Justin Coyne]
+
+  2014-07-23: Set the mime_type even when the deprecated mimeType is passed to
+  add_file_datastream [Justin Coyne]
+
+  2014-07-23: Deprecate the mimeType option for add_file_datastream [Justin Coyne]
+
+  2014-07-23: Added Datastream#stream [Justin Coyne]
+
+  2014-07-22: remove the fedora generator [Justin Coyne]
+
+  2014-07-22: Get rid of fedora 3 config templates [Justin Coyne]
+
+  2014-07-22: Fix change tracking on datastream [Justin Coyne]
+
+  2014-07-22: Adjust test expectation of underlying API [Justin Coyne]
+
+  2014-07-22: Adjust expectation to match exising code [Justin Coyne]
+
+  2014-07-21: DatastreamHash doesn't need an object reference [Justin Coyne]
+
+  2014-07-21: Allow setting a base_path for working with a subgraph in Fedora
+  [Justin Coyne]
+
+  2014-07-21: Move Base#to_key to ActiveFedora::Attributes::PrimaryKey [Justin
+  Coyne]
+
+  2014-07-21: Fix bugs that cropped up in rebase [Justin Coyne]
+
+  2014-07-17: Return nil for deleted content. [Justin Coyne]
+
+  2014-06-19: Allow setting many values for a HABTM [Justin Coyne]
+
+  2014-06-19: Handle inheritance for class_name on belongs_to associations [Justin
+  Coyne]
+
+  2014-06-19: Update tests to set multiple/single values. Initialize should accept
+  a hash [Justin Coyne]
+
+  2014-06-18: Fix spec broken in ed13e88 [Justin Coyne]
+
+  2014-06-18: Fix the class filter of the belongs_to relationship [Justin Coyne]
+
+  2014-06-18: Auxillary gemfiles should include the main gemfile [Justin Coyne]
+
+  2014-06-18: Association ids are now regular attributes [Justin Coyne]
+
+  2014-05-30: Fixed occasional failures in property_spec.rb [Justin Coyne]
+
+  2014-05-30: Added cleanup to fix occasional failures. [Justin Coyne]
+
+  2014-05-30: Previous assigning of config wasn't working. [Justin Coyne]
+
+  2014-05-30: Clear out FooHistory definitions, was interfering. [Justin Coyne]
+
+  2014-05-29: Fix up test namespacing. [Justin Coyne]
+
+  2014-05-29: Namespaced all tests into /test in Fedora. [Justin Coyne]
+
+  2014-06-18: Use the beta release of fedora [Justin Coyne]
+
+  2014-05-27: Don't cast AF items if explicitly told not to. [Justin Coyne]
+
+  2014-05-27: Fix rdfxml specs using old URI. [Justin Coyne]
+
+  2014-05-06: fix relationship indexing [Justin Coyne]
+
+  2014-04-28: Set inverse relationship on a has_many when it is a belongs_to or a
+  habtm. [Justin Coyne]
+
+  2014-04-28: Fixed stubs in indexing test [Justin Coyne]
+
+  2014-04-28: Move callbacks so that before_save occurs before saving the node
+  properties. This enables autosave associations to work [Justin Coyne]
+
+  2014-04-28: Set has_many polymorphic foreign keys for belongs_to or HABTM
+  [Justin Coyne]
+
+  2014-04-28: Fixed primary_solr_name lookup [Justin Coyne]
+
+  2014-04-28: Fixed initializing datastreams from solr_digital_object [Justin
+  Coyne]
+
+  2014-04-28: Remove require of byebug [Justin Coyne]
+
+  2014-04-28: Freeze relationships when the object is frozen [Justin Coyne]
+
+  2014-04-28: Removed tests for sharded config [Justin Coyne]
+
+  2014-04-28: Ensure that the datastreams resource gets updated when the parent
+  object is saved [Justin Coyne]
+
+  2014-04-25: Adding a has_content? [Justin Coyne]
+
+  2014-04-25: Get the datastreams mime_type an size from the correct graph node
+  [Justin Coyne]
+
+  2014-04-25: Set a proper URI for datastreams [Justin Coyne]
+
+  2014-04-24: Fixed query spec [Justin Coyne]
+
+  2014-04-24: Fixed json serialization spec [Justin Coyne]
+
+  2014-04-24: Rewrote ActiveFedora::Indexing.reindex_everything (fixes #401) Added
+  ActiveFedora::Indexing.ids_from_sitemap_index [Justin Coyne]
+
+  2014-04-24: Fix polymorphic has_many to HABTM association writer [Justin Coyne]
+
+  2014-04-24: Moved fedora_lens to projecthydra-labs [Justin Coyne]
+
+  2014-04-23: Removed invalid pid from spec [Justin Coyne]
+
+  2014-04-23: Don't save when removing HABTM associations on a deleted record
+  [Justin Coyne]
+
+  2014-04-23: Use delegated attributes only if there isn't a registered RDF
+  predicate [Justin Coyne]
+
+  2014-04-23: Fix subject uri for complex rdf datastream spec [Justin Coyne]
+
+  2014-04-23: Reenable delegated attributes [Justin Coyne]
+
+  2014-04-23: Fixed inspect to show relationship fields [Justin Coyne]
+
+  2014-04-23: Test the size attribute is set [Justin Coyne]
+
+  2014-04-23: Removed colin from test pid. It causes a 400 error in Fedora [Justin
+  Coyne]
+
+  2014-04-23: Update expectations for saving [Justin Coyne]
+
+  2014-04-23: Fixed test to exclude expectation of RELS-EXT [Justin Coyne]
+
+  2014-04-23: Strip leading slash from to_key [Justin Coyne]
+
+  2014-04-23: Fixed expecation in test for indexing relationships [Justin Coyne]
+
+  2014-04-23: Fixed test for indexing datastreams [Justin Coyne]
+
+  2014-04-23: Don't require byebug [Justin Coyne]
+
+  2014-04-22: Use URIs for ntriples datastream spec [Justin Coyne]
+
+  2014-04-22: Remove RDFXMLWriter [Justin Coyne]
+
+  2014-04-22: Set RDF datastream subject to be the id of the parent resource
+  [Justin Coyne]
+
+  2014-04-22: Removed DatastreamCollections [Justin Coyne]
+
+  2014-04-22: remove external resources from datastream collections spec [Justin
+  Coyne]
+
+  2014-04-22: If a model isn't asserted, then use ActiveFedora::Base [Justin
+  Coyne]
+
+  2014-04-22: Load datastreams that are in the repository, but not declared
+  [Justin Coyne]
+
+  2014-04-22: Stub should be a :put [Justin Coyne]
+
+  2014-04-22: Use the changed_attribute method to avoid a NPE [Justin Coyne]
+
+  2014-04-22: A datastreams dsid will never be nil [Justin Coyne]
+
+  2014-04-22: Remove test about OmDatastream#term_values, which isn't used anymore
+  [Justin Coyne]
+
+  2014-04-22: Fixed test for to_class_uri [Justin Coyne]
+
+  2014-04-22: has_model should just store the class name, no need to make it look
+  like a uri [Justin Coyne]
+
+  2014-04-22: Updating all info:fedora namespaces to use HTTP URIs [Justin Coyne]
+
+  2014-04-20: Point hydra-jetty at the version with fedora 4.0.0-alpha-5 [Justin
+  Coyne]
+
+  2014-04-19: Fix test Solr query, and remove test for the DC datastream [Justin
+  Coyne]
+
+  2014-04-18: If a file is set for a datastream, read it before saving [Justin
+  Coyne]
+
+  2014-04-18: Use save! in test to expose exceptions [Justin Coyne]
+
+  2014-04-18: Cast models when doing AF::Base.find() [Justin Coyne]
+
+  2014-04-18: removed generated uri with namespace spec [Justin Coyne]
+
+  2014-04-18: Changed the Datastream#inspect [Justin Coyne]
+
+  2014-04-18: Fix change tracking on datastreams [Justin Coyne]
+
+  2014-04-18: Don't call inner_object in specs [Justin Coyne]
+
+  2014-04-18: Fix base_extra_spec [Justin Coyne]
+
+  2014-04-18: Fixed callback spec [Justin Coyne]
+
+  2014-04-18: Fixed base uri for RDF datastreams [Justin Coyne]
+
+  2014-04-18: Clean up rakefile [Justin Coyne]
+
+  2014-04-17: When doing new with a string, it is an id. Thus it needs to be
+  transformed to a URL before calling super [Justin Coyne]
+
+  2014-04-17: Add a TODO about delete requests [Justin Coyne]
+
+  2014-04-17: Don't cast class unless the class exists [Justin Coyne]
+
+  2014-04-17: Added SolrService.delete(pid) [Justin Coyne]
+
+  2014-04-16: Filter belongs_to associations by class name [Justin Coyne]
+
+  2014-04-16: Fixed test for inverse of HABTM relationship [Justin Coyne]
+
+  2014-04-16: remove the last remaining calls to add_relationship [Justin Coyne]
+
+  2014-04-16: Change the stubs to reflect current behavior in
+  has_and_belongs_to_many_collection_spec [Justin Coyne]
+
+  2014-04-16: Fix unit test for has_many [Justin Coyne]
+
+  2014-04-16: Removed references to nonexistant method internal_uri [Justin Coyne]
+
+  2014-04-16: Remove references to nonexistant method: remove_relationship [Justin
+  Coyne]
+
+  2014-04-16: In has_many_collection_spec, don't pass pid as a parameter to
+  Base#new [Justin Coyne]
+
+  2014-04-16: Stub parent object correctly in RdfDatastreamSpec [Justin Coyne]
+
+  2014-04-16: Don't use pid as an attribute to ActiveFedora::Base.new [Justin
+  Coyne]
+
+  2014-04-16: Handle initializing with an Ldp::Resource or a hash of attributes
+  [Justin Coyne]
+
+  2014-04-16: Fix test so it doesn't rely on removed method [Justin Coyne]
+
+  2014-04-16: has_many associations should set id rather than URL. [Justin Coyne]
+
+  2014-04-16: Fix associations to set ids (not url) [Justin Coyne]
+
+  2014-04-15: Saving a datastream should use PUT instead of POST [Justin Coyne]
+
+  2014-04-15: Index has_model [Justin Coyne]
+
+  2014-04-15: Use the literals_to_strings lens for multiple associations [Justin
+  Coyne]
+
+  2014-04-15: Use the []= method to remove belongs_to methods [Justin Coyne]
+
+  2014-04-15: Store belongs_to relation as literals for the time being [Justin
+  Coyne]
+
+  2014-04-15: Fix stubs in complex_rdf_datastream_spec [Justin Coyne]
+
+  2014-04-15: Cast objects to their correct types [Justin Coyne]
+
+  2014-04-15: Remove clone and clone_into [Justin Coyne]
+
+  2014-04-15: Added size attribute to datastream [Justin Coyne]
+
+  2014-04-15: Correct expectations of parent object on RDF nested attributes spec
+  [Justin Coyne]
+
+  2014-04-15: Fixed delegated property setter [Justin Coyne]
+
+  2014-04-14: RdfResourceDatastream spec should use a resolvable class name
+  [Justin Coyne]
+
+  2014-04-14: Only solrize relationships [Justin Coyne]
+
+  2014-04-14: Dates should be single values [Justin Coyne]
+
+  2014-04-14: Allow a 200 return value for datastream content [Justin Coyne]
+
+  2014-04-14: Associations using RDF attributes [Justin Coyne]
+
+  2014-04-14: Use the attributes coming from FedoraLens [Justin Coyne]
+
+  2014-04-14: Removed mimeType from datastream [Justin Coyne]
+
+  2014-04-14: removed RelationshipGraph [Justin Coyne]
+
+  2014-04-14: Remove tests for nonexistant features [Justin Coyne]
+
+  2014-04-14: Get rid of ContentModel [Justin Coyne]
+
+  2014-04-14: Removed references to dsLabel [Justin Coyne]
+
+  2014-04-14: removed versionable attribute from datastreams [Justin Coyne]
+
+  2014-04-14: Fix datastream spec to ignore label and mimeType [Justin Coyne]
+
+  2014-04-14: Remove inner_object from solr_config_option_spec [Justin Coyne]
+
+  2014-04-14: Remove owner_id accessor [Justin Coyne]
+
+  2014-04-14: removed #reify [Justin Coyne]
+
+  2014-04-14: removed #init_with [Justin Coyne]
+
+  2014-04-14: Removed load_instance_from_solr [Justin Coyne]
+
+  2014-04-14: Remove Auditable. Its functions are specifcally for FC3 [Justin
+  Coyne]
+
+  2014-04-14: Removed DigitalObject. Removed #adapt_to [Justin Coyne]
+
+  2014-04-14: Simplify the Travis matrix [Justin Coyne]
+
+  2014-04-14: Use the fedora 4 version of hydra-jetty [Justin Coyne]
+
+  2014-03-31: remove sharding [Justin Coyne]
+
+  2014-03-28: Update expectation to have the datastream node in the path [Justin
+  Coyne]
+
+  2014-03-27: Remove mimeType from datastream spec [Justin Coyne]
+
+  2014-03-27: Remove SemanticNode [Justin Coyne]
+
+  2014-03-27: Remove from_xml [Justin Coyne]
+
+  2014-03-27: Allow a 404 response from datastream_content [Justin Coyne]
+
+  2014-03-27: Save datastreams after save [Justin Coyne]
+
+  2014-03-27: WIP checkpoint [Justin Coyne]
+
+  2014-03-20: WIP based on LDP [Justin Coyne]
+
+  2014-03-19: Remove deprecated method escape_uri_for_query [Justin Coyne]
+
+  2014-03-19: remove deprecated method SolrDigitalObject#new? [Justin Coyne]
+
+  2014-03-19: Removed deprecated method pids_from_uris [Justin Coyne]
+
+  2014-03-19: Removed deprecated prefix methods from Rdf::Indexing [Justin Coyne]
+
+  2014-03-19: Removed deprecated method quote_for_solr [Justin Coyne]
+
+  2014-03-19: Removed deprecated methods Base#new? and Base#new_object? [Justin
+  Coyne]
+
+  2014-03-19: Removed deprecated method rdf_type [Justin Coyne]
+
+  2014-03-19: Solr fields are now prefixed by the dsid by default [Justin Coyne]
+
 v7.1.0
 
   2014-07-17: Update Om and Rubydora depencencies [Justin Coyne]
