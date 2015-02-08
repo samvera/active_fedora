@@ -19,7 +19,11 @@ module ActiveFedora::Associations::Builder
       mixin.send(:define_method, name) do |*params|
         association(name).reader(*params).tap do |file|
           set_uri = uri.kind_of?(RDF::URI) ? uri.value.present? : uri.present?
-          file.uri = "#{uri}/#{name}" if set_uri
+          if set_uri
+            file_uri = "#{uri}/#{name}"
+            file.uri = file_uri
+            file.exists! if contains_assertions.include?(file_uri)
+          end
         end
       end
     end

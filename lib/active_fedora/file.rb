@@ -58,12 +58,19 @@ module ActiveFedora
       ldp_source.subject
     end
 
+    # If this file have a parent with ldp#contains, we know it is not new.
+    # By tracking exists we prevent an unnecessary HEAD request.
     def new_record?
-      ldp_source.new?
+      !@exists && ldp_source.new?
     end
 
     def uri= uri
       @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, uri, '', ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
+    end
+
+    # If we know the record to exist (parent has LDP:contains), we can avoid unnecessary HEAD requests
+    def exists!
+      @exists = true
     end
 
     # When restoring from previous versions, we need to reload certain attributes from Fedora
