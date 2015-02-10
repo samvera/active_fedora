@@ -26,9 +26,9 @@ module ActiveFedora
 
     # Call this to create a Container Resource to act as the base path for this connection
     def init_base_path
-        connection.get(root_resource_path)
-        ActiveFedora::Base.logger.info "Attempted to init base path `#{root_resource_path}`, but it already exists" if ActiveFedora::Base.logger
-        return false
+      connection.head(root_resource_path)
+      ActiveFedora::Base.logger.info "Attempted to init base path `#{root_resource_path}`, but it already exists" if ActiveFedora::Base.logger
+      false
     rescue Ldp::NotFound
       if !host.downcase.end_with?("/rest")
         ActiveFedora::Base.logger.warn "Fedora URL (#{host}) does not end with /rest. This could be a problem. Check your fedora.yml config"
