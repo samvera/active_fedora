@@ -62,6 +62,10 @@ module ActiveFedora
           @values.map {|v| FakeStatement.new(v) }
         end
 
+        def objects
+          @values
+        end
+
         class FakeStatement
           def initialize(value)
             @value = value
@@ -89,7 +93,7 @@ module ActiveFedora
       end
 
       def reflection(predicate)
-        @model.outgoing_reflections.find { |key, reflection| reflection.predicate == predicate }.first
+        Array(@model.outgoing_reflections.find { |key, reflection| reflection.predicate == predicate }).first
       end
     end
 
