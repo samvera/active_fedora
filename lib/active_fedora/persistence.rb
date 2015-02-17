@@ -39,9 +39,10 @@ module ActiveFedora
 
     alias update_attributes update
 
-    #Deletes a Base object, also deletes the info indexed in Solr, and
-    #the underlying inner_object.  If this object is held in any relationships (ie inbound relationships
-    #outside of this object it will remove it from those items rels-ext as well
+    # Deletes an object from Fedora and deletes the indexed record from Solr.
+    # Delete does not run any callbacks, so consider using _destroy_ instead.
+    # @param [Hash] opts
+    # @option opts [Boolean] :eradicate if passed in, eradicate the tombstone from Fedora
     def delete(opts = {})
       return self if new_record?
 
@@ -68,6 +69,9 @@ module ActiveFedora
       freeze
     end
 
+    # Delete the object from Fedora and Solr. Run any before/after/around callbacks for destroy
+    # @param [Hash] opts
+    # @option opts [Boolean] :eradicate if passed in, eradicate the tombstone from Fedora
     def destroy(*args)
       raise ReadOnlyRecord if readonly?
       delete(*args)
