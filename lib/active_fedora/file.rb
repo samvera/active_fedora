@@ -255,11 +255,11 @@ module ActiveFedora
         ldp_source.content = content
         if new_record?
           ldp_source.create do |req|
-            req.headers = headers
+            req.headers.merge!(headers)
           end
         else
           ldp_source.update do |req|
-            req.headers = headers
+            req.headers.merge!(headers)
           end
         end
         reset
@@ -300,9 +300,21 @@ module ActiveFedora
       # @returns [Stream] an object that responds to each
       def stream(range = nil)
         uri = URI.parse(self.uri)
-        headers = {}
-        headers['Range'] = range if range
-        FileBody.new(uri, headers)
+        FileBody.new(uri, headers(range, authorization_key))
+      end
+
+      # @returns current authorization token from Ldp::Client
+      def authorization_key
+        self.ldp_source.client.http.headers.fetch("Authorization", nil)
+      end
+
+      # @param range [String] from #stream
+      # @param key [String] from #authorization_key
+      # @returns [Hash]
+      def headers(range, key, result = Hash.new)
+        result["Range"] = range if range
+        result["Authorization"] = key if key
+        result
       end
 
       class FileBody

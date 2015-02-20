@@ -19,16 +19,18 @@ describe ActiveFedora do
 
     let(:good_url) { ActiveFedora.fedora_config.credentials[:url] }
     let(:bad_url) { good_url.gsub('/rest', '/') }
+    let(:user) { ActiveFedora.fedora_config.credentials[:user] }
+    let(:password) { ActiveFedora.fedora_config.credentials[:password] }
 
     it "should connect OK" do 
       expect(ActiveFedora::Base.logger).to_not receive(:warn)
-      ActiveFedora::Fedora.new(url: good_url, base_path: '/test')
+      ActiveFedora::Fedora.new(url: good_url, base_path: '/test', user: user, password: password)
     end
 
     it "should not connect and warn" do 
       expect(ActiveFedora::Base.logger).to receive(:warn)
       expect {
-        ActiveFedora::Fedora.new(url: bad_url, base_path: '/test')
+        ActiveFedora::Fedora.new(url: bad_url, base_path: '/test', user: user, password: password)
       }.to raise_error Ldp::HttpError 
     end
   end

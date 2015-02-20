@@ -13,8 +13,16 @@ module ActiveFedora
       @config[:base_path] || '/'
     end
 
+    def user
+      @config[:user]
+    end
+
+    def password
+      @config[:password]
+    end
+
     def connection
-      @connection ||= CachingConnection.new(host)
+      @connection ||= CachingConnection.new(authorized_connection)
     end
 
     def ldp_resource_service
@@ -39,6 +47,12 @@ module ActiveFedora
     # Remove a leading slash from the base_path
     def root_resource_path
       @root_resource_path ||= base_path.sub(SLASH, BLANK)
+    end
+
+    def authorized_connection
+      connection = Faraday.new(host)
+      connection.basic_auth(user, password)
+      connection
     end
 
   end
