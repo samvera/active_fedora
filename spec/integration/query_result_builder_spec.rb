@@ -30,7 +30,7 @@ describe ActiveFedora::QueryResultBuilder do
       Object.send(:remove_const, :FooObject)
     end
     it "should return an array of objects that are of the class stored in active_fedora_model_s" do
-      query = "id\:#{RSolr.escape(@test_object.id)} OR id\:#{RSolr.escape(@foo_object.id)}"
+      query = "id\:#{RSolr.solr_escape(@test_object.id)} OR id\:#{RSolr.solr_escape(@foo_object.id)}"
       solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::QueryResultBuilder.reify_solr_results(solr_result)
       expect(result.length).to eq 2
@@ -40,7 +40,7 @@ describe ActiveFedora::QueryResultBuilder do
     end
 
     it 'should #reify a lightweight object as a new instance' do
-      query = "id\:#{RSolr.escape(@foo_object.id)}"
+      query = "id\:#{RSolr.solr_escape(@foo_object.id)}"
       solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::QueryResultBuilder.reify_solr_results(solr_result,{:load_from_solr=>true})
       expect(result.first).to be_instance_of FooObject

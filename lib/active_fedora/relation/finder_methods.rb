@@ -264,10 +264,10 @@ module ActiveFedora
         if value.empty?
           "-#{key}:['' TO *]"
         elsif value.is_a? Array
-          value.map { |val| "#{key}:#{RSolr.escape(val)}" }
+          value.map { |val| "#{key}:#{RSolr.solr_escape(val)}" }
         else
           key = SOLR_DOCUMENT_ID if (key === :id || key === :id)
-          "#{key}:#{RSolr.escape(value)}"
+          "#{key}:#{RSolr.solr_escape(value)}"
         end
       end
     end
