@@ -264,10 +264,10 @@ module ActiveFedora
         if value.empty?
           "-#{key}:['' TO *]"
         elsif value.is_a? Array
-          value.map { |val| "#{key}:#{SolrQueryBuilder.solr_escape(val)}" }
+          value.map { |val| "#{key}:#{solr_escape(val)}" }
         else
           key = SOLR_DOCUMENT_ID if (key === :id || key === :id)
-          "#{key}:#{SolrQueryBuilder.solr_escape(value)}"
+          "#{key}:#{solr_escape(value)}"
         end
       end
     end
@@ -283,5 +283,12 @@ module ActiveFedora
       end
     end
 
+
+    private
+      # Adds esaping for spaces which are not handled by RSolr.solr_escape
+      # See rsolr/rsolr#101
+      def solr_escape terms
+        RSolr.solr_escape(terms).gsub(/\s+/,"\\ ")
+      end
   end
 end
