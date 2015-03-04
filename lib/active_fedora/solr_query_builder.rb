@@ -35,12 +35,6 @@ module ActiveFedora
       clauses.empty? ? "id:NEVER_USE_THIS_ID" : clauses.join(" #{join_with} ".freeze)
     end
 
-    # Adds esaping for spaces which are not handled by RSolr.solr_escape
-    # See rsolr/rsolr#101
-    def self.solr_escape terms
-      RSolr.solr_escape(terms).gsub(/\s+/,"\\ ")
-    end
-
     private
       # Given an list of 2 element lists, transform to a list of solr clauses
       def self.pairs_to_clauses(pairs)
