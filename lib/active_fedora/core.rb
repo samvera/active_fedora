@@ -138,7 +138,7 @@ module ActiveFedora
         else
           id = "/#{id}" unless id.start_with? SLASH
           unless ActiveFedora.fedora.base_path == SLASH || id.start_with?("#{ActiveFedora.fedora.base_path}/")
-            id = ActiveFedora.fedora.base_path + id 
+            id = ActiveFedora.fedora.base_path + id
           end
           ActiveFedora.fedora.host + id
         end

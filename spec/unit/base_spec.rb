@@ -4,6 +4,30 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   it_behaves_like "An ActiveModel"
 
+  describe "id=" do
+    before do
+      class FooHistory < ActiveFedora::Base
+        property :title, predicate: ::RDF::DC.title
+      end
+    end
+    after do
+      Object.send(:remove_const, :FooHistory)
+    end
+
+    subject { FooHistory.new(title: ["A good title"]) }
+    before { subject.id = 9 }
+
+    it "is settable" do
+      expect(subject.id).to eq '9'
+      expect(subject.title).to eq ["A good title"]
+    end
+
+    it "is only settable once" do
+      expect { subject.id = 10 }.to raise_error "ID has already been set to 9"
+      expect(subject.id).to eq '9'
+    end
+  end
+
   describe 'descendants' do
     it "should record the decendants" do
       expect(ActiveFedora::Base.descendants).to include(ModsArticle, SpecialThing)
