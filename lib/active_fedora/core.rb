@@ -33,13 +33,14 @@ module ActiveFedora
     # Also, if +attrs+ does not contain +:id+ but does contain +:namespace+ it will pass the
     # +:namespace+ value to Fedora::Repository.nextid to generate the next id available within
     # the given namespace.
-    def initialize(attributes_or_resource_or_url = nil, &block)
+    def initialize(attributes_or_id = nil, &block)
       init_internals
-      attributes = initialize_resource_and_attributes(attributes_or_resource_or_url)
+      attributes = initialize_attributes(attributes_or_id)
+      @ldp_source = build_ldp_resource(attributes.delete(:id))
       raise IllegalOperation, "Attempting to recreate existing ldp_source: `#{ldp_source.subject}'" unless ldp_source.new?
       assert_content_model
       load_attached_files
-      self.attributes = attributes if attributes
+      self.attributes = attributes
 
       yield self if block_given?
       run_callbacks :initialize
@@ -193,33 +194,22 @@ module ActiveFedora
         end
       end
 
-      def initialize_resource_and_attributes attributes_or_resource_or_url
-        case attributes_or_resource_or_url
+      def initialize_attributes attributes_or_id
+        case attributes_or_id
           when String
-            @ldp_source = build_ldp_resource(attributes_or_resource_or_url)
-            @attributes = {}.with_indifferent_access
+            attributes = {id: attributes_or_id}.with_indifferent_access
           when Hash
-            attributes = attributes_or_resource_or_url
-
-            id = attributes.delete(:id)
-
+            attributes = attributes_or_id.with_indifferent_access
             # TODO: Remove when we decide using 'pid' is no longer supported.
-            if !id && attributes.has_key?(:pid)
+            if !attributes.key?(:id) && attributes.key?(:pid)
               Deprecation.warn Core, 'Initializing with :pid is deprecated and will be removed in active-fedora 10.0. Use :id instead'
-              id = attributes.delete(:pid)
+              attributes[:id] = attributes.delete(:pid)
             end
 
-            attributes = attributes.with_indifferent_access if attributes
-            @ldp_source = if id
-              build_ldp_resource(id)
-            else
-              build_ldp_resource
-            end
           when NilClass
-            @ldp_source = build_ldp_resource
             attributes = {}.with_indifferent_access
           else
-            raise ArgumentError, "#{attributes_or_resource_or_url.class} is not acceptable"
+            raise ArgumentError, "#{attributes_or_id.class} is not acceptable"
         end
         return attributes
       end
