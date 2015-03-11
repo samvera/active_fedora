@@ -36,7 +36,7 @@ describe ActiveFedora::SolrService do
       Object.send(:remove_const, :FooObject)
     end
     it "should return an array of objects that are of the class stored in active_fedora_model_s" do
-      query = "id\:#{RSolr.escape(@test_object.pid)} OR id\:#{RSolr.escape(@foo_object.pid)}"
+      query = "id\:#{RSolr.solr_escape(@test_object.pid)} OR id\:#{RSolr.solr_escape(@foo_object.pid)}"
       solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result)
       result.length.should == 2
@@ -46,7 +46,7 @@ describe ActiveFedora::SolrService do
     end
     
     it 'should load objects from solr data if a :load_from_solr option is passed in' do
-      query = "id\:#{RSolr.escape(@test_object.pid)} OR id\:#{RSolr.escape(@foo_object.pid)}"
+      query = "id\:#{RSolr.solr_escape(@test_object.pid)} OR id\:#{RSolr.solr_escape(@foo_object.pid)}"
       solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
       result.length.should == 2
@@ -67,7 +67,7 @@ describe ActiveFedora::SolrService do
     end
     
     it 'should #reify a lightweight object as a new instance' do
-      query = "id\:#{RSolr.escape(@foo_object.pid)}"
+      query = "id\:#{RSolr.solr_escape(@foo_object.pid)}"
       solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
       solr_foo = result.first
@@ -79,7 +79,7 @@ describe ActiveFedora::SolrService do
     end
     
     it 'should #reify! a lightweight object within the same instance' do
-      query = "id\:#{RSolr.escape(@foo_object.pid)}"
+      query = "id\:#{RSolr.solr_escape(@foo_object.pid)}"
       solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
       solr_foo = result.first
@@ -90,7 +90,7 @@ describe ActiveFedora::SolrService do
     end
     
     it 'should raise an exception when attempting to reify a first-class object' do
-      query = "id\:#{RSolr.escape(@foo_object.pid)}"
+      query = "id\:#{RSolr.solr_escape(@foo_object.pid)}"
       solr_result = ActiveFedora::SolrService.query(query)
       result = ActiveFedora::SolrService.reify_solr_results(solr_result,{:load_from_solr=>true})
       solr_foo = result.first
@@ -101,7 +101,7 @@ describe ActiveFedora::SolrService do
     end
   
     it 'should call load_instance_from_solr if :load_from_solr option passed in' do
-      query = "id\:#{RSolr.escape(@test_object.pid)} OR id\:#{RSolr.escape(@foo_object.pid)}"
+      query = "id\:#{RSolr.solr_escape(@test_object.pid)} OR id\:#{RSolr.solr_escape(@foo_object.pid)}"
       solr_result = ActiveFedora::SolrService.query(query)
       ActiveFedora::Base.should_receive(:load_instance_from_solr).once
       FooObject.should_receive(:load_instance_from_solr).once

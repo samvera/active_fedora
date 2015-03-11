@@ -233,10 +233,10 @@ module ActiveFedora
         if value.empty?
           "-#{key}:['' TO *]"
         elsif value.is_a? Array
-          value.map { |val| "#{key}:#{RSolr.escape(val)}" }
+          value.map { |val| "#{key}:#{solr_escape(val)}" }
         else
           key = SOLR_DOCUMENT_ID if (key === :id || key === :pid)
-          "#{key}:#{RSolr.escape(value)}"
+          "#{key}:#{solr_escape(value)}"
         end
       end
     end
@@ -248,5 +248,8 @@ module ActiveFedora
       end
     end
 
+    def solr_escape terms
+      RSolr.solr_escape(terms).gsub(/\s+/,"\\ ")
+    end
   end
 end
