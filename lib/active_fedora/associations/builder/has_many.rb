@@ -2,7 +2,7 @@ module ActiveFedora::Associations::Builder
   class HasMany < CollectionAssociation #:nodoc:
     self.macro = :has_many
 
-    self.valid_options += [:dependent, :inverse_of]
+    self.valid_options += [:as, :dependent, :inverse_of]
 
     def build
       reflection = super

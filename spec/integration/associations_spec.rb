@@ -24,6 +24,37 @@ describe ActiveFedora::Base do
     end
 
   end
+  
+  describe "explicit foreign key" do
+    before do
+      class FooThing < ActiveFedora::Base
+        has_many :bars, :class_name=>'BarThing', :predicate=>ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, :as=>:foothing
+      end
+
+      class BarThing < ActiveFedora::Base
+        belongs_to :foothing, :class_name=>'FooThing', :predicate=>ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
+      end
+    end
+    
+    after do
+      Object.send(:remove_const, :FooThing)
+      Object.send(:remove_const, :BarThing)
+    end
+    
+    let(:foo) { FooThing.create }
+    let(:bar) { BarThing.create }
+    
+    it "should associate from bar to foo" do
+      bar.foothing = foo
+      bar.save
+      expect(foo.bars).to eq [bar]
+    end
+    
+    it "should associate from foo to bar" do
+      foo.bars << bar
+      expect(bar.foothing).to eq foo
+    end
+  end
 
   describe "complex example" do
     before do
