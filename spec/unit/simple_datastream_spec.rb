@@ -62,5 +62,37 @@ describe ActiveFedora::SimpleDatastream do
       expect(solr[ActiveFedora::SolrQueryBuilder.solr_name('creation_date', type: :date)]).to eq "2012-01-15"
     end
   end
+  
+  describe "datastream configuration" do
+    let(:foo) do
+      ActiveFedora::Base.create! do |obj|
+        obj.add_file(%{<?xml version="1.0"?>\n<fields><fubar>test</fubar></fields>}, path:'someData')
+      end
+    end
+    let(:resource) { Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, foo.uri) }
+    let(:orm) { Ldp::Orm.new(resource) }
+
+    before do
+      class FooHistory < ActiveFedora::Base
+        has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
+          m.field "fubar", :string
+        end
+        has_attributes :fubar, datastream: 'someData', multiple: false
+      end
+
+      orm.graph.delete([orm.resource.subject_uri, ActiveFedora::RDF::Fcrepo::Model.hasModel, nil])
+      orm.graph.insert([orm.resource.subject_uri, ActiveFedora::RDF::Fcrepo::Model.hasModel, 'FooHistory'])
+      orm.save
+      foo.reload
+      foo.update_index
+    end
+    
+    after do
+      Object.send(:remove_const, :FooHistory)
+    end
+    
+    subject { FooHistory.find(foo.id) }
+    its(:fubar) { is_expected.to eq 'test' }
+  end
 
 end
