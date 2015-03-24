@@ -18,10 +18,6 @@ module ActiveFedora
       @terminology
     end
 
-    def self.default_attributes
-      super.merge(:mimeType => 'text/xml')
-    end
-
     def self.decorate_ng_xml(xml)
       xml.set_terminology terminology_options, &terminology
       xml.nom!
@@ -61,6 +57,12 @@ module ActiveFedora
 
     def respond_to? *args
       super || self.class.terminology.respond_to?(*args)
+    end
+
+    protected
+
+    def default_mime_type
+      'text/xml'
     end
   end
 end

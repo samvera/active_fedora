@@ -156,21 +156,6 @@ module ActiveFedora
       super || content_changed?
     end
 
-
-    class << self
-      def default_attributes
-        {}
-      end
-    end
-
-    def default_attributes
-      @default_attributes ||= self.class.default_attributes
-    end
-
-    def default_attributes= attributes
-      @default_attributes = default_attributes.merge attributes
-    end
-
     def original_name= name
       @original_name = name
     end
