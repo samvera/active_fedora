@@ -53,7 +53,10 @@ module ActiveFedora
       end
     end
 
-    # Adds datastream to the object.
+    # Add an ActiveFedora::File to the object.
+    # @param [ActiveFedora::File] file
+    # @param [String] file_path
+    # @param [Hash] opts
     # @return [String] path of the added datastream
     def attach_file(file, file_path, opts={})
       create_singleton_association(file_path)
@@ -80,9 +83,9 @@ module ActiveFedora
       add_file(file, opts)
     end
 
-    # Attach the given file to object
+    # Attach the given stream/string to object
     #
-    # @param [File] file the file to add
+    # @param [IO, String] file the file to add
     # @param [Hash] opts options: :dsid, :prefix, :mime_type
     # @option opts [String] :path The file path
     # @option opts [String] :prefix The path prefix (for auto-generated path)
