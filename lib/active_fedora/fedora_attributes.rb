@@ -5,7 +5,7 @@ module ActiveFedora
     included do
       include ActiveTriples::Properties
       include ActiveTriples::Reflection
-      delegate :rdf_subject, :get_values, to: :resource
+      delegate :rdf_subject, :get_values, :type, to: :resource
 
       property :has_model, predicate: ActiveFedora::RDF::Fcrepo::Model.hasModel
       property :create_date, predicate: ActiveFedora::RDF::Fcrepo4.created
@@ -75,6 +75,10 @@ module ActiveFedora
             end
             klass
         end
+      end
+
+      def type(uri)
+        resource_class.configure type: uri
       end
     end
   end
