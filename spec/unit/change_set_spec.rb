@@ -18,10 +18,12 @@ describe ActiveFedora::ChangeSet do
       class Book < ActiveFedora::Base
         belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
         property :title, predicate: ::RDF::DC.title
+        property :alt_id, predicate: ::RDF::DC.identifier
       end
 
       base.library_id = 'foo'
       base.title = ['bar']
+      base.alt_id = ['12345']
     end
     after do
       Object.send(:remove_const, :Library)
@@ -36,8 +38,8 @@ describe ActiveFedora::ChangeSet do
 
       it { is_expected.to be_kind_of Hash }
 
-      it "should have two elements" do
-        expect(subject.size).to eq 2
+      it "should have three elements" do
+        expect(subject.size).to eq 3
       end
     end
 

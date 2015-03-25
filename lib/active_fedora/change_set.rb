@@ -19,8 +19,8 @@ module ActiveFedora
 
     def changes
       @changes ||= changed_attributes.each_with_object({}) do |key, result|
-        if m = /^.*_ids?$/.match(key)
-          predicate = object.association(m[0].to_sym).reflection.predicate
+        if object.respond_to?(:association) && object.association(key.to_sym).present?
+          predicate = object.association(key.to_sym).reflection.predicate
           result[predicate] = graph.query(predicate: predicate)
         elsif object.class.properties.keys.include?(key)
           predicate = graph.reflections.reflect_on_property(key).predicate
