@@ -1,3 +1,68 @@
+8.0.1
+
+  2015-03-11: Backport solr escape patch [Chris Colvard]
+
+8.0.0
+
+  2015-01-07: Can assign single ActiveTriples::Resource to single-valued attribute
+  (fixes #653) [David Chandek-Stark]
+
+  2014-12-04: point to FCRepo 3.x stable branch [Benjamin Armintor]
+
+  2013-02-28: github issue 48 tests and YARD [Benjamin Armintor]
+
+  2014-12-02: Removed pending deprecations omitted in 8.0.0.rc1 Bumped version to
+  8.0.0.rc2 [David Chandek-Stark]
+
+  2014-12-02: Bumped version to 8.0.0.rc1 [David Chandek-Stark]
+
+  2014-11-28: Removed pending deprecations for version 8.0.0. [David
+  Chandek-Stark]
+
+  2014-11-19: add RDF::Vocabulary subclasses for Fcrepo and ProjectHydra [Benjamin
+  Armintor]
+
+  2014-11-24: rename ActiveFedora::Rdf to ActiveFedora::RDF [Benjamin Armintor]
+
+  2014-11-21: Adding optional yml paramters as comments so people know they exist
+  [Carolyn Cole]
+
+  2014-11-18: Makes sure all values are handled as arrays [Hector Correa]
+
+  2014-11-17: Bumped version to 8.0.0.pre1 [David Chandek-Stark]
+
+  2014-10-02: Remove ObjectResource from RdfDatastream [Tom Johnson]
+
+  2014-09-22: Factors out behavior from ActiveFedora::Rdf::ObjectResource to mixin
+  ActiveFedora::Rdf::Persistence. [David Chandek-Stark]
+
+v7.1.2
+
+  2014-11-05: Revert "clarified a comment" [Adam Wead]
+
+  2014-11-04: clarified a comment [Brian Maddy]
+
+  2014-10-21: Correction to comment example [Joe Atzberger]
+
+  2014-10-07: Bug #479: Typo in XSD filename value stuck in config generator
+  templates [Joe Atzberger]
+
+v7.1.1
+
+  2014-09-16: RdfDatastream#deserialize should always return an RDF::Graph. Fixes
+  #471 [Justin Coyne]
+
+  2014-08-15: Set default mimeType for NtriplesRDFDatastream to
+  'application/n-triples' per W3C recommendation.
+  http://www.w3.org/TR/n-triples/#n-triples-mediatype Fixes #464 [David
+  Chandek-Stark]
+
+  2014-08-04: RDFDatastream#content= patched to accept IO, matching
+  Rubydora::Datastream API Fixes #461 [David Chandek-Stark]
+
+  2014-07-30: Only set ds content in #create_datastream for managed and inline
+  [David Chandek-Stark]
+
 v7.1.0
 
   2014-07-17: Update Om and Rubydora depencencies [Justin Coyne]
