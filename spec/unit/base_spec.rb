@@ -32,15 +32,23 @@ describe ActiveFedora::Base do
     before do
       class FooHistory < ActiveFedora::Base
         type ::RDF::URI.new('http://example.com/foo')
+        property :title, predicate: ::RDF::DC.title
       end
     end
     after do
       Object.send(:remove_const, :FooHistory)
     end
 
-    subject { FooHistory.new().type }
+    subject { FooHistory.new.type }
 
     it { is_expected.to eq [RDF::URI('http://example.com/foo')] }
+
+    context "when type is called before propertes" do
+      subject { FooHistory.resource_class.reflect_on_property(:title) }
+      it "should not wipe out the properties" do
+        expect(subject).to be_kind_of ActiveTriples::NodeConfig
+      end
+    end
   end
 
   describe 'descendants' do
