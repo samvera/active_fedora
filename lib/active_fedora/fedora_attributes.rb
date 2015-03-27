@@ -65,9 +65,12 @@ module ActiveFedora
     module ClassMethods
       # We make a unique class, because properties belong to a class.
       # This keeps properties from different objects separate.
+      # Since the copy of properties can only happen once, we don't want to invoke it
+      # until all properties have been defined.
       def resource_class
         @generated_resource_class ||= begin
             klass = self.const_set(:GeneratedResourceSchema, Class.new(ActiveTriples::Resource))
+            klass.configure type: @type if @type
             klass.properties.merge(self.properties).each do |property, config|
               klass.property(config.term,
                              predicate: config.predicate,
@@ -77,8 +80,9 @@ module ActiveFedora
         end
       end
 
+      # Set the rdf type for this class
       def type(uri)
-        resource_class.configure type: uri
+        @type = uri
       end
     end
   end
