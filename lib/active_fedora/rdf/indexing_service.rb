@@ -22,9 +22,8 @@ module ActiveFedora::RDF
 
       def add_assertions(prefix_method, solr_doc = {})
         fields.each do |field_key, field_info|
-          values = resource.get_values(field_key)
           solr_field_key = solr_document_field_name(field_key, prefix_method)
-          Array(values).each do |val|
+          Array(field_info[:values]).each do |val|
             append_to_solr_doc(solr_doc, solr_field_key, field_info, val)
           end
         end
@@ -70,22 +69,31 @@ module ActiveFedora::RDF
         object.class.properties
       end
 
+      def index_config
+        object.class.index_config
+      end
+
       # returns a Hash, e.g.: {field => { values: [], type: :something, behaviors: [] }, ...}
       def fields
         field_map = {}.with_indifferent_access
 
-        properties.each do |name, config|
-          type = config[:type]
-          behaviors = config[:behaviors]
+        index_config.each do |name, index_field_config|
+          type = index_field_config.data_type
+          behaviors = index_field_config.behaviors
           next unless type and behaviors
-          next if config[:class_name] && config[:class_name] < ActiveFedora::Base
-          resource.query(subject: object.rdf_subject, predicate: config[:predicate]).each_statement do |statement|
-            field_map[name] ||= { values: [], type: type, behaviors: behaviors}
-            field_map[name][:values] << statement.object.to_s
-          end
+          next if kind_of_af_base?(name)
+          field_map[name] = { values: find_values(name), type: type, behaviors: behaviors}
         end
         field_map
       end
 
+      def kind_of_af_base?(name)
+        config = properties[name.to_s]
+        config && config[:class_name] && config[:class_name] < ActiveFedora::Base
+      end
+
+      def find_values(name)
+        object.send(name) || []
+      end
   end
 end

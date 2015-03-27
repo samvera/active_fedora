@@ -43,8 +43,10 @@ describe "Objects should be serialized to JSON" do
       end
 
       class DummyResource < ActiveFedora::RDFDatastream
-        property :license, predicate: ::RDF::DC[:license], class_name: DummySubnode do |index|
-          index.as :searchable, :displayable
+        Deprecation.silence(ActiveFedora::RDFDatastream) do
+          property :license, predicate: ::RDF::DC[:license], class_name: DummySubnode do |index|
+            index.as :searchable, :displayable
+          end
         end
         def serialization_format
           :ntriples
