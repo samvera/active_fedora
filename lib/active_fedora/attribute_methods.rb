@@ -1,5 +1,6 @@
 require 'active_support/core_ext/object'
 require 'active_support/core_ext/class/attribute'
+require 'active_support/core_ext/module/method_transplanting'
 
 module ActiveFedora
   module AttributeMethods
