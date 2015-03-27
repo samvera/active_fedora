@@ -282,20 +282,20 @@ module ActiveFedora
 
     module Streaming
       # @param range [String] the Range HTTP header
-      # @returns [Stream] an object that responds to each
+      # @return [Stream] an object that responds to each
       def stream(range = nil)
         uri = URI.parse(self.uri)
         FileBody.new(uri, headers(range, authorization_key))
       end
 
-      # @returns current authorization token from Ldp::Client
+      # @return [String] current authorization token from Ldp::Client
       def authorization_key
         self.ldp_source.client.http.headers.fetch("Authorization", nil)
       end
 
       # @param range [String] from #stream
       # @param key [String] from #authorization_key
-      # @returns [Hash]
+      # @return [Hash]
       def headers(range, key, result = Hash.new)
         result["Range"] = range if range
         result["Authorization"] = key if key
