@@ -110,7 +110,7 @@ ActiveFedora:
 ActiveFedora.init("/path/to/my/config/fedora.yml")
 ```
 
-If no predicate_mappings.yml file is found, ActiveFedora will use the
+If no `predicate_mappings.yml` file is found, ActiveFedora will use the
 default mappings.
 
 Acknowledgements
