@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe SolrQueryBuilder do
+describe ActiveFedora::SolrQueryBuilder do
   describe "raw_query" do
     it "should generate a raw query clause" do
       expect(ActiveFedora::SolrQueryBuilder.raw_query('id', "my:_ID1_")).to eq '_query_:"{!raw f=id}my:_ID1_"'

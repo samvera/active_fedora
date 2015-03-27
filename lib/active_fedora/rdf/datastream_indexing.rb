@@ -26,6 +26,10 @@ module ActiveFedora::RDF
       def indexer
         ActiveFedora::RDF::IndexingService
       end
+
+      def index_config
+        @index_config ||= ActiveFedora::Indexing::Map.new
+      end
     end
 
     protected

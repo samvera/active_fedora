@@ -134,26 +134,28 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
   describe "solr integration" do
     before(:all) do
-      class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :created, predicate: ::RDF::DC.created do |index|
-          index.as :sortable, :displayable
-          index.type :date
+      Deprecation.silence(ActiveFedora::RDFDatastream) do
+        class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+          property :created, predicate: ::RDF::DC.created do |index|
+            index.as :sortable, :displayable
+            index.type :date
+          end
+          property :title, predicate: ::RDF::DC.title do |index|
+            index.as :stored_searchable, :sortable
+            index.type :text
+          end
+          property :publisher, predicate: ::RDF::DC.publisher do |index|
+            index.as :facetable, :sortable, :stored_searchable
+          end
+          property :based_near, predicate: ::RDF::FOAF.based_near do |index|
+            index.as :facetable, :stored_searchable
+            index.type :text
+          end
+          property :related_url, predicate: ::RDF::RDFS.seeAlso do |index|
+            index.as :stored_searchable
+          end
+          property :rights, predicate: ::RDF::DC.rights
         end
-        property :title, predicate: ::RDF::DC.title do |index|
-          index.as :stored_searchable, :sortable
-          index.type :text
-        end
-        property :publisher, predicate: ::RDF::DC.publisher do |index|
-          index.as :facetable, :sortable, :stored_searchable
-        end
-        property :based_near, predicate: ::RDF::FOAF.based_near do |index|
-          index.as :facetable, :stored_searchable
-          index.type :text
-        end
-        property :related_url, predicate: ::RDF::RDFS.seeAlso do |index|
-          index.as :stored_searchable
-        end
-        property :rights, predicate: ::RDF::DC.rights
       end
     end
 
