@@ -1,3 +1,19 @@
+v9.0.6
+  2015-03-26: Setting type should not wipe out properties. Fixes #737 [Justin Coyne]
+
+v9.0.5
+  2015-03-25: Properties named *_id should not break the change set [Chris Colvard]
+
+  2015-03-24: Add rdf:type assertions to ActiveFedora::Base [Justin Coyne]
+
+  2015-03-24: Add documentation that differentiates attach_file from add_file [Justin Coyne]
+
+  2015-03-24: Remove #default_attributes. Fixes #732 [Chris Colvard]
+
+  2015-03-18: Make sure datastreams get configured on load as well as new/create [Michael B. Klein]
+
+  2015-03-17: Allow a has_many association to specify an explicit foreign key via the :as option [Michael B. Klein]
+
 v9.0.4
   2015-03-10: Refactor the AF::Base initializer [Justin Coyne]
 
