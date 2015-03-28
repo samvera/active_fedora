@@ -1,7 +1,10 @@
 require 'active_model/forbidden_attributes_protection'
+require 'deprecation'
 module ActiveFedora
   module Attributes
     extend ActiveSupport::Concern
+    extend Deprecation
+    self.deprecation_horizon = 'ActiveFedora 10.0'
     include ActiveModel::Dirty
     include ActiveModel::ForbiddenAttributesProtection
 
@@ -145,15 +148,8 @@ module ActiveFedora
       end
 
       def has_attributes(*fields, &block)
-        options = fields.pop
-        datastream = options.delete(:datastream).to_s
-        raise ArgumentError, "You must provide a datastream to has_attributes" if datastream.blank?
-        define_attribute_methods fields
-        fields.each do |f|
-          create_attribute_reader(f, datastream, options)
-          create_attribute_setter(f, datastream, options)
-          add_attribute_indexing_config(f, &block) if block_given?
-        end
+        Deprecation.warn(Attributes, "has_attributes is deprecated and will be removed in ActiveFedora 10.0. Use property instead")
+        define_delegated_accessor(*fields, &block)
       end
 
       # Reveal if the attribute has been declared unique
@@ -172,6 +168,18 @@ module ActiveFedora
       end
 
       def property name, properties={}, &block
+        if properties.key?(:predicate)
+          define_active_triple_accessor(name, properties, &block)
+        elsif properties.key?(:datastream)
+          define_delegated_accessor(name, properties.merge(multiple: true), &block)
+        else
+          raise "You must provide `:datastream' or `:predicate' options to property"
+        end
+      end
+
+      private
+
+      def define_active_triple_accessor(name, properties, &block)
         warn_duplicate_predicates name, properties
         properties = { multiple: true }.merge(properties)
         find_or_create_defined_attribute(name, nil, properties)
@@ -182,7 +190,17 @@ module ActiveFedora
         add_attribute_indexing_config(name, &block) if block_given?
       end
 
-      private
+      def define_delegated_accessor(*fields, &block)
+        options = fields.pop
+        datastream = options.delete(:datastream).to_s
+        raise ArgumentError, "You must provide a datastream to has_attributes" if datastream.blank?
+        define_attribute_methods fields
+        fields.each do |f|
+          create_attribute_reader(f, datastream, options)
+          create_attribute_setter(f, datastream, options)
+          add_attribute_indexing_config(f, &block) if block_given?
+        end
+      end
 
       def add_attribute_indexing_config(name, &block)
         # TODO the hash can be initalized to return on of these

@@ -7,8 +7,10 @@ describe ActiveFedora::Base do
         m.field "fubar", :string
         m.field "swank", :text
       end
-      has_attributes :fubar, datastream: 'someData', multiple: true
-      has_attributes :swank, datastream: 'someData', multiple: false
+      Deprecation.silence(ActiveFedora::Attributes) do
+        has_attributes :fubar, datastream: 'someData', multiple: true
+        has_attributes :swank, datastream: 'someData', multiple: false
+      end
 
       validates_presence_of :fubar
       validates_length_of :swank, :minimum=>5

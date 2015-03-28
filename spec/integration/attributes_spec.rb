@@ -1,5 +1,6 @@
 require 'spec_helper'
 
+
 describe "delegating attributes" do
   before :all do
     class PropertiesDatastream < ActiveFedora::OmDatastream
@@ -13,14 +14,18 @@ describe "delegating attributes" do
       has_metadata 'foo', type: ActiveFedora::SimpleDatastream do |m|
         m.field "title", :string
       end
-      has_attributes :title, datastream: 'foo', multiple: false
+      Deprecation.silence(ActiveFedora::Attributes) do
+        has_attributes :title, datastream: 'foo', multiple: false
+      end
     end
     class RdfObject < ActiveFedora::Base
       contains 'foo', class_name: 'PropertiesDatastream'
-      has_attributes :depositor, datastream: :foo, multiple: false do |index|
-        index.as :stored_searchable
+      Deprecation.silence(ActiveFedora::Attributes) do
+        has_attributes :depositor, datastream: :foo, multiple: false do |index|
+          index.as :stored_searchable
+        end
+        has_attributes :wrangler, datastream: :foo, multiple: true
       end
-      has_attributes :wrangler, datastream: :foo, multiple: true
       property :resource_type, predicate: ::RDF::DC.type do |index|
         index.as :stored_searchable, :facetable
       end

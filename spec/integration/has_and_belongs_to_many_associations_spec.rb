@@ -334,7 +334,9 @@ describe "Autosave" do
       has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
         m.field "title", :string
       end
-      has_attributes :title, datastream: 'foo'
+      Deprecation.silence(ActiveFedora::Attributes) do
+        has_attributes :title, datastream: 'foo'
+      end
     end
 
     class Component < ActiveFedora::Base
@@ -342,7 +344,9 @@ describe "Autosave" do
       has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
         m.field "description", :string
       end
-      has_attributes :description, datastream: 'foo'
+      Deprecation.silence(ActiveFedora::Attributes) do
+        has_attributes :description, datastream: 'foo'
+      end
     end
   end
 

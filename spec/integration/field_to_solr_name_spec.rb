@@ -16,7 +16,9 @@ describe "An object with RDF backed attributes" do
         end
       end
       has_metadata 'descMetadata', type: MyMetadata
-      has_attributes :title, :date_uploaded, datastream: 'descMetadata'
+      Deprecation.silence(ActiveFedora::Attributes) do
+        has_attributes :title, :date_uploaded, datastream: 'descMetadata'
+      end
     end
   end
 

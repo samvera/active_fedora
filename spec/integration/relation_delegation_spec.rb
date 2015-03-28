@@ -11,7 +11,9 @@ describe ActiveFedora::Model do
           m.field "baz", :string
         end
 
-        has_attributes :foo, :bar, :baz, datastream: 'properties', multiple: true
+        Deprecation.silence(ActiveFedora::Attributes) do
+          has_attributes :foo, :bar, :baz, datastream: 'properties', multiple: true
+        end
 
         def to_solr(doc = {})
           doc = super

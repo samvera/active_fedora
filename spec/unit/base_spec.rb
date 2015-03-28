@@ -70,8 +70,10 @@ describe ActiveFedora::Base do
         has_metadata "withText2", type: ActiveFedora::SimpleDatastream, autocreate: true do |m|
           m.field "fubar", :text
         end
-        has_attributes :fubar, datastream: 'withText', multiple: true
-        has_attributes :swank, datastream: 'someData', multiple: true
+        Deprecation.silence(ActiveFedora::Attributes) do
+          has_attributes :fubar, datastream: 'withText', multiple: true
+          has_attributes :swank, datastream: 'someData', multiple: true
+        end
       end
 
       class FooAdaptation < ActiveFedora::Base

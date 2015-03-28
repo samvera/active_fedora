@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
   before :each do
-    begin 
+    begin
       ActiveFedora::Base.find('test:123').delete
     rescue
     end
@@ -12,7 +12,9 @@ describe ActiveFedora::Base do
         m.field "fubar", :string
         m.field "swank", :text
       end
-      has_attributes :fubar, :swank, datastream: 'someData', multiple: true
+      Deprecation.silence(ActiveFedora::Attributes) do
+        has_attributes :fubar, :swank, datastream: 'someData', multiple: true
+      end
 
       after_initialize :a_init
       before_save :b_save
