@@ -89,7 +89,7 @@ module ActiveFedora
       end
 
       # Create a query with a clause for each key, value
-      # @param [Hash, Array<Array<String>>] args key is the predicate, value is the target_uri
+      # @param [Hash, Array<Array<String>>] field_pairs key is the predicate, value is the target_uri
       # @param [String] join_with ('AND') the value we're joining the clauses with
       # @example
       #   construct_query_for_rel [[:has_model, "info:fedora/afmodel:ComplexCollection"], [:has_model, "info:fedora/afmodel:ActiveFedora_Base"]], 'OR'

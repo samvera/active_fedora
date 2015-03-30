@@ -27,7 +27,7 @@ module ActiveFedora
       end
 
       ##
-      # @param [Class] an object to set as the resource class, Must be a descendant of 
+      # @param [Class] klass an object to set as the resource class, Must be a descendant of
       # ActiveTriples::Resource and include ActiveFedora::RDF::Persistence.
       #
       # @return [Class] the object resource class

@@ -86,7 +86,7 @@ module ActiveFedora
       # Note that this method doesn't actually execute the block, but stores it, to be executed
       # by any the implementation of the datastream(specified as :class_name)
       #
-      # @param [String] :name the handle to refer to this child as
+      # @param [String] name the handle to refer to this child as
       # @param [Hash] options
       # @option options [Class] :class_name The class that will represent this child, should extend ``ActiveFedora::File''
       # @option options [String] :url

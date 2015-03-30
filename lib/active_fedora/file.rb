@@ -12,8 +12,8 @@ module ActiveFedora
     define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, only: :after
 
-    # @param parent_or_url [ActiveFedora::Base, String, Hash, NilClass] the parent resource or the URI of this resource
-    # @param path_name [String] the path partial relative to the resource
+    # @param parent_or_url_or_hash [ActiveFedora::Base, String, Hash, NilClass] the parent resource or the URI of this resource
+    # @param path [String] the path partial relative to the resource
     # @param options [Hash]
     def initialize(parent_or_url_or_hash = nil, path=nil, options={})
       case parent_or_url_or_hash

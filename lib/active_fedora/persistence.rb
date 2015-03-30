@@ -23,8 +23,8 @@ module ActiveFedora
     # @param [Hash] options
     # @option options [Boolean] :update_index (true) set false to skip indexing
     # @return [Boolean] true if save was successful, otherwise false
-    def save(*args)
-      create_or_update(*args)
+    def save(*options)
+      create_or_update(*options)
     end
 
     def save!(*args)
@@ -72,9 +72,9 @@ module ActiveFedora
     # Delete the object from Fedora and Solr. Run any before/after/around callbacks for destroy
     # @param [Hash] opts
     # @option opts [Boolean] :eradicate if passed in, eradicate the tombstone from Fedora
-    def destroy(*args)
+    def destroy(*opts)
       raise ReadOnlyRecord if readonly?
-      delete(*args)
+      delete(*opts)
     end
 
     def eradicate

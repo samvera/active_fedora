@@ -4,7 +4,6 @@ module ActiveFedora::RDF
     attr_reader :object
 
     # @param obj [#resource, #rdf_subject] the object to build an solr document for. Its class must respond to 'properties'
-    # @param prefix_method [Lambda] This method gets the original name of the field and the options passed in. It should return the name of the field in the solr document
     def initialize(obj)
       @object = obj
     end

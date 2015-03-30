@@ -86,7 +86,7 @@ module ActiveFedora
     # Attach the given stream/string to object
     #
     # @param [IO, String] file the file to add
-    # @param [Hash] opts options: :dsid, :prefix, :mime_type
+    # @param [Hash] args options: :dsid, :prefix, :mime_type
     # @option opts [String] :path The file path
     # @option opts [String] :prefix The path prefix (for auto-generated path)
     # @option opts [String] :mime_type The Mime-Type of the file
