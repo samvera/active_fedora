@@ -7,21 +7,23 @@ describe ActiveFedora::NtriplesRDFDatastream do
       property :size
     end
 
-    class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-      property :title, predicate: ::RDF::DC.title do |index|
-        index.as :stored_searchable, :facetable
+    Deprecation.silence(ActiveFedora::RDFDatastream) do
+      class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+        property :title, predicate: ::RDF::DC.title do |index|
+          index.as :stored_searchable, :facetable
+        end
+        property :date_uploaded, predicate: ::RDF::DC.dateSubmitted do |index|
+          index.type :date
+          index.as :stored_searchable, :sortable
+        end
+        property :filesize, predicate: FileVocabulary.size do |index|
+          index.type :integer
+          index.as :stored_sortable
+        end
+        property :part, predicate: ::RDF::DC.hasPart
+        property :based_near, predicate: ::RDF::FOAF.based_near
+        property :related_url, predicate: ::RDF::RDFS.seeAlso
       end
-      property :date_uploaded, predicate: ::RDF::DC.dateSubmitted do |index|
-        index.type :date
-        index.as :stored_searchable, :sortable
-      end
-      property :filesize, predicate: FileVocabulary.size do |index|
-        index.type :integer
-        index.as :stored_sortable
-      end
-      property :part, predicate: ::RDF::DC.hasPart
-      property :based_near, predicate: ::RDF::FOAF.based_near
-      property :related_url, predicate: ::RDF::RDFS.seeAlso
     end
 
     class RdfTest < ActiveFedora::Base

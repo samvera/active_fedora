@@ -17,7 +17,9 @@ describe "delegating attributes" do
     end
     class RdfObject < ActiveFedora::Base
       contains 'foo', class_name: 'PropertiesDatastream'
-      has_attributes :depositor, datastream: :foo, multiple: false
+      has_attributes :depositor, datastream: :foo, multiple: false do |index|
+        index.as :stored_searchable
+      end
       has_attributes :wrangler, datastream: :foo, multiple: true
       property :resource_type, predicate: ::RDF::DC.type do |index|
         index.as :stored_searchable, :facetable
@@ -29,6 +31,14 @@ describe "delegating attributes" do
     Object.send(:remove_const, :TitledObject)
     Object.send(:remove_const, :RdfObject)
     Object.send(:remove_const, :PropertiesDatastream)
+  end
+
+  describe "#index_config" do
+    subject { RdfObject.index_config }
+    it "should have configuration " do
+      expect(subject[:resource_type].behaviors).to eq [:stored_searchable, :facetable]
+      expect(subject[:depositor].behaviors).to eq [:stored_searchable]
+    end
   end
 
   context "with a simple datastream" do

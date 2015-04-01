@@ -16,6 +16,17 @@ module ActiveFedora
         @subject_block ||= lambda { |ds| parent_uri(ds) }
       end
 
+      def property(name, *args, &block)
+        super
+        add_attribute_indexing_config(name, &block) if block_given?
+      end
+
+      def add_attribute_indexing_config(name, &block)
+        Deprecation.warn(RDFDatastream, "Adding indexing to datastreams is deprecated")
+        # TODO the hash can be initalized to return on of these
+        index_config[name] ||= ActiveFedora::Indexing::Map::IndexObject.new &block
+      end
+
       # Trim the last segment off the URI to get the parents uri
       def parent_uri(ds)
         m = /^(.*)\/[^\/]*$/.match(ds.uri)

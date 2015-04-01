@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe QueryResultBuilder do
+describe ActiveFedora::QueryResultBuilder do
   describe "reify solr results" do
     before(:all) do
       class AudioRecord
