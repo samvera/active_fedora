@@ -38,7 +38,6 @@ module ActiveFedora
       return to_a.find { |*block_args| yield(*block_args) } if block_given?
       options = args.extract_options!
       options = options.dup
-
       cast = if @klass == ActiveFedora::Base && !options.has_key?(:cast)
         true
       else 
@@ -198,12 +197,20 @@ module ActiveFedora
         ActiveFedora::Base
       else
         # The true class may be a subclass of @klass, so always use from_class_uri
-        Model.from_class_uri(has_model_value(resource)) || ActiveFedora::Base
+        resource_class = Model.from_class_uri(has_model_value(resource)) || ActiveFedora::Base
+        unless equivalent_class?(resource_class)
+          raise ActiveFedora::ActiveFedoraError.new("Model mismatch. Expected #{@klass}. Got: #{resource_class}") 
+        end
+        resource_class
       end
     end
 
     def has_model_value(resource)
       resource.graph.query([nil, ActiveFedora::RDF::Fcrepo::Model.hasModel, nil]).first.object.to_s
+    end
+
+    def equivalent_class?(other_class)
+      other_class <= @klass
     end
 
     def find_with_ids(ids, cast)

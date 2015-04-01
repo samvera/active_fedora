@@ -286,6 +286,39 @@ describe ActiveFedora::Base do
       end
     end
 
+    describe "when fetching an existing object" do
+      before do
+        class Dog < ActiveFedora::Base; end
+        class BigDog < Dog; end
+        class Cat < ActiveFedora::Base; end
+        @dog = Dog.create
+        @big_dog = BigDog.create
+      end
+      it "should detect class mismatch" do
+        expect {
+          Cat.find @dog.id
+        }.to raise_error(ActiveFedora::ActiveFedoraError)
+      end
+
+      it "should not accept parent class into a subclass" do
+        expect {
+          BigDog.find @dog.id
+        }.to raise_error(ActiveFedora::ActiveFedoraError)
+      end
+
+      it "should accept a subclass into a parent class" do
+        # We could prevent this altogether since loading a subclass into
+        # a parent class (a BigDog into a Dog) would result in lost of 
+        # data if the object is saved back and the subclass has more 
+        # properties than the parent class. However, it does seem reasonable 
+        # that people might want to use them interchangeably (after all  
+        # a BigDog is a Dog) and therefore we allow for it.
+        expect {
+          Dog.find @big_dog.id
+        }.not_to raise_error    
+      end
+    end
+
     describe "setting belongs_to" do
       before do
         @library = Library.new()
