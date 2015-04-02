@@ -72,4 +72,8 @@ module ActiveFedora #:nodoc:
   # Transactions are currently incomplete
   class Rollback < ActiveFedoraError
   end
+
+  # Raised when Fedora returns a version without a create date
+  class VersionLacksCreateDate < ActiveFedoraError
+  end
 end
