@@ -28,8 +28,10 @@ describe ActiveFedora::Base do
       end
 
       has_metadata :type=>BarStream, :name=>"xmlish"
-      has_attributes :fubar, datastream: 'withText', multiple: false
-      has_attributes :duck, datastream: 'xmlish', multiple: false
+      Deprecation.silence(ActiveFedora::Attributes) do
+        has_attributes :fubar, datastream: 'withText', multiple: false
+        has_attributes :duck, datastream: 'xmlish', multiple: false
+      end
     end
     before :each do
       @n = BarHistory.new()

@@ -13,8 +13,10 @@ describe ActiveFedora::Base do
         m.field "title", :string
       end
       has_metadata "bar", type: MyDatastream
-      has_attributes :title, datastream: 'foo' # Om backed property
-      has_attributes :publisher, datastream: 'bar' # RDF backed property
+      Deprecation.silence(ActiveFedora::Attributes) do
+        has_attributes :title, datastream: 'foo' # Om backed property
+        has_attributes :publisher, datastream: 'bar' # RDF backed property
+      end
     end
   end
 

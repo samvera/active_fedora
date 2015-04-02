@@ -26,8 +26,10 @@ describe ActiveFedora::RDFDatastream do
 
     class DummyAsset < ActiveFedora::Base
       has_metadata  'descMetadata', type: DummyResource
-      has_attributes :title, :license, datastream: 'descMetadata', multiple: true
-      has_attributes :relation, datastream: 'descMetadata', at: [:license, :relation], multiple: false
+      Deprecation.silence(ActiveFedora::Attributes) do
+        has_attributes :title, :license, datastream: 'descMetadata', multiple: true
+        has_attributes :relation, datastream: 'descMetadata', at: [:license, :relation], multiple: false
+      end
     end
   end
 

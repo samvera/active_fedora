@@ -28,8 +28,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
     class RdfTest < ActiveFedora::Base
       has_metadata 'rdf', type: MyDatastream
-      has_attributes :based_near, :related_url, :part, :date_uploaded, datastream: 'rdf', multiple: true
-      has_attributes :title, :filesize, datastream: 'rdf', multiple: false
+      Deprecation.silence(ActiveFedora::Attributes) do
+        has_attributes :based_near, :related_url, :part, :date_uploaded, datastream: 'rdf', multiple: true
+        has_attributes :title, :filesize, datastream: 'rdf', multiple: false
+      end
     end
     @subject = RdfTest.new
   end
@@ -218,7 +220,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
       end
       class Foobar < ActiveFedora::Base 
         has_metadata 'rdf', type: TitleDatastream
-        has_attributes :title, datastream: 'rdf', multiple: true
+        Deprecation.silence(ActiveFedora::Attributes) do
+          has_attributes :title, datastream: 'rdf', multiple: true
+        end
       end
       @subject = Foobar.new
       @subject.title = ["title1", "title2", "title3"]

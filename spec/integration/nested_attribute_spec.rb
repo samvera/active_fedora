@@ -8,7 +8,9 @@ describe "NestedAttribute behavior" do
         m.field "uno", :string
         m.field "dos", :string
       end
-      has_attributes :uno, :dos, datastream: 'someData', multiple: false
+      Deprecation.silence(ActiveFedora::Attributes) do
+        has_attributes :uno, :dos, datastream: 'someData', multiple: false
+      end
     end
 
     # base Car class, used in test for association updates and :allow_destroy flag

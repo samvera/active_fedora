@@ -187,7 +187,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
       before(:each) do
         class Foo < ActiveFedora::Base
           has_metadata "descMetadata", type: MyDatastream
-          has_attributes :created, :title, :publisher, :based_near, :related_url, :rights, datastream: :descMetadata, multiple: true
+          Deprecation.silence(ActiveFedora::Attributes) do
+            has_attributes :created, :title, :publisher, :based_near, :related_url, :rights, datastream: :descMetadata, multiple: true
+          end
         end
         @obj = MyDatastream.new
         @obj.created = Date.parse("2012-03-04")

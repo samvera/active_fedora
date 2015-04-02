@@ -33,6 +33,34 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :BarStream2)
     end
 
+    describe "#property" do
+      context "with an xml property" do
+        before do
+          class BarHistory4 < ActiveFedora::Base
+            has_metadata type: BarStream2, name: "xmlish"
+            property :cow, datastream: 'xmlish'
+          end
+        end
+        after do
+          Object.send(:remove_const, :BarHistory4)
+        end
+
+        let(:obj) { BarHistory4.new }
+
+        before { obj.cow = ['one', 'two'] }
+        describe "the object accessor" do
+          subject { obj.cow }
+          it { is_expected.to eq ['one', 'two'] }
+        end
+
+        describe "the datastream accessor" do
+          subject { obj.xmlish.cow }
+          it { is_expected.to eq ['one', 'two'] }
+        end
+
+      end
+    end
+
     describe "first level delegation" do
       before :all do
         class BarHistory2 < ActiveFedora::Base
@@ -50,12 +78,14 @@ describe ActiveFedora::Base do
           end
 
           has_metadata :type=>BarStream2, :name=>"xmlish"
-          has_attributes :cow, datastream: 'xmlish'                      # for testing the default value of multiple
-          has_attributes :fubar, datastream: 'withText', multiple: true  # test alternate datastream
-          has_attributes :pig, datastream: 'xmlish', multiple: false
-          has_attributes :horse, datastream: 'xmlish', multiple: true
-          has_attributes :duck, datastream: 'xmlish', :at=>[:waterfowl, :ducks, :duck], multiple: true
-          has_attributes :animal_id, datastream: 'someData', multiple: false
+          Deprecation.silence(ActiveFedora::Attributes) do
+            has_attributes :cow, datastream: 'xmlish'                      # for testing the default value of multiple
+            has_attributes :fubar, datastream: 'withText', multiple: true  # test alternate datastream
+            has_attributes :pig, datastream: 'xmlish', multiple: false
+            has_attributes :horse, datastream: 'xmlish', multiple: true
+            has_attributes :duck, datastream: 'xmlish', :at=>[:waterfowl, :ducks, :duck], multiple: true
+            has_attributes :animal_id, datastream: 'someData', multiple: false
+          end
 
           property :goose, predicate: ::RDF::URI.new('http://example.com#hasGoose')
 
@@ -253,7 +283,9 @@ describe ActiveFedora::Base do
       before :all do
         class BarHistory2 < ActiveFedora::Base
           has_metadata 'xmlish', :type=>BarStream2
-          has_attributes :donkey, :cow, datastream: 'xmlish', multiple: true
+          Deprecation.silence(ActiveFedora::Attributes) do
+            has_attributes :donkey, :cow, datastream: 'xmlish', multiple: true
+          end
         end
         class BarHistory3 < BarHistory2
         end
@@ -287,8 +319,10 @@ describe ActiveFedora::Base do
       end
       class BarHistory4 < ActiveFedora::Base
         has_metadata 'rdfish', :type=>BarRdfDatastream
-        has_attributes :title, datastream: 'rdfish', multiple: true
-        has_attributes :description, datastream: 'rdfish', multiple: false
+        Deprecation.silence(ActiveFedora::Attributes) do
+          has_attributes :title, datastream: 'rdfish', multiple: true
+          has_attributes :description, datastream: 'rdfish', multiple: false
+        end
       end
     end
 
@@ -330,7 +364,9 @@ describe ActiveFedora::Base do
 
     describe "has_attributes" do
       it "should raise an error" do
-        expect {subject.has_attributes :title, :description, multiple: true}.to raise_error
+        Deprecation.silence(ActiveFedora::Attributes) do
+          expect {subject.has_attributes :title, :description, multiple: true}.to raise_error
+        end
       end
     end
   end
@@ -339,7 +375,9 @@ describe ActiveFedora::Base do
   context "when an unknown datastream is specified" do
     before :all do
       class BarHistory4 < ActiveFedora::Base
-        has_attributes :description, datastream: 'rdfish', multiple: true
+        Deprecation.silence(ActiveFedora::Attributes) do
+          has_attributes :description, datastream: 'rdfish', multiple: true
+        end
       end
     end
 
@@ -372,7 +410,9 @@ describe ActiveFedora::Base do
       end
       class BarHistory4 < ActiveFedora::Base
         has_metadata 'rdfish', :type=>BarRdfDatastream
-        has_attributes :description, datastream: :rdfish
+        Deprecation.silence(ActiveFedora::Attributes) do
+          has_attributes :description, datastream: :rdfish
+        end
       end
     end
 

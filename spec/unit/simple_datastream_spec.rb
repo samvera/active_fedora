@@ -77,7 +77,9 @@ describe ActiveFedora::SimpleDatastream do
         has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
           m.field "fubar", :string
         end
-        has_attributes :fubar, datastream: 'someData', multiple: false
+        Deprecation.silence(ActiveFedora::Attributes) do
+          has_attributes :fubar, datastream: 'someData', multiple: false
+        end
       end
 
       orm.graph.delete([orm.resource.subject_uri, ActiveFedora::RDF::Fcrepo::Model.hasModel, nil])

@@ -12,8 +12,10 @@ describe "Objects should be serialized to JSON" do
           m.field "foo", :text
           m.field "bar", :text
         end
-        has_attributes :foo, datastream: 'descMetadata', multiple: true
-        has_attributes :bar, datastream: 'descMetadata', multiple: false
+        Deprecation.silence(ActiveFedora::Attributes) do
+          has_attributes :foo, datastream: 'descMetadata', multiple: true
+          has_attributes :bar, datastream: 'descMetadata', multiple: false
+        end
         property :title, predicate: ::RDF::DC.title
       end
     end
@@ -55,7 +57,9 @@ describe "Objects should be serialized to JSON" do
 
       class DummyAsset < ActiveFedora::Base
         has_metadata  'descMetadata', type: DummyResource
-        has_attributes :relation, datastream: 'descMetadata', at: [:license, :relation], multiple: false
+        Deprecation.silence(ActiveFedora::Attributes) do
+          has_attributes :relation, datastream: 'descMetadata', at: [:license, :relation], multiple: false
+        end
       end
     end
 
