@@ -206,7 +206,24 @@ module ActiveFedora
     end
 
     def has_model_value(resource)
-      resource.graph.query([nil, ActiveFedora::RDF::Fcrepo::Model.hasModel, nil]).first.object.to_s
+      best_model_match = nil
+
+      resource.graph.query([nil, ActiveFedora::RDF::Fcrepo::Model.hasModel, nil]).each do |rg|
+
+        model_value = Model.from_class_uri(rg.object.to_s)
+
+        if model_value
+
+          best_model_match ||= model_value
+
+          # If there is an inheritance structure, use the most specific case.
+          if best_model_match > model_value
+            best_model_match = model_value
+          end
+        end
+      end
+
+      best_model_match.to_s
     end
 
     def equivalent_class?(other_class)
