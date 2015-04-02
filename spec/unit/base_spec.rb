@@ -51,6 +51,50 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe ".rdf_label" do
+    context "on a concrete class" do
+      before do
+        class FooHistory < ActiveFedora::Base
+          rdf_label ::RDF::DC.title
+          property :title, predicate: ::RDF::DC.title
+        end
+      end
+      after do
+        Object.send(:remove_const, :FooHistory)
+      end
+
+      let(:instance) { FooHistory.new(title: ['A label']) }
+      subject { instance.rdf_label }
+
+      it { is_expected.to eq ['A label'] }
+    end
+
+    context "on an inherited class" do
+      before do
+        class Agent < ActiveFedora::Base
+          rdf_label ::RDF::FOAF.name
+          property :foaf_name, predicate: ::RDF::FOAF.name
+        end
+        class Person < Agent
+          rdf_label ::RDF::URI('http://example.com/foo')
+          property :job, predicate: ::RDF::URI('http://example.com/foo')
+        end
+        class Creator < Person
+        end
+      end
+      after do
+        Object.send(:remove_const, :Person)
+        Object.send(:remove_const, :Agent)
+        Object.send(:remove_const, :Creator)
+      end
+
+      let(:instance) { Creator.new(foaf_name: ['Carolyn'], job: ['Developer']) }
+      subject { instance.rdf_label }
+
+      it { is_expected.to eq ['Developer'] }
+    end
+  end
+
   describe 'descendants' do
     it "should record the decendants" do
       expect(ActiveFedora::Base.descendants).to include(ModsArticle, SpecialThing)
