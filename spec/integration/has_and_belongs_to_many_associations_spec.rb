@@ -5,14 +5,6 @@ describe ActiveFedora::Base do
     before do
       class Book < ActiveFedora::Base
         has_and_belongs_to_many :topics, predicate: ::RDF::FOAF.primaryTopic, inverse_of: :books
-        has_and_belongs_to_many :collections, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection
-      end
-
-      class SpecialInheritedBook < Book
-      end
-
-
-      class Collection < ActiveFedora::Base
       end
 
       class Topic < ActiveFedora::Base
@@ -21,54 +13,53 @@ describe ActiveFedora::Base do
     end
 
     after do
-      Object.send(:remove_const, :SpecialInheritedBook)
       Object.send(:remove_const, :Book)
-      Object.send(:remove_const, :Collection)
       Object.send(:remove_const, :Topic)
     end
 
     describe "an unsaved instance" do
       let(:topic1) { Topic.create }
-      before do
-        @book = Book.create
-      end
+      let(:book) { Book.create }
 
       it "habtm should set and remove relationships bidirectionally" do
-        @book.topics << topic1
-        expect(@book.topics).to eq [topic1]
-        expect(topic1.books).to eq [@book]
-        expect(topic1.reload.books).to eq [@book]
+        book.topics << topic1
+        expect(book.topics).to eq [topic1]
+        expect(topic1.books).to eq [book]
+        expect(topic1.reload.books).to eq [book]
 
-        @book.topics.delete(topic1)
-        expect(@book.topics).to be_empty
+        book.topics.delete(topic1)
+        expect(book.topics).to be_empty
         expect(topic1.books).to be_empty
       end
 
       it "Should allow for more than 10 items" do
         (1..12).each do
-          @book.topics << Topic.create
+          book.topics << Topic.create
         end
-        @book.save
-        expect(@book.topics.count).to eq 12
-        book2 = Book.find(@book.id)
+        book.save
+        expect(book.topics.count).to eq 12
+        book2 = Book.find(book.id)
         expect(book2.topics.count).to eq 12
       end
 
       context "with subclassed objects" do
+        before do
+          class SpecialInheritedBook < Book
+          end
+        end
+
+        after do
+          Object.send(:remove_const, :SpecialInheritedBook)
+        end
+
         let!(:special_book) { SpecialInheritedBook.create }
         it "Should find inherited objects along with base objects" do
-          @book.topics << topic1
+          book.topics << topic1
           special_book.topics << topic1
-          expect(topic1.books).to eq [@book, special_book]
-          expect(topic1.reload.books).to eq [@book, special_book]
+          expect(topic1.books).to match_array [book, special_book]
+          expect(topic1.reload.books).to match_array [book, special_book]
         end
       end
-
-      it "Should cast found books to the correct cmodel" do
-        topic1.books[0].class == Book
-        topic1.books[1].class == SpecialInheritedBook
-      end
-
     end
 
     describe "a saved instance" do
@@ -297,91 +288,91 @@ describe ActiveFedora::Base do
       end
     end
   end
-end
 
-describe "create" do
-  before do
-    class Book < ActiveFedora::Base
-      has_and_belongs_to_many :collections, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection
-    end
-
-    class Collection < ActiveFedora::Base
-      property :title, predicate: ::RDF::DC.title
-    end
-  end
-
-  after do
-    Object.send(:remove_const, :Book)
-    Object.send(:remove_const, :Collection)
-  end
-
-  let(:book) { Book.create }
-
-  it "should create" do
-    collection = book.collections.create(title: ["Permanent"])
-    expect(collection).to be_kind_of Collection
-    expect(book.collections).to include collection
-    book.save
-    expect(book.reload.collections.first.title).to eq ['Permanent']
-  end
-end
-
-
-describe "Autosave" do
-  before do
-    class Item < ActiveFedora::Base
-      has_many :components
-      has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
-        m.field "title", :string
+  describe "create" do
+    before do
+      class Book < ActiveFedora::Base
+        has_and_belongs_to_many :collections, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection
       end
-      Deprecation.silence(ActiveFedora::Attributes) do
-        has_attributes :title, datastream: 'foo'
+
+      class Collection < ActiveFedora::Base
+        property :title, predicate: ::RDF::DC.title
       end
     end
 
-    class Component < ActiveFedora::Base
-      has_and_belongs_to_many :items, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
-      has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
-        m.field "description", :string
-      end
-      Deprecation.silence(ActiveFedora::Attributes) do
-        has_attributes :description, datastream: 'foo'
-      end
+    after do
+      Object.send(:remove_const, :Book)
+      Object.send(:remove_const, :Collection)
+    end
+
+    let(:book) { Book.create }
+
+    it "should create" do
+      collection = book.collections.create(title: ["Permanent"])
+      expect(collection).to be_kind_of Collection
+      expect(book.collections).to include collection
+      book.save
+      expect(book.reload.collections.first.title).to eq ['Permanent']
     end
   end
 
-  after do
-    Object.send(:remove_const, :Item)
-    Object.send(:remove_const, :Component)
-  end
 
-  describe "From the has_and_belongs_to_many side" do
-    describe "dependent records" do
-      let(:component) { Component.create(items: [Item.new(title: 'my title')]) }
+  describe "Autosave" do
+    before do
+      class Item < ActiveFedora::Base
+        has_many :components
+        has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
+          m.field "title", :string
+        end
+        Deprecation.silence(ActiveFedora::Attributes) do
+          has_attributes :title, datastream: 'foo'
+        end
+      end
 
-      it "should be saved" do
-        component.reload
-        expect(component.items.first.title).to eq 'my title'
+      class Component < ActiveFedora::Base
+        has_and_belongs_to_many :items, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
+        has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
+          m.field "description", :string
+        end
+        Deprecation.silence(ActiveFedora::Attributes) do
+          has_attributes :description, datastream: 'foo'
+        end
       end
     end
 
-    describe "shifting" do
-      let(:component) { Component.new }
-      let(:item) { Item.create }
+    after do
+      Object.send(:remove_const, :Item)
+      Object.send(:remove_const, :Component)
+    end
 
-      it "should set item_ids" do
-        component.items << item
-        expect(component.item_ids).to eq [item.id]
+    describe "From the has_and_belongs_to_many side" do
+      describe "dependent records" do
+        let(:component) { Component.create(items: [Item.new(title: 'my title')]) }
+
+        it "should be saved" do
+          component.reload
+          expect(component.items.first.title).to eq 'my title'
+        end
+      end
+
+      describe "shifting" do
+        let(:component) { Component.new }
+        let(:item) { Item.create }
+
+        it "should set item_ids" do
+          component.items << item
+          expect(component.item_ids).to eq [item.id]
+        end
       end
     end
-  end
 
-  describe "From the has_many side" do
-    let(:item) { Item.create(components: [Component.new(description: 'my description')]) }
+    describe "From the has_many side" do
+      let(:item) { Item.create(components: [Component.new(description: 'my description')]) }
 
-    it "should save dependent records" do
-      item.reload
-      expect(item.components.first.description).to eq 'my description'
+      it "should save dependent records" do
+        item.reload
+        expect(item.components.first.description).to eq 'my description'
+      end
     end
   end
 end
