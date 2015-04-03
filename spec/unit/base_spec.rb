@@ -52,6 +52,13 @@ describe ActiveFedora::Base do
   end
 
   describe 'descendants' do
+    before do
+      class SpecialThing < ActiveFedora::Base
+      end
+    end
+    after do
+      Object.send(:remove_const, :SpecialThing)
+    end
     it "should record the decendants" do
       expect(ActiveFedora::Base.descendants).to include(ModsArticle, SpecialThing)
     end
