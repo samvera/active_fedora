@@ -25,6 +25,10 @@ module ActiveFedora
       @connection ||= CachingConnection.new(authorized_connection)
     end
 
+    def clean_connection
+      @clean_connection ||= CleanConnection.new(connection)
+    end
+
     def ldp_resource_service
       @service ||= LdpResourceService.new(connection)
     end

@@ -49,6 +49,7 @@ module ActiveFedora #:nodoc:
     autoload :CachingConnection
     autoload :Callbacks
     autoload :ChangeSet
+    autoload :CleanConnection
     autoload :Config
     autoload :Core
     autoload :Datastream
