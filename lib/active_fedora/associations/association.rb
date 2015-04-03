@@ -17,7 +17,7 @@ module ActiveFedora
         reflection.check_validity!
         @owner, @reflection = owner, reflection
         reset
-        # construct_scope
+        reset_scope
       end
 
       # Resets the \loaded flag to +false+ and sets the \target to +nil+.
@@ -30,7 +30,7 @@ module ActiveFedora
       # Reloads the \target and returns +self+ on success.
       def reload
         reset
-        # construct_scope
+        reset_scope
         load_target
         self unless @target.nil?
       end
@@ -77,6 +77,10 @@ module ActiveFedora
         if klass
           @association_scope ||= AssociationScope.new(self).scope
         end
+      end
+
+      def reset_scope
+        @association_scope = nil
       end
 
       # Set the inverse association, if possible
