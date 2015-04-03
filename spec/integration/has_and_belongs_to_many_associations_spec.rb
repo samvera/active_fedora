@@ -316,6 +316,33 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe "build" do
+    before do
+      class Book < ActiveFedora::Base
+        has_and_belongs_to_many :collections, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection
+      end
+
+      class Collection < ActiveFedora::Base
+        property :title, predicate: ::RDF::DC.title
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :Book)
+      Object.send(:remove_const, :Collection)
+    end
+
+    let(:book) { Book.create }
+
+    it "should create the association on save" do
+      book.collections.build(title: ["Permanent"])
+      book.save
+      book.reload
+      expect(book.collections.size).to eq 1
+      expect(book.collections.first).to be_kind_of Collection
+    end
+  end
+
 
   describe "Autosave" do
     before do
