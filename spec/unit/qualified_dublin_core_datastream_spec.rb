@@ -3,12 +3,6 @@ require 'spec_helper'
 describe ActiveFedora::QualifiedDublinCoreDatastream do
   DC_ELEMENTS = [:contributor, :coverage, :creator, :date, :description, :identifier, :language, :publisher, :relation, :rights, :source]
 
-  before(:all) do
-    # Load Sample OralHistory Model
-    require File.join( File.dirname(__FILE__), "..", "samples","oral_history_sample_model" )
-    @dc_terms = []
-  end
-
   let(:sample_xml) do "<dc xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:dcterms='http://purl.org/dc/terms/'>
           <dcterms:type xsi:type='DCMITYPE'>sound</dcterms:type>
           <dcterms:medium>medium</dcterms:medium>
