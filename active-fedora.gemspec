@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rdf-rdfxml", '~> 1.1.0'
   s.add_dependency "linkeddata"
   s.add_dependency "deprecation"
-  s.add_dependency "ldp", '~> 0.2.1'
+  s.add_dependency "ldp", '~> 0.3.0'
   s.add_dependency "rdf-ldp"
 
   s.add_development_dependency "rdoc"

@@ -7,5 +7,6 @@ module ActiveFedora::RDF
     property :hasVersionLabel
     property :lastModified
     property :status
+    property :ServerManaged
   end
 end
