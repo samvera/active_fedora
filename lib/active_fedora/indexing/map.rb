@@ -10,6 +10,10 @@ module ActiveFedora::Indexing
       @hash = hash
     end
 
+    def dup
+      self.class.new(@hash.deep_dup)
+    end
+
     # this enables a cleaner API for solr integration
     class IndexObject
       attr_accessor :data_type, :behaviors
@@ -26,6 +30,12 @@ module ActiveFedora::Indexing
 
       def type(sym)
         @data_type = sym
+      end
+
+      def dup
+        self.class.new do |idx|
+          idx.behaviors = @behaviors.dup
+        end
       end
 
       def defaults
