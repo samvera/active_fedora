@@ -1,6 +1,7 @@
 module ActiveFedora
   module FedoraAttributes
     extend ActiveSupport::Concern
+    include InheritableAccessors
 
     included do
       include ActiveTriples::Properties
@@ -18,6 +19,8 @@ module ActiveFedora
       def modified_date
         super.first
       end
+
+      define_inheritable_accessor(:type, :rdf_label)
     end
 
     # Override ActiveTriples method for setting properties
@@ -62,6 +65,12 @@ module ActiveFedora
       @resource ||= self.class.resource_class.new(@ldp_source.graph.rdf_subject, @ldp_source.graph)
     end
 
+    # You can set the URI to use for the rdf_label on ClassMethods.rdf_label, then on
+    # the instance, calling rdf_label returns the value of that configured property
+    def rdf_label
+      resource.rdf_label
+    end
+
     module ClassMethods
       # We make a unique class, because properties belong to a class.
       # This keeps properties from different objects separate.
@@ -70,7 +79,7 @@ module ActiveFedora
       def resource_class
         @generated_resource_class ||= begin
             klass = self.const_set(:GeneratedResourceSchema, Class.new(ActiveTriples::Resource))
-            klass.configure type: @type if @type
+            klass.configure active_triple_options
             klass.properties.merge(self.properties).each do |property, config|
               klass.property(config.term,
                              predicate: config.predicate,
@@ -80,10 +89,11 @@ module ActiveFedora
         end
       end
 
-      # Set the rdf type for this class
-      def type(uri)
-        @type = uri
-      end
+      private
+        # @return a Hash of options suitable for passing to ActiveTriples::Base.configure
+        def active_triple_options
+          { type: type, rdf_label: rdf_label }
+        end
     end
   end
 end
