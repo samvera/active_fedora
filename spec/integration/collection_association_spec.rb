@@ -71,4 +71,26 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe "finding the inverse" do
+    context "when no inverse exists" do
+      before do
+        class Item < ActiveFedora::Base
+        end
+        class Container < ActiveFedora::Base
+          has_many :items
+        end
+      end
+      after do
+        Object.send(:remove_const, :Item)
+        Object.send(:remove_const, :Container)
+      end
+
+      let(:instance) { Container.new }
+      subject { instance.items }
+
+      it "raises an error" do
+        expect { subject }.to raise_error "unable to find a reflection for Item#container or Item#containers"
+      end
+    end
+  end
 end
