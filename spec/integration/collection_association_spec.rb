@@ -92,5 +92,29 @@ describe ActiveFedora::Base do
         expect { subject }.to raise_error "unable to find a reflection for Item#container or Item#containers"
       end
     end
+
+    context "when classes are namespaced" do
+      before do
+        class Item < ActiveFedora::Base
+          has_and_belongs_to_many :container, predicate: ::RDF::DC.extent, class_name: 'Foo::Container'
+        end
+        module Foo
+          class Container < ActiveFedora::Base
+            has_many :items
+          end
+        end
+      end
+      after do
+        Object.send(:remove_const, :Item)
+        Object.send(:remove_const, :Foo)
+      end
+
+      let(:instance) { Foo::Container.new }
+      subject { instance.items }
+
+      it "finds the association" do
+        expect(subject).to eq []
+      end
+    end
   end
 end
