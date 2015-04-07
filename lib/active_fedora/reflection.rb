@@ -152,6 +152,8 @@ module ActiveFedora
             "#{name.to_s.singularize}_ids"
           elsif options[:as]
             "#{options[:as]}_id"
+          elsif inverse_of && inverse_of.collection?
+            "#{options[:inverse_of].to_s.singularize}_ids"
           else
             # This works well if this is a has_many that is the inverse of a belongs_to, but it isn't correct for a has_many that is the invers of a has_and_belongs_to_many
             active_fedora.name.foreign_key
