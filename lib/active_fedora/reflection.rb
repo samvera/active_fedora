@@ -294,7 +294,7 @@ module ActiveFedora
       # returns either false or the inverse association name that it finds.
       def automatic_inverse_of
         if can_find_inverse_of_automatically?(self)
-          inverse_name = ActiveSupport::Inflector.underscore(active_fedora.name).to_sym
+          inverse_name = ActiveSupport::Inflector.underscore(options[:as] || active_fedora.name.demodulize).to_sym
 
           begin
             reflection = klass.reflect_on_association(inverse_name)
