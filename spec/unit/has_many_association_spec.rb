@@ -23,7 +23,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
     end
 
     let(:reflection) { Book.create_reflection(:has_many, 'pages', { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf }, Book) }
-    let(:association) { ActiveFedora::Associations::HasManyAssociation.new(book, reflection) }
+    let(:association) { described_class.new(book, reflection) }
 
     it "should set the book_id attribute" do
       expect(association).to receive(:callback).twice
@@ -40,12 +40,37 @@ describe ActiveFedora::Associations::HasManyAssociation do
       Page.has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
     end
     let(:book_reflection) { Book.create_reflection(:has_many, 'pages', { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf }, Book) }
-    let(:association) { ActiveFedora::Associations::HasManyAssociation.new(book, book_reflection) }
+    let(:association) { described_class.new(book, book_reflection) }
 
     subject { association.send(:find_polymorphic_inverse, page) }
 
     it "should find the HABTM reflection" do
       expect(subject.name).to eq :contents
+    end
+  end
+
+
+  context "when inverse doesn't have a predictable name" do
+    before do
+      class TimeSpan < ActiveFedora::Base
+        has_many :images, inverse_of: :created # predicate: ::RDF::DC.created
+      end
+
+      class Image < ActiveFedora::Base
+         has_and_belongs_to_many :created, predicate: ::RDF::DC.created, class_name: 'TimeSpan'
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :TimeSpan)
+      Object.send(:remove_const, :Image)
+    end
+
+    let(:owner) { TimeSpan.new }
+    let(:reflection) { TimeSpan.reflect_on_association(:images) }
+
+    it "finds the predicate" do
+      expect { described_class.new(owner, reflection) }.not_to raise_error
     end
   end
 end

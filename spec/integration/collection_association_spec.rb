@@ -89,7 +89,7 @@ describe ActiveFedora::Base do
       subject { instance.items }
 
       it "raises an error" do
-        expect { subject }.to raise_error "unable to find a reflection for Item#container or Item#containers"
+        expect { subject }.to raise_error "No :inverse_of or :predicate attribute was set or could be inferred for has_many :items on Container"
       end
     end
 
