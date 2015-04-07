@@ -591,27 +591,6 @@ describe ActiveFedora::Base do
         expect(MediaObject.new.association(:baubles).send(:find_reflection)).to eq MediaObject.reflect_on_association(:baubles)
       end
     end
-
-    describe "an object doesn't have a property" do
-      before :all do
-        class Bauble < ActiveFedora::Base
-          belongs_to :media_object, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
-        end
-
-        class MediaObject < ActiveFedora::Base
-          has_many :shoes
-        end
-      end
-
-      after :all do
-        Object.send(:remove_const, :Bauble)
-        Object.send(:remove_const, :MediaObject)
-      end
-
-      it "it should find the predicate" do
-        expect { MediaObject.new.shoes.send(:find_predicate) }.to raise_error RuntimeError, "No :inverse_of or :predicate attribute was set or could be inferred for has_many :shoes on MediaObject"
-      end
-    end
   end
 
   describe "casting when the class name is ActiveFedora::Base" do
