@@ -28,7 +28,7 @@ describe ActiveFedora::Base do
   describe "explicit foreign key" do
     before do
       class FooThing < ActiveFedora::Base
-        has_many :bars, :class_name=>'BarThing', :predicate=>ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, :as=>:foothing
+        has_many :bars, :class_name=>'BarThing', :predicate=>ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, as: :foothing
       end
 
       class BarThing < ActiveFedora::Base
