@@ -361,6 +361,23 @@ describe ActiveFedora::Base do
         end
       end
 
+      context "when the has_and_belongs_to_many provides an inverse_of" do
+        let(:reflection) { Component.reflect_on_association(:items) }
+        before do
+          reflection.options[:inverse_of] = :components
+        end
+
+        describe "shifting" do
+          let(:component) { Component.create }
+          let(:item) { Item.new }
+
+          it "should set item_ids" do
+            component.items << item
+            expect(component.item_ids).to eq [item.id]
+          end
+        end
+      end
+
       describe "From the has_many side" do
         let(:item) { Item.create(components: [Component.new(description: 'my description')]) }
 
