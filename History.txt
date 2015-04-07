@@ -1,3 +1,33 @@
+v9.0.7
+  2015-04-06: Only set/save the inverse on a HABTM if the inverse is also HABTM
+  previously we were getting: [Justin Coyne]
+
+  2015-04-06: Derive a foreign_key ending with `_ids` if the inverse is a
+  collection [Justin Coyne]
+
+  2015-04-06: Find inverse relations when class_names have modules [Justin Coyne]
+
+  2015-04-06: Raise an error when the inverse relationship can not be found.
+  Previously a "SystemStackError: Stack too deep" was encountered in this
+  situation [Justin Coyne]
+
+  2015-04-02: Add a mechanism to set rdf_label on the ActiveTriple resource
+  [Justin Coyne]
+
+  2015-04-03: Refactor has_and_belongs_to_many_associations_spec [Justin Coyne]
+
+  2015-04-03: Remove unused sample classes [Justin Coyne]
+
+  2015-04-02: Sort versions as dates not as strings [Justin Coyne]
+
+  2015-04-01: Prevents an object from being loaded to the incorrect class. For
+  example, when loading a batch object it should be loaded into a Batch (and not a
+  File for example.) [Justin Coyne]
+
+  2015-03-27: Move the indexing logic to the model. Fixes #736 You should now add
+  indexing hints to has_attributes by passing a block similar to how you do it
+  with rdf properties. e.g.: [Justin Coyne]
+
 v9.0.6
   2015-03-26: Setting type should not wipe out properties. Fixes #737 [Justin Coyne]
 
