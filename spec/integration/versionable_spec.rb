@@ -18,6 +18,43 @@ describe "a versionable class" do
 
   it { is_expected.to be_versionable }
 
+  describe 'sorting versions' do
+    before do
+      allow(subject).to receive(:fedora_versions) { versions }
+    end
+
+    let(:version1) { double('version1', uri: 'http://localhost:8983/fedora/rest/test/84/61/63/98/84616398-f63a-4572-ba01-0689339e4fcb/fcr:versions/87a0a8c317f1e711aa993d-e1d2-4a65-93ee-3a12fc9541ab', label: 'version1', created: '2015-04-02T19:54:45.962Z') }
+    let(:version2) { double('version2', uri: 'http://localhost:8983/fedora/rest/test/84/61/63/98/84616398-f63a-4572-ba01-0689339e4fcb/fcr:versions/87a0a8c317f1e790373a67-c9ee-447d-b740-4faa882b1a1f', label: 'version2', created: '2015-04-02T19:54:45.96Z') }
+    let(:versions) { [version1, version2] }
+
+    subject { ActiveFedora::VersionsGraph.new }
+
+    it 'sorts by DateTime' do
+      expect(subject.first).to eq version2
+    end
+
+    context 'with an unparseable created date' do
+      let(:version2) { double('version2', uri: 'http://localhost:8983/fedora/rest/test/84/61/63/98/84616398-f63a-4572-ba01-0689339e4fcb/fcr:versions/87a0a8c317f1e790373a67-c9ee-447d-b740-4faa882b1a1f', label: 'version2', created: '') }
+
+      it 'raises an exception' do
+        expect { subject.first }.to raise_error(ActiveFedora::VersionLacksCreateDate)
+      end
+    end
+
+    context 'with a missing created date' do
+      before do
+        # Because mocks raise RSpec::Mocks::MockExpectationError instead
+        allow(version2).to receive(:created) { raise NoMethodError }
+      end
+
+      let(:version2) { double('version2', uri: 'http://localhost:8983/fedora/rest/test/84/61/63/98/84616398-f63a-4572-ba01-0689339e4fcb/fcr:versions/87a0a8c317f1e790373a67-c9ee-447d-b740-4faa882b1a1f', label: 'version2') }
+
+      it 'raises an exception' do
+        expect { subject.first }.to raise_error(ActiveFedora::VersionLacksCreateDate)
+      end
+    end
+  end
+
   context "after saving" do
     before do
       subject.title = ["Greetings Earthlings"]
@@ -175,7 +212,7 @@ describe "a versionable rdf datastream" do
           end
 
           it "should have two unique versions" do
-            expect(subject.versions.all.size).to eq 2      
+            expect(subject.versions.all.size).to eq 2
           end
 
           it "should load the restored datastream's content" do

@@ -144,7 +144,7 @@ module ActiveFedora
         @delegated_attributes = val
       end
 
-      def has_attributes(*fields)
+      def has_attributes(*fields, &block)
         options = fields.pop
         datastream = options.delete(:datastream).to_s
         raise ArgumentError, "You must provide a datastream to has_attributes" if datastream.blank?
@@ -152,6 +152,7 @@ module ActiveFedora
         fields.each do |f|
           create_attribute_reader(f, datastream, options)
           create_attribute_setter(f, datastream, options)
+          add_attribute_indexing_config(f, &block) if block_given?
         end
       end
 
@@ -177,9 +178,16 @@ module ActiveFedora
         raise ArgumentError, "#{name} is a keyword and not an acceptable property name." if protected_property_name? name
         reflection = ActiveFedora::Attributes::PropertyBuilder.build(self, name, properties, &block)
         ActiveTriples::Reflection.add_reflection self, name, reflection
+
+        add_attribute_indexing_config(name, &block) if block_given?
       end
 
       private
+
+      def add_attribute_indexing_config(name, &block)
+        # TODO the hash can be initalized to return on of these
+        index_config[name] ||= ActiveFedora::Indexing::Map::IndexObject.new &block
+      end
 
       def warn_duplicate_predicates new_name, new_properties
         new_predicate = new_properties[:predicate]

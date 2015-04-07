@@ -343,7 +343,6 @@ module ActiveFedora
         def find_reflection
           return reflection if @reflection.options[:predicate]
           if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base' && @reflection.macro != :has_and_belongs_to_many
-            inverse_relation = @owner.class.to_s.underscore.to_sym
             begin
               find_reflection_for_relation(@reflection.class_name.constantize)
             rescue NameError
@@ -354,16 +353,18 @@ module ActiveFedora
           end
         end
 
-        def find_reflection_for_relation(klass, inverse_relation=@owner.class.to_s.underscore.to_sym)
-          raise "Unable to lookup the :predicate attribute for #{@reflection.macro} #{@reflection.name.inspect} on #{@owner.class} because #{klass} specifies \"class_name: 'ActiveFedora::Base'\".  Either specify a specific class_name in #{klass} or set :predicate in the #{@reflection.macro} declaration on #{@owner.class}" if inverse_relation == :'active_fedora/base'
-          if klass.reflections.key?(inverse_relation)
-            # Try it singular
-            return klass.reflections[inverse_relation]
+        def find_reflection_for_relation(klass, inverse_relation=@owner.class.to_s.demodulize.underscore.to_sym)
+          if inverse_relation == :'active_fedora/base'
+            raise "Unable to lookup the :predicate attribute for #{@reflection.macro} #{@reflection.name.inspect} on #{@owner.class} because #{klass} specifies \"class_name: 'ActiveFedora::Base'\".  Either specify a specific class_name in #{klass} or set :predicate in the #{@reflection.macro} declaration on #{@owner.class}"
+          elsif klass.reflections.key?(inverse_relation)
+            # Try it singular (for belongs_to)
+            klass.reflections[inverse_relation]
           elsif klass.reflections.key?(inverse_relation.to_s.pluralize.to_sym)
-            # Try it plural
-            return klass.reflections[inverse_relation.to_s.pluralize.to_sym]
+            # Try it plural (for has_and_belongs_to_many)
+            klass.reflections[inverse_relation.to_s.pluralize.to_sym]
+          else
+            raise "unable to find a reflection for #{klass}##{inverse_relation} or #{klass}##{inverse_relation.to_s.pluralize}"
           end
-          find_reflection_for_relation(klass, @owner.class.superclass.to_s.underscore.to_sym)
         end
 
         def create_record(attributes, raise = false)
