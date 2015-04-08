@@ -56,9 +56,13 @@ module ActiveFedora
 
     module ClassMethods
 
-      # Return ActiveFedora::Indexing::Map
+      # @return ActiveFedora::Indexing::Map
       def index_config
-        @index_config ||= ActiveFedora::Indexing::Map.new
+        @index_config ||= if superclass.respond_to?(:index_config)
+            superclass.index_config.deep_dup
+          else
+            ActiveFedora::Indexing::Map.new
+          end
       end
 
       def indexer
