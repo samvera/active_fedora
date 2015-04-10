@@ -51,6 +51,10 @@ module ActiveFedora #:nodoc:
     autoload :ChangeSet
     autoload :Config
     autoload :Core
+    autoload_under 'core' do
+      autoload :FedoraIdTranslator
+      autoload :FedoraUriTranslator
+    end
     autoload :Datastream
     autoload :Datastreams
     autoload :DelegatedAttribute
