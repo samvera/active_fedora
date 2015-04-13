@@ -244,6 +244,9 @@ module ActiveFedora #:nodoc:
 
   self.configurator ||= ActiveFedora::FileConfigurator.new
 
+  def self.Base(uri=nil)
+    ActiveFedora::Base.subclass(uri)
+  end
 end
 
 

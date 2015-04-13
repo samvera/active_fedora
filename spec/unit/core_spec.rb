@@ -18,6 +18,10 @@ describe ActiveFedora::Base do
         has_attributes :publisher, datastream: 'bar' # RDF backed property
       end
     end
+    module Nonkernel
+      class Object < ActiveFedora::Base("http://projecthydra.org/foo/Object")
+      end
+    end
   end
 
   let (:library) { Library.create }
@@ -27,6 +31,7 @@ describe ActiveFedora::Base do
     Object.send(:remove_const, :Book)
     Object.send(:remove_const, :Library)
     Object.send(:remove_const, :MyDatastream)
+    Object.send(:remove_const, :Nonkernel)
   end
 
   it "should assert a content model" do
@@ -139,5 +144,10 @@ describe ActiveFedora::Base do
       it { should eq '123456w' }
     end
   end
-
+  describe "to_class_uri" do
+    it do
+      expect(Nonkernel::Object.to_class_uri).to eq("http://projecthydra.org/foo/Object")
+      expect(Book.to_class_uri).to eq("Book")
+    end
+  end
 end

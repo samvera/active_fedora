@@ -29,6 +29,7 @@ module ActiveFedora
     extend ActiveSupport::DescendantsTracker
     extend LdpCache::ClassMethods
 
+    extend Model::ClassMethods
     include Core
     include Persistence
     include Indexing

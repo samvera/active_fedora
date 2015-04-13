@@ -15,6 +15,9 @@ describe ActiveFedora::SolrInstanceLoader do
       property :description, predicate: ::RDF::DC.description
       belongs_to :another, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'Foo'
     end
+    # the self.class reference here is a workaround for rspec context of Foo class definition
+    class Bar < self.class.Foo("http://projecthydra.org/bar/Object")
+    end
   end
 
   let(:another) { Foo.create }
@@ -24,6 +27,7 @@ describe ActiveFedora::SolrInstanceLoader do
 
   after do
     Object.send(:remove_const, :Foo)
+    Object.send(:remove_const, :Bar)
   end
 
   context "without a solr doc" do
@@ -84,6 +88,18 @@ describe ActiveFedora::SolrInstanceLoader do
     it "should find the document in solr" do
       expect(subject).to be_instance_of Foo
       expect(subject.title).to eq 'My Title'
+    end
+    context "with a model URI specified" do
+      let!(:obj_with_uri) { Bar.create!(id: 'test-uri-123', foo: ["baz"], bar: 'quix', title: 'My Title',
+                           description: ['first desc', 'second desc'], another_id: another.id) }
+      let(:doc) { { 'id' => 'test-uri-123', 'has_model_ssim'=>['http://projecthydra.org/bar/Object'], 'object_profile_ssm' => profile } }
+      # since the id context is the same, should work without specifying Bar here
+      let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj_with_uri.id, doc) }
+      subject { loader.object }
+      it "should find the document in solr" do
+        expect(subject).to be_instance_of Bar
+        expect(subject.title).to eq 'My Title'
+      end
     end
   end
 
