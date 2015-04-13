@@ -90,12 +90,54 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe "#translate_id_to_uri" do
+    subject { ActiveFedora::Base.translate_id_to_uri }
+    context "when it's not set" do
+      it "should be a FedoraIdTranslator" do
+        expect(subject).to eq ActiveFedora::Core::FedoraIdTranslator
+      end
+    end
+    context "when it's set to nil" do
+      before do
+        ActiveFedora::Base.translate_id_to_uri = nil
+      end
+      it "should be a FedoraIdTranslator" do
+        expect(subject).to eq ActiveFedora::Core::FedoraIdTranslator
+      end
+    end
+  end
+
+  describe "#translate_uri_to_id" do
+    subject { ActiveFedora::Base.translate_uri_to_id }
+    context "when it's not set" do
+      it "should be a FedoraUriTranslator" do
+        expect(subject).to eq ActiveFedora::Core::FedoraUriTranslator
+      end
+    end
+    context "when it's set to nil" do
+      before do
+        ActiveFedora::Base.translate_uri_to_id = nil
+      end
+      it "should be a FedoraIdTranslator" do
+        expect(subject).to eq ActiveFedora::Core::FedoraUriTranslator
+      end
+    end
+  end
+
   describe "id_to_uri" do
     let(:id) { '123456w' }
     subject { ActiveFedora::Base.id_to_uri(id) }
 
     context "with no custom proc is set" do
       it { should eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/123456w" }
+      it "should just call #translate_id_to_uri" do
+        allow(ActiveFedora::Base).to receive(:translate_id_to_uri).and_call_original
+        allow(ActiveFedora::Core::FedoraIdTranslator).to receive(:call).and_call_original
+
+        subject
+
+        expect(ActiveFedora::Core::FedoraIdTranslator).to have_received(:call).with(id)
+      end
     end
 
     context "when custom proc is set" do
@@ -128,6 +170,14 @@ describe ActiveFedora::Base do
 
     context "with no custom proc is set" do
       it { should eq 'foo/123456w' }
+      it "should just call #translate_uri_to_id" do
+        allow(ActiveFedora::Base).to receive(:translate_uri_to_id).and_call_original
+        allow(ActiveFedora::Core::FedoraUriTranslator).to receive(:call).and_call_original
+
+        subject
+
+        expect(ActiveFedora::Core::FedoraUriTranslator).to have_received(:call).with(uri)
+      end
     end
 
     context "when custom proc is set" do
