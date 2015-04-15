@@ -2,100 +2,131 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
   describe "with inverse" do
-    before do
-      class Book < ActiveFedora::Base
-        has_and_belongs_to_many :topics, predicate: ::RDF::FOAF.primaryTopic, inverse_of: :books
-      end
-
-      class Topic < ActiveFedora::Base
-        has_and_belongs_to_many :books, predicate: ::RDF::FOAF.isPrimaryTopicOf
-      end
-    end
-
-    after do
-      Object.send(:remove_const, :Book)
-      Object.send(:remove_const, :Topic)
-    end
-
-    describe "an unsaved instance" do
-      let(:topic1) { Topic.create }
-      let(:book) { Book.create }
-
-      it "habtm should set and remove relationships bidirectionally" do
-        book.topics << topic1
-        expect(book.topics).to eq [topic1]
-        expect(topic1.books).to eq [book]
-        expect(topic1.reload.books).to eq [book]
-
-        book.topics.delete(topic1)
-        expect(book.topics).to be_empty
-        expect(topic1.books).to be_empty
-      end
-
-      it "Should allow for more than 10 items" do
-        (1..12).each do
-          book.topics << Topic.create
-        end
-        book.save
-        expect(book.topics.count).to eq 12
-        book2 = Book.find(book.id)
-        expect(book2.topics.count).to eq 12
-      end
-
-      context "with subclassed objects" do
-        before do
-          class SpecialInheritedBook < Book
-          end
+    context "that is also a HABTM" do
+      before do
+        class Book < ActiveFedora::Base
+          has_and_belongs_to_many :topics, predicate: ::RDF::FOAF.primaryTopic, inverse_of: :books
         end
 
-        after do
-          Object.send(:remove_const, :SpecialInheritedBook)
+        class Topic < ActiveFedora::Base
+          has_and_belongs_to_many :books, predicate: ::RDF::FOAF.isPrimaryTopicOf
         end
+      end
 
-        let!(:special_book) { SpecialInheritedBook.create }
-        it "Should find inherited objects along with base objects" do
+      after do
+        Object.send(:remove_const, :Book)
+        Object.send(:remove_const, :Topic)
+      end
+
+      describe "an unsaved instance" do
+        let(:topic1) { Topic.create }
+        let(:book) { Book.create }
+
+        it "habtm should set and remove relationships bidirectionally" do
           book.topics << topic1
-          special_book.topics << topic1
-          expect(topic1.books).to match_array [book, special_book]
-          expect(topic1.reload.books).to match_array [book, special_book]
+          expect(book.topics).to eq [topic1]
+          expect(topic1.books).to eq [book]
+          expect(topic1.reload.books).to eq [book]
+
+          book.topics.delete(topic1)
+          expect(book.topics).to be_empty
+          expect(topic1.books).to be_empty
+        end
+
+        it "Should allow for more than 10 items" do
+          (1..12).each do
+            book.topics << Topic.create
+          end
+          book.save
+          expect(book.topics.count).to eq 12
+          book2 = Book.find(book.id)
+          expect(book2.topics.count).to eq 12
+        end
+
+        context "with subclassed objects" do
+          before do
+            class SpecialInheritedBook < Book
+            end
+          end
+
+          after do
+            Object.send(:remove_const, :SpecialInheritedBook)
+          end
+
+          let!(:special_book) { SpecialInheritedBook.create }
+          it "Should find inherited objects along with base objects" do
+            book.topics << topic1
+            special_book.topics << topic1
+            expect(topic1.books).to match_array [book, special_book]
+            expect(topic1.reload.books).to match_array [book, special_book]
+          end
+        end
+      end
+
+      describe "a saved instance" do
+        let!(:book) { Book.create }
+        let!(:topic1) { Topic.create }
+        let!(:topic2) { Topic.create }
+
+        it "should set relationships bidirectionally" do
+          book.topics << topic1
+          expect(book.topics).to eq [topic1]
+          expect(book['topic_ids']).to eq [topic1.id]
+          expect(topic1['book_ids']).to eq [book.id]
+          expect(Topic.find(topic1.id).books).to eq [book] #Can't have saved it because book isn't saved yet.
+        end
+
+        it "should save new child objects" do
+          book.topics << Topic.new
+          expect(book.topics.first.id).to_not be_nil
+        end
+
+        it "should clear out the old associtions" do
+          book.topics = [topic1]
+          book.topics = [topic2]
+          expect(book.topic_ids).to eq [topic2.id]
+        end
+
+        context "with members" do
+          before do
+            book.topics = [topic1, topic2]
+            book.save
+          end
+
+          context "destroy" do
+            it "should remove the associations" do
+              book.destroy
+            end
+          end
         end
       end
     end
 
-    describe "a saved instance" do
-      let!(:book) { Book.create }
-      let!(:topic1) { Topic.create }
-      let!(:topic2) { Topic.create }
-
-      it "should set relationships bidirectionally" do
-        book.topics << topic1
-        expect(book.topics).to eq [topic1]
-        expect(book['topic_ids']).to eq [topic1.id]
-        expect(topic1['book_ids']).to eq [book.id]
-        expect(Topic.find(topic1.id).books).to eq [book] #Can't have saved it because book isn't saved yet.
-      end
-
-      it "should save new child objects" do
-        book.topics << Topic.new
-        expect(book.topics.first.id).to_not be_nil
-      end
-
-      it "should clear out the old associtions" do
-        book.topics = [topic1]
-        book.topics = [topic2]
-        expect(book.topic_ids).to eq [topic2.id]
-      end
-
-      context "with members" do
-        before do
-          book.topics = [topic1, topic2]
-          book.save
+    context "that is a has_many" do
+      before do
+        class Book < ActiveFedora::Base
+          has_many :collections
         end
 
-        context "destroy" do
-          it "should remove the associations" do
-            book.destroy
-          end
+        class Collection < ActiveFedora::Base
+          has_and_belongs_to_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection
+        end
+      end
+
+      after do
+        Object.send(:remove_const, :Book)
+        Object.send(:remove_const, :Collection)
+      end
+
+      describe "add and remove members" do
+        let(:collection) { Collection.create }
+        let(:book) { Book.create }
+
+        it "is successful" do
+          collection.books << book
+          expect {
+            collection.books.delete(book)
+          }.to change { collection.books.size }.from(1).to(0)
         end
       end
     end

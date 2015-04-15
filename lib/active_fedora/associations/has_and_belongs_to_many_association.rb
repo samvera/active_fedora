@@ -79,9 +79,8 @@ module ActiveFedora
           records.each do |r|
             owner[reflection.foreign_key] -= [r.id]
 
-            if (@reflection.options[:inverse_of])
-              inverse = @reflection.inverse_of
-              r[inverse.foreign_key] -= [owner.id]
+            if inverse = @reflection.inverse_of
+              r[inverse.foreign_key] -= [owner.id] if inverse.has_and_belongs_to_many?
               r.association(inverse.name).reset
               r.save
             end
