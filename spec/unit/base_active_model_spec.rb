@@ -25,7 +25,7 @@ describe ActiveFedora::Base do
       end
       has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2" do |m|
         m.field "fubar", :text
-      end
+      end 
 
       has_metadata :type=>BarStream, :name=>"xmlish"
       has_attributes :fubar, datastream: 'withText', multiple: false
