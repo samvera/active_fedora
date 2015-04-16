@@ -175,7 +175,7 @@ module ActiveFedora
         if properties.key?(:predicate)
           define_active_triple_accessor(name, properties, &block)
         elsif properties.key?(:delegate_to)
-          define_delegated_accessor([name], properties.delete(:delegate_to), properties.merge(multiple: true), &block)
+          define_delegated_accessor([name], properties.delete(:delegate_to), properties.reverse_merge(multiple: true), &block)
         else
           raise "You must provide `:datastream' or `:predicate' options to property"
         end
