@@ -38,7 +38,7 @@ describe ActiveFedora::Base do
         before do
           class BarHistory4 < ActiveFedora::Base
             has_metadata type: BarStream2, name: "xmlish"
-            property :cow, datastream: 'xmlish'
+            property :cow, delegate_to: 'xmlish'
           end
         end
         after do
