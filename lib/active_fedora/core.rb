@@ -14,14 +14,25 @@ module ActiveFedora
       # :singleton-method
       #
       # Accepts a proc that takes an id and transforms it to a URI
-      mattr_accessor :translate_id_to_uri, instance_writer: false
+      mattr_reader :translate_id_to_uri do
+        FedoraIdTranslator
+      end
+
+      def self.translate_id_to_uri=(translator)
+        @@translate_id_to_uri = translator || FedoraIdTranslator
+      end
 
       ##
       # :singleton-method
       #
       # Accepts a proc that takes a uri and transforms it to an id
-      mattr_accessor :translate_uri_to_id, instance_writer: false
+      mattr_reader :translate_uri_to_id do
+        FedoraUriTranslator
+      end
 
+      def self.translate_uri_to_id=(translator)
+        @@translate_uri_to_id = translator || FedoraUriTranslator
+      end
     end
 
     def ldp_source
@@ -134,27 +145,14 @@ module ActiveFedora
       # Transforms an id into a uri
       # if translate_id_to_uri is set it uses that proc, otherwise just the default
       def id_to_uri(id)
-        if translate_id_to_uri
-          translate_id_to_uri.call(id)
-        else
-          id = "/#{id}" unless id.start_with? SLASH
-          unless ActiveFedora.fedora.base_path == SLASH || id.start_with?("#{ActiveFedora.fedora.base_path}/")
-            id = ActiveFedora.fedora.base_path + id
-          end
-          ActiveFedora.fedora.host + id
-        end
+        translate_id_to_uri.call(id)
       end
 
       ##
       # Transforms a uri into an id
       # if translate_uri_to_id is set it uses that proc, otherwise just the default
       def uri_to_id(uri)
-        if translate_uri_to_id
-          translate_uri_to_id.call(uri)
-        else
-          id = uri.to_s.sub(ActiveFedora.fedora.host + ActiveFedora.fedora.base_path, '')
-          id.start_with?('/') ? id[1..-1] : id
-        end
+        translate_uri_to_id.call(uri)
       end
 
       ##

@@ -1,3 +1,5 @@
+require 'deprecation'
+
 module ActiveFedora
 
   #This class represents a Fedora datastream
