@@ -148,8 +148,12 @@ module ActiveFedora
       end
 
       def has_attributes(*fields, &block)
-        Deprecation.warn(Attributes, "has_attributes is deprecated and will be removed in ActiveFedora 10.0. Use property instead")
-        define_delegated_accessor(*fields, &block)
+        options = fields.pop
+        delegate_target = options.delete(:datastream)
+        raise ArgumentError, "You must provide a datastream to has_attributes" if delegate_target.blank?
+        Deprecation.warn(Attributes, "has_attributes is deprecated and will be removed in ActiveFedora 10.0. Instead use:\n  property #{fields.first.inspect}, delegate_to: '#{delegate_target}', ...")
+
+        define_delegated_accessor(fields, delegate_target, options, &block)
       end
 
       # Reveal if the attribute has been declared unique
@@ -170,8 +174,8 @@ module ActiveFedora
       def property name, properties={}, &block
         if properties.key?(:predicate)
           define_active_triple_accessor(name, properties, &block)
-        elsif properties.key?(:datastream)
-          define_delegated_accessor(name, properties.merge(multiple: true), &block)
+        elsif properties.key?(:delegate_to)
+          define_delegated_accessor([name], properties.delete(:delegate_to), properties.merge(multiple: true), &block)
         else
           raise "You must provide `:datastream' or `:predicate' options to property"
         end
@@ -190,14 +194,11 @@ module ActiveFedora
         add_attribute_indexing_config(name, &block) if block_given?
       end
 
-      def define_delegated_accessor(*fields, &block)
-        options = fields.pop
-        datastream = options.delete(:datastream).to_s
-        raise ArgumentError, "You must provide a datastream to has_attributes" if datastream.blank?
+      def define_delegated_accessor(fields, delegate_target, options, &block)
         define_attribute_methods fields
         fields.each do |f|
-          create_attribute_reader(f, datastream, options)
-          create_attribute_setter(f, datastream, options)
+          create_attribute_reader(f, delegate_target, options)
+          create_attribute_setter(f, delegate_target, options)
           add_attribute_indexing_config(f, &block) if block_given?
         end
       end
