@@ -1,3 +1,72 @@
+v9.1.0
+  2015-04-16: Use delegate_to instead of datastream in the options for property
+  Trying to reduce/elimnate the useage of "datastream" especially in the public
+  API. [Justin Coyne]
+
+  2015-04-15: Bump version to 9.1.0.rc1 [Justin Coyne]
+
+  2015-04-15: Bump version to 9.1.0.alpha [ci skip] [Justin Coyne]
+
+  2015-04-08: Fix deleting from a HABTM when the inverse_of is a has_many. Fixes
+  #763 [Justin Coyne]
+
+  2015-04-07: Remove a spec that is a duplicate of
+  integration/collection_association_spec.rb:92 [Justin Coyne]
+
+  2015-04-07: Leverage the code in AssociationRelation to find the inverse. Fixes
+  #760 [Justin Coyne]
+
+  2015-04-10: Make #translate_id_to_uri/uri_to_id reliable. [Trey Terrell]
+
+  2015-04-02: Find best model match in case of inheritance [Stuart Kenny]
+
+  2015-04-10: Requires 'deprecation' for ActiveFedora::File [Andrew Myers]
+
+  2015-04-06: Only set/save the inverse on a HABTM if the inverse is also HABTM
+  previously we were getting: [Justin Coyne]
+
+  2015-04-06: Derive a foreign_key ending with `_ids` if the inverse is a
+  collection [Justin Coyne]
+
+  2015-04-06: Find inverse relations when class_names have modules [Justin Coyne]
+
+  2015-04-06: Raise an error when the inverse relationship can not be found.
+  Previously a "SystemStackError: Stack too deep" was encountered in this
+  situation [Justin Coyne]
+
+  2015-04-02: Add a mechanism to set rdf_label on the ActiveTriple resource
+  [Justin Coyne]
+
+  2015-04-03: Add CleanConnection [Trey Terrell]
+
+  2015-04-02: The indexing hints should be inheritable [Justin Coyne]
+
+  2015-04-03: Refactor has_and_belongs_to_many_associations_spec [Justin Coyne]
+
+  2015-04-03: Remove unused sample classes [Justin Coyne]
+
+  2015-04-02: Sort versions as dates not as strings [Michael J. Giarlo]
+
+  2015-03-27: Allow property to delegate to a datastream. Ref #736 [Justin Coyne]
+
+  2015-04-01: Prevents an object from being loaded to the incorrect class. For
+  example, when loading a batch object it should be loaded into a Batch (and not a
+  File for example.) [Hector Correa]
+
+  2015-03-30: Groundskeeping: YARD cleanup [Joe Atzberger]
+
+  2015-03-27: Move the indexing logic to the model. Fixes #736 You should now add
+  indexing hints to has_attributes by passing a block similar to how you do it
+  with rdf properties. e.g.: [Justin Coyne]
+
+  2015-03-27: YARD syntax is @return, not @returns [Joe Atzberger]
+
+  2015-03-27: Last touch up on README [Joe Atzberger]
+
+  2015-03-27: README touchup [Joe Atzberger]
+
+  2015-03-27: Formatting for README [Joe Atzberger]
+
 v9.0.6
   2015-03-26: Setting type should not wipe out properties. Fixes #737 [Justin Coyne]
 
