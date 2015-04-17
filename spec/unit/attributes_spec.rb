@@ -34,7 +34,7 @@ describe ActiveFedora::Base do
     end
 
     describe "#property" do
-      context "with an xml property" do
+      context "with an xml property (default cardinality)" do
         before do
           class BarHistory4 < ActiveFedora::Base
             has_metadata type: BarStream2, name: "xmlish"
@@ -56,6 +56,26 @@ describe ActiveFedora::Base do
         describe "the datastream accessor" do
           subject { obj.xmlish.cow }
           it { is_expected.to eq ['one', 'two'] }
+        end
+      end
+
+      context "with multiple set to false" do
+        before do
+          class BarHistory4 < ActiveFedora::Base
+            has_metadata type: BarStream2, name: "xmlish"
+            property :cow, delegate_to: 'xmlish', multiple: false
+          end
+        end
+        after do
+          Object.send(:remove_const, :BarHistory4)
+        end
+
+        let(:obj) { BarHistory4.new }
+
+        before { obj.cow = 'one' }
+        describe "the object accessor" do
+          subject { obj.cow }
+          it { is_expected.to eq 'one' }
         end
 
       end
