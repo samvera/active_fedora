@@ -1,11 +1,6 @@
 module ActiveFedora
   module Indexing
     extend ActiveSupport::Concern
-    extend ActiveSupport::Autoload
-
-    eager_autoload do
-      autoload :Map
-    end
 
     # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.
     # @param [Hash] solr_doc (optional) Hash to insert the fields into
@@ -55,15 +50,6 @@ module ActiveFedora
       end
 
     module ClassMethods
-
-      # @return ActiveFedora::Indexing::Map
-      def index_config
-        @index_config ||= if superclass.respond_to?(:index_config)
-            superclass.index_config.deep_dup
-          else
-            ActiveFedora::Indexing::Map.new
-          end
-      end
 
       def indexer
         IndexingService

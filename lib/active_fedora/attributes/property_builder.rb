@@ -54,7 +54,6 @@ module ActiveFedora::Attributes
     end
 
     def build(&block)
-      #TODO remove this block stuff
       NodeConfig.new(name, options[:predicate], options.except(:predicate)) do |config|
         config.with_index(&block) if block_given?
       end
