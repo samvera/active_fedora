@@ -407,15 +407,15 @@ describe ActiveFedora::OmDatastream do
       @obj = MyObj.new
       @obj.descMetadata.title = 'Foobar'
       @obj.save
+      @obj.reload
     end
     after do
       @obj.destroy
       Object.send(:remove_const, :MyObj)
     end
-    subject { @obj.reload.descMetadata } 
     it "should not load the descMetadata datastream when calling content_changed?" do
       @obj.inner_object.repository.should_not_receive(:datastream_dissemination).with(hash_including(:dsid=>'descMetadata'))
-      subject.should_not be_content_changed
+      @obj.descMetadata.should_not be_content_changed
     end
   end
 end

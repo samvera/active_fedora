@@ -60,7 +60,7 @@ describe ActiveFedora::Datastreams do
     end
     
     it "should use ds_specs and preserve existing datastreams on migrated objects" do
-      test_obj = HasMetadata.find(@base.pid)
+      test_obj = HasMetadata.find(@base.pid, cast: false)
       expect(test_obj.datastreams["testDS"].dsLabel).to eql "Test DS"
       expect(test_obj.datastreams["testDS"].new?).to be_false
       expect(test_obj.with_versions.dsLabel).to eql "Versioned DS"
@@ -114,17 +114,17 @@ describe ActiveFedora::Datastreams do
     end
     
     it "should use ds_specs on migrated objects" do
-      test_obj = HasFile.find(@base.pid)
+      test_obj = HasFile.find(@base.pid, cast: false)
       expect(test_obj.file_ds.versionable).to be_false
       expect(test_obj.file_ds.new?).to be_true
       test_obj.file_ds.content = "blah blah blah"
       test_obj.save
       expect(test_obj.file_ds.versionable).to be_false
       # look it up again to check datastream profile
-      test_obj = HasFile.find(@base.pid)
+      test_obj = HasFile.find(@base.pid, cast: false)
       expect(test_obj.file_ds.versionable).to be_false
       expect(test_obj.file_ds.dsLabel).to eql "File Datastream"
-      test_obj = HasFile.find(@base2.pid)
+      test_obj = HasFile.find(@base2.pid, cast: false)
       expect(test_obj.file_ds.versionable).to be_true
       expect(test_obj.file_ds.dsLabel).to eql "Pre-existing DS"
     end

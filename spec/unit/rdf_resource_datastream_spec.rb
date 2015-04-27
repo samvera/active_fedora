@@ -7,8 +7,6 @@ describe ActiveFedora::RDFDatastream do
       property :relation, :predicate => RDF::DC[:relation]
     end
 
-    class DummyAsset < ActiveFedora::Base; end;
-
     class DummyResource < ActiveFedora::RDFDatastream
       property :title, :predicate => RDF::DC[:title], :class_name => RDF::Literal do |index|
         index.as :searchable, :displayable
@@ -16,7 +14,7 @@ describe ActiveFedora::RDFDatastream do
       property :license, :predicate => RDF::DC[:license], :class_name => DummySubnode do |index|
         index.as :searchable, :displayable
       end
-      property :creator, :predicate => RDF::DC[:creator], :class_name => DummyAsset do |index|
+      property :creator, :predicate => RDF::DC[:creator], :class_name => "DummyAsset" do |index|
         index.as :searchable
       end
       def serialization_format

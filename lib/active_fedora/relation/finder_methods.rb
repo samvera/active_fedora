@@ -168,10 +168,12 @@ module ActiveFedora
     protected
 
     def load_from_fedora(pid, cast)
-      cast = true if klass == ActiveFedora::Base && cast.nil?
       inner = DigitalObject.find(klass, pid)
-      af_base = klass.allocate.init_with_object(inner)
-      cast ? af_base.adapt_to_cmodel : af_base
+      obj = klass.allocate.init_with_object(inner)
+      if cast != false
+        obj = obj.adapt_to_cmodel
+      end
+      obj
     end
 
     def find_with_ids(ids, cast)
