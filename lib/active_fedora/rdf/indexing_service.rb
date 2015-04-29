@@ -54,7 +54,7 @@ module ActiveFedora::RDF
           when ::RDF::URI
             val.to_s
           when ActiveTriples::Resource
-            val.solrize
+            val.node? ? val.rdf_label : val.rdf_subject.to_s
           else
             val
         end

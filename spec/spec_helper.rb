@@ -17,7 +17,7 @@ require 'rspec'
 require 'rspec/its'
 require 'equivalent-xml/rspec_matchers'
 require 'logger'
-require 'byebug' unless ENV['TRAVIS']
+require 'pry' unless ENV['TRAVIS']
 
 ActiveFedora::Base.logger = Logger.new(STDERR)
 ActiveFedora::Base.logger.level = Logger::WARN
