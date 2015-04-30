@@ -19,10 +19,10 @@ describe ActiveFedora::ContentModel do
   end
   
   describe '.best_model_for' do
-    it 'should be the input model if no relationships' do
+    it 'should be nil if no relationships' do
       mock_object = BaseModel.new
       mock_object.should_receive(:relationships).with(:has_model).and_return([])
-      expect(ActiveFedora::ContentModel.best_model_for(mock_object)).to eq BaseModel
+      expect(ActiveFedora::ContentModel.best_model_for(mock_object)).to be_nil
     end
 
     it 'should be based on inheritance hierarchy' do

@@ -14,15 +14,14 @@ module ActiveFedora
     end
     
     def self.best_model_for(obj)
-      best_model_match = obj.class unless obj.instance_of? ActiveFedora::Base
+      best_model_match = nil
 
       known_models_for(obj).each do |model_value|
-        # If this is of type ActiveFedora::Base, then set to the first found :has_model.
-        best_model_match ||= model_value
-
-        # If there is an inheritance structure, use the most specific case.
-        if best_model_match > model_value
-          best_model_match = model_value
+        if model_value <= obj.class
+          # If there is an inheritance structure, use the most specific case.
+          if best_model_match.nil? || best_model_match > model_value
+            best_model_match = model_value
+          end
         end
       end
 

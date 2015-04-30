@@ -428,9 +428,9 @@ describe ActiveFedora::Base do
     describe ".adapt_to_cmodel with implemented (non-ActiveFedora::Base) cmodel" do
       subject { FooHistory.new }
 
-      it "should not cast to a random first cmodel if it has a specific cmodel already" do
+      it "should raise an exception if the object class is not equal to or a subclass of any known model" do
         ActiveFedora::ContentModel.should_receive(:known_models_for).with(subject).and_return([FooAdaptation])
-        subject.adapt_to_cmodel.should be_kind_of FooHistory
+        expect { subject.adapt_to_cmodel }.to raise_error(ActiveFedora::ModelNotAsserted)
       end
       it "should cast to an inherited model over a random one" do
         ActiveFedora::ContentModel.should_receive(:known_models_for).with(subject).and_return([FooAdaptation, FooInherited])

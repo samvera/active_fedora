@@ -119,21 +119,15 @@ module ActiveFedora
       klass.allocate.init_with_object(inner_object)
     end
 
-    # Examines the :has_model assertions in the RELS-EXT.
-    #
-    # If the object is of type ActiveFedora::Base, then use the first :has_model
-    # in the RELS-EXT for this object. Due to how the RDF writer works, this is
-    # currently just the first alphabetical model.
-    #
-    # If the object was instantiated with any other class, then use that class
-    # as the base of the type the user wants rather than casting to the first
-    # :has_model found on the object.
-    #
-    # In either case, if an extended model of that initial base model of the two
-    # cases above exists in the :has_model, then instantiate as that extended
-    # model type instead.
+    # Adapts the inner object to the best known model
+    # Raise ActiveFedora::ModelNotAsserted if unable to adapt object
+    # (i.e, best model is nil)
     def adapt_to_cmodel
       best_model_match = ActiveFedora::ContentModel.best_model_for(self)
+
+      if best_model_match.nil?
+        raise ActiveFedora::ModelNotAsserted, "Unable to adapt #{self.inspect} to a model asserted for the resource."
+      end
 
       self.instance_of?(best_model_match) ? self : self.adapt_to(best_model_match)
     end
