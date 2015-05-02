@@ -184,8 +184,20 @@ module ActiveFedora
       @ldp_source = if !id && new_id = assign_id
         LdpResource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_id), @resource)
       else
-        LdpResource.new(ActiveFedora.fedora.connection, @ldp_source.subject, @resource, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
+        LdpResource.new(ActiveFedora.fedora.connection, @ldp_source.subject, @resource, ActiveFedora.fedora.host + base_path_for_resource)
       end
+    end
+
+    def base_path_for_resource
+      init_root_path if self.has_uri_prefix?
+      self.root_resource_path
+    end
+
+    def init_root_path
+      path = self.root_resource_path.gsub(/^\//,"")
+      ActiveFedora.fedora.connection.head(path)
+    rescue Ldp::NotFound
+      ActiveFedora.fedora.connection.put(path, "")
     end
 
     def assign_uri_to_attached_files
