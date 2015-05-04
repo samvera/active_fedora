@@ -3,11 +3,6 @@ module ActiveFedora
     class CollectionAssociation < Association #:nodoc:
       attr_reader :proxy
 
-      def initialize(owner, reflection)
-        super
-        construct_query
-      end
-
       # Implements the reader method, e.g. foo.items for Foo.has_many :items
       # @param opts [Boolean, Hash] if true, force a reload
       # @option opts [Symbol] :response_format can be ':solr' to return a solr result.
@@ -233,7 +228,7 @@ module ActiveFedora
       # Count all records using solr. Construct options and pass them with
       # scope to the target class's +count+.
       def count(options = {})
-        @reflection.klass.count(:conditions => @counter_query)
+        @reflection.klass.count(conditions: construct_query)
       end
 
       # Sets the target of this proxy to <tt>\target</tt>, and the \loaded flag to +true+.
@@ -291,10 +286,11 @@ module ActiveFedora
 
       # @param opts [Hash] Options that will be passed through to ActiveFedora::SolrService.query.
       def load_from_solr(opts = Hash.new)
-        return [] if @finder_query.empty?
+        finder_query = construct_query
+        return [] if finder_query.empty?
         rows = opts.delete(:rows) { count }
         return [] if rows == 0
-        SolrService.query(@finder_query, {rows: rows}.merge(opts))
+        SolrService.query(finder_query, { rows: rows }.merge(opts))
       end
 
       def add_to_target(record, skip_callbacks = false)
@@ -330,11 +326,12 @@ module ActiveFedora
         end
 
         def construct_query
-
-          #TODO use primary_key instead of id
-          clauses = { find_reflection => @owner.id }
-          clauses[:has_model] = @reflection.class_name.constantize.to_class_uri if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base'
-          @counter_query = @finder_query = ActiveFedora::SolrQueryBuilder.construct_query_for_rel(clauses)
+          @solr_query ||= begin
+            #TODO use primary_key instead of id
+            clauses = { find_reflection => @owner.id }
+            clauses[:has_model] = @reflection.class_name.constantize.to_class_uri if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base'
+            ActiveFedora::SolrQueryBuilder.construct_query_for_rel(clauses)
+          end
         end
 
 
