@@ -37,11 +37,23 @@ module ActiveFedora
 
       def save
         raise "Save the file first" if file.new_record?
-        change_set = ChangeSet.new(self, self, changed_attributes.keys)
-        SparqlInsert.new(change_set.changes, ::RDF::URI.new(file.uri)).execute(metadata_uri)
+        SparqlInsert.new(changes_for_update, ::RDF::URI.new(file.uri)).execute(metadata_uri)
         @ldp_source = nil
         true
       end
+
+      def changed_attributes
+        super.tap do |changed|
+          changed['type'] = true if type.present?
+        end
+      end
+
+      private
+
+        def changes_for_update
+          ChangeSet.new(self, self, changed_attributes.keys).changes
+        end
+
 
       class << self
         def parent_class= parent
