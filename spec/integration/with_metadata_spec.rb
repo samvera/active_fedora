@@ -2,10 +2,6 @@ require 'spec_helper'
 
 describe ActiveFedora::WithMetadata do
   before do
-    class Sample < ActiveFedora::Base
-      contains :file, class_name: 'SampleFile'
-    end
-
     class SampleFile < ActiveFedora::File
       include ActiveFedora::WithMetadata
 
@@ -17,11 +13,9 @@ describe ActiveFedora::WithMetadata do
 
   after do
     Object.send(:remove_const, :SampleFile)
-    Object.send(:remove_const, :Sample)
   end
 
-  let(:base) { Sample.new }
-  let(:file) { base.file }
+  let(:file) { SampleFile.new }
 
   describe "properties" do
     before do
@@ -38,14 +32,27 @@ describe ActiveFedora::WithMetadata do
 
   describe "#save" do
     before do
-      file.content = "Hey"
       file.title = ["foo"]
-      base.save
-      base.reload
     end
 
-    it "should save the metadata too" do
-      expect(base.file.title).to eq ['foo']
+    context "if the object saves (because it has content)" do
+      before do
+        file.content = "Hey"
+        file.save
+      end
+
+      let(:reloaded) { SampleFile.new(file.uri) }
+
+      it "should save the metadata too" do
+        expect(reloaded.title).to eq ['foo']
+      end
+    end
+
+    context "if the object is a new_record (didn't save)" do
+      it "doesn't save the metadata" do
+        expect(file.metadata_node).not_to receive(:save)
+        file.save
+      end
     end
   end
 

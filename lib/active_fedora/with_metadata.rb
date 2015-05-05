@@ -10,7 +10,7 @@ module ActiveFedora
     end
 
     def save(*)
-      if super
+      if super && !new_record?
         metadata_node.metadata_uri = described_by # TODO only necessary if the URI was < > before
         metadata_node.save # TODO if changed?
       end
