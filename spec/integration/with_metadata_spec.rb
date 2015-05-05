@@ -56,4 +56,33 @@ describe ActiveFedora::WithMetadata do
     end
   end
 
+  context "when RDF.type is set" do
+    let(:book) { RDF::URI.new("http://example.com/ns/Book") }
+
+    before do
+      class SampleBook < ActiveFedora::File
+        include ActiveFedora::WithMetadata
+
+        metadata do
+          configure type: RDF::URI.new("http://example.com/ns/Book")
+        end
+      end
+
+      file.content = 'foo'
+      file.save
+    end
+
+    after do
+      Object.send(:remove_const, :SampleBook)
+    end
+
+    let(:file) { SampleBook.new }
+    let(:reloaded_file) { SampleBook.new(file.uri) }
+
+    it "persists the configured type" do
+      expect(reloaded_file.metadata_node.query(predicate: ::RDF.type).map(&:object)).to include book
+    end
+
+  end
+
 end
