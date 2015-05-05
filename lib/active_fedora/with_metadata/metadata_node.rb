@@ -7,6 +7,10 @@ module ActiveFedora
       def initialize(file)
         @file = file
         super(file.uri, ldp_source.graph)
+        if self.class.type && !self.type.include?(self.class.type)
+          # Workaround for https://github.com/ActiveTriples/ActiveTriples/issues/123
+          self.get_values(:type) << self.class.type
+        end
       end
 
       def metadata_uri= uri
@@ -37,11 +41,25 @@ module ActiveFedora
 
       def save
         raise "Save the file first" if file.new_record?
-        change_set = ChangeSet.new(self, self, changed_attributes.keys)
-        SparqlInsert.new(change_set.changes, ::RDF::URI.new(file.uri)).execute(metadata_uri)
+        SparqlInsert.new(changes_for_update, ::RDF::URI.new(file.uri)).execute(metadata_uri)
         @ldp_source = nil
         true
       end
+
+      def changed_attributes
+        super.tap do |changed|
+          if type.present?
+            changed['type'] = true
+          end
+        end
+      end
+
+      private
+
+        def changes_for_update
+          ChangeSet.new(self, self, changed_attributes.keys).changes
+        end
+
 
       class << self
         def parent_class= parent
