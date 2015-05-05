@@ -222,4 +222,14 @@ describe ActiveFedora::Datastream do
       end
     end
   end
+
+  describe "#save" do
+    let(:file) { described_class.new }
+    context "when there is nothing to save" do
+      it "should not write" do
+        expect(file.ldp_source).not_to receive(:create)
+        expect(file.save).to be true
+      end
+    end
+  end
 end
