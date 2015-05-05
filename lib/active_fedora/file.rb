@@ -235,7 +235,7 @@ module ActiveFedora
       end
 
       def save(*)
-        return unless content_changed?
+        return true unless content_changed?
         headers = { 'Content-Type'.freeze => mime_type, 'Content-Length'.freeze => content.size.to_s }
         headers['Content-Disposition'.freeze] = "attachment; filename=\"#{URI.encode(@original_name)}\"" if @original_name
 
