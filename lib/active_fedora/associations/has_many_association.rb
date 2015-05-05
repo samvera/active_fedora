@@ -17,7 +17,7 @@ module ActiveFedora
         count = if loaded?
           @target.size
         else
-          @reflection.klass.count(:conditions => @counter_query)
+          @reflection.klass.count(conditions: construct_query)
         end
 
         # If there's nothing in the database and @target has no new records

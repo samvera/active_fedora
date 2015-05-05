@@ -25,6 +25,17 @@ describe "Collection members" do
         expect(library.books.any?).to be false
       end
     end
+
+    context "loading the association prior to a save that affects the association" do
+      let(:library) { Library.new }
+      before do
+        Book.create
+        library.books
+        library.save
+      end
+      subject { library.books.size }
+      it { is_expected.to eq 0 }
+    end
   end
 
   describe "looking up has_many" do
