@@ -19,11 +19,13 @@ module ActiveFedora
     autoload :SingularRDF,           'active_fedora/associations/singular_rdf'
     autoload :CollectionAssociation, 'active_fedora/associations/collection_association'
     autoload :CollectionProxy,       'active_fedora/associations/collection_proxy'
+    autoload :ContainerProxy,        'active_fedora/associations/container_proxy'
 
     autoload :HasManyAssociation,             'active_fedora/associations/has_many_association'
     autoload :BelongsToAssociation,           'active_fedora/associations/belongs_to_association'
     autoload :HasAndBelongsToManyAssociation, 'active_fedora/associations/has_and_belongs_to_many_association'
     autoload :ContainsAssociation,            'active_fedora/associations/contains_association'
+    autoload :DirectlyContainsAssociation,    'active_fedora/associations/directly_contains_association'
 
     module Builder
       autoload :Association,             'active_fedora/associations/builder/association'
@@ -34,6 +36,7 @@ module ActiveFedora
       autoload :HasMany,             'active_fedora/associations/builder/has_many'
       autoload :HasAndBelongsToMany, 'active_fedora/associations/builder/has_and_belongs_to_many'
       autoload :Contains,            'active_fedora/associations/builder/contains'
+      autoload :DirectlyContains,    'active_fedora/associations/builder/directly_contains'
 
       autoload :Property,         'active_fedora/associations/builder/property'
       autoload :SingularProperty, 'active_fedora/associations/builder/singular_property'
@@ -76,6 +79,27 @@ module ActiveFedora
       end
 
     module ClassMethods
+
+      # This method is used to declare an ldp:DirectContainer on a resource
+      # you must specify an is_member_of_relation or a has_member_relation
+      #
+      # @param [String] name the handle to refer to this child as
+      # @param [Hash] options
+      # @option options [String] :class_name ('ActiveFedora::File') The name of the class that will represent the contained resources
+      # @option options [RDF::URI] :has_member_relation the rdf predicate to use for the ldp:hasMemberRelation
+      # @option options [RDF::URI] :is_member_of_relation the rdf predicate to use for the ldp:isMemberOfRelation
+      #
+      # example:
+      #   class FooHistory < ActiveFedora::Base
+      #     directly_contains :files, has_member_relation:
+      #         ::RDF::URI.new("http://example.com/hasFiles"), class_name: 'Thing'
+      #     directly_contains :other_stuff, is_member_of_relation:
+      #         ::RDF::URI.new("http://example.com/isContainedBy"), class_name: 'Thing'
+      #   end
+      #
+      def directly_contains(name, options={})
+        Builder::DirectlyContains.build(self, name, { class_name: 'ActiveFedora::File' }.merge(options))
+      end
 
       def has_many(name, options={})
         Builder::HasMany.build(self, name, options)

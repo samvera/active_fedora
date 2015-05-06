@@ -9,7 +9,7 @@ module ActiveFedora
       def find_target
         reflection.build_association(target_uri).tap do |record|
           configure_datastream(record) if reflection.options[:block]
-        end 
+        end
       end
 
       def target_uri
