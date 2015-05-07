@@ -55,6 +55,7 @@ module ActiveFedora #:nodoc:
     autoload_under 'containers' do
       autoload :Container
       autoload :DirectContainer
+      autoload :IndirectContainer
     end
     autoload :Datastream
     autoload :Datastreams

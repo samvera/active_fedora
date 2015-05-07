@@ -24,8 +24,10 @@ module ActiveFedora
     autoload :HasManyAssociation,             'active_fedora/associations/has_many_association'
     autoload :BelongsToAssociation,           'active_fedora/associations/belongs_to_association'
     autoload :HasAndBelongsToManyAssociation, 'active_fedora/associations/has_and_belongs_to_many_association'
-    autoload :ContainsAssociation,            'active_fedora/associations/contains_association'
+    autoload :BasicContainsAssociation,       'active_fedora/associations/basic_contains_association'
     autoload :DirectlyContainsAssociation,    'active_fedora/associations/directly_contains_association'
+    autoload :IndirectlyContainsAssociation,  'active_fedora/associations/indirectly_contains_association'
+    autoload :ContainsAssociation,            'active_fedora/associations/contains_association'
 
     module Builder
       autoload :Association,             'active_fedora/associations/builder/association'
@@ -37,6 +39,7 @@ module ActiveFedora
       autoload :HasAndBelongsToMany, 'active_fedora/associations/builder/has_and_belongs_to_many'
       autoload :Contains,            'active_fedora/associations/builder/contains'
       autoload :DirectlyContains,    'active_fedora/associations/builder/directly_contains'
+      autoload :IndirectlyContains,  'active_fedora/associations/builder/indirectly_contains'
 
       autoload :Property,         'active_fedora/associations/builder/property'
       autoload :SingularProperty, 'active_fedora/associations/builder/singular_property'
@@ -99,6 +102,37 @@ module ActiveFedora
       #
       def directly_contains(name, options={})
         Builder::DirectlyContains.build(self, name, { class_name: 'ActiveFedora::File' }.merge(options))
+      end
+
+      # This method is used to declare an ldp:IndirectContainer on a resource
+      # you must specify an is_member_of_relation or a has_member_relation
+      #
+      # @param [String] name the handle to refer to this child as
+      # @param [Hash] options
+      # @option options [String] :class_name ('ActiveFedora::File') The name of the class that will represent the contained resources
+      # @option options [RDF::URI] :has_member_relation the rdf predicate to use for the ldp:hasMemberRelation
+      # @option options [RDF::URI] :is_member_of_relation the rdf predicate to use for the ldp:isMemberOfRelation
+      # @option options [RDF::URI] :inserted_content_relation the rdf predicate to use for the ldp:insertedContentRelation
+      # @option options [String] :through name of a class to represent the interstitial node
+      # @option options [Symbol] :foreign_key property that points at the remote resource
+      #
+      # example:
+      #   class Proxy < ActiveFedora::Base
+      #     belongs_to :proxy_for, predicate: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'), class_name: 'ActiveFedora::Base'
+      #   end
+      #
+      #   class FooHistory < ActiveFedora::Base
+      #     indirectly_contains :files, has_member_relation: RDF::Vocab::ORE.aggregates,
+      #       inserted_content_relation: RDF::Vocab::ORE.proxyFor, class_name: 'Thing',
+      #       through: 'Proxy', foreign_key: :proxy_for
+      #
+      #     indirectly_contains :other_stuff, is_member_of_relation:
+      #         ::RDF::URI.new("http://example.com/isContainedBy"), class_name: 'Thing',
+      #         through: 'Proxy', foreign_key: :proxy_for
+      #   end
+      #
+      def indirectly_contains(name, options={})
+        Builder::IndirectlyContains.build(self, name, options)
       end
 
       def has_many(name, options={})

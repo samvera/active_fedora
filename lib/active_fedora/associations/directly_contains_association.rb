@@ -1,6 +1,6 @@
 module ActiveFedora
   module Associations
-    class DirectlyContainsAssociation < CollectionAssociation #:nodoc:
+    class DirectlyContainsAssociation < ContainsAssociation #:nodoc:
 
       def insert_record(record, force = true, validate = true)
         container.save!
@@ -9,10 +9,6 @@ module ActiveFedora
         else
           record.save(validate: validate)
         end
-      end
-
-      def reader
-        @records ||= ContainerProxy.new(self)
       end
 
       def find_target
@@ -40,20 +36,9 @@ module ActiveFedora
 
       protected
 
-        def count_records
-          load_target.size
-        end
-
         def initialize_attributes(record) #:nodoc:
           record.uri = ActiveFedora::Base.id_to_uri(container.mint_id)
           set_inverse_instance(record)
-        end
-
-      private
-
-        def uri
-          raise "Can't get uri. Owner isn't saved" if @owner.new_record?
-          "#{@owner.uri}/#{@reflection.name}"
         end
     end
   end
