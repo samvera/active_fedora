@@ -30,6 +30,7 @@ module ActiveFedora
     extend LdpCache::ClassMethods
 
     include Core
+    include Identifiable
     include Persistence
     include Indexing
     include Scoping

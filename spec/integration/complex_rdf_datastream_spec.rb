@@ -180,7 +180,7 @@ END
           property :title
         end
 
-        class Container < ActiveFedora::Base
+        class SpecContainer < ActiveFedora::Base
           contains :info, class_name: 'SpecDatastream'
         end
 
@@ -203,10 +203,10 @@ END
 
       after(:each) do
         Object.send(:remove_const, :SpecDatastream)
-        Object.send(:remove_const, :Container)
+        Object.send(:remove_const, :SpecContainer)
       end
 
-      let(:parent) { Container.new id: '124' }
+      let(:parent) { SpecContainer.new id: '124' }
       let (:file) { parent.info }
 
 

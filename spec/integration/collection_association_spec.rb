@@ -76,20 +76,20 @@ describe ActiveFedora::Base do
       before do
         class Item < ActiveFedora::Base
         end
-        class Container < ActiveFedora::Base
+        class SpecContainer < ActiveFedora::Base
           has_many :items
         end
       end
       after do
         Object.send(:remove_const, :Item)
-        Object.send(:remove_const, :Container)
+        Object.send(:remove_const, :SpecContainer)
       end
 
-      let(:instance) { Container.new }
+      let(:instance) { SpecContainer.new }
       subject { instance.items }
 
       it "raises an error" do
-        expect { subject }.to raise_error "No :inverse_of or :predicate attribute was set or could be inferred for has_many :items on Container"
+        expect { subject }.to raise_error "No :inverse_of or :predicate attribute was set or could be inferred for has_many :items on SpecContainer"
       end
     end
 

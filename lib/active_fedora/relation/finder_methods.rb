@@ -28,7 +28,7 @@ module ActiveFedora
       end
     end
 
-    # Returns an Array of objects of the Class that +find+ is being 
+    # Returns an Array of objects of the Class that +find+ is being
     # called on
     #
     # @param[String,Hash] args either an id or a hash of conditions
@@ -40,12 +40,12 @@ module ActiveFedora
       options = options.dup
       cast = if @klass == ActiveFedora::Base && !options.has_key?(:cast)
         true
-      else 
+      else
         options.delete(:cast)
       end
       if options[:sort]
         # Deprecate sort sometime?
-        sort = options.delete(:sort) 
+        sort = options.delete(:sort)
         options[:order] ||= sort if sort.present?
       end
 
@@ -251,7 +251,7 @@ module ActiveFedora
       ids.map{|id| find_one(id, cast)}
     end
 
-    private 
+    private
 
     # Returns a solr query for the supplied conditions
     # @param[Hash] conditions solr conditions to match

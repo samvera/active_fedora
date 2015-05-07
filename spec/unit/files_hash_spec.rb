@@ -2,18 +2,18 @@ require 'spec_helper'
 
 describe ActiveFedora::FilesHash do
   before do
-    class Container; end
-    allow(Container).to receive(:child_resource_reflections).and_return(file: reflection)
+    class FilesContainer; end
+    allow(FilesContainer).to receive(:child_resource_reflections).and_return(file: reflection)
     allow(container).to receive(:association).with(:file).and_return(association)
     allow(container).to receive(:undeclared_files).and_return([])
   end
 
-  after { Object.send(:remove_const, :Container) }
+  after { Object.send(:remove_const, :FilesContainer) }
 
   let(:reflection) { double('reflection') }
   let(:association) { double('association', reader: object) }
   let(:object) { double('object') }
-  let(:container) { Container.new }
+  let(:container) { FilesContainer.new }
 
   subject { ActiveFedora::FilesHash.new(container) }
 

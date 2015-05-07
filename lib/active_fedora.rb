@@ -52,9 +52,9 @@ module ActiveFedora #:nodoc:
     autoload :CleanConnection
     autoload :Config
     autoload :Core
-    autoload_under 'core' do
-      autoload :FedoraIdTranslator
-      autoload :FedoraUriTranslator
+    autoload_under 'containers' do
+      autoload :Container
+      autoload :DirectContainer
     end
     autoload :Datastream
     autoload :Datastreams
@@ -64,8 +64,10 @@ module ActiveFedora #:nodoc:
     autoload :File
     autoload :FileConfigurator
     autoload :FilePathBuilder
+    autoload :FileRelation
     autoload :FilesHash
     autoload :FixityService
+    autoload :Identifiable
     autoload :Indexing
     autoload :IndexingService
     autoload :InheritableAccessors

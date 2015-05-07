@@ -11,6 +11,9 @@ module ActiveFedora
     generate_method 'content'
 
     extend ActiveModel::Callbacks
+    include Identifiable
+    include Scoping
+    extend Querying
     define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, only: :after
 
@@ -42,6 +45,13 @@ module ActiveFedora
       @attributes = {}.with_indifferent_access
     end
 
+    def ==(comparison_object)
+         comparison_object.equal?(self) ||
+           (comparison_object.instance_of?(self.class) &&
+             comparison_object.uri == uri &&
+             !comparison_object.new_record?)
+    end
+
     def ldp_source
       @ldp_source || raise("NO source")
     end
@@ -64,6 +74,10 @@ module ActiveFedora
     # By tracking exists we prevent an unnecessary HEAD request.
     def new_record?
       !@exists && ldp_source.new?
+    end
+
+    def destroyed?
+      false
     end
 
     def uri= uri
@@ -217,6 +231,9 @@ module ActiveFedora
       @links ||= Ldp::Response.links(ldp_source.head)
     end
 
+    def self.relation
+      FileRelation.new(self)
+    end
 
     # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
     def behaves_like_io?(obj)
@@ -251,6 +268,10 @@ module ActiveFedora
         end
         reset
         changed_attributes.clear
+      end
+
+      def save!(*attrs)
+        save(*attrs)
       end
 
       def retrieve_content
