@@ -124,7 +124,7 @@ module ActiveFedora
     private
       def create_singleton_association(file_path)
         self.undeclared_files << file_path.to_sym
-        association = Associations::ContainsAssociation.new(self, Reflection::AssociationReflection.new(:contains, file_path, {class_name: 'ActiveFedora::File'}, self.class))
+        association = Associations::BasicContainsAssociation.new(self, Reflection::AssociationReflection.new(:contains, file_path, {class_name: 'ActiveFedora::File'}, self.class))
         @association_cache[file_path.to_sym] = association
 
         self.singleton_class.send :define_method, accessor_name(file_path) do
