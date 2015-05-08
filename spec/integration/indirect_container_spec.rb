@@ -75,6 +75,11 @@ describe "Direct containers" do
             it "has two related_objects" do
               expect(reloaded.related_objects).to eq [file, file2]
             end
+            it "has inbound triples" do
+              statement = file.reload.resource.query(predicate: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor')).to_a.first
+
+              expect(statement.object).to eq file.resource.rdf_subject
+            end
           end
         end
       end

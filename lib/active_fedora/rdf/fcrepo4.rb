@@ -8,5 +8,6 @@ module ActiveFedora::RDF
     property :lastModified
     property :status
     property :ServerManaged
+    property :InboundReferences
   end
 end
