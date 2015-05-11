@@ -28,6 +28,8 @@ module ActiveFedora
     autoload :DirectlyContainsAssociation,    'active_fedora/associations/directly_contains_association'
     autoload :IndirectlyContainsAssociation,  'active_fedora/associations/indirectly_contains_association'
     autoload :ContainsAssociation,            'active_fedora/associations/contains_association'
+    autoload :DeleteProxy,            'active_fedora/associations/delete_proxy'
+    autoload :RecordProxyFinder,      'active_fedora/associations/record_proxy_finder'
 
     module Builder
       autoload :Association,             'active_fedora/associations/builder/association'
