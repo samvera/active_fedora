@@ -2,7 +2,7 @@ language: ruby
 cache: bundler
 sudo: false
 rvm:
-  - 2.2
+  - 2.2.1
 
 gemfile:
   - gemfiles/rails4.1.gemfile

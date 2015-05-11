@@ -17,7 +17,7 @@ module ActiveFedora::Associations
     private
 
     def proxies
-      @proxies ||= proxy_ids.map{|uri| uri_to_proxy(uri) }
+      @proxies ||= proxy_ids.map{ |uri| uri_to_proxy(uri) }
     end
 
     def uri_to_proxy(uri)

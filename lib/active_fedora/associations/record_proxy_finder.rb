@@ -1,7 +1,7 @@
 module ActiveFedora::Associations
   class RecordProxyFinder
     attr_reader :container
-    delegate :contained_ids, :to => :container
+    delegate :contained_ids, to: :container
     def initialize(container:)
       @container = container
     end
@@ -18,7 +18,7 @@ module ActiveFedora::Associations
     end
 
     def relation_subjects(record)
-      record.resource.query(:object => record.rdf_subject).subjects.to_a
+      record.resource.query(object: record.rdf_subject).subjects.to_a
     end
   end
 end
