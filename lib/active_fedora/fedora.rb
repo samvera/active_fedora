@@ -22,7 +22,7 @@ module ActiveFedora
     end
 
     def connection
-      @connection ||= CachingConnection.new(authorized_connection)
+      @connection ||= InboundRelationConnection.new(CachingConnection.new(authorized_connection))
     end
 
     def clean_connection

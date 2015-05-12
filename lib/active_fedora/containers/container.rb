@@ -5,6 +5,7 @@ module ActiveFedora
     property :membership_resource, predicate: ::RDF::Vocab::LDP.membershipResource
     property :has_member_relation, predicate: ::RDF::Vocab::LDP.hasMemberRelation
     property :is_member_of_relation, predicate: ::RDF::Vocab::LDP.isMemberOfRelation
+    property :contained, predicate: ::RDF::Vocab::LDP.contains
 
     def parent
       @parent || raise("Parent hasn't been set on #{self.class}")
@@ -24,6 +25,13 @@ module ActiveFedora
     rescue ActiveFedora::ObjectNotFoundError
       new(id)
     end
+
+    private
+
+    # Don't allow directly setting contained
+    def contained=(*args)
+    end
+
   end
 end
 

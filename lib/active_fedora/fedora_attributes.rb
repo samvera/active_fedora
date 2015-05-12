@@ -62,7 +62,10 @@ module ActiveFedora
     #
     # set_value, get_value, and property accessors are delegated to this object.
     def resource
-      @resource ||= self.class.resource_class.new(@ldp_source.graph.rdf_subject, @ldp_source.graph)
+      # Appending the graph at the end is necessary because adding it as the
+      # parent leaves behind triples not related to the ldp_source's rdf
+      # subject.
+      @resource ||= self.class.resource_class.new(@ldp_source.graph.rdf_subject, @ldp_source.graph) << @ldp_source.graph
     end
 
     # You can set the URI to use for the rdf_label on ClassMethods.rdf_label, then on

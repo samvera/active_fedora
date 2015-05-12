@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Direct containers" do
+describe "Indirect containers" do
   before do
     class RelatedObject < ActiveFedora::Base
       property :title, predicate: ::RDF::DC.title, multiple: false
@@ -75,6 +75,19 @@ describe "Direct containers" do
             it "has two related_objects" do
               expect(reloaded.related_objects).to eq [file, file2]
             end
+            it "has inbound triples" do
+              statement = file.reload.resource.query(predicate: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor')).to_a.first
+
+              expect(statement.object).to eq file.resource.rdf_subject
+            end
+          end
+        end
+        describe "remove" do
+          it "should be able to remove" do
+            o.related_objects = []
+            o.save!
+
+            expect(reloaded.related_objects).to eq []
           end
         end
       end

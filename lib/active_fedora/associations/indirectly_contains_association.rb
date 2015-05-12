@@ -15,6 +15,13 @@ module ActiveFedora
         return true
       end
 
+      def delete_records(records, method)
+        container.reload # Reload container to get updated LDP.contains
+        records.each do |record|
+          delete_record(record)
+        end
+      end
+
       def find_target
         if container_predicate = options[:has_member_relation]
           uris = owner.resource.query(predicate: container_predicate).map { |r| r.object.to_s }
@@ -48,6 +55,11 @@ module ActiveFedora
         end
 
       private
+
+        def delete_record(record)
+          proxy_ids = RecordProxyFinder.new(container: container).call(record)
+          DeleteProxy.call(proxy_ids: proxy_ids, proxy_class: proxy_class)
+        end
 
         def save_through_record(record)
           build_proxy_node({}) do |node|
