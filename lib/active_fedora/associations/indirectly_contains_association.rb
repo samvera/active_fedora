@@ -57,8 +57,15 @@ module ActiveFedora
       private
 
         def delete_record(record)
-          proxy_ids = RecordProxyFinder.new(container: container).call(record)
-          DeleteProxy.call(proxy_ids: proxy_ids, proxy_class: proxy_class)
+          record_proxy_finder.find(record).delete
+        end
+
+        def record_proxy_finder
+          ContainedFinder.new(container: container, repository: composite_proxy_repository)
+        end
+
+        def composite_proxy_repository
+          RecordComposite::Repository.new(base_repository: proxy_class)
         end
 
         def save_through_record(record)
