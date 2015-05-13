@@ -14,7 +14,7 @@ module ActiveFedora::Associations
     private
 
     def proxy_ids(record)
-      contained_ids
+      relation_subjects(record)
     end
 
     def relation_subjects(record)

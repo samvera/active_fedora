@@ -15,6 +15,29 @@ describe "Indirect containers" do
     Object.send(:remove_const, :Proxy)
   end
 
+  describe "delete" do 
+    before do
+      class FooHistory < ActiveFedora::Base
+        indirectly_contains :related_objects, 
+          has_member_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/aggregates'), inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'), 
+          through: 'Proxy', 
+          foreign_key: :proxy_for
+      end
+    end
+
+    it "should delete only one object" do 
+      foo = FooHistory.new
+      foo.related_objects.build
+      file2 = foo.related_objects.build
+      foo.save
+      expect(foo.related_objects.each.count).to eq(2)
+      foo.related_objects.delete(file2)
+      expect(foo.related_objects.each.count).to eq 1
+      foo = FooHistory.find(foo.id)
+      expect(foo.related_objects.each.count).to eq(1)
+    end
+  end
+
   describe "#indirectly_contains" do
     context "when the class is implied" do
       before do
