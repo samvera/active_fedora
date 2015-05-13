@@ -7,9 +7,11 @@ module ActiveFedora
       # :singleton-method
       #
       # Accepts a proc that takes an id and transforms it to a URI
-      mattr_reader :translate_id_to_uri do
-        Core::FedoraIdTranslator
-      end
+      mattr_reader :translate_id_to_uri
+
+      # This method is mixed into ActiveFedora::Base and ActiveFedora::File, so don't
+      # overwrite the value if it's already set.
+      @@translate_id_to_uri ||= Core::FedoraIdTranslator
 
       def self.translate_id_to_uri=(translator)
         @@translate_id_to_uri = translator || Core::FedoraIdTranslator
@@ -19,9 +21,11 @@ module ActiveFedora
       # :singleton-method
       #
       # Accepts a proc that takes a uri and transforms it to an id
-      mattr_reader :translate_uri_to_id do
-        Core::FedoraUriTranslator
-      end
+      mattr_reader :translate_uri_to_id
+
+      # This method is mixed into ActiveFedora::Base and ActiveFedora::File, so don't
+      # overwrite the value if it's already set.
+      @@translate_uri_to_id ||= Core::FedoraUriTranslator
 
       def self.translate_uri_to_id=(translator)
         @@translate_uri_to_id = translator || Core::FedoraUriTranslator
