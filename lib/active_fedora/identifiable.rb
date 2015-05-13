@@ -3,29 +3,11 @@ module ActiveFedora
     extend ActiveSupport::Concern
 
     included do
-      ##
-      # :singleton-method
-      #
-      # Accepts a proc that takes an id and transforms it to a URI
-      mattr_reader :translate_id_to_uri do
-        Core::FedoraIdTranslator
-      end
+      class_attribute :translate_id_to_uri
+      self.translate_id_to_uri = Core::FedoraIdTranslator
 
-      def self.translate_id_to_uri=(translator)
-        @@translate_id_to_uri = translator || Core::FedoraIdTranslator
-      end
-
-      ##
-      # :singleton-method
-      #
-      # Accepts a proc that takes a uri and transforms it to an id
-      mattr_reader :translate_uri_to_id do
-        Core::FedoraUriTranslator
-      end
-
-      def self.translate_uri_to_id=(translator)
-        @@translate_uri_to_id = translator || Core::FedoraUriTranslator
-      end
+      class_attribute :translate_uri_to_id
+      self.translate_uri_to_id = Core::FedoraUriTranslator
     end
 
 
