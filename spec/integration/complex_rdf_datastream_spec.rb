@@ -36,7 +36,7 @@ describe "Nested Rdf Objects" do
     end
 
     it "should be able to nest a complex object" do
-      comp = SpecDatastream::Component.new(ds.graph)
+      comp = SpecDatastream::Component.new(nil, ds.graph)
       comp.label = ["Alternator"]
       ds.parts = comp
       expect(ds.parts.first.label).to eq ["Alternator"]
@@ -53,16 +53,16 @@ describe "Nested Rdf Objects" do
       ds.parts.build(label: 'Alternator')
       ds.parts.build(label: 'Distributor')
       expect(ds.parts.size).to eq 2
-      comp = SpecDatastream::Component.new(ds.graph)
+      comp = SpecDatastream::Component.new(nil, ds.graph)
       comp.label = "Injector port"
       ds.parts = [comp]
       expect(ds.parts.size).to eq 1
     end
 
     it "should be able to nest many complex objects" do
-      comp1 = SpecDatastream::Component.new ds.graph
+      comp1 = SpecDatastream::Component.new nil, ds.graph
       comp1.label = ["Alternator"]
-      comp2 = SpecDatastream::Component.new ds.graph
+      comp2 = SpecDatastream::Component.new nil, ds.graph
       comp2.label = ["Crankshaft"]
       ds.parts = [comp1, comp2]
       expect(ds.parts.first.label).to eq ["Alternator"]
@@ -70,9 +70,9 @@ describe "Nested Rdf Objects" do
     end
 
     it "should be able to clear complex objects" do
-      comp1 = SpecDatastream::Component.new ds.graph
+      comp1 = SpecDatastream::Component.new nil, ds.graph
       comp1.label = ["Alternator"]
-      comp2 = SpecDatastream::Component.new ds.graph
+      comp2 = SpecDatastream::Component.new nil, ds.graph
       comp2.label = ["Crankshaft"]
       ds.parts = [comp1, comp2]
       ds.parts = []
@@ -147,7 +147,7 @@ END
 
 
       it "should store the type of complex objects when type is specified" do
-        comp = SpecDatastream::MediatorUser.new ds.graph
+        comp = SpecDatastream::MediatorUser.new nil, ds.graph
         comp.title = ["Doctor"]
         ds.mediator = comp
         expect(ds.mediator.first.type.first).to be_instance_of ::RDF::URI
@@ -211,11 +211,11 @@ END
 
 
       it "should store the type of complex objects when type is specified" do
-        series = SpecDatastream::Series.new file.graph
+        series = SpecDatastream::Series.new nil, file.graph
         series.title = ["renovating bathrooms"]
         file.series = series
 
-        program = SpecDatastream::Program.new file.graph
+        program = SpecDatastream::Program.new nil, file.graph
         program.title = ["This old House"]
         file.program = program
 

@@ -5,6 +5,7 @@ source "https://rubygems.org"
 gemspec path: File.expand_path('..', __FILE__)
 
 gem 'byebug' unless ENV['TRAVIS']
+gem 'pry-byebug' unless ENV['CI']
 
 group :test do
   gem 'simplecov', require: false

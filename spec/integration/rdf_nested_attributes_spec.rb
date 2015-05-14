@@ -7,7 +7,7 @@ describe "Nesting attribute behavior of RDF resources" do
     end
 
     class ComplexResource < ActiveFedora::Base
-      property :topic, predicate: DummyMADS.Topic, class_name: "Topic"
+      property :topic, predicate: DummyMADS.Topic, class_name: "ComplexResource::Topic"
 
       class Topic < ActiveTriples::Resource
         property :subject, predicate: ::RDF::DC.subject
