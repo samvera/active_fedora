@@ -54,8 +54,14 @@ module ActiveFedora
 
       # FakeQuery exists to adapt the hash to the RDF interface used by RDF associations in ActiveFedora
       class FakeQuery
+        include ::Enumerable
+
         def initialize(values)
           @values = values || []
+        end
+
+        def each(&block)
+          enum_statement.each(&block)
         end
 
         def enum_statement
@@ -87,6 +93,8 @@ module ActiveFedora
         ::RDF::URI.new(nil)
       end
 
+      # Called by Associations::RDF#replace to add data to this resource represenation
+      # @param [Array] vals an array of 3 elements (subject, predicate, object) to insert
       def insert(vals)
         _, pred, val = vals
         set_value(reflection(pred), [val])
