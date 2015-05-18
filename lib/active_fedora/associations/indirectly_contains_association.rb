@@ -2,6 +2,9 @@ module ActiveFedora
   module Associations
     class IndirectlyContainsAssociation < ContainsAssociation #:nodoc:
 
+      # TODO we may want to split this into two subclasses, one for has_member_relation
+      # and the other for is_member_of_relation
+
       def insert_record(record, force = true, validate = true)
         container.save!
         if force
@@ -26,7 +29,7 @@ module ActiveFedora
         if container_predicate = options[:has_member_relation]
           uris = owner.resource.query(predicate: container_predicate).map { |r| r.object.to_s }
           uris.map { |object_uri| klass.find(klass.uri_to_id(object_uri)) }
-        else
+        else # is_member_of_relation
           # TODO this is a lot of reads. Avoid this path
           container_predicate = ::RDF::Vocab::LDP.contains
           proxy_uris = container.resource.query(predicate: container_predicate).map { |r| r.object.to_s }
