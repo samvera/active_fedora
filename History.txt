@@ -1,3 +1,18 @@
+8.1.0
+
+  2015-04-27: Patches casting behavior [David Chandek-Stark]
+  See https://github.com/projecthydra/active_fedora/wiki/Patching-ActiveFedora-7.x-&-8.x-Casting-Behavior
+  for detailed information on the problem.
+    
+  The solution offered in this patch preserves the most-specific-class algorithm
+  of `ActiveFedora::ContentModel.best_model_for` and raises a new execption,
+  `ActiveFedora::ModelNotAsserted` in `ActiveFedora::Core#adapt_to_cmodel`.
+    
+  Note that a repository object can still be loaded into a model class not asserted,
+  for example, by using `.find` with `cast: false`.
+    
+  Closes #746 (although not really a backport)
+
 8.0.1
 
   2015-03-11: Backport solr escape patch [Chris Colvard]
