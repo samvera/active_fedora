@@ -148,4 +148,55 @@ describe "Direct containers" do
       end
     end
   end
+
+  describe "#include?" do
+
+    before do
+      class FooHistory < ActiveFedora::Base
+        directly_contains :files, has_member_relation: ::RDF::URI.new('http://example.com/hasFiles')
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :FooHistory)
+    end
+
+    let(:foo) { FooHistory.create }
+
+    let!(:file1) { foo.files.build }
+
+    before do
+      file1.content = 'hmm'
+      foo.save
+    end
+
+    context "when it is not loaded" do
+      context "and it contains the file" do
+        subject { foo.reload.files.include? file1 }
+        it { is_expected.to be true }
+      end
+
+      context "and it doesn't contain the file" do
+        let!(:file2) { ActiveFedora::File.new.tap { |f| f.content= 'hmm'; f.save } }
+        subject { foo.reload.files.include? file2 }
+        it { is_expected.to be false }
+      end
+    end
+
+    context "when it is loaded" do
+      before { foo.files.to_a } # initial load of the association
+
+      context "and it contains the file" do
+        subject { foo.files.include? file1 }
+        it { is_expected.to be true }
+      end
+
+      context "and it doesn't contain the file" do
+        let!(:file2) { ActiveFedora::File.new.tap { |f| f.content= 'hmm'; f.save } }
+        subject { foo.files.include? file2 }
+        it { is_expected.to be false }
+      end
+    end
+  end
+
 end

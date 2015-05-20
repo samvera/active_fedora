@@ -15,17 +15,73 @@ describe "Indirect containers" do
     Object.send(:remove_const, :Proxy)
   end
 
-  describe "delete" do 
+  describe "#include?" do
     before do
       class FooHistory < ActiveFedora::Base
-        indirectly_contains :related_objects, 
-          has_member_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/aggregates'), inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'), 
-          through: 'Proxy', 
+        indirectly_contains :related_objects,
+          has_member_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/aggregates'),
+          inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'),
+          through: 'Proxy', foreign_key: :proxy_for
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :FooHistory)
+    end
+
+    let(:foo) { FooHistory.new }
+
+    let(:file1) { RelatedObject.create }
+
+    before do
+      foo.related_objects << file1
+      foo.save
+    end
+
+    context "when it is not loaded" do
+      context "and it contains the file" do
+        subject { foo.reload.related_objects.include? file1 }
+        it { is_expected.to be true }
+      end
+
+      context "and it doesn't contain the file" do
+        let!(:file2) { RelatedObject.create }
+        subject { foo.reload.related_objects.include? file2 }
+        it { is_expected.to be false }
+      end
+    end
+
+    context "when it is loaded" do
+      before { foo.related_objects.to_a } # initial load of the association
+
+      context "and it contains the file" do
+        subject { foo.related_objects.include? file1 }
+        it { is_expected.to be true }
+      end
+
+      context "and it doesn't contain the file" do
+        let!(:file2) { RelatedObject.create }
+        subject { foo.related_objects.include? file2 }
+        it { is_expected.to be false }
+      end
+    end
+  end
+
+  describe "delete" do
+    before do
+      class FooHistory < ActiveFedora::Base
+        indirectly_contains :related_objects,
+          has_member_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/aggregates'), inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'),
+          through: 'Proxy',
           foreign_key: :proxy_for
       end
     end
 
-    it "should delete only one object" do 
+    after do
+      Object.send(:remove_const, :FooHistory)
+    end
+
+    it "should delete only one object" do
       foo = FooHistory.new
       foo.related_objects.build
       file2 = foo.related_objects.build
