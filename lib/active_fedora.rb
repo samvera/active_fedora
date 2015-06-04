@@ -68,6 +68,7 @@ module ActiveFedora #:nodoc:
     autoload :FilesHash
     autoload :FixityService
     autoload :Identifiable
+    autoload :Indexers
     autoload :Indexing
     autoload :IndexingService
     autoload :InheritableAccessors
@@ -105,9 +106,11 @@ module ActiveFedora #:nodoc:
       autoload :FinderMethods
     end
 
+    autoload :Schema
     autoload :Scoping
     autoload :Serialization
     autoload :SimpleDatastream
+    autoload :SchemaIndexingStrategy
     autoload :SolrInstanceLoader
     autoload :SolrQueryBuilder
     autoload :SolrService

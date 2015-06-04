@@ -148,7 +148,6 @@ describe ActiveFedora::RDFDatastream do
       end
       context "persisted to repository" do
         before do
-          DummySubnode.configure :repository => :default
           allow_any_instance_of(DummySubnode).to receive(:repository).and_return(RDF::Repository.new)
           dummy = DummySubnode.new(RDF::URI('http://example.org/dummy/blah'))
           dummy.title = 'subbla'
