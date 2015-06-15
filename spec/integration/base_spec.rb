@@ -135,6 +135,25 @@ describe ActiveFedora::Base do
     end
   end
   
+  describe "#apply_schema" do
+    before do
+      class ExampleSchema < ActiveTriples::Schema
+        property :title, predicate: RDF::DC.title
+      end
+      class ExampleBase < ActiveFedora::Base
+        apply_schema ExampleSchema, ActiveFedora::SchemaIndexingStrategy.new(ActiveFedora::Indexers::GlobalIndexer.new(:symbol))
+      end
+    end
+    after do
+      Object.send(:remove_const, :ExampleSchema)
+      Object.send(:remove_const, :ExampleBase)
+    end
+    let(:obj) { ExampleBase.new }
+    it "should configure properties and solrize them" do
+      obj.title = ["Test"]
+      expect(obj.to_solr[ActiveFedora::SolrQueryBuilder.solr_name("title", :symbol)]).to eq ["Test"]
+    end
+  end
 
   describe "#exists?" do
     let(:obj) { ActiveFedora::Base.create } 

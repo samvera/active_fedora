@@ -99,7 +99,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
       end
 
       describe "on lists" do
-        subject { ComplexRDFDatastream::PersonalName.new(RDF::Graph.new) }
+        subject { ComplexRDFDatastream::PersonalName.new(nil) }
         it "should accept a hash" do
           subject.elementList_attributes =  [{ topicElement_attributes: {'0' => { elementValue:"Quantum Behavior" }, '1' => { elementValue:"Wave Function" }}}]
           expect(subject.elementList.first[0].elementValue).to eq ["Quantum Behavior"]
