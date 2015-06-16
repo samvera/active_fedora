@@ -7,6 +7,8 @@ describe ActiveFedora::Datastream do
 
   it { should_not be_metadata }
 
+  it { is_expected.to be_versionable }
+
   describe "#behaves_like_io?" do
     subject { datastream.send(:behaves_like_io?, object) }
 

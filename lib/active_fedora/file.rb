@@ -10,6 +10,9 @@ module ActiveFedora
     extend ActiveTriples::Properties
     generate_method 'content'
 
+    include ActiveFedora::Versionable
+    has_many_versions
+
     extend ActiveModel::Callbacks
     include Identifiable
     include Scoping
@@ -349,7 +352,6 @@ module ActiveFedora
 
     include ActiveFedora::File::Persistence
     include ActiveFedora::File::Streaming
-    include ActiveFedora::Versionable
   end
 
 end
