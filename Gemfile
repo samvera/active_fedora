@@ -6,6 +6,9 @@ gemspec path: File.expand_path('..', __FILE__)
 
 gem 'byebug' unless ENV['TRAVIS']
 gem 'pry-byebug' unless ENV['CI']
+# From https://github.com/ActiveTriples/ActiveTriples/pull/150
+gem 'active-triples', github: 'ActiveTriples/ActiveTriples', ref: 'b4a0087'
+
 
 group :test do
   gem 'simplecov', require: false
