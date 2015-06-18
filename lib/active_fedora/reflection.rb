@@ -10,7 +10,7 @@ module ActiveFedora
     module ClassMethods
       def create_reflection(macro, name, options, active_fedora)
         klass = case macro
-          when :has_many, :belongs_to, :has_and_belongs_to_many, :contains, :directly_contains, :indirectly_contains
+          when :has_many, :belongs_to, :has_and_belongs_to_many, :contains, :directly_contains, :directly_contains_one, :indirectly_contains
             AssociationReflection
           when :rdf, :singular_rdf
             RDFPropertyReflection
@@ -260,6 +260,8 @@ module ActiveFedora
           Associations::RDF
         when :directly_contains
           Associations::DirectlyContainsAssociation
+        when :directly_contains_one
+          Associations::DirectlyContainsOneAssociation
         when :indirectly_contains
           Associations::IndirectlyContainsAssociation
         end

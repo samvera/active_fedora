@@ -26,6 +26,7 @@ module ActiveFedora
     autoload :HasAndBelongsToManyAssociation, 'active_fedora/associations/has_and_belongs_to_many_association'
     autoload :BasicContainsAssociation,       'active_fedora/associations/basic_contains_association'
     autoload :DirectlyContainsAssociation,    'active_fedora/associations/directly_contains_association'
+    autoload :DirectlyContainsOneAssociation, 'active_fedora/associations/directly_contains_one_association'
     autoload :IndirectlyContainsAssociation,  'active_fedora/associations/indirectly_contains_association'
     autoload :ContainsAssociation,            'active_fedora/associations/contains_association'
     autoload :DeleteProxy,            'active_fedora/associations/delete_proxy'
@@ -43,6 +44,7 @@ module ActiveFedora
       autoload :HasAndBelongsToMany, 'active_fedora/associations/builder/has_and_belongs_to_many'
       autoload :Contains,            'active_fedora/associations/builder/contains'
       autoload :DirectlyContains,    'active_fedora/associations/builder/directly_contains'
+      autoload :DirectlyContainsOne, 'active_fedora/associations/builder/directly_contains_one'
       autoload :IndirectlyContains,  'active_fedora/associations/builder/indirectly_contains'
 
       autoload :Property,         'active_fedora/associations/builder/property'
@@ -106,6 +108,10 @@ module ActiveFedora
       #
       def directly_contains(name, options={})
         Builder::DirectlyContains.build(self, name, { class_name: 'ActiveFedora::File' }.merge(options))
+      end
+
+      def directly_contains_one(name, options={})
+        Builder::DirectlyContainsOne.build(self, name, { class_name: 'ActiveFedora::File' }.merge(options))
       end
 
       # This method is used to declare an ldp:IndirectContainer on a resource

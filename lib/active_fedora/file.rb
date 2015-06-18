@@ -70,10 +70,14 @@ module ActiveFedora
       ldp_source.subject
     end
 
-    # If this file have a parent with ldp#contains, we know it is not new.
+    # If this file has a parent with ldp#contains, we know it is not new.
     # By tracking exists we prevent an unnecessary HEAD request.
     def new_record?
       !@exists && ldp_source.new?
+    end
+
+    def persisted?
+      @exists && !ldp_source.new?
     end
 
     def destroyed?
