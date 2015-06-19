@@ -1,3 +1,20 @@
+v9.1.2
+  2015-06-11: Remove unnecessary dependency on rdf-vocab [Justin Coyne]
+
+  2015-05-05: Track type as a changed attribute in MetadataNode [Justin Coyne]
+
+  2015-05-05: Don't try to save the metadata node if the file is unsaved [Justin
+  Coyne]
+
+  2015-05-05: File#save should return true if there is nothing to save Fixes #784
+  This parallels how ActiveRecord objects behave if there are no changes, e.g.:
+  [Justin Coyne]
+
+  2015-05-04: CollectionAssociation should generate a solr query lazily When a
+  CollectionAssociation is loaded before the owing object is saved the solr query
+  is produced without the id of the owner, so all the objects of the correct type
+  are returned. Ref #781 [Justin Coyne]
+
 v9.1.0
   2015-04-16: Use delegate_to instead of datastream in the options for property
   Trying to reduce/elimnate the useage of "datastream" especially in the public
