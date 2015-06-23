@@ -59,6 +59,12 @@ module ActiveFedora #:nodoc:
     autoload :Datastream
     autoload :Datastreams
     autoload :DelegatedAttribute
+    autoload_under 'attributes' do
+      autoload :StreamAttribute
+      autoload :ActiveTripleAttribute
+      autoload :OmAttribute
+      autoload :RdfDatastreamAttribute
+    end
     autoload :Fedora
     autoload :FedoraAttributes
     autoload :File

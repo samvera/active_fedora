@@ -407,12 +407,14 @@ describe ActiveFedora::Base do
 
     subject { BarHistory4.new }
 
-    it "should raise an error on get" do
-      expect {subject.description}.to raise_error(ArgumentError, "Undefined datastream id: `rdfish' in has_attributes")
+    let(:error_message) { "Undefined file: `rdfish' in property description" }
+
+    it "raises an error on get" do
+      expect { subject.description }.to raise_error(ArgumentError, error_message)
     end
 
-    it "should raise an error on set" do
-      expect { subject.description = ['Neat'] }.to raise_error(ArgumentError, "Undefined datastream id: `rdfish' in has_attributes")
+    it "raises an error on set" do
+      expect { subject.description = ['Neat'] }.to raise_error(ArgumentError, error_message)
     end
 
     describe ".datastream_class_for_name" do
@@ -520,5 +522,3 @@ describe ActiveFedora::Base do
     end
   end
 end
-
-
