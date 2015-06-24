@@ -9,7 +9,7 @@ module ActiveFedora
       @metadata_node ||= self.class.metadata_schema.new(self)
     end
 
-    def save(*)
+    def create_or_update(*)
       if super && !new_record?
         metadata_node.metadata_uri = described_by # TODO only necessary if the URI was < > before
         metadata_node.save # TODO if changed?

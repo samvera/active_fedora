@@ -32,6 +32,32 @@ module ActiveFedora
       end
     end
 
+    def id
+      if uri.kind_of?(::RDF::URI) && uri.value.blank?
+        nil
+      elsif uri.present?
+        self.class.uri_to_id(URI.parse(uri))
+      end
+    end
+
+    def id=(id)
+      raise "ID has already been set to #{self.id}" if self.id
+      @ldp_source = build_ldp_resource(id.to_s)
+    end
+
+
+    # TODO: Remove after we no longer support #pid.
+    def pid
+      Deprecation.warn FedoraAttributes, "#{self.class}#pid is deprecated and will be removed in active-fedora 10.0. Use #{self.class}#id instead."
+      id
+    end
+
+    def uri
+      # TODO could we return a RDF::URI instead?
+      uri = @ldp_source.try(:subject_uri)
+      uri.value == '' ? uri : uri.to_s
+    end
+
 
     module ClassMethods
       ##

@@ -23,12 +23,9 @@ module ActiveFedora
     def initialize(parent_or_url_or_hash = nil, path=nil, options={})
       case parent_or_url_or_hash
       when Hash
-        content = ''
-        @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, nil, content, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
+        @ldp_source = build_ldp_resource_via_uri
       when nil, String
-      #TODO this is similar to Core#build_ldp_resource
-        content = ''
-        @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, parent_or_url_or_hash, content, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
+        @ldp_source = build_ldp_resource_via_uri parent_or_url_or_hash
       when ActiveFedora::Base
         Deprecation.warn File, "Initializing a file by passing a container is deprecated. Initialize with a uri instead. This capability will be removed in active-fedora 10.0"
         uri = if parent_or_url_or_hash.uri.kind_of?(::RDF::URI) && parent_or_url_or_hash.uri.value.empty?
@@ -36,7 +33,7 @@ module ActiveFedora
         else
           "#{parent_or_url_or_hash.uri}/#{path}"
         end
-        @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, uri, nil, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
+        @ldp_source = build_ldp_resource_via_uri(uri, nil)
 
       else
         raise "The first argument to #{self} must be a String or an ActiveFedora::Base. You provided a #{parent_or_url.class}"
@@ -65,27 +62,14 @@ module ActiveFedora
       ActiveFedora.fedora.connection
     end
 
-    # TODO this is like FedoraAttributes#uri
-    def uri
-      ldp_source.subject
-    end
-
     # If this file has a parent with ldp#contains, we know it is not new.
     # By tracking exists we prevent an unnecessary HEAD request.
     def new_record?
       !@exists && ldp_source.new?
     end
 
-    def persisted?
-      @exists && !ldp_source.new?
-    end
-
-    def destroyed?
-      false
-    end
-
     def uri= uri
-      @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, uri, '', ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
+      @ldp_source = build_ldp_resource_via_uri(uri)
     end
 
     # If we know the record to exist (parent has LDP:contains), we can avoid unnecessary HEAD requests
@@ -96,15 +80,16 @@ module ActiveFedora
     # When restoring from previous versions, we need to reload certain attributes from Fedora
     def reload
       return if new_record?
-      reset
+      refresh
     end
 
-    def reset
-      @ldp_source = Ldp::Resource::BinarySource.new(ldp_connection, uri)
+    def refresh
+      @ldp_source = build_ldp_resource_via_uri(uri)
       @original_name = nil
       @mime_type = nil
       @content = nil
       @metadata = nil
+      changed_attributes.clear
     end
 
     def check_fixity
@@ -207,82 +192,90 @@ module ActiveFedora
       solr_doc
     end
 
+    def content= string_or_io
+      content_will_change! unless @content == string_or_io
+      @content = string_or_io
+    end
+
+    def content
+      local_or_remote_content(true)
+    end
+
+    def save(*)
+      return true unless content_changed?
+      super
+    end
+
+    def readonly?
+      false
+    end
+
     protected
 
-    def default_mime_type
-      'text/plain'
-    end
+      def default_mime_type
+        'text/plain'
+      end
 
-    # The string to prefix all solr fields with. Override this method if you want
-    # a prefix other than the default
-    def prefix(path)
-      path ? "#{path.underscore}__" : ''
-    end
+      # The string to prefix all solr fields with. Override this method if you want
+      # a prefix other than the default
+      def prefix(path)
+        path ? "#{path.underscore}__" : ''
+      end
 
-    def fetch_original_name_from_headers
-      return if new_record?
-      m = ldp_source.head.headers['Content-Disposition'].match(/filename="(?<filename>[^"]*)";/)
-      URI.decode(m[:filename])
-    end
+      def fetch_original_name_from_headers
+        return if new_record?
+        m = ldp_source.head.headers['Content-Disposition'].match(/filename="(?<filename>[^"]*)";/)
+        URI.decode(m[:filename])
+      end
 
-    def fetch_mime_type
-      ldp_source.head.headers['Content-Type']
-    end
+      def fetch_mime_type
+        ldp_source.head.headers['Content-Type']
+      end
 
     private
 
-    def links
-      @links ||= Ldp::Response.links(ldp_source.head)
-    end
-
-    def self.relation
-      FileRelation.new(self)
-    end
-
-    # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
-    def behaves_like_io?(obj)
-      [IO, Tempfile, StringIO].any? { |klass| obj.kind_of? klass } || (defined?(Rack) && obj.is_a?(Rack::Test::UploadedFile))
-    end
-
-    # Persistence is an included module, so that we can include other modules which override these methods
-    module Persistence
-      def content= string_or_io
-        content_will_change! unless @content == string_or_io
-        @content = string_or_io
+      def links
+        @links ||= Ldp::Response.links(ldp_source.head)
       end
 
-      def content
-        local_or_remote_content(true)
+      def self.relation
+        FileRelation.new(self)
       end
 
-      def save(*)
-        return true unless content_changed?
-        headers = { 'Content-Type'.freeze => mime_type, 'Content-Length'.freeze => content.size.to_s }
-        headers['Content-Disposition'.freeze] = "attachment; filename=\"#{URI.encode(@original_name)}\"" if @original_name
-
-        ldp_source.content = content
-        if new_record?
-          ldp_source.create do |req|
-            req.headers.merge!(headers)
-          end
-        else
-          ldp_source.update do |req|
-            req.headers.merge!(headers)
-          end
-        end
-        reset
-        changed_attributes.clear
-      end
-
-      def save!(*attrs)
-        save(*attrs)
+      # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
+      def behaves_like_io?(obj)
+        [IO, Tempfile, StringIO].any? { |klass| obj.kind_of? klass } || (defined?(Rack) && obj.is_a?(Rack::Test::UploadedFile))
       end
 
       def retrieve_content
         ldp_source.get.body
       end
 
-      private
+      def ldp_headers
+        headers = { 'Content-Type'.freeze => mime_type, 'Content-Length'.freeze => content.size.to_s }
+        headers['Content-Disposition'.freeze] = "attachment; filename=\"#{URI.encode(@original_name)}\"" if @original_name
+        headers
+      end
+
+      def create_record(options = {})
+        ldp_source.content = content
+        ldp_source.create do |req|
+          req.headers.merge!(ldp_headers)
+        end
+        refresh
+      end
+
+      def update_record(options = {})
+        ldp_source.content = content
+        ldp_source.update do |req|
+          req.headers.merge!(ldp_headers)
+        end
+        refresh
+      end
+
+      def build_ldp_resource_via_uri(uri=nil, content='')
+        Ldp::Resource::BinarySource.new(ldp_connection, uri, content, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
+      end
 
       def uploaded_file?(payload)
         defined?(ActionDispatch::Http::UploadedFile) and payload.instance_of?(ActionDispatch::Http::UploadedFile)
@@ -305,7 +298,6 @@ module ActiveFedora
         end
         @content
       end
-    end
 
     module Streaming
       # @param range [String] the Range HTTP header
@@ -351,7 +343,7 @@ module ActiveFedora
       end
     end
 
-    include ActiveFedora::File::Persistence
+    include ActiveFedora::Persistence
     include ActiveFedora::File::Streaming
     include ActiveFedora::Versionable
   end
