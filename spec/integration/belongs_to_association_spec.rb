@@ -106,13 +106,13 @@ describe ActiveFedora::Base do
       end
 
       class SimpleCollection < ActiveFedora::Base
-        has_many :objects, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'SimpleObject', autosave: true
-        has_many :complex_objects, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ZComplexObject', autosave: true
+        has_many :objects, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'SimpleObject'
+        has_many :complex_objects, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ZComplexObject'
       end
 
       class ComplexCollection < SimpleCollection
-        has_many :objects, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'SimpleObject', autosave: true
-        has_many :complex_objects, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ZComplexObject', autosave: true
+        has_many :objects, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'SimpleObject'
+        has_many :complex_objects, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ZComplexObject'
 
         def assert_content_model
           self.has_model = [self.class.to_s, self.class.superclass.to_s]
@@ -223,7 +223,7 @@ describe ActiveFedora::Base do
       end
 
       class SuperclassCollection < ActiveFedora::Base
-        has_many :objects, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'SuperclassObject', autosave: true
+        has_many :objects, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'SuperclassObject'
       end
     end
     after :all do
