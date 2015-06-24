@@ -149,7 +149,6 @@ module ActiveFedora
       assign_rdf_subject
       serialize_attached_files
       @ldp_source = @ldp_source.create
-      @resource = nil
       assign_uri_to_attached_files
       save_attached_files
       refresh
