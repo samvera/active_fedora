@@ -280,85 +280,120 @@ describe "Deleting a dependent relationship" do
 end
 
 describe "Autosave" do
-  context "a has_many - belongs_to relationship" do
-    before do
-      class Item < ActiveFedora::Base
-        has_many :components
-        has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
-          m.field "title", :string
+  context "with new objects" do
+    context "a has_many - belongs_to relationship" do
+      before do
+        class Item < ActiveFedora::Base
+          has_many :components
+          has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
+            m.field "title", :string
+          end
+          Deprecation.silence(ActiveFedora::Attributes) do
+            has_attributes :title, datastream: 'foo'
+          end
         end
-        Deprecation.silence(ActiveFedora::Attributes) do
-          has_attributes :title, datastream: 'foo'
+        class Component < ActiveFedora::Base
+          belongs_to :item, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
+          has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
+            m.field "description", :string
+          end
+          Deprecation.silence(ActiveFedora::Attributes) do
+            has_attributes :description, datastream: 'foo'
+          end
         end
       end
-      class Component < ActiveFedora::Base
-        belongs_to :item, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
-        has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
-          m.field "description", :string
+
+      after do
+        Object.send(:remove_const, :Item)
+        Object.send(:remove_const, :Component)
+      end
+
+      context "From the belongs_to side" do
+        let(:component) { Component.create(item: Item.new(title: 'my title')) }
+
+        it "should save dependent records" do
+          component.reload
+          expect(component.item.title).to eq 'my title'
         end
-        Deprecation.silence(ActiveFedora::Attributes) do
-          has_attributes :description, datastream: 'foo'
+      end
+
+      context "From the has_many side" do
+        let(:item) { Item.create(components: [Component.new(description: 'my description')]) }
+
+        it "should save dependent records" do
+          item.reload
+          expect(item.components.first.description).to eq 'my description'
         end
       end
     end
 
-    after do
-      Object.send(:remove_const, :Item)
-      Object.send(:remove_const, :Component)
-    end
+    context "a has_many - has_and_belongs_to_many relationship" do
+      context "with ActiveFedora::Base as classes" do
+        before do
+          class Novel < ActiveFedora::Base
+            has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+            has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+          end
+          class Text < ActiveFedora::Base
+            has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+          end
+        end
+        let(:text) { Text.create}
+        let(:novel) { Novel.create}
 
-    context "From the belongs_to side" do
-      let(:component) { Component.create(item: Item.new(title: 'my title')) }
+        after do
+          Object.send(:remove_const, :Novel)
+          Object.send(:remove_const, :Text)
+        end
 
-      it "should save dependent records" do
-        component.reload
-        expect(component.item.title).to eq 'my title'
-      end
-    end
+        it "should work when added via the has_many" do
+          text.books << novel
+          novel.save
+          expect(novel.reload.contents).to eq [text]
+          expect(text.reload.books).to eq [novel]
+        end
 
-    context "From the has_many side" do
-      let(:item) { Item.create(components: [Component.new(description: 'my description')]) }
+        it "should work when added via the has_and_belongs_to_many" do
+          novel.contents << text
+          novel.save!
+          text.reload
+          expect(text.books).to eq [novel]
+        end
 
-      it "should save dependent records" do
-        item.reload
-        expect(item.components.first.description).to eq 'my description'
       end
     end
   end
 
-  context "a has_many - has_and_belongs_to_many relationship" do
-    context "with ActiveFedora::Base as classes" do
-      before do
-        class Novel < ActiveFedora::Base
-          has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
-          has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
-        end
-        class Text < ActiveFedora::Base
-          has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
-        end
-      end
-      let(:text) { Text.create}
-      let(:novel) { Novel.create}
-
-      after do
-        Object.send(:remove_const, :Novel)
-        Object.send(:remove_const, :Text)
+  context "with updated objects" do
+    
+    before :all do
+      class Library < ActiveFedora::Base
+        has_many :books, autosave: true
       end
 
-      it "should work when added via the has_many" do
-        text.books << novel
-        novel.save
-        expect(novel.reload.contents).to eq [text]
-        expect(text.reload.books).to eq [novel]
+      class Book < ActiveFedora::Base
+        belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
+        property :title, predicate: ::RDF::DC.title
       end
-
-      it "should work when added via the has_and_belongs_to_many" do
-        novel.contents << text
-        novel.save!
-        text.reload
-        expect(text.books).to eq [novel]
-      end
-
     end
+    after :all do
+      Object.send(:remove_const, :Book)
+      Object.send(:remove_const, :Library)
+    end
+  
+    let(:library) { Library.create }
+    
+    before do
+      library.books.create(title: ["Great Book"])
+      library.books.first.title = ["Better book"]
+      library.save
+    end
+
+    subject { library.books(true) }
+
+    it "saves the new title" do
+      expect(subject.first.title).to eql ["Better book"]
+    end
+
   end
 end
