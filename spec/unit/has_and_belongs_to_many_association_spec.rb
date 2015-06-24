@@ -42,17 +42,19 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
 
       describe "finding member" do
         let(:ids) { (0..15).map(&:to_s) }
-        let(:query1) { ids.slice(0,10).map {|i| "_query_:\"{!raw f=id}#{i}\""}.join(" OR ") }
-        let(:query2) { ids.slice(10,10).map {|i| "_query_:\"{!raw f=id}#{i}\""}.join(" OR ") }
-
-        it "should call solr query multiple times" do
-          reflection = Book.create_reflection(:has_and_belongs_to_many, :pages, { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection, solr_page_size: 10}, Book)
+        let(:reflection) { Book.create_reflection(:has_and_belongs_to_many, :pages, { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection }, Book) }
+        let(:association) { ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, reflection) }
+        it "calls ActiveFedora::Base.find" do
           expect(subject).to receive(:[]).with('page_ids').and_return(ids)
-          expect(ActiveFedora::SolrService).to receive(:query).with(query1, rows: 10).and_return([])
-          expect(ActiveFedora::SolrService).to receive(:query).with(query2, rows: 10).and_return([])
+          expect(ActiveFedora::Base).to receive(:find).with(ids)
+          association.send(:find_target)
+        end
+      end
 
-          ac = ActiveFedora::Associations::HasAndBelongsToManyAssociation.new(subject, reflection)
-          ac.find_target
+      describe "solr page size option" do
+        it "sends a deprecation warning" do
+          expect(Deprecation).to receive(:warn)
+          Book.has_and_belongs_to_many(:pages, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection, solr_page_size: 123)
         end
       end
     end

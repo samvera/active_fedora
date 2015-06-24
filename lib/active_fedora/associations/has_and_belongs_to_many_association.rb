@@ -46,20 +46,6 @@ module ActiveFedora
         result && records
       end
 
-
-      def find_target
-        page_size = @reflection.options[:solr_page_size]
-        page_size ||= 200
-        ids = owner[reflection.foreign_key]
-        return [] if ids.blank?
-        solr_result = []
-        0.step(ids.size,page_size) do |startIdx|
-          query = ActiveFedora::SolrQueryBuilder.construct_query_for_ids(ids.slice(startIdx,page_size))
-          solr_result += ActiveFedora::SolrService.query(query, rows: page_size)
-        end
-        return ActiveFedora::QueryResultBuilder.reify_solr_results(solr_result)
-      end
-
       # In a HABTM, just look in the RDF, no need to run a count query from solr.
       def count(options = {})
         owner[reflection.foreign_key].size
@@ -94,6 +80,12 @@ module ActiveFedora
 
         def stale_state
           owner[reflection.foreign_key]
+        end
+
+        def find_target
+          ids = owner[reflection.foreign_key]
+          return [] if ids.blank?
+          ActiveFedora::Base.find(ids)
         end
 
     end
