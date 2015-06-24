@@ -88,6 +88,7 @@ module ActiveFedora #:nodoc:
     autoload :NomDatastream
     autoload :NullRelation
     autoload :OmDatastream
+    autoload :Pathing
     autoload :Persistence
     autoload :ProfileIndexingService
     autoload :Property
