@@ -46,10 +46,8 @@ module ActiveFedora
     end
 
     def ==(comparison_object)
-         comparison_object.equal?(self) ||
-           (comparison_object.instance_of?(self.class) &&
-             comparison_object.uri == uri &&
-             !comparison_object.new_record?)
+      return true if comparison_object.equal?(self)
+      comparison_object.instance_of?(self.class) && comparison_object.uri == uri && !comparison_object.new_record?
     end
 
     def ldp_source
