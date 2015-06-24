@@ -177,7 +177,7 @@ module ActiveFedora
         elsif properties.key?(:delegate_to)
           define_delegated_accessor([name], properties.delete(:delegate_to), properties.reverse_merge(multiple: true), &block)
         else
-          raise "You must provide `:datastream' or `:predicate' options to property"
+          raise "You must provide `:delegate_to' or `:predicate' options to property"
         end
       end
 
@@ -186,7 +186,7 @@ module ActiveFedora
       def define_active_triple_accessor(name, properties, &block)
         warn_duplicate_predicates name, properties
         properties = { multiple: true }.merge(properties)
-        find_or_create_defined_attribute(name, nil, properties)
+        find_or_create_defined_attribute(name, ActiveTripleAttribute, properties)
         raise ArgumentError, "#{name} is a keyword and not an acceptable property name." if protected_property_name? name
         reflection = ActiveFedora::Attributes::PropertyBuilder.build(self, name, properties, &block)
         ActiveTriples::Reflection.add_reflection self, name, reflection
@@ -197,6 +197,10 @@ module ActiveFedora
       def define_delegated_accessor(fields, delegate_target, options, &block)
         define_attribute_methods fields
         fields.each do |f|
+          klass = datastream_class_for_name(delegate_target)
+          attribute_properties = options.merge(delegate_target: delegate_target, klass: klass)
+          find_or_create_defined_attribute f, attribute_class(klass), attribute_properties
+
           create_attribute_reader(f, delegate_target, options)
           create_attribute_setter(f, delegate_target, options)
           add_attribute_indexing_config(f, &block) if block_given?
@@ -204,7 +208,6 @@ module ActiveFedora
       end
 
       def add_attribute_indexing_config(name, &block)
-        # TODO the hash can be initalized to return on of these
         index_config[name] ||= ActiveFedora::Indexing::Map::IndexObject.new &block
       end
 
@@ -215,31 +218,46 @@ module ActiveFedora
         end
       end
 
-      def find_or_create_defined_attribute(field, dsid, args)
-        delegated_attributes[field] ||= DelegatedAttribute.new(field, dsid, datastream_class_for_name(dsid), args)
+      # @param [Symbol] field the field to find or create
+      # @param [Class] klass the class to use to delegate the attribute (e.g. 
+      #                ActiveTripleAttribute, OmAttribute, or RdfDatastreamAttribute)
+      # @param [Hash] args 
+      # @option args [String] :delegate_target the path to the delegate
+      # @option args [Class] :klass the class to create
+      # @option args [true,false] :multiple (false) true for multi-value fields
+      # @option args [Array<Symbol>] :at path to a deep node 
+      # @return [DelegatedAttribute] the found or created attribute
+      def find_or_create_defined_attribute(field, klass, args)
+        delegated_attributes[field] ||= klass.new(field, args)
       end
 
       # @param [String] dsid the datastream id
       # @return [Class] the class of the datastream
       def datastream_class_for_name(dsid)
-        reflection = reflect_on_association(dsid)
+        reflection = reflect_on_association(dsid.to_sym)
         reflection ? reflection.klass : ActiveFedora::File
       end
 
       def create_attribute_reader(field, dsid, args)
-        find_or_create_defined_attribute(field, dsid, args)
-
         define_method field do |*opts|
           array_reader(field, *opts)
         end
       end
 
       def create_attribute_setter(field, dsid, args)
-        find_or_create_defined_attribute(field, dsid, args)
         define_method "#{field}=".to_sym do |v|
           self[field]=v
         end
       end
+
+      def attribute_class(klass)
+        if klass < ActiveFedora::RDFDatastream
+          RdfDatastreamAttribute 
+        else
+          OmAttribute
+        end
+      end
+
     end
   end
 end
