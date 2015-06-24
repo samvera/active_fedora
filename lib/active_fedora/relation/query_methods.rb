@@ -1,15 +1,6 @@
 module ActiveFedora
   module QueryMethods # :nodoc:
 
-    def extending_values
-      @values[:extending] || []
-    end
-
-    def extending_values=(values)
-      raise ImmutableRelation if @loaded
-      @values[:extending] = values
-    end
-
     def where_values
       @values[:where] ||= []
     end
