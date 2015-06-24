@@ -3,9 +3,11 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   before :all do
     class Library < ActiveFedora::Base
-      has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
+      has_many :books
     end
-    class Book < ActiveFedora::Base; end
+    class Book < ActiveFedora::Base
+      belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
+    end
   end
 
   after :all do
@@ -60,6 +62,12 @@ describe ActiveFedora::Base do
         expect{ subject.sort! }.to raise_error NoMethodError
       end
     end
+
+    context "when limit is applied" do
+      subject { Library.create books: [Book.create, Book.create] }
+      it "limits the number of books" do
+        expect(subject.books.limit(1).size).to eq 1
+      end
+    end
   end
 end
-
