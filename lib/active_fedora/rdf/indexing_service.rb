@@ -22,7 +22,7 @@ module ActiveFedora::RDF
       def add_assertions(prefix_method, solr_doc = {})
         fields.each do |field_key, field_info|
           solr_field_key = solr_document_field_name(field_key, prefix_method)
-          Array(field_info[:values]).each do |val|
+          field_info.values.each do |val|
             append_to_solr_doc(solr_doc, solr_field_key, field_info, val)
           end
         end
@@ -38,7 +38,7 @@ module ActiveFedora::RDF
       def append_to_solr_doc(solr_doc, solr_field_key, field_info, val)
         self.class.create_and_insert_terms(solr_field_key,
                                            solr_document_field_value(val),
-                                           field_info[:behaviors], solr_doc)
+                                           field_info.behaviors, solr_doc)
       end
 
       def solr_document_field_name(field_key, prefix_method)
@@ -64,35 +64,21 @@ module ActiveFedora::RDF
         object.resource
       end
 
-      def properties
-        object.class.properties
-      end
-
       def index_config
         object.class.index_config
       end
 
-      # returns a Hash, e.g.: {field => { values: [], type: :something, behaviors: [] }, ...}
+      # returns the field map instance
       def fields
-        field_map = {}.with_indifferent_access
-
-        index_config.each do |name, index_field_config|
-          type = index_field_config.data_type
-          behaviors = index_field_config.behaviors
-          next unless type and behaviors
-          next if kind_of_af_base?(name)
-          field_map[name] = { values: find_values(name), type: type, behaviors: behaviors}
+        field_map_class.new do |field_map| 
+          index_config.each { |name, index_field_config| field_map.insert(name, index_field_config, object) }
         end
-        field_map
       end
 
-      def kind_of_af_base?(name)
-        config = properties[name.to_s]
-        config && config[:class_name] && config[:class_name] < ActiveFedora::Base
+      # Override this method to use your own FieldMap class for custom indexing of objects and properties
+      def field_map_class
+        ActiveFedora::RDF::FieldMap
       end
 
-      def find_values(name)
-        object.send(name) || []
-      end
   end
 end

@@ -42,10 +42,8 @@ describe ActiveFedora::RDFDatastream do
   subject { DummyAsset.new }
 
   describe "#to_solr" do
-    before do
-      subject.descMetadata.title = "bla"
-      subject.descMetadata.license = DummySubnode.new('http://example.org/blah')
-    end
+
+    before { subject.descMetadata.title = "bla" }
 
     it "should not be blank" do
       expect(subject.to_solr).not_to be_blank
@@ -55,9 +53,31 @@ describe ActiveFedora::RDFDatastream do
       expect(subject.to_solr["desc_metadata__title_teim"]).to eq ["bla"]
     end
 
-    it "should solrize uris" do
-      expect(subject.to_solr["desc_metadata__license_teim"]).to eq ['http://example.org/blah']
+    context "with ActiveFedora::Base resources" do
+
+      let(:dummy_asset) { DummyAsset.new }
+
+      before do
+        allow(dummy_asset).to receive(:uri).and_return("http://foo")
+        subject.descMetadata.creator = dummy_asset
+      end
+
+      it "should solrize objects" do
+        expect(subject.to_solr["desc_metadata__creator_teim"]).to eq ["http://foo"]
+      end
+
     end
+
+    context "with ActiveTriples resources" do
+
+      before { subject.descMetadata.license = DummySubnode.new('http://example.org/blah') }
+
+      it "should solrize uris" do
+        expect(subject.to_solr["desc_metadata__license_teim"]).to eq ['http://example.org/blah']
+      end
+
+   end
+
   end
 
   describe "delegation" do

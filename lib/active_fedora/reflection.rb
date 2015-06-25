@@ -193,10 +193,13 @@ module ActiveFedora
         options[:predicate]
       end
 
+      def predicate_for_solr
+        predicate.fragment || predicate.to_s.rpartition(/\//).last
+      end
+
       def solr_key
         @solr_key ||= begin
-          predicate_string = predicate.fragment || predicate.to_s.rpartition(/\//).last
-          ActiveFedora::SolrQueryBuilder.solr_name(predicate_string, :symbol)
+          ActiveFedora::SolrQueryBuilder.solr_name(predicate_for_solr, :symbol)
         end
       end
 

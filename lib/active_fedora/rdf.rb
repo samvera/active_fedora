@@ -9,5 +9,7 @@ module ActiveFedora
     autoload :Identifiable
     autoload :Persistence
     autoload :ProjectHydra
+    autoload :FieldMap
+    autoload :FieldMapEntry
   end
 end

@@ -17,10 +17,12 @@ module ActiveFedora::Indexing
     # this enables a cleaner API for solr integration
     class IndexObject
       attr_accessor :data_type, :behaviors
+      attr_reader :key
 
-      def initialize(&block)
+      def initialize(name, &block)
         @behaviors = []
         @data_type = :string
+        @key = name
         yield self if block_given?
       end
 
@@ -33,14 +35,11 @@ module ActiveFedora::Indexing
       end
 
       def dup
-        self.class.new do |idx|
+        self.class.new(@key) do |idx|
           idx.behaviors = @behaviors.dup
         end
       end
 
-      def defaults
-        :noop
-      end
     end
   end
 end

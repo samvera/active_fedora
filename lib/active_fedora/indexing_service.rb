@@ -1,15 +1,9 @@
 module ActiveFedora
   class IndexingService
     attr_reader :object
-    # Object must respond to
-    #   create_date
-    #   modified_date
-    #   has_model
-    #   id
-    #   to_json
-    #   attached_files
-    #   []
-    # and it's class must respond to
+
+    # @param [#create_date, #modified_date, #has_model, #id, #to_json, #attached_files, #[]] obj
+    # The class of obj must respond to these methods:
     #   inspect
     #   outgoing_reflections
     def initialize(obj)
@@ -42,7 +36,6 @@ module ActiveFedora
       object.attached_files.each do |name, file|
         solr_doc.merge! file.to_solr(solr_doc, name: name.to_s)
       end
-      solr_doc = solrize_relationships(solr_doc)
       solr_doc = solrize_rdf_assertions(solr_doc)
       yield(solr_doc) if block_given?
       solr_doc
@@ -60,18 +53,6 @@ module ActiveFedora
       m_time = object.modified_date.present? ? object.modified_date : DateTime.now
       m_time = DateTime.parse(m_time) unless m_time.is_a?(DateTime)
       m_time
-    end
-
-    # Serialize the datastream's RDF relationships to solr
-    # @param [Hash] solr_doc @deafult an empty Hash
-    def solrize_relationships(solr_doc = Hash.new)
-      object.class.outgoing_reflections.values.each do |reflection|
-        solr_key = reflection.solr_key
-        Array(object[reflection.foreign_key]).compact.each do |v|
-          ::Solrizer::Extractor.insert_solr_field_value(solr_doc, solr_key, v )
-        end
-      end
-      solr_doc
     end
 
     # Serialize the resource's RDF relationships to solr
