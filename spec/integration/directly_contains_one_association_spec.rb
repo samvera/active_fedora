@@ -89,7 +89,6 @@ describe ActiveFedora::Base do
     end
     subject { reloaded_page_image.files }
     it "replaces existing record without disturbing the other contents of the container" do
-      pending "Blocked by projecthydra/active_fedora#794 Can't remove objects from a ContainerAssociation"
       replacement_file = page_image.primary_file = FileWithMetadata.new
       replacement_file.content = "I'm a replacement"
       page_image.save

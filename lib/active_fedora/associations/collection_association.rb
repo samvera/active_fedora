@@ -365,8 +365,12 @@ module ActiveFedora
           existing_records = records.select { |r| r.persisted? }
 
           records.each { |record| callback(:before_remove, record) }
+
+          # Delete the record from Fedora.
           delete_records(existing_records, method) if existing_records.any?
+
           records.each do |record|
+            # Remove the record from the array/collection.
             target.delete(record)
           end
 

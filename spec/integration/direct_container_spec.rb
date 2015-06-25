@@ -147,6 +147,58 @@ describe "Direct containers" do
         end
       end
     end
+
+    context "deleting members" do
+      before do
+        class FooHistory < ActiveFedora::Base
+           directly_contains :files, is_member_of_relation: ::RDF::URI.new("http://example.com/isWithin")
+        end
+      end
+      after do
+        Object.send(:remove_const, :FooHistory)
+      end
+
+      describe "#delete the contained object directly" do
+        let(:history) { FooHistory.create }
+        let(:file1) { history.files.build }
+        let(:file2) { history.files.build }
+
+        before do
+          file1.content = "hello"
+          file2.content = "hola"
+          history.save
+          history.reload
+        end
+
+        it "deletes the contained resource directly" do
+          expect(history.files).to eq [file1, file2]
+          file1.delete
+          history.reload
+          expect(history.files).to eq [file2]
+        end
+      end
+
+      describe "#delete via the collection proxy" do
+        let(:history) { FooHistory.create }
+        let(:file1) { history.files.build }
+        let(:file2) { history.files.build }
+
+        before do
+          file1.content = "hello"
+          file2.content = "hola"
+          history.save
+          history.reload
+        end
+
+        it "deletes the contained resource via the collection proxy" do
+          expect(history.reload.files).to eq [file1, file2]
+          history.files.delete(file1)
+          expect(history.reload.files).to eq [file2]
+        end
+      end
+
+    end
+
   end
 
   describe "#include?" do

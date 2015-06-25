@@ -47,11 +47,6 @@ module ActiveFedora
       return self if new_record?
 
       @destroyed = true
-      reflections.each_pair do |name, reflection|
-        if reflection.macro == :has_many
-          association(name.to_sym).delete_all
-        end
-      end
 
       id = self.id ## cache so it's still available after delete
       # Clear out the ETag
