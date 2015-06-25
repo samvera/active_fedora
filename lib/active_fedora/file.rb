@@ -1,19 +1,27 @@
 require 'deprecation'
 
 module ActiveFedora
-
-  #This class represents a Fedora datastream
   class File
-    include AttributeMethods # allows 'content' to be tracked
-    include ActiveModel::Dirty
-    extend Deprecation
-    extend ActiveTriples::Properties
-    generate_method 'content'
-
     extend ActiveModel::Callbacks
+    extend ActiveSupport::Autoload
+    extend ActiveTriples::Properties
+    extend Deprecation
+    extend Querying
+
+    autoload :Streaming
+    autoload :Attributes
+
+    include ActiveFedora::File::Attributes
+    include ActiveFedora::File::Streaming
+    include ActiveFedora::Persistence
+    include ActiveFedora::Versionable
+    include ActiveModel::Dirty
+    include AttributeMethods # allows 'content' to be tracked
     include Identifiable
     include Scoping
-    extend Querying
+
+    generate_method 'content'
+
     define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, only: :after
 
@@ -111,43 +119,8 @@ module ActiveFedora
       @ds_content ||= retrieve_content
     end
 
-    attr_writer :mime_type
-    def mime_type
-      @mime_type ||= fetch_mime_type unless new_record?
-      @mime_type || default_mime_type
-    end
-
     def metadata
       @metadata ||= ActiveFedora::WithMetadata::MetadataNode.new(self)
-    end
-
-    def original_name
-      @original_name ||= fetch_original_name_from_headers
-    end
-
-    def digest
-      response = metadata.ldp_source.graph.query(predicate: ActiveFedora::RDF::Fcrepo4.digest)
-      response.map(&:object)
-    end
-
-    def persisted_size
-      ldp_source.head.headers['Content-Length'].to_i unless new_record?
-    end
-
-    def dirty_size
-      content.size if changed? && content.respond_to?(:size)
-    end
-
-    def size
-      dirty_size || persisted_size
-    end
-
-    def has_content?
-      size && size > 0
-    end
-
-    def empty?
-      !has_content?
     end
 
     def content_changed?
@@ -157,10 +130,6 @@ module ActiveFedora
 
     def changed?
       super || content_changed?
-    end
-
-    def original_name= name
-      @original_name = name
     end
 
     def inspect
@@ -210,31 +179,13 @@ module ActiveFedora
 
     protected
 
-      def default_mime_type
-        'text/plain'
-      end
-
       # The string to prefix all solr fields with. Override this method if you want
       # a prefix other than the default
       def prefix(path)
         path ? "#{path.underscore}__" : ''
       end
 
-      def fetch_original_name_from_headers
-        return if new_record?
-        m = ldp_source.head.headers['Content-Disposition'].match(/filename="(?<filename>[^"]*)";/)
-        URI.decode(m[:filename])
-      end
-
-      def fetch_mime_type
-        ldp_source.head.headers['Content-Type']
-      end
-
     private
-
-      def links
-        @links ||= Ldp::Response.links(ldp_source.head)
-      end
 
       def self.relation
         FileRelation.new(self)
@@ -297,53 +248,6 @@ module ActiveFedora
         @content
       end
 
-    module Streaming
-      # @param range [String] the Range HTTP header
-      # @return [Stream] an object that responds to each
-      def stream(range = nil)
-        uri = URI.parse(self.uri)
-        FileBody.new(uri, headers(range, authorization_key))
-      end
-
-      # @return [String] current authorization token from Ldp::Client
-      def authorization_key
-        self.ldp_source.client.http.headers.fetch("Authorization", nil)
-      end
-
-      # @param range [String] from #stream
-      # @param key [String] from #authorization_key
-      # @return [Hash]
-      def headers(range, key, result = Hash.new)
-        result["Range"] = range if range
-        result["Authorization"] = key if key
-        result
-      end
-
-      class FileBody
-        attr_reader :uri, :headers
-        def initialize(uri, headers)
-          @uri = uri
-          @headers = headers
-        end
-
-        def each
-          Net::HTTP.start(uri.host, uri.port) do |http|
-            request = Net::HTTP::Get.new uri, headers
-            http.request request do |response|
-
-              raise "Couldn't get data from Fedora (#{uri}). Response: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
-              response.read_body do |chunk|
-                yield chunk
-              end
-            end
-          end
-        end
-      end
-    end
-
-    include ActiveFedora::Persistence
-    include ActiveFedora::File::Streaming
-    include ActiveFedora::Versionable
   end
 
 end
