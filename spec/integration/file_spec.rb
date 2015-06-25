@@ -5,12 +5,23 @@ require "rexml/document"
 
 describe ActiveFedora::File do
   describe "#save" do
-    context "with a string" do
-      it "should save" do
-        subject.content = "some stuff"
-        subject.save
-        expect(subject).not_to be_new_record
+
+    context "with new files" do
+
+      context "with a string" do
+        before { subject.content = "hello" }
+        it "saves" do
+          expect(subject.save).to be true
+        end
       end
+
+      context "with no content" do
+        before { subject.content = nil }
+        it "does not save" do
+          expect(subject.save).to be false
+        end
+      end
+
     end
 
     context "with UploadedFile" do

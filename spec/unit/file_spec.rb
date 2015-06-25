@@ -228,7 +228,7 @@ describe ActiveFedora::Datastream do
     context "when there is nothing to save" do
       it "should not write" do
         expect(file.ldp_source).not_to receive(:create)
-        expect(file.save).to be true
+        expect(file.save).to be false
       end
     end
   end
