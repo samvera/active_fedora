@@ -37,7 +37,7 @@ describe ActiveFedora::SolrService do
   describe '#construct_query_for_pids' do
     it "should generate a useable solr query from an array of Fedora ids" do
       expect(Deprecation).to receive(:warn)
-      expect(ActiveFedora::SolrService.construct_query_for_pids(["my:_ID1_", "my:_ID2_", "my:_ID3_"])).to eq '_query_:"{!raw f=id}my:_ID1_" OR _query_:"{!raw f=id}my:_ID2_" OR _query_:"{!raw f=id}my:_ID3_"'
+      expect(ActiveFedora::SolrService.construct_query_for_pids(["my:_ID1_", "my:_ID2_", "my:_ID3_"])).to eq '{!terms f=id}my:_ID1_,my:_ID2_,my:_ID3_'
 
     end
   end
