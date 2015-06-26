@@ -172,7 +172,7 @@ describe ActiveFedora::Base do
           simple_collection.objects = [complex_object, simple_object]
           simple_collection.save!
         end
-        it "ignores objects who's classes aren't specified" do
+        it "ignores objects whose classes aren't specified" do
           expect(simple_collection.complex_objects.size).to eq 1
           expect(simple_collection.complex_objects[0]).to be_instance_of ZComplexObject
           expect(simple_collection.complex_objects[1]).to be_nil

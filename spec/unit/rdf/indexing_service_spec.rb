@@ -78,12 +78,12 @@ describe ActiveFedora::RDF::IndexingService do
     end
 
     it "should return the right values" do
-      expect(fields[:related_url][:values]).to eq ["http://example.org/blogtastic/"]
-      expect(fields[:based_near][:values]).to eq ["Tacoma, WA", "Renton, WA"]
+      expect(fields["related_url"].values).to eq ["http://example.org/blogtastic/"]
+      expect(fields["based_near"].values).to eq ["Tacoma, WA", "Renton, WA"]
     end
 
     it "should return the right type information" do
-      expect(fields[:created][:type]).to eq :date
+      expect(fields["created"].type).to eq :date
     end
   end
 

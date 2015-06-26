@@ -208,7 +208,7 @@ module ActiveFedora
       end
 
       def add_attribute_indexing_config(name, &block)
-        index_config[name] ||= ActiveFedora::Indexing::Map::IndexObject.new &block
+        index_config[name] ||= ActiveFedora::Indexing::Map::IndexObject.new(name, &block)
       end
 
       def warn_duplicate_predicates new_name, new_properties
