@@ -327,7 +327,6 @@ module ActiveFedora
 
         def construct_query
           @solr_query ||= begin
-            #TODO use primary_key instead of id
             clauses = { find_reflection => @owner.id }
             clauses[:has_model] = @reflection.class_name.constantize.to_class_uri if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base'
             ActiveFedora::SolrQueryBuilder.construct_query_for_rel(clauses)

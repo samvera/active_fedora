@@ -35,19 +35,16 @@ module ActiveFedora
             record[inverse.foreign_key] = owner.id
           else # HABTM
             record[inverse.foreign_key] ||= []
-            #TODO use primary_key instead of `owner.id`
             record[inverse.foreign_key] += [owner.id]
           end
         elsif owner.persisted?
           inverse = reflection.inverse_of
           if inverse && inverse.collection?
             record[inverse.foreign_key] ||= []
-            #TODO use primary_key instead of `owner.id`
             record[inverse.foreign_key] += [owner.id]
           elsif inverse && inverse.klass == ActiveFedora::Base
             record[inverse.foreign_key] = owner.id
           else
-            #TODO use primary_key instead of `owner.id`
             record[reflection.foreign_key] = owner.id
           end
         end
