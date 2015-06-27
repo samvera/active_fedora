@@ -5,8 +5,9 @@ module ActiveFedora
     # If the id_array is empty, defaults to a query of "id:NEVER_USE_THIS_ID", which will return an empty solr response
     # @param [Array] id_array the ids that you want included in the query
     def self.construct_query_for_ids(id_array)
-      q = id_array.reject { |x| x.blank? }.map { |id| raw_query(SOLR_DOCUMENT_ID, id) }
-      q.empty? ? "id:NEVER_USE_THIS_ID" : q.join(" OR ".freeze)
+      ids = id_array.reject { |x| x.blank? }
+      return "id:NEVER_USE_THIS_ID" if ids.empty?
+      "{!terms f=#{SOLR_DOCUMENT_ID}}#{ids.join(',')}"
     end
 
     # Create a raw query clause suitable for sending to solr as an fq element
