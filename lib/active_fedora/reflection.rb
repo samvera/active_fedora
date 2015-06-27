@@ -106,10 +106,9 @@ module ActiveFedora
 
       # Returns a new, unsaved instance of the associated class. +options+ will
       # be passed to the class's constructor.
-      def build_association(*options)
-        klass.new(*options)
+      def build_association(*options, &block)
+        klass.new(*options, &block)
       end
-
 
       # Returns the class name for the macro.
       #
@@ -168,13 +167,6 @@ module ActiveFedora
       def initialize(macro, name, options, active_fedora)
         super
         @collection = [:has_many, :has_and_belongs_to_many, :directly_contains, :indirectly_contains].include?(macro)
-      end
-
-
-      # Returns a new, unsaved instance of the associated class. +options+ will
-      # be passed to the class's constructor.
-      def build_association(*options)
-        klass.new(*options)
       end
 
       # Creates a new instance of the associated class, and immediately saves it

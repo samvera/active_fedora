@@ -26,6 +26,7 @@ module ActiveFedora
       # Relies on container_association.initialize_attributes to appropriately set things like record.uri
       def add_to_container(record)
         container_association.add_to_target(record)  # adds record to corresponding Container
+        # TODO is send necessary?
         container_association.send(:initialize_attributes, record) # Uses the :through association initialize the record with things like the correct URI for a direclty contained object
       end
 
@@ -58,13 +59,10 @@ module ActiveFedora
         end
       end
 
-      # Overrides build_record to ensure that record is initialized with attributes from the corresponding container
-      def build_record(attributes)
-        # TODO make initalize take a block and get rid of the tap
-        reflection.build_association(attributes).tap do |record|
-          container_association.initialize_attributes(record) # initializes record with attributes from the corresponding container
-          initialize_attributes(record)
-        end
+      # Overrides initialize_attributes to ensure that record is initialized with attributes from the corresponding container
+      def initialize_attributes(record)
+        super
+        container_association.initialize_attributes(record)
       end
 
       # Returns the Reflection corresponding to the direct container association that's being filtered

@@ -173,8 +173,7 @@ module ActiveFedora
         end
 
         def build_record(attributes)
-          # TODO make initalize take a block and get rid of the tap
-          reflection.build_association(attributes).tap do |record|
+          reflection.build_association(attributes) do |record|
             initialize_attributes(record)
           end
         end

@@ -28,7 +28,9 @@ module ActiveFedora
     # @param parent_or_url_or_hash [ActiveFedora::Base, String, Hash, NilClass] the parent resource or the URI of this resource
     # @param path [String] the path partial relative to the resource
     # @param options [Hash]
-    def initialize(parent_or_url_or_hash = nil, path=nil, options={})
+    # @yield [self] Yields self
+    # @yieldparam [File] self the newly created file
+    def initialize(parent_or_url_or_hash = nil, path=nil, options={}, &block)
       case parent_or_url_or_hash
       when Hash
         @ldp_source = build_ldp_resource_via_uri
@@ -48,6 +50,7 @@ module ActiveFedora
       end
 
       @attributes = {}.with_indifferent_access
+      yield self if block_given?
     end
 
     def ==(comparison_object)
