@@ -168,11 +168,6 @@ module ActiveFedora
       local_or_remote_content(true)
     end
 
-    def save(*)
-      return true unless content_changed?
-      super
-    end
-
     def readonly?
       false
     end
@@ -207,6 +202,7 @@ module ActiveFedora
       end
 
       def create_record(options = {})
+        return false if content.nil?
         ldp_source.content = content
         ldp_source.create do |req|
           req.headers.merge!(ldp_headers)
@@ -215,6 +211,7 @@ module ActiveFedora
       end
 
       def update_record(options = {})
+        return true unless content_changed?
         ldp_source.content = content
         ldp_source.update do |req|
           req.headers.merge!(ldp_headers)

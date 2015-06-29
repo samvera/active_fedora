@@ -141,7 +141,8 @@ module ActiveFedora
 
     def create_or_update(*args)
       raise ReadOnlyRecord if readonly?
-      new_record? ? create_record(*args) : update_record(*args)
+      result = new_record? ? create_record(*args) : update_record(*args)
+      result != false
     end
 
     # Deals with preparing new object to be saved to Fedora, then pushes it and its attached files into Fedora.
