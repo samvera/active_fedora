@@ -33,9 +33,15 @@ module ActiveFedora
         end
       end
 
-      # TODO Detect when this is the only relationship for this predicate, then skip the filtering.
       def filtering_required?
-        reflection.klass != ActiveFedora::Base
+        return false if reflection.klass == ActiveFedora::Base
+        reflections_with_same_predicate.count > 1
+      end
+
+      # Count the number of reflections that have the same predicate as the reflection
+      # for this association.
+      def reflections_with_same_predicate
+        owner.class.outgoing_reflections.select { |k, v| v.options[:predicate] == reflection.predicate }
       end
 
       # @return [Array<RDF::URI>]
@@ -48,8 +54,6 @@ module ActiveFedora
         owner.resource.query(subject: owner.rdf_subject, predicate: reflection.predicate).enum_statement
       end
 
-
-      # TODO this is a huge waste of time that can be completely avoided if the attributes aren't sharing predicates.
       # @return [Array<RDF::URI>]
       def filter_by_class(candidate_uris)
         return [] if candidate_uris.empty?
