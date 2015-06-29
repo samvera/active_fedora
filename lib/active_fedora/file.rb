@@ -1,6 +1,7 @@
 require 'deprecation'
 
 module ActiveFedora
+  # An LDP NonRDFSource. The base class for a bytestream stored in the repository.
   class File
     extend ActiveModel::Callbacks
     extend ActiveSupport::Autoload
@@ -25,14 +26,14 @@ module ActiveFedora
     define_model_callbacks :save, :create, :destroy
     define_model_callbacks :initialize, only: :after
 
-    # @param parent_or_url_or_hash [ActiveFedora::Base, String, Hash, NilClass] the parent resource or the URI of this resource
+    # @param parent_or_url_or_hash [ActiveFedora::Base, RDF::URI, String, Hash, NilClass] the parent resource or the URI of this resource
     # @param path [String] the path partial relative to the resource
     # @param options [Hash]
     def initialize(parent_or_url_or_hash = nil, path=nil, options={})
       case parent_or_url_or_hash
       when Hash
         @ldp_source = build_ldp_resource_via_uri
-      when nil, String
+      when nil, String, ::RDF::URI
         @ldp_source = build_ldp_resource_via_uri parent_or_url_or_hash
       when ActiveFedora::Base
         Deprecation.warn File, "Initializing a file by passing a container is deprecated. Initialize with a uri instead. This capability will be removed in active-fedora 10.0"
@@ -44,16 +45,18 @@ module ActiveFedora
         @ldp_source = build_ldp_resource_via_uri(uri, nil)
 
       else
-        raise "The first argument to #{self} must be a String or an ActiveFedora::Base. You provided a #{parent_or_url.class}"
+        raise "The first argument to #{self} must be a String or an ActiveFedora::Base. You provided a #{parent_or_url_or_hash.class}"
       end
 
       @attributes = {}.with_indifferent_access
     end
 
+    # @return [true, false] true if the objects are equal or when the objects have uris
+    #   and the uris are equal
     def ==(comparison_object)
       super ||
         comparison_object.instance_of?(self.class) &&
-        id.present? &&
+        uri.value.present? &&
         comparison_object.uri == uri
     end
 

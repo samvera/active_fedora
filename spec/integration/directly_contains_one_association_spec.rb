@@ -45,7 +45,7 @@ describe ActiveFedora::Base do
       end
       it "relies on info from the :through association, including class_name" do
         expect(page_image.files).to include(primary_file)
-        expect(primary_file.uri).to include("/files/")
+        expect(primary_file.uri.to_s).to include("/files/")
         expect(subject.class).to eq FileWithMetadata
       end
     end

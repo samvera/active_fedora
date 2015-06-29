@@ -52,10 +52,9 @@ module ActiveFedora
       id
     end
 
+    # @return [RDF::URI] the uri for this resource
     def uri
-      # TODO could we return a RDF::URI instead?
-      uri = @ldp_source.try(:subject_uri)
-      uri.value == '' ? uri : uri.to_s
+      @ldp_source.subject_uri
     end
 
 
