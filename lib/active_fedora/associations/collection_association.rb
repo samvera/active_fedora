@@ -239,49 +239,11 @@ module ActiveFedora
 
       def load_target
         if find_target?
-          targets = []
-
-          begin
-            targets = find_target
-          rescue ObjectNotFoundError, Ldp::Gone => e
-            ActiveFedora::Base.logger.error "Solr and Fedora may be out of sync:\n" + e.message if ActiveFedora::Base.logger
-            reset
-          end
-
-          @target = merge_target_lists(targets, @target)
+          @target = merge_target_lists(find_target, @target)
         end
 
         loaded!
         target
-      end
-
-      def find_target
-        # TODO: don't reify, just store the solr results and lazily reify.
-        # For now, we set a hard limit of 1000 results.
-        records = ActiveFedora::QueryResultBuilder.reify_solr_results(load_from_solr(rows: 1000))
-        records.each { |record| set_inverse_instance(record) }
-        records
-      end
-
-      def merge_target_lists(loaded, existing)
-        return loaded if existing.empty?
-        return existing if loaded.empty?
-
-        loaded.map do |f|
-          i = existing.index(f)
-          if i
-            existing.delete_at(i).tap do |t|
-              keys = ["id"] + t.changes.keys + (f.attribute_names - t.attribute_names)
-              # FIXME: this call to attributes causes many NoMethodErrors
-              attributes = f.attributes
-              (attributes.keys - keys).each do |k|
-                t.send("#{k}=", attributes[k])
-              end
-            end
-          else
-            f
-          end
-        end + existing
       end
 
       # @param opts [Hash] Options that will be passed through to ActiveFedora::SolrService.query.
@@ -292,6 +254,7 @@ module ActiveFedora
         return [] if rows == 0
         SolrService.query(finder_query, { rows: rows }.merge(opts))
       end
+
 
       def add_to_target(record, skip_callbacks = false)
       #  transaction do
@@ -335,6 +298,39 @@ module ActiveFedora
 
 
       private
+
+        def find_target
+          # TODO: don't reify, just store the solr results and lazily reify.
+          # For now, we set a hard limit of 1000 results.
+          records = ActiveFedora::QueryResultBuilder.reify_solr_results(load_from_solr(rows: 1000))
+          records.each { |record| set_inverse_instance(record) }
+          records
+        rescue ObjectNotFoundError, Ldp::Gone => e
+          ActiveFedora::Base.logger.error "Solr and Fedora may be out of sync:\n" + e.message if ActiveFedora::Base.logger
+          reset
+          []
+        end
+
+        def merge_target_lists(loaded, existing)
+          return loaded if existing.empty?
+          return existing if loaded.empty?
+
+          loaded.map do |f|
+            i = existing.index(f)
+            if i
+              existing.delete_at(i).tap do |t|
+                keys = ["id"] + t.changes.keys + (f.attribute_names - t.attribute_names)
+                # FIXME: this call to attributes causes many NoMethodErrors
+                attributes = f.attributes
+                (attributes.keys - keys).each do |k|
+                  t.send("#{k}=", attributes[k])
+                end
+              end
+            else
+              f
+            end
+          end + existing
+        end
 
         def find_reflection
           return reflection if @reflection.options[:predicate]
