@@ -47,8 +47,8 @@ module ActiveFedora
       end
 
       def reset
-        reset_target!
-        @loaded = false
+        super
+        @target = []
       end
 
       def find(*args)
@@ -320,10 +320,8 @@ module ActiveFedora
       def null_scope?
         owner.new_record? && !foreign_key_present?
       end
+
       protected
-        def reset_target!
-          @target = Array.new
-        end
 
         def construct_query
           @solr_query ||= begin
