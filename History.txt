@@ -1,3 +1,93 @@
+v9.2.0.rc1
+  2015-06-30: Refactor CollectionAssociation#reset [Justin Coyne]
+
+  2015-06-30: make CollectionAssociation#find_target private [Justin Coyne]
+
+  2015-06-25: Implements delete for direct containers. [Hector Correa]
+
+  2015-06-29: The uri() method should return an RDF::URI instead of a string
+  [Justin Coyne]
+
+  2015-06-29: Refactor File#== to avoid an unnecessary API call The new_record?
+  call used to cause an API call to fedora, which we are now able to avoid.
+  [Justin Coyne]
+
+  2015-06-26: Allow File constructor to take a block. Enables removing several
+  TODOs about using `tap` [Justin Coyne]
+
+  2015-06-26: Avoid unnecessary solr query If only one property has been defined
+  for a predicate, there's no reason to run a query to filter the results by
+  class. This avoids a call to solr that is unnecessary in most situations.
+  [Justin Coyne]
+
+  2015-06-26: For an AF record the primary key is always `id` [Justin Coyne]
+
+  2015-06-26: Use the solr terms query when fetching by id This allows the query
+  to be smaller and more understandable [Justin Coyne]
+
+  2015-06-25: RDF::IndexingService indexes objects & properties [Adam Wead]
+  true/false depending on whether something was saved or not. [Hector Correa]
+
+  2015-06-24: Reorganizing ActiveFedora:File code [Adam Wead]
+
+  2015-06-24: Make autosave tests more specific [Adam Wead]
+
+  2015-06-24: Use foreign_key in case user has specified one [Adam Wead]
+
+  2015-06-24: Refactoring ActiveFedora::File to use ActiveFedora::Persistence
+  changed WithMetadata to override create_or_update instead of save so that it
+  gets called when you call save or save! [Carolyn Cole]
+
+  2015-06-24: Removing unneeded line [Carolyn Cole]
+
+  2015-05-02: Add optional prefix to resource URI [Adam Wead]
+
+  2015-06-24: refactoring equals [Carolyn Cole]
+
+  2015-06-24: Removing dead define_destroy_hook method [Adam Wead]
+
+  2015-06-24: Refactoring .find_target for HasAndBelongsToMany [Adam Wead]
+
+  2015-06-18: Implements directly_contains_one association Note: part of this
+  functionality is blocked by #794 [Matt Zumwalt]
+
+  2015-06-24: Return relation for .limit, fixes #352 [Carolyn Cole]
+
+  2015-06-23: Refactoring DelegateAttribute [Adam Wead]
+
+  2015-06-18: Create a blacklist to disallow mutating relations [Justin Coyne]
+
+  2015-06-15: Add documentation to apply_schema. [Trey Terrell]
+
+  2015-06-04: Add apply_schema support to AF. [Trey Terrell]
+
+  2015-06-11: Remove unnecessary dependency on rdf-vocab [Justin Coyne]
+
+  2015-05-18: Direct/Indirect containers should have an include? method [Justin
+  Coyne]
+
+  2015-05-18: A SolrBackedResource should be enumerable [Justin Coyne]
+
+  2015-05-13: Refactor Deleting Indirect Proxies [Trey Terrell]
+
+  2015-04-29: Update ActiveTriples [Trey Terrell]
+
+  2015-05-13: Translation procs should not overwrite one another [Justin Coyne]
+
+  2015-05-13: Fix Deletion of Indirect Container Proxies [Trey Terrell]
+
+  2015-05-11: Update Travis to support YARD [Trey Terrell]
+
+  2015-05-11: Delete proxies. [Trey Terrell]
+
+  2015-05-11: Add spec for deleting indirect items. [Trey Terrell]
+
+  2015-05-08: Request Inbound Relations [Trey Terrell]
+
+  2015-05-07: Added ldp:IndirectContainer [Justin Coyne]
+
+  2015-05-06: Add direct containers [Justin Coyne]
+
 v9.1.2
   2015-06-11: Remove unnecessary dependency on rdf-vocab [Justin Coyne]
 
