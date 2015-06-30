@@ -24,6 +24,7 @@ module ActiveFedora
       def reset
         @loaded = false
         @target = nil
+        @stale_state = nil
         @inversed = false
       end
 
