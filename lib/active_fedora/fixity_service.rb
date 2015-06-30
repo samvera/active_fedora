@@ -4,10 +4,10 @@ module ActiveFedora
 
     attr_accessor :target, :response
 
-    # Accepts an Fedora resource such as File.ldp_resource.subject
+    # @param [String, RDF::URI] target url for a Fedora resource
     def initialize target
       raise ArgumentError, 'You must provide a uri' unless target
-      @target = target
+      @target = target.to_s
     end
 
     # Executes a fixity check on Fedora and saves the Faraday::Response.
@@ -23,23 +23,23 @@ module ActiveFedora
 
     private
 
-    def get_fixity_response_from_fedora
-      uri = target + "/fcr:fixity"
-      ActiveFedora.fedora.connection.get(encoded_url(uri))
-    end
-
-    def fixity_graph
-      ::RDF::Graph.new << ::RDF::Reader.for(:ttl).new(response.body)
-    end
-
-    # See https://jira.duraspace.org/browse/FCREPO-1247
-    def encoded_url uri
-      if uri.match("fcr:versions")
-        uri.gsub(/fcr:versions/,"fcr%3aversions")
-      else
-        uri
+      def get_fixity_response_from_fedora
+        uri = target + "/fcr:fixity"
+        ActiveFedora.fedora.connection.get(encoded_url(uri))
       end
-    end
 
+      def fixity_graph
+        ::RDF::Graph.new << ::RDF::Reader.for(:ttl).new(response.body)
+      end
+
+      # See https://jira.duraspace.org/browse/FCREPO-1247
+      # @param [String] uri
+      def encoded_url uri
+        if uri.match("fcr:versions")
+          uri.gsub(/fcr:versions/,"fcr%3aversions")
+        else
+          uri
+        end
+      end
   end
 end
