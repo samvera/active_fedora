@@ -221,6 +221,10 @@ module ActiveFedora
         refresh
       end
 
+      def build_ldp_resource(id)
+        build_ldp_resource_via_uri self.class.id_to_uri(id)
+      end
+
       def build_ldp_resource_via_uri(uri=nil, content='')
         Ldp::Resource::BinarySource.new(ldp_connection, uri, content, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
       end

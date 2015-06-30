@@ -40,6 +40,17 @@ module ActiveFedora
           record.uri = ActiveFedora::Base.id_to_uri(container.mint_id)
           set_inverse_instance(record)
         end
+
+      private
+
+        def delete_records(records, method)
+          if method == :destroy
+            records.each { |r| r.destroy }
+          else
+            records.each { |r| r.delete }
+          end
+        end
+
     end
   end
 end

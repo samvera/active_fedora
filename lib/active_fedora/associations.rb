@@ -74,6 +74,14 @@ module ActiveFedora
       association
     end
 
+    def delete(*)
+      reflections.each_pair do |name, reflection|
+        if reflection.macro == :has_many
+          association(name.to_sym).delete_all
+        end
+      end
+      super
+    end
 
     private
 
