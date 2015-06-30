@@ -20,9 +20,9 @@ module ActiveFedora
 
     #Constructor. this class will call self.field for each DCTERM. In short, all DCTERMS fields will already exist
     #when this method returns. Each term is marked as a multivalue string.
-    def initialize(digital_object=nil, dsid=nil, options={})
-      super
+    def initialize(digital_object=nil, dsid=nil, options={}, &block)
       self.fields={}
+      super
     end
 
     # This method generates the various accessor and mutator methods on self for the datastream metadata attributes.
