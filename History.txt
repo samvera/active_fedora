@@ -1,3 +1,6 @@
+v9.2.0.rc2
+  2015-06-30: Allow the FixityService to accept an RDF::URI [Justin Coyne]
+
 v9.2.0.rc1
   2015-06-30: Refactor CollectionAssociation#reset [Justin Coyne]
 
