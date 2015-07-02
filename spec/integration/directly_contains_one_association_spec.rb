@@ -5,22 +5,21 @@ describe ActiveFedora::Base do
     class PageImage < ActiveFedora::Base
       directly_contains :files, has_member_relation: ::RDF::URI.new("http://example.com/hasFiles"), class_name:"FileWithMetadata"
       directly_contains_one :primary_file, through: :files, type: ::RDF::URI.new("http://example.com/primaryFile"), class_name:"FileWithMetadata"
-      directly_contains_one :special_versioned_file, through: :files, type: ::RDF::URI.new("http://example.com/featuredFile"), class_name:'VersionedFileWithMetadata'
+      directly_contains_one :alternative_file, through: :files, type: ::RDF::URI.new("http://example.com/featuredFile"), class_name:'AlternativeFileWithMetadata'
     end
 
     class FileWithMetadata < ActiveFedora::File
       include ActiveFedora::WithMetadata
     end
-    class VersionedFileWithMetadata < ActiveFedora::File
+    class AlternativeFileWithMetadata < ActiveFedora::File
       include ActiveFedora::WithMetadata
-      has_many_versions
     end
   end
 
   after do
     Object.send(:remove_const, :PageImage)
     Object.send(:remove_const, :FileWithMetadata)
-    Object.send(:remove_const, :VersionedFileWithMetadata)
+    Object.send(:remove_const, :AlternativeFileWithMetadata)
   end
 
   let(:page_image)              { PageImage.create }
@@ -28,7 +27,7 @@ describe ActiveFedora::Base do
 
   let(:a_file)                  { page_image.files.build }
   let(:primary_file)            { page_image.build_primary_file }
-  let(:special_versioned_file)  { page_image.build_special_versioned_file }
+  let(:alternative_file)        { page_image.build_alternative_file }
   let(:primary_sub_image)       { page_image.build_primary_sub_image }
 
 
@@ -70,13 +69,13 @@ describe ActiveFedora::Base do
     context "if class_name is set" do
       before do
         a_file.content = "I'm a file"
-        special_versioned_file.content = "I am too"
+        alternative_file.content = "I am too"
         page_image.save!
       end
-      subject { reloaded_page_image.special_versioned_file }
+      subject { reloaded_page_image.alternative_file }
       it "uses the specified class to load objects" do
-        expect(subject).to eq special_versioned_file
-        expect(subject).to be_instance_of VersionedFileWithMetadata
+        expect(subject).to eq alternative_file
+        expect(subject).to be_instance_of AlternativeFileWithMetadata
       end
     end
   end

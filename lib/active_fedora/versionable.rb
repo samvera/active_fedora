@@ -1,6 +1,7 @@
 module ActiveFedora
   module Versionable
     extend ActiveSupport::Concern
+    extend Deprecation
 
     included do
       class_attribute :versionable
@@ -8,7 +9,8 @@ module ActiveFedora
 
     module ClassMethods
       def has_many_versions
-        self.versionable = true
+        Deprecation.warn Versionable, "has_many_versions is deprecated and will be removed in ActiveFedora 11."
+        # self.versionable = true
       end
     end
 
@@ -26,7 +28,7 @@ module ActiveFedora
       if reload
         @versions = ActiveFedora::VersionsGraph.new << ::RDF::Reader.for(:ttl).new(versions_request)
       else
-        @versions ||= ActiveFedora::VersionsGraph.new << ::RDF::Reader.for(:ttl).new(versions_request)     
+        @versions ||= ActiveFedora::VersionsGraph.new << ::RDF::Reader.for(:ttl).new(versions_request)
       end
     end
 
@@ -36,10 +38,9 @@ module ActiveFedora
       resp.success?
     end
 
-    # This method does not rely on the internal versionable flag of the object, instead
-    # it queries Fedora directly to figure out if there are versions for the resource.
+    # Queries Fedora to figure out if there are versions for the resource.
     def has_versions?
-      ActiveFedora.fedora.connection.head(versions_uri) 
+      ActiveFedora.fedora.connection.head(versions_uri)
       true
     rescue Ldp::NotFound
       false
