@@ -1,9 +1,21 @@
 require 'spec_helper'
 
+describe "deprecated behavior" do
+  it "has a warning" do
+    expect(Deprecation).to receive(:warn)
+    class WithVersions < ActiveFedora::Base
+      has_many_versions
+    end
+  end
+
+  after do
+    Object.send(:remove_const, :WithVersions)
+  end
+end
+
 describe "a versionable class" do
   before do
     class WithVersions < ActiveFedora::Base
-      has_many_versions
       property :title, predicate: ::RDF::DC.title
     end
   end
@@ -15,8 +27,6 @@ describe "a versionable class" do
   subject { WithVersions.new }
 
   let(:current_year) { DateTime.now.year.to_s }
-
-  it { is_expected.to be_versionable }
 
   describe 'sorting versions' do
     before do
@@ -116,15 +126,14 @@ describe "a versionable class" do
   end
 end
 
-describe "a versionable rdf datastream" do
+describe "a versionable rdf file" do
   before(:all) do
     class VersionableDatastream < ActiveFedora::NtriplesRDFDatastream
-      has_many_versions
       property :title, predicate: ::RDF::DC.title
     end
 
     class MockAFBase < ActiveFedora::Base
-      has_metadata "descMetadata", type: VersionableDatastream, autocreate: true
+      contains "descMetadata", class_name: 'VersionableDatastream', autocreate: true
     end
   end
 
@@ -144,11 +153,7 @@ describe "a versionable rdf datastream" do
   context "that exists in the repository" do
     let(:test_object) { MockAFBase.create }
 
-    it "should be versionable" do
-      expect(subject).to be_versionable
-    end
-
-    context "before creating the datastream" do
+    context "before creating the file" do
       it "should not have versions" do
         expect(subject.versions).to be_empty
       end
@@ -157,7 +162,7 @@ describe "a versionable rdf datastream" do
       end
     end
 
-    context "after creating the datastream" do
+    context "after creating the file" do
       before do
         subject.title = "Greetings Earthlings"
         subject.save
@@ -215,11 +220,11 @@ describe "a versionable rdf datastream" do
             expect(subject.versions.all.size).to eq 2
           end
 
-          it "should load the restored datastream's content" do
+          it "should load the restored file's content" do
             expect(subject.title).to eql(["Greetings Earthlings"])
           end
 
-          it "should be the same size as the original datastream" do
+          it "should be the same size as the original file" do
             expect(subject.size).to eq @original_size
           end
 
@@ -249,10 +254,9 @@ describe "a versionable rdf datastream" do
   end
 end
 
-describe "a versionable OM datastream" do
+describe "a versionable OM file" do
   before(:all) do
     class VersionableDatastream < ActiveFedora::OmDatastream
-      has_many_versions
       set_terminology do |t|
         t.root(path: "foo")
         t.title
@@ -260,7 +264,7 @@ describe "a versionable OM datastream" do
     end
 
     class MockAFBase < ActiveFedora::Base
-      has_metadata "descMetadata", type: VersionableDatastream, autocreate: true
+      contains "descMetadata", class_name: 'VersionableDatastream', autocreate: true
     end
   end
 
@@ -276,11 +280,7 @@ describe "a versionable OM datastream" do
   context "that exists in the repository" do
     let(:test_object) { MockAFBase.create }
 
-    it "should be versionable" do
-      expect(subject).to be_versionable
-    end
-
-    context "before creating the datastream" do
+    context "before creating the file" do
       it "should not have versions" do
         expect(subject.versions).to be_empty
       end
@@ -289,7 +289,7 @@ describe "a versionable OM datastream" do
       end
     end
 
-    context "after creating the datastream" do
+    context "after creating the file" do
       before do
         subject.title = "Greetings Earthlings"
         subject.save
@@ -349,11 +349,11 @@ describe "a versionable OM datastream" do
             expect(subject.versions.all.size).to eq 2
           end
 
-          it "should load the restored datastream's content" do
+          it "should load the restored file's content" do
             expect(subject.title).to eql(["Greetings Earthlings"])
           end
 
-          it "should be the same size as the original datastream" do
+          it "should be the same size as the original file" do
             expect(subject.size).to eq @original_size
           end
 
@@ -383,14 +383,13 @@ describe "a versionable OM datastream" do
   end
 end
 
-describe "a versionable binary datastream" do
+describe "a versionable binary file" do
   before(:all) do
     class BinaryDatastream < ActiveFedora::File
-      has_many_versions
     end
 
     class MockAFBase < ActiveFedora::Base
-      has_file_datastream "content", type: BinaryDatastream, autocreate: true
+      contains "content", class_name: 'BinaryDatastream', autocreate: true
     end
   end
 
@@ -406,17 +405,13 @@ describe "a versionable binary datastream" do
   context "that exists in the repository" do
     let(:test_object) { MockAFBase.create }
 
-    it "should be versionable" do
-      expect(subject).to be_versionable
-    end
-
-    context "before creating the datastream" do
+    context "before creating the file" do
       it "should not have versions" do
         expect(subject.versions).to be_empty
       end
     end
 
-    context "after creating the datastream" do
+    context "after creating the file" do
       let(:first_file) { File.new(File.join( File.dirname(__FILE__), "../fixtures/dino.jpg" )) }
       let(:first_name) { "dino.jpg" }
       before do
@@ -484,11 +479,11 @@ describe "a versionable binary datastream" do
             expect(subject.versions.all.size).to eq 2
           end
 
-          it "should load the restored datastream's content" do
+          it "should load the restored file's content" do
             expect(subject.content.size).to eq first_file.size
           end
 
-          it "should load the restored datastream's original name" do
+          it "should load the restored file's original name" do
             expect(subject.original_name).to eql(first_name)
           end
 
@@ -517,19 +512,18 @@ describe "a versionable binary datastream" do
   end
 end
 
-describe "a non-versionable resource" do
-  before(:all) do
-    class NotVersionableWithVersions < ActiveFedora::Base
-      # explicitly don't call has_many_versions
+describe "an ActiveFedora::Base" do
+  before do
+    class TestBase < ActiveFedora::Base
       property :title, predicate: ::RDF::DC.title
     end
   end
 
-  after(:all) do
-    Object.send(:remove_const, :NotVersionableWithVersions)
+  after do
+    Object.send(:remove_const, :TestBase)
   end
 
-  subject { NotVersionableWithVersions.new }
+  subject { TestBase.new }
 
   context "saved with no versions" do
     it "should not have versions" do
