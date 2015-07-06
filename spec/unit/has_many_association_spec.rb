@@ -93,4 +93,24 @@ describe ActiveFedora::Associations::HasManyAssociation do
       it { is_expected.to be_kind_of ActiveFedora::NullRelation }
     end
   end
+
+  describe "#ids_reader" do
+    let(:owner) { double('owner') }
+    let(:reflection) { double('reflection', check_validity!: true) }
+    let(:association) { described_class.new(owner, reflection) }
+
+    let(:r1) { ActiveFedora::Base.new(id: 'r1-id', &:mark_for_destruction) }
+    let(:r2) { ActiveFedora::Base.new(id: 'r2-id') }
+
+    context "when some records are marked_for_destruction" do
+      before do
+        allow(association).to receive(:loaded?).and_return(true)
+        allow(association).to receive(:load_target).and_return([r1, r2])
+      end
+
+      it "only returns the records not marked for destruction" do
+        expect(association.ids_reader).to eq ['r2-id']
+      end
+    end
+  end
 end
