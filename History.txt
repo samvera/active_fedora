@@ -1,3 +1,9 @@
+v9.2.0
+  2015-07-08: Add comments to FedoraAttributes [ci skip] [Justin Coyne]
+
+  2015-07-01: Remove has_many_versions This no longer does anything meaninful, so
+  it has been removed to prevent confusion. [Justin Coyne]
+
 v9.2.0.rc2
   2015-06-30: Allow the FixityService to accept an RDF::URI [Justin Coyne]
 
