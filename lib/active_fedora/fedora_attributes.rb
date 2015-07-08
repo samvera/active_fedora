@@ -6,6 +6,8 @@ module ActiveFedora
     included do
       include ActiveTriples::Properties
       include ActiveTriples::Reflection
+
+      # get_values() is called by ActiveTriples in the PropertyBuilder
       delegate :rdf_subject, :get_values, :type, to: :resource
 
       property :has_model, predicate: ActiveFedora::RDF::Fcrepo::Model.hasModel
