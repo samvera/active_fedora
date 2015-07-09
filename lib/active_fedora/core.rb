@@ -66,10 +66,10 @@ module ActiveFedora
     end
 
     def ==(comparison_object)
-         comparison_object.equal?(self) ||
-           (comparison_object.instance_of?(self.class) &&
+      (comparison_object.instance_of?(self.class) &&
              comparison_object.id == id &&
-             !comparison_object.new_record?)
+             !comparison_object.new_record?) ||
+      comparison_object.equal?(self)
     end
 
     def freeze
