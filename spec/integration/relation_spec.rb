@@ -17,8 +17,12 @@ describe ActiveFedora::Base do
 
   subject { Library.all }
 
-  it "should be a relation" do
+  it "is a relation" do
     expect(subject.class).to be ActiveFedora::Relation
+  end
+
+  it "is enumerable" do
+    expect(subject).to respond_to(:each_with_index)
   end
 
   context "when some records exist" do

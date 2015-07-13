@@ -1,6 +1,7 @@
 module ActiveFedora
   class Relation
 
+    include Enumerable
     include FinderMethods, Calculations, SpawnMethods, QueryMethods, Delegation
 
 
