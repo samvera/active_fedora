@@ -1,39 +1,48 @@
 require 'spec_helper'
 
-describe ActiveFedora::Datastream do
-  let(:datastream) { ActiveFedora::Datastream.new }
+describe ActiveFedora::File do
+  let(:file) { described_class.new }
 
-  subject { datastream }
+  subject { file }
 
-  it { should_not be_metadata }
+  it { is_expected.not_to be_metadata }
 
   describe "#behaves_like_io?" do
-    subject { datastream.send(:behaves_like_io?, object) }
+    subject { file.send(:behaves_like_io?, object) }
 
     context "with a File" do
       let(:object) { File.new __FILE__ }
-      it { should be true }
+      it { is_expected.to be true }
     end
 
     context "with a Tempfile" do
       after { object.close; object.unlink }
       let(:object) { Tempfile.new('foo') }
-      it { should be true }
+      it { is_expected.to be true }
     end
 
     context "with a StringIO" do
       let(:object) { StringIO.new('foo') }
-      it { should be true }
+      it { is_expected.to be true }
     end
   end
 
   describe "#uri" do
-    let(:parent) { ActiveFedora::Base.new(id: '1234') }
-    before { allow(Deprecation).to receive(:warn) }
-    subject { ActiveFedora::Datastream.new(parent, 'FOO1') }
 
-    it "should set the uri" do
-      expect(subject.uri).to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234/FOO1"
+    subject { file.uri }
+
+    context "when the file is in an ldp:BasicContainer" do
+      let(:parent) { ActiveFedora::Base.new(id: '1234') }
+      before { allow(Deprecation).to receive(:warn) }
+      let(:file) { described_class.new(parent, 'FOO1') }
+
+      it "sets the uri using the parent as the base" do
+        expect(subject).to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234/FOO1"
+      end
+    end
+
+    context "when the file doesn't have a uri" do
+      it { is_expected.to eq ::RDF::URI(nil) }
     end
   end
 
@@ -64,7 +73,7 @@ describe ActiveFedora::Datastream do
     end
 
     describe '#persisted_size' do
-      it 'should load the datastream size attribute from the fedora repository' do
+      it 'should load the file size attribute from the fedora repository' do
         expect(subject.size).to eq 9999
       end
 
@@ -152,25 +161,25 @@ describe ActiveFedora::Datastream do
     end
   end
 
-  context "when the datastream has local content" do
+  context "when the file has local content" do
 
     before do
-      datastream.uri = "http://localhost:8983/fedora/rest/test/1234/abcd"
-      datastream.content = "hi there"
+      file.uri = "http://localhost:8983/fedora/rest/test/1234/abcd"
+      file.content = "hi there"
     end
 
     describe "#inspect" do
-      subject { datastream.inspect }
-      it { should eq "#<ActiveFedora::Datastream uri=\"http://localhost:8983/fedora/rest/test/1234/abcd\" >" }
+      subject { file.inspect }
+      it { is_expected.to eq "#<ActiveFedora::File uri=\"http://localhost:8983/fedora/rest/test/1234/abcd\" >" }
     end
   end
 
   context "original_name" do
-    subject { datastream.original_name }
+    subject { file.original_name }
 
-    context "on a new datastream" do
+    context "on a new file" do
       context "that has a name set locally" do
-        before { datastream.original_name = "my_image.png" }
+        before { file.original_name = "my_image.png" }
         it { is_expected.to eq "my_image.png" }
       end
 
@@ -204,10 +213,10 @@ describe ActiveFedora::Datastream do
   end
 
   context "digest" do
-    subject { datastream.digest }
+    subject { file.digest }
 
-    context "on a new datastream" do
-      it { should be_empty }
+    context "on a new file" do
+      it { is_expected.to be_empty }
     end
 
     context "when it's saved" do
