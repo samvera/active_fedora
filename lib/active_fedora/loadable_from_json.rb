@@ -117,7 +117,7 @@ module ActiveFedora
         attached_files[key] = SolrBackedMetadataFile.new
       end
       @resource = SolrBackedResource.new(self.class)
-      self.attributes = attrs.slice(*self.class.attribute_names)
+      self.attributes = adapt_attributes(attrs)
       # TODO Should we clear the change tracking, or make this object Read-only?
 
       run_callbacks :find
@@ -125,6 +125,39 @@ module ActiveFedora
       freeze
       self
     end
+
+    private
+
+      # Adapt attributes read from Solr to possible minor changes in data model
+      # since the attributes were saved.
+      # @param attrs [Hash] attributes read from Solr
+      # @return [Hash] the adapted attributes
+      def adapt_attributes(attrs)
+        self.class.attribute_names.each_with_object({}) do |attribute_name, new_attributes|
+          new_attributes[attribute_name] = adapt_attribute_value(attrs, attribute_name)
+        end
+      end
+
+      # Adapts a single attribute value from the given attributes hash to match
+      # minor changes in the data model.
+      # @param attrs [Hash] attributes read from Solr
+      # @param attribute_name [String] the name of the attribute to adapt
+      # @return [Object] the adapted value
+      def adapt_attribute_value(attrs, attribute_name)
+        reflection = self.class.reflect_on_property(attribute_name)
+        if !reflection
+          return attrs[attribute_name] # if this isn't a property, copy value verbatim
+        else
+          multiple = reflection.multiple?
+          if !attrs.key?(attribute_name)
+            # value is missing in attrs, add [] or nil
+            return multiple ? [] : nil
+          else
+            # convert an existing scalar to an array if needed
+            return multiple ? Array(attrs[attribute_name]) : attrs[attribute_name]
+          end
+        end
+      end
 
   end
 end
