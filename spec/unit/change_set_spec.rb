@@ -41,6 +41,11 @@ describe ActiveFedora::ChangeSet do
       it "should have three elements" do
         expect(subject.size).to eq 3
       end
+      it "should not include URIs from other objects" do
+        base.resource << RDF::Statement.new(RDF::URI("http://wrong.com"), RDF::DC.title, "bad")
+        base.title = nil
+        expect(subject[RDF::DC.title].to_a).to eq []
+      end
     end
 
     it { is_expected.to_not be_empty }
