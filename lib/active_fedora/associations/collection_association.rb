@@ -354,7 +354,7 @@ module ActiveFedora
         end
 
         def delete_or_destroy(records, method)
-          records = records.flatten
+          records = records.flatten.select{|x| load_target.include?(x)}
           records.each { |record| raise_on_type_mismatch(record) }
           existing_records = records.select { |r| r.persisted? }
 

@@ -42,6 +42,22 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe "#delete" do
+    context "when given items not in collection" do
+      it "should return an empty set" do
+        expect(library.books.delete(Book.new)).to eq []
+      end
+      it "should not act on it" do
+        b = Book.new
+        allow(b).to receive(:persisted?).and_return(true)
+
+        library.books.delete(b)
+
+        expect(b).not_to have_received(:persisted?)
+      end
+    end
+  end
+
   describe "#destroy_all" do
     it "should delete em" do
       expect {
