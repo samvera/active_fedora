@@ -87,12 +87,37 @@ describe ActiveFedora::SolrInstanceLoader do
     end
   end
 
-  context "when the model has extra values in its json" do
-    let(:profile) { { "foo"=>["baz"], "bar"=>"quix", "title"=>"My Title", "extra_value"=>"Bonus values!"}.to_json }
+  context "when the model has imperfect json" do
     let(:doc) { { 'id' => 'test-123', 'has_model_ssim'=>['Foo'], 'object_profile_ssm' => profile } }
     let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj.id, doc) }
-    it "should load the object without trouble" do
-      expect(loader.object).to be_instance_of Foo
+    context "when the json has extra values in it" do
+      let(:profile) { { "foo"=>["baz"], "bar"=>"quix", "title"=>"My Title", "extra_value"=>"Bonus values!"}.to_json }
+      it "should load the object without trouble" do
+        expect(loader.object).to be_instance_of Foo
+      end
+    end
+
+    context "when the json is missing values" do
+      let(:profile) { { "foo"=>["baz"], "bar"=>"quix" }.to_json }
+      it "should load the object without trouble" do
+        expect(loader.object).to be_instance_of Foo
+      end
+      it "missing scalar should be nil" do
+        expect(loader.object.title).to be_nil
+      end
+      it "missing multi-value should be []" do
+        expect(loader.object.description).to eql( [] )
+      end
+    end
+
+    context "when the json has scalar where multi-value is expected" do
+      let(:profile) { { "foo"=>["baz"], "bar"=>"quix", "description"=>"test description" }.to_json }
+      it "should load the object without trouble" do
+        expect(loader.object).to be_instance_of Foo
+      end
+      it "should convert the scalar to an array" do
+        expect(loader.object.description).to eql( ["test description"] )
+      end
     end
   end
 end
