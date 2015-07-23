@@ -1,3 +1,15 @@
+v9.2.1
+  2015-07-20: Don't delete objects not part of the association. [Trey Terrell]
+
+  2015-07-19: Improve handling of imperfect profile_json when loading instances
+  from Solr. [Olli Lyytinen]
+
+  2015-07-16: ChangeSet shouldn't record other subjects. [Trey Terrell]
+
+  2015-07-15: Update unit test style [Mike Giarlo]
+
+  2015-07-09: Relation should respond to enumerable methods [Justin Coyne]
+
 v9.2.0
   2015-07-08: Add comments to FedoraAttributes [ci skip] [Justin Coyne]
 
