@@ -149,6 +149,11 @@ module ActiveFedora
             message = "#{@reflection.class_name}(##{@reflection.klass.object_id}) expected, got #{record.class}(##{record.class.object_id})"
             raise ActiveFedora::AssociationTypeMismatch, message
           end
+          type_validator.validate!(self, record)
+        end
+
+        def type_validator
+          options[:type_validator] || NullValidator
         end
 
         # Can be redefined by subclasses, notably polymorphic belongs_to

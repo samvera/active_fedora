@@ -56,6 +56,52 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe "type validator" do
+    before do
+      class EnsureBanana
+        def self.validate!(reflection, object)
+          unless object.try(:banana?)
+            raise ActiveFedora::AssociationTypeMismatch.new "#{object} must be a banana"
+          end
+        end
+      end
+      class FooThing < ActiveFedora::Base
+        attr_accessor :banana
+        has_many :bars, class_name: 'BarThing', predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, as: :foothing, type_validator: EnsureBanana
+        def banana?
+          !!banana
+        end
+      end
+
+      class BarThing < ActiveFedora::Base
+        attr_accessor :banana
+        belongs_to :foothing, class_name: 'FooThing', predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, type_validator: EnsureBanana
+        def banana?
+          !!banana
+        end
+      end
+    end
+    
+    after do
+      Object.send(:remove_const, :FooThing)
+      Object.send(:remove_const, :BarThing)
+    end
+
+    let(:foo) { FooThing.create }
+    let(:bar) { BarThing.create }
+
+    it "should validate on singular associations" do
+      expect{bar.foothing = foo}.to raise_error ActiveFedora::AssociationTypeMismatch, "#{foo} must be a banana"
+      foo.banana = true
+      expect{bar.foothing = foo}.not_to raise_error
+    end
+    it "should validate on collection associations" do
+      expect{foo.bars << bar}.to raise_error ActiveFedora::AssociationTypeMismatch, "#{bar} must be a banana"
+      bar.banana = true
+      expect{foo.bars << bar}.not_to raise_error
+    end
+  end
+
   describe "complex example" do
     before do
       class Library < ActiveFedora::Base
