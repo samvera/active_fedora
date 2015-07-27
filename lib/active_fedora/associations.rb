@@ -30,10 +30,11 @@ module ActiveFedora
     autoload :DirectlyContainsOneAssociation, 'active_fedora/associations/directly_contains_one_association'
     autoload :IndirectlyContainsAssociation,  'active_fedora/associations/indirectly_contains_association'
     autoload :ContainsAssociation,            'active_fedora/associations/contains_association'
-    autoload :DeleteProxy,            'active_fedora/associations/delete_proxy'
-    autoload :ContainedFinder,      'active_fedora/associations/contained_finder'
-    autoload :RecordComposite,         'active_fedora/associations/record_composite'
-    autoload :IDComposite,         'active_fedora/associations/id_composite'
+    autoload :DeleteProxy,                    'active_fedora/associations/delete_proxy'
+    autoload :ContainedFinder,                'active_fedora/associations/contained_finder'
+    autoload :RecordComposite,                'active_fedora/associations/record_composite'
+    autoload :IDComposite,                    'active_fedora/associations/id_composite'
+    autoload :NullValidator,                  'active_fedora/associations/null_validator'
 
     module Builder
       autoload :Association,             'active_fedora/associations/builder/association'
