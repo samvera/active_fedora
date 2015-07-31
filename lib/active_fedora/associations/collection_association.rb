@@ -284,6 +284,10 @@ module ActiveFedora
         owner.new_record? && !foreign_key_present?
       end
 
+      def select(select=nil, &block)
+        to_a.select(&block)
+      end
+
       protected
 
         def construct_query
