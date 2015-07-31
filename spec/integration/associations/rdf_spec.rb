@@ -20,6 +20,19 @@ describe "rdf associations" do
       expect(library.association(:foo_ids)).not_to receive(:filter_by_class)
       library.foos.to_a
     end
+
+    describe "the id setter" do
+      it "can handle nil" do
+        library.foo_ids = nil
+        expect(library.foo_ids).to eq []
+      end
+
+      it "can handle array with nils" do
+        library.foo_ids = [nil, nil]
+        expect(library.foo_ids).to eq []
+      end
+    end
+
   end
 
   context "when two relationships have the same predicate" do
