@@ -14,16 +14,30 @@ describe ActiveFedora::SolrInstanceLoader do
       property :title, predicate: ::RDF::DC.title, multiple: false
       property :description, predicate: ::RDF::DC.description
       belongs_to :another, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'Foo'
+      has_and_belongs_to_many :dates, predicate: ::RDF::DC.date, class_name: 'Bar'
+      accepts_nested_attributes_for :dates, reject_if: :all_blank, allow_destroy: true
+    end
+    class Bar < ActiveFedora::Base
+      property :start, predicate: ::RDF::Vocab::EDM.begin, multiple: false
+      has_many :foos, inverse_of: :dates, class_name: 'Foo'
     end
   end
 
   let(:another) { Foo.create }
 
-  let!(:obj) { Foo.create!(id: 'test-123', foo: ["baz"], bar: 'quix', title: 'My Title',
-                           description: ['first desc', 'second desc'], another_id: another.id) }
+  let!(:obj) { Foo.create!(
+    id: 'test-123',
+    foo: ["baz"],
+    bar: 'quix',
+    title: 'My Title',
+    description: ['first desc', 'second desc'],
+    another_id: another.id,
+    dates_attributes: [ {start: "2003"}, { start: "1996" } ]
+  ) }
 
   after do
     Object.send(:remove_const, :Foo)
+    Object.send(:remove_const, :Bar)
   end
 
   context "without a solr doc" do
@@ -42,6 +56,14 @@ describe ActiveFedora::SolrInstanceLoader do
 
       it "should not be mutable" do
         expect { subject.title = 'Foo' }.to raise_error ActiveFedora::ReadOnlyRecord
+      end
+
+      it "loads the correct number of nested attributes" do
+        expect(subject.date_ids.count).to eq 2
+      end
+
+      it "loads the correct number of regular attributes" do
+        expect(subject.description.count).to eq 2
       end
     end
 

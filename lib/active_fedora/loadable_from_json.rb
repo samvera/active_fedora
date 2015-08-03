@@ -97,7 +97,12 @@ module ActiveFedora
       # @param [Array] vals an array of 3 elements (subject, predicate, object) to insert
       def insert(vals)
         _, pred, val = vals
-        set_value(reflection(pred), [val])
+        k = reflection(pred)
+        if @hash[k].is_a?(Array)
+          set_value(k, @hash[k] << val)
+        else
+          set_value(k, [val])
+        end
       end
 
       def reflection(predicate)
