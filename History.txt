@@ -1,3 +1,12 @@
+v9.3.0
+  2015-08-06: Records should be able to be marshaled and loaded [Justin Coyne]
+
+  2015-07-31: RDF association ids setter should handle nil [Justin Coyne]
+
+  2015-07-31: Add collection#select using block syntax [Trey Terrell]
+
+  2015-07-24: Add type validator objects to associations. [Trey Terrell]
+
 v9.2.1
   2015-07-20: Don't delete objects not part of the association. [Trey Terrell]
 
