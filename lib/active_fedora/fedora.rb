@@ -22,7 +22,11 @@ module ActiveFedora
     end
 
     def connection
-      @connection ||= InboundRelationConnection.new(CachingConnection.new(authorized_connection))
+      # The InboundRelationConnection does provide more data, useful for
+      # things like ldp:IndirectContainers, but it's imposes a significant
+      # performance penalty on every request
+      #   @connection ||= InboundRelationConnection.new(CachingConnection.new(authorized_connection))
+      @connection ||= CachingConnection.new(authorized_connection)
     end
 
     def clean_connection
