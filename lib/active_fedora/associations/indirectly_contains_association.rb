@@ -64,7 +64,7 @@ module ActiveFedora
         end
 
         def record_proxy_finder
-          ContainedFinder.new(container: container, repository: composite_proxy_repository)
+          ContainedFinder.new(container: container, repository: composite_proxy_repository, proxy_class: proxy_class)
         end
 
         def composite_proxy_repository

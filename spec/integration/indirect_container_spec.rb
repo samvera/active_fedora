@@ -151,16 +151,13 @@ describe "Indirect containers" do
               file2.title = "Derp"
               o.save!
             end
+
             it "has two related_objects" do
               expect(reloaded.related_objects).to eq [file, file2]
             end
-            it "has inbound triples" do
-              statement = file.reload.resource.query(predicate: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor')).to_a.first
-
-              expect(statement.object).to eq file.resource.rdf_subject
-            end
           end
         end
+
         describe "remove" do
           it "should be able to remove" do
             o.related_objects = []
