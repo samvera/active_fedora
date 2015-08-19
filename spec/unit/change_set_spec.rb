@@ -46,6 +46,15 @@ describe ActiveFedora::ChangeSet do
         base.title = nil
         expect(subject[RDF::DC.title].to_a).to eq []
       end
+      it "should include hash URIs" do
+        # This is useful as an alternative to blank nodes.
+        hash_uri = RDF::URI(base.uri.to_s + "#test")
+        base.resource << RDF::Statement.new(hash_uri, RDF::DC.title, "good")
+        base.title = [RDF::URI(hash_uri)]
+        expect(subject[RDF::DC.title].to_a).not_to eq []
+        # Include the title reference and the title for the hash URI
+        expect(subject[RDF::DC.title].to_a.length).to eq 2
+      end
     end
 
     it { is_expected.to_not be_empty }

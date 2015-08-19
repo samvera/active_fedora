@@ -26,6 +26,7 @@ module ActiveFedora
         elsif object.class.properties.keys.include?(key)
           predicate = graph.reflections.reflect_on_property(key).predicate
           result[predicate] = graph.query(subject: object.rdf_subject, predicate: predicate)
+          result[predicate] = child_graphs(result[predicate].objects) << result[predicate]
         elsif key == 'type'.freeze
           # working around https://github.com/ActiveTriples/ActiveTriples/issues/122
           predicate = ::RDF.type
@@ -34,6 +35,36 @@ module ActiveFedora
           raise "Unable to find a graph predicate corresponding to the attribute: \"#{key}\""
         end
       end
+    end
+
+    private
+    
+    # @return [RDF::Graph] A graph containing child graphs from changed
+    #   attributes.
+    def child_graphs(objects)
+      child_graphs = ::RDF::Graph.new
+      objects.each do |object|
+        graph.query(subject: object).each do |statement|
+          # Have to filter out Fedora triples.
+          unless FedoraStatement.new(statement).internal?
+            child_graphs << statement
+          end
+        end
+      end
+      child_graphs
+    end
+  end
+
+  class FedoraStatement
+    attr_reader :value
+    def initialize(value)
+      @value = value
+    end
+
+    def internal?
+      value.object.to_s.start_with?("http://www.jcp.org") ||
+        value.object.to_s.start_with?("http://fedora.info") ||
+        value.predicate.to_s.start_with?("http://fedora.info")
     end
   end
 end
