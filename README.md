@@ -9,7 +9,7 @@ Description
 ActiveFedora is a Ruby gem for creating and
 managing objects in the Fedora Repository Architecture
 ([http://fedora-commons.org](http://fedora-commons.org)). ActiveFedora
-is loosely based on “ActiveRecord” in Rails. Version 9.0+ works with Fedora 4 and prior versions work on Fedora 3.
+is loosely based on “ActiveRecord” in Rails. Version 9.0+ works with Fedora 4 and prior versions work on Fedora 3. Version 9.2+ works with Solr 4.10.
 
 Getting Help
 ------------
