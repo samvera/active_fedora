@@ -230,6 +230,16 @@ describe ActiveFedora::File do
         expect(parent.reload.abcd.digest.first).to be_kind_of RDF::URI
       end
     end
+    context "with pre-4.3.0 predicate" do
+      before do
+        graph = ActiveTriples::Resource.new
+        graph << RDF::Statement.new(file.uri, ActiveFedora::RDF::Fcrepo4.digest, RDF::URI.new("urn:sha1:f1d2d2f924e986ac86fdf7b36c94bcdf32beec15"))
+        allow(file).to receive_message_chain(:metadata, :ldp_source, :graph).and_return(graph)
+      end
+      it "falls back on fedora:digest if premis:hasMessageDigest is not present" do
+        expect(file.digest.first).to be_kind_of RDF::URI
+      end
+    end
   end
 
   describe "#save" do
