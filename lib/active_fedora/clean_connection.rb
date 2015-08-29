@@ -13,10 +13,10 @@ module ActiveFedora
 
     def omit_uris
       [
-        RDF::Fcrepo4.ServerManaged,
-        RDF::Ldp.PreferContainment,
-        RDF::Ldp.PreferEmptyContainer,
-        RDF::Ldp.PreferMembership
+        ::RDF::Vocab::Fcrepo4.ServerManaged,
+        ::RDF::Vocab::LDP.PreferContainment,
+        ::RDF::Vocab::LDP.PreferEmptyContainer,
+        ::RDF::Vocab::LDP.PreferMembership
       ]
     end
 

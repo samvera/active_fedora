@@ -16,7 +16,7 @@ module ActiveFedora
 
     def include_uris
       [
-        RDF::Fcrepo4.InboundReferences
+        ::RDF::Vocab::Fcrepo4.InboundReferences
       ]
     end
   end

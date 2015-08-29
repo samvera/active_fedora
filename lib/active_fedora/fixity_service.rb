@@ -18,7 +18,7 @@ module ActiveFedora
     end
 
     def status
-      fixity_graph.query(predicate: ActiveFedora::RDF::Fcrepo4.status).map(&:object).first.to_s
+      fixity_graph.query(predicate: ::RDF::Vocab::Fcrepo4.status).map(&:object).first.to_s
     end
 
     private
