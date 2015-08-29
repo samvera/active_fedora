@@ -11,8 +11,8 @@ module ActiveFedora
       delegate :rdf_subject, :get_values, :type, to: :resource
 
       property :has_model, predicate: ActiveFedora::RDF::Fcrepo::Model.hasModel
-      property :create_date, predicate: ActiveFedora::RDF::Fcrepo4.created
-      property :modified_date, predicate: ActiveFedora::RDF::Fcrepo4.lastModified
+      property :create_date, predicate: ::RDF::Vocab::Fcrepo4.created
+      property :modified_date, predicate: ::RDF::Vocab::Fcrepo4.lastModified
 
       def create_date
         super.first
