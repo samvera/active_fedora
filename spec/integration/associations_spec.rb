@@ -100,6 +100,12 @@ describe ActiveFedora::Base do
       bar.banana = true
       expect{foo.bars << bar}.not_to raise_error
     end
+    it "should NOT validate on destroy" do
+      bar.banana = true
+      foo.bars << bar
+      bar.banana = false
+      expect{foo.bars.destroy(bar)}.not_to raise_error
+    end
   end
 
   describe "complex example" do

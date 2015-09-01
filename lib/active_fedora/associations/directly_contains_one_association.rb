@@ -35,6 +35,7 @@ module ActiveFedora
       def replace(record, *)
         if record
           raise_on_type_mismatch(record)
+          run_type_validator(record)
           remove_existing_target
           add_type_to_record(record, options[:type])
           add_to_container(record)

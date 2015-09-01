@@ -26,6 +26,7 @@ module ActiveFedora
       def replace(record)
         if record
           raise_on_type_mismatch(record)
+          run_type_validator(record)
           @updated = true
         end
 

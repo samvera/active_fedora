@@ -149,7 +149,6 @@ module ActiveFedora
             message = "#{@reflection.class_name}(##{@reflection.klass.object_id}) expected, got #{record.class}(##{record.class.object_id})"
             raise ActiveFedora::AssociationTypeMismatch, message
           end
-          type_validator.validate!(self, record)
         end
 
         def type_validator
@@ -182,6 +181,10 @@ module ActiveFedora
           reflection.build_association(attributes) do |record|
             initialize_attributes(record)
           end
+        end
+
+        def run_type_validator(record)
+          type_validator.validate!(self, record)
         end
 
     end
