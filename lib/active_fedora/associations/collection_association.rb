@@ -157,6 +157,7 @@ module ActiveFedora
 
         records.flatten.each do |record|
           raise_on_type_mismatch(record)
+          run_type_validator(record)
           add_to_target(record) do |r|
             result &&= insert_record(record) unless owner.new_record?
           end

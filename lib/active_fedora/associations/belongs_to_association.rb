@@ -5,6 +5,7 @@ module ActiveFedora
       def replace(record)
         if record
           raise_on_type_mismatch(record)
+          run_type_validator(record)
           # update_counters(record)
           replace_keys(record)
           set_inverse_instance(record)
