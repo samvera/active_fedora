@@ -120,6 +120,7 @@ module ActiveFedora
 
     def assign_nested_attributes_for_collection_association(association_name, attributes_collection)
       options = nested_attributes_options[association_name]
+      allow_destroy = options[:allow_destroy]
 
       if options[:limit] && attributes_collection.size > options[:limit]
         raise TooManyRecords, "Maximum #{options[:limit]} records are allowed. Got #{attributes_collection.size} records instead."
@@ -148,13 +149,12 @@ module ActiveFedora
         attributes = attributes.with_indifferent_access
 
         if attributes['id'].blank?
-          association.build(attributes.except(*UNASSIGNABLE_KEYS)) unless call_reject_if(association_name, attributes)
-
+          association.build(attributes.except(*UNASSIGNABLE_KEYS)) unless call_reject_if(association_name, attributes, allow_destroy)
         elsif existing_record = existing_records.detect { |record| record.id.to_s == attributes['id'].to_s }
-          association.send(:add_record_to_target_with_callbacks, existing_record) if !association.loaded? && !call_reject_if(association_name, attributes)
+          association.send(:add_record_to_target_with_callbacks, existing_record) if !association.loaded? && !call_reject_if(association_name, attributes, allow_destroy)
 
-          if !call_reject_if(association_name, attributes)
-            assign_to_or_mark_for_destruction(existing_record, attributes, options[:allow_destroy])
+          if !call_reject_if(association_name, attributes, allow_destroy)
+            assign_to_or_mark_for_destruction(existing_record, attributes, allow_destroy)
           end
 
         else
@@ -181,8 +181,8 @@ module ActiveFedora
       raise ObjectNotFoundError, "Couldn't find #{reflection.klass.name} with ID=#{record_id} for #{self.class.name} with ID=#{id}"
     end
 
-    def call_reject_if(association_name, attributes)
-      return false if has_destroy_flag?(attributes)
+    def call_reject_if(association_name, attributes, allow_destroy)
+      return false if has_destroy_flag?(attributes) && allow_destroy && attributes['id'].present?
       case callback = self.nested_attributes_options[association_name][:reject_if]
       when Symbol
         method(callback).arity == 0 ? send(callback) : send(callback, attributes)
@@ -193,5 +193,3 @@ module ActiveFedora
 
   end
 end
-
-  
