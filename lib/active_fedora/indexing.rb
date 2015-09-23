@@ -1,4 +1,12 @@
 module ActiveFedora
+  # Mix in this module to update Solr on save.
+  # Assign a new indexer at the class level where this is mixed in
+  #   (or define an #indexing_service method)
+  #   to change the document contents sent to solr
+  #
+  # Example indexing services are:
+  # @see ActiveFedora::IndexingService
+  # @see ActiveFedora::RDF::IndexingService
   module Indexing
     extend ActiveSupport::Concern
     extend ActiveSupport::Autoload
@@ -10,7 +18,7 @@ module ActiveFedora
     # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.
     # @param [Hash] solr_doc (optional) Hash to insert the fields into
     # @param [Hash] opts (optional)
-    # If opts[:model_only] == true, the base object metadata and the RELS-EXT datastream will be omitted.  This is mainly to support shelver, which calls .to_solr for each model an object subscribes to.
+    # If opts[:model_only] == true, the base object metadata and the RELS-EXT datastream will be omitted.  This is mainly to support shelver, which calls #to_solr for each model an object subscribes to.
     def to_solr(solr_doc = Hash.new, opts={})
       indexing_service.generate_solr_document
     end
