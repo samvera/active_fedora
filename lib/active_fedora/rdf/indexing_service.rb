@@ -1,4 +1,9 @@
 module ActiveFedora::RDF
+  # Responsible for generating the solr document (via #generate_solr_document) of the
+  # given object.
+  #
+  # @see ActiveFedora::Indexing
+  # @see ActiveFedora::IndexingService
   class IndexingService
     include Solrizer::Common
     attr_reader :object
@@ -70,7 +75,7 @@ module ActiveFedora::RDF
 
       # returns the field map instance
       def fields
-        field_map_class.new do |field_map| 
+        field_map_class.new do |field_map|
           index_config.each { |name, index_field_config| field_map.insert(name, index_field_config, object) }
         end
       end
