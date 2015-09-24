@@ -17,7 +17,7 @@ module ActiveFedora::File::Attributes
   def digest
     response = metadata.ldp_source.graph.query(predicate: RDF::Vocab::PREMIS.hasMessageDigest)
     # fallback on old predicate for checksum
-    response = metadata.ldp_source.graph.query(predicate: RDF::Vocab::Fcrepo4.digest) if response.empty?
+    response = metadata.ldp_source.graph.query(predicate: fallback_digest_predicate) if response.empty?
     response.map(&:object)
   end
 
@@ -42,6 +42,18 @@ module ActiveFedora::File::Attributes
   end
 
   private
+
+    # Fcrepo4.digest was used by Fedora < 4.3, but it was removed
+    # from the 2015-07-24 version of the fedora 4 ontology
+    # http://fedora.info/definitions/v4/2015/07/24/repository and
+    # from rdf-vocab in version 0.8.5
+    def fallback_digest_predicate
+      @fallback_digest ||= if RDF::Vocab::Fcrepo4.respond_to? :digest
+        RDF::Vocab::Fcrepo4.digest
+      else
+        ::RDF::URI("http://fedora.info/definitions/v4/repository#digest")
+      end
+    end
 
     def links
       @links ||= Ldp::Response.links(ldp_source.head)

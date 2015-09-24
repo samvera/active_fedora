@@ -232,8 +232,10 @@ describe ActiveFedora::File do
     end
     context "with pre-4.3.0 predicate" do
       before do
+        predicate = ::RDF::URI("http://fedora.info/definitions/v4/repository#digest")
+        object = RDF::URI.new("urn:sha1:f1d2d2f924e986ac86fdf7b36c94bcdf32beec15")
         graph = ActiveTriples::Resource.new
-        graph << RDF::Statement.new(file.uri, RDF::Vocab::Fcrepo4.digest, RDF::URI.new("urn:sha1:f1d2d2f924e986ac86fdf7b36c94bcdf32beec15"))
+        graph << RDF::Statement.new(file.uri, predicate, object)
         allow(file).to receive_message_chain(:metadata, :ldp_source, :graph).and_return(graph)
       end
       it "falls back on fedora:digest if premis:hasMessageDigest is not present" do
