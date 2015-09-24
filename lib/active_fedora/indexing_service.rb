@@ -1,4 +1,9 @@
 module ActiveFedora
+  # Responsible for generating the solr document (via #generate_solr_document) of the
+  # given object.
+  #
+  # @see ActiveFedora::Indexing
+  # @see ActiveFedora::RDF::IndexingService
   class IndexingService
     attr_reader :object
 
