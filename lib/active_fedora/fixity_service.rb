@@ -18,10 +18,18 @@ module ActiveFedora
     end
 
     def status
-      fixity_graph.query(predicate: ::RDF::Vocab::Fcrepo4.status).map(&:object).first.to_s
+      fixity_graph.query(predicate: status_predicate).map(&:object).first.to_s
     end
 
     private
+
+      # Fcrepo4.status was used by Fedora < 4.3, but it was removed
+      # from the 2015-07-24 version of the fedora 4 ontology
+      # http://fedora.info/definitions/v4/2015/07/24/repository and
+      # from rdf-vocab in version 0.8.5
+      def status_predicate
+        ::RDF::URI("http://fedora.info/definitions/v4/repository#status")
+      end
 
       def get_fixity_response_from_fedora
         uri = target + "/fcr:fixity"
