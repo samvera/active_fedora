@@ -29,6 +29,11 @@ describe "NestedAttribute behavior" do
       accepts_nested_attributes_for :bars, reject_if: proc { |attributes| attributes['uno'].blank? }
     end
 
+    # class used in test for reject_if: with proc object and destroy flag set.
+    class CarProcDestroy < Car
+      accepts_nested_attributes_for :bars, allow_destroy: true, reject_if: proc { |attributes| attributes['uno'].blank? }
+    end
+
     # class used in test for reject_if: with method name as symbol
     class CarSymbol < Car
       accepts_nested_attributes_for :bars, reject_if: :uno_blank
@@ -47,6 +52,7 @@ describe "NestedAttribute behavior" do
     Object.send(:remove_const, :Bar)
     Object.send(:remove_const, :CarAllBlank)
     Object.send(:remove_const, :CarProc)
+    Object.send(:remove_const, :CarProcDestroy)
     Object.send(:remove_const, :CarSymbol)
     Object.send(:remove_const, :CarWithLimit)
     Object.send(:remove_const, :Car)
@@ -101,10 +107,31 @@ describe "NestedAttribute behavior" do
 
   describe "allow_destroy: false" do
     let(:car_class) { CarProc }
+    it "should ignore _destroy flag and reject based on proc" do
+      car.update bars_attributes: [{id: bar2.id, dos: "bar2 dos", _destroy:"1"}]
+      bar2.reload
+      expect(bar2.dos).to be_nil
+    end
+
     it "should create a new record even if _destroy is set" do
       expect(car.bars.count).to eq 2
       car.update bars_attributes: [{uno: "new uno", _destroy: "1"}]
       expect(car.bars(true).count).to eq 3
+    end
+  end
+
+  describe "allow_destroy: true" do
+    let(:car_class) { CarProcDestroy }
+    it "should still create a new record even if _destroy is set" do
+      expect(car.bars.count).to eq 2
+      car.update bars_attributes: [{uno: "new uno", _destroy: "1"}]
+      expect(car.bars(true).count).to eq 3
+    end
+
+    it "should reject a new record based on proc when _destroy is set" do
+      expect(car.bars.count).to eq 2
+      car.update bars_attributes: [{dos: "bar2 dos", _destroy:"1"}]
+      expect(car.bars(true).count).to eq 2
     end
   end
 
