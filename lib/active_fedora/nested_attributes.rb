@@ -148,7 +148,9 @@ module ActiveFedora
         attributes = attributes.with_indifferent_access
 
         if attributes['id'].blank?
-          association.build(attributes.except(*UNASSIGNABLE_KEYS)) unless call_reject_if(association_name, attributes)
+          unless reject_new_record?(association_name, attributes)
+            association.build(attributes.except(*UNASSIGNABLE_KEYS))
+          end
 
         elsif existing_record = existing_records.detect { |record| record.id.to_s == attributes['id'].to_s }
           association.send(:add_record_to_target_with_callbacks, existing_record) if !association.loaded? && !call_reject_if(association_name, attributes)
@@ -176,22 +178,32 @@ module ActiveFedora
       ["1", "true"].include?(hash['_destroy'].to_s)
     end
 
+    # Determines if a new record should be rejected by checking
+    # has_destroy_flag? or if a <tt>:reject_if</tt> proc exists for this
+    # association and evaluates to +true+.
+    def reject_new_record?(association_name, attributes)
+      has_destroy_flag?(attributes) || call_reject_if(association_name, attributes)
+    end
+
     def raise_nested_attributes_record_not_found(association_name, record_id)
       reflection = self.class.reflect_on_association(association_name)
       raise ObjectNotFoundError, "Couldn't find #{reflection.klass.name} with ID=#{record_id} for #{self.class.name} with ID=#{id}"
     end
 
+    # Determines if a record with the particular +attributes+ should be
+    # rejected by calling the reject_if Symbol or Proc (if defined).
+    # The reject_if option is defined by +accepts_nested_attributes_for+.
+    #
+    # Returns false if there is a +destroy_flag+ on the attributes.
     def call_reject_if(association_name, attributes)
-      return false if has_destroy_flag?(attributes)
-      case callback = self.nested_attributes_options[association_name][:reject_if]
+      opts = self.nested_attributes_options[association_name]
+      return false if has_destroy_flag?(attributes) && opts[:allow_destroy]
+      case callback = opts[:reject_if]
       when Symbol
         method(callback).arity == 0 ? send(callback) : send(callback, attributes)
       when Proc
         callback.call(attributes)
       end
     end
-
   end
 end
-
-  
