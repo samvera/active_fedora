@@ -1,3 +1,18 @@
+v9.4.2
+  2015-09-25: Refactor nested_attribute test for easier reading [Justin Coyne]
+
+  2015-09-25: Don't skip reject_if when _destroy is passed [Justin Coyne]
+
+  2015-09-24: Don't use Fcrepo digest predicate from rdf-vocab [Justin Coyne]
+
+  2015-09-24: Updating documentation of Indexing Service [Jeremy Friesen]
+
+  2015-09-24: Moving a method to protected [Jeremy Friesen]
+
+  2015-09-23: Add high-level comment for Indexing module. [Anna Headley]
+
+  2015-09-18: Refactor nested_attribute_spec [Justin Coyne]
+
 v9.4.1
   2015-09-18: Update ldp gem to 0.4.0. [Justin Coyne]
 
