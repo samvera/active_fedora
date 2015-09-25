@@ -19,10 +19,6 @@ module ActiveFedora
       @profile_solr_name ||= ActiveFedora::SolrQueryBuilder.solr_name("object_profile", :displayable)
     end
 
-    def profile_service
-      ProfileIndexingService
-    end
-
     def rdf_service
       RDF::IndexingService
     end
@@ -47,6 +43,10 @@ module ActiveFedora
     end
 
     protected
+
+    def profile_service
+      ProfileIndexingService
+    end
 
     def c_time
       c_time = object.create_date.present? ? object.create_date : DateTime.now
