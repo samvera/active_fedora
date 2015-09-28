@@ -21,7 +21,12 @@ module ActiveFedora::Associations::Builder
           set_uri = uri.kind_of?(RDF::URI) ? uri.value.present? : uri.present?
           if set_uri
             file_uri = "#{uri}/#{name}"
-            file.uri = file_uri
+            begin
+              file.uri = file_uri
+            rescue ActiveFedora::AlreadyPersistedError
+            end
+          end
+          if file.respond_to?(:exists!)
             file.exists! if contains_assertions.include?(file_uri)
           end
         end

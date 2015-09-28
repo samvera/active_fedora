@@ -145,15 +145,15 @@ module ActiveFedora
       assign_rdf_subject
       serialize_attached_files
       @ldp_source = @ldp_source.create
-      assign_uri_to_attached_files
-      save_attached_files
+      assign_uri_to_contained_resources
+      save_contained_resources
       refresh
     end
 
     def update_record(options = {})
       serialize_attached_files
       execute_sparql_update
-      save_attached_files
+      save_contained_resources
       refresh
     end
 
@@ -195,16 +195,25 @@ module ActiveFedora
       ActiveFedora.fedora.connection.put(path, "")
     end
 
-    def assign_uri_to_attached_files
-      attached_files.each do |name, ds|
-        ds.uri= "#{uri}/#{name}"
+    def assign_uri_to_contained_resources
+      contained_resources.each do |name, source|
+        source.uri= "#{uri}/#{name}"
       end
     end
 
-    def save_attached_files
-      attached_files.select { |_, file| file.changed? }.each do |_, file|
-        file.save # Don't call save! because if the content_changed? returns false, it'll raise an error.
+    def save_contained_resources
+      contained_resources.changed.each do |_, resource|
+        resource.save
       end
+    end
+
+    def contained_resources
+      @contained_resources ||= attached_files.merge(contained_rdf_sources)
+    end
+
+    def contained_rdf_sources
+      @contained_rdf_sources ||=
+        AssociationHash.new(self, self.class.contained_rdf_source_reflections)
     end
   end
 end

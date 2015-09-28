@@ -38,6 +38,7 @@ module ActiveFedora #:nodoc:
   extend ActiveSupport::Autoload
 
   eager_autoload do
+    autoload :AssociationHash
     autoload :AssociationRelation
     autoload :Associations
     autoload :AttachedFiles

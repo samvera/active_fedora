@@ -37,6 +37,18 @@ module ActiveFedora
       run_callbacks :initialize
     end
 
+    ##
+    # @param [#to_s] uri a full fedora URI or relative ID to set this resource
+    #   to.
+    # @note This can only be run on an unpersisted resource.
+    def uri=(uri)
+      if persisted?
+        raise AlreadyPersistedError, "You can not set a URI for a persisted ActiveFedora object."
+      else
+        @ldp_source = build_ldp_resource(self.class.uri_to_id(uri))
+      end
+    end
+
     # Reloads the object from Fedora.
     def reload
       check_persistence unless persisted?

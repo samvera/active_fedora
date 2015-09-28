@@ -35,8 +35,11 @@ module ActiveFedora
       case parent_or_url_or_hash
       when Hash
         @ldp_source = build_ldp_resource_via_uri
-      when nil, String, ::RDF::URI
-        @ldp_source = build_ldp_resource_via_uri parent_or_url_or_hash
+      when nil
+        @ldp_source = build_ldp_resource_via_uri nil
+      when String, ::RDF::URI
+        id = ActiveFedora::Associations::IDComposite.new([parent_or_url_or_hash], translate_uri_to_id).first
+        @ldp_source = build_ldp_resource id
       when ActiveFedora::Base
         Deprecation.warn File, "Initializing a file by passing a container is deprecated. Initialize with a uri instead. This capability will be removed in active-fedora 10.0"
         uri = if parent_or_url_or_hash.uri.kind_of?(::RDF::URI) && parent_or_url_or_hash.uri.value.empty?

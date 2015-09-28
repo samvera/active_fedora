@@ -7,13 +7,13 @@ module ActiveFedora
       end
 
       def find_target
-        reflection.build_association(target_uri) do |record|
+        find_or_initialize_target do |record|
           configure_datastream(record) if reflection.options[:block]
         end
       end
 
       def target_uri
-        "#{owner.uri}/#{reflection.name}"
+        "#{owner.id}/#{reflection.name}"
       end
 
       private
@@ -21,6 +21,18 @@ module ActiveFedora
       def raise_on_type_mismatch(record)
         return if record.is_a? LoadableFromJson::SolrBackedMetadataFile
         super
+      end
+
+      def find_or_initialize_target(&block)
+        begin
+          if reflection.klass < ActiveFedora::File
+            reflection.build_association(target_uri, &block)
+          else
+            reflection.klass.find(target_uri)
+          end
+        rescue ActiveFedora::ObjectNotFoundError
+          reflection.build_association(target_uri, &block)
+        end
       end
 
       def replace(record)

@@ -5,6 +5,9 @@ module ActiveFedora::Associations
   class IDComposite
     attr_reader :ids, :id_translator
     include Enumerable
+    # @param [Array<#to_s>] ids An array of ids or URIs to convert to IDs.
+    # @param [#call] id_translator An object to handle the conversion of a URI
+    #   to an ID.
     def initialize(ids, id_translator)
       @ids = ids
       @id_translator = id_translator
@@ -20,7 +23,7 @@ module ActiveFedora::Associations
     private
 
     def convert(id)
-      if id.start_with?("http")
+      if id.to_s.start_with?("http")
         id_translator.call(id)
       else
         id
