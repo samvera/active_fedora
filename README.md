@@ -64,7 +64,7 @@ integration server. To do that, unzip a copy of hydra-jetty first. This includes
 used during the testing process.
 
 ```bash
-rake jetty:unzip 
+rake jetty:unzip
 ```
 
 Once hydra-jetty is unzipped, the ci rake task will spin up jetty,
