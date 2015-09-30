@@ -28,6 +28,7 @@ module ActiveFedora::Attributes
       mixin.class_eval <<-CODE, __FILE__, __LINE__ + 1
         def #{name}(*args)
           vals = get_values(:#{name})
+          return nil unless vals
           raise ActiveFedora::ConstraintError, "Expected \\"#{name}\\" to have 0-1 statements, but there are \#{vals.size}" if vals.size > 1
           vals.first
         end
