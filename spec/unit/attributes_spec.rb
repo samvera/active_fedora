@@ -228,10 +228,28 @@ describe ActiveFedora::Base do
           }.to change { subject.fubar_changed? }.from(false).to(true)
         end
 
-        it "should work for properties" do
-          expect {
-            subject.goose = ["honk!"]
-          }.to change { subject.goose_changed? }.from(false).to(true)
+        context "when a change is made to a property" do
+          it "is marked changed" do
+            expect {
+              subject.goose = ["honk!"]
+            }.to change { subject.goose_changed? }.from(false).to(true)
+          end
+        end
+
+        context "when a property is set to the same value" do
+          before do
+            subject.goose = ['honk!', 'Honk']
+            if ActiveModel.version < Gem::Version.new('4.2.0')
+              subject.send(:reset_changes)
+            else
+              subject.send(:clear_changes_information)
+            end
+          end
+
+          it "is not marked changed" do
+            subject.goose = ['honk!', 'Honk']
+            expect(subject.goose_changed?).to be false
+          end
         end
       end
 
