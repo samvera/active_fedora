@@ -1,3 +1,9 @@
+v9.4.3
+  2015-09-30: Don't mark an attribute as changed if it's set to the same value
+  [Justin Coyne]
+
+  2015-09-28: Remove unnecessary whitespace [Justin Coyne]
+
 v9.4.2
   2015-09-25: Refactor nested_attribute test for easier reading [Justin Coyne]
 
