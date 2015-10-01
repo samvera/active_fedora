@@ -162,13 +162,13 @@ module ActiveFedora
       # This method is used to specify the details of a contained resource.
       # Pass the name as the first argument and a hash of options as the second argument
       # Note that this method doesn't actually execute the block, but stores it, to be executed
-      # by any the implementation of the datastream(specified as :class_name)
+      # by any the implementation of the resource(specified as :class_name)
       #
       # @param [String] name the handle to refer to this child as
       # @param [Hash] options
-      # @option options [Class] :class_name The class that will represent this child, should extend ``ActiveFedora::File''
+      # @option options [Class] :class_name The class that will represent this child, should extend ``ActiveFedora::File'' or ``ActiveFedora::Base''
       # @option options [String] :url
-      # @option options [Boolean] :autocreate Always create this datastream on new objects
+      # @option options [Boolean] :autocreate Always create this resource on new objects
       # @yield block executed by some types of child resources
       def contains(name, options = {}, &block)
         options[:block] = block if block

@@ -4,19 +4,24 @@ describe ActiveFedora::AttachedFiles do
   subject { ActiveFedora::Base.new }
   describe "contains" do
     before do
+      class Z < ActiveFedora::File
+      end
       class FooHistory < ActiveFedora::Base
          contains 'dsid', class_name: 'ActiveFedora::SimpleDatastream'
          contains 'complex_ds', autocreate: true, class_name: 'Z'
          contains 'thumbnail'
+         contains 'child_resource', class_name: 'ActiveFedora::Base'
       end
     end
     after do
+      Object.send(:remove_const, :Z)
       Object.send(:remove_const, :FooHistory)
     end
 
     it "should have a child_resource_reflection" do
       expect(FooHistory.child_resource_reflections).to have_key(:dsid)
       expect(FooHistory.child_resource_reflections).to have_key(:thumbnail)
+      expect(FooHistory.child_resource_reflections).not_to have_key(:child_resource)
     end
 
     it "should let you override defaults" do
@@ -34,6 +39,8 @@ describe ActiveFedora::AttachedFiles do
     before do
       @original_behavior = Deprecation.default_deprecation_behavior
       Deprecation.default_deprecation_behavior = :silence
+      class Z < ActiveFedora::File
+      end
       class FooHistory < ActiveFedora::Base
          has_metadata :name => 'dsid', type: ActiveFedora::SimpleDatastream
          has_metadata 'complex_ds', autocreate: true, type: 'Z'
@@ -42,6 +49,7 @@ describe ActiveFedora::AttachedFiles do
     after do
       Deprecation.default_deprecation_behavior = @original_behavior
       Object.send(:remove_const, :FooHistory)
+      Object.send(:remove_const, :Z)
     end
 
     it "should have a child_resource_reflection" do

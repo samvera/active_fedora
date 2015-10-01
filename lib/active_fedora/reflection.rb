@@ -41,7 +41,11 @@ module ActiveFedora
       end
 
       def child_resource_reflections
-        reflections.select { |_, reflection| reflection.kind_of?(AssociationReflection) && reflection.macro == :contains }
+        reflections.select { |_, reflection| reflection.kind_of?(AssociationReflection) && reflection.macro == :contains && reflection.klass <= ActiveFedora::File}
+      end
+
+      def contained_rdf_source_reflections
+        reflections.select { |_, reflection| reflection.kind_of?(AssociationReflection) && reflection.macro == :contains && !(reflection.klass <= ActiveFedora::File)}
       end
 
       # Returns the AssociationReflection object for the +association+ (use the symbol).
