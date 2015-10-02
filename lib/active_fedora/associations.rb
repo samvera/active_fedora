@@ -10,31 +10,30 @@ module ActiveFedora
   end
 
   module Associations
-
     extend ActiveSupport::Concern
+    extend ActiveSupport::Autoload
 
-    autoload :Association,           'active_fedora/associations/association'
-    autoload :AssociationScope,      'active_fedora/associations/association_scope'
-    autoload :SingularAssociation,   'active_fedora/associations/singular_association'
-    autoload :RDF,                   'active_fedora/associations/rdf'
-    autoload :SingularRDF,           'active_fedora/associations/singular_rdf'
-    autoload :CollectionAssociation, 'active_fedora/associations/collection_association'
-    autoload :CollectionProxy,       'active_fedora/associations/collection_proxy'
-    autoload :ContainerProxy,        'active_fedora/associations/container_proxy'
+    autoload :Association
+    autoload :SingularAssociation
+    autoload :RDF
+    autoload :SingularRDF
+    autoload :CollectionAssociation
+    autoload :CollectionProxy
+    autoload :ContainerProxy
 
-    autoload :HasManyAssociation,             'active_fedora/associations/has_many_association'
-    autoload :BelongsToAssociation,           'active_fedora/associations/belongs_to_association'
-    autoload :HasAndBelongsToManyAssociation, 'active_fedora/associations/has_and_belongs_to_many_association'
-    autoload :BasicContainsAssociation,       'active_fedora/associations/basic_contains_association'
-    autoload :DirectlyContainsAssociation,    'active_fedora/associations/directly_contains_association'
-    autoload :DirectlyContainsOneAssociation, 'active_fedora/associations/directly_contains_one_association'
-    autoload :IndirectlyContainsAssociation,  'active_fedora/associations/indirectly_contains_association'
-    autoload :ContainsAssociation,            'active_fedora/associations/contains_association'
-    autoload :DeleteProxy,                    'active_fedora/associations/delete_proxy'
-    autoload :ContainedFinder,                'active_fedora/associations/contained_finder'
-    autoload :RecordComposite,                'active_fedora/associations/record_composite'
-    autoload :IDComposite,                    'active_fedora/associations/id_composite'
-    autoload :NullValidator,                  'active_fedora/associations/null_validator'
+    autoload :HasManyAssociation
+    autoload :BelongsToAssociation
+    autoload :HasAndBelongsToManyAssociation
+    autoload :BasicContainsAssociation
+    autoload :DirectlyContainsAssociation
+    autoload :DirectlyContainsOneAssociation
+    autoload :IndirectlyContainsAssociation
+    autoload :ContainsAssociation
+    autoload :DeleteProxy
+    autoload :ContainedFinder
+    autoload :RecordComposite
+    autoload :IDComposite
+    autoload :NullValidator
 
     module Builder
       autoload :Association,             'active_fedora/associations/builder/association'
@@ -51,6 +50,10 @@ module ActiveFedora
 
       autoload :Property,         'active_fedora/associations/builder/property'
       autoload :SingularProperty, 'active_fedora/associations/builder/singular_property'
+    end
+
+    eager_autoload do
+      autoload :AssociationScope
     end
 
     # Clears out the association cache.
