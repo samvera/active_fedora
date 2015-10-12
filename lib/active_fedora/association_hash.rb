@@ -106,7 +106,7 @@ module ActiveFedora
     end
 
     def []= (name)
-      raise NotImplementedError "Unable to set properties on a merged association hash"
+      raise NotImplementedError, "Unable to set properties on a merged association hash."
     end
 
     def keys
