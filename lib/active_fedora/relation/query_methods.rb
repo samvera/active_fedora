@@ -17,7 +17,7 @@ module ActiveFedora
     def where_values=(values)
       raise ImmutableRelation if @loaded
       @values[:where] = values
-    end   
+    end
 
     def order_values
       @values[:order] || []
@@ -62,11 +62,13 @@ module ActiveFedora
       self
     end
 
+    # @param [Hash,String] values
+    # @return [Array<String>] list of solr hashes
     def build_where(values)
       return [] if values.blank?
       case values
       when Hash
-        [create_query_from_hash(values)]
+        create_query_from_hash(values)
       when String
         ["(#{values})"]
       else
@@ -76,7 +78,7 @@ module ActiveFedora
 
     # Order the returned records by the field and direction provided
     #
-    # @option [Array<String>] args a list of fields and directions to sort by 
+    # @option [Array<String>] args a list of fields and directions to sort by
     #
     # @example
     #  Person.where(occupation_s: 'Plumber').order('name_t desc', 'color_t asc')

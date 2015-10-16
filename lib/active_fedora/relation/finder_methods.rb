@@ -111,7 +111,7 @@ module ActiveFedora
       unless opts.include?(:sort)
         opts[:sort]=@klass.default_sort_params
       end
-      SolrService.query(create_query(conditions), opts) 
+      SolrService.query(create_query(conditions), opts)
     end
 
     # Yields the found ActiveFedora::Base object to the passed block
@@ -199,7 +199,7 @@ module ActiveFedora
         # The true class may be a subclass of @klass, so always use from_class_uri
         resource_class = Model.from_class_uri(has_model_value(resource)) || ActiveFedora::Base
         unless equivalent_class?(resource_class)
-          raise ActiveFedora::ActiveFedoraError.new("Model mismatch. Expected #{@klass}. Got: #{resource_class}") 
+          raise ActiveFedora::ActiveFedoraError.new("Model mismatch. Expected #{@klass}. Got: #{resource_class}")
         end
         resource_class
       end
@@ -254,45 +254,42 @@ module ActiveFedora
     private
 
     # Returns a solr query for the supplied conditions
-    # @param[Hash] conditions solr conditions to match
+    # @param[Hash,String,Array] conditions solr conditions to match
     def create_query(conditions)
-        case conditions
-        when Hash
-          build_query([create_query_from_hash(conditions)])
-        when String
-          build_query(["(#{conditions})"])
-        else
-          build_query(conditions)
-        end
+      build_query(build_where(conditions))
     end
 
+    # @param [Array<String>] conditions
     def build_query(conditions)
-      clauses = search_model_clause ?  [search_model_clause] : []
-      clauses += conditions.reject{|c| c.blank?}
+      clauses = search_model_clause ? [search_model_clause] : []
+      clauses += conditions.reject { |c| c.blank? }
       return "*:*" if clauses.empty?
       clauses.compact.join(" AND ")
     end
 
+    # @param [Hash<Symbol,String>] conditions
+    # @returns [Array<String>]
     def create_query_from_hash(conditions)
-      conditions.map {|key,value| condition_to_clauses(key, value)}.compact.join(" AND ")
+      conditions.map { |key, value| condition_to_clauses(key, value) }.compact
     end
 
+    # @param [Symbol] key
+    # @param [String] value
     def condition_to_clauses(key, value)
-      unless value.nil?
-        # if the key is a property name, turn it into a solr field
-        if @klass.delegated_attributes.key?(key)
-          # TODO Check to see if `key' is a possible solr field for this class, if it isn't try :searchable instead
-          key = ActiveFedora::SolrQueryBuilder.solr_name(key, :stored_searchable, type: :string)
-        end
+      SolrQueryBuilder.construct_query([[field_name_for(key), value]])
+    end
 
-        if value.empty?
-          "-#{key}:['' TO *]"
-        elsif value.is_a? Array
-          value.map { |val| "#{key}:#{solr_escape(val)}" }
-        else
-          key = SOLR_DOCUMENT_ID if (key === :id || key === :id)
-          "#{key}:#{solr_escape(value)}"
-        end
+    # If the key is a property name, turn it into a solr field
+    # @param [Symbol] key
+    # @return [String]
+    def field_name_for(key)
+      if @klass.delegated_attributes.key?(key)
+        # TODO Check to see if `key' is a possible solr field for this class, if it isn't try :searchable instead
+        ActiveFedora::SolrQueryBuilder.solr_name(key, :stored_searchable, type: :string)
+      elsif key == :id
+        SOLR_DOCUMENT_ID
+      else
+        key.to_s
       end
     end
 
@@ -306,13 +303,5 @@ module ActiveFedora
         clauses.size == 1 ? clauses.first : "(#{clauses.join(" OR ")})"
       end
     end
-
-
-    private
-      # Adds esaping for spaces which are not handled by RSolr.solr_escape
-      # See rsolr/rsolr#101
-      def solr_escape terms
-        RSolr.solr_escape(terms).gsub(/\s+/,"\\ ")
-      end
   end
 end
