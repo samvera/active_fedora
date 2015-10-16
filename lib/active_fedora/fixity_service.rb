@@ -11,24 +11,33 @@ module ActiveFedora
     end
 
     # Executes a fixity check on Fedora and saves the Faraday::Response.
-    # Returns true when the fixity check was successfully.
+    # @return true or false
     def check
       @response = get_fixity_response_from_fedora
-      status.match("SUCCESS") ? true : false
+      status.include?(success)
     end
 
     def status
-      fixity_graph.query(predicate: status_predicate).map(&:object).first.to_s
+      fixity_graph.query(predicate: premis_status_predicate).map(&:object) +
+        fixity_graph.query(predicate: fedora_status_predicate).map(&:object)
     end
 
     private
+
+      def premis_status_predicate
+        ::RDF::Vocab::PREMIS.hasEventOutcome
+      end
 
       # Fcrepo4.status was used by Fedora < 4.3, but it was removed
       # from the 2015-07-24 version of the fedora 4 ontology
       # http://fedora.info/definitions/v4/2015/07/24/repository and
       # from rdf-vocab in version 0.8.5
-      def status_predicate
+      def fedora_status_predicate
         ::RDF::URI("http://fedora.info/definitions/v4/repository#status")
+      end
+
+      def success
+        ::RDF::Literal.new("SUCCESS")
       end
 
       def get_fixity_response_from_fedora
