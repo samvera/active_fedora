@@ -1,5 +1,7 @@
 module ActiveFedora
   module SolrQueryBuilder
+    PARSED_SUFFIX = '_tesim'.freeze
+
     # Construct a solr query for a list of ids
     # This is used to get a solr response based on the list of ids in an object's RELS-EXT relationhsips
     # If the id_array is empty, defaults to a query of "id:NEVER_USE_THIS_ID", which will return an empty solr response
@@ -29,18 +31,72 @@ module ActiveFedora
     #   # => _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ComplexCollection" OR _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ActiveFedora_Base"
     #
     #   construct_query_for_rel [[Book.reflect_on_association(:library), "foo/bar/baz"]]
-    def self.construct_query_for_rel(field_pairs, join_with = 'AND')
+    def self.construct_query_for_rel(field_pairs, join_with = ' AND ')
       field_pairs = field_pairs.to_a if field_pairs.kind_of? Hash
+      construct_query(property_values_to_solr(field_pairs), join_with)
+    end
 
-      clauses = pairs_to_clauses(field_pairs.reject { |_, target_uri| target_uri.blank? })
-      clauses.empty? ? "id:NEVER_USE_THIS_ID" : clauses.join(" #{join_with} ".freeze)
+    # Construct a solr query from a list of pairs (e.g. [field name, values])
+    # @param [Array<Array>] pairs a list of pairs of property name and values
+    # @param [String] join_with ('AND') the value we're joining the clauses with
+    # @returns [String] a solr query
+    # @example
+    #   construct_query([['library_id_ssim', '123'], ['owner_ssim', 'Fred']])
+    #   # => "_query_:\"{!raw f=library_id_ssim}123\" AND _query_:\"{!raw f=owner_ssim}Fred\""
+    def self.construct_query(field_pairs, join_with = ' AND ')
+      pairs_to_clauses(field_pairs).join(join_with)
     end
 
     private
-      # Given an list of 2 element lists, transform to a list of solr clauses
+      # @param [Array<Array>] pairs a list of (key, value) pairs. The value itself may
+      # @return [Array] a list of solr clauses
       def self.pairs_to_clauses(pairs)
-        pairs.map do |field, target_uri|
-          raw_query(solr_field(field), target_uri)
+        pairs.flat_map do |field, value|
+          condition_to_clauses(field, value)
+        end
+      end
+
+      # @param [String] field
+      # @param [String, Array<String>] values
+      # @return [Array<String>]
+      def self.condition_to_clauses(field, values)
+        values = Array(values)
+        values << nil if values.empty?
+        values.map do |value|
+          if value.present?
+            if parsed?(field)
+              # If you do a raw query on a parsed field you won't get the matches you expect.
+              "#{field}:#{solr_escape(value)}"
+            else
+              raw_query(field, value)
+            end
+          else
+            # Check that the field is not present. In SQL: "WHERE field IS NULL"
+            "-#{field}:[* TO *]"
+          end
+        end
+      end
+
+      def self.parsed?(field)
+        field.end_with?(PARSED_SUFFIX)
+      end
+
+      # Adds esaping for spaces which are not handled by RSolr.solr_escape
+      # See rsolr/rsolr#101
+      def self.solr_escape terms
+        RSolr.solr_escape(terms).gsub(/\s+/,"\\ ")
+      end
+
+      # Given a list of pairs (e.g. [field name, values]), convert the field names
+      # to solr names
+      # @param [Array<Array>] pairs a list of pairs of property name and values
+      # @returns [Hash] map of solr fields to values
+      # @example
+      #   property_values_to_solr([['library_id', '123'], ['owner', 'Fred']])
+      #   # => [['library_id_ssim', '123'], ['owner_ssim', 'Fred']]
+      def self.property_values_to_solr(pairs)
+        pairs.each_with_object([]) do |(property, value), list|
+          list << [solr_field(property), value]
         end
       end
 

@@ -30,7 +30,6 @@ describe "scoped queries" do
     Object.send(:remove_const, :ModelIntegrationSpec)
   end
 
-
   describe "When there is one object in the store" do
     let!(:test_instance) { ModelIntegrationSpec::Basic.create!()}
 
@@ -67,7 +66,7 @@ describe "scoped queries" do
         test_instance3.delete
       end
 
-      it "should query" do
+      it "queries" do
         field = ActiveFedora::SolrQueryBuilder.solr_name('foo', type: :string)
         expect(ModelIntegrationSpec::Basic.where(field => 'Beta')).to eq [test_instance1]
         expect(ModelIntegrationSpec::Basic.where('foo' => 'Beta')).to eq [test_instance1]
@@ -90,8 +89,13 @@ describe "scoped queries" do
         expect(ModelIntegrationSpec::Basic.where("foo:bar OR bar:baz").where_values).to eq ["(foo:bar OR bar:baz)"]
       end
 
-      it "should chain where queries" do
-        expect(ModelIntegrationSpec::Basic.where(ActiveFedora::SolrQueryBuilder.solr_name('bar', type: :string) => 'Peanuts').where("#{ActiveFedora::SolrQueryBuilder.solr_name('foo', type: :string)}:bar").where_values).to eq ["#{ActiveFedora::SolrQueryBuilder.solr_name('bar', type: :string)}:Peanuts", "(#{ActiveFedora::SolrQueryBuilder.solr_name('foo', type: :string)}:bar)"]
+      it "chains where queries" do
+        first_condition = { ActiveFedora::SolrQueryBuilder.solr_name('bar', type: :string) => 'Peanuts' }
+        second_condition = "foo_tesim:bar"
+        where_values = ModelIntegrationSpec::Basic.where(first_condition)
+                                                    .where(second_condition).where_values
+        expect(where_values).to eq ["bar_tesim:Peanuts",
+                                    "(foo_tesim:bar)"]
       end
 
       it "should chain count" do
