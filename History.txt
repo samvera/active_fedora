@@ -1,3 +1,16 @@
+v9.5.0
+  2015-10-16: query for nil creates correct query [Justin Coyne]
+
+  2015-10-16: Support both Fedora and Premis fixity predicates [Adam Wead]
+
+  2015-10-12: AssociationHash - alias  to [David Chandek-Stark]
+
+  2015-10-12: Fixed syntax error in raise statement [David Chandek-Stark]
+
+  2015-10-02: Let autoload do its thing [Justin Coyne]
+
+  2015-09-28: Add support for contained RDF sources. [Trey Terrell]
+
 v9.4.3
   2015-09-30: Don't mark an attribute as changed if it's set to the same value
   [Justin Coyne]
