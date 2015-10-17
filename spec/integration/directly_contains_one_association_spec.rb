@@ -48,6 +48,23 @@ describe ActiveFedora::Base do
         expect(subject.class).to eq FileWithMetadata
       end
     end
+    context "when contained element is a type of ActiveFedora::Base" do
+      before do
+        primary_sub_image.label = "I'm in a container all alone!"
+        page_image.save!
+      end
+      subject { reloaded_page_image.primary_sub_image }
+      it "relies on info from the :through association, including class_name" do
+        expect(page_image.sub_images).to include(primary_sub_image)
+        expect(primary_sub_image.uri).to include("/sub_images/")
+        expect(subject.class).to eq PageImage
+      end
+      it "initializes an object within the container" do
+        expect(subject.content).to eq("I'm in a container all alone!")
+        expect(subject.metadata_node.type).to include( ::RDF::URI.new("http://example.com/primaryFile") )
+        expect(subject.class).to eq PageImage
+      end
+    end
   end
 
   context "finder" do
