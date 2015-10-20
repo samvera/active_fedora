@@ -267,4 +267,19 @@ describe ActiveFedora::File do
       end
     end
   end
+
+  describe "#create_date" do
+    subject { file.create_date }
+    describe "when new record" do
+      it { is_expected.to be_nil }
+    end
+    describe "when persisted" do
+      before do
+        file.content = "foo"
+        file.save!
+      end
+      it { is_expected.to be_a(DateTime) }
+    end
+  end
+
 end
