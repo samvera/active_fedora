@@ -41,6 +41,12 @@ module ActiveFedora::File::Attributes
     !has_content?
   end
 
+  def create_date
+    if created = metadata.attributes["http://fedora.info/definitions/v4/repository#created"]
+      created.first
+    end
+  end
+
   private
 
     # Fcrepo4.digest was used by Fedora < 4.3, but it was removed
