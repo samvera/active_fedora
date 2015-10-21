@@ -130,7 +130,7 @@ module ActiveFedora
       # Should reverse Model#from_class_uri
       # TODO this is a poorly named method
       def to_class_uri(attrs = {})
-        name
+        uri || name
       end
 
       private

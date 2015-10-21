@@ -21,6 +21,9 @@ describe ActiveFedora::SolrInstanceLoader do
       property :start, predicate: ::RDF::Vocab::EDM.begin, multiple: false
       has_many :foos, inverse_of: :dates, class_name: 'Foo'
     end
+    # the self.class reference here is a workaround for rspec context of Foo class definition
+    class Bar < self.class.Foo("http://projecthydra.org/bar/Object")
+    end
   end
 
   let(:another) { Foo.create }
@@ -106,6 +109,18 @@ describe ActiveFedora::SolrInstanceLoader do
     it "should find the document in solr" do
       expect(subject).to be_instance_of Foo
       expect(subject.title).to eq 'My Title'
+    end
+    context "with a model URI specified" do
+      let!(:obj_with_uri) { Bar.create!(id: 'test-uri-123', foo: ["baz"], bar: 'quix', title: 'My Title',
+                           description: ['first desc', 'second desc'], another_id: another.id) }
+      let(:doc) { { 'id' => 'test-uri-123', 'has_model_ssim'=>['http://projecthydra.org/bar/Object'], 'object_profile_ssm' => profile } }
+      # since the id context is the same, should work without specifying Bar here
+      let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj_with_uri.id, doc) }
+      subject { loader.object }
+      it "should find the document in solr" do
+        expect(subject).to be_instance_of Bar
+        expect(subject.title).to eq 'My Title'
+      end
     end
   end
 
