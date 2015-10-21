@@ -258,6 +258,20 @@ describe ActiveFedora::File do
     end
   end
 
+  describe "#checksum" do
+    let(:digest) { RDF::URI.new("urn:sha1:f1d2d2f924e986ac86fdf7b36c94bcdf32beec15") }
+    before do
+      allow(subject).to receive(:digest) { [digest] }
+    end
+    its(:checksum) { is_expected.to be_a(ActiveFedora::Checksum) }
+    it "should have the right value" do
+      expect(subject.checksum.value).to eq("f1d2d2f924e986ac86fdf7b36c94bcdf32beec15")
+    end
+    it "should have the right algorithm" do
+      expect(subject.checksum.algorithm).to eq("SHA1")
+    end
+  end
+
   describe "#save" do
     let(:file) { described_class.new }
     context "when there is nothing to save" do

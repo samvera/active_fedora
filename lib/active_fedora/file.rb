@@ -134,6 +134,10 @@ module ActiveFedora
       @metadata ||= ActiveFedora::WithMetadata::MetadataNode.new(self)
     end
 
+    def checksum
+      ActiveFedora::Checksum.new(self)
+    end
+
     def content_changed?
       return true if new_record? and !local_or_remote_content(false).blank?
       local_or_remote_content(false) != @ds_content
