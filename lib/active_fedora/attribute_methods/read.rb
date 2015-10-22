@@ -1,8 +1,9 @@
 module ActiveFedora
   module AttributeMethods
     module Read
-      ReaderMethodCache = Class.new(AttributeMethodCache) {
-        private
+      ReaderMethodCache = Class.new(AttributeMethodCache) do
+                            private
+
         # We want to generate the methods via module_eval rather than
         # define_method, because define_method is slower on dispatch.
         # Evaluating many similar methods may use more memory as the instruction
@@ -29,7 +30,7 @@ module ActiveFedora
           end
           EOMETHOD
         end
-      }.new
+      end.new
 
       extend ActiveSupport::Concern
 
@@ -42,20 +43,19 @@ module ActiveFedora
       end
 
       private
+
         def attribute(attribute_name)
           read_attribute(attribute_name)
         end
 
-
-      module ClassMethods
-        def define_method_attribute(name)
-          method = ReaderMethodCache[name.to_s]
-          generated_attribute_methods.module_eval {
-            define_method name, method
-          }
+        module ClassMethods
+          def define_method_attribute(name)
+            method = ReaderMethodCache[name.to_s]
+            generated_attribute_methods.module_eval do
+              define_method name, method
+            end
+          end
         end
-
-      end
     end
   end
 end

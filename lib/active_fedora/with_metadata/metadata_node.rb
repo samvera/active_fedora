@@ -7,23 +7,20 @@ module ActiveFedora
       def initialize(file)
         @file = file
         super(file.uri, ldp_source.graph)
-        if self.class.type && !self.type.include?(self.class.type)
-          # Workaround for https://github.com/ActiveTriples/ActiveTriples/issues/123
-          self.get_values(:type) << self.class.type
-        end
+        return unless self.class.type && !type.include?(self.class.type)
+        # Workaround for https://github.com/ActiveTriples/ActiveTriples/issues/123
+        get_values(:type) << self.class.type
       end
 
-      def metadata_uri= uri
-        @metadata_uri = uri
-      end
+      attr_writer :metadata_uri
 
       def metadata_uri
         @metadata_uri ||= if file.new_record?
-          ::RDF::URI.new nil
-        else
-          raise "#{file} must respond_to described_by" unless file.respond_to? :described_by
-          file.described_by
-        end
+                            ::RDF::URI.new nil
+                          else
+                            raise "#{file} must respond_to described_by" unless file.respond_to? :described_by
+                            file.described_by
+                          end
       end
 
       def set_value(*args)
@@ -48,9 +45,7 @@ module ActiveFedora
 
       def changed_attributes
         super.tap do |changed|
-          if type.present?
-            changed['type'] = true
-          end
+          changed['type'] = true if type.present?
         end
       end
 
@@ -60,29 +55,24 @@ module ActiveFedora
           ChangeSet.new(self, self, changed_attributes.keys).changes
         end
 
+        class << self
+          attr_writer :parent_class
 
-      class << self
-        def parent_class= parent
-          @parent_class = parent
-        end
+          attr_reader :parent_class
 
-        def parent_class
-          @parent_class
-        end
+          def property(name, options)
+            parent_class.delegate name, :"#{name}=", :"#{name}_changed?", to: :metadata_node
+            super
+          end
 
-        def property(name, options)
-          parent_class.delegate name, :"#{name}=", :"#{name}_changed?", to: :metadata_node
-          super
-        end
+          def create_delegating_setter(name)
+            file.class.delegate(name, to: :metadata_node)
+          end
 
-        def create_delegating_setter(name)
-          file.class.delegate(name, to: :metadata_node)
+          def exec_block(&block)
+            class_eval(&block)
+          end
         end
-
-        def exec_block(&block)
-          class_eval &block
-        end
-      end
     end
   end
 end

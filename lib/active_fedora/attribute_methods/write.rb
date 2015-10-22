@@ -1,8 +1,8 @@
 module ActiveFedora
   module AttributeMethods
     module Write
-      WriterMethodCache = Class.new(AttributeMethodCache) {
-        private
+      WriterMethodCache = Class.new(AttributeMethodCache) do
+                            private
 
         def method_body(method_name, const_name)
           <<-EOMETHOD
@@ -12,7 +12,7 @@ module ActiveFedora
           end
           EOMETHOD
         end
-      }.new
+      end.new
 
       extend ActiveSupport::Concern
 
@@ -29,19 +29,19 @@ module ActiveFedora
       end
 
       private
+
         def attribute=(attribute_name, value)
           write_attribute(attribute_name, value)
         end
 
-      module ClassMethods
-        def define_method_attribute=(name)
-          method = WriterMethodCache[name.to_s]
-          generated_attribute_methods.module_eval {
-            define_method "#{name}=", method
-          }
+        module ClassMethods
+          def define_method_attribute=(name)
+            method = WriterMethodCache[name.to_s]
+            generated_attribute_methods.module_eval do
+              define_method "#{name}=", method
+            end
+          end
         end
-      end
-
     end
   end
 end

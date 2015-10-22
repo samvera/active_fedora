@@ -11,30 +11,30 @@ module ActiveFedora
 
     private
 
-    def omit_uris
-      [
-        ::RDF::Vocab::Fcrepo4.ServerManaged,
-        ::RDF::Vocab::LDP.PreferContainment,
-        ::RDF::Vocab::LDP.PreferEmptyContainer,
-        ::RDF::Vocab::LDP.PreferMembership
-      ]
-    end
-
-    class CleanResult < SimpleDelegator
-      def graph
-        @graph ||= clean_graph
+      def omit_uris
+        [
+          ::RDF::Vocab::Fcrepo4.ServerManaged,
+          ::RDF::Vocab::LDP.PreferContainment,
+          ::RDF::Vocab::LDP.PreferEmptyContainer,
+          ::RDF::Vocab::LDP.PreferMembership
+        ]
       end
 
-      private
+      class CleanResult < SimpleDelegator
+        def graph
+          @graph ||= clean_graph
+        end
 
-      def clean_graph
-        __getobj__.graph.delete(has_model_query)
-        __getobj__.graph
-      end
+        private
 
-      def has_model_query
-        [nil, ActiveFedora::RDF::Fcrepo::Model.hasModel, nil]
+          def clean_graph
+            __getobj__.graph.delete(has_model_query)
+            __getobj__.graph
+          end
+
+          def has_model_query
+            [nil, ActiveFedora::RDF::Fcrepo::Model.hasModel, nil]
+          end
       end
-    end
   end
 end

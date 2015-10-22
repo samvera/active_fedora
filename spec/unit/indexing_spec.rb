@@ -43,11 +43,11 @@ describe ActiveFedora::Indexing do
 
     subject { test_object.to_solr }
 
-    it "should index the rdf properties" do
+    it "indexs the rdf properties" do
       expect(subject).to include('title_tesim' => ['first title'], 'abstract_ssi' => 'The abstract')
     end
 
-    it "should add id, system_create_date, system_modified_date from object attributes" do
+    it "adds id, system_create_date, system_modified_date from object attributes" do
       expect(test_object).to receive(:create_date).and_return(DateTime.parse("2012-03-04T03:12:02Z")).twice
       expect(test_object).to receive(:modified_date).and_return(DateTime.parse("2012-03-07T03:12:02Z")).twice
       allow(test_object).to receive(:id).and_return('changeme:123')
@@ -57,7 +57,7 @@ describe ActiveFedora::Indexing do
       expect(solr_doc[:id]).to eql("changeme:123")
     end
 
-    it "should add self.class as the :active_fedora_model" do
+    it "adds self.class as the :active_fedora_model" do
       expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("active_fedora_model", :stored_sortable)]).to eql "SpecNode"
     end
 
@@ -65,7 +65,7 @@ describe ActiveFedora::Indexing do
       let(:mock1) { double("ds1") }
       let(:mock2) { double("ds2") }
 
-      it "should call .to_solr on all datastreams, passing the resulting document to solr" do
+      it "calls .to_solr on all datastreams, passing the resulting document to solr" do
         expect(mock1).to receive(:to_solr).and_return("one" => "title one")
         expect(mock2).to receive(:to_solr).and_return("two" => "title two")
 
@@ -74,5 +74,4 @@ describe ActiveFedora::Indexing do
       end
     end
   end
-
 end

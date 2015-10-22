@@ -7,7 +7,7 @@ describe ActiveFedora::IndexingService do
   describe "#generate_solr_document" do
     context "when no block is passed" do
       subject { indexer.generate_solr_document }
-      it "should produce a document" do
+      it "produces a document" do
         expect(subject['has_model_ssim']).to eq ['ActiveFedora::Base']
       end
     end
@@ -19,7 +19,7 @@ describe ActiveFedora::IndexingService do
         end
       end
 
-      it "should produce and yield the document" do
+      it "produces and yield the document" do
         expect(subject['has_model_ssim']).to eq ['ActiveFedora::Base']
         expect(subject['noid']).to eq '12345'
       end

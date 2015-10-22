@@ -21,11 +21,11 @@ describe ActiveFedora::WithMetadata do
     before do
       file.title = ['one', 'two']
     end
-    it "should set and retrieve properties" do
+    it "sets and retrieve properties" do
       expect(file.title).to eq ['one', 'two']
     end
 
-    it "should track changes" do
+    it "tracks changes" do
       expect(file.title_changed?).to be true
     end
   end
@@ -43,7 +43,7 @@ describe ActiveFedora::WithMetadata do
 
       let(:reloaded) { SampleFile.new(file.uri) }
 
-      it "should save the metadata too" do
+      it "saves the metadata too" do
         expect(reloaded.title).to eq ['foo']
       end
     end
@@ -82,7 +82,5 @@ describe ActiveFedora::WithMetadata do
     it "persists the configured type" do
       expect(reloaded_file.metadata_node.query(predicate: ::RDF.type).map(&:object)).to include book
     end
-
   end
-
 end

@@ -1,7 +1,6 @@
 module ActiveFedora::Attributes
   class PropertyBuilder < ActiveTriples::PropertyBuilder #:nodoc:
-
-    def self.define_accessors(model, reflection, options={})
+    def self.define_accessors(model, reflection, options = {})
       if reflection.multiple?
         super
       else
@@ -55,7 +54,7 @@ module ActiveFedora::Attributes
     end
 
     def build(&block)
-      #TODO remove this block stuff
+      # TODO: remove this block stuff
       NodeConfig.new(name, options[:predicate], options.except(:predicate)) do |config|
         config.with_index(&block) if block_given?
       end

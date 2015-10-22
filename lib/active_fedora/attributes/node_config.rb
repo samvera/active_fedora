@@ -4,10 +4,9 @@ module ActiveFedora::Attributes
       @multiple
     end
 
-    def initialize(term, predicate, options={})
+    def initialize(term, predicate, options = {})
       super
       @multiple = options[:multiple]
     end
-
   end
 end

@@ -11,8 +11,8 @@ module ActiveFedora
 
     private
 
-    def exec_queries
-      super.each { |r| @association.set_inverse_instance r }
-    end
+      def exec_queries
+        super.each { |r| @association.set_inverse_instance r }
+      end
   end
 end

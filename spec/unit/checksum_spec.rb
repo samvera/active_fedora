@@ -2,7 +2,6 @@ require "spec_helper"
 
 module ActiveFedora
   describe Checksum do
-
     subject { described_class.new(file) }
 
     let(:uri) { ::RDF::URI("urn:sha1:bb3200c2ddaee4bd7b9a4dc1ad3e10ed886eaef1") }
@@ -22,6 +21,5 @@ module ActiveFedora
       its(:value) { is_expected.to be_nil }
       its(:algorithm) { is_expected.to be_nil }
     end
-
   end
 end

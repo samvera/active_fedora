@@ -1,5 +1,4 @@
 module ActiveFedora::File::Attributes
-
   attr_writer :mime_type
 
   def mime_type
@@ -10,7 +9,7 @@ module ActiveFedora::File::Attributes
     @original_name ||= fetch_original_name
   end
 
-  def original_name= name
+  def original_name=(name)
     @original_name = name
   end
 
@@ -42,9 +41,8 @@ module ActiveFedora::File::Attributes
   end
 
   def create_date
-    if created = metadata.attributes["http://fedora.info/definitions/v4/repository#created"]
-      created.first
-    end
+    created = metadata.attributes["http://fedora.info/definitions/v4/repository#created"]
+    created && created.first
   end
 
   private
@@ -55,10 +53,10 @@ module ActiveFedora::File::Attributes
     # from rdf-vocab in version 0.8.5
     def fallback_digest_predicate
       @fallback_digest ||= if RDF::Vocab::Fcrepo4.respond_to? :digest
-        RDF::Vocab::Fcrepo4.digest
-      else
-        ::RDF::URI("http://fedora.info/definitions/v4/repository#digest")
-      end
+                             RDF::Vocab::Fcrepo4.digest
+                           else
+                             ::RDF::URI("http://fedora.info/definitions/v4/repository#digest")
+                           end
     end
 
     def links
@@ -79,5 +77,4 @@ module ActiveFedora::File::Attributes
       m = ldp_source.head.headers['Content-Disposition'].match(/filename="(?<filename>[^"]*)";/)
       URI.decode(m[:filename])
     end
-
 end

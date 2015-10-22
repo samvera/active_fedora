@@ -15,20 +15,20 @@ describe ActiveFedora::FilesHash do
   let(:object) { double('object') }
   let(:container) { FilesContainer.new }
 
-  subject { ActiveFedora::FilesHash.new(container) }
+  subject { described_class.new(container) }
 
   describe "#key?" do
     context 'when the key is present' do
-      it "should be true" do
+      it "is true" do
         expect(subject.key?(:file)).to be true
       end
-      it "should return true if a string is passed" do
+      it "returns true if a string is passed" do
         expect(subject.key?('file')).to be true
       end
     end
 
     context 'when the key is not present' do
-      it "should be false" do
+      it "is false" do
         expect(subject.key?(:foo)).to be false
       end
     end
@@ -36,16 +36,16 @@ describe ActiveFedora::FilesHash do
 
   describe "#[]" do
     context 'when the key is present' do
-      it "should return the object" do
+      it "returns the object" do
         expect(subject[:file]).to eq object
       end
-      it "should return the object if a string is passed" do
+      it "returns the object if a string is passed" do
         expect(subject['file']).to eq object
       end
     end
 
     context 'when the key is not present' do
-      it "should be nil" do
+      it "is nil" do
         expect(subject[:foo]).to be_nil
       end
     end

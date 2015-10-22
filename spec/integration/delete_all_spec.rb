@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-
   before(:all) do
     module SpecModel
       class Basic < ActiveFedora::Base
@@ -27,9 +26,8 @@ describe ActiveFedora::Base do
     SpecModel::Basic.callback_counter = 0
   end
 
-
   describe ".destroy_all" do
-    it "should remove both and run callbacks" do
+    it "removes both and run callbacks" do
       SpecModel::Basic.destroy_all
       expect(SpecModel::Basic.count).to eq 0
       expect(SpecModel::Basic.callback_counter).to eq 2
@@ -48,8 +46,8 @@ describe ActiveFedora::Base do
         end
       end
 
-      it "should be able to skip a missing model" do
-        expect(ActiveFedora::Base.logger).to receive(:error).with("Although #{id} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
+      it "is able to skip a missing model" do
+        expect(described_class.logger).to receive(:error).with("Although #{id} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
         SpecModel::Basic.destroy_all
         expect(SpecModel::Basic.count).to eq 1
       end
@@ -57,7 +55,7 @@ describe ActiveFedora::Base do
   end
 
   describe ".delete_all" do
-    it "should remove both and not run callbacks" do
+    it "removes both and not run callbacks" do
       SpecModel::Basic.delete_all
       expect(SpecModel::Basic.count).to eq 0
       expect(SpecModel::Basic.callback_counter).to eq 0

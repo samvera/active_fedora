@@ -12,7 +12,7 @@ describe "Caching" do
   let!(:object) { TestClass.create(id: '123') }
 
   describe "#cache" do
-    it "should find records in the cache" do
+    it "finds records in the cache" do
       expect_any_instance_of(Faraday::Connection).to receive(:get).once.and_call_original
       ActiveFedora::Base.cache do
         o1 = TestClass.find(object.id)
@@ -21,7 +21,7 @@ describe "Caching" do
       end
     end
 
-    it "should clear the cache at the end of the block" do
+    it "clears the cache at the end of the block" do
       expect_any_instance_of(Faraday::Connection).to receive(:get).twice.and_call_original
       ActiveFedora::Base.cache do
         TestClass.find(object.id)
@@ -32,11 +32,11 @@ describe "Caching" do
     end
 
     context "an update" do
-      it "should flush the cache" do
+      it "flushes the cache" do
         expect_any_instance_of(Faraday::Connection).to receive(:get).twice.and_call_original
         ActiveFedora::Base.cache do
           TestClass.find(object.id)
-          object.title= ['foo']
+          object.title = ['foo']
           object.save!
           TestClass.find(object.id)
         end
@@ -45,7 +45,7 @@ describe "Caching" do
   end
 
   describe "#uncached" do
-    it "should not use the cache" do
+    it "does not use the cache" do
       expect_any_instance_of(Faraday::Connection).to receive(:get).twice.and_call_original
       ActiveFedora::Base.cache do
         TestClass.find(object.id)

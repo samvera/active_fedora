@@ -5,7 +5,7 @@ module ActiveFedora
   #   good place to define that.
   class SchemaIndexingStrategy
     # @param [#index] indexer The indexer to use
-    def initialize(indexer=Indexers::NullIndexer.instance)
+    def initialize(indexer = Indexers::NullIndexer.instance)
       @indexer = indexer
     end
 
@@ -19,7 +19,6 @@ module ActiveFedora
 
     private
 
-    attr_reader :indexer
+      attr_reader :indexer
   end
 end
-

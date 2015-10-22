@@ -1,6 +1,5 @@
 module ActiveFedora
   class LogSubscriber < ActiveSupport::LogSubscriber
-
     def initialize
       super
       @odd = false
@@ -11,12 +10,12 @@ module ActiveFedora
 
       payload = event.payload
 
-      name  = "#{payload[:name]} (#{event.duration.round(1)}ms)"
-      id   = payload[:id] || "[no id]"
+      name = "#{payload[:name]} (#{event.duration.round(1)}ms)"
+      id = payload[:id] || "[no id]"
 
       if odd?
         name = color(name, CYAN, true)
-        id  = color(id, nil, true)
+        id = color(id, nil, true)
       else
         name = color(name, MAGENTA, true)
       end
@@ -35,4 +34,3 @@ module ActiveFedora
 end
 
 ActiveFedora::LogSubscriber.attach_to :active_fedora
-

@@ -1,11 +1,10 @@
 require 'spec_helper'
 
 describe ActiveFedora::Model do
-
   before(:all) do
     module ModelIntegrationSpec
       class Basic < ActiveFedora::Base
-        has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream do |m|
+        has_metadata name: "properties", type: ActiveFedora::SimpleDatastream do |m|
           m.field "foo", :string
           m.field "bar", :string
           m.field "baz", :string
@@ -22,45 +21,41 @@ describe ActiveFedora::Model do
         end
       end
     end
-
   end
 
   after(:all) do
     Object.send(:remove_const, :ModelIntegrationSpec)
   end
 
-
   describe "with multiple objects" do
-    let!(:instance1){ ModelIntegrationSpec::Basic.create!(foo: ['Beta'], bar: ['Chips'])}
-    let!(:instance2){ ModelIntegrationSpec::Basic.create!(foo: ['Alpha'], bar: ['Peanuts'])}
-    let!(:instance3){ ModelIntegrationSpec::Basic.create!(foo: ['Sigma'], bar: ['Peanuts'])}
+    let!(:instance1) { ModelIntegrationSpec::Basic.create!(foo: ['Beta'], bar: ['Chips']) }
+    let!(:instance2) { ModelIntegrationSpec::Basic.create!(foo: ['Alpha'], bar: ['Peanuts']) }
+    let!(:instance3) { ModelIntegrationSpec::Basic.create!(foo: ['Sigma'], bar: ['Peanuts']) }
 
     subject { ModelIntegrationSpec::Basic.where(bar: 'Peanuts') }
 
-    it "should map" do
+    it "maps" do
       expect(subject.map(&:id)).to eq [instance2.id, instance3.id]
     end
 
-    it "should collect" do
+    it "collects" do
       expect(subject.collect(&:id)).to eq [instance2.id, instance3.id]
     end
 
-    it "should have each" do
+    it "has each" do
       t = double
       expect(t).to receive(:foo).twice
       subject.each { t.foo }
     end
 
-    it "should have all?" do
-      expect(subject.all? { |t| t.foo == ['Alpha']}).to be false
-      expect(subject.all? { |t| t.bar == ['Peanuts']}).to be true
+    it "has all?" do
+      expect(subject.all? { |t| t.foo == ['Alpha'] }).to be false
+      expect(subject.all? { |t| t.bar == ['Peanuts'] }).to be true
     end
 
-    it "should have include?" do
+    it "has include?" do
       expect(subject.include?(instance1)).to be false
       expect(subject.include?(instance2)).to be true
     end
   end
 end
-
-

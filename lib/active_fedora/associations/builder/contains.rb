@@ -10,15 +10,14 @@ module ActiveFedora::Associations::Builder
 
     def validate_options
       super
-      if options[:class_name] && !options[:class_name].is_a?(String)
-        raise ArgumentError, ":class_name must be a string for contains '#{name}'" unless options[:class_name].is_a? String
-      end
+      return unless options[:class_name] && !options[:class_name].is_a?(String)
+      raise ArgumentError, ":class_name must be a string for contains '#{name}'"
     end
 
     def self.define_readers(mixin, name)
       mixin.send(:define_method, name) do |*params|
         association(name).reader(*params).tap do |file|
-          set_uri = uri.kind_of?(RDF::URI) ? uri.value.present? : uri.present?
+          set_uri = uri.is_a?(RDF::URI) ? uri.value.present? : uri.present?
           if set_uri
             file_uri = "#{uri}/#{name}"
             begin
@@ -34,4 +33,3 @@ module ActiveFedora::Associations::Builder
     end
   end
 end
-

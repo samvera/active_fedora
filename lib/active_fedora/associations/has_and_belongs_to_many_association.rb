@@ -11,7 +11,7 @@ module ActiveFedora
           if force
             record.save!
           else
-            return false unless record.save(:validate => validate)
+            return false unless record.save(validate: validate)
           end
         end
 
@@ -30,7 +30,7 @@ module ActiveFedora
           end
         end
 
-        return true
+        true
       end
 
       def concat_records(*records)
@@ -38,7 +38,7 @@ module ActiveFedora
 
         records.flatten.each do |record|
           raise_on_type_mismatch(record)
-          add_to_target(record) do |r|
+          add_to_target(record) do |_r|
             result &&= insert_record(record)
           end
         end
@@ -47,13 +47,11 @@ module ActiveFedora
       end
 
       # In a HABTM, just look in the RDF, no need to run a count query from solr.
-      def count(options = {})
+      def count(_options = {})
         owner[reflection.foreign_key].size
       end
 
-      def first
-        load_target.first
-      end
+      delegate :first, to: :load_target
 
       protected
 
@@ -61,19 +59,16 @@ module ActiveFedora
           load_target.size
         end
 
-        def delete_records(records, method)
+        def delete_records(records, _method)
           records.each do |r|
             owner[reflection.foreign_key] -= [r.id]
-
-            if inverse = @reflection.inverse_of
-              r[inverse.foreign_key] -= [owner.id] if inverse.has_and_belongs_to_many?
-              r.association(inverse.name).reset
-              r.save
-            end
+            inverse = @reflection.inverse_of
+            next unless inverse
+            r[inverse.foreign_key] -= [owner.id] if inverse.has_and_belongs_to_many?
+            r.association(inverse.name).reset
+            r.save
           end
-          unless @owner.new_record? || @owner.destroyed?
-            @owner.save!
-          end
+          @owner.save! unless @owner.new_record? || @owner.destroyed?
         end
 
       private
@@ -87,7 +82,6 @@ module ActiveFedora
           return [] if ids.blank?
           ActiveFedora::Base.find(ids)
         end
-
     end
   end
 end

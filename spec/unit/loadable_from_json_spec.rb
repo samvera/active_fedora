@@ -25,7 +25,7 @@ describe ActiveFedora::LoadableFromJson::SolrBackedResource do
     subject { resource.query(predicate: ::RDF::DC.extent) }
 
     it "is enumerable" do
-      expect(subject.map { |g| g.object }).to eq [RDF::URI('http://example.org/123')]
+      expect(subject.map(&:object)).to eq [RDF::URI('http://example.org/123')]
     end
   end
 end

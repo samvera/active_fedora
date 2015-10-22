@@ -28,23 +28,22 @@ module ActiveFedora::Associations
 
     private
 
-    def matching_ids(record)
-      IDComposite.new(proxy_ids(record) & contained_ids, repository.translate_uri_to_id)
-    end
+      def matching_ids(record)
+        IDComposite.new(proxy_ids(record) & contained_ids, repository.translate_uri_to_id)
+      end
 
-    def proxy_ids(record)
-      relation_subjects(record)
-    end
+      def proxy_ids(record)
+        relation_subjects(record)
+      end
 
-    # This could be done with Prefer InboundReferences, but that is
-    # a slow fedora call
-    def relation_subjects(record)
-      query = ActiveFedora::SolrQueryBuilder.construct_query_for_rel(
-        [[:has_model, proxy_class.to_class_uri], [:proxyFor, record.id]]
-      )
-      results = ActiveFedora::SolrService.query(query, fl: 'id')
-      results.map { |res| ::RDF::URI(ActiveFedora::Base.id_to_uri(res['id'])) }
-    end
+      # This could be done with Prefer InboundReferences, but that is
+      # a slow fedora call
+      def relation_subjects(record)
+        query = ActiveFedora::SolrQueryBuilder.construct_query_for_rel(
+          [[:has_model, proxy_class.to_class_uri], [:proxyFor, record.id]]
+        )
+        results = ActiveFedora::SolrService.query(query, fl: 'id')
+        results.map { |res| ::RDF::URI(ActiveFedora::Base.id_to_uri(res['id'])) }
+      end
   end
-
 end

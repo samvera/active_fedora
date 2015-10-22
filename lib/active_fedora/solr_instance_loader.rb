@@ -26,42 +26,41 @@ module ActiveFedora
 
     private
 
-    def allocate_object
-      active_fedora_class.allocate.init_with_json(profile_json)
-    end
+      def allocate_object
+        active_fedora_class.allocate.init_with_json(profile_json)
+      end
 
-    def solr_doc
-      @solr_doc ||= begin
-        result = context.find_with_conditions(id: id)
-        if result.empty?
-          raise ActiveFedora::ObjectNotFoundError, "Object #{id} not found in solr"
+      def solr_doc
+        @solr_doc ||= begin
+          result = context.find_with_conditions(id: id)
+          if result.empty?
+            raise ActiveFedora::ObjectNotFoundError, "Object #{id} not found in solr"
+          end
+          @solr_doc = result.first
+          validate_solr_doc_and_id!(@solr_doc)
+          @solr_doc
         end
-        @solr_doc = result.first
-        validate_solr_doc_and_id!(@solr_doc)
-        @solr_doc
       end
-    end
 
-    def validate_solr_doc_and_id!(document)
-      return true if document.nil?
-      solr_id = document[SOLR_DOCUMENT_ID]
-      if id != solr_id
-        raise ActiveFedora::FedoraSolrMismatchError.new(id, solr_id)
+      def validate_solr_doc_and_id!(document)
+        return true if document.nil?
+        solr_id = document[SOLR_DOCUMENT_ID]
+        return if id == solr_id
+        raise ActiveFedora::FedoraSolrMismatchError, id, solr_id
       end
-    end
 
-    def active_fedora_class
-      @active_fedora_class ||= ActiveFedora::QueryResultBuilder.class_from_solr_document(solr_doc)
-    end
+      def active_fedora_class
+        @active_fedora_class ||= ActiveFedora::QueryResultBuilder.class_from_solr_document(solr_doc)
+      end
 
-    def profile_json
-      @profile_json ||= begin
-        profile_json = Array(solr_doc[ActiveFedora::IndexingService.profile_solr_name]).first
-        unless profile_json.present?
-          raise ActiveFedora::ObjectNotFoundError, "Object #{id} does not contain a solrized profile"
+      def profile_json
+        @profile_json ||= begin
+          profile_json = Array(solr_doc[ActiveFedora::IndexingService.profile_solr_name]).first
+          unless profile_json.present?
+            raise ActiveFedora::ObjectNotFoundError, "Object #{id} does not contain a solrized profile"
+          end
+          profile_json
         end
-        profile_json
       end
-    end
   end
 end

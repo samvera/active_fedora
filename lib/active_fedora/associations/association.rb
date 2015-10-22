@@ -15,7 +15,8 @@ module ActiveFedora
 
       def initialize(owner, reflection)
         reflection.check_validity!
-        @owner, @reflection = owner, reflection
+        @owner = owner
+        @reflection = reflection
         reset
         # construct_scope
       end
@@ -75,24 +76,20 @@ module ActiveFedora
       # by scope.scoping { ... } or with_scope { ... } etc, which affects the scope which
       # actually gets built.
       def association_scope
-        if klass
-          @association_scope ||= AssociationScope.new(self).scope
-        end
+        @association_scope ||= AssociationScope.new(self).scope if klass
       end
 
       # Set the inverse association, if possible
       def set_inverse_instance(record)
-        if record && invertible_for?(record)
-          inverse = record.association(inverse_reflection_for(record).name.to_sym)
-          if inverse.is_a? ActiveFedora::Associations::HasAndBelongsToManyAssociation
-            inverse.target << owner
-          else
-            inverse.target = owner
-          end
-          inverse.inversed = true
+        return unless record && invertible_for?(record)
+        inverse = record.association(inverse_reflection_for(record).name.to_sym)
+        if inverse.is_a? ActiveFedora::Associations::HasAndBelongsToManyAssociation
+          inverse.target << owner
+        else
+          inverse.target = owner
         end
+        inverse.inversed = true
       end
-
 
       # Can be overridden (i.e. in ThroughAssociation) to merge in other scopes (i.e. the
       # through association's scope)
@@ -123,8 +120,7 @@ module ActiveFedora
         set_inverse_instance(record)
       end
 
-        private
-
+      private
 
         def find_target?
           !loaded? && (!owner.new_record? || foreign_key_present?) && klass
@@ -145,10 +141,9 @@ module ActiveFedora
         # the kind of the class of the associated objects. Meant to be used as
         # a sanity check when you are about to assign an associated record.
         def raise_on_type_mismatch(record)
-          unless record.is_a?(@reflection.klass) || record.is_a?(@reflection.class_name.constantize)
-            message = "#{@reflection.class_name}(##{@reflection.klass.object_id}) expected, got #{record.class}(##{record.class.object_id})"
-            raise ActiveFedora::AssociationTypeMismatch, message
-          end
+          return if record.is_a?(@reflection.klass) || record.is_a?(@reflection.class_name.constantize)
+          message = "#{@reflection.class_name}(##{@reflection.klass.object_id}) expected, got #{record.class}(##{record.class.object_id})"
+          raise ActiveFedora::AssociationTypeMismatch, message
         end
 
         def type_validator
@@ -158,7 +153,7 @@ module ActiveFedora
         # Can be redefined by subclasses, notably polymorphic belongs_to
         # The record parameter is necessary to support polymorphic inverses as we must check for
         # the association in the specific class of the record.
-        def inverse_reflection_for(record)
+        def inverse_reflection_for(_record)
           reflection.inverse_of
         end
 
@@ -167,7 +162,6 @@ module ActiveFedora
         def invertible_for?(record)
           inverse_reflection_for(record)
         end
-
 
         # This should be implemented to return the values of the relevant key(s) on the owner,
         # so that when state_state is different from the value stored on the last find_target,
@@ -186,7 +180,6 @@ module ActiveFedora
         def run_type_validator(record)
           type_validator.validate!(self, record)
         end
-
     end
   end
 end

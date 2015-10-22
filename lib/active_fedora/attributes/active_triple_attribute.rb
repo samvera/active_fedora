@@ -1,5 +1,4 @@
 module ActiveFedora
-
   # Attributes delegated to ActiveTriples. Allows ActiveFedora to track all attributes consistently.
   #
   # @example
@@ -13,5 +12,4 @@ module ActiveFedora
 
   class ActiveTripleAttribute < DelegatedAttribute
   end
-
 end

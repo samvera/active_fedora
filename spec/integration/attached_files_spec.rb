@@ -4,7 +4,7 @@ describe ActiveFedora::AttachedFiles do
   describe "#contains" do
     before do
       class FooHistory < ActiveFedora::Base
-         contains 'child'
+        contains 'child'
       end
     end
     after do
@@ -18,7 +18,7 @@ describe ActiveFedora::AttachedFiles do
         o.save
       end
 
-      it "should not need to do a head on the children" do
+      it "does not need to do a head on the children" do
         f = FooHistory.find(o.id)
         expect(f.ldp_source.client).not_to receive(:head)
         f.child.content
@@ -39,8 +39,8 @@ describe ActiveFedora::AttachedFiles do
 
     subject { TestingMetadataSerializing.new }
 
-    it "should work" do
-      subject.save(:validate => false)
+    it "works" do
+      subject.save(validate: false)
       expect(subject.nokogiri_autocreate_on).to_not be_new_record
       expect(subject.nokogiri_autocreate_off).to be_new_record
     end
@@ -61,7 +61,7 @@ describe ActiveFedora::AttachedFiles do
 
     let(:has_file) { HasFile.create("test:ds_versionable_has_file") }
 
-    it "should create datastreams from the spec on new objects" do
+    it "creates datastreams from the spec on new objects" do
       has_file.file_ds.content = "blah blah blah"
       expect(has_file.file_ds).to be_changed
       expect(has_file.file_ds2).to_not be_changed # no autocreate
@@ -79,9 +79,8 @@ describe ActiveFedora::AttachedFiles do
       class DSTest < ActiveFedora::Base
         def load_attached_files
           super
-          unless attached_files.keys.include? :test_ds
-            add_file("XXX", path: 'test_ds', mime_type: 'text/html')
-          end
+          return if attached_files.keys.include? :test_ds
+          add_file("XXX", path: 'test_ds', mime_type: 'text/html')
         end
       end
     end
@@ -95,7 +94,7 @@ describe ActiveFedora::AttachedFiles do
       Object.send(:remove_const, :DSTest)
     end
 
-    it { should == 'XXX'}
+    it { should == 'XXX' }
 
     context "After updating" do
       before do
@@ -103,12 +102,11 @@ describe ActiveFedora::AttachedFiles do
         file.save!
       end
 
-      it "Should update datastream" do
+      it "updates datastream" do
         expect(DSTest.find(file.id).attached_files['test_ds'].content).to eq 'Foobar'
         expect(DSTest.find(file.id).test_ds.content).to eq 'Foobar'
       end
     end
-
   end
 
   describe "an instance of ActiveFedora::Base" do
@@ -116,12 +114,12 @@ describe ActiveFedora::AttachedFiles do
 
     describe ".attached_files" do
       subject { obj.attached_files }
-      it "should return a Hash of datastreams from fedora" do
+      it "returns a Hash of datastreams from fedora" do
         expect(subject).to be_a_kind_of(ActiveFedora::FilesHash)
         expect(subject).to be_empty
       end
 
-      it "should initialize the datastream pointers with @new_object=false" do
+      it "initializes the datastream pointers with @new_object=false" do
         subject.each_value do |ds|
           expect(ds).to_not be_new
         end
@@ -139,19 +137,19 @@ describe ActiveFedora::AttachedFiles do
         obj.attach_file(fds, 'fds')
       end
 
-      it "should return all of the datastreams from the object that are kinds of OmDatastream " do
+      it "returns all of the datastreams from the object that are kinds of OmDatastream" do
         expect(obj.metadata_streams).to match_array [mds1, mds2]
       end
     end
 
     describe '#add_file' do
       before do
-        f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
+        f = File.new(File.join(File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext"))
         obj.add_file(f, mime_type: "image/jpeg")
         obj.save
       end
 
-      it "should set the correct mime_type if :mime_type is passed in and path does not contain correct extension" do
+      it "sets the correct mime_type if :mime_type is passed in and path does not contain correct extension" do
         expect(obj.reload.attached_files["DS1"].mime_type).to eq "image/jpeg"
       end
     end
@@ -159,7 +157,7 @@ describe ActiveFedora::AttachedFiles do
     describe '.attach_file' do
       let(:ds) { ActiveFedora::File.new }
 
-      it "should be able to add datastreams" do
+      it "is able to add datastreams" do
         expect(obj.attach_file(ds, 'DS1')).to eq 'DS1'
       end
 
@@ -170,16 +168,15 @@ describe ActiveFedora::AttachedFiles do
         obj.save
         expect(obj.attached_files).to have_key(:DS1)
       end
-
     end
 
     describe "retrieving datastream content" do
       let(:obj) { ActiveFedora::Base.create }
       after { obj.destroy }
 
-      let(:ds) { ActiveFedora::File.new(obj.uri+'/DS1').tap {|ds| ds.content = "foo"; ds.save } }
+      let(:ds) { ActiveFedora::File.new(obj.uri + '/DS1').tap { |ds| ds.content = "foo"; ds.save } }
 
-      it "should retrieve blobs that match the saved blobs" do
+      it "retrieves blobs that match the saved blobs" do
         obj.attach_file(ds, 'DS1')
         expect(obj.reload.attached_files["DS1"].content).to eq "foo"
       end

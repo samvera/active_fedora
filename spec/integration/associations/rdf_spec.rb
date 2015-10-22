@@ -32,7 +32,6 @@ describe "rdf associations" do
         expect(library.foo_ids).to eq []
       end
     end
-
   end
 
   context "when two relationships have the same predicate" do

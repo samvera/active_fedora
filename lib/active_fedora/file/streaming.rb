@@ -9,7 +9,7 @@ module ActiveFedora::File::Streaming
   # @param range [String] from #stream
   # @param key [String] from #authorization_key
   # @return [Hash]
-  def headers(range, key, result = Hash.new)
+  def headers(range, key, result = {})
     result["Range"] = range if range
     result["Authorization"] = key if key
     result
@@ -26,7 +26,6 @@ module ActiveFedora::File::Streaming
       Net::HTTP.start(uri.host, uri.port) do |http|
         request = Net::HTTP::Get.new uri, headers
         http.request request do |response|
-
           raise "Couldn't get data from Fedora (#{uri}). Response: #{response.code}" unless response.is_a?(Net::HTTPSuccess)
           response.read_body do |chunk|
             yield chunk
@@ -40,7 +39,6 @@ module ActiveFedora::File::Streaming
 
     # @return [String] current authorization token from Ldp::Client
     def authorization_key
-      self.ldp_source.client.http.headers.fetch("Authorization", nil)
+      ldp_source.client.http.headers.fetch("Authorization", nil)
     end
-
 end

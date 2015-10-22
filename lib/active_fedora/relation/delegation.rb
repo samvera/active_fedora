@@ -13,21 +13,21 @@ module ActiveFedora
       :keep_if, :pop, :shift, :delete_at, :select!
     ].to_set
 
-    delegate :length, :collect, :map, :each, :all?, :include?, :to_ary, :to => :to_a
+    delegate :length, :collect, :map, :each, :all?, :include?, :to_ary, to: :to_a
 
     protected
 
-    def array_delegable?(method)
-      Array.method_defined?(method) && BLACKLISTED_ARRAY_METHODS.exclude?(method)
-    end
-
-    def method_missing(method, *args, &block)
-      if array_delegable?(method)
-        self.class.delegate method, to: :to_a
-        to_a.public_send(method, *args, &block)
-      else
-        super
+      def array_delegable?(method)
+        Array.method_defined?(method) && BLACKLISTED_ARRAY_METHODS.exclude?(method)
       end
-    end
+
+      def method_missing(method, *args, &block)
+        if array_delegable?(method)
+          self.class.delegate method, to: :to_a
+          to_a.public_send(method, *args, &block)
+        else
+          super
+        end
+      end
   end
 end

@@ -6,14 +6,12 @@ module ActiveFedora
     extend ActiveSupport::Concern
     include ActiveModel::AttributeMethods
 
-    AttrNames = Module.new {
+    AttrNames = Module.new do
       def self.set_name_cache(name, value)
         const_name = "ATTR_#{name}"
-        unless const_defined? const_name
-          const_set const_name, value.dup.freeze
-        end
+        const_set const_name, value.dup.freeze unless const_defined? const_name
       end
-    }
+    end
 
     class AttributeMethodCache
       def initialize
@@ -32,9 +30,11 @@ module ActiveFedora
       end
 
       private
-      def method_body; raise NotImplementedError; end
-    end
 
+        def method_body
+          raise NotImplementedError
+        end
+    end
 
     included do
       initialize_generated_modules
@@ -64,11 +64,10 @@ module ActiveFedora
     #   person.attributes
     #   # => {"id"=>3, "created_at"=>Sun, 21 Oct 2012 04:53:04, "updated_at"=>Sun, 21 Oct 2012 04:53:04, "name"=>"Francesco", "age"=>22}
     def attributes
-      attribute_names.each_with_object({}) { |name, attrs|
+      attribute_names.each_with_object({}) do |name, attrs|
         attrs[name] = read_attribute(name)
-      }
+      end
     end
-
 
     # Returns the value of the attribute identified by <tt>attr_name</tt> after it has been typecast (for example,
     # "2004-12-12" in a date column is cast to a date object, like Date.new(2004, 12, 12)). It raises
@@ -110,7 +109,9 @@ module ActiveFedora
         @generated_attribute_methods = Module.new { extend Mutex_m }
         include @generated_attribute_methods
       end
+
       private
+
         # @param name [Symbol] name of the attribute to generate
         def generate_method(name)
           generated_attribute_methods.synchronize do

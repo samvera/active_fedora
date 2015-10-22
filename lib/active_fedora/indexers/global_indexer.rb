@@ -4,27 +4,24 @@ module ActiveFedora::Indexers
   # property
   class GlobalIndexer
     # @param [Array<Symbol>] index_types The indexing hints to use.
-    def initialize(index_types=nil)
+    def initialize(index_types = nil)
       @index_types = Array.wrap(index_types)
     end
 
-
     # The global indexer acts as both an indexer factory and an indexer, since
     # the property doesn't matter.
-    def new(property)
+    def new(_property)
       self
     end
 
     # @param [ActiveFedora::Indexing::Map::IndexObject, #as] index_obj The indexing
     #   object to call #as on.
     def index(index_obj)
-      unless index_types.empty?
-        index_obj.as(*index_types)
-      end
+      index_obj.as(*index_types) unless index_types.empty?
     end
 
     private
 
-    attr_reader :index_types
+      attr_reader :index_types
   end
 end

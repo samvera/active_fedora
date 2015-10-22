@@ -7,19 +7,15 @@ module ActiveFedora
     end
 
     def self.cleanout_fedora
-      begin
-        delete_root_resource
-        delete_tombstone
-      rescue Ldp::HttpError => exception
-        log "#cleanout_fedora in spec_helper.rb raised #{exception}"
-      end
+      delete_root_resource
+      delete_tombstone
+    rescue Ldp::HttpError => exception
+      log "#cleanout_fedora in spec_helper.rb raised #{exception}"
     end
 
     def self.delete_root_resource
-      begin
-        connection.delete(root_resource_path)
-      rescue Ldp::Gone
-      end
+      connection.delete(root_resource_path)
+    rescue Ldp::Gone
     end
 
     def self.delete_tombstone
@@ -44,7 +40,7 @@ module ActiveFedora
 
     def self.cleanout_solr
       restore_spec_configuration if solr_connection.nil?
-      solr_connection.delete_by_query('*:*', params: {'softCommit' => true})
+      solr_connection.delete_by_query('*:*', params: { 'softCommit' => true })
     end
 
     def self.reinitialize_repo

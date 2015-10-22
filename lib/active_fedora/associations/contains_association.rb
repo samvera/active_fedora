@@ -2,7 +2,6 @@
 module ActiveFedora
   module Associations
     class ContainsAssociation < CollectionAssociation #:nodoc:
-
       def reader
         @records ||= ContainerProxy.new(self)
       end
@@ -12,7 +11,7 @@ module ActiveFedora
           target.include?(other)
         elsif container_predicate = options[:has_member_relation]
           owner.resource.query(predicate: container_predicate, object: ::RDF::URI(other.uri)).present?
-        else #is_member_of_relation
+        else # is_member_of_relation
           # This will force a load, so it's slowest and the least preferable option
           target.include?(other)
         end
@@ -31,4 +30,3 @@ module ActiveFedora
     end
   end
 end
-

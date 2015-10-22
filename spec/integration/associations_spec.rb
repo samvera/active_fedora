@@ -19,38 +19,37 @@ describe ActiveFedora::Base do
     let(:person) { Person.create }
     let(:book) { Book.new(author: person) }
 
-    it "should go" do
+    it "goes" do
       book.save
     end
-
   end
-  
+
   describe "explicit foreign key" do
     before do
       class FooThing < ActiveFedora::Base
-        has_many :bars, :class_name=>'BarThing', :predicate=>ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, as: :foothing
+        has_many :bars, class_name: 'BarThing', predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, as: :foothing
       end
 
       class BarThing < ActiveFedora::Base
-        belongs_to :foothing, :class_name=>'FooThing', :predicate=>ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
+        belongs_to :foothing, class_name: 'FooThing', predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
       end
     end
-    
+
     after do
       Object.send(:remove_const, :FooThing)
       Object.send(:remove_const, :BarThing)
     end
-    
+
     let(:foo) { FooThing.create }
     let(:bar) { BarThing.create }
-    
-    it "should associate from bar to foo" do
+
+    it "associates from bar to foo" do
       bar.foothing = foo
       bar.save
       expect(foo.bars).to eq [bar]
     end
-    
-    it "should associate from foo to bar" do
+
+    it "associates from foo to bar" do
       foo.bars << bar
       expect(bar.foothing).to eq foo
     end
@@ -59,9 +58,9 @@ describe ActiveFedora::Base do
   describe "type validator" do
     before do
       class EnsureBanana
-        def self.validate!(reflection, object)
+        def self.validate!(_reflection, object)
           unless object.try(:banana?)
-            raise ActiveFedora::AssociationTypeMismatch.new "#{object} must be a banana"
+            raise ActiveFedora::AssociationTypeMismatch, "#{object} must be a banana"
           end
         end
       end
@@ -69,7 +68,7 @@ describe ActiveFedora::Base do
         attr_accessor :banana
         has_many :bars, class_name: 'BarThing', predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, as: :foothing, type_validator: EnsureBanana
         def banana?
-          !!banana
+          !banana.nil?
         end
       end
 
@@ -77,11 +76,11 @@ describe ActiveFedora::Base do
         attr_accessor :banana
         belongs_to :foothing, class_name: 'FooThing', predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, type_validator: EnsureBanana
         def banana?
-          !!banana
+          !banana.nil?
         end
       end
     end
-    
+
     after do
       Object.send(:remove_const, :FooThing)
       Object.send(:remove_const, :BarThing)
@@ -90,21 +89,21 @@ describe ActiveFedora::Base do
     let(:foo) { FooThing.create }
     let(:bar) { BarThing.create }
 
-    it "should validate on singular associations" do
-      expect{bar.foothing = foo}.to raise_error ActiveFedora::AssociationTypeMismatch, "#{foo} must be a banana"
+    it "validates on singular associations" do
+      expect { bar.foothing = foo }.to raise_error ActiveFedora::AssociationTypeMismatch, "#{foo} must be a banana"
       foo.banana = true
-      expect{bar.foothing = foo}.not_to raise_error
+      expect { bar.foothing = foo }.not_to raise_error
     end
-    it "should validate on collection associations" do
-      expect{foo.bars << bar}.to raise_error ActiveFedora::AssociationTypeMismatch, "#{bar} must be a banana"
+    it "validates on collection associations" do
+      expect { foo.bars << bar }.to raise_error ActiveFedora::AssociationTypeMismatch, "#{bar} must be a banana"
       bar.banana = true
-      expect{foo.bars << bar}.not_to raise_error
+      expect { foo.bars << bar }.not_to raise_error
     end
-    it "should NOT validate on destroy" do
+    it "does NOT validate on destroy" do
       bar.banana = true
       foo.bars << bar
       bar.banana = false
-      expect{foo.bars.destroy(bar)}.not_to raise_error
+      expect { foo.bars.destroy(bar) }.not_to raise_error
     end
   end
 
@@ -137,14 +136,14 @@ describe ActiveFedora::Base do
     describe "an unsaved instance" do
       describe "of has_many" do
         before do
-          @library = Library.new()
+          @library = Library.new
           @book = Book.new
           @book.save
           @book2 = Book.new
           @book2.save
         end
 
-        it "should build child" do
+        it "builds child" do
           new_book = @library.books.build({})
           expect(new_book).to be_new_record
           expect(new_book).to be_kind_of Book
@@ -152,7 +151,7 @@ describe ActiveFedora::Base do
           expect(@library.books).to eq [new_book]
         end
 
-        it "should make a new child" do
+        it "makes a new child" do
           new_book = @library.books.new
           expect(new_book).to be_new_record
           expect(new_book).to be_kind_of Book
@@ -160,11 +159,11 @@ describe ActiveFedora::Base do
           expect(@library.books).to eq [new_book]
         end
 
-        it "should not create children if the parent isn't saved" do
-          expect {@library.books.create({})}.to raise_error ActiveFedora::RecordNotSaved, "You cannot call create unless the parent is saved"
+        it "does not create children if the parent isn't saved" do
+          expect { @library.books.create({}) }.to raise_error ActiveFedora::RecordNotSaved, "You cannot call create unless the parent is saved"
         end
 
-        it "should create children" do
+        it "creates children" do
           @library.save!
           new_book = @library.books.create({})
           expect(new_book).to_not be_new_record
@@ -172,21 +171,21 @@ describe ActiveFedora::Base do
           expect(new_book.library).to eq @library
         end
 
-        it "should build parent" do
+        it "builds parent" do
           new_library = @book.build_library({})
           expect(new_library).to be_new_record
           expect(new_library).to be_kind_of Library
           expect(@book.library).to eq new_library
         end
 
-        it "should create parent" do
+        it "creates parent" do
           new_library = @book.create_library({})
           expect(new_library).to_not be_new_record
           expect(new_library).to be_kind_of Library
           expect(@book.library).to eq new_library
         end
 
-        it "should let you shift onto the association" do
+        it "lets you shift onto the association" do
           expect(@library).to be_new_record
           expect(@library.books.size).to eq 0
           expect(@library.books).to eq []
@@ -194,19 +193,17 @@ describe ActiveFedora::Base do
           @library.books << @book
           expect(@library.books).to eq [@book]
           expect(@library.book_ids).to eq [@book.id]
-
         end
 
-        it "should let you set an array of objects" do
+        it "lets you set an array of objects" do
           @library.books = [@book, @book2]
           expect(@library.books).to eq [@book, @book2]
           @library.save
 
           @library.books = [@book]
           expect(@library.books).to eq [@book]
-
         end
-        it "should let you set an array of object ids" do
+        it "lets you set an array of object ids" do
           @library.book_ids = [@book.id, @book2.id]
           expect(@library.books).to eq [@book, @book2]
         end
@@ -215,7 +212,6 @@ describe ActiveFedora::Base do
           @library.book_ids = [@book.id, @book2.id]
           @library.book_ids = [@book2.id]
           expect(@library.books).to eq [@book2]
-
         end
 
         it "saving the parent should save the relationships on the children" do
@@ -226,8 +222,7 @@ describe ActiveFedora::Base do
           expect(@library.books).to eq [@book, @book2]
         end
 
-
-        it "should let you lookup an array of objects with solr" do
+        it "lets you lookup an array of objects with solr" do
           @library.save
           @book.library = @library
           @book2.library = @library
@@ -237,30 +232,28 @@ describe ActiveFedora::Base do
           @library = Library.find(@library.id)
           expect(@library.books).to eq [@book, @book2]
 
-          solr_resp =  @library.books(:response_format=>:solr)
+          solr_resp = @library.books(response_format: :solr)
           expect(solr_resp.size).to eq 2
           expect(solr_resp[0]['id']).to eq @book.id
           expect(solr_resp[1]['id']).to eq @book2.id
-
         end
-
       end
 
       describe "of belongs to" do
         before do
-          @library = Library.new()
+          @library = Library.new
           @library.save
           @book = Book.new
           @book.save
         end
-        it "shouldn't do anything if you set a nil id" do
+        it "does not do anything if you set a nil id" do
           @book.library_id = nil
         end
-        it "should be settable from the book side" do
+        it "is settable from the book side" do
           @book.library_id = @library.id
           expect(@book.library).to eq @library
           expect(@book.library.id).to eq @library.id
-          @book.attributes= {:library_id => nil }
+          @book.attributes = { library_id: nil }
           expect(@book.library_id).to be_nil
         end
       end
@@ -269,8 +262,8 @@ describe ActiveFedora::Base do
     describe "a saved instance" do
       describe "of belongs_to" do
         before do
-          @library = Library.new()
-          @library.save()
+          @library = Library.new
+          @library.save
           @book = Book.new
           @book.save
           @person = Person.new
@@ -278,7 +271,7 @@ describe ActiveFedora::Base do
           @publisher = Publisher.new
           @publisher.save
         end
-        it "should have many books once it has been saved" do
+        it "has many books once it has been saved" do
           @library.books << @book
 
           expect(@book.library.id).to eq @library.id
@@ -289,7 +282,7 @@ describe ActiveFedora::Base do
           expect(@library2.books).to eq [@book]
         end
 
-        it "should have a count once it has been saved" do
+        it "has a count once it has been saved" do
           @book_2 = Book.create
           @library.books << @book << @book_2
           @library.save
@@ -300,7 +293,7 @@ describe ActiveFedora::Base do
           @book_2.delete
         end
 
-        it "should respect the :class_name parameter" do
+        it "respects the :class_name parameter" do
           @book.author = @person
           @book.save
           new_book = Book.find(@book.id)
@@ -308,7 +301,7 @@ describe ActiveFedora::Base do
           expect(new_book.author).to be_kind_of Person
         end
 
-        it "should respect multiple associations that share the same :property and respect associated class" do
+        it "respects multiple associations that share the same :property and respect associated class" do
           @book.author = @person
           @book.publisher = @publisher
           @book.save
@@ -328,7 +321,7 @@ describe ActiveFedora::Base do
             @book.save
             @library2 = Library.create
           end
-          it "should replace an existing instance" do
+          it "replaces an existing instance" do
             expect(@book.library_id).to eq @library.id
             @book.library = @library2
             @book.save
@@ -346,51 +339,49 @@ describe ActiveFedora::Base do
         @dog = Dog.create
         @big_dog = BigDog.create
       end
-      it "should detect class mismatch" do
+      it "detects class mismatch" do
         expect {
           Cat.find @dog.id
         }.to raise_error(ActiveFedora::ActiveFedoraError)
       end
 
-      it "should not accept parent class into a subclass" do
+      it "does not accept parent class into a subclass" do
         expect {
           BigDog.find @dog.id
         }.to raise_error(ActiveFedora::ActiveFedoraError)
       end
 
-      it "should accept a subclass into a parent class" do
+      it "accepts a subclass into a parent class" do
         # We could prevent this altogether since loading a subclass into
-        # a parent class (a BigDog into a Dog) would result in lost of 
-        # data if the object is saved back and the subclass has more 
-        # properties than the parent class. However, it does seem reasonable 
-        # that people might want to use them interchangeably (after all  
+        # a parent class (a BigDog into a Dog) would result in lost of
+        # data if the object is saved back and the subclass has more
+        # properties than the parent class. However, it does seem reasonable
+        # that people might want to use them interchangeably (after all
         # a BigDog is a Dog) and therefore we allow for it.
         expect {
           Dog.find @big_dog.id
-        }.not_to raise_error    
+        }.not_to raise_error
       end
     end
 
     describe "setting belongs_to" do
       before do
-        @library = Library.new()
-        @library.save()
+        @library = Library.new
+        @library.save
         @book = Book.new
         @author = Person.new
         @author.save
         @publisher = Publisher.new
         @publisher.save
       end
-      it "should set the association" do
+      it "sets the association" do
         @book.library = @library
         expect(@book.library.id).to eq @library.id
         @book.save
 
-
-        expect(Book.find(@book.id).library.id).to eq@library.id
-        
+        expect(Book.find(@book.id).library.id).to eq @library.id
       end
-      it "should clear the association" do
+      it "clears the association" do
         @book.library = @library
         @book.library = nil
         @book.save
@@ -398,7 +389,7 @@ describe ActiveFedora::Base do
         expect(Book.find(@book.id).library).to be_nil
       end
 
-      it "should replace the association" do
+      it "replaces the association" do
         @library2 = Library.new
         @library2.save
         @book.library = @library
@@ -406,15 +397,14 @@ describe ActiveFedora::Base do
         @book.library = @library2
         @book.save
         expect(Book.find(@book.id).library.id).to eq @library2.id
-
       end
 
-      it "should only replace the matching class association" do
+      it "only replaces the matching class association" do
         @publisher2 = Publisher.new
         @publisher2.save
 
         @book.publisher = @publisher
-        @book.author = @author      
+        @book.author = @author
         @book.save!
 
         @book.publisher = @publisher2
@@ -425,7 +415,7 @@ describe ActiveFedora::Base do
         expect(new_book.author.id).to eq @author.id
       end
 
-      it "should only clear the matching class association" do
+      it "only clears the matching class association" do
         @book.publisher = @publisher
         @book.author = @author
         @book.save
@@ -437,14 +427,13 @@ describe ActiveFedora::Base do
         expect(Book.find(@book.id).publisher.id).to eq @publisher.id
       end
 
-      it "should be able to be set by id" do
+      it "is able to be set by id" do
         @book.library_id = @library.id
         expect(@book.library_id).to eq @library.id
         expect(@book.library.id).to eq @library.id
         @book.save
         expect(Book.find(@book.id).library_id).to eq @library.id
       end
-
     end
   end
 
@@ -456,7 +445,6 @@ describe ActiveFedora::Base do
       class Textbook < ActiveFedora::Base
         has_many :courses, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
       end
-
     end
     after :all do
       Object.send(:remove_const, :Course)
@@ -466,18 +454,18 @@ describe ActiveFedora::Base do
     describe "with a parent that has two children" do
       before do
         @course = Course.create
-        @t1 = Textbook.create()
-        @t2 = Textbook.create()
+        @t1 = Textbook.create
+        @t2 = Textbook.create
         @course.textbooks = [@t1, @t2]
         @course.save
       end
 
-      it "should load the association stored in the parent" do
+      it "loads the association stored in the parent" do
         @reloaded_course = Course.find(@course.id)
         expect(@reloaded_course.textbooks).to eq [@t1, @t2]
       end
 
-      it "should allow a parent to be deleted from the has_many association" do
+      it "allows a parent to be deleted from the has_many association" do
         @reloaded_course = Course.find(@course.id)
         @t1.courses.delete(@reloaded_course)
         @reloaded_course.save
@@ -486,16 +474,16 @@ describe ActiveFedora::Base do
         expect(@reloaded_course.textbooks).to eq [@t2]
       end
 
-      it "should allow replacing the children" do
-        @t3 = Textbook.create()
-        @t4 = Textbook.create()
+      it "allows replacing the children" do
+        @t3 = Textbook.create
+        @t4 = Textbook.create
         @course.textbooks = [@t3, @t4]
         @course.save
 
         expect(@course.reload.textbooks).to eq [@t3, @t4]
       end
 
-      it "should allow a child to be deleted from the has_and_belongs_to_many association" do
+      it "allows a child to be deleted from the has_and_belongs_to_many association" do
         @reloaded_course = Course.find(@course.id)
         @reloaded_course.textbooks.delete(@t1)
         @reloaded_course.save
@@ -523,15 +511,12 @@ describe ActiveFedora::Base do
             after_count(m.reload.library_books.count)
           end
 
-          def say_hi(var)
+          def say_hi(_var)
           end
-
-
         end
         class Page < ActiveFedora::Base
           has_many :library_books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         end
-
       end
       after :all do
         Object.send(:remove_const, :LibraryBook)
@@ -539,14 +524,14 @@ describe ActiveFedora::Base do
       end
 
       describe "removing association" do
-        subject {LibraryBook.create}
+        subject { LibraryBook.create }
         before do
           @p1 = Page.create
           @p2 = Page.create
           subject.pages << @p1 << @p2
           subject.save!
         end
-        it "should save between the before and after hooks" do
+        it "saves between the before and after hooks" do
           expect(subject).to receive(:before_count).with(1)
           expect(subject).to receive(:after_count).with(0)
           expect(subject).to receive(:say_hi).with(@p2).twice
@@ -558,7 +543,6 @@ describe ActiveFedora::Base do
       before :all do
         class LibraryBook < ActiveFedora::Base
           has_many :pages, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, after_remove: :say_hi
-
         end
         class Page < ActiveFedora::Base
           belongs_to :library_book, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
@@ -571,12 +555,12 @@ describe ActiveFedora::Base do
       end
 
       describe "removing association" do
-        subject {LibraryBook.new}
+        subject { LibraryBook.new }
         before do
           @p1 = subject.pages.build
           @p2 = subject.pages.build
         end
-        it "should run the hooks" do
+        it "runs the hooks" do
           expect(subject).to receive(:say_hi).with(@p2)
           subject.pages.delete(@p2)
         end
@@ -586,7 +570,7 @@ describe ActiveFedora::Base do
 
   describe "has_many" do
     describe "when an object doesn't have a property, and the class_name is predictable" do
-      before (:all) do
+      before(:all) do
         class Bauble < ActiveFedora::Base
           belongs_to :media_object, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         end
@@ -670,14 +654,14 @@ describe ActiveFedora::Base do
       end
 
       describe "saving between the before and after hooks" do
-        let(:text1) { Text.create}
-        let(:image1) { Image.create}
-        let(:text2) { Text.create}
-        let(:image2) { Image.create}
-        let(:book1) { TextBook.create}
-        let(:book2) { Novel.create}
+        let(:text1) { Text.create }
+        let(:image1) { Image.create }
+        let(:text2) { Text.create }
+        let(:image2) { Image.create }
+        let(:book1) { TextBook.create }
+        let(:book2) { Novel.create }
 
-        it "should work when added via the has_and_belongs_to_many" do
+        it "works when added via the has_and_belongs_to_many" do
           book1.contents = [text1, image1]
           book1.save!
           book2.contents = [text2, image2]

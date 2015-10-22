@@ -14,13 +14,12 @@ module ActiveFedora::Associations::Builder
       super
       if !options[:has_member_relation] && !options[:is_member_of_relation]
         raise ArgumentError, "You must specify a predicate for #{name}"
-      elsif !options[:has_member_relation].kind_of?(RDF::URI) && !options[:is_member_of_relation].kind_of?(RDF::URI)
+      elsif !options[:has_member_relation].is_a?(RDF::URI) && !options[:is_member_of_relation].is_a?(RDF::URI)
         raise ArgumentError, "Predicate must be a kind of RDF::URI"
       end
 
-      raise ArgumentError, "Missing :through option" if !options[:through]
-      raise ArgumentError, "Missing :foreign_key option" if !options[:foreign_key]
+      raise ArgumentError, "Missing :through option" unless options[:through]
+      raise ArgumentError, "Missing :foreign_key option" unless options[:foreign_key]
     end
   end
 end
-

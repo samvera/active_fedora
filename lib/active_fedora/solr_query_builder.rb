@@ -7,7 +7,7 @@ module ActiveFedora
     # If the id_array is empty, defaults to a query of "id:NEVER_USE_THIS_ID", which will return an empty solr response
     # @param [Array] id_array the ids that you want included in the query
     def self.construct_query_for_ids(id_array)
-      ids = id_array.reject { |x| x.blank? }
+      ids = id_array.reject(&:blank?)
       return "id:NEVER_USE_THIS_ID" if ids.empty?
       "{!terms f=#{SOLR_DOCUMENT_ID}}#{ids.join(',')}"
     end
@@ -32,7 +32,7 @@ module ActiveFedora
     #
     #   construct_query_for_rel [[Book.reflect_on_association(:library), "foo/bar/baz"]]
     def self.construct_query_for_rel(field_pairs, join_with = ' AND ')
-      field_pairs = field_pairs.to_a if field_pairs.kind_of? Hash
+      field_pairs = field_pairs.to_a if field_pairs.is_a? Hash
       construct_query(property_values_to_solr(field_pairs), join_with)
     end
 
@@ -48,6 +48,7 @@ module ActiveFedora
     end
 
     private
+
       # @param [Array<Array>] pairs a list of (key, value) pairs. The value itself may
       # @return [Array] a list of solr clauses
       def self.pairs_to_clauses(pairs)
@@ -83,8 +84,8 @@ module ActiveFedora
 
       # Adds esaping for spaces which are not handled by RSolr.solr_escape
       # See rsolr/rsolr#101
-      def self.solr_escape terms
-        RSolr.solr_escape(terms).gsub(/\s+/,"\\ ")
+      def self.solr_escape(terms)
+        RSolr.solr_escape(terms).gsub(/\s+/, "\\ ")
       end
 
       # Given a list of pairs (e.g. [field name, values]), convert the field names

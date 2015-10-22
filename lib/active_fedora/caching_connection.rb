@@ -62,15 +62,15 @@ module ActiveFedora
 
       def log(url)
         ActiveSupport::Notifications.instrument("ldp.active_fedora",
-                 id: url, name: "Load LDP", ldp_service: object_id) { yield }
+                                                id: url, name: "Load LDP", ldp_service: object_id) { yield }
       end
 
-      def cache_resource(url, &block)
+      def cache_resource(url, &_block)
         result =
           if @cache.key?(url)
-             ActiveSupport::Notifications.instrument("ldp.active_fedora",
-                                                     id: url, name: "CACHE", ldp_service: object_id)
-             @cache[url]
+            ActiveSupport::Notifications.instrument("ldp.active_fedora",
+                                                    id: url, name: "CACHE", ldp_service: object_id)
+            @cache[url]
           else
             @cache[url] = log(url) { yield }
           end

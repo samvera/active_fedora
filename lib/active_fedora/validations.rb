@@ -14,7 +14,7 @@ module ActiveFedora
     def initialize(record)
       @record = record
       errors = @record.errors.full_messages.join(", ")
-      super(I18n.t("activefedora.errors.messages.record_invalid", :errors => errors))
+      super(I18n.t("activefedora.errors.messages.record_invalid", errors: errors))
     end
   end
 
@@ -46,14 +46,14 @@ module ActiveFedora
 
     # The validation process on save can be skipped by passing <tt>:validate => false</tt>. The regular Base#save method is
     # replaced with this when the validations module is mixed in, which it is by default.
-    def save(options={})
+    def save(options = {})
       perform_validations(options) ? super : false
     end
 
     # Attempts to save the record just like Base#save but will raise a +RecordInvalid+ exception instead of returning false
     # if the record is not valid.
-    def save!(options={})
-      perform_validations(options) ? super : raise(RecordInvalid.new(self))
+    def save!(options = {})
+      perform_validations(options) ? super : raise(RecordInvalid, self)
     end
 
     # Runs all the validations within the specified context. Returns true if no errors are found,
@@ -74,14 +74,14 @@ module ActiveFedora
     # @param [Symbol] key a field
     # @return [Boolean] is it required or not
     def required?(key)
-      self.class.validators_on(key).any?{|v| v.kind_of? ActiveModel::Validations::PresenceValidator}
+      self.class.validators_on(key).any? { |v| v.is_a? ActiveModel::Validations::PresenceValidator }
     end
 
-  protected
+    protected
 
-    def perform_validations(options={})
-      perform_validation = options[:validate] != false
-      perform_validation ? valid?(options[:context]) : true
-    end
+      def perform_validations(options = {})
+        perform_validation = options[:validate] != false
+        perform_validation ? valid?(options[:context]) : true
+      end
   end
 end

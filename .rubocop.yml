@@ -1,0 +1,243 @@
+require: rubocop-rspec
+
+AllCops:
+  RunRailsCops: true
+  DisplayCopNames: true
+  Include:
+    - '**/Rakefile'
+  Exclude:
+    - 'script/**/*'
+
+Lint/RescueException:
+  Exclude:
+    - 'lib/active_fedora/ldp_cache.rb'
+
+Lint/HandleExceptions:
+  Exclude:
+    - 'spec/unit/**/*'
+    - 'spec/integration/**/*'
+    - 'lib/active_fedora/cleaner.rb'
+    - 'lib/active_fedora/associations/builder/contains.rb'
+
+Lint/AssignmentInCondition:
+  Enabled: false
+
+Metrics/LineLength:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/BlockNesting:
+  Exclude:
+    - 'lib/active_fedora/autosave_association.rb'
+    - 'lib/active_fedora/associations/has_many_association.rb'
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'lib/active_fedora.rb'
+    - 'lib/active_fedora/reflection.rb'
+    - 'lib/active_fedora/relation/finder_methods.rb'
+    - 'lib/active_fedora/query_result_builder.rb'
+    - 'lib/active_fedora/nested_attributes.rb'
+    - 'lib/active_fedora/autosave_association.rb'
+    - 'lib/active_fedora/associations/has_many_association.rb'
+    - 'lib/active_fedora/associations/has_and_belongs_to_many_association.rb'
+    - 'lib/active_fedora/associations/builder/indirectly_contains.rb'
+    - 'lib/active_fedora/associations/builder/directly_contains_one.rb'
+    - 'lib/active_fedora/file_configurator.rb'
+    - 'lib/active_fedora/file.rb'
+    - 'lib/active_fedora/datastreams/nokogiri_datastreams.rb'
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'lib/active_fedora.rb'
+    - 'lib/active_fedora/relation/finder_methods.rb'
+    - 'lib/active_fedora/nested_attributes.rb'
+    - 'lib/active_fedora/file_configurator.rb'
+    - 'lib/active_fedora/datastreams/nokogiri_datastreams.rb'
+    - 'lib/active_fedora/autosave_association.rb'
+    - 'lib/active_fedora/associations/has_many_association.rb'
+    - 'lib/active_fedora/associations/has_and_belongs_to_many_association.rb'
+    - 'lib/active_fedora/associations/builder/indirectly_contains.rb'
+    - 'lib/active_fedora/associations/builder/directly_contains_one.rb'
+
+Metrics/ModuleLength:
+  Exclude:
+    - 'lib/active_fedora.rb'
+    - 'lib/active_fedora/relation/finder_methods.rb'
+    - 'lib/active_fedora/persistence.rb'
+    - 'lib/active_fedora/attributes.rb'
+    - 'lib/active_fedora/autosave_association.rb'
+
+Metrics/ClassLength:
+  Exclude:
+    - 'spec/samples/hydra-mods_article_datastream.rb'
+    - 'lib/active_fedora/rdf/rdf_datastream.rb'
+    - 'lib/active_fedora/rdf/fcrepo.rb'
+    - 'lib/active_fedora/qualified_dublin_core_datastream.rb'
+    - 'lib/active_fedora/file_configurator.rb'
+    - 'lib/active_fedora/file.rb'
+    - 'lib/active_fedora/associations/collection_proxy.rb'
+    - 'lib/active_fedora/associations/collection_association.rb'
+
+Metrics/MethodLength:
+  Enabled: false
+
+Style/MethodName:
+  Exclude:
+    - 'lib/active_fedora/with_metadata.rb'
+
+Style/AndOr:
+  Exclude:
+    - 'lib/active_fedora/associations/has_many_association.rb'
+
+Style/AccessorMethodName:
+  Exclude:
+    - 'lib/active_fedora/with_metadata/metadata_node.rb'
+    - 'lib/active_fedora/predicates.rb'
+    - 'lib/active_fedora/fedora_attributes.rb'
+    - 'lib/active_fedora/attribute_methods/dirty.rb'
+    - 'lib/active_fedora/associations/has_many_association.rb'
+    - 'lib/active_fedora/associations/association.rb'
+
+Style/PredicateName:
+  Exclude:
+    - 'lib/active_fedora/relation/finder_methods.rb'
+    - 'lib/active_fedora/versionable.rb'
+    - 'lib/active_fedora/reflection.rb'
+    - 'lib/active_fedora/pathing.rb'
+    - 'lib/active_fedora/om_datastream.rb'
+    - 'lib/active_fedora/nested_attributes.rb'
+    - 'lib/active_fedora/clean_connection.rb'
+    - 'lib/active_fedora/attributes.rb'
+    - 'lib/active_fedora/file/attributes.rb'
+    - 'lib/active_fedora/attached_files.rb'
+    - 'lib/active_fedora/associations.rb'
+    - 'lib/active_fedora/association_hash.rb'
+
+Style/GuardClause:
+  Exclude:
+    - 'lib/active_fedora/autosave_association.rb'
+
+Style/TrivialAccessors:
+  Exclude:
+    - 'lib/active_fedora/reflection.rb'
+    - 'lib/active_fedora/attributes/node_config.rb'
+    - 'lib/active_fedora/associations/directly_contains_one_association.rb'
+    - 'lib/active_fedora/associations/belongs_to_association.rb'
+    - 'lib/active_fedora/associations/association.rb'
+
+Style/EachWithObject:
+  Exclude:
+    - 'lib/active_fedora/relation/finder_methods.rb'
+
+Style/CaseEquality:
+  Exclude:
+    - 'lib/active_fedora/relation/finder_methods.rb'
+
+Style/BlockDelimiters:
+  Exclude:
+    - 'spec/**/*'
+
+Style/BlockEndNewline:
+  Exclude:
+    - 'spec/**/*'
+
+Style/MultilineBlockLayout:
+  Exclude:
+    - 'spec/**/*'
+
+Style/Semicolon:
+  Exclude:
+    - 'spec/**/*'
+
+Style/Lambda:
+  Exclude:
+    - 'spec/**/*'
+
+Style/IndentationConsistency:
+  EnforcedStyle: rails
+
+Style/CollectionMethods:
+  PreferredMethods:
+    collect: 'map'
+    collect!: 'map!'
+    inject: 'reduce'
+    detect: 'find'
+    find_all: 'select'
+
+Style/WordArray:
+  Enabled: false
+
+Style/RegexpLiteral:
+  Enabled: false
+
+Style/StringLiterals:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/HashSyntax:
+  Exclude:
+
+Style/GlobalVars:
+  Exclude:
+    - 'spec/**/*'
+
+Style/SingleLineBlockParams:
+  Enabled: false
+
+Style/ClassVars:
+  Exclude:
+    - 'spec/unit/finder_methods_spec.rb'
+    - 'spec/unit/base_spec.rb'
+    - 'spec/integration/indexing_spec.rb'
+    - 'lib/active_fedora/predicates.rb'
+    - 'lib/active_fedora/identifiable.rb'
+
+Style/SignalException:
+  Enabled: false
+
+Style/FileName:
+  Exclude:
+    - 'lib/active-fedora.rb'
+    - 'spec/samples/hydra-mods_article_datastream.rb'
+
+Rails/Output:
+  Exclude:
+    - 'lib/generators/**/*'
+
+Rails/Date:
+  Enabled: false
+
+Rails/TimeZone:
+  Enabled: false
+
+RSpec/ExampleWording:
+  CustomTransform:
+    be: is
+    have: has
+    not: does not
+    NOT: does NOT
+  IgnoredWords:
+    - only
+
+RSpec/FilePath:
+  Enabled: false
+
+RSpec/InstanceVariable:
+  Enabled: false
+
+RSpec/DescribeClass:
+  Exclude:
+    - 'spec/integration/**/*'
+
+RSpec/DescribedClass:
+  Exclude:
+    - 'spec/unit/finder_methods_spec.rb'
+

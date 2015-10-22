@@ -21,19 +21,19 @@ describe ActiveFedora::OmDatastream do
   subject { obj.descMetadata }
 
   describe "#changed?" do
-    it "should not be changed when no fields have been set" do
+    it "does not be changed when no fields have been set" do
       expect(subject).to_not be_content_changed
     end
-    it "should be changed when a field has been set" do
+    it "is changed when a field has been set" do
       subject.title = 'Foobar'
       expect(subject).to be_content_changed
     end
-    it "should not be changed if the new xml matches the old xml" do
+    it "does not be changed if the new xml matches the old xml" do
       subject.content = subject.content
       expect(subject).to_not be_changed
     end
 
-    it "should be changed if there are minor differences in whitespace" do
+    it "is changed if there are minor differences in whitespace" do
       subject.content = "<a><b>1</b></a>"
       obj.save
       expect(subject).to_not be_changed
@@ -43,7 +43,7 @@ describe ActiveFedora::OmDatastream do
   end
 
   describe "empty datastream content" do
-    it "should not break when there is empty datastream content" do
+    it "does not break when there is empty datastream content" do
       subject.content = ""
       obj.save
     end
@@ -56,15 +56,14 @@ describe ActiveFedora::OmDatastream do
       obj.reload
     end
 
-    it "should not be dirty after .update_values is saved" do
-      obj.descMetadata.update_values([{:name=>0},{:role=>0},:text] =>"Funder")
+    it "does not be dirty after .update_values is saved" do
+      obj.descMetadata.update_values([{ name: 0 }, { role: 0 }, :text] => "Funder")
       expect(obj.descMetadata).to be_changed
       obj.save
       expect(obj.descMetadata).to_not be_changed
-      expect(obj.descMetadata.term_values({:name=>0},{:role=>0},:text)).to eq ["Funder"]
+      expect(obj.descMetadata.term_values({ name: 0 }, { role: 0 }, :text)).to eq ["Funder"]
     end
   end
-
 
   describe ".to_solr" do
     before do
@@ -72,7 +71,7 @@ describe ActiveFedora::OmDatastream do
       obj.save!
       obj.reload
     end
-    it "should solrize terms with :type=>'date' to *_dt solr terms" do
+    it "solrizes terms with :type=>'date' to *_dt solr terms" do
       expect(obj.to_solr[ActiveFedora::SolrQueryBuilder.solr_name('desc_metadata__journal_issue_publication_date', type: :date)]).to eq ['2012-11-02T00:00:00Z']
     end
   end

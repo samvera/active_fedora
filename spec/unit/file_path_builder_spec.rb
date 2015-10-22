@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::FilePathBuilder do
   describe ".build" do
     let(:parent) { ActiveFedora::Base.new(id: '1234') }
-    subject { ActiveFedora::FilePathBuilder.build(parent, nil, 'FOO') }
+    subject { described_class.build(parent, nil, 'FOO') }
 
     it { should eq 'FOO1' }
 

@@ -222,7 +222,7 @@ module ActiveFedora
       extend ActiveModel::Callbacks
       include ActiveModel::Validations::Callbacks
 
-      define_model_callbacks :initialize, :find, :only => :after
+      define_model_callbacks :initialize, :find, only: :after
       define_model_callbacks :save, :create, :update, :destroy
     end
 
@@ -230,18 +230,18 @@ module ActiveFedora
       run_callbacks(:destroy) { super }
     end
 
-  private
+    private
 
-    def create_record(*) #:nodoc:
-      run_callbacks(:create) {
-        run_callbacks(:save) { super }
-      }
-    end
+      def create_record(*) #:nodoc:
+        run_callbacks(:create) do
+          run_callbacks(:save) { super }
+        end
+      end
 
-    def update_record(*) #:nodoc:
-      run_callbacks(:update) {
-        run_callbacks(:save) { super }
-      }
-    end
+      def update_record(*) #:nodoc:
+        run_callbacks(:update) do
+          run_callbacks(:save) { super }
+        end
+      end
   end
 end

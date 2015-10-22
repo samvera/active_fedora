@@ -1,10 +1,8 @@
 module ActiveFedora
   module Associations
-    # TODO we may want to split this into two subclasses, one for has_member_relation
+    # TODO: we may want to split this into two subclasses, one for has_member_relation
     # and the other for is_member_of_relation
     class IndirectlyContainsAssociation < ContainsAssociation #:nodoc:
-
-
       # Add +records+ to this association.  Returns +self+ so method calls may be chained.
       # Since << flattens its argument list and inserts each record, +push+ and +concat+ behave identically.
       def concat(*records)
@@ -21,7 +19,7 @@ module ActiveFedora
 
         save_through_record(record)
 
-        return true
+        true
       end
 
       def find_target
@@ -34,8 +32,6 @@ module ActiveFedora
           proxy_uris = container.resource.query(predicate: container_predicate).map { |r| r.object.to_s }
           proxy_uris.map { |uri| proxy_class.find(proxy_class.uri_to_id(uri))[options[:foreign_key]] }
         end
-
-
       end
 
       def container
@@ -51,14 +47,14 @@ module ActiveFedora
 
       protected
 
-        def initialize_attributes(record) #:nodoc:
-          #record.uri = ActiveFedora::Base.id_to_uri(container.mint_id)
+        def initialize_attributes(_record) #:nodoc:
+          # record.uri = ActiveFedora::Base.id_to_uri(container.mint_id)
           # set_inverse_instance(record)
         end
 
       private
 
-        def delete_records(records, method)
+        def delete_records(records, _method)
           container.reload # Reload container to get updated LDP.contains
           records.each do |record|
             delete_record(record)

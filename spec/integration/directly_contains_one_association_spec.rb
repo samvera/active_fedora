@@ -3,9 +3,9 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   before do
     class PageImage < ActiveFedora::Base
-      directly_contains :files, has_member_relation: ::RDF::URI.new("http://example.com/hasFiles"), class_name:"FileWithMetadata"
-      directly_contains_one :primary_file, through: :files, type: ::RDF::URI.new("http://example.com/primaryFile"), class_name:"FileWithMetadata"
-      directly_contains_one :alternative_file, through: :files, type: ::RDF::URI.new("http://example.com/featuredFile"), class_name:'AlternativeFileWithMetadata'
+      directly_contains :files, has_member_relation: ::RDF::URI.new("http://example.com/hasFiles"), class_name: "FileWithMetadata"
+      directly_contains_one :primary_file, through: :files, type: ::RDF::URI.new("http://example.com/primaryFile"), class_name: "FileWithMetadata"
+      directly_contains_one :alternative_file, through: :files, type: ::RDF::URI.new("http://example.com/featuredFile"), class_name: 'AlternativeFileWithMetadata'
     end
 
     class FileWithMetadata < ActiveFedora::File
@@ -30,7 +30,6 @@ describe ActiveFedora::Base do
   let(:alternative_file)        { page_image.build_alternative_file }
   let(:primary_sub_image)       { page_image.build_primary_sub_image }
 
-
   context "#build" do
     context "when container element is a type of ActiveFedora::File" do
       before do
@@ -40,7 +39,7 @@ describe ActiveFedora::Base do
       subject { reloaded_page_image.primary_file }
       it "initializes an object within the container" do
         expect(subject.content).to eq("I'm in a container all alone!")
-        expect(subject.metadata_node.type).to include( ::RDF::URI.new("http://example.com/primaryFile") )
+        expect(subject.metadata_node.type).to include(::RDF::URI.new("http://example.com/primaryFile"))
       end
       it "relies on info from the :through association, including class_name" do
         expect(page_image.files).to include(primary_file)
@@ -53,7 +52,7 @@ describe ActiveFedora::Base do
   context "finder" do
     subject { reloaded_page_image.primary_file }
     context "when no matching child is set" do
-      before { page_image.files.build}
+      before { page_image.files.build }
       it { is_expected.to be_nil }
     end
     context "when a matching object is directly contained" do
@@ -95,7 +94,5 @@ describe ActiveFedora::Base do
       expect(subject).to eq([a_file, replacement_file])
       expect(reloaded_page_image.primary_file).to eq(replacement_file)
     end
-
   end
-
 end

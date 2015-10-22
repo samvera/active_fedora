@@ -29,17 +29,15 @@ RSpec::Matchers.define :have_predicate do |predicate|
 
   chain(:with_objects) { |objects| @expected_objects = objects }
 
-
   description do
     "#{@subject.class} ID=#{@subject.id} relationship: #{@predicate.inspect} matches Fedora"
   end
 
-  failure_message do |text|
+  failure_message do |_text|
     "expected #{@subject.class} ID=#{@subject.id} relationship: #{@predicate.inspect} to match"
   end
 
-  failure_message_when_negated do |text|
+  failure_message_when_negated do |_text|
     "expected #{@subject.class} ID=#{@subject.id} relationship: #{@predicate.inspect} to NOT match"
   end
-
 end

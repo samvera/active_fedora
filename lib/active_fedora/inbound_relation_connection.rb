@@ -14,10 +14,10 @@ module ActiveFedora
 
     private
 
-    def include_uris
-      [
-        ::RDF::Vocab::Fcrepo4.InboundReferences
-      ]
-    end
+      def include_uris
+        [
+          ::RDF::Vocab::Fcrepo4.InboundReferences
+        ]
+      end
   end
 end

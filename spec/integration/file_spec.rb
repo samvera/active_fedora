@@ -5,9 +5,7 @@ require "rexml/document"
 
 describe ActiveFedora::File do
   describe "#save" do
-
     context "with new files" do
-
       context "with a string" do
         before { subject.content = "hello" }
         it "saves" do
@@ -21,7 +19,6 @@ describe ActiveFedora::File do
           expect(subject.save).to be false
         end
       end
-
     end
 
     context "with UploadedFile" do
@@ -29,25 +26,23 @@ describe ActiveFedora::File do
         module ActionDispatch
           module Http
             class UploadedFile
-
               def initialize
                 @content = StringIO.new("hello world")
               end
 
               def read(a, b)
-                return @content.read(a, b)
+                @content.read(a, b)
               end
 
               def size
                 @content.length
               end
-
             end
           end
         end
       end
 
-      it "should save" do
+      it "saves" do
         subject.content = ActionDispatch::Http::UploadedFile.new
         subject.save
         expect(subject).not_to be_new_record
@@ -68,11 +63,11 @@ describe ActiveFedora::File do
 
     let(:test_object) { MockAFBase.create }
 
-    let(:descMetadata) {  test_object.attached_files["descMetadata"] }
+    let(:descMetadata) { test_object.attached_files["descMetadata"] }
 
     describe "the metadata file" do
       subject { descMetadata }
-      it { should be_a_kind_of(ActiveFedora::File) }
+      it { should be_a_kind_of(described_class) }
     end
 
     describe "#content" do
@@ -84,7 +79,6 @@ describe ActiveFedora::File do
       subject { descMetadata.described_by }
       it { should eq descMetadata.uri + '/fcr:metadata' }
     end
-
 
     context "an XML file" do
       let(:xml_content) { Nokogiri::XML::Document.parse(descMetadata.content) }
@@ -107,25 +101,25 @@ describe ActiveFedora::File do
     context "a binary file" do
       let(:path) { "ds#{Time.now.to_i}" }
       let(:content) { fixture('dino.jpg') }
-      let(:file) { ActiveFedora::File.new.tap { |ds| ds.content = content } }
+      let(:file) { described_class.new.tap { |ds| ds.content = content } }
 
       before do
         test_object.attach_file(file, path)
         test_object.save
       end
 
-      it "should not be changed" do
+      it "does not be changed" do
         expect(test_object.attached_files[path]).to_not be_changed
       end
 
-      it "should be able to read the content from fedora" do
+      it "is able to read the content from fedora" do
         content.rewind
         expect(test_object.attached_files[path].content).to eq content.read
       end
 
       describe "streaming the response" do
         let(:stream_reader) { double }
-        it "should stream the response" do
+        it "streams the response" do
           expect(stream_reader).to receive(:read).at_least(:once)
           test_object.attached_files[path].stream.each { |buff| stream_reader.read(buff) }
         end
@@ -135,24 +129,24 @@ describe ActiveFedora::File do
             test_object.add_file('one1two2threfour', path: 'webm', mime_type: 'video/webm')
             test_object.save!
           end
-          subject { str = ''; test_object.webm.stream(range).each {|chunk| str << chunk }; str }
+          subject { str = ''; test_object.webm.stream(range).each { |chunk| str << chunk }; str }
           context "whole thing" do
             let(:range) { 'bytes=0-15' }
-            it { should eq 'one1two2threfour'}
+            it { should eq 'one1two2threfour' }
           end
           context "open ended" do
             let(:range) { 'bytes=0-' }
-            it "should get a response" do
+            it "gets a response" do
               expect(subject).to eq 'one1two2threfour'
             end
           end
           context "not starting at the beginning" do
             let(:range) { 'bytes=3-15' }
-            it { should eq '1two2threfour'}
+            it { should eq '1two2threfour' }
           end
           context "not ending at the end" do
             let(:range) { 'bytes=4-11' }
-            it { should eq 'two2thre'}
+            it { should eq 'two2thre' }
           end
         end
       end

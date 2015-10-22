@@ -1,5 +1,4 @@
 module ActiveFedora #:nodoc:
-
   # Generic ActiveFedora exception class
   class ActiveFedoraError < StandardError
   end
@@ -76,7 +75,7 @@ module ActiveFedora #:nodoc:
   # Raised when Fedora returns a version without a create date
   class VersionLacksCreateDate < ActiveFedoraError
   end
-  
+
   # Raised when you try to set a URI to an already persisted Base object.
   class AlreadyPersistedError < ActiveFedoraError
   end

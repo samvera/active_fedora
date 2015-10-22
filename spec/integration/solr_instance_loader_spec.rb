@@ -32,7 +32,7 @@ describe ActiveFedora::SolrInstanceLoader do
     title: 'My Title',
     description: ['first desc', 'second desc'],
     another_id: another.id,
-    dates_attributes: [ {start: "2003"}, { start: "1996" } ]
+    dates_attributes: [{ start: "2003" }, { start: "1996" }]
   ) }
 
   after do
@@ -44,9 +44,9 @@ describe ActiveFedora::SolrInstanceLoader do
     subject { loader.object }
 
     context "with context" do
-      let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj.id) }
+      let(:loader) { described_class.new(Foo, obj.id) }
 
-      it "should find the document in solr" do
+      it "finds the document in solr" do
         expect(subject).to be_instance_of Foo
         expect(subject.title).to eq 'My Title'
         expect(subject.description).to match_array ['first desc', 'second desc']
@@ -54,7 +54,7 @@ describe ActiveFedora::SolrInstanceLoader do
         expect(subject.bar).to eq 'quix'
       end
 
-      it "should not be mutable" do
+      it "does not be mutable" do
         expect { subject.title = 'Foo' }.to raise_error ActiveFedora::ReadOnlyRecord
       end
 
@@ -68,9 +68,9 @@ describe ActiveFedora::SolrInstanceLoader do
     end
 
     context "without context" do
-      let(:loader) { ActiveFedora::SolrInstanceLoader.new(ActiveFedora::Base, obj.id) }
+      let(:loader) { described_class.new(ActiveFedora::Base, obj.id) }
 
-      it "should find the document in solr" do
+      it "finds the document in solr" do
         expect_any_instance_of(ActiveFedora::Datastream).to_not receive(:retrieve_content)
         expect_any_instance_of(Ldp::Client).to_not receive(:get)
         object = loader.object
@@ -88,57 +88,57 @@ describe ActiveFedora::SolrInstanceLoader do
     end
 
     context "with children" do
-      let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj.id) }
+      let(:loader) { described_class.new(Foo, obj.id) }
 
-      it "should have stub implementation of the children" do
+      it "has stub implementation of the children" do
         expect(subject.descMetadata).to be_kind_of ActiveFedora::LoadableFromJson::SolrBackedMetadataFile
       end
     end
   end
 
   context "with a solr doc" do
-    let(:profile) { { "foo"=>["baz"], "bar"=>"quix", "title"=>"My Title"}.to_json }
-    let(:doc) { { 'id' => 'test-123', 'has_model_ssim'=>['Foo'], 'object_profile_ssm' => profile } }
-    let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj.id, doc) }
+    let(:profile) { { "foo" => ["baz"], "bar" => "quix", "title" => "My Title" }.to_json }
+    let(:doc) { { 'id' => 'test-123', 'has_model_ssim' => ['Foo'], 'object_profile_ssm' => profile } }
+    let(:loader) { described_class.new(Foo, obj.id, doc) }
 
     subject { loader.object }
 
-    it "should find the document in solr" do
+    it "finds the document in solr" do
       expect(subject).to be_instance_of Foo
       expect(subject.title).to eq 'My Title'
     end
   end
 
   context "when the model has imperfect json" do
-    let(:doc) { { 'id' => 'test-123', 'has_model_ssim'=>['Foo'], 'object_profile_ssm' => profile } }
-    let(:loader) { ActiveFedora::SolrInstanceLoader.new(Foo, obj.id, doc) }
+    let(:doc) { { 'id' => 'test-123', 'has_model_ssim' => ['Foo'], 'object_profile_ssm' => profile } }
+    let(:loader) { described_class.new(Foo, obj.id, doc) }
     context "when the json has extra values in it" do
-      let(:profile) { { "foo"=>["baz"], "bar"=>"quix", "title"=>"My Title", "extra_value"=>"Bonus values!"}.to_json }
-      it "should load the object without trouble" do
+      let(:profile) { { "foo" => ["baz"], "bar" => "quix", "title" => "My Title", "extra_value" => "Bonus values!" }.to_json }
+      it "loads the object without trouble" do
         expect(loader.object).to be_instance_of Foo
       end
     end
 
     context "when the json is missing values" do
-      let(:profile) { { "foo"=>["baz"], "bar"=>"quix" }.to_json }
-      it "should load the object without trouble" do
+      let(:profile) { { "foo" => ["baz"], "bar" => "quix" }.to_json }
+      it "loads the object without trouble" do
         expect(loader.object).to be_instance_of Foo
       end
       it "missing scalar should be nil" do
         expect(loader.object.title).to be_nil
       end
       it "missing multi-value should be []" do
-        expect(loader.object.description).to eql( [] )
+        expect(loader.object.description).to eql([])
       end
     end
 
     context "when the json has scalar where multi-value is expected" do
-      let(:profile) { { "foo"=>["baz"], "bar"=>"quix", "description"=>"test description" }.to_json }
-      it "should load the object without trouble" do
+      let(:profile) { { "foo" => ["baz"], "bar" => "quix", "description" => "test description" }.to_json }
+      it "loads the object without trouble" do
         expect(loader.object).to be_instance_of Foo
       end
-      it "should convert the scalar to an array" do
-        expect(loader.object.description).to eql( ["test description"] )
+      it "converts the scalar to an array" do
+        expect(loader.object.description).to eql(["test description"])
       end
     end
   end

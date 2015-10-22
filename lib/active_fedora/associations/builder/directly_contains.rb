@@ -14,10 +14,9 @@ module ActiveFedora::Associations::Builder
       super
       if !options[:has_member_relation] && !options[:is_member_of_relation]
         raise ArgumentError, "You must specify a :has_member_relation or :is_member_of_relation predicate for #{name}"
-      elsif !options[:has_member_relation].kind_of?(RDF::URI) && !options[:is_member_of_relation].kind_of?(RDF::URI)
+      elsif !options[:has_member_relation].is_a?(RDF::URI) && !options[:is_member_of_relation].is_a?(RDF::URI)
         raise ArgumentError, "Predicate must be a kind of RDF::URI"
       end
     end
   end
 end
-

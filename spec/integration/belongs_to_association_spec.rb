@@ -14,7 +14,6 @@ describe ActiveFedora::Base do
         self.has_model = [self.class.to_s, self.class.superclass.to_s]
       end
     end
-
   end
   after do
     Object.send(:remove_const, :Library)
@@ -26,22 +25,22 @@ describe ActiveFedora::Base do
   let(:book) { Book.new }
 
   describe "setting the id property" do
-    it "should store it" do
+    it "stores it" do
       book.library_id = library.id
       expect(book.library_id).to eq library.id
     end
 
-    it "should mark it as changed" do
+    it "marks it as changed" do
       expect {
         book.library_id = library.id
       }.to change { book.changed? }.from(false).to(true)
     end
 
     describe "reassigning the parent_id" do
-      let(:library2) { Library.create}
+      let(:library2) { Library.create }
       before { book.library = library2 }
 
-      it "should update the object" do
+      it "updates the object" do
         expect(book.library).to eq library2 # cause the association to set @loaded
         library_proxy = book.send(:association_instance_get, :library)
         expect(library_proxy).to_not be_stale_target
@@ -51,14 +50,14 @@ describe ActiveFedora::Base do
       end
     end
 
-    it "should be settable via []=" do
+    it "is settable via []=" do
       book[:library_id] = library.id
       expect(book.library_id).to eq library.id
     end
   end
 
   describe "getting the id property" do
-    it "should be accessable via []" do
+    it "is accessable via []" do
       book[:library_id] = library.id
       expect(book[:library_id]).to eq library.id
     end
@@ -75,7 +74,7 @@ describe ActiveFedora::Base do
       @special_book.save
     end
 
-    it "should cast to the most specific class for the association" do
+    it "casts to the most specific class for the association" do
       expect(@library2.books[0]).to be_instance_of Book
       expect(@library2.books[1]).to be_instance_of SpecialInheritedBook
     end
@@ -93,7 +92,7 @@ describe ActiveFedora::Base do
         belongs_to :complex_collection, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ComplexCollection'
       end
 
-      #NOTE: As RDF assertions seem to be returned in alphabetical order, the "Z" is to insure this is stored
+      # NOTE: As RDF assertions seem to be returned in alphabetical order, the "Z" is to insure this is stored
       # after the SimpleObject relationship for this particular case. This is to ensure people don't just change ActiveFedora
       # to pick the first content model and it works by alphabetical chance.
       class ZComplexObject < SimpleObject
@@ -118,7 +117,6 @@ describe ActiveFedora::Base do
           self.has_model = [self.class.to_s, self.class.superclass.to_s]
         end
       end
-
     end
     after :all do
       Object.send(:remove_const, :SimpleObject)
@@ -132,7 +130,7 @@ describe ActiveFedora::Base do
       let(:complex_collection) { ComplexCollection.find(ComplexCollection.create.id) }
 
       context "Verify that an inherited object will save and retrieve with the correct models" do
-        it "should have added the inverse relationship for the correct class" do
+        it "has added the inverse relationship for the correct class" do
           expect(complex_object.has_model).to match_array(["SimpleObject", "ZComplexObject"])
           expect(complex_collection.has_model).to match_array(["SimpleCollection", "ComplexCollection"])
         end
@@ -146,7 +144,7 @@ describe ActiveFedora::Base do
           simple_collection.save!
           complex_collection.save!
         end
-        it "should have added the inverse relationship for the correct class" do
+        it "has added the inverse relationship for the correct class" do
           expect(complex_object.simple_collection).to be_instance_of SimpleCollection
           expect(complex_object.complex_collection).to be_nil
         end
@@ -158,7 +156,7 @@ describe ActiveFedora::Base do
           complex_collection.save
         end
 
-        it "should have added the inverse relationship for the correct class" do
+        it "has added the inverse relationship for the correct class" do
           expect(complex_object.complex_collection).to be_instance_of ComplexCollection
           expect(complex_object.reload.simple_collection).to be_instance_of ComplexCollection
         end
@@ -167,7 +165,7 @@ describe ActiveFedora::Base do
       context "Adding mixed types on a base class with a filtered has_many relationship" do
         let(:simple_collection) { SimpleCollection.create }
         let(:simple_object) { SimpleObject.create }
-       
+
         before do
           simple_collection.objects = [complex_object, simple_object]
           simple_collection.save!
@@ -187,9 +185,9 @@ describe ActiveFedora::Base do
       end
 
       context "Adding mixed types on a subclass with a filtered has_many relationship" do
-       let(:simple_object) { SimpleObject.create }
-       
-       before do
+        let(:simple_object) { SimpleObject.create }
+
+        before do
           complex_collection.objects = [complex_object, simple_object]
           complex_collection.save!
         end
@@ -241,24 +239,22 @@ describe ActiveFedora::Base do
           superclass_collection.objects = [subclass_object]
           superclass_collection.save!
         end
-        it "should have added the inverse relationship for the correct class" do
+        it "has added the inverse relationship for the correct class" do
           expect(subclass_object.superclass_collection).to be_instance_of SuperclassCollection
         end
       end
 
       context "Set the superclass_collection of a subclass object"
-        let(:subclass_object) { SubclassObject.create }
+      let(:subclass_object) { SubclassObject.create }
 
-        before do
-          subclass_object.superclass_collection = superclass_collection
-          subclass_object.save!
-        end
-        it "should have added the inverse relationship for the correct class" do
-          expect(superclass_collection.objects.size).to eq 1
-          expect(superclass_collection.objects[0]).to be_instance_of SubclassObject
-        end
+      before do
+        subclass_object.superclass_collection = superclass_collection
+        subclass_object.save!
+      end
+      it "has added the inverse relationship for the correct class" do
+        expect(superclass_collection.objects.size).to eq 1
+        expect(superclass_collection.objects[0]).to be_instance_of SubclassObject
       end
     end
+  end
 end
-
-

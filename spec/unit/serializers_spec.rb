@@ -12,10 +12,9 @@ describe ActiveFedora::Attributes::Serializers do
       Object.send(:remove_const, :Foo)
     end
     subject { Foo.new }
-    it "should deserialize dates" do
-      subject.attributes = {'birthday(1i)' =>'2012', 'birthday(2i)' =>'10', 'birthday(3i)' => '31'}
+    it "deserializes dates" do
+      subject.attributes = { 'birthday(1i)' => '2012', 'birthday(2i)' => '10', 'birthday(3i)' => '31' }
       expect(subject.birthday).to eq '2012-10-31'
     end
   end
-
 end

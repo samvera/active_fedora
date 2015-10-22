@@ -13,4 +13,3 @@ module ActiveFedora
     end
   end
 end
-

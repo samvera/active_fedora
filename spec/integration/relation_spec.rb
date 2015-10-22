@@ -37,33 +37,33 @@ describe ActiveFedora::Base do
         subject.to_a # trigger initial load
       end
 
-      it "should be loaded" do
+      it "is loaded" do
         expect(subject).to be_loaded
       end
-      it "shouldn't reload" do
+      it "does not reload" do
         expect_any_instance_of(ActiveFedora::Relation).to_not receive :find_each
         subject[0]
       end
     end
 
     describe "#find" do
-      it "should find one of them" do
+      it "finds one of them" do
         expect(subject.find(library1.id)).to eq library1
       end
-      it "should find with a block" do
-        expect(subject.find { |l| l.id == library1.id}).to eq library1
+      it "finds with a block" do
+        expect(subject.find { |l| l.id == library1.id }).to eq library1
       end
     end
 
     describe "#select" do
-      it "should find with a block" do
-        expect(subject.select { |l| l.id == library1.id}).to eq [library1]
+      it "finds with a block" do
+        expect(subject.select { |l| l.id == library1.id }).to eq [library1]
       end
     end
 
     context "unpermitted methods" do
       it "excludes them" do
-        expect{ subject.sort! }.to raise_error NoMethodError
+        expect { subject.sort! }.to raise_error NoMethodError
       end
     end
 

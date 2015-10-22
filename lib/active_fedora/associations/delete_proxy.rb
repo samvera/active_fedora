@@ -16,13 +16,12 @@ module ActiveFedora::Associations
 
     private
 
-    def proxies
-      @proxies ||= proxy_ids.map{ |uri| uri_to_proxy(uri) }
-    end
+      def proxies
+        @proxies ||= proxy_ids.map { |uri| uri_to_proxy(uri) }
+      end
 
-    def uri_to_proxy(uri)
-      proxy_class.find(proxy_class.uri_to_id(uri))
-    end
-
+      def uri_to_proxy(uri)
+        proxy_class.find(proxy_class.uri_to_id(uri))
+      end
   end
 end

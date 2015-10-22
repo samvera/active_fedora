@@ -1,7 +1,6 @@
 module ActiveFedora
   class VersionsGraph < ::RDF::Graph
-
-    def all opts={}
+    def all(opts = {})
       versions = fedora_versions
       unless opts[:include_auto_save]
         versions.reject! { |version| version.label.match("auto") }
@@ -11,15 +10,11 @@ module ActiveFedora
       raise ActiveFedora::VersionLacksCreateDate
     end
 
-    def first
-      all.first
-    end
+    delegate :first, to: :all
 
-    def last
-      all.last
-    end
+    delegate :last, to: :all
 
-    def with_label label
+    def with_label(label)
       all.each do |version|
         return version if version.label == label
       end
@@ -35,19 +30,19 @@ module ActiveFedora
         attr_accessor :uri, :label, :created
       end
 
-      def version_from_resource statement
+      def version_from_resource(statement)
         version = ResourceVersion.new
-        version.uri = statement.object.to_s.gsub(/\/fcr:metadata$/,"")
+        version.uri = statement.object.to_s.gsub(/\/fcr:metadata$/, "")
         version.label = label_query(statement)
         version.created = created_query(statement)
-        return version
+        version
       end
 
-      def label_query statement
+      def label_query(statement)
         query(subject: statement.object).query(predicate: ::RDF::Vocab::Fcrepo4.hasVersionLabel).first.object.to_s
       end
 
-      def created_query statement
+      def created_query(statement)
         query(subject: statement.object).query(predicate: ::RDF::Vocab::Fcrepo4.created).first.object.to_s
       end
 

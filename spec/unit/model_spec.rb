@@ -1,18 +1,17 @@
 require 'spec_helper'
 
 describe ActiveFedora::Model do
-  
   before(:all) do
     module SpecModel
       class Basic < ActiveFedora::Base
       end
     end
   end
-  
+
   after(:all) do
     Object.send(:remove_const, :SpecModel)
   end
-  
+
   describe '.solr_query_handler' do
     subject { SpecModel::Basic.solr_query_handler }
     after do
@@ -30,7 +29,7 @@ describe ActiveFedora::Model do
   end
 
   describe ".from_class_uri" do
-    subject { ActiveFedora::Model.from_class_uri(uri) }
+    subject { described_class.from_class_uri(uri) }
     context "a blank string" do
       before { expect(ActiveFedora::Base.logger).to receive(:warn) }
       let(:uri) { '' }

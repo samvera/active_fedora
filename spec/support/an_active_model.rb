@@ -1,5 +1,5 @@
 shared_examples_for "An ActiveModel" do
-  def assert(test, *args)
+  def assert(test, *_args)
     expect(test).to be true
   end
 
@@ -13,8 +13,8 @@ shared_examples_for "An ActiveModel" do
 
   include ActiveModel::Lint::Tests
 
-  ActiveModel::Lint::Tests.public_instance_methods.map{|m| m.to_s}.grep(/^test/).each do |m|
-    example m.gsub('_',' ') do
+  ActiveModel::Lint::Tests.public_instance_methods.map(&:to_s).grep(/^test/).each do |m|
+    example m.tr('_', ' ') do
       send m
     end
   end
@@ -22,5 +22,4 @@ shared_examples_for "An ActiveModel" do
   def model
     subject
   end
-
 end

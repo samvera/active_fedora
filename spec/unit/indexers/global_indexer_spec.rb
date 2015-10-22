@@ -7,7 +7,7 @@ RSpec.describe ActiveFedora::Indexers::GlobalIndexer do
   describe "#new" do
     # The global indexer acts as both an indexer factory and an indexer, since
     # the property doesn't matter.
-    it "should return itself" do
+    it "returns itself" do
       expect(subject.new("bla")).to eq subject
     end
   end
@@ -15,7 +15,7 @@ RSpec.describe ActiveFedora::Indexers::GlobalIndexer do
     let(:index_obj) { instance_double(ActiveFedora::Indexing::Map::IndexObject, as: nil) }
     context "with one index type" do
       let(:index_types) { :symbol }
-      it "should pass that to index_obj" do
+      it "passes that to index_obj" do
         subject.index(index_obj)
 
         expect(index_obj).to have_received(:as).with(:symbol)
@@ -23,7 +23,7 @@ RSpec.describe ActiveFedora::Indexers::GlobalIndexer do
     end
     context "with multiple index types" do
       let(:index_types) { [:symbol, :stored_searchable] }
-      it "should pass that to index_obj" do
+      it "passes that to index_obj" do
         subject.index(index_obj)
 
         expect(index_obj).to have_received(:as).with(:symbol, :stored_searchable)
@@ -31,7 +31,7 @@ RSpec.describe ActiveFedora::Indexers::GlobalIndexer do
     end
     context "with no index types" do
       subject { described_class.new }
-      it "should not pass anything to index_obj" do
+      it "does not pass anything to index_obj" do
         subject.index(index_obj)
 
         expect(index_obj).not_to have_received(:as)

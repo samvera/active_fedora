@@ -3,12 +3,12 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   before :each do
     begin
-      ActiveFedora::Base.find('test:123').delete
+      described_class.find('test:123').delete
     rescue
     end
 
     class CallbackStub < ActiveFedora::Base
-      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
+      has_metadata type: ActiveFedora::SimpleDatastream, name: "someData" do |m|
         m.field "fubar", :string
         m.field "swank", :text
       end
@@ -33,11 +33,11 @@ describe ActiveFedora::Base do
     end
   end
   after :each do
-    @cb.destroy if @cb && @cb.persisted?# this only is called if the test failed to run all the way through.
+    @cb.destroy if @cb && @cb.persisted? # this only is called if the test failed to run all the way through.
     Object.send(:remove_const, :CallbackStub)
   end
 
-  it "Should have after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
+  it "has after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
     allow_any_instance_of(CallbackStub).to receive(:a_init)
     allow_any_instance_of(CallbackStub).to receive :b_create
     allow_any_instance_of(CallbackStub).to receive :a_create
@@ -47,7 +47,7 @@ describe ActiveFedora::Base do
     @cb.save
   end
 
-  it "Should have after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
+  it "has after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
     allow_any_instance_of(CallbackStub).to receive(:a_init)
     allow_any_instance_of(CallbackStub).to receive(:b_create)
     allow_any_instance_of(CallbackStub).to receive(:a_create)
@@ -67,6 +67,5 @@ describe ActiveFedora::Base do
     @cb.save!
 
     @cb.destroy
-
   end
 end

@@ -1,7 +1,6 @@
 module ActiveFedora
   module Associations
     class DirectlyContainsAssociation < ContainsAssociation #:nodoc:
-
       def insert_record(record, force = true, validate = true)
         container.save!
         if force
@@ -13,11 +12,11 @@ module ActiveFedora
 
       def find_target
         query_node = if container_predicate = options[:has_member_relation]
-           owner
-        else
-          container_predicate = ::RDF::Vocab::LDP.contains
-          container
-        end
+                       owner
+                     else
+                       container_predicate = ::RDF::Vocab::LDP.contains
+                       container
+                     end
 
         uris = query_node.resource.query(predicate: container_predicate).map { |r| r.object.to_s }
 
@@ -45,12 +44,11 @@ module ActiveFedora
 
         def delete_records(records, method)
           if method == :destroy
-            records.each { |r| r.destroy }
+            records.each(&:destroy)
           else
-            records.each { |r| r.delete }
+            records.each(&:delete)
           end
         end
-
     end
   end
 end

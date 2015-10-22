@@ -28,7 +28,6 @@ describe ActiveFedora::File do
   end
 
   describe "#uri" do
-
     subject { file.uri }
 
     context "when the file is in an ldp:BasicContainer" do
@@ -41,14 +40,14 @@ describe ActiveFedora::File do
       end
 
       context "and it's initialized with the URI" do
-        let(:file) { described_class.new(parent.uri+"/FOO1") }
+        let(:file) { described_class.new(parent.uri + "/FOO1") }
         it "works" do
           expect(subject.to_s).to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234/FOO1"
         end
       end
 
       context "and it's initialized with an ID" do
-        let(:file) { described_class.new(parent.id+"/FOO1") }
+        let(:file) { described_class.new(parent.id + "/FOO1") }
         it "works" do
           expect(subject.to_s).to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234/FOO1"
         end
@@ -63,7 +62,7 @@ describe ActiveFedora::File do
   context "content" do
     let(:mock_conn) do
       Faraday.new do |builder|
-        builder.adapter :test, conn_stubs do |stub|
+        builder.adapter :test, conn_stubs do |_stub|
         end
       end
     end
@@ -74,7 +73,7 @@ describe ActiveFedora::File do
 
     let(:conn_stubs) do
       Faraday::Adapter::Test::Stubs.new do |stub|
-        stub.head(path) { [200, {'Content-Length' => '9999' }] }
+        stub.head(path) { [200, { 'Content-Length' => '9999' }] }
       end
     end
 
@@ -87,7 +86,7 @@ describe ActiveFedora::File do
     end
 
     describe '#persisted_size' do
-      it 'should load the file size attribute from the fedora repository' do
+      it 'loads the file size attribute from the fedora repository' do
         expect(subject.size).to eq 9999
       end
 
@@ -103,12 +102,11 @@ describe ActiveFedora::File do
         context 'and has been set to something that has a #size method (i.e. string or File)' do
           it 'returns the size of the dirty content' do
             dirty_content = double
-            allow(dirty_content).to receive(:size) { 8675309 }
+            allow(dirty_content).to receive(:size) { 8_675_309 }
             subject.content = dirty_content
             expect(subject.size).to eq dirty_content.size
           end
         end
-
       end
 
       context 'when content has not changed from what is currently persisted' do
@@ -140,7 +138,7 @@ describe ActiveFedora::File do
     end
 
     describe ".empty?" do
-      it "should not be empty" do
+      it "does not be empty" do
         expect(subject.empty?).to be false
       end
     end
@@ -150,7 +148,7 @@ describe ActiveFedora::File do
         before do
           allow(subject).to receive(:size).and_return(10)
         end
-        it "should return true" do
+        it "returns true" do
           expect(subject.has_content?).to be true
         end
       end
@@ -159,7 +157,7 @@ describe ActiveFedora::File do
         before do
           allow(subject).to receive(:size).and_return(nil)
         end
-        it "should not have content" do
+        it "does not have content" do
           expect(subject).to_not have_content
         end
       end
@@ -168,7 +166,7 @@ describe ActiveFedora::File do
         before do
           allow(subject).to receive(:size).and_return(0)
         end
-        it "should return false" do
+        it "returns false" do
           expect(subject.has_content?).to be false
         end
       end
@@ -176,7 +174,6 @@ describe ActiveFedora::File do
   end
 
   context "when the file has local content" do
-
     before do
       file.uri = "http://localhost:8983/fedora/rest/test/1234/abcd"
       file.content = "hi there"
@@ -209,7 +206,7 @@ describe ActiveFedora::File do
         parent.save!
       end
 
-      it "should have original_name" do
+      it "has original_name" do
         expect(parent.reload.abcd.original_name).to eq 'my image.png'
       end
     end
@@ -217,10 +214,10 @@ describe ActiveFedora::File do
     context "with special characters" do
       let(:parent) { ActiveFedora::Base.create }
       before do
-        parent.add_file('one1two2threfour', path: 'abcd', mime_type: 'video/webm', original_name:'my "image".png')
+        parent.add_file('one1two2threfour', path: 'abcd', mime_type: 'video/webm', original_name: 'my "image".png')
         parent.save!
       end
-      it "should save OK and preserve name" do
+      it "saves OK and preserve name" do
         expect(parent.reload.abcd.original_name).to eq 'my "image".png'
       end
     end
@@ -240,7 +237,7 @@ describe ActiveFedora::File do
         parent.save!
       end
 
-      it "should have digest" do
+      it "has digest" do
         expect(parent.reload.abcd.digest.first).to be_kind_of RDF::URI
       end
     end
@@ -264,10 +261,10 @@ describe ActiveFedora::File do
       allow(subject).to receive(:digest) { [digest] }
     end
     its(:checksum) { is_expected.to be_a(ActiveFedora::Checksum) }
-    it "should have the right value" do
+    it "has the right value" do
       expect(subject.checksum.value).to eq("f1d2d2f924e986ac86fdf7b36c94bcdf32beec15")
     end
-    it "should have the right algorithm" do
+    it "has the right algorithm" do
       expect(subject.checksum.algorithm).to eq("SHA1")
     end
   end
@@ -275,7 +272,7 @@ describe ActiveFedora::File do
   describe "#save" do
     let(:file) { described_class.new }
     context "when there is nothing to save" do
-      it "should not write" do
+      it "does not write" do
         expect(file.ldp_source).not_to receive(:create)
         expect(file.save).to be false
       end
@@ -295,5 +292,4 @@ describe ActiveFedora::File do
       it { is_expected.to be_a(DateTime) }
     end
   end
-
 end

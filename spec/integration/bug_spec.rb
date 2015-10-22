@@ -8,7 +8,7 @@ include ActiveFedora::Model
 describe 'bugs' do
   before do
     class FooHistory < ActiveFedora::Base
-      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
+      has_metadata type: ActiveFedora::SimpleDatastream, name: "someData" do |m|
         m.field "fubar", :string
       end
     end
@@ -20,20 +20,19 @@ describe 'bugs' do
     Object.send(:remove_const, :FooHistory)
   end
 
-  it 'should raise ActiveFedora::ObjectNotFoundError when find("")' do
+  it 'raises ActiveFedora::ObjectNotFoundError when find("")' do
     expect {
       FooHistory.find('')
     }.to raise_error(ActiveFedora::ObjectNotFoundError)
   end
 
-  it "should not clobber everything when setting a value" do
-    @test_object.someData.fubar=['initial']
+  it "does not clobber everything when setting a value" do
+    @test_object.someData.fubar = ['initial']
     @test_object.save!
 
     x = FooHistory.find(@test_object.id)
     x.someData.fubar = ["replacement"] # set a new value
     x.save!
-
 
     x = FooHistory.find(@test_object.id)
     expect(x.someData.fubar).to eq ["replacement"] # recall the value

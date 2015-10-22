@@ -7,10 +7,8 @@ module ActiveFedora
       # @param opts [Boolean, Hash] if true, force a reload
       # @option opts [Symbol] :response_format can be ':solr' to return a solr result.
       def reader(opts = false)
-        if opts.kind_of?(Hash)
-          if opts.delete(:response_format) == :solr
-            return load_from_solr(opts)
-          end
+        if opts.is_a?(Hash)
+          return load_from_solr(opts) if opts.delete(:response_format) == :solr
           raise ArgumentError, "Hash parameter must include :response_format=>:solr (#{opts.inspect})"
         else
           force_reload = opts
@@ -27,9 +25,7 @@ module ActiveFedora
       # Implements the ids reader method, e.g. foo.item_ids for Foo.has_many :items
       def ids_reader
         if loaded?
-          load_target.map do |record|
-            record.id
-          end
+          load_target.map(&:id)
         else
           load_from_solr.map do |solr_record|
             solr_record['id']
@@ -39,11 +35,11 @@ module ActiveFedora
 
       # Implements the ids writer method, e.g. foo.item_ids= for Foo.has_many :items
       def ids_writer(ids)
-        ids = Array(ids).reject { |id| id.blank? }
-        replace(klass.find(ids))#.index_by { |r| r.id }.values_at(*ids))
-        #TODO, like this when find() can return multiple records
-        #send("#{reflection.name}=", reflection.klass.find(ids))
-        #send("#{reflection.name}=", ids.collect { |id| reflection.klass.find(id)})
+        ids = Array(ids).reject(&:blank?)
+        replace(klass.find(ids)) # .index_by { |r| r.id }.values_at(*ids))
+        # TODO, like this when find() can return multiple records
+        # send("#{reflection.name}=", reflection.klass.find(ids))
+        # send("#{reflection.name}=", ids.collect { |id| reflection.klass.find(id)})
       end
 
       def reset
@@ -75,7 +71,7 @@ module ActiveFedora
         if @owner.new_record? && @target
           @target.size
         elsif !loaded? && @target.is_a?(Array)
-          unsaved_records = @target.select { |r| r.new_record? }
+          unsaved_records = @target.select(&:new_record?)
           unsaved_records.size + count_records
         else
           count_records
@@ -158,7 +154,7 @@ module ActiveFedora
         records.flatten.each do |record|
           raise_on_type_mismatch(record)
           run_type_validator(record)
-          add_to_target(record) do |r|
+          add_to_target(record) do |_r|
             result &&= insert_record(record) unless owner.new_record?
           end
         end
@@ -170,7 +166,7 @@ module ActiveFedora
       #
       # See delete for more info.
       def delete_all
-        # TODO load_target causes extra loads. Can't we just send delete requests?
+        # TODO: load_target causes extra loads. Can't we just send delete requests?
         delete(load_target).tap do
           reset
           loaded!
@@ -204,7 +200,7 @@ module ActiveFedora
       # Note that this method will _always_ remove records from the database
       # ignoring the +:dependent+ option.
       def destroy(*records)
-        records = find(records) if records.any? { |record| record.kind_of?(Fixnum) || record.kind_of?(String) }
+        records = find(records) if records.any? { |record| record.is_a?(Fixnum) || record.is_a?(String) }
         delete_or_destroy(records, :destroy)
       end
 
@@ -228,7 +224,7 @@ module ActiveFedora
 
       # Count all records using solr. Construct options and pass them with
       # scope to the target class's +count+.
-      def count(options = {})
+      def count(_options = {})
         @reflection.klass.count(conditions: construct_query)
       end
 
@@ -239,16 +235,14 @@ module ActiveFedora
       end
 
       def load_target
-        if find_target?
-          @target = merge_target_lists(find_target, @target)
-        end
+        @target = merge_target_lists(find_target, @target) if find_target?
 
         loaded!
         target
       end
 
       # @param opts [Hash] Options that will be passed through to ActiveFedora::SolrService.query.
-      def load_from_solr(opts = Hash.new)
+      def load_from_solr(opts = {})
         finder_query = construct_query
         return [] if finder_query.empty?
         rows = opts.delete(:rows) { count }
@@ -256,21 +250,20 @@ module ActiveFedora
         SolrService.query(finder_query, { rows: rows }.merge(opts))
       end
 
-
       def add_to_target(record, skip_callbacks = false)
-      #  transaction do
-          callback(:before_add, record) unless skip_callbacks
-          yield(record) if block_given?
+        #  transaction do
+        callback(:before_add, record) unless skip_callbacks
+        yield(record) if block_given?
 
-          if @reflection.options[:uniq] && index = @target.index(record)
-            @target[index] = record
-          else
-            @target << record
-          end
+        if @reflection.options[:uniq] && index = @target.index(record)
+          @target[index] = record
+        else
+          @target << record
+        end
 
-          callback(:after_add, record) unless skip_callbacks
-          set_inverse_instance(record)
-       # end
+        callback(:after_add, record) unless skip_callbacks
+        set_inverse_instance(record)
+        # end
 
         record
       end
@@ -285,7 +278,7 @@ module ActiveFedora
         owner.new_record? && !foreign_key_present?
       end
 
-      def select(select=nil, &block)
+      def select(_select = nil, &block)
         to_a.select(&block)
       end
 
@@ -298,7 +291,6 @@ module ActiveFedora
             ActiveFedora::SolrQueryBuilder.construct_query_for_rel(clauses)
           end
         end
-
 
       private
 
@@ -359,9 +351,9 @@ module ActiveFedora
         end
 
         def delete_or_destroy(records, method)
-          records = records.flatten.select{|x| load_target.include?(x)}
+          records = records.flatten.select { |x| load_target.include?(x) }
           records.each { |record| raise_on_type_mismatch(record) }
-          existing_records = records.select { |r| r.persisted? }
+          existing_records = records.select(&:persisted?)
 
           records.each { |record| callback(:before_remove, record) }
 
@@ -395,16 +387,15 @@ module ActiveFedora
         end
 
         def ensure_owner_is_not_new
-          if @owner.new_record?
-            raise ActiveFedora::RecordNotSaved, "You cannot call create unless the parent is saved"
-          end
+          return if @owner.persisted?
+          raise ActiveFedora::RecordNotSaved, "You cannot call create unless the parent is saved"
         end
 
         # Fetches the first/last using solr if possible, otherwise from the target array.
         def first_or_last(type, *args)
           args.shift if args.first.is_a?(Hash) && args.first.empty?
 
-          #collection = fetch_first_or_last_using_find?(args) ? scoped : load_target
+          # collection = fetch_first_or_last_using_find?(args) ? scoped : load_target
           collection = load_target
           collection.send(type, *args).tap do |record|
             set_inverse_instance record if record.is_a? ActiveFedora::Base

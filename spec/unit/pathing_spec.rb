@@ -28,10 +28,9 @@ describe ActiveFedora::Base do
     context "when the object is saved" do
       before { subject.save }
 
-      it "should persist the path in the uri" do
+      it "persists the path in the uri" do
         expect(subject.uri.to_s).to include(path)
       end
-
     end
   end
 end

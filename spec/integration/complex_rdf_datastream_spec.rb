@@ -10,7 +10,6 @@ describe "Nested Rdf Objects" do
           property :label, predicate: ::RDF::DC.title
         end
       end
-
     end
 
     after do
@@ -18,16 +17,16 @@ describe "Nested Rdf Objects" do
     end
 
     let(:ds) do
-      ds = SpecDatastream.new('http://localhost:8983/fedora/rest/test/test:124/descMd')
+      SpecDatastream.new('http://localhost:8983/fedora/rest/test/test:124/descMd')
     end
 
     describe "#new_record?" do
-      it "should be true when its built" do
+      it "is true when its built" do
         v = ds.parts.build(label: 'Alternator')
         expect(v).to be_new_record
       end
 
-      it "should not be new when it's loaded from fedora" do
+      it "does not be new when it's loaded from fedora" do
         ds.content = '_:g70324142325120 <http://purl.org/dc/terms/title> "Alternator" .
 <http://localhost:8983/fedora/rest/test/test:124> <http://purl.org/dc/terms/hasPart> _:g70324142325120 .'
         ds.resource.persist!
@@ -35,21 +34,21 @@ describe "Nested Rdf Objects" do
       end
     end
 
-    it "should be able to nest a complex object" do
+    it "is able to nest a complex object" do
       comp = SpecDatastream::Component.new(nil, ds.graph)
       comp.label = ["Alternator"]
       ds.parts = comp
       expect(ds.parts.first.label).to eq ["Alternator"]
     end
 
-    it "should be able to replace attributes" do
-      v = ds.parts.build(label: 'Alternator')
+    it "is able to replace attributes" do
+      ds.parts.build(label: 'Alternator')
       expect(ds.parts.first.label).to eq ['Alternator']
       ds.parts.first.label = ['Distributor']
       expect(ds.parts.first.label).to eq ['Distributor']
     end
 
-    it "should be able to replace objects" do
+    it "is able to replace objects" do
       ds.parts.build(label: 'Alternator')
       ds.parts.build(label: 'Distributor')
       expect(ds.parts.size).to eq 2
@@ -59,7 +58,7 @@ describe "Nested Rdf Objects" do
       expect(ds.parts.size).to eq 1
     end
 
-    it "should be able to nest many complex objects" do
+    it "is able to nest many complex objects" do
       comp1 = SpecDatastream::Component.new nil, ds.graph
       comp1.label = ["Alternator"]
       comp2 = SpecDatastream::Component.new nil, ds.graph
@@ -69,7 +68,7 @@ describe "Nested Rdf Objects" do
       expect(ds.parts.last.label).to eq ["Crankshaft"]
     end
 
-    it "should be able to clear complex objects" do
+    it "is able to clear complex objects" do
       comp1 = SpecDatastream::Component.new nil, ds.graph
       comp1.label = ["Alternator"]
       comp2 = SpecDatastream::Component.new nil, ds.graph
@@ -79,7 +78,7 @@ describe "Nested Rdf Objects" do
       expect(ds.parts).to eq []
     end
 
-    it "should load complex objects" do
+    it "loads complex objects" do
       ds.content = <<END
 _:g70350851837440 <http://purl.org/dc/terms/title> "Alternator" .
 <http://localhost:8983/fedora/rest/test/test:124> <http://purl.org/dc/terms/hasPart> _:g70350851837440 .
@@ -89,20 +88,20 @@ END
       expect(ds.parts.first.label).to eq ["Alternator"]
     end
 
-    it "should build complex objects when a parent node doesn't exist" do
+    it "builds complex objects when a parent node doesn't exist" do
       part = ds.parts.build
       expect(part).to be_kind_of SpecDatastream::Component
       part.label = "Wheel bearing"
       expect(ds.parts.first.label).to eq ['Wheel bearing']
     end
 
-    it "should not create a child node when hitting the accessor" do
+    it "does not create a child node when hitting the accessor" do
       ds.parts
       expect(ds.parts.first).to be_nil
       expect(ds.serialize).to eq ''
     end
 
-    it "should build complex objects when a parent node exists" do
+    it "builds complex objects when a parent node exists" do
       part = ds.parts.build
       expect(part).to be_kind_of SpecDatastream::Component
       part.label = "Wheel bearing"
@@ -110,22 +109,20 @@ END
     end
 
     describe "#first_or_create" do
-      it "should return a result if the predicate exists" do
+      it "returns a result if the predicate exists" do
         part1 = ds.parts.build
-        part2 = ds.parts.build
+        ds.parts.build
         expect(ds.parts.first_or_create).to eq part1
       end
 
-      it "should create a new result if the predicate doesn't exist" do
+      it "creates a new result if the predicate doesn't exist" do
         expect(ds.parts).to eq []
         part = ds.parts.first_or_create(label: 'Front control arm bushing')
         expect(part.label).to eq ['Front control arm bushing']
         expect(ds.parts).to eq [part]
       end
-
     end
   end
-
 
   describe "with type" do
     describe "one class per assertion" do
@@ -143,10 +140,9 @@ END
       after(:each) do
         Object.send(:remove_const, :SpecDatastream)
       end
-      let (:ds) { SpecDatastream.new('http://localhost:8983/fedora/rest/test/test:124/descMd') }
+      let(:ds) { SpecDatastream.new('http://localhost:8983/fedora/rest/test/test:124/descMd') }
 
-
-      it "should store the type of complex objects when type is specified" do
+      it "stores the type of complex objects when type is specified" do
         comp = SpecDatastream::MediatorUser.new nil, ds.graph
         comp.title = ["Doctor"]
         ds.mediator = comp
@@ -155,7 +151,7 @@ END
         expect(ds.mediator.first.title.first).to eq 'Doctor'
       end
 
-      it "should add the type of complex object when it is not provided" do
+      it "adds the type of complex object when it is not provided" do
         ds.content = <<END
   _:g70350851837440 <http://purl.org/dc/terms/title> "Mediation Person" .
   <http://localhost:8983/fedora/rest/test/test:124> <http://purl.org/dc/terms/mediator> _:g70350851837440 .
@@ -163,7 +159,7 @@ END
         expect(ds.mediator.first.type.first.to_s).to eq "http://purl.org/dc/terms/AgentClass"
       end
 
-      it "should add load the type of complex objects when provided (superceeding what is specified by the class)" do
+      it "adds load the type of complex objects when provided (superceeding what is specified by the class)" do
         ds.content = <<END
   _:g70350851837440 <http://purl.org/dc/terms/title> "Mediation Orgainzation" .
   _:g70350851837440 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.ebu.ch/metadata/ontologies/ebucore#Organisation> .
@@ -193,12 +189,11 @@ END
             property :title, predicate: EbuCore.title
           end
 
-          class Program  < ActiveTriples::Resource
+          class Program < ActiveTriples::Resource
             configure type: 'http://www.ebu.ch/metadata/ontologies/ebucore#Programme'
             property :title, predicate: EbuCore.title
           end
         end
-
       end
 
       after(:each) do
@@ -207,10 +202,9 @@ END
       end
 
       let(:parent) { SpecContainer.new id: '124' }
-      let (:file) { parent.info }
+      let(:file) { parent.info }
 
-
-      it "should store the type of complex objects when type is specified" do
+      it "stores the type of complex objects when type is specified" do
         series = SpecDatastream::Series.new nil, file.graph
         series.title = ["renovating bathrooms"]
         file.series = series
@@ -225,7 +219,7 @@ END
         expect(file.series.first.type.first.to_s).to eq 'http://www.ebu.ch/metadata/ontologies/ebucore#Series'
       end
 
-      it "should create an object of the correct type" do
+      it "creates an object of the correct type" do
         expect(file.program.build).to be_kind_of SpecDatastream::Program
         expect(file.series.build).to be_kind_of SpecDatastream::Series
       end

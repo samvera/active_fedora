@@ -19,9 +19,9 @@ describe "Indirect containers" do
     before do
       class FooHistory < ActiveFedora::Base
         indirectly_contains :related_objects,
-          has_member_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/aggregates'),
-          inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'),
-          through: 'Proxy', foreign_key: :proxy_for
+                            has_member_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/aggregates'),
+                            inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'),
+                            through: 'Proxy', foreign_key: :proxy_for
       end
     end
 
@@ -71,9 +71,9 @@ describe "Indirect containers" do
     before do
       class FooHistory < ActiveFedora::Base
         indirectly_contains :related_objects,
-          has_member_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/aggregates'), inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'),
-          through: 'Proxy',
-          foreign_key: :proxy_for
+                            has_member_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/aggregates'), inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'),
+                            through: 'Proxy',
+                            foreign_key: :proxy_for
       end
     end
 
@@ -81,7 +81,7 @@ describe "Indirect containers" do
       Object.send(:remove_const, :FooHistory)
     end
 
-    it "should delete only one object" do
+    it "deletes only one object" do
       foo = FooHistory.new
       foo.related_objects.build
       file2 = foo.related_objects.build
@@ -98,7 +98,7 @@ describe "Indirect containers" do
     context "when the class is implied" do
       before do
         class FooHistory < ActiveFedora::Base
-          # TODO inserted_content_relation can look up the predicate at options[:through].constantize.reflect_on_association(options[:foreign_key]).predicate
+          # TODO: inserted_content_relation can look up the predicate at options[:through].constantize.reflect_on_association(options[:foreign_key]).predicate
           indirectly_contains :related_objects,
                               has_member_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/aggregates'),
                               inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'),
@@ -176,7 +176,7 @@ describe "Indirect containers" do
         end
 
         describe "remove" do
-          it "should be able to remove" do
+          it "is able to remove" do
             o.related_objects = []
             o.save!
 
@@ -224,7 +224,7 @@ describe "Indirect containers" do
       end
     end
 
-    context "when using is_member_of_relation" do #, skip: "As far as I can tell, FC4 doesn't support IndirectContainer with isMemberOfRelation" do
+    context "when using is_member_of_relation" do # , skip: "As far as I can tell, FC4 doesn't support IndirectContainer with isMemberOfRelation" do
       before do
         class FooHistory < ActiveFedora::Base
           indirectly_contains :related_objects, is_member_of_relation: ::RDF::URI.new("http://example.com/isWithin"), inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'), through: 'Proxy', foreign_key: :proxy_for
