@@ -1,9 +1,15 @@
 module ActiveFedora
   module Associations
+    # TODO we may want to split this into two subclasses, one for has_member_relation
+    # and the other for is_member_of_relation
     class IndirectlyContainsAssociation < ContainsAssociation #:nodoc:
 
-      # TODO we may want to split this into two subclasses, one for has_member_relation
-      # and the other for is_member_of_relation
+
+      # Add +records+ to this association.  Returns +self+ so method calls may be chained.
+      # Since << flattens its argument list and inserts each record, +push+ and +concat+ behave identically.
+      def concat(*records)
+        concat_records(records)
+      end
 
       def insert_record(record, force = true, validate = true)
         container.save!

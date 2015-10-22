@@ -99,7 +99,11 @@ describe "Indirect containers" do
       before do
         class FooHistory < ActiveFedora::Base
           # TODO inserted_content_relation can look up the predicate at options[:through].constantize.reflect_on_association(options[:foreign_key]).predicate
-          indirectly_contains :related_objects, has_member_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/aggregates'), inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'), through: 'Proxy', foreign_key: :proxy_for
+          indirectly_contains :related_objects,
+                              has_member_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/aggregates'),
+                              inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'),
+                              through: 'Proxy',
+                              foreign_key: :proxy_for
         end
       end
       after do
@@ -137,6 +141,19 @@ describe "Indirect containers" do
 
           it "delegates to to_a" do
             expect(subject).to eq [file]
+          end
+        end
+
+        describe "#concat" do
+          it "doesn't load all the members" do
+            other = FooHistory.find(o.id)
+            r3 = RelatedObject.create
+            other.related_objects << r3
+            expect(other.related_objects.loaded?).to be false
+            # Calling the reader method triggers a load
+            expect(other.related_objects.size).to eq 2
+            expect(other.related_objects.loaded?).to be true
+            expect(other.related_objects).to include(r3)
           end
         end
 
