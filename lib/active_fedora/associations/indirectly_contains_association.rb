@@ -22,6 +22,18 @@ module ActiveFedora
         true
       end
 
+      # Implements the ids reader method, e.g. foo.item_ids for
+      # Foo.indirectly_contains :items, ...
+      def ids_reader
+        predicate = reflection.options.fetch(:has_member_relation)
+        if loaded?
+          target.map(&:id)
+        else
+          owner.resource.query(predicate: predicate)
+            .map { |s| ActiveFedora::Base.uri_to_id(s.object) } + target.map(&:id)
+        end
+      end
+
       def find_target
         if container_predicate = options[:has_member_relation]
           uris = owner.resource.query(predicate: container_predicate).map { |r| r.object.to_s }
