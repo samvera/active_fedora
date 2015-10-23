@@ -23,10 +23,9 @@ namespace :active_fedora do
   end
 
   require 'rspec/core/rake_task'
-  task rspec: :rubocop do
-    RSpec::Core::RakeTask.new(:rspec) do |spec|
-      spec.rspec_opts = ['--backtrace'] if ENV['CI']
-    end
+  desc 'Run tests only'
+  RSpec::Core::RakeTask.new(:rspec) do |spec|
+    spec.rspec_opts = ['--backtrace'] if ENV['CI']
   end
 
   require 'rubocop/rake_task'
@@ -62,7 +61,7 @@ namespace :active_fedora do
   end
 
   desc "Execute specs with coverage"
-  task :coverage do
+  task coverage: :rubocop do
     # Put spec opts in a file named .rspec in root
     ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
     ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
