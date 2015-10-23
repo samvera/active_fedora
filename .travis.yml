@@ -3,17 +3,18 @@ cache: bundler
 sudo: false
 rvm:
   - 2.2.1
-gemfile:
-  - gemfiles/rails4.1.gemfile
-  - gemfiles/rails4.2.gemfile
 matrix:
   include:
     - rvm: 2.1
-      gemfile: gemfiles/rails4.2.gemfile
+      env: "RAILS_VERSION=4.2.4"
+
 notifications:
   irc: "irc.freenode.org#projecthydra"
+
 env:
-  global:
-    - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+  - "RAILS_VERSION=4.1.13"
+
+global_env:
+  - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
 before_script:
   - jdk_switcher use oraclejdk8
