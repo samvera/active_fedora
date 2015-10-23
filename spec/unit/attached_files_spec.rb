@@ -168,6 +168,33 @@ describe ActiveFedora::AttachedFiles do
     end
   end
 
+  describe "#declared_attached_files" do
+    subject { obj.declared_attached_files }
+
+    context "when there are undeclared attached files" do
+      let(:obj) { ActiveFedora::Base.create }
+      let(:file) { ActiveFedora::File.new }
+      before do
+        obj.attach_file(file, 'Abc')
+      end
+      it { is_expected.to be_empty }
+    end
+
+    context "when there are declared attached files" do
+      before do
+        class FooHistory < ActiveFedora::Base
+          contains 'thumbnail'
+        end
+      end
+
+      after do
+        Object.send(:remove_const, :FooHistory)
+      end
+      let(:obj) { FooHistory.new }
+      it { is_expected.to have_key :thumbnail }
+    end
+  end
+
   describe "#serialize_attached_files" do
     it "touches each file" do
       m1 = double
@@ -175,7 +202,7 @@ describe ActiveFedora::AttachedFiles do
 
       expect(m1).to receive(:serialize!)
       expect(m2).to receive(:serialize!)
-      allow(subject).to receive(:attached_files).and_return(m1: m1, m2: m2)
+      allow(subject).to receive(:declared_attached_files).and_return(m1: m1, m2: m2)
       subject.serialize_attached_files
     end
   end

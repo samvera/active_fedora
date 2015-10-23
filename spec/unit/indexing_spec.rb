@@ -69,7 +69,7 @@ describe ActiveFedora::Indexing do
         expect(mock1).to receive(:to_solr).and_return("one" => "title one")
         expect(mock2).to receive(:to_solr).and_return("two" => "title two")
 
-        allow(test_object).to receive(:attached_files).and_return(ds1: mock1, ds2: mock2)
+        allow(test_object).to receive(:declared_attached_files).and_return(ds1: mock1, ds2: mock2)
         expect(subject).to include('one' => 'title one', 'two' => 'title two')
       end
     end

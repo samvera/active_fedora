@@ -12,7 +12,14 @@ module ActiveFedora
     deprecation_deprecate :ds_specs
 
     def serialize_attached_files
-      attached_files.each_value(&:serialize!)
+      declared_attached_files.each_value(&:serialize!)
+    end
+
+    # Returns only the attached_files that are declared with 'contains'
+    def declared_attached_files
+      attached_files.reflections.keys.each_with_object({}) do |k, h|
+        h[k] = attached_files[k]
+      end
     end
 
     #
