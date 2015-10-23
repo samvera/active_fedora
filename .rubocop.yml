@@ -70,6 +70,7 @@ Metrics/ModuleLength:
     - 'lib/active_fedora/persistence.rb'
     - 'lib/active_fedora/attributes.rb'
     - 'lib/active_fedora/autosave_association.rb'
+    - 'lib/active_fedora/attached_files.rb'
 
 Metrics/ClassLength:
   Exclude:

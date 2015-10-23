@@ -3,6 +3,8 @@ module ActiveFedora
   # Used as an access method for associations on a model, given some
   # reflections.
   class AssociationHash
+    attr_reader :base
+
     def initialize(model, reflections)
       @base = model
       @reflections = reflections
@@ -19,7 +21,7 @@ module ActiveFedora
     def association(name)
       # Check to see if the key exists before casting to a symbol, because symbols
       # are not garbage collected in earlier versions of Ruby
-      @base.association(name.to_sym) if key?(name)
+      base.association(name.to_sym) if key?(name)
     end
 
     attr_reader :reflections
@@ -68,10 +70,13 @@ module ActiveFedora
       end
     end
 
+    # returns the loaded files for with the passed block returns true
     def select
       keys.each_with_object({}) do |k, h|
-        val = self[k]
-        h[k] = val if yield k, val
+        if association(k).loaded?
+          val = self[k]
+          h[k] = val if yield k, val
+        end
       end
     end
 
@@ -91,6 +96,7 @@ module ActiveFedora
 
     def initialize(first, second)
       @first = first
+      @base = first.base
       @second = second
     end
 
