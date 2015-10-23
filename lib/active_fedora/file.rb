@@ -27,8 +27,8 @@ module ActiveFedora
     define_model_callbacks :initialize, only: :after
 
     # @param parent_or_url_or_hash [ActiveFedora::Base, RDF::URI, String, Hash, NilClass] the parent resource or the URI of this resource
-    # @param path [String] the path partial relative to the resource
-    # @param options [Hash]
+    # @param [String] path the path partial relative to the resource
+    # @param [Hash] _options
     # @yield [self] Yields self
     # @yieldparam [File] self the newly created file
     def initialize(parent_or_url_or_hash = nil, path = nil, _options = {}, &_block)

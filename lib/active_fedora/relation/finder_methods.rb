@@ -258,7 +258,7 @@ module ActiveFedora
       end
 
       # @param [Hash<Symbol,String>] conditions
-      # @returns [Array<String>]
+      # @return [Array<String>]
       def create_query_from_hash(conditions)
         conditions.map { |key, value| condition_to_clauses(key, value) }.compact
       end
