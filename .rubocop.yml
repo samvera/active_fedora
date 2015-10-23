@@ -7,6 +7,7 @@ AllCops:
     - '**/Rakefile'
   Exclude:
     - 'script/**/*'
+    - 'vendor/**/*'
 
 Lint/RescueException:
   Exclude:
