@@ -25,7 +25,7 @@ describe ActiveFedora::RDFDatastream do
     end
 
     class DummyAsset < ActiveFedora::Base
-      has_metadata  'descMetadata', type: DummyResource
+      has_metadata 'descMetadata', type: DummyResource
       Deprecation.silence(ActiveFedora::Attributes) do
         has_attributes :title, :license, datastream: 'descMetadata', multiple: true
         has_attributes :relation, datastream: 'descMetadata', at: [:license, :relation], multiple: false
@@ -42,19 +42,17 @@ describe ActiveFedora::RDFDatastream do
   subject { DummyAsset.new }
 
   describe "#to_solr" do
-
     before { subject.descMetadata.title = "bla" }
 
-    it "should not be blank" do
+    it "does not be blank" do
       expect(subject.to_solr).not_to be_blank
     end
 
-    it "should solrize" do
+    it "solrizes" do
       expect(subject.to_solr["desc_metadata__title_teim"]).to eq ["bla"]
     end
 
     context "with ActiveFedora::Base resources" do
-
       let(:dummy_asset) { DummyAsset.new }
 
       before do
@@ -62,31 +60,27 @@ describe ActiveFedora::RDFDatastream do
         subject.descMetadata.creator = dummy_asset
       end
 
-      it "should solrize objects" do
+      it "solrizes objects" do
         expect(subject.to_solr["desc_metadata__creator_teim"]).to eq ["http://foo"]
       end
-
     end
 
     context "with ActiveTriples resources" do
-
       before { subject.descMetadata.license = DummySubnode.new('http://example.org/blah') }
 
-      it "should solrize uris" do
+      it "solrizes uris" do
         expect(subject.to_solr["desc_metadata__license_teim"]).to eq ['http://example.org/blah']
       end
-
-   end
-
+    end
   end
 
   describe "delegation" do
-    it "should retrieve values" do
+    it "retrieves values" do
       subject.descMetadata.title = "bla"
       expect(subject.title).to eq ["bla"]
     end
 
-    it "should set values" do
+    it "sets values" do
       subject.title = ["blah"]
       expect(subject.descMetadata.title).to eq ["blah"]
     end
@@ -98,11 +92,11 @@ describe ActiveFedora::RDFDatastream do
         subject.descMetadata.title = "bla"
       end
 
-      it "should let you access" do
+      it "lets you access" do
         expect(subject.descMetadata.title).to eq ["bla"]
       end
 
-      it "should mark it as changed" do
+      it "marks it as changed" do
         expect(subject.descMetadata).to be_changed
       end
 
@@ -112,7 +106,7 @@ describe ActiveFedora::RDFDatastream do
           subject.reload
         end
 
-        it "should be persisted" do
+        it "is persisted" do
           expect(subject.descMetadata.resource).to be_persisted
         end
 
@@ -121,11 +115,11 @@ describe ActiveFedora::RDFDatastream do
             subject.reload
           end
 
-          it "should be accessible after being saved" do
+          it "is accessible after being saved" do
             expect(subject.descMetadata.title).to eq ["bla"]
           end
 
-          it "should serialize to content" do
+          it "serializes to content" do
             expect(subject.descMetadata.content).not_to be_blank
           end
         end
@@ -135,15 +129,15 @@ describe ActiveFedora::RDFDatastream do
             @object = DummyAsset.find(subject.id)
           end
 
-          it "should serialize to content" do
+          it "serializes to content" do
             expect(@object.descMetadata.content).not_to be_blank
           end
 
-          it "should be accessible after being saved" do
+          it "is accessible after being saved" do
             expect(@object.descMetadata.title).to eq ["bla"]
           end
 
-          it "should have datastream content" do
+          it "has datastream content" do
             expect(@object.descMetadata.remote_content).not_to be_blank
           end
         end
@@ -158,11 +152,11 @@ describe ActiveFedora::RDFDatastream do
           subject.descMetadata.license = dummy
         end
 
-        it "should let you access" do
+        it "lets you access" do
           expect(subject.descMetadata.license.first.title).to eq ['subbla']
         end
 
-        it "should mark it as changed" do
+        it "marks it as changed" do
           expect(subject.descMetadata).to be_changed
         end
       end
@@ -177,11 +171,11 @@ describe ActiveFedora::RDFDatastream do
           subject.descMetadata.license = dummy
         end
 
-        it "should let you access" do
+        it "lets you access" do
           expect(subject.descMetadata.license.first.title).to eq ['subbla']
         end
 
-        it "should mark it as changed" do
+        it "marks it as changed" do
           expect(subject.descMetadata).to be_changed
         end
       end
@@ -197,11 +191,11 @@ describe ActiveFedora::RDFDatastream do
       subject.descMetadata.creator = @new_object
     end
 
-    it "should have accessible relationship attributes" do
+    it "has accessible relationship attributes" do
       expect(subject.descMetadata.creator.first.title).to eq ["subbla"]
     end
 
-    it "should let me get to an AF:Base object" do
+    it "lets me get to an AF:Base object" do
       subject.save
       subject.reload
       expect(subject.descMetadata.creator.first).to be_kind_of(ActiveFedora::Base)
@@ -212,14 +206,14 @@ describe ActiveFedora::RDFDatastream do
         subject.save
         @new_object.destroy
       end
-      it "should give back an ActiveTriples::Resource" do
+      it "gives back an ActiveTriples::Resource" do
         subject.reload
         expect(subject.descMetadata.creator.first).to be_kind_of(ActiveTriples::Resource)
         expect(subject.descMetadata.creator.first.rdf_subject).to eq @new_object.resource.rdf_subject
       end
     end
 
-    it "should allow for deep attributes to be set directly" do
+    it "allows for deep attributes to be set directly" do
       subject.descMetadata.creator.first.title = ["Bla"]
       expect(subject.descMetadata.creator.first.title).to eq ["Bla"]
     end
@@ -227,16 +221,16 @@ describe ActiveFedora::RDFDatastream do
     context "when the subject is set with base_uri" do
       before do
         @old_uri = DummyResource.resource_class.base_uri
-        DummyResource.resource_class.configure :base_uri => 'http://example.org/'
+        DummyResource.resource_class.configure base_uri: 'http://example.org/'
         new_object = DummyAsset.new
         new_object.save
         subject.descMetadata.creator = new_object
       end
       after do
-        DummyResource.resource_class.configure :base_uri => @old_uri
+        DummyResource.resource_class.configure base_uri: @old_uri
       end
 
-      it "should let me get to an AF:Base object" do
+      it "lets me get to an AF:Base object" do
         subject.save
         subject.reload
         expect(subject.descMetadata.creator.first).to be_kind_of(ActiveFedora::Base)
@@ -249,7 +243,7 @@ describe ActiveFedora::RDFDatastream do
         @object = subject.class.find(subject.id)
       end
 
-      it "should be retrievable" do
+      it "is retrievable" do
         expect(subject.descMetadata.creator.first.title).to eq ["subbla"]
       end
     end
@@ -262,7 +256,7 @@ describe ActiveFedora::RDFDatastream do
         subject.freeze
       end
 
-      it "should be retrievable" do
+      it "is retrievable" do
         expect(subject.descMetadata.creator.first.title).to eq ["subbla"]
       end
     end

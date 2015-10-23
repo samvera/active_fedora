@@ -22,12 +22,12 @@ module ActiveFedora::Associations
 
     private
 
-    def convert(id)
-      if id.to_s.start_with?("http")
-        id_translator.call(id)
-      else
-        id
+      def convert(id)
+        if id.to_s.start_with?("http")
+          id_translator.call(id)
+        else
+          id
+        end
       end
-    end
   end
 end

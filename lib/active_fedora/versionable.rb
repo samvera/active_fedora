@@ -24,7 +24,7 @@ module ActiveFedora
 
     # Returns an array of ActiveFedora::VersionsGraph::ResourceVersion objects.
     # Excludes auto-snapshot versions from Fedora.
-    def versions(reload=false)
+    def versions(reload = false)
       if reload
         @versions = ActiveFedora::VersionsGraph.new << ::RDF::Reader.for(:ttl).new(versions_request)
       else
@@ -33,7 +33,7 @@ module ActiveFedora
     end
 
     def create_version
-      resp = ActiveFedora.fedora.connection.post(versions_uri, nil, {slug: version_name})
+      resp = ActiveFedora.fedora.connection.post(versions_uri, nil, slug: version_name)
       @versions = nil
       resp.success?
     end
@@ -46,7 +46,7 @@ module ActiveFedora
       false
     end
 
-    def restore_version label
+    def restore_version(label)
       resp = ActiveFedora.fedora.connection.patch(versions.with_label(label).uri, nil)
       @versions = nil
       reload
@@ -72,7 +72,7 @@ module ActiveFedora
 
       def versions_uri
         uri + '/fcr:versions'
-      end     
+      end
 
       def version_name
         if versions.all.empty?
@@ -81,6 +81,5 @@ module ActiveFedora
           "version" + (versions.all.count + 1).to_s
         end
       end
-
   end
 end

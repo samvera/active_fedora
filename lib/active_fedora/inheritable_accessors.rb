@@ -12,6 +12,7 @@ module ActiveFedora
       end
 
       private
+
         def define_accessor(name, val)
           singleton_class.class_eval do
             remove_possible_method(name)

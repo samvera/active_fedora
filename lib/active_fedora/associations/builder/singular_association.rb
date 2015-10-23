@@ -8,7 +8,7 @@ module ActiveFedora::Associations::Builder
 
     def self.define_accessors(model, reflection)
       super
-      define_constructors(model.generated_association_methods, reflection.name)  if constructable?
+      define_constructors(model.generated_association_methods, reflection.name) if constructable?
     end
 
     def self.define_constructors(mixin, name)

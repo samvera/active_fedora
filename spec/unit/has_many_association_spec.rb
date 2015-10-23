@@ -25,7 +25,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
     let(:reflection) { Book.create_reflection(:has_many, 'pages', { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf }, Book) }
     let(:association) { described_class.new(book, reflection) }
 
-    it "should set the book_id attribute" do
+    it "sets the book_id attribute" do
       expect(association).to receive(:callback).twice
       expect(page).to receive(:[]=).with('book_id', book.id)
       association.concat page
@@ -33,7 +33,6 @@ describe ActiveFedora::Associations::HasManyAssociation do
   end
 
   describe "Finding a polymorphic inverse relation" do
-
     before do
       # :books must come first, so that we can test that is being passed over in favor of :contents
       Page.has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
@@ -44,11 +43,10 @@ describe ActiveFedora::Associations::HasManyAssociation do
 
     subject { association.send(:find_polymorphic_inverse, page) }
 
-    it "should find the HABTM reflection" do
+    it "finds the HABTM reflection" do
       expect(subject.name).to eq :contents
     end
   end
-
 
   context "when inverse doesn't have a predictable name" do
     before do
@@ -57,7 +55,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       end
 
       class Image < ActiveFedora::Base
-         has_and_belongs_to_many :created, predicate: ::RDF::DC.created, class_name: 'TimeSpan'
+        has_and_belongs_to_many :created, predicate: ::RDF::DC.created, class_name: 'TimeSpan'
       end
     end
 

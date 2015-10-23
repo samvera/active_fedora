@@ -29,17 +29,15 @@ RSpec::Matchers.define :have_many_associated_active_fedora_objects do |associati
 
   chain(:with_objects) { |objects| @expected_objects = objects }
 
-
   description do
     "#{@subject.class} ID=#{@subject.id} association: #{@association_name.inspect} matches ActiveFedora"
   end
 
-  failure_message do |text|
+  failure_message do |_text|
     "expected #{@subject.class} ID=#{@subject.id} association: #{@association_name.inspect} to match"
   end
 
-  failure_message_when_negated do |text|
+  failure_message_when_negated do |_text|
     "expected #{@subject.class} ID=#{@subject.id} association: #{@association_name.inspect} to NOT match"
   end
-
 end

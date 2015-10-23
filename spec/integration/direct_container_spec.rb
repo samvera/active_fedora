@@ -5,7 +5,7 @@ describe "Direct containers" do
     context "when the class is ActiveFedora::File" do
       before do
         class FooHistory < ActiveFedora::Base
-           directly_contains :files, has_member_relation: ::RDF::URI.new("http://example.com/hasFiles")
+          directly_contains :files, has_member_relation: ::RDF::URI.new("http://example.com/hasFiles")
         end
       end
       after do
@@ -78,7 +78,7 @@ describe "Direct containers" do
       before do
         class SubFile < ActiveFedora::File; end
         class FooHistory < ActiveFedora::Base
-           directly_contains :files, has_member_relation: ::RDF::URI.new("http://example.com/hasFiles"), class_name: 'SubFile'
+          directly_contains :files, has_member_relation: ::RDF::URI.new("http://example.com/hasFiles"), class_name: 'SubFile'
         end
       end
       after do
@@ -113,7 +113,7 @@ describe "Direct containers" do
     context "when using is_member_of_relation" do
       before do
         class FooHistory < ActiveFedora::Base
-           directly_contains :files, is_member_of_relation: ::RDF::URI.new("http://example.com/isWithin")
+          directly_contains :files, is_member_of_relation: ::RDF::URI.new("http://example.com/isWithin")
         end
       end
       after do
@@ -151,7 +151,7 @@ describe "Direct containers" do
     context "deleting members" do
       before do
         class FooHistory < ActiveFedora::Base
-           directly_contains :files, is_member_of_relation: ::RDF::URI.new("http://example.com/isWithin")
+          directly_contains :files, is_member_of_relation: ::RDF::URI.new("http://example.com/isWithin")
         end
       end
       after do
@@ -196,13 +196,10 @@ describe "Direct containers" do
           expect(history.reload.files).to eq [file2]
         end
       end
-
     end
-
   end
 
   describe "#include?" do
-
     before do
       class FooHistory < ActiveFedora::Base
         directly_contains :files, has_member_relation: ::RDF::URI.new('http://example.com/hasFiles')
@@ -229,7 +226,7 @@ describe "Direct containers" do
       end
 
       context "and it doesn't contain the file" do
-        let!(:file2) { ActiveFedora::File.new.tap { |f| f.content= 'hmm'; f.save } }
+        let!(:file2) { ActiveFedora::File.new.tap { |f| f.content = 'hmm'; f.save } }
         subject { foo.reload.files.include? file2 }
         it { is_expected.to be false }
       end
@@ -244,11 +241,10 @@ describe "Direct containers" do
       end
 
       context "and it doesn't contain the file" do
-        let!(:file2) { ActiveFedora::File.new.tap { |f| f.content= 'hmm'; f.save } }
+        let!(:file2) { ActiveFedora::File.new.tap { |f| f.content = 'hmm'; f.save } }
         subject { foo.files.include? file2 }
         it { is_expected.to be false }
       end
     end
   end
-
 end

@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-describe "Mass assignment protection" do
+describe ActiveFedora::Attributes, ".new" do
   before(:all) do
     class ProtectedParams < ActiveSupport::HashWithIndifferentAccess
       attr_accessor :permitted
-      alias :permitted? :permitted
+      alias_method :permitted?, :permitted
 
       def initialize(attributes)
         super(attributes)
@@ -34,7 +34,6 @@ describe "Mass assignment protection" do
     Object.send(:remove_const, :Person)
   end
 
-
   context "forbidden attributes" do
     let(:params) { ProtectedParams.new(first_name: 'Guille', gender: 'm') }
     it "cannot be used for mass assignment" do
@@ -48,5 +47,4 @@ describe "Mass assignment protection" do
       expect { Person.new(params) }.not_to raise_error
     end
   end
-
 end

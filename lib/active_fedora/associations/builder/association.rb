@@ -8,7 +8,7 @@ module ActiveFedora::Associations::Builder
 
     attr_reader :model, :name, :options, :mixin
 
-    #configure_dependency
+    # configure_dependency
     def self.build(model, name, options)
       reflection = new(model, name, options).build
       define_accessors(model, reflection)
@@ -17,7 +17,9 @@ module ActiveFedora::Associations::Builder
     end
 
     def initialize(model, name, options)
-      @model, @name, @options = model, name, options
+      @model = model
+      @name = name
+      @options = options
       translate_property_to_predicate
       validate_options
     end
@@ -37,10 +39,9 @@ module ActiveFedora::Associations::Builder
       options.assert_valid_keys(self.class.valid_options)
     end
 
-
     # Returns the RDF predicate as defined by the :property attribute
     def predicate(property)
-      return property if property.kind_of? RDF::URI
+      return property if property.is_a? RDF::URI
       ActiveFedora::Predicates.find_graph_predicate(property)
     end
 
@@ -71,21 +72,19 @@ module ActiveFedora::Associations::Builder
     end
 
     def configure_dependency
-      if options[:dependent]
-        unless [:destroy, :delete].include?(options[:dependent])
-          raise ArgumentError, "The :dependent option expects either :destroy or :delete (#{options[:dependent].inspect})"
-        end
-
-        method_name = "belongs_to_dependent_#{options[:dependent]}_for_#{name}"
-        model.send(:class_eval, <<-eoruby, __FILE__, __LINE__ + 1)
-          def #{method_name}
-            association = #{name}
-            association.#{options[:dependent]} if association
-          end
-        eoruby
-        model.after_destroy method_name
+      return unless options[:dependent]
+      unless [:destroy, :delete].include?(options[:dependent])
+        raise ArgumentError, "The :dependent option expects either :destroy or :delete (#{options[:dependent].inspect})"
       end
-    end
 
+      method_name = "belongs_to_dependent_#{options[:dependent]}_for_#{name}"
+      model.send(:class_eval, <<-eoruby, __FILE__, __LINE__ + 1)
+        def #{method_name}
+          association = #{name}
+          association.#{options[:dependent]} if association
+        end
+      eoruby
+      model.after_destroy method_name
+    end
   end
 end

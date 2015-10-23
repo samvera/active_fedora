@@ -33,11 +33,11 @@ module ActiveFedora
 
     # Pushes the object and all of its new or dirty attached files into Fedora
     def update(attributes)
-      self.attributes=attributes
+      self.attributes = attributes
       save
     end
 
-    alias update_attributes update
+    alias_method :update_attributes, :update
 
     # Deletes an object from Fedora and deletes the indexed record from Solr.
     # Delete does not run any callbacks, so consider using _destroy_ instead.
@@ -58,9 +58,7 @@ module ActiveFedora
       end
 
       ActiveFedora::SolrService.delete(id) if ENABLE_SOLR_UPDATES
-      if opts[:eradicate]
-        self.class.eradicate(id)
-      end
+      self.class.eradicate(id) if opts[:eradicate]
       freeze
     end
 
@@ -73,7 +71,7 @@ module ActiveFedora
     end
 
     def eradicate
-      self.class.eradicate(self.id)
+      self.class.eradicate(id)
     end
 
     module ClassMethods
@@ -118,102 +116,102 @@ module ActiveFedora
 
       private
 
-      def gone? uri
-        ActiveFedora::Base.find(uri)
-        false
-      rescue Ldp::Gone
-        true
+        def gone?(uri)
+          ActiveFedora::Base.find(uri)
+          false
+        rescue Ldp::Gone
+          true
+        end
+
+        def delete_tombstone(uri)
+          tombstone = ActiveFedora::Base.id_to_uri(uri) + "/fcr:tombstone"
+          ActiveFedora.fedora.connection.delete(tombstone)
+          true
+        end
+    end
+
+    private
+
+      def create_or_update(*args)
+        raise ReadOnlyRecord if readonly?
+        result = new_record? ? create_record(*args) : update_record(*args)
+        result != false
       end
 
-      def delete_tombstone uri
-        tombstone = ActiveFedora::Base.id_to_uri(uri) + "/fcr:tombstone"
-        ActiveFedora.fedora.connection.delete(tombstone)
-        true
+      # Deals with preparing new object to be saved to Fedora, then pushes it and its attached files into Fedora.
+      def create_record(_options = {})
+        assign_rdf_subject
+        serialize_attached_files
+        @ldp_source = @ldp_source.create
+        assign_uri_to_contained_resources
+        save_contained_resources
+        refresh
       end
-    end
 
-  private
-
-    def create_or_update(*args)
-      raise ReadOnlyRecord if readonly?
-      result = new_record? ? create_record(*args) : update_record(*args)
-      result != false
-    end
-
-    # Deals with preparing new object to be saved to Fedora, then pushes it and its attached files into Fedora.
-    def create_record(options = {})
-      assign_rdf_subject
-      serialize_attached_files
-      @ldp_source = @ldp_source.create
-      assign_uri_to_contained_resources
-      save_contained_resources
-      refresh
-    end
-
-    def update_record(options = {})
-      serialize_attached_files
-      execute_sparql_update
-      save_contained_resources
-      refresh
-    end
-
-    def refresh
-      @ldp_source = build_ldp_resource(id)
-      @resource = nil
-    end
-
-    def execute_sparql_update
-      change_set = ChangeSet.new(self, self.resource, self.changed_attributes.keys)
-      return true if change_set.empty?
-      ActiveFedora.fedora.ldp_resource_service.update(change_set, self.class, id)
-    end
-
-    # Override to tie in an ID minting service
-    def assign_id
-    end
-
-    # This is only used when creating a new record. If the object doesn't have an id
-    # and assign_id can mint an id for the object, then assign it to the resource.
-    # Otherwise the resource will have the id assigned by the LDP server
-    def assign_rdf_subject
-      @ldp_source = if !id && new_id = assign_id
-        LdpResource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_id), @resource)
-      else
-        LdpResource.new(ActiveFedora.fedora.connection, @ldp_source.subject, @resource, ActiveFedora.fedora.host + base_path_for_resource)
+      def update_record(_options = {})
+        serialize_attached_files
+        execute_sparql_update
+        save_contained_resources
+        refresh
       end
-    end
 
-    def base_path_for_resource
-      init_root_path if self.has_uri_prefix?
-      self.root_resource_path
-    end
-
-    def init_root_path
-      path = self.root_resource_path.gsub(/^\//,"")
-      ActiveFedora.fedora.connection.head(path)
-    rescue Ldp::NotFound
-      ActiveFedora.fedora.connection.put(path, "")
-    end
-
-    def assign_uri_to_contained_resources
-      contained_resources.each do |name, source|
-        source.uri= "#{uri}/#{name}"
+      def refresh
+        @ldp_source = build_ldp_resource(id)
+        @resource = nil
       end
-    end
 
-    def save_contained_resources
-      contained_resources.changed.each do |_, resource|
-        resource.save
+      def execute_sparql_update
+        change_set = ChangeSet.new(self, resource, changed_attributes.keys)
+        return true if change_set.empty?
+        ActiveFedora.fedora.ldp_resource_service.update(change_set, self.class, id)
       end
-    end
 
-    def contained_resources
-      @contained_resources ||= attached_files.merge(contained_rdf_sources)
-    end
+      # Override to tie in an ID minting service
+      def assign_id
+      end
 
-    def contained_rdf_sources
-      @contained_rdf_sources ||=
-        AssociationHash.new(self, self.class.contained_rdf_source_reflections)
-    end
+      # This is only used when creating a new record. If the object doesn't have an id
+      # and assign_id can mint an id for the object, then assign it to the resource.
+      # Otherwise the resource will have the id assigned by the LDP server
+      def assign_rdf_subject
+        @ldp_source = if !id && new_id = assign_id
+                        LdpResource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_id), @resource)
+                      else
+                        LdpResource.new(ActiveFedora.fedora.connection, @ldp_source.subject, @resource, ActiveFedora.fedora.host + base_path_for_resource)
+                      end
+      end
+
+      def base_path_for_resource
+        init_root_path if self.has_uri_prefix?
+        root_resource_path
+      end
+
+      def init_root_path
+        path = root_resource_path.gsub(/^\//, "")
+        ActiveFedora.fedora.connection.head(path)
+      rescue Ldp::NotFound
+        ActiveFedora.fedora.connection.put(path, "")
+      end
+
+      def assign_uri_to_contained_resources
+        contained_resources.each do |name, source|
+          source.uri = "#{uri}/#{name}"
+        end
+      end
+
+      def save_contained_resources
+        contained_resources.changed.each do |_, resource|
+          resource.save
+        end
+      end
+
+      def contained_resources
+        @contained_resources ||= attached_files.merge(contained_rdf_sources)
+      end
+
+      def contained_rdf_sources
+        @contained_rdf_sources ||=
+          AssociationHash.new(self, self.class.contained_rdf_source_reflections)
+      end
   end
 end

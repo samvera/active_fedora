@@ -3,7 +3,6 @@ require 'yaml'
 
 module ActiveFedora
   class FileConfigurator
-
     # Initializes ActiveFedora's connection to Fedora and Solr based on the info in fedora.yml and solr.yml
     # NOTE: this deprecates the use of a solr url in the fedora.yml
     #
@@ -55,7 +54,7 @@ module ActiveFedora
       reset!
     end
 
-    def init options = {}
+    def init(options = {})
       if options.is_a?(String)
         raise ArgumentError, "Calling ActiveFedora.init with a path as an argument has been removed.  Use ActiveFedora.init(:fedora_config_path=>#{options})"
       end
@@ -68,17 +67,18 @@ module ActiveFedora
       load_configs
       @fedora_config
     end
+
     def solr_config
       load_configs
       @solr_config
     end
 
     def path
-      get_config_path(:fedora)
+      config_path(:fedora)
     end
 
     def reset!
-      @config_loaded = false  #Force reload of configs
+      @config_loaded = false # Force reload of configs
       @fedora_config = {}
       @solr_config = {}
       @config_options = {}
@@ -100,13 +100,13 @@ module ActiveFedora
 
     def load_fedora_config
       return @fedora_config unless @fedora_config.empty?
-      @fedora_config_path = get_config_path(:fedora)
+      @fedora_config_path = config_path(:fedora)
       ActiveFedora::Base.logger.info("ActiveFedora: loading fedora config from #{::File.expand_path(@fedora_config_path)}") if ActiveFedora::Base.logger
 
       begin
         config_erb = ERB.new(IO.read(@fedora_config_path)).result(binding)
-      rescue Exception => e
-        raise("fedora.yml was found, but could not be parsed with ERB. \n#{$!.inspect}")
+      rescue StandardError
+        raise("fedora.yml was found, but could not be parsed with ERB. \n#{$ERROR_INFO.inspect}")
       end
 
       begin
@@ -119,41 +119,41 @@ module ActiveFedora
       config = fedora_yml.symbolize_keys
 
       cfg = config[ActiveFedora.environment.to_sym] || {}
-      @fedora_config = cfg.kind_of?(Array) ? cfg.map(&:symbolize_keys) : cfg.symbolize_keys
+      @fedora_config = cfg.is_a?(Array) ? cfg.map(&:symbolize_keys) : cfg.symbolize_keys
     end
 
     def load_solr_config
       return @solr_config unless @solr_config.empty?
-      @solr_config_path = get_config_path(:solr)
+      @solr_config_path = config_path(:solr)
 
       ActiveFedora::Base.logger.info "ActiveFedora: loading solr config from #{::File.expand_path(@solr_config_path)}" if ActiveFedora::Base.logger
       begin
         config_erb = ERB.new(IO.read(@solr_config_path)).result(binding)
-      rescue Exception => e
-        raise("solr.yml was found, but could not be parsed with ERB. \n#{$!.inspect}")
+      rescue StandardError
+        raise("solr.yml was found, but could not be parsed with ERB. \n#{$ERROR_INFO.inspect}")
       end
 
       begin
         solr_yml = YAML.load(config_erb)
-      rescue StandardError => e
+      rescue StandardError
         raise("solr.yml was found, but could not be parsed.\n")
       end
 
       config = solr_yml.symbolize_keys
       raise "The #{ActiveFedora.environment.to_sym} environment settings were not found in the solr.yml config.  If you already have a solr.yml file defined, make sure it defines settings for the #{ActiveFedora.environment.to_sym} environment" unless config[ActiveFedora.environment.to_sym]
-      @solr_config = {:url=> get_solr_url(config[ActiveFedora.environment.to_sym].symbolize_keys)}
+      @solr_config = { url: solr_url(config[ActiveFedora.environment.to_sym].symbolize_keys) }
     end
 
     # Given the solr_config that's been loaded for this environment,
     # determine which solr url to use
-    def get_solr_url(solr_config)
-      if @index_full_text == true && solr_config.has_key?(:fulltext) && solr_config[:fulltext].has_key?('url')
+    def solr_url(solr_config)
+      if @index_full_text == true && solr_config.key?(:fulltext) && solr_config[:fulltext].key?('url')
         return solr_config[:fulltext]['url']
-      elsif solr_config.has_key?(:default) && solr_config[:default].has_key?('url')
+      elsif solr_config.key?(:default) && solr_config[:default].key?('url')
         return solr_config[:default]['url']
-      elsif solr_config.has_key?('url')
+      elsif solr_config.key?('url')
         return solr_config['url']
-      elsif solr_config.has_key?(:url)
+      elsif solr_config.key?(:url)
         return solr_config[:url]
       else
         raise URI::InvalidURIError
@@ -165,11 +165,11 @@ module ActiveFedora
     # 2. Look in +Rails.root+/config/fedora.yml
     # 3. Look in +current working directory+/config/fedora.yml
     # 4. Load the default config that ships with this gem
-    # @param [String] config_type Either ‘fedora’ or ‘solr’
+    # @param [String] config_type Either 'fedora' or 'solr'
     # @return [String]
-    def get_config_path(config_type)
+    def config_path(config_type)
       config_type = config_type.to_s
-      if (config_path = config_options.fetch("#{config_type}_config_path".to_sym,nil) )
+      if (config_path = config_options.fetch("#{config_type}_config_path".to_sym, nil))
         raise ConfigurationError, "file does not exist #{config_path}" unless ::File.file? config_path
         return ::File.expand_path(config_path)
       end
@@ -215,20 +215,19 @@ module ActiveFedora
 
     protected
 
-    def build_predicate_config_path
-      testfile = ::File.expand_path(get_config_path(:predicate_mappings))
-      if ::File.exist?(testfile) && valid_predicate_mapping?(testfile)
-        return testfile
+      def build_predicate_config_path
+        testfile = ::File.expand_path(config_path(:predicate_mappings))
+        if ::File.exist?(testfile) && valid_predicate_mapping?(testfile)
+          return testfile
+        end
+        raise PredicateMappingsNotFoundError
       end
-      raise PredicateMappingsNotFoundError
-    end
 
-    def valid_predicate_mapping?(testfile)
-      mapping = YAML.load(::File.open(testfile))
-      return false unless mapping.has_key?(:default_namespace) && mapping[:default_namespace].is_a?(String)
-      return false unless mapping.has_key?(:predicate_mapping) && mapping[:predicate_mapping].is_a?(Hash)
-      true
-    end
-
+      def valid_predicate_mapping?(testfile)
+        mapping = YAML.load(::File.open(testfile))
+        return false unless mapping.key?(:default_namespace) && mapping[:default_namespace].is_a?(String)
+        return false unless mapping.key?(:predicate_mapping) && mapping[:predicate_mapping].is_a?(Hash)
+        true
+      end
   end
 end

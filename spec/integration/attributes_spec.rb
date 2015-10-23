@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-
 describe "delegating attributes" do
   before :all do
     class PropertiesDatastream < ActiveFedora::OmDatastream
@@ -41,7 +40,7 @@ describe "delegating attributes" do
   describe "#index_config" do
     context "on a class with properties" do
       subject { RdfObject.index_config }
-      it "should have configuration " do
+      it "has configuration" do
         expect(subject[:resource_type].behaviors).to eq [:stored_searchable, :facetable]
         expect(subject[:depositor].behaviors).to eq [:stored_searchable]
       end
@@ -59,7 +58,7 @@ describe "delegating attributes" do
 
       subject { InheritedObject.index_config }
 
-      it "should have configuration " do
+      it "has configuration" do
         expect(subject[:resource_type].behaviors).to eq [:stored_searchable, :facetable]
         expect(subject[:depositor].behaviors).to eq [:stored_searchable]
       end
@@ -85,11 +84,11 @@ describe "delegating attributes" do
         obj.save
         obj
       end
-      it "should keep a list of changes after a successful save" do
+      it "keeps a list of changes after a successful save" do
         expect(subject.previous_changes).to_not be_empty
         expect(subject.previous_changes.keys).to include("title")
       end
-      it "should clean out changes" do
+      it "cleans out changes" do
         expect(subject).to_not be_title_changed
         expect(subject.changes).to be_empty
       end
@@ -97,11 +96,9 @@ describe "delegating attributes" do
   end
 
   context "with multiple datastreams" do
-
     subject { RdfObject.create }
 
     describe "getting attributes" do
-
       before do
         subject.depositor = "foo"
         subject.resource_type = ["bar"]

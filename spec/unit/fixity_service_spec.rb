@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe ActiveFedora::FixityService do
-
   let(:service) { described_class.new(uri) }
   let(:uri) { RDF::URI("http://path/to/resource") }
 
@@ -24,9 +23,9 @@ describe ActiveFedora::FixityService do
   end
 
   describe "#check" do
-    before { allow(service).to receive(:get_fixity_response_from_fedora).and_return(response) }
+    before { allow(service).to receive(:fixity_response_from_fedora).and_return(response) }
     subject { service.check }
-    
+
     context "with Fedora version >= 4.4.0" do
       context "with a passing result" do
         let(:response) do
@@ -66,5 +65,4 @@ describe ActiveFedora::FixityService do
       it { is_expected.to be false }
     end
   end
-
 end

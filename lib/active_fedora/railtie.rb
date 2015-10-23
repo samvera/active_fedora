@@ -1,8 +1,7 @@
 module ActiveFedora
   class Railtie < Rails::Railtie
-
     config.app_middleware.insert_after "::ActionDispatch::Callbacks",
-      "ActiveFedora::LdpCache"
+                                       "ActiveFedora::LdpCache"
 
     initializer 'active_fedora.autoload', before: :set_autoload_paths do |app|
       app.config.autoload_paths << 'app/models/datastreams'

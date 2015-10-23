@@ -7,7 +7,7 @@ describe "nested hash resources" do
       ## Necessary to get AT to create hash URIs.
       def initialize(uri, parent)
         if uri.try(:node?)
-          uri = RDF::URI("#nested_#{uri.to_s.gsub('_:','')}")
+          uri = RDF::URI("#nested_#{uri.to_s.gsub('_:', '')}")
         elsif uri.start_with?("#")
           uri = RDF::URI(uri)
         end
@@ -27,12 +27,12 @@ describe "nested hash resources" do
     Object.send(:remove_const, :NestedResource)
     Object.send(:remove_const, :ExampleOwner)
   end
-  it "should be able to nest resources" do
+  it "is able to nest resources" do
     obj = ExampleOwner.new
     obj.attributes = {
-      :relation_attributes => [
+      relation_attributes: [
         {
-          :title => "Test"
+          title: "Test"
         }
       ]
     }

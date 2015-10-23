@@ -1,6 +1,5 @@
 module ActiveFedora
   module FinderMethods
-
     # Returns the first records that was found.
     #
     # @example
@@ -38,11 +37,11 @@ module ActiveFedora
       return to_a.find { |*block_args| yield(*block_args) } if block_given?
       options = args.extract_options!
       options = options.dup
-      cast = if @klass == ActiveFedora::Base && !options.has_key?(:cast)
-        true
-      else
-        options.delete(:cast)
-      end
+      cast = if @klass == ActiveFedora::Base && !options.key?(:cast)
+               true
+             else
+               options.delete(:cast)
+             end
       if options[:sort]
         # Deprecate sort sometime?
         sort = options.delete(:sort)
@@ -52,7 +51,7 @@ module ActiveFedora
       if options.present?
         options = args.first unless args.empty?
         Deprecation.warn(ActiveFedora::Base, "Calling .find with a hash has been deprecated and will not be allowed in active-fedora 10.0. Use .where instead")
-        options = {conditions: options}
+        options = { conditions: options }
         apply_finder_options(options)
       else
         raise ArgumentError, "#{self}.find() expects an id. You provided `#{args.inspect}'" unless args.is_a? Array
@@ -80,17 +79,17 @@ module ActiveFedora
     end
 
     # Returns true if object having the id or matching the conditions exists in the repository
-    # Returns false if param is false (or nil) 
+    # Returns false if param is false (or nil)
     # @param[ActiveFedora::Base, String, Hash] object, id or hash of conditions
     # @return[boolean]
     def exists?(conditions)
       conditions = conditions.id if Base === conditions
-      return false if !conditions
+      return false unless conditions
       case conditions
       when Hash
-        find_with_conditions(conditions, {rows: 1}).present?
+        find_with_conditions(conditions, rows: 1).present?
       when String
-        !!find(conditions)
+        find(conditions).present?
       else
         raise ArgumentError, "`conditions' argument must be ActiveFedora::Base, String, or Hash: #{conditions.inspect}"
       end
@@ -99,18 +98,16 @@ module ActiveFedora
     end
 
     # Returns a solr result matching the supplied conditions
-    # @param[Hash,String] conditions can either be specified as a string, or 
-    # hash representing the query part of an solr statement. If a hash is 
+    # @param[Hash,String] conditions can either be specified as a string, or
+    # hash representing the query part of an solr statement. If a hash is
     # provided, this method will generate conditions based simple equality
     # combined using the boolean AND operator.
-    # @param[Hash] options 
-    # @option opts [Array] :sort a list of fields to sort by 
+    # @param[Hash] options
+    # @option opts [Array] :sort a list of fields to sort by
     # @option opts [Array] :rows number of rows to return
-    def find_with_conditions(conditions, opts={})
-      #set default sort to created date ascending
-      unless opts.include?(:sort)
-        opts[:sort]=@klass.default_sort_params
-      end
+    def find_with_conditions(conditions, opts = {})
+      # set default sort to created date ascending
+      opts[:sort] = @klass.default_sort_params unless opts.include?(:sort)
       SolrService.query(create_query(conditions), opts)
     end
 
@@ -119,9 +116,9 @@ module ActiveFedora
     # @param [Hash] conditions the conditions for the solr search to match
     # @param [Hash] opts
     # @option opts [Boolean] :cast (true) when true, examine the model and cast it to the first known cModel
-    def find_each( conditions={}, opts={})
+    def find_each(conditions = {}, opts = {})
       cast = opts.delete(:cast)
-      find_in_batches(conditions, opts.merge({:fl=>SOLR_DOCUMENT_ID})) do |group|
+      find_in_batches(conditions, opts.merge(fl: SOLR_DOCUMENT_ID)) do |group|
         group.each do |hit|
           begin
             yield(load_from_fedora(hit[SOLR_DOCUMENT_ID], cast))
@@ -147,23 +144,22 @@ module ActiveFedora
     #  group.each { |person| puts person['name_t'] }
     #  end
 
-    def find_in_batches conditions, opts={}
+    def find_in_batches(conditions, opts = {})
       opts[:q] = create_query(conditions)
       opts[:qt] = @klass.solr_query_handler
-      #set default sort to created date ascending
-      unless opts[:sort].present?
-        opts[:sort]= @klass.default_sort_params
-      end
+      # set default sort to created date ascending
+      opts[:sort] = @klass.default_sort_params unless opts[:sort].present?
 
       batch_size = opts.delete(:batch_size) || 1000
 
       counter = 0
-      begin
+      loop do
         counter += 1
-        response = ActiveFedora::SolrService.instance.conn.paginate counter, batch_size, "select", :params => opts
+        response = ActiveFedora::SolrService.instance.conn.paginate counter, batch_size, "select", params: opts
         docs = response["response"]["docs"]
         yield docs
-      end while docs.has_next?
+        break unless docs.has_next?
+      end
     end
 
     # Retrieve the Fedora object with the given id, explore the returned object
@@ -173,7 +169,7 @@ module ActiveFedora
     #
     # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel http://fedora.info/definitions/v4/model#Dataset), return a Dataset object (not a Book).
     #   Book.find_one("hydra:dataset1")
-    def find_one(id, cast=nil)
+    def find_one(id, cast = nil)
       if where_values.empty?
         load_from_fedora(id, cast)
       else
@@ -185,123 +181,116 @@ module ActiveFedora
 
     protected
 
-    def load_from_fedora(id, cast)
-      raise ActiveFedora::ObjectNotFoundError if id.empty?
-      resource = ActiveFedora.fedora.ldp_resource_service.build(klass, id)
-      raise ActiveFedora::ObjectNotFoundError if resource.new?
-      class_to_load(resource, cast).allocate.init_with_resource(resource) # Triggers the find callback
-    end
-
-    def class_to_load(resource, cast)
-      if @klass == ActiveFedora::Base && cast == false
-        ActiveFedora::Base
-      else
-        # The true class may be a subclass of @klass, so always use from_class_uri
-        resource_class = Model.from_class_uri(has_model_value(resource)) || ActiveFedora::Base
-        unless equivalent_class?(resource_class)
-          raise ActiveFedora::ActiveFedoraError.new("Model mismatch. Expected #{@klass}. Got: #{resource_class}")
-        end
-        resource_class
+      def load_from_fedora(id, cast)
+        raise ActiveFedora::ObjectNotFoundError if id.empty?
+        resource = ActiveFedora.fedora.ldp_resource_service.build(klass, id)
+        raise ActiveFedora::ObjectNotFoundError if resource.new?
+        class_to_load(resource, cast).allocate.init_with_resource(resource) # Triggers the find callback
       end
-    end
 
-    def has_model_value(resource)
-      best_model_match = nil
+      def class_to_load(resource, cast)
+        if @klass == ActiveFedora::Base && cast == false
+          ActiveFedora::Base
+        else
+          # The true class may be a subclass of @klass, so always use from_class_uri
+          resource_class = Model.from_class_uri(has_model_value(resource)) || ActiveFedora::Base
+          unless equivalent_class?(resource_class)
+            raise ActiveFedora::ActiveFedoraError, "Model mismatch. Expected #{@klass}. Got: #{resource_class}"
+          end
+          resource_class
+        end
+      end
 
-      resource.graph.query([nil, ActiveFedora::RDF::Fcrepo::Model.hasModel, nil]).each do |rg|
+      def has_model_value(resource)
+        best_model_match = nil
 
-        model_value = Model.from_class_uri(rg.object.to_s)
-
-        if model_value
-
+        resource.graph.query([nil, ActiveFedora::RDF::Fcrepo::Model.hasModel, nil]).each do |rg|
+          model_value = Model.from_class_uri(rg.object.to_s)
+          next unless model_value
           best_model_match ||= model_value
 
           # If there is an inheritance structure, use the most specific case.
-          if best_model_match > model_value
-            best_model_match = model_value
-          end
+          best_model_match = model_value if best_model_match > model_value
+        end
+
+        best_model_match.to_s
+      end
+
+      def equivalent_class?(other_class)
+        other_class <= @klass
+      end
+
+      def find_with_ids(ids, cast)
+        expects_array = ids.first.is_a?(Array)
+        return ids.first if expects_array && ids.first.empty?
+
+        ids = ids.flatten.compact.uniq
+
+        case ids.size
+        when 0
+          raise ArgumentError, "Couldn't find #{@klass.name} without an ID"
+        when 1
+          result = find_one(ids.first, cast)
+          expects_array ? [result] : result
+        else
+          find_some(ids, cast)
         end
       end
 
-      best_model_match.to_s
-    end
-
-    def equivalent_class?(other_class)
-      other_class <= @klass
-    end
-
-    def find_with_ids(ids, cast)
-      expects_array = ids.first.kind_of?(Array)
-      return ids.first if expects_array && ids.first.empty?
-
-      ids = ids.flatten.compact.uniq
-
-      case ids.size
-      when 0
-        raise ArgumentError, "Couldn't find #{@klass.name} without an ID"
-      when 1
-        result = find_one(ids.first, cast)
-        expects_array ? [ result ] : result
-      else
-        find_some(ids, cast)
+      def find_some(ids, cast)
+        ids.map { |id| find_one(id, cast) }
       end
-    end
-
-    def find_some(ids, cast)
-      ids.map{|id| find_one(id, cast)}
-    end
 
     private
 
-    # Returns a solr query for the supplied conditions
-    # @param[Hash,String,Array] conditions solr conditions to match
-    def create_query(conditions)
-      build_query(build_where(conditions))
-    end
-
-    # @param [Array<String>] conditions
-    def build_query(conditions)
-      clauses = search_model_clause ? [search_model_clause] : []
-      clauses += conditions.reject { |c| c.blank? }
-      return "*:*" if clauses.empty?
-      clauses.compact.join(" AND ")
-    end
-
-    # @param [Hash<Symbol,String>] conditions
-    # @returns [Array<String>]
-    def create_query_from_hash(conditions)
-      conditions.map { |key, value| condition_to_clauses(key, value) }.compact
-    end
-
-    # @param [Symbol] key
-    # @param [String] value
-    def condition_to_clauses(key, value)
-      SolrQueryBuilder.construct_query([[field_name_for(key), value]])
-    end
-
-    # If the key is a property name, turn it into a solr field
-    # @param [Symbol] key
-    # @return [String]
-    def field_name_for(key)
-      if @klass.delegated_attributes.key?(key)
-        # TODO Check to see if `key' is a possible solr field for this class, if it isn't try :searchable instead
-        ActiveFedora::SolrQueryBuilder.solr_name(key, :stored_searchable, type: :string)
-      elsif key == :id
-        SOLR_DOCUMENT_ID
-      else
-        key.to_s
+      # Returns a solr query for the supplied conditions
+      # @param[Hash,String,Array] conditions solr conditions to match
+      def create_query(conditions)
+        build_query(build_where(conditions))
       end
-    end
 
-    # Return the solr clause that queries for this type of class
-    def search_model_clause
-      # The concrete class could could be any subclass of @klass or @klass itself
-      unless @klass == ActiveFedora::Base
+      # @param [Array<String>] conditions
+      def build_query(conditions)
+        clauses = search_model_clause ? [search_model_clause] : []
+        clauses += conditions.reject(&:blank?)
+        return "*:*" if clauses.empty?
+        clauses.compact.join(" AND ")
+      end
+
+      # @param [Hash<Symbol,String>] conditions
+      # @returns [Array<String>]
+      def create_query_from_hash(conditions)
+        conditions.map { |key, value| condition_to_clauses(key, value) }.compact
+      end
+
+      # @param [Symbol] key
+      # @param [String] value
+      def condition_to_clauses(key, value)
+        SolrQueryBuilder.construct_query([[field_name_for(key), value]])
+      end
+
+      # If the key is a property name, turn it into a solr field
+      # @param [Symbol] key
+      # @return [String]
+      def field_name_for(key)
+        if @klass.delegated_attributes.key?(key)
+          # TODO: Check to see if `key' is a possible solr field for this class, if it isn't try :searchable instead
+          ActiveFedora::SolrQueryBuilder.solr_name(key, :stored_searchable, type: :string)
+        elsif key == :id
+          SOLR_DOCUMENT_ID
+        else
+          key.to_s
+        end
+      end
+
+      # Return the solr clause that queries for this type of class
+      def search_model_clause
+        # The concrete class could could be any subclass of @klass or @klass itself
+        return if @klass == ActiveFedora::Base
         clauses = ([@klass] + @klass.descendants).map do |k|
           ActiveFedora::SolrQueryBuilder.construct_query_for_rel(has_model: k.to_s)
         end
-        clauses.size == 1 ? clauses.first : "(#{clauses.join(" OR ")})"
+        clauses.size == 1 ? clauses.first : "(#{clauses.join(' OR ')})"
       end
-    end
   end
 end

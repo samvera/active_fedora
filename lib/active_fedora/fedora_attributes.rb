@@ -31,7 +31,6 @@ module ActiveFedora
       resource.set_value(*args)
     end
 
-
     ##
     # The resource is the RdfResource object that stores the graph for
     # the datastream and is the central point for its relationship to
@@ -47,9 +46,7 @@ module ActiveFedora
 
     # You can set the URI to use for the rdf_label on ClassMethods.rdf_label, then on
     # the instance, calling rdf_label returns the value of that configured property
-    def rdf_label
-      resource.rdf_label
-    end
+    delegate :rdf_label, to: :resource
 
     module ClassMethods
       # We make a unique class, because properties belong to a class.
@@ -58,18 +55,19 @@ module ActiveFedora
       # until all properties have been defined.
       def resource_class
         @generated_resource_class ||= begin
-            klass = self.const_set(:GeneratedResourceSchema, Class.new(ActiveTriples::Resource))
-            klass.configure active_triple_options
-            klass.properties.merge(self.properties).each do |property, config|
-              klass.property(config.term,
-                             predicate: config.predicate,
-                             class_name: config.class_name)
-            end
-            klass
+          klass = const_set(:GeneratedResourceSchema, Class.new(ActiveTriples::Resource))
+          klass.configure active_triple_options
+          klass.properties.merge(properties).each do |_property, config|
+            klass.property(config.term,
+                           predicate: config.predicate,
+                           class_name: config.class_name)
+          end
+          klass
         end
       end
 
       private
+
         # @return a Hash of options suitable for passing to ActiveTriples::Base.configure
         def active_triple_options
           { type: type, rdf_label: rdf_label }

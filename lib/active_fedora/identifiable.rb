@@ -33,7 +33,7 @@ module ActiveFedora
     end
 
     def id
-      if uri.kind_of?(::RDF::URI) && uri.value.blank?
+      if uri.is_a?(::RDF::URI) && uri.value.blank?
         nil
       elsif uri.present?
         self.class.uri_to_id(URI.parse(uri))
@@ -45,7 +45,6 @@ module ActiveFedora
       @ldp_source = build_ldp_resource(id.to_s)
     end
 
-
     # TODO: Remove after we no longer support #pid.
     def pid
       Deprecation.warn FedoraAttributes, "#{self.class}#pid is deprecated and will be removed in active-fedora 10.0. Use #{self.class}#id instead."
@@ -56,7 +55,6 @@ module ActiveFedora
     def uri
       @ldp_source.subject_uri
     end
-
 
     module ClassMethods
       ##
@@ -75,12 +73,10 @@ module ActiveFedora
 
       ##
       # Provides the common interface for ActiveTriples::Identifiable
-      def from_uri(uri,_)
-        begin
-          self.find(uri_to_id(uri))
-        rescue ActiveFedora::ObjectNotFoundError, Ldp::Gone
-          ActiveTriples::Resource.new(uri)
-        end
+      def from_uri(uri, _)
+        find(uri_to_id(uri))
+      rescue ActiveFedora::ObjectNotFoundError, Ldp::Gone
+        ActiveTriples::Resource.new(uri)
       end
     end
   end

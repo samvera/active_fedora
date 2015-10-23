@@ -6,7 +6,7 @@ module ActiveFedora::Associations::Builder
       super
       if !options[:predicate]
         raise "You must specify a predicate for #{name}"
-      elsif !options[:predicate].kind_of?(RDF::URI)
+      elsif !options[:predicate].is_a?(RDF::URI)
         raise ArgumentError, "Predicate must be a kind of RDF::URI"
       end
     end

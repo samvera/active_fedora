@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   before :all do
     class ValidationStub < ActiveFedora::Base
-      has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"someData" do |m|
+      has_metadata type: ActiveFedora::SimpleDatastream, name: "someData" do |m|
         m.field "fubar", :string
         m.field "swank", :text
       end
@@ -13,8 +13,7 @@ describe ActiveFedora::Base do
       end
 
       validates_presence_of :fubar
-      validates_length_of :swank, :minimum=>5
-
+      validates_length_of :swank, minimum: 5
     end
   end
 
@@ -26,16 +25,16 @@ describe ActiveFedora::Base do
 
   describe "a valid object" do
     before do
-      subject.attributes={ fubar: ['here'], swank:'long enough'}
+      subject.attributes = { fubar: ['here'], swank: 'long enough' }
     end
 
-    it { should be_valid}
+    it { should be_valid }
   end
   describe "an invalid object" do
     before do
-      subject.attributes={ swank:'smal'}
+      subject.attributes = { swank: 'smal' }
     end
-    it "should have errors" do
+    it "has errors" do
       expect(subject).to_not be_valid
       expect(subject.errors[:fubar]).to eq ["can't be blank"]
       expect(subject.errors[:swank]).to eq ["is too short (minimum is 5 characters)"]
@@ -47,11 +46,10 @@ describe ActiveFedora::Base do
     it { should_not be_required(:swank) }
   end
 
-
   describe "#save!" do
-    before { allow(subject).to receive(:create_record) } #prevent saving to Fedora/Solr
+    before { allow(subject).to receive(:create_record) } # prevent saving to Fedora/Solr
 
-    it "should validate only once" do
+    it "validates only once" do
       expect(subject).to receive(:perform_validations).once.and_return(true)
       subject.save!
     end

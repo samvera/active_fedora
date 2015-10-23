@@ -31,7 +31,7 @@ module ActiveFedora
     # @param options [Hash]
     # @yield [self] Yields self
     # @yieldparam [File] self the newly created file
-    def initialize(parent_or_url_or_hash = nil, path=nil, options={}, &block)
+    def initialize(parent_or_url_or_hash = nil, path = nil, _options = {}, &_block)
       case parent_or_url_or_hash
       when Hash
         @ldp_source = build_ldp_resource_via_uri
@@ -42,11 +42,11 @@ module ActiveFedora
         @ldp_source = build_ldp_resource id
       when ActiveFedora::Base
         Deprecation.warn File, "Initializing a file by passing a container is deprecated. Initialize with a uri instead. This capability will be removed in active-fedora 10.0"
-        uri = if parent_or_url_or_hash.uri.kind_of?(::RDF::URI) && parent_or_url_or_hash.uri.value.empty?
-          nil
-        else
-          "#{parent_or_url_or_hash.uri}/#{path}"
-        end
+        uri = if parent_or_url_or_hash.uri.is_a?(::RDF::URI) && parent_or_url_or_hash.uri.value.empty?
+                nil
+              else
+                "#{parent_or_url_or_hash.uri}/#{path}"
+              end
         @ldp_source = build_ldp_resource_via_uri(uri, nil)
 
       else
@@ -59,11 +59,11 @@ module ActiveFedora
 
     # @return [true, false] true if the objects are equal or when the objects have uris
     #   and the uris are equal
-    def ==(comparison_object)
+    def ==(other)
       super ||
-        comparison_object.instance_of?(self.class) &&
-        uri.value.present? &&
-        comparison_object.uri == uri
+        other.instance_of?(self.class) &&
+          uri.value.present? &&
+          other.uri == uri
     end
 
     def ldp_source
@@ -85,7 +85,7 @@ module ActiveFedora
       !@exists && ldp_source.new?
     end
 
-    def uri= uri
+    def uri=(uri)
       @ldp_source = build_ldp_resource_via_uri(uri)
     end
 
@@ -139,7 +139,7 @@ module ActiveFedora
     end
 
     def content_changed?
-      return true if new_record? and !local_or_remote_content(false).blank?
+      return true if new_record? && !local_or_remote_content(false).blank?
       local_or_remote_content(false) != @ds_content
     end
 
@@ -163,18 +163,18 @@ module ActiveFedora
     end
 
     def frozen?
-      !!@frozen
+      @frozen.present?
     end
 
     # serializes any changed data into the content field
     def serialize!
     end
 
-    def to_solr(solr_doc={}, opts={})
+    def to_solr(solr_doc = {}, _opts = {})
       solr_doc
     end
 
-    def content= string_or_io
+    def content=(string_or_io)
       content_will_change! unless @content == string_or_io
       @content = string_or_io
     end
@@ -203,7 +203,7 @@ module ActiveFedora
 
       # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
       def behaves_like_io?(obj)
-        [IO, Tempfile, StringIO].any? { |klass| obj.kind_of? klass } || (defined?(Rack) && obj.is_a?(Rack::Test::UploadedFile))
+        [IO, Tempfile, StringIO].any? { |klass| obj.is_a? klass } || (defined?(Rack) && obj.is_a?(Rack::Test::UploadedFile))
       end
 
       def retrieve_content
@@ -216,7 +216,7 @@ module ActiveFedora
         headers
       end
 
-      def create_record(options = {})
+      def create_record(_options = {})
         return false if content.nil?
         ldp_source.content = content
         ldp_source.create do |req|
@@ -225,7 +225,7 @@ module ActiveFedora
         refresh
       end
 
-      def update_record(options = {})
+      def update_record(_options = {})
         return true unless content_changed?
         ldp_source.content = content
         ldp_source.update do |req|
@@ -238,12 +238,12 @@ module ActiveFedora
         build_ldp_resource_via_uri self.class.id_to_uri(id)
       end
 
-      def build_ldp_resource_via_uri(uri=nil, content='')
+      def build_ldp_resource_via_uri(uri = nil, content = '')
         Ldp::Resource::BinarySource.new(ldp_connection, uri, content, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
       end
 
       def uploaded_file?(payload)
-        defined?(ActionDispatch::Http::UploadedFile) and payload.instance_of?(ActionDispatch::Http::UploadedFile)
+        defined?(ActionDispatch::Http::UploadedFile) && payload.instance_of?(ActionDispatch::Http::UploadedFile)
       end
 
       def local_or_remote_content(ensure_fetch = true)
@@ -263,7 +263,5 @@ module ActiveFedora
         end
         @content
       end
-
   end
-
 end

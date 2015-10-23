@@ -5,15 +5,13 @@ module ActiveFedora
     include ActiveTriples::Properties
     include ActiveTriples::Reflection
 
-    delegate :rdf_subject, :set_value, :get_values, :attributes=, :to => :resource
+    delegate :rdf_subject, :set_value, :get_values, :attributes=, to: :resource
 
     class << self
-      def rdf_subject &block
-        if block_given?
-          return @subject_block = block
-        end
+      def rdf_subject(&block)
+        return @subject_block = block if block_given?
 
-        @subject_block ||= lambda { |ds| parent_uri(ds) }
+        @subject_block ||= ->(ds) { parent_uri(ds) }
       end
 
       def property(name, *args, &block)
@@ -41,9 +39,9 @@ module ActiveFedora
       # ActiveTriples::Resource and include ActiveFedora::RDF::Persistence.
       #
       # @return [Class] the object resource class
-      def resource_class(klass=nil)
+      def resource_class(klass = nil)
         if klass
-          raise ArgumentError, "#{self} already has a resource_class #{@resource_class}, cannot redefine it to #{klass}" if @resource_class and klass != @resource_class
+          raise ArgumentError, "#{self} already has a resource_class #{@resource_class}, cannot redefine it to #{klass}" if @resource_class && klass != @resource_class
           raise ArgumentError, "#{klass} must be a subclass of ActiveTriples::Resource" unless klass < ActiveTriples::Resource
         end
 
@@ -57,7 +55,7 @@ module ActiveFedora
 
     before_save do
       if content.blank?
-        ActiveFedora::Base.logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}" if ActiveFedora::Base.logger
+        ActiveFedora::Base.logger.warn "Cowardly refusing to save a datastream with empty content: #{inspect}" if ActiveFedora::Base.logger
         false
       end
     end
@@ -109,7 +107,7 @@ module ActiveFedora
     def resource
       @resource ||= begin
                       klass = self.class.resource_class
-                      klass.properties.merge(self.class.properties).each do |prop, config|
+                      klass.properties.merge(self.class.properties).each do |_prop, config|
                         klass.property(config.term,
                                        predicate: config.predicate,
                                        class_name: config.class_name)
@@ -136,23 +134,23 @@ module ActiveFedora
     # OmDatastream implementation as our "consistency" point.
     # @TODO: We may need to enable deep RDF delegation at one point.
     def term_values(*values)
-      self.send(values.first)
+      send(values.first)
     end
 
     def update_indexed_attributes(hash)
       hash.each do |fields, value|
         fields.each do |field|
-          self.send("#{field}=", value)
+          send("#{field}=", value)
         end
       end
     end
 
     def serialize
-      resource.set_subject!(parent_uri) if parent_uri and rdf_subject.node?
+      resource.set_subject!(parent_uri) if parent_uri && rdf_subject.node?
       resource.dump serialization_format
     end
 
-    def deserialize(data=nil)
+    def deserialize(data = nil)
       return ::RDF::Graph.new if new_record? && data.nil?
       data ||= remote_content
 
@@ -166,6 +164,5 @@ module ActiveFedora
     def serialization_format
       raise "you must override the `serialization_format' method in a subclass"
     end
-
   end
 end

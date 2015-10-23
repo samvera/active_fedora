@@ -9,13 +9,13 @@ module ActiveFedora
 
     def initialize(host, args)
       host = 'http://localhost:8080/solr' unless host
-      args = {read_timeout: 120, open_timeout: 120}.merge(args.dup)
+      args = { read_timeout: 120, open_timeout: 120 }.merge(args.dup)
       args.merge!(url: host)
       @conn = RSolr.connect args
     end
 
     class << self
-      def register(host=nil, args={})
+      def register(host = nil, args = {})
         Thread.current[:solr_service] = new(host, args)
       end
 
@@ -24,7 +24,7 @@ module ActiveFedora
       end
 
       def instance
-      # Register Solr
+        # Register Solr
 
         unless Thread.current[:solr_service]
           register(ActiveFedora.solr_config[:url])
@@ -49,13 +49,13 @@ module ActiveFedora
         QueryResultBuilder.reify_solr_result(hit, opts)
       end
 
-      #Returns all possible classes for the solr object
+      # Returns all possible classes for the solr object
       def classes_from_solr_document(hit, opts = {})
         Deprecation.warn SolrService, "SolrService.classes_from_solr_document is deprecated. Use QueryResultBuilder.classes_from_solr_document instead. This will be removed in active-fedora 10.0"
         QueryResultBuilder.classes_from_solr_document(hit, opts)
       end
 
-      #Returns the best singular class for the solr object
+      # Returns the best singular class for the solr object
       def class_from_solr_document(hit, opts = {})
         Deprecation.warn SolrService, "SolrService.class_from_solr_document is deprecated. Use QueryResultBuilder.class_from_solr_document instead. This will be removed in active-fedora 10.0"
         QueryResultBuilder.class_from_solr_document(hit, opts)
@@ -101,7 +101,7 @@ module ActiveFedora
         SolrQueryBuilder.construct_query_for_rel(field_pairs, join_with)
       end
 
-      def query(query, args={})
+      def query(query, args = {})
         raw = args.delete(:raw)
         args = args.merge(q: query, qt: 'standard')
         result = SolrService.instance.conn.get('select', params: args)
@@ -110,15 +110,15 @@ module ActiveFedora
       end
 
       def delete(id)
-        SolrService.instance.conn.delete_by_id(id, params: {'softCommit' => true})
+        SolrService.instance.conn.delete_by_id(id, params: { 'softCommit' => true })
       end
 
       # Get the count of records that match the query
       # @param [String] query a solr query
       # @param [Hash] args arguments to pass through to `args' param of SolrService.query (note that :rows will be overwritten to 0)
       # @return [Integer] number of records matching
-      def count(query, args={})
-        args = args.merge(:raw=>true, :rows=>0)
+      def count(query, args = {})
+        args = args.merge(raw: true, rows: 0)
         SolrService.query(query, args)['response']['numFound'].to_i
       end
 
@@ -133,8 +133,7 @@ module ActiveFedora
       def commit
         SolrService.instance.conn.commit
       end
-
     end
-  end #SolrService
-  class SolrNotInitialized < StandardError;end
-end #ActiveFedora
+  end # SolrService
+  class SolrNotInitialized < StandardError; end
+end # ActiveFedora

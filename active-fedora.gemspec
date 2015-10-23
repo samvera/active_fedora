@@ -32,6 +32,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec-its"
   s.add_development_dependency "equivalent-xml"
   s.add_development_dependency "simplecov", '~> 0.7.1'
+  s.add_development_dependency "rubocop", '~> 0.34'
+  s.add_development_dependency "rubocop-rspec", '~> 1.3'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {spec}/*`.split("\n")

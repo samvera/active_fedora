@@ -16,7 +16,7 @@ module ActiveFedora
       #   apply_schema MySchema, ActiveFedora::SchemaIndexingStrategy.new(
       #     ActiveFedora::GlobalIndexer.new(:symbol)
       #   )
-      def apply_schema(schema, strategy=ActiveFedora::SchemaIndexingStrategy.new)
+      def apply_schema(schema, strategy = ActiveFedora::SchemaIndexingStrategy.new)
         schema.properties.each do |property|
           strategy.apply(self, property)
         end

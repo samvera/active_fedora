@@ -3,16 +3,16 @@ module ActiveFedora
   # Used as an access method for associations on a model, given some
   # reflections.
   class AssociationHash
-    def initialize (model, reflections)
+    def initialize(model, reflections)
       @base = model
       @reflections = reflections
     end
 
-    def [] (name)
+    def [](name)
       association(name).reader if association(name)
     end
 
-    def []= (name, object)
+    def []=(name, object)
       association(name).writer(object) if association(name)
     end
 
@@ -22,9 +22,7 @@ module ActiveFedora
       @base.association(name.to_sym) if key?(name)
     end
 
-    def reflections
-      @reflections
-    end
+    attr_reader :reflections
 
     def merge(other_hash)
       Merged.new(self, other_hash)
@@ -36,9 +34,7 @@ module ActiveFedora
       end
     end
 
-    def keys
-      reflections.keys
-    end
+    delegate :keys, to: :reflections
 
     # Check that the key exists with indifferent access (symbol or string) in a
     # manner that avoids generating extra symbols. Symbols are not garbage collected
@@ -56,13 +52,9 @@ module ActiveFedora
       keys.include?(key)
     end
 
-    def size
-      keys.size
-    end
+    delegate :size, to: :keys
 
-    def empty?
-      reflections.empty?
-    end
+    delegate :empty?, to: :reflections
 
     def each_value
       keys.each do |k|
@@ -102,11 +94,11 @@ module ActiveFedora
       @second = second
     end
 
-    def [] (name)
+    def [](name)
       first[name] || second[name]
     end
 
-    def []= (name)
+    def []=(_name)
       raise NotImplementedError, "Unable to set properties on a merged association hash."
     end
 

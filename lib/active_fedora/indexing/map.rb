@@ -19,7 +19,7 @@ module ActiveFedora::Indexing
       attr_accessor :data_type, :behaviors
       attr_reader :key
 
-      def initialize(name, &block)
+      def initialize(name, &_block)
         @behaviors = []
         @data_type = :string
         @key = name
@@ -39,7 +39,6 @@ module ActiveFedora::Indexing
           idx.behaviors = @behaviors.dup
         end
       end
-
     end
   end
 end

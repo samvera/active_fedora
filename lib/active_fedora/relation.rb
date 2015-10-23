@@ -1,24 +1,22 @@
 module ActiveFedora
   class Relation
-
     include Enumerable
     include FinderMethods, Calculations, SpawnMethods, QueryMethods, Delegation
 
-
     attr_reader :loaded
     attr_accessor :default_scoped
-    alias :loaded? :loaded
+    alias_method :loaded?, :loaded
 
     attr_accessor :values, :klass
 
-    def initialize(klass, values = {})
+    def initialize(klass, _values = {})
       @klass = klass
       @loaded = false
       @values = {}
     end
 
     # This method gets called on clone
-    def initialize_copy(other)
+    def initialize_copy(_other)
       # Dup the values
       @values = Hash[@values]
       reset
@@ -53,7 +51,7 @@ module ActiveFedora
 
     def to_a
       return @records if loaded?
-      args = @klass == ActiveFedora::Base ? {:cast=>true} : {}
+      args = @klass == ActiveFedora::Base ? { cast: true } : {}
       args[:rows] = limit_value if limit_value
       args[:start] = offset_value if offset_value
       args[:sort] = order_values if order_values
@@ -64,7 +62,6 @@ module ActiveFedora
       @records
     end
 
-
     def ==(other)
       case other
       when Relation
@@ -74,10 +71,7 @@ module ActiveFedora
       end
     end
 
-    def inspect
-      to_a.inspect
-      # "<#{self.class} @klass=\"#{@klass}\" @values=\"#{@values.inspect}\">"
-    end
+    delegate :inspect, to: :to_a
 
     # Destroys the records matching +conditions+ by instantiating each
     # record and calling its +destroy+ method. Each object's callbacks are
@@ -109,7 +103,7 @@ module ActiveFedora
       if conditions
         where(conditions).destroy_all
       else
-        to_a.each {|object| object.destroy }.tap { reset }.size
+        to_a.each(&:destroy).tap { reset }.size
       end
     end
 
@@ -117,7 +111,7 @@ module ActiveFedora
       if conditions
         where(conditions).delete_all
       else
-        to_a.each {|object| object.delete }.tap { reset }.size
+        to_a.each(&:delete).tap { reset }.size
       end
     end
 
@@ -135,23 +129,22 @@ module ActiveFedora
 
     private
 
-    VALID_FIND_OPTIONS = [:order, :limit, :start, :conditions, :cast]
+      VALID_FIND_OPTIONS = [:order, :limit, :start, :conditions, :cast]
 
-    def apply_finder_options(options)
-      relation = clone
-      return relation unless options
+      def apply_finder_options(options)
+        relation = clone
+        return relation unless options
 
-      options.assert_valid_keys(VALID_FIND_OPTIONS)
-      finders = options.dup
-      finders.delete_if { |key, value| value.nil? && key != :limit }
+        options.assert_valid_keys(VALID_FIND_OPTIONS)
+        finders = options.dup
+        finders.delete_if { |key, value| value.nil? && key != :limit }
 
-      ([:order,:limit,:start] & finders.keys).each do |finder|
-        relation = relation.send(finder, finders[finder])
+        ([:order, :limit, :start] & finders.keys).each do |finder|
+          relation = relation.send(finder, finders[finder])
+        end
+
+        relation = relation.where(finders[:conditions]) if options.key?(:conditions)
+        relation
       end
-
-      relation = relation.where(finders[:conditions]) if options.has_key?(:conditions)
-      relation
-    end
-
   end
 end

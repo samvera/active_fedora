@@ -14,9 +14,9 @@ describe ActiveFedora::RDFXMLDatastream do
       Object.send(:remove_const, :MyRdfxmlDatastream)
     end
 
-    it "should save and reload" do
+    it "saves and reload" do
       @subject.publisher = ["St. Martin's Press"]
-      expect(@subject.serialize).to match /<rdf:RDF/
+      expect(@subject.serialize).to match(/<rdf:RDF/)
     end
   end
 
@@ -53,21 +53,21 @@ describe ActiveFedora::RDFXMLDatastream do
 
       class MyDatastream < ActiveFedora::RDFXMLDatastream
         property :resource_type, predicate: DAMS.typeOfResource
-        property :title, predicate: DAMS.title, :class_name => 'Description'
+        property :title, predicate: DAMS.title, class_name: 'Description'
 
         rdf_subject { |ds| RDF::URI.new(ds.about) }
 
         attr_accessor :about
 
-        def initialize(options={})
+        def initialize(options = {})
           @about = options.delete(:about)
           super
         end
 
         class Description < ActiveTriples::Resource
-          configure :type => DAMS.Description
+          configure type: DAMS.Description
           property :value, predicate: ::RDF.value do |index|
-              index.as :searchable
+            index.as :searchable
           end
         end
       end
@@ -80,10 +80,9 @@ describe ActiveFedora::RDFXMLDatastream do
 
     describe "a new instance" do
       subject { MyDatastream.new(about: "http://library.ucsd.edu/ark:/20775/") }
-      it "should have a subject" do
+      it "has a subject" do
         expect(subject.rdf_subject.to_s).to eq "http://library.ucsd.edu/ark:/20775/"
       end
-
     end
 
     describe "an instance with content" do
@@ -92,13 +91,13 @@ describe ActiveFedora::RDFXMLDatastream do
         subject.content = File.new('spec/fixtures/damsObjectModel.xml').read
         subject
       end
-      it "should have a subject" do
+      it "has a subject" do
         expect(subject.rdf_subject.to_s).to eq "http://library.ucsd.edu/ark:/20775/"
       end
-      it "should have mimeType" do
+      it "has mimeType" do
         expect(subject.mime_type).to eq 'text/xml'
       end
-      it "should have fields" do
+      it "has fields" do
         expect(subject.resource_type).to eq ["image"]
         expect(subject.title.first.value).to eq ["example title"]
       end

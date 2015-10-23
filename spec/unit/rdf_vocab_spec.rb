@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe ActiveFedora::RDF do
   describe ActiveFedora::RDF::Fcrepo do
-    it "should register the vocabularies" do
+    it "registers the vocabularies" do
       namespaces = [
         "info:fedora/fedora-system:def/model#",
         "info:fedora/fedora-system:def/view#",
@@ -17,7 +17,7 @@ describe ActiveFedora::RDF do
     end
   end
   describe ActiveFedora::RDF::ProjectHydra do
-    it "should register the vocabularies" do
+    it "registers the vocabularies" do
       namespaces = [
         "http://projecthydra.org/ns/relations#"
       ]

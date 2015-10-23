@@ -29,15 +29,14 @@ module ActiveFedora::Associations::Builder
     private
 
       def configure_dependency
-        if options[:dependent]
-          unless [:destroy, :delete_all, :nullify, :restrict].include?(options[:dependent])
-            raise ArgumentError, "The :dependent option expects either :destroy, :delete_all, " \
-                                 ":nullify or :restrict (#{options[:dependent].inspect})"
-          end
-
-          send("define_#{options[:dependent]}_dependency_method")
-          model.before_destroy dependency_method_name
+        return unless options[:dependent]
+        unless [:destroy, :delete_all, :nullify, :restrict].include?(options[:dependent])
+          raise ArgumentError, "The :dependent option expects either :destroy, :delete_all, " \
+                               ":nullify or :restrict (#{options[:dependent].inspect})"
         end
+
+        send("define_#{options[:dependent]}_dependency_method")
+        model.before_destroy dependency_method_name
       end
 
       def define_destroy_dependency_method
@@ -53,12 +52,12 @@ module ActiveFedora::Associations::Builder
           send(name).delete_all
         end
       end
-      alias :define_nullify_dependency_method :define_delete_all_dependency_method
+      alias_method :define_nullify_dependency_method, :define_delete_all_dependency_method
 
       def define_restrict_dependency_method
         name = self.name
         model.send(:define_method, dependency_method_name) do
-          raise ActiveRecord::DeleteRestrictionError.new(name) unless send(name).empty?
+          raise ActiveRecord::DeleteRestrictionError, name unless send(name).empty?
         end
       end
 

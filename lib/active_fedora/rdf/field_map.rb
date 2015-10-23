@@ -5,10 +5,10 @@ module ActiveFedora::RDF
   # but only with selected methods as outlined in def_delegators.
   class FieldMap
     extend Forwardable
-    
+
     def_delegators :@hash, :[], :[]=, :each, :keys
-    
-    def initialize(hash = {}, &block)
+
+    def initialize(hash = {}, &_block)
       @hash = hash
       yield self if block_given?
     end
@@ -28,7 +28,6 @@ module ActiveFedora::RDF
     # @attr [Object] object the instance of ActiveFedora::Base which is being indexed into Solr
     # @attr [Symbol] name the name of the property on the object that we're indexing
     class PolymorphicBuilder
-
       attr_accessor :entry, :index_field_config, :object, :name
 
       def initialize(entry, index_field_config, object, name)
@@ -57,7 +56,6 @@ module ActiveFedora::RDF
         def properties
           object.class.properties
         end
-
     end
 
     # Abstract class that implements the PolymorphicBuilder interface and is used for
@@ -67,7 +65,7 @@ module ActiveFedora::RDF
       def build
         type = index_field_config.data_type
         behaviors = index_field_config.behaviors
-        return unless type and behaviors
+        return unless type && behaviors
         entry.merge!(type, behaviors, find_values)
       end
     end
@@ -85,6 +83,5 @@ module ActiveFedora::RDF
         Array(object.send(name))
       end
     end
-
   end
 end

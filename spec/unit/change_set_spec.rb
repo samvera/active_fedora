@@ -32,21 +32,20 @@ describe ActiveFedora::ChangeSet do
 
     let(:base) { Book.create }
 
-
     describe "#changes" do
       subject { change_set.changes }
 
       it { is_expected.to be_kind_of Hash }
 
-      it "should have three elements" do
+      it "has three elements" do
         expect(subject.size).to eq 3
       end
-      it "should not include URIs from other objects" do
+      it "does not include URIs from other objects" do
         base.resource << RDF::Statement.new(RDF::URI("http://wrong.com"), RDF::DC.title, "bad")
         base.title = nil
         expect(subject[RDF::DC.title].to_a).to eq []
       end
-      it "should include hash URIs" do
+      it "includes hash URIs" do
         # This is useful as an alternative to blank nodes.
         hash_uri = RDF::URI(base.uri.to_s + "#test")
         base.resource << RDF::Statement.new(hash_uri, RDF::DC.title, "good")

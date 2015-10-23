@@ -19,9 +19,9 @@ module ActiveFedora
     end
 
     private
+
       def to_uri(klass, id)
         klass.id_to_uri(id)
       end
-
   end
 end

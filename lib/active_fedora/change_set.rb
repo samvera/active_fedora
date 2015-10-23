@@ -1,7 +1,6 @@
 module ActiveFedora
   # a Hash of properties that have changed and their present values
   class ChangeSet
-
     attr_reader :object, :graph, :changed_attributes
 
     # @param [ActiveFedora::Base] object The resource that has associations and properties
@@ -13,9 +12,7 @@ module ActiveFedora
       @changed_attributes = changed_attributes
     end
 
-    def empty?
-      changes.empty?
-    end
+    delegate :empty?, to: :changes
 
     # @return [Hash<RDF::URI, RDF::Queryable::Enumerator>] hash of predicate uris to statements
     def changes
@@ -38,21 +35,21 @@ module ActiveFedora
     end
 
     private
-    
-    # @return [RDF::Graph] A graph containing child graphs from changed
-    #   attributes.
-    def child_graphs(objects)
-      child_graphs = ::RDF::Graph.new
-      objects.each do |object|
-        graph.query(subject: object).each do |statement|
-          # Have to filter out Fedora triples.
-          unless FedoraStatement.new(statement).internal?
-            child_graphs << statement
+
+      # @return [RDF::Graph] A graph containing child graphs from changed
+      #   attributes.
+      def child_graphs(objects)
+        child_graphs = ::RDF::Graph.new
+        objects.each do |object|
+          graph.query(subject: object).each do |statement|
+            # Have to filter out Fedora triples.
+            unless FedoraStatement.new(statement).internal?
+              child_graphs << statement
+            end
           end
         end
+        child_graphs
       end
-      child_graphs
-    end
   end
 
   class FedoraStatement

@@ -40,6 +40,4 @@ describe ActiveFedora::WithMetadata::MetadataNode do
       end
     end
   end
-
-
 end

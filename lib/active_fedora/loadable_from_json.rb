@@ -11,21 +11,19 @@ module ActiveFedora
         @hash = {}
       end
 
-      def term_values *terminology
+      def term_values(*terminology)
         @hash.fetch(terminology.first, [])
       end
 
       # It is expected that the singular filter gets applied after fetching the value from this
       # resource, so cast everything back to an array.
-      def update_indexed_attributes hash
+      def update_indexed_attributes(hash)
         hash.each do |k, v|
           @hash[k.first] = Array(v)
         end
       end
 
-      def uri= uri
-        @uri = uri
-      end
+      attr_writer :uri
     end
 
     class SolrBackedResource
@@ -65,7 +63,7 @@ module ActiveFedora
         end
 
         def enum_statement
-          @values.map {|v| FakeStatement.new(v) }
+          @values.map { |v| FakeStatement.new(v) }
         end
 
         def objects
@@ -83,7 +81,7 @@ module ActiveFedora
         end
       end
 
-      def query(args={})
+      def query(args = {})
         predicate = args[:predicate]
         reflection = reflection(predicate)
         FakeQuery.new(get_values(reflection))
@@ -106,7 +104,7 @@ module ActiveFedora
       end
 
       def reflection(predicate)
-        Array(@model.outgoing_reflections.find { |key, reflection| reflection.predicate == predicate }).first
+        Array(@model.outgoing_reflections.find { |_key, reflection| reflection.predicate == predicate }).first
       end
     end
 
@@ -123,7 +121,7 @@ module ActiveFedora
       end
       @resource = SolrBackedResource.new(self.class)
       self.attributes = adapt_attributes(attrs)
-      # TODO Should we clear the change tracking, or make this object Read-only?
+      # TODO: Should we clear the change tracking, or make this object Read-only?
 
       run_callbacks :find
       run_callbacks :initialize
@@ -163,6 +161,5 @@ module ActiveFedora
           end
         end
       end
-
   end
 end

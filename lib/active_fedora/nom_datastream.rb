@@ -1,8 +1,7 @@
-require  "nom"
+require "nom"
 
 module ActiveFedora
   class NomDatastream < File
-
     include Datastreams::NokogiriDatastreams
 
     def self.set_terminology(options = {}, &block)
@@ -10,12 +9,12 @@ module ActiveFedora
       @terminology = block
     end
 
-    def self.terminology_options
-      @terminology_options
+    class << self
+      attr_reader :terminology_options
     end
 
-    def self.terminology
-      @terminology
+    class << self
+      attr_reader :terminology
     end
 
     def self.decorate_ng_xml(xml)
@@ -25,7 +24,7 @@ module ActiveFedora
     end
 
     def serialize!
-       self.content = @ng_xml.to_s if @ng_xml
+      self.content = @ng_xml.to_s if @ng_xml
     end
 
     def to_solr
@@ -47,7 +46,7 @@ module ActiveFedora
       solr_doc
     end
 
-    def method_missing method, *args, &block
+    def method_missing(method, *args, &block)
       if ng_xml.respond_to? method
         ng_xml.send(method, *args, &block)
       else
@@ -55,15 +54,14 @@ module ActiveFedora
       end
     end
 
-    def respond_to? *args
+    def respond_to?(*args)
       super || self.class.terminology.respond_to?(*args)
     end
 
     protected
 
-    def default_mime_type
-      'text/xml'
-    end
+      def default_mime_type
+        'text/xml'
+      end
   end
 end
-

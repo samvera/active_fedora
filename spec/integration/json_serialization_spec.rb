@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe "Objects should be serialized to JSON" do
-  it "should have json results" do
+  it "has json results" do
     expect(ActiveFedora::Base.new.to_json).to eq "{\"id\":null}"
   end
 
@@ -28,9 +28,9 @@ describe "Objects should be serialized to JSON" do
 
     before { allow(obj).to receive(:id).and_return('test-123') }
 
-    subject { JSON.parse(obj.to_json)}
+    subject { JSON.parse(obj.to_json) }
 
-    it "should have to_json" do
+    it "has to_json" do
       expect(subject['id']).to eq "test-123"
       expect(subject['foo']).to eq ["baz"]
       expect(subject['bar']).to eq "quix"
@@ -56,7 +56,7 @@ describe "Objects should be serialized to JSON" do
       end
 
       class DummyAsset < ActiveFedora::Base
-        has_metadata  'descMetadata', type: DummyResource
+        has_metadata 'descMetadata', type: DummyResource
         Deprecation.silence(ActiveFedora::Attributes) do
           has_attributes :relation, datastream: 'descMetadata', at: [:license, :relation], multiple: false
         end
@@ -72,8 +72,8 @@ describe "Objects should be serialized to JSON" do
     let(:obj) { DummyAsset.new { |a| a.relation = 'Great Grandchild' } }
     before { allow(obj).to receive(:id).and_return('test-123') }
 
-    subject { JSON.parse(obj.to_json)}
+    subject { JSON.parse(obj.to_json) }
 
-    it { should eq("id"=>"test-123", "relation"=>"Great Grandchild") }
+    it { should eq("id" => "test-123", "relation" => "Great Grandchild") }
   end
 end

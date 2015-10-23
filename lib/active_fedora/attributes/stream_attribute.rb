@@ -1,23 +1,21 @@
 module ActiveFedora
-
   # Abstract class for attributes that are delegated to a serialized representation such as a NonRDFSource
-  # 
+  #
   # @abstract
   # @attr [String] delegate_target
   # @attr [String] at
   # @attr [String] target_class
 
   class StreamAttribute < DelegatedAttribute
-
     attr_accessor :delegate_target, :at, :target_class
 
     # @param [Symbol] field the field to find or create
-    # @param [Hash] args 
+    # @param [Hash] args
     # @option args [String] :delegate_target the path to the delegate
     # @option args [Class] :klass the class to create
     # @option args [true,false] :multiple (false) true for multi-value fields
-    # @option args [Array<Symbol>] :at path to a deep node 
-    def initialize(field, args={})
+    # @option args [Array<Symbol>] :at path to a deep node
+    def initialize(field, args = {})
       super
       self.delegate_target  = args.fetch(:delegate_target)
       self.target_class     = args.fetch(:klass)
@@ -41,6 +39,5 @@ module ActiveFedora
       def file_for_attribute(obj, delegate_target)
         obj.attached_files[delegate_target] || raise(ArgumentError, "Undefined file: `#{delegate_target}' in property #{field}")
       end
-
   end
 end

@@ -35,7 +35,6 @@ module ActiveFedora
     # is computed directly through Solr and does not trigger by itself the
     # instantiation of the actual post records.
     class CollectionProxy < Relation # :nodoc:
-
       def initialize(association)
         @association = association
         super association.klass
@@ -50,7 +49,7 @@ module ActiveFedora
         @association.load_target
       end
 
-      def load_from_solr(opts = Hash.new)
+      def load_from_solr(opts = {})
         @association.load_from_solr(opts)
       end
 
@@ -87,9 +86,9 @@ module ActiveFedora
       #   #      #<Pet id: 3, name: "Choo-Choo">
       #   #    ]
       #
-      # Be careful because this also means you’re initializing a model
-      # object with only the fields that you’ve selected. If you attempt
-      # to access a field that is not in the initialized record you’ll
+      # Be careful because this also means you're initializing a model
+      # object with only the fields that you've selected. If you attempt
+      # to access a field that is not in the initialized record you'll
       # receive:
       #
       #   person.pets.select(:name).first.person_id
@@ -205,7 +204,7 @@ module ActiveFedora
         @association.last(*args)
       end
 
-           # Returns a new object of the collection type that has been instantiated
+      # Returns a new object of the collection type that has been instantiated
       # with +attributes+ and linked to this object, but have not yet been saved.
       # You can pass an array of attributes hashes, this will return an array
       # with the new objects.
@@ -658,7 +657,7 @@ module ActiveFedora
       def uniq
         @association.uniq
       end
-      
+
       # Count all records using Solr.
       #
       #   class Person < ActiveFedora::Base
@@ -677,7 +676,7 @@ module ActiveFedora
       end
 
       # Returns the size of the collection. If the collection hasn't been loaded,
-      # it executes a solr query to find the matching records. Else it calls 
+      # it executes a solr query to find the matching records. Else it calls
       # <tt>collection.size</tt>.
       #
       # If the collection has been already loaded +size+ and +length+ are
@@ -846,7 +845,7 @@ module ActiveFedora
       def scope
         @association.scope
       end
-      alias spawn scope
+      alias_method :spawn, :scope
 
       def to_ary
         load_target.dup
@@ -867,7 +866,6 @@ module ActiveFedora
         proxy_association.reload
         self
       end
-
     end
   end
 end

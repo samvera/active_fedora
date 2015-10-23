@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-
   before(:all) do
     class ResurrectionModel < ActiveFedora::Base
       after_destroy :eradicate
@@ -14,23 +13,23 @@ describe ActiveFedora::Base do
 
   context "when an object is has already been deleted" do
     let(:ghost) do
-      obj = ActiveFedora::Base.create
+      obj = described_class.create
       obj.destroy
       obj.id
     end
     context "in a typical sitation" do
       specify "it cannot be reused" do
-        expect { ActiveFedora::Base.create(ghost) }.to raise_error(Ldp::Gone)
+        expect { described_class.create(ghost) }.to raise_error(Ldp::Gone)
       end
     end
     specify "remove its tombstone" do
-      expect(ActiveFedora::Base.eradicate(ghost)).to be true
+      expect(described_class.eradicate(ghost)).to be true
     end
   end
 
   context "when an object has just been deleted" do
     let(:zombie) do
-      obj = ActiveFedora::Base.create
+      obj = described_class.create
       obj.destroy
       return obj
     end
@@ -46,9 +45,8 @@ describe ActiveFedora::Base do
       body.destroy
       return soul
     end
-    it "should allow reusing a uri" do
+    it "allows reusing a uri" do
       expect(ResurrectionModel.create(id: lazarus)).to be_kind_of(ResurrectionModel)
     end
   end
-
 end

@@ -24,7 +24,7 @@ module ActiveFedora
     # Also, if +attrs+ does not contain +:id+ but does contain +:namespace+ it will pass the
     # +:namespace+ value to Fedora::Repository.nextid to generate the next id available within
     # the given namespace.
-    def initialize(attributes_or_id = nil, &block)
+    def initialize(attributes_or_id = nil, &_block)
       init_internals
       attributes = initialize_attributes(attributes_or_id)
       @ldp_source = build_ldp_resource(attributes.delete(:id))
@@ -77,23 +77,21 @@ module ActiveFedora
       self
     end
 
-    def ==(comparison_object)
-         comparison_object.equal?(self) ||
-           (comparison_object.instance_of?(self.class) &&
-             comparison_object.id == id &&
-             !comparison_object.new_record?)
+    def ==(other)
+      other.equal?(self) ||
+        (other.instance_of?(self.class) &&
+          other.id == id &&
+          !other.new_record?)
     end
 
     def freeze
       @resource.freeze
-      #@attributes = @attributes.clone.freeze
+      # @attributes = @attributes.clone.freeze
       attached_files.freeze
       self
     end
 
-    def frozen?
-      attached_files.frozen?
-    end
+    delegate :frozen?, to: :attached_files
 
     # Returns +true+ if the record is read only. Records loaded through joins with piggy-back
     # attributes will be marked as read only since they cannot be saved.
@@ -114,31 +112,30 @@ module ActiveFedora
         self.has_model = self.class.to_s
       end
 
-    module ClassMethods
+      module ClassMethods
+        SLASH = '/'.freeze
 
-      SLASH = '/'.freeze
-
-      def generated_association_methods
-        @generated_association_methods ||= begin
-          mod = const_set(:GeneratedAssociationMethods, Module.new)
-          include mod
-          mod
+        def generated_association_methods
+          @generated_association_methods ||= begin
+            mod = const_set(:GeneratedAssociationMethods, Module.new)
+            include mod
+            mod
+          end
         end
-      end
 
-      # Returns a suitable uri object for :has_model
-      # Should reverse Model#from_class_uri
-      # TODO this is a poorly named method
-      def to_class_uri(attrs = {})
-        name
-      end
+        # Returns a suitable uri object for :has_model
+        # Should reverse Model#from_class_uri
+        # TODO this is a poorly named method
+        def to_class_uri(_attrs = {})
+          name
+        end
 
-      private
+        private
 
-      def relation
-        Relation.new(self)
+          def relation
+            Relation.new(self)
+          end
       end
-    end
 
     private
 
@@ -148,7 +145,7 @@ module ActiveFedora
         @association_cache = {}
       end
 
-      def build_ldp_resource(id=nil)
+      def build_ldp_resource(id = nil)
         ActiveFedora.fedora.ldp_resource_service.build(self.class, id)
       end
 
@@ -160,25 +157,24 @@ module ActiveFedora
         end
       end
 
-      def initialize_attributes attributes_or_id
+      def initialize_attributes(attributes_or_id)
         case attributes_or_id
-          when String
-            attributes = {id: attributes_or_id}.with_indifferent_access
-          when Hash
-            attributes = attributes_or_id.with_indifferent_access
-            # TODO: Remove when we decide using 'pid' is no longer supported.
-            if !attributes.key?(:id) && attributes.key?(:pid)
-              Deprecation.warn Core, 'Initializing with :pid is deprecated and will be removed in active-fedora 10.0. Use :id instead'
-              attributes[:id] = attributes.delete(:pid)
-            end
+        when String
+          attributes = { id: attributes_or_id }.with_indifferent_access
+        when Hash
+          attributes = attributes_or_id.with_indifferent_access
+          # TODO: Remove when we decide using 'pid' is no longer supported.
+          if !attributes.key?(:id) && attributes.key?(:pid)
+            Deprecation.warn Core, 'Initializing with :pid is deprecated and will be removed in active-fedora 10.0. Use :id instead'
+            attributes[:id] = attributes.delete(:pid)
+          end
 
-          when NilClass
-            attributes = {}.with_indifferent_access
-          else
-            raise ArgumentError, "#{attributes_or_id.class} is not acceptable"
+        when NilClass
+          attributes = {}.with_indifferent_access
+        else
+          raise ArgumentError, "#{attributes_or_id.class} is not acceptable"
         end
-        return attributes
+        attributes
       end
-
   end
 end

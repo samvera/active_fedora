@@ -56,12 +56,12 @@ module ActiveFedora::RDF
 
       def solr_document_field_value(val)
         case val
-          when ::RDF::URI
-            val.to_s
-          when ActiveTriples::Resource
-            val.node? ? val.rdf_label : val.rdf_subject.to_s
-          else
-            val
+        when ::RDF::URI
+          val.to_s
+        when ActiveTriples::Resource
+          val.node? ? val.rdf_label : val.rdf_subject.to_s
+        else
+          val
         end
       end
 
@@ -84,6 +84,5 @@ module ActiveFedora::RDF
       def field_map_class
         ActiveFedora::RDF::FieldMap
       end
-
   end
 end

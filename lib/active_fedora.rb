@@ -152,7 +152,6 @@ module ActiveFedora #:nodoc:
     end
   end
 
-
   module Scoping
     extend ActiveSupport::Autoload
 
@@ -169,11 +168,14 @@ module ActiveFedora #:nodoc:
     def fedora_config
       @fedora_config ||= Config.new(configurator.fedora_config)
     end
-    def solr_config;    configurator.solr_config;    end
-    def config_options; configurator.config_options; end
-    def config_loaded?; configurator.config_loaded?; end
 
-    def init( options={} )
+    delegate :solr_config, to: :configurator
+
+    delegate :config_options, to: :configurator
+
+    delegate :config_loaded?, to: :configurator
+
+    def init(options = {})
       # Make config_options into a Hash if nil is passed in as the value
       options = {} if options.nil?
       # For backwards compatibility, handle cases where config_path (a String) is passed in as the argument rather than a config_options hash
@@ -202,14 +204,14 @@ module ActiveFedora #:nodoc:
     #  ActiveFedora.init(:environment=>"test")
     #  ActiveFedora.environment => "test"
     def environment
-      if config_options.fetch(:environment,nil)
+      if config_options.fetch(:environment, nil)
         return config_options[:environment]
-      elsif defined?(Rails.env) and !Rails.env.nil?
+      elsif defined?(Rails.env) && !Rails.env.nil?
         return Rails.env.to_s
-      elsif defined?(ENV['environment']) and !(ENV['environment'].nil?)
+      elsif defined?(ENV['environment']) && !(ENV['environment'].nil?)
         return ENV['environment']
-      elsif defined?(ENV['RAILS_ENV']) and !(ENV['RAILS_ENV'].nil?)
-        raise RuntimeError, "You're depending on RAILS_ENV for setting your environment. Please use ENV['environment'] for non-rails environment setting: 'rake foo:bar environment=test'"
+      elsif defined?(ENV['RAILS_ENV']) && !(ENV['RAILS_ENV'].nil?)
+        raise "You're depending on RAILS_ENV for setting your environment. Please use ENV['environment'] for non-rails environment setting: 'rake foo:bar environment=test'"
       else
         ENV['environment'] = 'development'
       end
@@ -223,9 +225,7 @@ module ActiveFedora #:nodoc:
       @fedora ||= Fedora.new(fedora_config.credentials)
     end
 
-    def predicate_config
-      configurator.predicate_config
-    end
+    delegate :predicate_config, to: :configurator
 
     def root
       ::File.expand_path('../..', __FILE__)
@@ -244,10 +244,10 @@ module ActiveFedora #:nodoc:
     # @example Search within ActiveFedora::RdfNode for a class called "TermProxy"
     #   ActiveFedora.class_from_string("TermProxy", ActiveFedora::RdfNode)
     #   => ActiveFedora::RdfNode::TermProxy
-    def class_from_string(class_name, container_class=Kernel)
+    def class_from_string(full_class_name, container_class = Kernel)
       container_class = container_class.name if container_class.is_a? Module
       container_parts = container_class.split('::')
-      (container_parts + class_name.split('::')).flatten.inject(Kernel) do |mod, class_name|
+      (container_parts + full_class_name.split('::')).flatten.inject(Kernel) do |mod, class_name|
         if mod == Kernel
           Object.const_get(class_name)
         elsif mod.const_defined? class_name.to_sym
@@ -258,13 +258,10 @@ module ActiveFedora #:nodoc:
         end
       end
     end
-
   end
 
   self.configurator ||= ActiveFedora::FileConfigurator.new
-
 end
-
 
 I18n.load_path << ::File.dirname(__FILE__) + '/active_fedora/locale/en.yml'
 

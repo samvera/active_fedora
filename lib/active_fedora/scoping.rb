@@ -6,7 +6,6 @@ module ActiveFedora
       include Named
     end
 
-    
     module ClassMethods
       def current_scope #:nodoc:
         Thread.current["#{self}_current_scope"]

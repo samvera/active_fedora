@@ -45,7 +45,7 @@ describe ActiveFedora::Base do
 
     context "when type is called before propertes" do
       subject { FooHistory.resource_class.reflect_on_property(:title) }
-      it "should not wipe out the properties" do
+      it "does not wipe out the properties" do
         expect(subject).to be_kind_of ActiveTriples::NodeConfig
       end
     end
@@ -103,8 +103,8 @@ describe ActiveFedora::Base do
     after do
       Object.send(:remove_const, :SpecialThing)
     end
-    it "should record the decendants" do
-      expect(ActiveFedora::Base.descendants).to include(ModsArticle, SpecialThing)
+    it "records the decendants" do
+      expect(described_class.descendants).to include(ModsArticle, SpecialThing)
     end
   end
 
@@ -132,7 +132,6 @@ describe ActiveFedora::Base do
       end
 
       class FooInherited < FooHistory
-
       end
     end
 
@@ -148,23 +147,22 @@ describe ActiveFedora::Base do
 
     before do
       @this_id = increment_id.to_s
-      @test_object = ActiveFedora::Base.new
+      @test_object = described_class.new
       allow(@test_object).to receive(:assign_id).and_return(@this_id)
     end
-
 
     describe '#new' do
       before do
         allow_any_instance_of(FooHistory).to receive(:assign_id).and_return(@this_id)
       end
       context "with no arguments" do
-        it "should not get an id on init" do
+        it "does not get an id on init" do
           expect(FooHistory.new.id).to be_nil
         end
       end
 
       context "with an id argument" do
-        it "should be able to create with a custom id" do
+        it "is able to create with a custom id" do
           expect(FooHistory).to receive(:id_to_uri).and_call_original
           f = FooHistory.new('baz_1')
           expect(f.id).to eq 'baz_1'
@@ -174,7 +172,7 @@ describe ActiveFedora::Base do
 
       context "with a hash argument" do
         context "that has an id" do
-          it "should be able to create with a custom id" do
+          it "is able to create with a custom id" do
             expect(FooHistory).to receive(:id_to_uri).and_call_original
             f = FooHistory.new(id: 'baz_1')
             expect(f.id).to eq 'baz_1'
@@ -183,7 +181,7 @@ describe ActiveFedora::Base do
         end
 
         context "that doesn't have an id" do
-          it "should be able to create with a custom id" do
+          it "is able to create with a custom id" do
             f = FooHistory.new(fubar: ['baz_1'])
             expect(f.id).to be_nil
           end
@@ -222,26 +220,26 @@ describe ActiveFedora::Base do
     ### end ActiveModel::Conversions
 
     ### Methods for ActiveModel::Naming
-    it "Should know the model_name" do
+    it "knows the model_name" do
       expect(FooHistory.model_name).to eq 'FooHistory'
       expect(FooHistory.model_name.human).to eq 'Foo history'
     end
     ### End ActiveModel::Naming
 
-    it 'should provide #find' do
-      expect(ActiveFedora::Base).to respond_to(:find)
+    it 'provides #find' do
+      expect(described_class).to respond_to(:find)
     end
 
-    it "should provide .create_date" do
+    it "provides .create_date" do
       expect(@test_object).to respond_to(:create_date)
     end
 
-    it "should provide .modified_date" do
+    it "provides .modified_date" do
       expect(@test_object).to respond_to(:modified_date)
     end
 
     describe '.save' do
-      it "should create a new record" do
+      it "creates a new record" do
         allow(@test_object).to receive(:new_record?).and_return(true)
         expect(@test_object).to receive(:serialize_attached_files)
         expect(@test_object).to receive(:assign_rdf_subject)
@@ -252,8 +250,7 @@ describe ActiveFedora::Base do
       end
 
       context "on an existing record" do
-
-        it "should update" do
+        it "updates" do
           allow(@test_object).to receive(:new_record?).and_return(false)
           expect(@test_object).to receive(:serialize_attached_files)
           allow_any_instance_of(Ldp::Orm).to receive(:save) { true }
@@ -265,8 +262,7 @@ describe ActiveFedora::Base do
 
       context "when assign id returns a value" do
         context "an no id has been set" do
-
-          it "should set the id" do
+          it "sets the id" do
             @test_object.save
             expect(@test_object.id).to eq @this_id
           end
@@ -284,7 +280,7 @@ describe ActiveFedora::Base do
               Object.send(:remove_const, :WithProperty)
             end
 
-            it "should update the resource" do
+            it "updates the resource" do
               expect(test_object.resource.rdf_subject).to eq ::RDF::URI.new("#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/#{@this_id}")
               expect(test_object.title).to eq ['foo']
             end
@@ -293,10 +289,10 @@ describe ActiveFedora::Base do
 
         context "when an id is set" do
           before do
-            @test_object = ActiveFedora::Base.new(id: '999')
+            @test_object = described_class.new(id: '999')
             allow(@test_object).to receive(:assign_id).and_return(@this_id)
           end
-          it "should not set the id" do
+          it "does not set the id" do
             @test_object.save
             expect(@test_object.id).to eq '999'
           end
@@ -305,8 +301,8 @@ describe ActiveFedora::Base do
     end
 
     describe "#create" do
-      it "should build a new record and save it" do
-        obj = double()
+      it "builds a new record and save it" do
+        obj = double
         expect(obj).to receive(:save)
         expect(FooHistory).to receive(:new).and_return(obj)
         @hist = FooHistory.create(fubar: 'ta', swank: 'da')
@@ -314,9 +310,9 @@ describe ActiveFedora::Base do
     end
 
     describe "update_attributes" do
-      it "should set the attributes and save" do
+      it "sets the attributes and save" do
         m = FooHistory.new
-        att= {"fubar"=> '1234', "baz" =>'stuff'}
+        att = { "fubar" => '1234', "baz" => 'stuff' }
 
         expect(m).to receive(:fubar=).with('1234')
         expect(m).to receive(:baz=).with('stuff')
@@ -326,9 +322,9 @@ describe ActiveFedora::Base do
     end
 
     describe "update" do
-      it "should set the attributes and save" do
+      it "sets the attributes and save" do
         m = FooHistory.new
-        att= {"fubar"=> '1234', "baz" =>'stuff'}
+        att = { "fubar" => '1234', "baz" => 'stuff' }
 
         expect(m).to receive(:fubar=).with('1234')
         expect(m).to receive(:baz=).with('stuff')

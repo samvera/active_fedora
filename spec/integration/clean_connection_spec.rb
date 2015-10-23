@@ -11,7 +11,7 @@ RSpec.describe ActiveFedora::CleanConnection do
         end
       end
       let(:result) { subject.get(uri) }
-      it "should return a clean graph" do
+      it "returns a clean graph" do
         graph = result.graph
         expect(graph.statements.to_a.length).to eq 1
         expect(graph.statements.to_a.first).to eq [asset.rdf_subject, RDF::DC.title, "test"]

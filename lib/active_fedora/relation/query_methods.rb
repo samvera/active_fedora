@@ -1,6 +1,5 @@
 module ActiveFedora
   module QueryMethods # :nodoc:
-
     def extending_values
       @values[:extending] || []
     end

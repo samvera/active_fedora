@@ -1,7 +1,7 @@
 module ActiveFedora
   module RDF
     #
-    # Mixin for adding datastream persistence to an ActiveTriples::Resource 
+    # Mixin for adding datastream persistence to an ActiveTriples::Resource
     # descendant so that it may be used to back an ActiveFedora::RDFDatastream.
     #
     # @see ActiveFedora::RDFDatastream.resource_class
@@ -13,19 +13,19 @@ module ActiveFedora
       BASE_URI = 'info:fedora/'
 
       included do
-        configure :base_uri => BASE_URI unless base_uri
+        configure base_uri: BASE_URI unless base_uri
         attr_accessor :datastream
       end
 
       # Overrides ActiveTriples::Resource
       def persist!
-        return false unless datastream and datastream.respond_to? :save
+        return false unless datastream && datastream.respond_to?(:save)
         @persisted ||= datastream.save
       end
 
       # Overrides ActiveTriples::Resource
       def persisted?
-        @persisted ||= (not datastream.new_record?)
+        @persisted ||= (!datastream.new_record?)
       end
     end
   end

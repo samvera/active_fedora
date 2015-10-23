@@ -24,13 +24,12 @@ describe "NestedAttribute behavior" do
   let(:bar1) { Bar.create(car: car) }
   let(:bar2) { Bar.create(car: car) }
 
-
-  it "should have _destroy" do
+  it "has _destroy" do
     expect(Bar.new._destroy).to be_nil
   end
 
-  it "should update the child objects" do
-    car.update bars_attributes: [{id: bar1.id, uno: "bar1 uno"}, {uno: "newbar uno"}, {id: bar2.id, _destroy: '1', uno: 'bar2 uno'}]
+  it "updates the child objects" do
+    car.update bars_attributes: [{ id: bar1.id, uno: "bar1 uno" }, { uno: "newbar uno" }, { id: bar2.id, _destroy: '1', uno: 'bar2 uno' }]
     expect(Bar.all.map(&:uno)).to match_array ['bar1 uno', 'newbar uno']
 
     bars = car.bars(true)
@@ -51,9 +50,9 @@ describe "NestedAttribute behavior" do
     let!(:bar1) { Bar.create(car: car) }
     let!(:bar2) { Bar.create(car: car) }
 
-    it "should reject attributes when all blank" do
+    it "rejects attributes when all blank" do
       expect(car.bars.count).to eq 2
-      car.update bars_attributes: [{}, {id: bar1.id, uno: "bar1 uno"}]
+      car.update bars_attributes: [{}, { id: bar1.id, uno: "bar1 uno" }]
       expect(car.bars(true).count).to eq 2
 
       bar1.reload
@@ -125,7 +124,7 @@ describe "NestedAttribute behavior" do
     let(:car_class) { CarSymbol }
 
     it "rejects attributes based on method name" do
-      car.update bars_attributes: [{}, {id: bar1.id, uno: "bar1 uno"}, {id: bar2.id, dos: "bar2 dos"}]
+      car.update bars_attributes: [{}, { id: bar1.id, uno: "bar1 uno" }, { id: bar2.id, dos: "bar2 dos" }]
       bar1.reload
       bar2.reload
       expect(bar1.uno).to eq "bar1 uno"
@@ -159,13 +158,13 @@ describe "NestedAttribute behavior" do
     after { Object.send(:remove_const, :CarWithLimit) }
 
     let(:car_class) { CarWithLimit }
-    it "should throw TooManyRecords" do
+    it "throws TooManyRecords" do
       expect {
-        car.attributes = {bars_attributes: [{}]}
+        car.attributes = { bars_attributes: [{}] }
       }.to_not raise_exception
 
       expect {
-        car.attributes = {bars_attributes: [{}, {}]}
+        car.attributes = { bars_attributes: [{}, {}] }
       }.to raise_exception(ActiveFedora::NestedAttributes::TooManyRecords)
     end
   end

@@ -2,11 +2,10 @@ require 'spec_helper'
 
 describe "Nesting attribute behavior of RDFDatastream" do
   describe ".attributes=" do
-
     context "complex properties in a datastream" do
       before do
         class DummyMADS < RDF::Vocabulary("http://www.loc.gov/mads/rdf/v1#")
-  # TODO this test is order dependent. It expects to use the object created in the previous test
+          # TODO: this test is order dependent. It expects to use the object created in the previous test
           # componentList and Types of components
           property :componentList
           property :Topic
@@ -14,7 +13,6 @@ describe "Nesting attribute behavior of RDFDatastream" do
           property :PersonalName
           property :CorporateName
           property :ComplexSubject
-
 
           # elementList and elementList values
           property :elementList
@@ -30,7 +28,6 @@ describe "Nesting attribute behavior of RDFDatastream" do
           property :topic, predicate: DummyMADS.Topic, class_name: "Topic"
           property :personalName, predicate: DummyMADS.PersonalName, class_name: "PersonalName"
           property :title, predicate: ::RDF::DC.title
-
 
           accepts_nested_attributes_for :topic, :personalName
 
@@ -54,7 +51,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
             accepts_nested_attributes_for :topicElement
           end
           class MadsTopicElement < ActiveTriples::Resource
-            configure :type => DummyMADS.TopicElement
+            configure type: DummyMADS.TopicElement
             property :elementValue, predicate: DummyMADS.elementValue
           end
         end
@@ -73,14 +70,14 @@ describe "Nesting attribute behavior of RDFDatastream" do
                 elementList_attributes: [{
                   topicElement_attributes: [{
                     id: 'http://library.ucsd.edu/ark:/20775/bb3333333x',
-                    elementValue:"Cosmology"
-                     }]
+                    elementValue: "Cosmology"
                   }]
+                }]
               },
               '1' =>
               {
                 elementList_attributes: [{
-                  topicElement_attributes: {'0' => {elementValue:"Quantum Behavior"}}
+                  topicElement_attributes: { '0' => { elementValue: "Quantum Behavior" } }
                 }]
               }
             },
@@ -92,22 +89,21 @@ describe "Nesting attribute behavior of RDFDatastream" do
                   dateNameElement: "1743-1826"
                 }]
               }
-              #, "Hemings, Sally"
-            ],
+              # , "Hemings, Sally"
+            ]
           }
         }
       end
 
       describe "on lists" do
         subject { ComplexRDFDatastream::PersonalName.new(nil) }
-        it "should accept a hash" do
-          subject.elementList_attributes =  [{ topicElement_attributes: {'0' => { elementValue:"Quantum Behavior" }, '1' => { elementValue:"Wave Function" }}}]
+        it "accepts a hash" do
+          subject.elementList_attributes = [{ topicElement_attributes: { '0' => { elementValue: "Quantum Behavior" }, '1' => { elementValue: "Wave Function" } } }]
           expect(subject.elementList.first[0].elementValue).to eq ["Quantum Behavior"]
           expect(subject.elementList.first[1].elementValue).to eq ["Wave Function"]
-
         end
-        it "should accept an array" do
-          subject.elementList_attributes =  [{ topicElement_attributes: [{ elementValue:"Quantum Behavior" }, { elementValue:"Wave Function" }]}]
+        it "accepts an array" do
+          subject.elementList_attributes = [{ topicElement_attributes: [{ elementValue: "Quantum Behavior" }, { elementValue: "Wave Function" }] }]
           expect(subject.elementList.first[0].elementValue).to eq ["Quantum Behavior"]
           expect(subject.elementList.first[1].elementValue).to eq ["Wave Function"]
         end
@@ -119,26 +115,26 @@ describe "Nesting attribute behavior of RDFDatastream" do
           subject.attributes = params[:myResource]
         end
 
-        it 'should have attributes' do
+        it 'has attributes' do
           expect(subject.topic[0].elementList.first[0].elementValue).to eq ["Cosmology"]
           expect(subject.topic[1].elementList.first[0].elementValue).to eq ["Quantum Behavior"]
           expect(subject.personalName.first.elementList.first.fullNameElement).to eq ["Jefferson, Thomas"]
           expect(subject.personalName.first.elementList.first.dateNameElement).to eq ["1743-1826"]
         end
 
-        it 'should build nodes with ids' do
+        it 'builds nodes with ids' do
           expect(subject.topic[0].elementList.first[0].rdf_subject).to eq 'http://library.ucsd.edu/ark:/20775/bb3333333x'
-          expect(subject.personalName.first.rdf_subject).to eq  'http://library.ucsd.edu/ark:20775/jefferson'
+          expect(subject.personalName.first.rdf_subject).to eq 'http://library.ucsd.edu/ark:20775/jefferson'
         end
 
-        it 'should fail when writing to a non-predicate' do
-          attributes = { topic_attributes: { '0' => { elementList_attributes: [{ topicElement_attributes: [{ fake_predicate:"Cosmology" }] }]}}}
-          expect{ subject.attributes = attributes }.to raise_error ArgumentError
+        it 'fails when writing to a non-predicate' do
+          attributes = { topic_attributes: { '0' => { elementList_attributes: [{ topicElement_attributes: [{ fake_predicate: "Cosmology" }] }] } } }
+          expect { subject.attributes = attributes }.to raise_error ArgumentError
         end
 
-        it 'should fail when writing to a non-predicate with a setter method' do
-          attributes = { topic_attributes: { '0' => { elementList_attributes: [{ topicElement_attributes: [{ name:"Cosmology" }] }]}}}
-          expect{ subject.attributes = attributes }.to raise_error ArgumentError
+        it 'fails when writing to a non-predicate with a setter method' do
+          attributes = { topic_attributes: { '0' => { elementList_attributes: [{ topicElement_attributes: [{ name: "Cosmology" }] }] } } }
+          expect { subject.attributes = attributes }.to raise_error ArgumentError
         end
       end
     end
@@ -146,14 +142,13 @@ describe "Nesting attribute behavior of RDFDatastream" do
     describe "with an existing object" do
       before(:each) do
         class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
-          property :parts, predicate: ::RDF::DC.hasPart, :class_name=>'Component'
+          property :parts, predicate: ::RDF::DC.hasPart, class_name: 'Component'
           accepts_nested_attributes_for :parts, allow_destroy: true
 
           class Component < ActiveTriples::Resource
             property :label, predicate: ::RDF::DC.title
           end
         end
-
       end
 
       after(:each) do
@@ -162,23 +157,22 @@ describe "Nesting attribute behavior of RDFDatastream" do
       subject { SpecDatastream.new }
       before do
         subject.attributes = { parts_attributes: [
-                                  {label: 'Alternator'},
-                                  {label: 'Distributor'},
-                                  {label: 'Transmission'},
-                                  {label: 'Fuel Filter'}]}
+          { label: 'Alternator' },
+          { label: 'Distributor' },
+          { label: 'Transmission' },
+          { label: 'Fuel Filter' }] }
       end
-      let (:replace_object_id) { subject.parts[1].rdf_subject.to_s }
-      let (:remove_object_id) { subject.parts[3].rdf_subject.to_s }
+      let(:replace_object_id) { subject.parts[1].rdf_subject.to_s }
+      let(:remove_object_id) { subject.parts[3].rdf_subject.to_s }
 
-      it "should update nested objects" do
-        subject.parts_attributes= [{id: replace_object_id, label: "Universal Joint"}, {label:"Oil Pump"}, {id: remove_object_id, _destroy: '1', label: "bar1 uno"}]
+      it "updates nested objects" do
+        subject.parts_attributes = [{ id: replace_object_id, label: "Universal Joint" }, { label: "Oil Pump" }, { id: remove_object_id, _destroy: '1', label: "bar1 uno" }]
 
-        expect(subject.parts.map{|p| p.label.first}).to eq ['Alternator', 'Universal Joint', 'Transmission', 'Oil Pump']
-
+        expect(subject.parts.map { |p| p.label.first }).to eq ['Alternator', 'Universal Joint', 'Transmission', 'Oil Pump']
       end
       it "create a new object when the id is provided" do
-       subject.parts_attributes= [{id: 'http://example.com/part#1', label: "Universal Joint"}]
-       expect(subject.parts.last.rdf_subject).to eq RDF::URI('http://example.com/part#1')
+        subject.parts_attributes = [{ id: 'http://example.com/part#1', label: "Universal Joint" }]
+        expect(subject.parts.last.rdf_subject).to eq RDF::URI('http://example.com/part#1')
       end
     end
   end

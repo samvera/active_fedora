@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe ActiveFedora::Persistence do
-
   describe '.delete' do
     context 'with an unsaved object' do
       subject { ActiveFedora::Base.new }
@@ -47,7 +46,7 @@ describe ActiveFedora::Persistence do
 
     context "when called with option update_index: false" do
       context "on a new record" do
-        it "should not update the index" do
+        it "does not update the index" do
           expect(subject).to_not receive(:update_index)
           subject.save(update_index: false)
         end
@@ -60,7 +59,7 @@ describe ActiveFedora::Persistence do
           allow(subject).to receive(:update_modified_date)
         end
 
-        it "should not update the index" do
+        it "does not update the index" do
           expect(subject).to_not receive(:update_index)
           subject.save(update_index: false)
         end
@@ -71,7 +70,7 @@ describe ActiveFedora::Persistence do
       context "on create" do
         before { allow(subject).to receive(:create_needs_index?) { false } }
 
-        it "should not override `create_needs_index?'" do
+        it "does not override `create_needs_index?'" do
           expect(subject).to_not receive(:update_index)
           subject.save(update_index: true)
         end
@@ -85,7 +84,7 @@ describe ActiveFedora::Persistence do
           allow(subject).to receive(:update_modified_date)
         end
 
-        it "should not override `update_needs_index?'" do
+        it "does not override `update_needs_index?'" do
           expect(subject).to_not receive(:update_index)
           subject.save(update_index: true)
         end

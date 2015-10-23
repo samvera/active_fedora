@@ -36,11 +36,9 @@ module ActiveFedora
 
     private
 
-    def reset_cache_settings
-      ActiveFedora.fedora.connection.clear_cache
-      ActiveFedora.fedora.connection.disable_cache!
-    end
-
+      def reset_cache_settings
+        ActiveFedora.fedora.connection.clear_cache
+        ActiveFedora.fedora.connection.disable_cache!
+      end
   end
 end
-

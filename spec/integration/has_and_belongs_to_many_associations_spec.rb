@@ -33,7 +33,7 @@ describe ActiveFedora::Base do
           expect(topic1.books).to be_empty
         end
 
-        it "Should allow for more than 10 items" do
+        it "allows for more than 10 items" do
           (1..12).each do
             book.topics << Topic.create
           end
@@ -54,7 +54,7 @@ describe ActiveFedora::Base do
           end
 
           let!(:special_book) { SpecialInheritedBook.create }
-          it "Should find inherited objects along with base objects" do
+          it "finds inherited objects along with base objects" do
             book.topics << topic1
             special_book.topics << topic1
             expect(topic1.books).to match_array [book, special_book]
@@ -68,20 +68,20 @@ describe ActiveFedora::Base do
         let!(:topic1) { Topic.create }
         let!(:topic2) { Topic.create }
 
-        it "should set relationships bidirectionally" do
+        it "sets relationships bidirectionally" do
           book.topics << topic1
           expect(book.topics).to eq [topic1]
           expect(book['topic_ids']).to eq [topic1.id]
           expect(topic1['book_ids']).to eq [book.id]
-          expect(Topic.find(topic1.id).books).to eq [book] #Can't have saved it because book isn't saved yet.
+          expect(Topic.find(topic1.id).books).to eq [book] # Can't have saved it because book isn't saved yet.
         end
 
-        it "should save new child objects" do
+        it "saves new child objects" do
           book.topics << Topic.new
           expect(book.topics.first.id).to_not be_nil
         end
 
-        it "should clear out the old associtions" do
+        it "clears out the old associtions" do
           book.topics = [topic1]
           book.topics = [topic2]
           expect(book.topic_ids).to eq [topic2.id]
@@ -94,7 +94,7 @@ describe ActiveFedora::Base do
           end
 
           context "destroy" do
-            it "should remove the associations" do
+            it "removes the associations" do
               book.destroy
             end
           end
@@ -148,8 +148,8 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :Collection)
     end
 
-    let (:book) { Book.create }
-    let (:collection) { Collection.create }
+    let(:book) { Book.create }
+    let(:collection) { Collection.create }
 
     context "when the book is a member of the collection" do
       before do
@@ -157,14 +157,14 @@ describe ActiveFedora::Base do
         book.save!
       end
 
-      it "should have a collection" do
+      it "has a collection" do
         expect(book['collection_ids']).to eq [collection.id]
         expect(book.collections).to eq [collection]
       end
       it "habtm should not set foreign relationships if :inverse_of is not specified" do
         expect(collection['book_ids']).to be_empty
       end
-      it "should load the collections" do
+      it "loads the collections" do
         reloaded = Book.find(book.id)
         expect(reloaded.collections).to eq [collection]
       end
@@ -183,7 +183,6 @@ describe ActiveFedora::Base do
     end
   end
 
-
   describe "when destroying the association" do
     describe "without callbacks" do
       before do
@@ -200,9 +199,9 @@ describe ActiveFedora::Base do
         Object.send(:remove_const, :Collection)
       end
 
-      let (:book) { Book.create }
-      let (:collection1) { Collection.create }
-      let (:collection2) { Collection.create }
+      let(:book) { Book.create }
+      let(:collection1) { Collection.create }
+      let(:collection2) { Collection.create }
       before do
         book.collections << collection1 << collection2
         book.save!
@@ -246,8 +245,8 @@ describe ActiveFedora::Base do
         Object.send(:remove_const, :Collection)
       end
 
-      let (:book) { Book.create }
-      let (:collection) { Collection.create }
+      let(:book) { Book.create }
+      let(:collection) { Collection.create }
       before do
         book.collections << collection
         book.save!
@@ -265,7 +264,7 @@ describe ActiveFedora::Base do
         book.collections.delete(collection)
       end
 
-      it "should not remove if an exception is thrown in before_remove" do
+      it "does not remove if an exception is thrown in before_remove" do
         expect(book).to receive(:foo).with(collection).and_raise
         expect(book).to_not receive(:bar)
         begin
@@ -308,7 +307,7 @@ describe ActiveFedora::Base do
         book.collections = [collection]
       end
 
-      it "should not add if an exception is thrown in before_add" do
+      it "does not add if an exception is thrown in before_add" do
         expect(book).to receive(:foo).with(collection).and_raise
         expect(book).to_not receive(:bar)
         begin
@@ -338,7 +337,7 @@ describe ActiveFedora::Base do
 
     let(:book) { Book.create }
 
-    it "should create" do
+    it "creates" do
       collection = book.collections.create(title: ["Permanent"])
       expect(collection).to be_kind_of Collection
       expect(book.collections).to include collection
@@ -346,7 +345,6 @@ describe ActiveFedora::Base do
       expect(book.reload.collections.first.title).to eq ['Permanent']
     end
   end
-
 
   describe "Autosave" do
     before do
@@ -380,7 +378,7 @@ describe ActiveFedora::Base do
       describe "dependent records" do
         let(:component) { Component.create(items: [Item.new(title: 'my title')]) }
 
-        it "should be saved" do
+        it "is saved" do
           component.reload
           expect(component.items.first.title).to eq 'my title'
         end
@@ -390,7 +388,7 @@ describe ActiveFedora::Base do
         let(:component) { Component.new }
         let(:item) { Item.create }
 
-        it "should set item_ids" do
+        it "sets item_ids" do
           component.items << item
           expect(component.item_ids).to eq [item.id]
         end
@@ -406,7 +404,7 @@ describe ActiveFedora::Base do
           let(:component) { Component.create }
           let(:item) { Item.new }
 
-          it "should set item_ids" do
+          it "sets item_ids" do
             component.items << item
             expect(component.item_ids).to eq [item.id]
           end
@@ -417,7 +415,7 @@ describe ActiveFedora::Base do
     describe "From the has_many side" do
       let(:item) { Item.create(components: [Component.new(description: 'my description')]) }
 
-      it "should save dependent records" do
+      it "saves dependent records" do
         item.reload
         expect(item.components.first.description).to eq 'my description'
       end

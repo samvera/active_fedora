@@ -1,27 +1,24 @@
 module ActiveFedora
-  #This class represents a simple xml datastream.
+  # This class represents a simple xml datastream.
   class SimpleDatastream < OmDatastream
-
     class_attribute :class_fields
     attr_accessor :fields
     self.class_fields = []
 
+    set_terminology do |t|
+      t.root(path: "fields", xmlns: nil)
+    end
 
-     set_terminology do |t|
-       t.root(:path=>"fields", :xmlns=>nil)
-     end
-
-    define_template :creator do |xml,name|
-      xml.creator() do
+    define_template :creator do |xml, name|
+      xml.creator do
         xml.text(name)
       end
     end
 
-
-    #Constructor. this class will call self.field for each DCTERM. In short, all DCTERMS fields will already exist
-    #when this method returns. Each term is marked as a multivalue string.
-    def initialize(digital_object=nil, dsid=nil, options={}, &block)
-      self.fields={}
+    # Constructor. this class will call self.field for each DCTERM. In short, all DCTERMS fields will already exist
+    # when this method returns. Each term is marked as a multivalue string.
+    def initialize(digital_object = nil, dsid = nil, options = {}, &block)
+      self.fields = {}
       super
     end
 
@@ -43,25 +40,23 @@ module ActiveFedora
     #   :multiple=>true -  mark this field as a multivalue field (on by default)
     #
     #
-    #There is quite a good example of this class in use in spec/examples/oral_history.rb
+    # There is quite a good example of this class in use in spec/examples/oral_history.rb
     #
-    #!! Careful: If you declare two fields that correspond to the same xml node without any qualifiers to differentiate them,
-    #you will end up replicating the values in the underlying datastream, resulting in mysterious dubling, quadrupling, etc.
-    #whenever you edit the field's values.
-    def field(name, datatype=:string, opts={})
-      fields ||= {}
-      @fields[name.to_s.to_sym]={:type=>datatype, :values=>[]}.merge(opts)
+    # !! Careful: If you declare two fields that correspond to the same xml node without any qualifiers to differentiate them,
+    # you will end up replicating the values in the underlying datastream, resulting in mysterious dubling, quadrupling, etc.
+    # whenever you edit the field's values.
+    def field(name, datatype = :string, opts = {})
+      @fields[name.to_s.to_sym] = { type: datatype, values: [] }.merge(opts)
       # add term to template
       self.class.class_fields << name.to_s
       # add term to terminology
-      unless self.class.terminology.has_term?(name.to_sym)
-        term = OM::XML::Term.new(name.to_sym, {:type=>datatype}, self.class.terminology)
-        self.class.terminology.add_term(term)
-        term.generate_xpath_queries!
-      end
+      return if self.class.terminology.has_term?(name.to_sym)
+      term = OM::XML::Term.new(name.to_sym, { type: datatype }, self.class.terminology)
+      self.class.terminology.add_term(term)
+      term.generate_xpath_queries!
     end
 
-    def update_indexed_attributes(params={}, opts={})
+    def update_indexed_attributes(params = {}, opts = {})
       raise "can't modify frozen #{self.class}" if frozen?
       # if the params are just keys, not an array, make then into an array.
       new_params = {}
@@ -75,24 +70,21 @@ module ActiveFedora
       super(new_params, opts)
     end
 
-
     def self.xml_template
-       Nokogiri::XML::Document.parse("<fields/>")
+      Nokogiri::XML::Document.parse("<fields/>")
     end
 
-    def to_solr(solr_doc = Hash.new, opts = {}) # :nodoc:
+    def to_solr(solr_doc = {}, _opts = {}) # :nodoc:
       @fields.each do |field_key, field_info|
         next if field_key == :location ## FIXME HYDRA-825
         things = send(field_key)
-        if things
-          field_symbol = ActiveFedora::SolrQueryBuilder.solr_name(field_key, type: field_info[:type])
-          things.val.each do |val|
-            ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val.to_s )
-          end
+        next unless things
+        field_symbol = ActiveFedora::SolrQueryBuilder.solr_name(field_key, type: field_info[:type])
+        things.val.each do |val|
+          ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val.to_s)
         end
       end
-      return solr_doc
+      solr_doc
     end
-
   end
 end

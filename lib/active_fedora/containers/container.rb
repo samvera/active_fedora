@@ -1,7 +1,6 @@
 module ActiveFedora
   # This is the base class for ldp containers, it is not an ldp:BasicContainer
   class Container < ActiveFedora::Base
-
     property :membership_resource, predicate: ::RDF::Vocab::LDP.membershipResource
     property :has_member_relation, predicate: ::RDF::Vocab::LDP.hasMemberRelation
     property :is_member_of_relation, predicate: ::RDF::Vocab::LDP.isMemberOfRelation
@@ -28,11 +27,8 @@ module ActiveFedora
 
     private
 
-    # Don't allow directly setting contained
-    def contained=(*args)
-    end
-
+      # Don't allow directly setting contained
+      def contained=(*_args)
+      end
   end
 end
-
-

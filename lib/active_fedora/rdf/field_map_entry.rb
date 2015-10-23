@@ -5,7 +5,6 @@ module ActiveFedora::RDF
   # @attribute [Array] behaviors the indexing hints such as :stored_searchable or :symbol
   # @attribute [Array] values the actual values that get sent to solr
   class FieldMapEntry
-
     attr_accessor :type, :behaviors, :values
 
     def initialize
@@ -23,6 +22,5 @@ module ActiveFedora::RDF
       self.behaviors.uniq!
       self.values += values
     end
-
   end
 end

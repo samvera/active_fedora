@@ -18,13 +18,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
     after do
       Object.send(:remove_const, :MyDatastream)
     end
-    it "should have a subject" do
+    it "has a subject" do
       expect(@subject.rdf_subject).to eq "http://localhost:8983/fedora/rest/test/test:1"
     end
-    it "should have mime_type" do
+    it "has mime_type" do
       expect(@subject.mime_type).to eq 'text/plain'
     end
-    it "should have fields" do
+    it "has fields" do
       expect(@subject.created).to eq [Date.parse('2010-12-31')]
       expect(@subject.title).to eq ["Title of work"]
       expect(@subject.publisher).to eq ["Penn State"]
@@ -33,37 +33,37 @@ describe ActiveFedora::NtriplesRDFDatastream do
       expect(@subject.related_url.first.rdf_subject).to eq "http://google.com/"
     end
 
-    it "should be able to call enumerable methods on the fields" do
+    it "is able to call enumerable methods on the fields" do
       expect(@subject.title.join(', ')).to eq "Title of work"
       expect(@subject.title.count).to eq 1
       expect(@subject.title.size).to eq 1
       expect(@subject.title[0]).to eq "Title of work"
       expect(@subject.title.to_a).to eq ["Title of work"]
       val = []
-      @subject.title.each_with_index {|v, i| val << "#{i}. #{v}"}
+      @subject.title.each_with_index { |v, i| val << "#{i}. #{v}" }
       expect(val).to eq ["0. Title of work"]
     end
 
-    it "should return fields that are not TermProxies" do
+    it "returns fields that are not TermProxies" do
       expect(@subject.created).to be_kind_of Array
     end
-    it "should have method missing" do
-      expect(lambda{@subject.frank}).to raise_exception NoMethodError
+    it "has method missing" do
+      expect(lambda { @subject.frank }).to raise_exception NoMethodError
     end
 
-    it "should set fields" do
+    it "sets fields" do
       @subject.publisher = "St. Martin's Press"
       expect(@subject.publisher).to eq ["St. Martin's Press"]
     end
-    it "should set rdf literal fields" do
+    it "sets rdf literal fields" do
       @subject.creator = RDF.Literal("Geoff Ryman")
       expect(@subject.creator).to eq ["Geoff Ryman"]
     end
-    it "should append fields" do
+    it "appends fields" do
       @subject.publisher << "St. Martin's Press"
       expect(@subject.publisher).to eq ["Penn State", "St. Martin's Press"]
     end
-    it "should delete fields" do
+    it "deletes fields" do
       @subject.related_url.delete(RDF::URI("http://google.com/"))
       expect(@subject.related_url).to eq []
     end
@@ -74,7 +74,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @one = ActiveFedora::RDFDatastream.new
       @two = ActiveFedora::RDFDatastream.new
     end
-    it "should generate predictable prexies" do
+    it "generates predictable prexies" do
       expect(@one.send(:apply_prefix, "baz", 'myFoobar')).to eq 'my_foobar__baz'
       expect(@two.send(:apply_prefix, "baz", 'myQuix')).to eq 'my_quix__baz'
     end
@@ -104,11 +104,11 @@ describe ActiveFedora::NtriplesRDFDatastream do
       Object.send(:remove_const, :MyDatastream)
     end
 
-    it "should have fields" do
+    it "has fields" do
       expect(@subject.title).to eq ["Title of datastream"]
     end
 
-    it "should have a custom subject" do
+    it "has a custom subject" do
       expect(@subject.rdf_subject).to eq 'http://localhost:8983/fedora/rest/test/test:1/content'
     end
   end
@@ -123,14 +123,14 @@ describe ActiveFedora::NtriplesRDFDatastream do
     after(:each) do
       Object.send(:remove_const, :MyDatastream)
     end
-    it "should support to_s method" do
+    it "supports to_s method" do
       expect(@subject.publisher.to_s).to eq [].to_s
       @subject.publisher = "Bob"
       expect(@subject.publisher.to_s).to eq ["Bob"].to_s
       @subject.publisher << "Jim"
       expect(@subject.publisher.to_s).to eq ["Bob", "Jim"].to_s
     end
- end
+  end
 
   describe "solr integration" do
     before(:all) do
@@ -169,18 +169,18 @@ describe ActiveFedora::NtriplesRDFDatastream do
       @subject.serialize
     end
 
-    it "should provide .to_solr and return a SolrDocument" do
+    it "provides .to_solr and return a SolrDocument" do
       expect(@subject).to respond_to(:to_solr)
       expect(@subject.to_solr).to be_kind_of(Hash)
     end
 
-    it "should have a solr_name method" do
+    it "has a solr_name method" do
       expect(MyDatastream.new.primary_solr_name(:based_near, 'descMetadata')).to eq 'desc_metadata__based_near_tesim'
       expect(MyDatastream.new.primary_solr_name(:title, 'props')).to eq 'props__title_tesim'
     end
 
-    it "should optionally allow you to provide the Solr::Document to add fields to and return that document when done" do
-      doc = Hash.new
+    it "optionallies allow you to provide the Solr::Document to add fields to and return that document when done" do
+      doc = {}
       expect(@subject.to_solr(doc)).to eq doc
     end
     describe "with an actual object" do
@@ -205,24 +205,23 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
       describe ".to_solr()" do
         subject { @obj.to_solr({}, name: 'solrRdf') }
-        it "should return the right fields" do
+        it "returns the right fields" do
           expect(subject.keys).to include(ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__related_url", type: :string),
-                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", type: :string),
-                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", :sortable),
-                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", :facetable),
-                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__created", :sortable, type: :date),
-                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__created", :displayable),
-                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__title", type: :string),
-                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__title", :sortable),
-                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__based_near", type: :string),
-                ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__based_near", :facetable))
-
+                                          ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", type: :string),
+                                          ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", :sortable),
+                                          ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", :facetable),
+                                          ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__created", :sortable, type: :date),
+                                          ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__created", :displayable),
+                                          ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__title", type: :string),
+                                          ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__title", :sortable),
+                                          ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__based_near", type: :string),
+                                          ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__based_near", :facetable))
         end
 
-        it "should return the right values" do
+        it "returns the right values" do
           expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__related_url", type: :string)]).to eq ["http://example.org/blogtastic/"]
-          expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__based_near", type: :string)]).to eq ["Tacoma, WA","Renton, WA"]
-          expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__based_near", :facetable)]).to eq ["Tacoma, WA","Renton, WA"]
+          expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__based_near", type: :string)]).to eq ["Tacoma, WA", "Renton, WA"]
+          expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__based_near", :facetable)]).to eq ["Tacoma, WA", "Renton, WA"]
           expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", type: :string)]).to eq ["Bob's Blogtastic Publishing"]
           expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", :sortable)]).to eq "Bob's Blogtastic Publishing"
           expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("solr_rdf__publisher", :facetable)]).to eq ["Bob's Blogtastic Publishing"]

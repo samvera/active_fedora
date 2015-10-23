@@ -15,17 +15,17 @@ module ActiveFedora
       # the loaded flag is set to true as well.
       def count_records
         count = if loaded?
-          @target.size
-        else
-          @reflection.klass.count(conditions: construct_query)
-        end
+                  @target.size
+                else
+                  @reflection.klass.count(conditions: construct_query)
+                end
 
         # If there's nothing in the database and @target has no new records
         # we are certain the current target is an empty array. This is a
         # documented side-effect of the method that may avoid an extra SELECT.
         @target ||= [] and loaded! if count == 0
 
-        return count
+        count
       end
 
       def set_owner_attributes(record)
@@ -64,13 +64,13 @@ module ActiveFedora
       protected
 
         def find_polymorphic_inverse(record)
-          record.reflections.values.find{ |r| !r.has_many? && r.options[:property] == reflection.options[:property]}
+          record.reflections.values.find { |r| !r.has_many? && r.options[:property] == reflection.options[:property] }
         end
 
         # Deletes the records according to the <tt>:dependent</tt> option.
         def delete_records(records, method)
           if method == :destroy
-            records.each { |r| r.destroy }
+            records.each(&:destroy)
           else
             # Find all the records that point to this and nullify them
             # keys  = records.map { |r| r[reflection.association_primary_key] }
@@ -78,30 +78,29 @@ module ActiveFedora
 
             if method == :delete_all
               raise "Not Implemented"
-              #update_counter(-scope.delete_all)
+              # update_counter(-scope.delete_all)
             else
 
               if reflection.inverse_of # Can't get an inverse when class_name: 'ActiveFedora::Base' is supplied
                 inverse = reflection.inverse_of
                 records.each do |record|
-                  if record.persisted?
-                    if inverse.collection?
-                      # Remove from a has_and_belongs_to_many
-                      record.association(inverse.name).delete(@owner)
-                    elsif inverse.klass == ActiveFedora::Base
-                      record[inverse.foreign_key] = nil
-                    else
-                      # Remove from a belongs_to
-                      record[reflection.foreign_key] = nil
-                    end
-                    # Check to see if the object still exists (may be already deleted).
-                    # In Rails, they do this with an update_all to avoid callbacks and validations, we may need the same.
-                    record.save! if record.class.exists?(record.id)
+                  next unless record.persisted?
+                  if inverse.collection?
+                    # Remove from a has_and_belongs_to_many
+                    record.association(inverse.name).delete(@owner)
+                  elsif inverse.klass == ActiveFedora::Base
+                    record[inverse.foreign_key] = nil
+                  else
+                    # Remove from a belongs_to
+                    record[reflection.foreign_key] = nil
                   end
+                  # Check to see if the object still exists (may be already deleted).
+                  # In Rails, they do this with an update_all to avoid callbacks and validations, we may need the same.
+                  record.save! if record.class.exists?(record.id)
                 end
               end
 
-              #update_counter(-scope.update_all(reflection.foreign_key => nil))
+              # update_counter(-scope.update_all(reflection.foreign_key => nil))
             end
           end
         end

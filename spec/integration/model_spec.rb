@@ -1,16 +1,14 @@
 require 'spec_helper'
 
 describe ActiveFedora::Model do
-  
-  before(:each) do 
+  before(:each) do
     module ModelIntegrationSpec
-      
       class Base < ActiveFedora::Base
         include ActiveFedora::Model
         def self.id_namespace
           "foo"
         end
-        has_metadata :name => "properties", :type => ActiveFedora::SimpleDatastream, :autocreate => true 
+        has_metadata name: "properties", type: ActiveFedora::SimpleDatastream, autocreate: true
       end
       class Basic < Base
       end
@@ -18,16 +16,15 @@ describe ActiveFedora::Model do
 
     @test_instance = ModelIntegrationSpec::Basic.new
     @test_instance.save
-    
   end
-  
+
   after(:each) do
     @test_instance.delete
     Object.send(:remove_const, :ModelIntegrationSpec)
   end
-  
+
   describe "#all" do
-    it "should return an array of instances of the calling Class" do
+    it "returns an array of instances of the calling Class" do
       result = ModelIntegrationSpec::Basic.all.to_a
       expect(result).to be_instance_of(Array)
       # this test is meaningless if the array length is zero

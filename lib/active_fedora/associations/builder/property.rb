@@ -1,6 +1,5 @@
 module ActiveFedora::Associations::Builder
   class Property < Association
-
     self.macro = :rdf
     self.valid_options = [:class_name, :predicate, :type_validator]
 
@@ -18,7 +17,5 @@ module ActiveFedora::Associations::Builder
     def build_index_config(reflection)
       ActiveFedora::Indexing::Map::IndexObject.new(reflection.predicate_for_solr) { |index| index.as :symbol }
     end
-
   end
 end
-

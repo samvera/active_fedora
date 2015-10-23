@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe ActiveFedora::RDFDatastream do
   describe "a new instance" do
-    subject { ActiveFedora::RDFDatastream.new }
+    subject { described_class.new }
     it { should be_metadata }
     it { should_not be_content_changed }
   end
@@ -29,30 +29,30 @@ describe ActiveFedora::RDFDatastream do
 
     subject { @obj.reload.descMetadata }
 
-    it "should not load the descMetadata datastream when calling content_changed?" do
+    it "does not load the descMetadata datastream when calling content_changed?" do
       expect(subject).to_not receive(:retrieve_content)
       expect(subject).to_not be_content_changed
     end
 
-    it "should allow asserting an empty string" do
+    it "allows asserting an empty string" do
       subject.title = ['']
       expect(subject.title).to eq ['']
     end
 
-    it "should clear stuff" do
+    it "clears stuff" do
       subject.title = ['one', 'two', 'three']
       subject.title.clear
-      expect(subject.graph.query([subject.rdf_subject,  ::RDF::DC.title, nil]).first).to be_nil
+      expect(subject.graph.query([subject.rdf_subject, ::RDF::DC.title, nil]).first).to be_nil
     end
 
-    it "should have a list of fields" do
+    it "has a list of fields" do
       expect(MyDatastream.fields).to eq [:title, :description]
     end
   end
 
   describe "deserialize" do
     subject { ActiveFedora::NtriplesRDFDatastream.new }
-    it "should be able to handle non-utf-8 characters" do
+    it "is able to handle non-utf-8 characters" do
       # see https://github.com/ruby-rdf/rdf/issues/142
       data = "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT')
 
@@ -62,8 +62,8 @@ describe ActiveFedora::RDFDatastream do
   end
 
   describe 'content=' do
-    let(:ds) {ActiveFedora::NtriplesRDFDatastream.new }
-    it "should be able to handle non-utf-8 characters" do
+    let(:ds) { ActiveFedora::NtriplesRDFDatastream.new }
+    it "is able to handle non-utf-8 characters" do
       data = "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT')
       ds.content = data
       expect(ds.resource.dump(:ntriples)).to eq "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
@@ -77,9 +77,8 @@ describe ActiveFedora::RDFDatastream do
         allow(datastream).to receive(:remote_content).and_return("<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT'))
       end
     end
-    it "should not error on access" do
+    it "does not error on access" do
       expect(ds.resource.dump(:ntriples)).to eq "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
     end
   end
-
 end

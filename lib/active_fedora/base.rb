@@ -1,11 +1,10 @@
-SOLR_DOCUMENT_ID = "id" unless (defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?)
+SOLR_DOCUMENT_ID = "id" unless defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?
 ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 require 'active_support/descendants_tracker'
 require 'active_fedora/errors'
 require 'active_fedora/log_subscriber'
 
 module ActiveFedora
-
   # This class ties together many of the lower-level modules, and
   # implements something akin to an ActiveRecord-alike interface to
   # fedora. If you want to represent a fedora object in the ruby
