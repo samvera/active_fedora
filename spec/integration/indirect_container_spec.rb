@@ -175,6 +175,25 @@ describe "Indirect containers" do
           end
         end
 
+        describe "#ids_reader" do
+          context "with persisted members" do
+            it "returns the ids" do
+              expect(reloaded.related_object_ids).to eq [file.id]
+            end
+          end
+
+          context "with some members in memory" do
+            let(:file2) { RelatedObject.create }
+            before do
+              reloaded.related_objects << file2
+            end
+
+            it "returns the ids" do
+              expect(reloaded.related_object_ids).to eq [file.id, file2.id]
+            end
+          end
+        end
+
         describe "remove" do
           it "should be able to remove" do
             o.related_objects = []

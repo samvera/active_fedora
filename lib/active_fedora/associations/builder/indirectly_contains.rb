@@ -10,6 +10,14 @@ module ActiveFedora::Associations::Builder
       reflection
     end
 
+    def self.define_readers(mixin, name)
+      super
+
+      mixin.redefine_method("#{name.to_s.singularize}_ids") do
+        association(name).ids_reader
+      end
+    end
+
     def validate_options
       super
       if !options[:has_member_relation] && !options[:is_member_of_relation]
