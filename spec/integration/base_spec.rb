@@ -81,6 +81,7 @@ describe ActiveFedora::Base do
   describe "a saved object" do
     before do
       class Book < ActiveFedora::Base
+        type [::RDF::URI("http://www.example.com/Book")]
         property :title, predicate: ::RDF::DC.title
       end
     end
@@ -130,6 +131,19 @@ describe ActiveFedora::Base do
         expect {
           obj.delete
         }.to change { described_class.exists?(obj.id) }.from(true).to(false)
+      end
+    end
+
+    describe "#type" do
+      subject { obj.type }
+      it { is_expected.to include(::RDF::URI("http://www.example.com/Book")) }
+      context "when adding additional types" do
+        before do
+          t = obj.get_values(:type)
+          t << ::RDF::URI("http://www.example.com/Novel")
+          obj.set_value(:type, t)
+        end
+        it { is_expected.to include(::RDF::URI("http://www.example.com/Novel")) }
       end
     end
   end

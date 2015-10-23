@@ -44,7 +44,7 @@ module ActiveFedora
       if assoc = association(key.to_sym)
         # This is for id attributes stored in the rdf graph.
         assoc.reader
-      elsif self.class.properties.key?(key.to_s)
+      elsif self.class.properties.key?(key.to_s) || self.class.attributes_with_defaults.include?(key.to_s)
         # Use the generated method so that single value assetions are single
         send(key)
       else
@@ -124,6 +124,11 @@ module ActiveFedora
         # Attributes that are required by ActiveFedora and Fedora
         def system_attributes
           ['has_model', 'create_date', 'modified_date']
+        end
+
+        # From ActiveFedora::FedoraAttributes
+        def attributes_with_defaults
+          ['type', 'rdf_label']
         end
 
         # Attributes that represent associations to other repository objects

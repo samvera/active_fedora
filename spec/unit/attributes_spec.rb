@@ -510,6 +510,13 @@ describe ActiveFedora::Base do
             expect(subject[:title]).to eq ['test1']
           end
         end
+
+        context "on Fedora attributes" do
+          it "return values" do
+            expect(subject[:type]).to be_empty
+            expect(subject[:rdf_label]).to contain_exactly("test1")
+          end
+        end
       end
     end
 
