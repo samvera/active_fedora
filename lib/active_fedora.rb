@@ -14,20 +14,21 @@ ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
 
 # Monkey patching RDF::Literal::DateTime to support fractional seconds.
 # See https://github.com/projecthydra/active_fedora/issues/497
+# Also monkey patches in a fix for timezones to be stored properly.
 module RDF
   class Literal
     class DateTime < Literal
       ALTERNATIVE_FORMAT   = '%Y-%m-%dT%H:%M:%S'.freeze
       DOT                  = '.'.freeze
-      Z                    = 'Z'.freeze
       EMPTY                = ''.freeze
+      TIMEZONE_FORMAT      = '%z'.freeze
 
       def to_s
         @string ||= begin
           # Show nanoseconds but remove trailing zeros
           nano = @object.strftime('%N').sub(/0+\Z/, EMPTY)
           nano = DOT + nano unless nano.blank?
-          @object.strftime(ALTERNATIVE_FORMAT) + nano + Z
+          @object.strftime(ALTERNATIVE_FORMAT) + nano + @object.strftime(TIMEZONE_FORMAT)
         end
       end
     end
