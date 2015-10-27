@@ -135,8 +135,7 @@ module ActiveFedora
 
     private
 
-      # Adapt attributes read from Solr to possible minor changes in data model
-      # since the attributes were saved.
+      # Adapt attributes read from Solr to fit the data model.
       # @param attrs [Hash] attributes read from Solr
       # @return [Hash] the adapted attributes
       def adapt_attributes(attrs)
@@ -145,24 +144,44 @@ module ActiveFedora
         end
       end
 
-      # Adapts a single attribute value from the given attributes hash to match
-      # minor changes in the data model.
+      # Adapts a single attribute from the given attributes hash to fit the data
+      # model.
       # @param attrs [Hash] attributes read from Solr
       # @param attribute_name [String] the name of the attribute to adapt
       # @return [Object] the adapted value
       def adapt_attribute_value(attrs, attribute_name)
         reflection = self.class.reflect_on_property(attribute_name)
-        if !reflection
-          return attrs[attribute_name] # if this isn't a property, copy value verbatim
-        else
-          multiple = reflection.multiple?
-          if !attrs.key?(attribute_name)
-            # value is missing in attrs, add [] or nil
-            return multiple ? [] : nil
-          else
-            # convert an existing scalar to an array if needed
-            return multiple ? Array(attrs[attribute_name]) : attrs[attribute_name]
+        # if this isn't a property, copy value verbatim
+        return attrs[attribute_name] unless reflection
+        multiple = reflection.multiple?
+        # if value is missing in attrs, return [] or nil as appropriate
+        return multiple ? [] : nil unless attrs.key?(attribute_name)
+
+        if multiple
+          Array(attrs[attribute_name]).map do |value|
+            adapt_single_attribute_value(value, attribute_name)
           end
+        else
+          adapt_single_attribute_value(attrs[attribute_name], attribute_name)
+        end
+      end
+
+      def date_attribute?(attribute_name)
+        reflection = self.class.reflect_on_property(attribute_name)
+        return false unless reflection
+        reflection.type == :date || reflection.class_name == DateTime
+      end
+
+      # Adapts a single attribute value to fit the data model. If the attribute
+      # is multi-valued, each value is passed separately to this method.
+      # @param value [Object] attribute value read from Solr
+      # @param attribute_name [String] the name of the attribute to adapt
+      # @return [Object] the adapted value
+      def adapt_single_attribute_value(value, attribute_name)
+        if date_attribute?(attribute_name)
+          DateTime.parse(value)
+        else
+          value
         end
       end
   end
