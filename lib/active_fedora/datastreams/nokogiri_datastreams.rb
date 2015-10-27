@@ -63,7 +63,7 @@ module ActiveFedora
       end
 
       def remote_content
-        @datastream_content ||= Nokogiri::XML(super).to_xml(&:no_declaration).strip
+        @ds_content ||= Nokogiri::XML(super).to_xml(&:no_declaration).strip
       end
 
       def content=(new_content)

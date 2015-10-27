@@ -78,6 +78,32 @@ describe ActiveFedora::Base do
           it { is_expected.to eq 'one' }
         end
       end
+
+      context "when updating and saving a property" do
+        before do
+          class BarHistory4 < ActiveFedora::Base
+            has_metadata type: BarStream2, name: "xmlish"
+            property :cow, delegate_to: 'xmlish', multiple: false
+          end
+        end
+        after do
+          Object.send(:remove_const, :BarHistory4)
+        end
+
+        let(:obj) { BarHistory4.new }
+
+        before do
+          obj.cow = 'two'
+          obj.save
+          obj.attached_files[:xmlish].content
+          obj.cow = 'three'
+          obj.save
+        end
+        describe "the attached datastream" do
+          subject { obj.attached_files[:xmlish].content }
+          it { is_expected.to include '<cow>three</cow>' }
+        end
+      end
     end
 
     describe "first level delegation" do
