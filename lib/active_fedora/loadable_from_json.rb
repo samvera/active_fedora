@@ -109,6 +109,8 @@ module ActiveFedora
     end
 
     # @param json [String] json to be parsed into attributes
+    # @yield [self] Yields self after attributes from json have been assigned
+    #               but before callbacks and before the object is frozen.
     def init_with_json(json)
       attrs = JSON.parse(json)
       id = attrs.delete('id')
@@ -122,6 +124,8 @@ module ActiveFedora
       @resource = SolrBackedResource.new(self.class)
       self.attributes = adapt_attributes(attrs)
       # TODO: Should we clear the change tracking, or make this object Read-only?
+
+      yield self if block_given?
 
       run_callbacks :find
       run_callbacks :initialize

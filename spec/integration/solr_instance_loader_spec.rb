@@ -142,4 +142,19 @@ describe ActiveFedora::SolrInstanceLoader do
       end
     end
   end
+
+  describe "loading system properties" do
+    let(:obj_solr) { Foo.load_instance_from_solr(obj.id) }
+    it "loads create_date from solr" do
+      expect(obj.create_date).to be_present
+      expect(obj_solr).to be_present
+      expect(obj_solr.create_date).to be_a DateTime
+    end
+
+    it "loads modified_date from solr" do
+      expect(obj.modified_date).to be_present
+      expect(obj_solr).to be_present
+      expect(obj_solr.modified_date).to be_a DateTime
+    end
+  end
 end
