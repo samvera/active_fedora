@@ -106,6 +106,7 @@ module ActiveFedora
       @mime_type = nil
       @content = nil
       @metadata = nil
+      @ds_content = nil
       changed_attributes.clear
     end
 
