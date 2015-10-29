@@ -55,7 +55,7 @@ module ActiveFedora
       # until all properties have been defined.
       def resource_class
         @generated_resource_class ||= begin
-          klass = const_set(:GeneratedResourceSchema, Class.new(ActiveTriples::Resource))
+          klass = const_set(:GeneratedResourceSchema, Class.new(resource_class_factory))
           klass.configure active_triple_options
           klass.properties.merge(properties).each do |_property, config|
             klass.property(config.term,
@@ -64,6 +64,11 @@ module ActiveFedora
           end
           klass
         end
+      end
+
+      # Allow inherited classes to override what class is used for triples ORM.
+      def resource_class_factory
+        ActiveTriples::Resource
       end
 
       private
