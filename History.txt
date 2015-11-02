@@ -1,3 +1,51 @@
+v9.6.0
+  2015-11-02: Loosen dependency on rdf-rdfxml [Justin Coyne]
+
+  2015-10-29: Allow developers to override resource_class. [Trey Terrell]
+
+  2015-10-27: Makes `has_key?` and `key?` behave consistently in
+  AF::AssociationHash [David Chandek-Stark]
+
+  2015-10-27: Create failing test for issue with datastreams resetting to old
+  version after save related to
+  https://github.com/projecthydra/active_fedora/issues/913 [Kathryn Cassidy]
+
+  2015-10-26: Save timezone information for DateTime values. Load from Solr as
+  DateTime rather than String when index type is :date. [Olli Lyytinen]
+
+  2015-10-26: Load create_date and modified_date from Solr. [Olli Lyytinen]
+
+  2015-10-23: Ensure Travis runs the tests [Justin Coyne]
+
+  2015-10-23: Avoid unnecessary loads [Justin Coyne]
+
+  2015-10-23: refactor persistence spec to not use deprecated methods [Justin
+  Coyne]
+
+  2015-10-23: Return values for inherited attributes the same way we do for
+  properties [Adam Wead]
+
+  2015-10-23: Create an ids_reader for indirect containers [Justin Coyne]
+
+  2015-10-22: Exclude vendor/**/* from rubocop [Justin Coyne]
+
+  2015-10-22: Do away with gemfiles [Justin Coyne]
+
+  2015-10-22: Add rubocop [Justin Coyne]
+
+  2015-10-22: Don't load all the members of an Aggregation on concat [Justin
+  Coyne]
+
+  2015-10-20: Adds ActiveFedora::Checksum class to encapsulate file digest info.
+  [David Chandek-Stark]
+
+  2015-08-03: Append val to solr array instead of replacing when appropriate.
+  [Anna Headley]
+
+  2015-10-20: Adds `#create_date` attribute method to File. [David Chandek-Stark]
+
+  2015-10-19: Update foreign_key documentation [ci skip] [Justin Coyne]
+
 v9.5.0
   2015-10-16: query for nil creates correct query [Justin Coyne]
 
