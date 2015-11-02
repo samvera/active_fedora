@@ -178,7 +178,7 @@ module ActiveFedora
       # @param attribute_name [String] the name of the attribute to adapt
       # @return [Object] the adapted value
       def adapt_single_attribute_value(value, attribute_name)
-        if date_attribute?(attribute_name)
+        if value && date_attribute?(attribute_name)
           DateTime.parse(value)
         else
           value
