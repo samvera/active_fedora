@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'nom-xml', '>= 0.5.1'
   s.add_dependency "activesupport", '>= 4.1.0'
   s.add_dependency "active-triples", '~> 0.7.1'
-  s.add_dependency "rdf-rdfxml", '~> 1.1.0'
+  s.add_dependency "rdf-rdfxml", '~> 1.1'
   s.add_dependency "linkeddata"
   s.add_dependency "deprecation"
   s.add_dependency "ldp", '~> 0.4.0'
