@@ -1,4 +1,7 @@
-v9.6.0
+v9.6.1
+  2015-11-02: Don't try to parse nil dates. Fixes #937 [Justin Coyne]
+
+v9.6.0 (yanked)
   2015-11-02: Loosen dependency on rdf-rdfxml [Justin Coyne]
 
   2015-10-29: Allow developers to override resource_class. [Trey Terrell]
