@@ -8,6 +8,7 @@ describe ActiveFedora::Base do
         index.type :date
       end
       property :single_date, multiple: false, class_name: 'DateTime', predicate: ::RDF::URI.new('http://www.example.com/single_date')
+      property :missing_date, multiple: false, class_name: 'DateTime', predicate: ::RDF::URI.new('http://www.example.com/missing_date')
     end
   end
 
