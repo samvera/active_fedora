@@ -34,10 +34,6 @@ restore_spec_configuration
 # Shut those Rails deprecation warnings up
 ActiveSupport::Deprecation.behavior= Proc.new { |message, callstack| }
 
-RSpec.configure do |config|
-  config.color_enabled = true
-end
-
 def fixture(file)
   File.open(File.join(File.dirname(__FILE__), 'fixtures', file), 'rb')
 end
