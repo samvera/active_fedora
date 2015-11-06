@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::RdfxmlRDFDatastream do
-  describe "a new instance" do
+  describe 'a new instance' do
     before(:each) do
       class MyRdfxmlDatastream < ActiveFedora::RdfxmlRDFDatastream
         map_predicates do |map|
@@ -14,15 +14,15 @@ describe ActiveFedora::RdfxmlRDFDatastream do
     after(:each) do
       Object.send(:remove_const, :MyRdfxmlDatastream)
     end
-    it "should save and reload" do
+    it 'should save and reload' do
       @subject.publisher = ["St. Martin's Press"]
-      @subject.serialize.should =~ /<rdf:RDF/
+      expect(@subject.serialize).to match(/<rdf:RDF/)
     end
   end
 
-  describe "a complex data model" do
-    before do 
-      class DAMS < RDF::Vocabulary("http://library.ucsd.edu/ontology/dams#")
+  describe 'a complex data model' do
+    before do
+      class DAMS < RDF::Vocabulary('http://library.ucsd.edu/ontology/dams#')
         property :title
         property :relatedTitle
         property :type
@@ -46,7 +46,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
 
       module RDF
         # This enables RDF to respond_to? :value
-        def self.value 
+        def self.value
           self[:value]
         end
       end
@@ -61,7 +61,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
 
         attr_reader :about
 
-        def initialize(digital_object=nil, dsid=nil, options={})
+        def initialize(digital_object = nil, dsid = nil, options = {})
           @about = options.delete(:about)
           super
         end
@@ -79,7 +79,7 @@ describe ActiveFedora::RdfxmlRDFDatastream do
           include ActiveFedora::RdfObject
           map_predicates do |map|
             rdf_type DAMS.Description
-            map.value(:in=> RDF) do |index|
+            map.value(:in => RDF) do |index|
               index.as :searchable
             end
           end
@@ -92,35 +92,35 @@ describe ActiveFedora::RdfxmlRDFDatastream do
       Object.send(:remove_const, :DAMS)
     end
 
-    describe "a new instance" do
-      subject { MyDatastream.new(double('inner object', :pid=>'test:1', :new_record? =>true), 'descMetadata', about:"http://library.ucsd.edu/ark:/20775/") }
-      it "should have a subject" do
-        subject.rdf_subject.to_s.should == "http://library.ucsd.edu/ark:/20775/"
+    describe 'a new instance' do
+      subject { MyDatastream.new(double('inner object', :pid => 'test:1', :new_record? => true), 'descMetadata', about: 'http://library.ucsd.edu/ark:/20775/') }
+      it 'should have a subject' do
+        expect(subject.rdf_subject.to_s).to eq('http://library.ucsd.edu/ark:/20775/')
       end
-      
+
     end
 
-    describe "an instance with content" do
+    describe 'an instance with content' do
       subject do
-        subject = MyDatastream.new(double('inner object', :pid=>'test:1', :new_record? =>true), 'descMetadata')
+        subject = MyDatastream.new(double('inner object', :pid => 'test:1', :new_record? => true), 'descMetadata')
         subject.content = File.new('spec/fixtures/damsObjectModel.xml').read
         subject
       end
-      it "should have a subject" do
-        subject.rdf_subject.to_s.should == "http://library.ucsd.edu/ark:/20775/"
+      it 'should have a subject' do
+        expect(subject.rdf_subject.to_s).to eq('http://library.ucsd.edu/ark:/20775/')
       end
-      it "should have controlGroup" do
-        subject.controlGroup.should == 'X'
+      it 'should have controlGroup' do
+        expect(subject.controlGroup).to eq('X')
       end
-      it "should have mimeType" do
-        subject.mimeType.should == 'text/xml'
+      it 'should have mimeType' do
+        expect(subject.mimeType).to eq('text/xml')
       end
-      it "should have dsid" do
-        subject.dsid.should == 'descMetadata'
+      it 'should have dsid' do
+        expect(subject.dsid).to eq('descMetadata')
       end
-      it "should have fields" do
-        subject.resource_type.should == ["image"]
-        subject.title.first.value.should == ["example title"]
+      it 'should have fields' do
+        expect(subject.resource_type).to eq(['image'])
+        expect(subject.title.first.value).to eq(['example title'])
       end
     end
   end

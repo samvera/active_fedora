@@ -1,5 +1,5 @@
 require 'active-fedora'
 
-class Image 
+class Image
   include ActiveFedora::Model
 end

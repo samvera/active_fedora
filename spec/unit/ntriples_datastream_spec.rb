@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 describe ActiveFedora::NtriplesRDFDatastream do
-  describe "an instance with content" do
-    before do 
+  describe 'an instance with content' do
+    before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         map_predicates do |map|
           map.created(:in => RDF::DC)
@@ -11,84 +11,84 @@ describe ActiveFedora::NtriplesRDFDatastream do
           map.creator(:in => RDF::DC)
           map.educationLevel(:in => RDF::DC)
           map.based_near(:in => RDF::FOAF)
-          map.related_url(:to => "seeAlso", :in => RDF::RDFS)
+          map.related_url(:to => 'seeAlso', :in => RDF::RDFS)
         end
       end
-      @subject = MyDatastream.new(double('inner object', :pid=>'test:1', :new_record? =>true), 'descMetadata')
+      @subject = MyDatastream.new(double('inner object', :pid => 'test:1', :new_record? => true), 'descMetadata')
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
     after do
       Object.send(:remove_const, :MyDatastream)
     end
-    it "should have a subject" do
-      @subject.rdf_subject.should == "info:fedora/test:1"
+    it 'should have a subject' do
+      expect(@subject.rdf_subject).to eq('info:fedora/test:1')
     end
-    it "should have controlGroup" do
-      @subject.controlGroup.should == 'M'
+    it 'should have controlGroup' do
+      expect(@subject.controlGroup).to eq('M')
     end
-    it "should have mimeType" do
-      @subject.mimeType.should == 'text/plain'
+    it 'should have mimeType' do
+      expect(@subject.mimeType).to eq('text/plain')
     end
-    it "should have dsid" do
-      @subject.dsid.should == 'descMetadata'
+    it 'should have dsid' do
+      expect(@subject.dsid).to eq('descMetadata')
     end
-    it "should have fields" do
-      @subject.created.should == ["2010-12-31"]
-      @subject.title.should == ["Title of work"]
-      @subject.publisher.should == ["Penn State"]
-      @subject.based_near.should == ["New York, NY, US"]
-      @subject.related_url.should == ["http://google.com/"]
+    it 'should have fields' do
+      expect(@subject.created).to eq(['2010-12-31'])
+      expect(@subject.title).to eq(['Title of work'])
+      expect(@subject.publisher).to eq(['Penn State'])
+      expect(@subject.based_near).to eq(['New York, NY, US'])
+      expect(@subject.related_url).to eq(['http://google.com/'])
     end
 
-    it "should be able to call enumerable methods on the fields" do
-      @subject.title.join(', ').should == "Title of work"
-      @subject.title.count.should == 1 
-      @subject.title.size.should == 1 
-      @subject.title[0].should == "Title of work" 
-      @subject.title.to_a.should == ["Title of work"]
+    it 'should be able to call enumerable methods on the fields' do
+      expect(@subject.title.join(', ')).to eq('Title of work')
+      expect(@subject.title.count).to eq(1)
+      expect(@subject.title.size).to eq(1)
+      expect(@subject.title[0]).to eq('Title of work')
+      expect(@subject.title.to_a).to eq(['Title of work'])
       val = []
       @subject.title.each_with_index {|v, i| val << "#{i}. #{v}"}
-      val.should == ["0. Title of work"]
+      expect(val).to eq(['0. Title of work'])
     end
 
-    it "should return fields that are not TermProxies" do
-      @subject.created.should be_kind_of Array
+    it 'should return fields that are not TermProxies' do
+      expect(@subject.created).to be_kind_of Array
     end
-    it "should have method missing" do
-      lambda{@subject.frank}.should raise_exception NoMethodError
+    it 'should have method missing' do
+      expect{@subject.frank}.to raise_exception NoMethodError
     end
 
-    it "should set fields" do
+    it 'should set fields' do
       @subject.publisher = "St. Martin's Press"
-      @subject.publisher.should == ["St. Martin's Press"]
+      expect(@subject.publisher).to eq(["St. Martin's Press"])
     end
-    it "should set rdf literal fields" do
-      @subject.creator = RDF.Literal("Geoff Ryman")
-      @subject.creator.should == ["Geoff Ryman"]
+    it 'should set rdf literal fields' do
+      @subject.creator = RDF.Literal('Geoff Ryman')
+      expect(@subject.creator).to eq(['Geoff Ryman'])
     end
-    it "should append fields" do
+    it 'should append fields' do
       @subject.publisher << "St. Martin's Press"
-      @subject.publisher.should == ["Penn State", "St. Martin's Press"]
+      expect(@subject.publisher).to eq(['Penn State', "St. Martin's Press"])
     end
-    it "should delete fields" do
-      @subject.related_url.delete(RDF::URI("http://google.com/"))
-      @subject.related_url.should == []
+    it 'should delete fields' do
+      @subject.related_url.delete(RDF::URI('http://google.com/'))
+      expect(@subject.related_url).to eq([])
     end
   end
 
-  describe "some dummy instances" do
+  describe 'some dummy instances' do
     before do
       @one = ActiveFedora::RDFDatastream.new('fakepid', 'myFoobar')
       @two = ActiveFedora::RDFDatastream.new('fakepid', 'myQuix')
     end
-    it "should generate predictable prexies" do
-      @one .prefix("baz").should == :my_foobar__baz
-      @two.prefix("baz").should == :my_quix__baz
+    it 'should generate predictable prexies' do
+      expect(@one .prefix('baz')).to eq(:my_foobar__baz)
+      expect(@two.prefix('baz')).to eq(:my_quix__baz)
     end
   end
 
-  describe "an instance with a custom subject" do
-    before do 
+  describe 'an instance with a custom subject' do
+    before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         rdf_subject { |ds| "info:fedora/#{ds.pid}/content" }
         map_predicates do |map|
@@ -96,7 +96,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
           map.title(:in => RDF::DC)
           map.publisher(:in => RDF::DC)
           map.based_near(:in => RDF::FOAF)
-          map.related_url(:to => "seeAlso", :in => RDF::RDFS)
+          map.related_url(:to => 'seeAlso', :in => RDF::RDFS)
         end
       end
       @subject = MyDatastream.new(@inner_object, 'mixed_rdf')
@@ -109,16 +109,16 @@ describe ActiveFedora::NtriplesRDFDatastream do
       Object.send(:remove_const, :MyDatastream)
     end
 
-    it "should have fields" do
-      @subject.title.should == ["Title of datastream"]
+    it 'should have fields' do
+      expect(@subject.title).to eq(['Title of datastream'])
     end
 
-    it "should have a custom subject" do
-      @subject.rdf_subject.should == 'info:fedora/test:1/content'
+    it 'should have a custom subject' do
+      expect(@subject.rdf_subject).to eq('info:fedora/test:1/content')
     end
   end
 
-  describe "a new instance" do
+  describe 'a new instance' do
     before(:each) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         map_predicates do |map|
@@ -131,35 +131,35 @@ describe ActiveFedora::NtriplesRDFDatastream do
     after(:each) do
       Object.send(:remove_const, :MyDatastream)
     end
-    it "should support to_s method" do
-      @subject.publisher.to_s.should == [].to_s
-      @subject.publisher = "Bob"
-      @subject.publisher.to_s.should == ["Bob"].to_s
-      @subject.publisher << "Jim"
-      @subject.publisher.to_s.should == ["Bob", "Jim"].to_s
+    it 'should support to_s method' do
+      expect(@subject.publisher.to_s).to eq([].to_s)
+      @subject.publisher = 'Bob'
+      expect(@subject.publisher.to_s).to eq(['Bob'].to_s)
+      @subject.publisher << 'Jim'
+      expect(@subject.publisher.to_s).to eq(['Bob', 'Jim'].to_s)
     end
  end
 
-  describe "solr integration" do
+  describe 'solr integration' do
     before(:all) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         map_predicates do |map|
-          map.created(:in => RDF::DC) do |index| 
+          map.created(:in => RDF::DC) do |index|
             index.as :sortable, :displayable
             index.type :date
           end
           map.title(:in => RDF::DC) do |index|
             index.as :stored_searchable, :sortable
-            index.type :text 
+            index.type :text
           end
-          map.publisher(:in => RDF::DC) do |index| 
+          map.publisher(:in => RDF::DC) do |index|
             index.as :facetable, :sortable, :stored_searchable
           end
           map.based_near(:in => RDF::FOAF) do |index|
-            index.as :facetable, :stored_searchable 
+            index.as :facetable, :stored_searchable
             index.type :text
           end
-          map.related_url(:to => "seeAlso", :in => RDF::RDFS) do |index|
+          map.related_url(:to => 'seeAlso', :in => RDF::RDFS) do |index|
             index.as :stored_searchable
           end
           map.rights(:in => RDF::DC)
@@ -171,35 +171,35 @@ describe ActiveFedora::NtriplesRDFDatastream do
     after(:all) do
       Object.send(:remove_const, :MyDatastream)
     end
-    before(:each) do  
+    before(:each) do
       @subject.stub(:pid => 'test:1')
     end
-    it "should provide .to_solr and return a SolrDocument" do
-      @subject.should respond_to(:to_solr)
-      @subject.to_solr.should be_kind_of(Hash)
+    it 'should provide .to_solr and return a SolrDocument' do
+      expect(@subject).to respond_to(:to_solr)
+      expect(@subject.to_solr).to be_kind_of(Hash)
     end
-    it "should optionally allow you to provide the Solr::Document to add fields to and return that document when done" do
-      doc = Hash.new
-      @subject.to_solr(doc).should == doc
+    it 'should optionally allow you to provide the Solr::Document to add fields to and return that document when done' do
+      doc = {}
+      expect(@subject.to_solr(doc)).to eq(doc)
     end
-    it "should iterate through @fields hash" do
+    it 'should iterate through @fields hash' do
       solr_doc = @subject.to_solr
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", type: :string)].should == ["publisher1"]
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :sortable)].should == "publisher1"
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :facetable)].should == ["publisher1"]
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", type: :string)].should == ["coverage1", "coverage2"]
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :facetable)].should == ["coverage1", "coverage2"]
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__created", :sortable, type: :date)].should == "2009-10-10T00:00:00Z"
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__created", :displayable)].should == ["2009-10-10"]
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__title", type: :string)].should == ["fake-title"]
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__title", :sortable)].should == "fake-title"
-      solr_doc[ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string)].should == ["http://example.org/"]
+      expect(solr_doc[ActiveFedora::SolrService.solr_name('solr_rdf__publisher', type: :string)]).to eq(['publisher1'])
+      expect(solr_doc[ActiveFedora::SolrService.solr_name('solr_rdf__publisher', :sortable)]).to eq('publisher1')
+      expect(solr_doc[ActiveFedora::SolrService.solr_name('solr_rdf__publisher', :facetable)]).to eq(['publisher1'])
+      expect(solr_doc[ActiveFedora::SolrService.solr_name('solr_rdf__based_near', type: :string)]).to eq(['coverage1', 'coverage2'])
+      expect(solr_doc[ActiveFedora::SolrService.solr_name('solr_rdf__based_near', :facetable)]).to eq(['coverage1', 'coverage2'])
+      expect(solr_doc[ActiveFedora::SolrService.solr_name('solr_rdf__created', :sortable, type: :date)]).to eq('2009-10-10T00:00:00Z')
+      expect(solr_doc[ActiveFedora::SolrService.solr_name('solr_rdf__created', :displayable)]).to eq(['2009-10-10'])
+      expect(solr_doc[ActiveFedora::SolrService.solr_name('solr_rdf__title', type: :string)]).to eq(['fake-title'])
+      expect(solr_doc[ActiveFedora::SolrService.solr_name('solr_rdf__title', :sortable)]).to eq('fake-title')
+      expect(solr_doc[ActiveFedora::SolrService.solr_name('solr_rdf__related_url', type: :string)]).to eq(['http://example.org/'])
     end
 
-    describe "with an actual object" do
+    describe 'with an actual object' do
       before(:each) do
         class Foo < ActiveFedora::Base
-          has_metadata :name => "descMetadata", :type => MyDatastream
+          has_metadata :name => 'descMetadata', :type => MyDatastream
           delegate :created, :to => :descMetadata, multiple: true
           delegate :title, :to => :descMetadata, multiple: true
           delegate :publisher, :to => :descMetadata, multiple: true
@@ -210,49 +210,49 @@ describe ActiveFedora::NtriplesRDFDatastream do
         @obj = MyDatastream.new(@inner_object, 'solr_rdf')
         repository = double()
           @obj.stub(:repository => repository, :pid => 'test:1')
-          repository.stub(:modify_datastream)
-          repository.stub(:add_datastream)
-        @obj.created = "2012-03-04"
-        @obj.title = "Of Mice and Men, The Sequel"
+          allow(repository).to receive(:modify_datastream)
+          allow(repository).to receive(:add_datastream)
+        @obj.created = '2012-03-04'
+        @obj.title = 'Of Mice and Men, The Sequel'
         @obj.publisher = "Bob's Blogtastic Publishing"
-        @obj.based_near = ["Tacoma, WA", "Renton, WA"]
-        @obj.related_url = "http://example.org/blogtastic/"
+        @obj.based_near = ['Tacoma, WA', 'Renton, WA']
+        @obj.related_url = 'http://example.org/blogtastic/'
         @obj.rights = "Totally open, y'all"
         @obj.save
       end
 
-      describe ".fields()" do
-        it "should return the right fields" do
-          @obj.send(:fields).keys.should == ["created", "title", "publisher", "based_near", "related_url"]
+      describe '.fields()' do
+        it 'should return the right fields' do
+          expect(@obj.send(:fields).keys).to eq(['created', 'title', 'publisher', 'based_near', 'related_url'])
         end
-        it "should return the right values" do
+        it 'should return the right values' do
           fields = @obj.send(:fields)
-          fields[:related_url][:values].should == ["http://example.org/blogtastic/"]
-          fields[:based_near][:values].should == ["Tacoma, WA", "Renton, WA"]
+          expect(fields[:related_url][:values]).to eq(['http://example.org/blogtastic/'])
+          expect(fields[:based_near][:values]).to eq(['Tacoma, WA', 'Renton, WA'])
         end
-        it "should return the right type information" do
+        it 'should return the right type information' do
           fields = @obj.send(:fields)
-          fields[:created][:type].should == :date
+          expect(fields[:created][:type]).to eq(:date)
         end
       end
-      describe ".to_solr()" do
-        it "should return the right fields" do
-          @obj.to_solr.keys.should include(ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string),
-                ActiveFedora::SolrService.solr_name("solr_rdf__publisher", type: :string),
-                ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :sortable),
-                ActiveFedora::SolrService.solr_name("solr_rdf__publisher", :facetable), 
-                ActiveFedora::SolrService.solr_name("solr_rdf__created", :sortable, type: :date),
-                ActiveFedora::SolrService.solr_name("solr_rdf__created", :displayable), 
-                ActiveFedora::SolrService.solr_name("solr_rdf__title", type: :string),
-                ActiveFedora::SolrService.solr_name("solr_rdf__title", :sortable),
-                ActiveFedora::SolrService.solr_name("solr_rdf__based_near", type: :string),
-                ActiveFedora::SolrService.solr_name("solr_rdf__based_near", :facetable))
+      describe '.to_solr()' do
+        it 'should return the right fields' do
+          expect(@obj.to_solr.keys).to include(ActiveFedora::SolrService.solr_name('solr_rdf__related_url', type: :string),
+                ActiveFedora::SolrService.solr_name('solr_rdf__publisher', type: :string),
+                ActiveFedora::SolrService.solr_name('solr_rdf__publisher', :sortable),
+                ActiveFedora::SolrService.solr_name('solr_rdf__publisher', :facetable),
+                ActiveFedora::SolrService.solr_name('solr_rdf__created', :sortable, type: :date),
+                ActiveFedora::SolrService.solr_name('solr_rdf__created', :displayable),
+                ActiveFedora::SolrService.solr_name('solr_rdf__title', type: :string),
+                ActiveFedora::SolrService.solr_name('solr_rdf__title', :sortable),
+                ActiveFedora::SolrService.solr_name('solr_rdf__based_near', type: :string),
+                ActiveFedora::SolrService.solr_name('solr_rdf__based_near', :facetable))
 
         end
 
-        it "should return the right values" do
-          @obj.to_solr[ActiveFedora::SolrService.solr_name("solr_rdf__related_url", type: :string)].should == ["http://example.org/blogtastic/"]
-          @obj.to_solr[ActiveFedora::SolrService.solr_name("solr_rdf__based_near", type: :string)].should == ["Tacoma, WA","Renton, WA"]
+        it 'should return the right values' do
+          expect(@obj.to_solr[ActiveFedora::SolrService.solr_name('solr_rdf__related_url', type: :string)]).to eq(['http://example.org/blogtastic/'])
+          expect(@obj.to_solr[ActiveFedora::SolrService.solr_name('solr_rdf__based_near', type: :string)]).to eq(['Tacoma, WA', 'Renton, WA'])
         end
       end
     end

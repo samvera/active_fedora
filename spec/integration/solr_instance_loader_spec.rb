@@ -22,14 +22,14 @@ describe ActiveFedora::SolrInstanceLoader do
       end
     end
     describe 'with matching solr document' do
-      let(:solr_doc) { ActiveFedora::Base.find_with_conditions(:id=>pid).first }
+      let(:solr_doc) { ActiveFedora::Base.find_with_conditions(:id => pid).first }
       it 'it casts the SOLR document and casts into an AF::Base object' do
         expect(subject.object).to eq(active_fedora_object)
       end
     end
     describe 'with a mismatching solr document' do
       let(:mismatching_pid) { @test_object2.pid }
-      let(:solr_doc) { ActiveFedora::Base.find_with_conditions(:id=>mismatching_pid).first }
+      let(:solr_doc) { ActiveFedora::Base.find_with_conditions(:id => mismatching_pid).first }
       it 'it raise ObjectNotFoundError' do
         expect {
           subject
@@ -47,7 +47,7 @@ describe ActiveFedora::SolrInstanceLoader do
       end
     end
     describe 'with matching solr document' do
-      let(:solr_doc) { ActiveFedora::Base.find_with_conditions(:id=>pid).first }
+      let(:solr_doc) { ActiveFedora::Base.find_with_conditions(:id => pid).first }
       it 'it raise ObjectNotFoundError' do
         expect {
           subject.object
@@ -56,7 +56,7 @@ describe ActiveFedora::SolrInstanceLoader do
     end
     describe 'with a mismatching solr document' do
       let(:mismatching_pid) { @test_object2.pid }
-      let(:solr_doc) { ActiveFedora::Base.find_with_conditions(:id=>mismatching_pid).first }
+      let(:solr_doc) { ActiveFedora::Base.find_with_conditions(:id => mismatching_pid).first }
       it 'it raise ObjectNotFoundError' do
         expect {
           subject

@@ -12,15 +12,15 @@ describe ActiveFedora::Persistence do
 
   subject { SpecNode.new }
 
-  describe "#create_needs_index?" do
-    it "should be true" do
-      subject.send(:create_needs_index?).should be_true
+  describe '#create_needs_index?' do
+    it 'should be true' do
+      expect(subject.send(:create_needs_index?)).to be_truthy
     end
   end
 
-  describe "#update_needs_index?" do
-      it "should be true" do
-        subject.send(:update_needs_index?).should be_true
+  describe '#update_needs_index?' do
+      it 'should be true' do
+        expect(subject.send(:update_needs_index?)).to be_truthy
       end
   end
 

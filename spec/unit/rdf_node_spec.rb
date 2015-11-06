@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::RdfNode do
-  describe "inheritance" do
+  describe 'inheritance' do
     before do
       class Parent
         include ActiveFedora::RdfObject
@@ -22,14 +22,14 @@ describe ActiveFedora::RdfNode do
       Object.send(:remove_const, :Parent)
     end
 
-    describe "child class" do
-      it "should inherit the terms" do
-        Child.config.keys.should == ['title', 'description']
+    describe 'child class' do
+      it 'should inherit the terms' do
+        expect(Child.config.keys).to eq(['title', 'description'])
       end
     end
-    describe "parent class" do
-      it "should not be infected with the child terms" do
-        Parent.config.keys.should == ['title']
+    describe 'parent class' do
+      it 'should not be infected with the child terms' do
+        expect(Parent.config.keys).to eq(['title'])
       end
     end
   end

@@ -1,4 +1,4 @@
-shared_examples_for "An ActiveModel" do
+shared_examples_for 'An ActiveModel' do
   begin
     require 'minitest/unit'
     include Minitest::Assertions
@@ -16,7 +16,7 @@ shared_examples_for "An ActiveModel" do
   include ActiveModel::Lint::Tests
 
   ActiveModel::Lint::Tests.public_instance_methods.map{|m| m.to_s}.grep(/^test/).each do |m|
-    example m.gsub('_',' ') do
+    example m.tr('_', ' ') do
       send m
     end
   end
