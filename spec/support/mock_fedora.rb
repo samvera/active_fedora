@@ -29,7 +29,7 @@ end
 def stub_add_ds(pid, dsids)
   pid.gsub!(/:/, '%3A')
   dsids.each do |dsid|
-    client = allow(mock_client).to receive(:[]).with do |params|
+    client = allow(mock_client).to receive(:[]).with(no_args) do |params|
       /objects\/#{pid}\/datastreams\/#{dsid}/.match(params)
     end
     client.and_return(double('ds_adder', :post => pid, :get => ''))
@@ -39,6 +39,6 @@ end
 def stub_get_content(pid, dsids)
   pid.gsub!(/:/, '%3A')
   dsids.each do |dsid|
-    allow(mock_client).to receive(:[]).with { |params| /objects\/#{pid}\/datastreams\/#{dsid}\/content/.match(params)}.and_return(double('content_accessor', :post => pid, :get => ''))
+    allow(mock_client).to receive(:[]).with(no_args) { |params| /objects\/#{pid}\/datastreams\/#{dsid}\/content/.match(params)}.and_return(double('content_accessor', :post => pid, :get => ''))
   end
 end
