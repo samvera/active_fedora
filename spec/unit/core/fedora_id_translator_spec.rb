@@ -9,8 +9,17 @@ RSpec.describe ActiveFedora::Core::FedoraIdTranslator do
       it "returns a fedora URI" do
         expect(result).to eq good_uri
       end
-      context "when given an id with a leading slash" do
+
+      context "with a leading slash" do
         let(:id) { "/banana" }
+        it "returns a good fedora URI" do
+          expect(result).to eq good_uri
+        end
+      end
+
+      context "with characters that need escaping" do
+        let(:good_uri) { ActiveFedora.fedora.host + ActiveFedora.fedora.base_path + "/%5Bfrob%5D" }
+        let(:id) { "[frob]" }
         it "returns a good fedora URI" do
           expect(result).to eq good_uri
         end
