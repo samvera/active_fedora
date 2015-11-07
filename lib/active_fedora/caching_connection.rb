@@ -31,7 +31,8 @@ module ActiveFedora
 
     # Enable the cache within the block.
     def cache
-      old, @cache_enabled = @cache_enabled, true
+      old = @cache_enabled
+      @cache_enabled = true
       yield
     ensure
       @cache_enabled = old
@@ -48,7 +49,8 @@ module ActiveFedora
 
     # Disable the query cache within the block.
     def uncached
-      old, @cache_enabled = @cache_enabled, false
+      old = @cache_enabled
+      @cache_enabled = false
       yield
     ensure
       @cache_enabled = old
