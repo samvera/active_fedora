@@ -7,8 +7,12 @@ describe ActiveFedora::Base do
       property :date, predicate: ::RDF::DC.date do |index|
         index.type :date
       end
+      property :integer, predicate: ::RDF::URI.new('http://www.example.com/integer'), multiple: false do |index|
+        index.type :integer
+      end
       property :single_date, multiple: false, class_name: 'DateTime', predicate: ::RDF::URI.new('http://www.example.com/single_date')
       property :missing_date, multiple: false, class_name: 'DateTime', predicate: ::RDF::URI.new('http://www.example.com/missing_date')
+      property :empty_date, multiple: false, class_name: 'DateTime', predicate: ::RDF::URI.new('http://www.example.com/empty_date')
     end
   end
 
@@ -18,7 +22,7 @@ describe ActiveFedora::Base do
 
   let(:date) { DateTime.parse("2015-10-22T10:20:03.653+01:00") }
   let(:date2) { DateTime.parse("2015-10-22T15:34:20.323-11:00") }
-  subject { Foo.create(date: [date], single_date: date2).reload }
+  subject { Foo.create(date: [date], single_date: date2, empty_date: '', integer: 1).reload }
 
   describe "saving and loading in Fedora" do
     it "loads the correct time" do
