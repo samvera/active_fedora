@@ -182,6 +182,13 @@ describe "Indirect containers" do
             end
           end
 
+          context "after save" do
+            it "returns correctly" do
+              o.save
+              expect(o.related_object_ids).to eq [file.id]
+            end
+          end
+
           context "with some members in memory" do
             let(:file2) { RelatedObject.create }
             before do
