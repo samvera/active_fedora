@@ -41,7 +41,7 @@ module ActiveFedora
         best_model_match = model_value if best_model_match > model_value
       end
 
-      ActiveFedora::Base.logger.warn "Could not find a model for #{hit['id']}, defaulting to ActiveFedora::Base" unless best_model_match if ActiveFedora::Base.logger
+      ActiveFedora::Base.logger.warn "Could not find a model for #{hit['id']}, defaulting to ActiveFedora::Base" if ActiveFedora::Base.logger && !best_model_match
       best_model_match || ActiveFedora::Base
     end
 
