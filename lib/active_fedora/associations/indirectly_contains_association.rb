@@ -30,7 +30,7 @@ module ActiveFedora
           target.map(&:id)
         else
           owner.resource.query(predicate: predicate)
-            .map { |s| ActiveFedora::Base.uri_to_id(s.object) } + target.map(&:id)
+            .map { |s| ActiveFedora::Base.uri_to_id(s.object) } | target.map(&:id)
         end
       end
 
