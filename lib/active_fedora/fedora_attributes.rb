@@ -1,3 +1,5 @@
+require 'rdf/vocab'
+
 module ActiveFedora
   module FedoraAttributes
     extend ActiveSupport::Concern
