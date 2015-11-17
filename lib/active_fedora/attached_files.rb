@@ -63,7 +63,7 @@ module ActiveFedora
     # Add an ActiveFedora::File to the object.
     # @param [ActiveFedora::File] file
     # @param [String] file_path
-    # @param [Hash] opts
+    # @param [Hash] _opts
     # @return [String] path of the added datastream
     def attach_file(file, file_path, _opts = {})
       create_singleton_association(file_path)

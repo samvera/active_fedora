@@ -60,7 +60,7 @@ module ActiveFedora
     #
     # @param [Hash] params The params specifying which fields to update and their new values.  The syntax of the params Hash is the same as that expected by
     #         term_pointers must be a valid OM Term pointers (ie. [:name]).  Strings will be ignored.
-    # @param [Hash] opts This is not currently used by the datastream-level update_indexed_attributes method
+    # @param [Hash] _opts This is not currently used by the datastream-level update_indexed_attributes method
     #
     # Example:
     #   @mods_ds.update_indexed_attributes( {[{":person"=>"0"}, "role"]=>{"0"=>"role1", "1"=>"role2", "2"=>"role3"} })

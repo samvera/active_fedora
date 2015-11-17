@@ -37,9 +37,9 @@ module ActiveFedora
     end
 
     # Construct a solr query from a list of pairs (e.g. [field name, values])
-    # @param [Array<Array>] pairs a list of pairs of property name and values
+    # @param [Array<Array>] field_pairs a list of pairs of property name and values
     # @param [String] join_with ('AND') the value we're joining the clauses with
-    # @returns [String] a solr query
+    # @return [String] a solr query
     # @example
     #   construct_query([['library_id_ssim', '123'], ['owner_ssim', 'Fred']])
     #   # => "_query_:\"{!raw f=library_id_ssim}123\" AND _query_:\"{!raw f=owner_ssim}Fred\""
@@ -91,7 +91,7 @@ module ActiveFedora
       # Given a list of pairs (e.g. [field name, values]), convert the field names
       # to solr names
       # @param [Array<Array>] pairs a list of pairs of property name and values
-      # @returns [Hash] map of solr fields to values
+      # @return [Hash] map of solr fields to values
       # @example
       #   property_values_to_solr([['library_id', '123'], ['owner', 'Fred']])
       #   # => [['library_id_ssim', '123'], ['owner_ssim', 'Fred']]

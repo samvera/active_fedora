@@ -16,8 +16,8 @@ module ActiveFedora
     end
 
     # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.
-    # @param [Hash] solr_doc (optional) Hash to insert the fields into
-    # @param [Hash] opts (optional)
+    # @param [Hash] _solr_doc (optional) Hash to insert the fields into
+    # @param [Hash] _opts (optional)
     # If opts[:model_only] == true, the base object metadata and the RELS-EXT datastream will be omitted.  This is mainly to support shelver, which calls #to_solr for each model an object subscribes to.
     def to_solr(_solr_doc = {}, _opts = {})
       indexing_service.generate_solr_document
