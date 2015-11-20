@@ -1,8 +1,10 @@
+require 'deprecation'
 require 'erb'
 require 'yaml'
 
 module ActiveFedora
   class FileConfigurator
+    extend Deprecation
     # Initializes ActiveFedora's connection to Fedora and Solr based on the info in fedora.yml and solr.yml
     # NOTE: this deprecates the use of a solr url in the fedora.yml
     #
@@ -158,6 +160,11 @@ module ActiveFedora
       else
         raise URI::InvalidURIError
       end
+    end
+
+    def get_config_path(config_type)
+      Deprecation.warn(FileConfigurator, "get_config_path is deprecated and will be removed in ActiveFedora 10.  Use config_path instead.")
+      config_path(config_type)
     end
 
     # Determine the fedora config file to use. Order of preference is:

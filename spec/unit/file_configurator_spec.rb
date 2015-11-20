@@ -58,6 +58,13 @@ describe ActiveFedora::FileConfigurator do
     end
   end
 
+  describe "#get_config_path" do
+    it "calls #config_path" do
+      expect(subject).to receive(:config_path)
+      subject.get_config_path(:fedora)
+    end
+  end
+
   describe "initialization methods" do
     describe "config_path(:fedora)" do
       it "uses the config_options[:config_path] if it exists" do
