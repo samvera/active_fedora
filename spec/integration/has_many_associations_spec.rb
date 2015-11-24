@@ -371,7 +371,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
 
         class Book < ActiveFedora::Base
           belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
-          property :title, predicate: ::RDF::DC.title
+          property :title, predicate: ::RDF::Vocab::DC.title
         end
       end
       after :all do

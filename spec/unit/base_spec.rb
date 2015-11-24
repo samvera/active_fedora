@@ -7,7 +7,7 @@ describe ActiveFedora::Base do
   describe "id=" do
     before do
       class FooHistory < ActiveFedora::Base
-        property :title, predicate: ::RDF::DC.title
+        property :title, predicate: ::RDF::Vocab::DC.title
       end
     end
     after do
@@ -32,7 +32,7 @@ describe ActiveFedora::Base do
     before do
       class FooHistory < ActiveFedora::Base
         type ::RDF::URI.new('http://example.com/foo')
-        property :title, predicate: ::RDF::DC.title
+        property :title, predicate: ::RDF::Vocab::DC.title
       end
     end
     after do
@@ -55,8 +55,8 @@ describe ActiveFedora::Base do
     context "on a concrete class" do
       before do
         class FooHistory < ActiveFedora::Base
-          rdf_label ::RDF::DC.title
-          property :title, predicate: ::RDF::DC.title
+          rdf_label ::RDF::Vocab::DC.title
+          property :title, predicate: ::RDF::Vocab::DC.title
         end
       end
       after do
@@ -271,7 +271,7 @@ describe ActiveFedora::Base do
             let(:test_object) { WithProperty.new(title: ['foo']) }
             before do
               class WithProperty < ActiveFedora::Base
-                property :title, predicate: ::RDF::DC.title
+                property :title, predicate: ::RDF::Vocab::DC.title
               end
               allow(test_object).to receive(:assign_id).and_return(@this_id)
               test_object.save

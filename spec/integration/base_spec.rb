@@ -82,7 +82,7 @@ describe ActiveFedora::Base do
     before do
       class Book < ActiveFedora::Base
         type [::RDF::URI("http://www.example.com/Book")]
-        property :title, predicate: ::RDF::DC.title
+        property :title, predicate: ::RDF::Vocab::DC.title
       end
     end
 
@@ -151,7 +151,7 @@ describe ActiveFedora::Base do
   describe "#apply_schema" do
     before do
       class ExampleSchema < ActiveTriples::Schema
-        property :title, predicate: RDF::DC.title
+        property :title, predicate: RDF::Vocab::DC.title
       end
       class ExampleBase < ActiveFedora::Base
         apply_schema ExampleSchema, ActiveFedora::SchemaIndexingStrategy.new(ActiveFedora::Indexers::GlobalIndexer.new(:symbol))

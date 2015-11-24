@@ -9,7 +9,7 @@ describe ActiveFedora::Base do
         def uri_prefix
           "foo"
         end
-        property :title, predicate: ::RDF::DC.title
+        property :title, predicate: ::RDF::Vocab::DC.title
       end
     end
 

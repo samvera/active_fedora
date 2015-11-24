@@ -114,7 +114,7 @@ describe ActiveFedora::Base do
     context "when classes are namespaced" do
       before do
         class Item < ActiveFedora::Base
-          has_and_belongs_to_many :container, predicate: ::RDF::DC.extent, class_name: 'Foo::Container'
+          has_and_belongs_to_many :container, predicate: ::RDF::Vocab::DC.extent, class_name: 'Foo::Container'
         end
         module Foo
           class Container < ActiveFedora::Base

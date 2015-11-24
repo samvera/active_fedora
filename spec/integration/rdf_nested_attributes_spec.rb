@@ -10,7 +10,7 @@ describe "Nesting attribute behavior of RDF resources" do
       property :topic, predicate: DummyMADS.Topic, class_name: "ComplexResource::Topic"
 
       class Topic < ActiveTriples::Resource
-        property :subject, predicate: ::RDF::DC.subject
+        property :subject, predicate: ::RDF::Vocab::DC.subject
       end
     end
   end

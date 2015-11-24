@@ -17,8 +17,8 @@ describe ActiveFedora::ChangeSet do
 
       class Book < ActiveFedora::Base
         belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
-        property :title, predicate: ::RDF::DC.title
-        property :alt_id, predicate: ::RDF::DC.identifier
+        property :title, predicate: ::RDF::Vocab::DC.title
+        property :alt_id, predicate: ::RDF::Vocab::DC.identifier
       end
 
       base.library_id = 'foo'
@@ -41,18 +41,18 @@ describe ActiveFedora::ChangeSet do
         expect(subject.size).to eq 3
       end
       it "does not include URIs from other objects" do
-        base.resource << RDF::Statement.new(RDF::URI("http://wrong.com"), RDF::DC.title, "bad")
+        base.resource << RDF::Statement.new(RDF::URI("http://wrong.com"), RDF::Vocab::DC.title, "bad")
         base.title = nil
-        expect(subject[RDF::DC.title].to_a).to eq []
+        expect(subject[RDF::Vocab::DC.title].to_a).to eq []
       end
       it "includes hash URIs" do
         # This is useful as an alternative to blank nodes.
         hash_uri = RDF::URI(base.uri.to_s + "#test")
-        base.resource << RDF::Statement.new(hash_uri, RDF::DC.title, "good")
+        base.resource << RDF::Statement.new(hash_uri, RDF::Vocab::DC.title, "good")
         base.title = [RDF::URI(hash_uri)]
-        expect(subject[RDF::DC.title].to_a).not_to eq []
+        expect(subject[RDF::Vocab::DC.title].to_a).not_to eq []
         # Include the title reference and the title for the hash URI
-        expect(subject[RDF::DC.title].to_a.length).to eq 2
+        expect(subject[RDF::Vocab::DC.title].to_a.length).to eq 2
       end
     end
 

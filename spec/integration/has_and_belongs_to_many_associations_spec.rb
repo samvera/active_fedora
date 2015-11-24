@@ -326,7 +326,7 @@ describe ActiveFedora::Base do
       end
 
       class Collection < ActiveFedora::Base
-        property :title, predicate: ::RDF::DC.title
+        property :title, predicate: ::RDF::Vocab::DC.title
       end
     end
 

@@ -4,15 +4,15 @@ describe ActiveFedora::RDF::IndexingService do
   before do
     class MyDatastream < ActiveFedora::NtriplesRDFDatastream
       Deprecation.silence(ActiveFedora::RDFDatastream) do
-        property :created, predicate: ::RDF::DC.created do |index|
+        property :created, predicate: ::RDF::Vocab::DC.created do |index|
           index.as :sortable, :displayable
           index.type :date
         end
-        property :title, predicate: ::RDF::DC.title do |index|
+        property :title, predicate: ::RDF::Vocab::DC.title do |index|
           index.as :stored_searchable, :sortable
           index.type :text
         end
-        property :publisher, predicate: ::RDF::DC.publisher do |index|
+        property :publisher, predicate: ::RDF::Vocab::DC.publisher do |index|
           index.as :facetable, :sortable, :stored_searchable
         end
         property :based_near, predicate: ::RDF::FOAF.based_near do |index|
@@ -23,7 +23,7 @@ describe ActiveFedora::RDF::IndexingService do
           index.as :stored_searchable
         end
       end
-      property :rights, predicate: ::RDF::DC.rights
+      property :rights, predicate: ::RDF::Vocab::DC.rights
     end
   end
 

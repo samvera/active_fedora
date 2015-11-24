@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::LoadableFromJson::SolrBackedResource do
   before do
     class Foo < ActiveFedora::Base
-      belongs_to :bar, predicate: ::RDF::DC.extent
+      belongs_to :bar, predicate: ::RDF::Vocab::DC.extent
     end
 
     class Bar < ActiveFedora::Base
@@ -18,12 +18,12 @@ describe ActiveFedora::LoadableFromJson::SolrBackedResource do
   let(:resource) { described_class.new(Foo) }
 
   before do
-    resource.insert [nil, ::RDF::DC.extent, RDF::URI('http://example.org/123')]
+    resource.insert [nil, ::RDF::Vocab::DC.extent, RDF::URI('http://example.org/123')]
   end
 
   describe "#query" do
     describe "a known relationship" do
-      subject { resource.query(predicate: ::RDF::DC.extent) }
+      subject { resource.query(predicate: ::RDF::Vocab::DC.extent) }
 
       it "is enumerable" do
         expect(subject.map(&:object)).to eq [RDF::URI('http://example.org/123')]

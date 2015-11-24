@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "Caching" do
   before do
     class TestClass < ActiveFedora::Base
-      property :title, predicate: ::RDF::DC.title
+      property :title, predicate: ::RDF::Vocab::DC.title
     end
   end
 

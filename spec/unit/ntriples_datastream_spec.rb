@@ -4,11 +4,11 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "an instance with content" do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :created, predicate: ::RDF::DC.created
-        property :title, predicate: ::RDF::DC.title
-        property :publisher, predicate: ::RDF::DC.publisher
-        property :creator, predicate: ::RDF::DC.creator
-        property :educationLevel, predicate: ::RDF::DC.educationLevel
+        property :created, predicate: ::RDF::Vocab::DC.created
+        property :title, predicate: ::RDF::Vocab::DC.title
+        property :publisher, predicate: ::RDF::Vocab::DC.publisher
+        property :creator, predicate: ::RDF::Vocab::DC.creator
+        property :educationLevel, predicate: ::RDF::Vocab::DC.educationLevel
         property :based_near, predicate: ::RDF::FOAF.based_near
         property :related_url, predicate: ::RDF::RDFS.seeAlso
       end
@@ -84,9 +84,9 @@ describe ActiveFedora::NtriplesRDFDatastream do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         rdf_subject { |ds| "http://localhost:8983/fedora/rest/test/#{ds.id}/content" }
-        property :created, predicate: ::RDF::DC.created
-        property :title, predicate: ::RDF::DC.title
-        property :publisher, predicate: ::RDF::DC.publisher
+        property :created, predicate: ::RDF::Vocab::DC.created
+        property :title, predicate: ::RDF::Vocab::DC.title
+        property :publisher, predicate: ::RDF::Vocab::DC.publisher
         property :based_near, predicate: ::RDF::FOAF.based_near
         property :related_url, predicate: ::RDF::RDFS.seeAlso
       end
@@ -116,7 +116,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "a new instance" do
     before(:each) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :publisher, predicate: ::RDF::DC.publisher
+        property :publisher, predicate: ::RDF::Vocab::DC.publisher
       end
       @subject = MyDatastream.new
     end
@@ -136,15 +136,15 @@ describe ActiveFedora::NtriplesRDFDatastream do
     before(:all) do
       Deprecation.silence(ActiveFedora::RDFDatastream) do
         class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-          property :created, predicate: ::RDF::DC.created do |index|
+          property :created, predicate: ::RDF::Vocab::DC.created do |index|
             index.as :sortable, :displayable
             index.type :date
           end
-          property :title, predicate: ::RDF::DC.title do |index|
+          property :title, predicate: ::RDF::Vocab::DC.title do |index|
             index.as :stored_searchable, :sortable
             index.type :text
           end
-          property :publisher, predicate: ::RDF::DC.publisher do |index|
+          property :publisher, predicate: ::RDF::Vocab::DC.publisher do |index|
             index.as :facetable, :sortable, :stored_searchable
           end
           property :based_near, predicate: ::RDF::FOAF.based_near do |index|
@@ -154,7 +154,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
           property :related_url, predicate: ::RDF::RDFS.seeAlso do |index|
             index.as :stored_searchable
           end
-          property :rights, predicate: ::RDF::DC.rights
+          property :rights, predicate: ::RDF::Vocab::DC.rights
         end
       end
     end

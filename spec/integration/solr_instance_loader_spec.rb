@@ -11,10 +11,10 @@ describe ActiveFedora::SolrInstanceLoader do
         has_attributes :foo, datastream: 'descMetadata', multiple: true
         has_attributes :bar, datastream: 'descMetadata', multiple: false
       end
-      property :title, predicate: ::RDF::DC.title, multiple: false
-      property :description, predicate: ::RDF::DC.description
+      property :title, predicate: ::RDF::Vocab::DC.title, multiple: false
+      property :description, predicate: ::RDF::Vocab::DC.description
       belongs_to :another, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'Foo'
-      has_and_belongs_to_many :dates, predicate: ::RDF::DC.date, class_name: 'Bar'
+      has_and_belongs_to_many :dates, predicate: ::RDF::Vocab::DC.date, class_name: 'Bar'
       accepts_nested_attributes_for :dates, reject_if: :all_blank, allow_destroy: true
     end
     class Bar < ActiveFedora::Base

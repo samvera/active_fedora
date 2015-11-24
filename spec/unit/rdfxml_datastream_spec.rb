@@ -4,7 +4,7 @@ describe ActiveFedora::RDFXMLDatastream do
   describe "a new instance" do
     before(:each) do
       class MyRdfxmlDatastream < ActiveFedora::RDFXMLDatastream
-        property :publisher, predicate: ::RDF::DC.publisher
+        property :publisher, predicate: ::RDF::Vocab::DC.publisher
       end
       @subject = MyRdfxmlDatastream.new
       allow(@subject).to receive(:id).and_return('test:1')

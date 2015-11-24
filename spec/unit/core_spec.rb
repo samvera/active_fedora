@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   before do
     class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-      property :publisher, predicate: ::RDF::DC.publisher
+      property :publisher, predicate: ::RDF::Vocab::DC.publisher
     end
     class Library < ActiveFedora::Base
     end

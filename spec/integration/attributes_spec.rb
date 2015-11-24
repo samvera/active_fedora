@@ -25,7 +25,7 @@ describe "delegating attributes" do
         end
         has_attributes :wrangler, datastream: :foo, multiple: true
       end
-      property :resource_type, predicate: ::RDF::DC.type do |index|
+      property :resource_type, predicate: ::RDF::Vocab::DC.type do |index|
         index.as :stored_searchable, :facetable
       end
     end
