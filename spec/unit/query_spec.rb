@@ -60,12 +60,11 @@ describe ActiveFedora::Base do
         end
       end
     end
+
     describe "using an options hash" do
-      before do
-        Deprecation.default_deprecation_behavior = :raise
-      end
       it "is deprecated" do
-        expect { SpecModel::Basic.find(id: "_ID_") }.to raise_error RuntimeError
+        expect(Deprecation).to receive(:warn)
+        SpecModel::Basic.find(id: "_ID_")
       end
     end
   end
