@@ -22,10 +22,19 @@ describe ActiveFedora::LoadableFromJson::SolrBackedResource do
   end
 
   describe "#query" do
-    subject { resource.query(predicate: ::RDF::DC.extent) }
+    describe "a known relationship" do
+      subject { resource.query(predicate: ::RDF::DC.extent) }
 
-    it "is enumerable" do
-      expect(subject.map(&:object)).to eq [RDF::URI('http://example.org/123')]
+      it "is enumerable" do
+        expect(subject.map(&:object)).to eq [RDF::URI('http://example.org/123')]
+      end
+    end
+
+    describe "a unknown relationship" do
+      subject { resource.query(predicate: ::RDF::Vocab::DC.accrualPeriodicity) }
+      it "raises an error" do
+        expect { subject }.to raise_error "Unable to find reflection for http://purl.org/dc/terms/accrualPeriodicity in Foo"
+      end
     end
   end
 end
