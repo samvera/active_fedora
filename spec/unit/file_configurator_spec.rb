@@ -61,7 +61,9 @@ describe ActiveFedora::FileConfigurator do
   describe "#get_config_path" do
     it "calls #config_path" do
       expect(subject).to receive(:config_path)
-      subject.get_config_path(:fedora)
+      Deprecation.silence(described_class) do
+        subject.get_config_path(:fedora)
+      end
     end
   end
 
