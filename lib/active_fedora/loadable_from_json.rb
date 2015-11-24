@@ -103,8 +103,11 @@ module ActiveFedora
         end
       end
 
+      # Find the reflection on the model that uses the given predicate
       def reflection(predicate)
-        Array(@model.outgoing_reflections.find { |_key, reflection| reflection.predicate == predicate }).first
+        result = Array(@model.outgoing_reflections.find { |_key, reflection| reflection.predicate == predicate }).first
+        return result if result
+        fail "Unable to find reflection for #{predicate} in #{@model}"
       end
     end
 
