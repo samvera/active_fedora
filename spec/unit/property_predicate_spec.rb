@@ -11,8 +11,8 @@ describe ActiveFedora::Base do
 
         module TestModel1
           class Book < ActiveFedora::Base
-            property :title1, predicate: ::RDF::DC.title
-            property :title2, predicate: ::RDF::DC.title
+            property :title1, predicate: ::RDF::Vocab::DC.title
+            property :title2, predicate: ::RDF::Vocab::DC.title
           end
         end
       end
@@ -25,8 +25,8 @@ describe ActiveFedora::Base do
 
         module TestModel2
           class Book < ActiveFedora::Base
-            property :title1, predicate: ::RDF::DC.title
-            property :title2, predicate: ::RDF::DC.creator
+            property :title1, predicate: ::RDF::Vocab::DC.title
+            property :title2, predicate: ::RDF::Vocab::DC.creator
           end
         end
       end

@@ -27,7 +27,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
         class ComplexRDFDatastream < ActiveFedora::NtriplesRDFDatastream
           property :topic, predicate: DummyMADS.Topic, class_name: "Topic"
           property :personalName, predicate: DummyMADS.PersonalName, class_name: "PersonalName"
-          property :title, predicate: ::RDF::DC.title
+          property :title, predicate: ::RDF::Vocab::DC.title
 
           accepts_nested_attributes_for :topic, :personalName
 
@@ -142,11 +142,11 @@ describe "Nesting attribute behavior of RDFDatastream" do
     describe "with an existing object" do
       before(:each) do
         class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
-          property :parts, predicate: ::RDF::DC.hasPart, class_name: 'Component'
+          property :parts, predicate: ::RDF::Vocab::DC.hasPart, class_name: 'Component'
           accepts_nested_attributes_for :parts, allow_destroy: true
 
           class Component < ActiveTriples::Resource
-            property :label, predicate: ::RDF::DC.title
+            property :label, predicate: ::RDF::Vocab::DC.title
           end
         end
       end

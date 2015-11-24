@@ -4,7 +4,7 @@ RSpec.describe ActiveFedora::Base do
   before do
     class Source < ActiveFedora::Base
       contains :sub_resource, class_name: "Source"
-      property :title, predicate: ::RDF::DC.title, multiple: false
+      property :title, predicate: ::RDF::Vocab::DC.title, multiple: false
     end
   end
   after do

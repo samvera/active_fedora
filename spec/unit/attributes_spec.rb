@@ -376,8 +376,8 @@ describe ActiveFedora::Base do
   context "with a RDF datastream" do
     before :all do
       class BarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :title, predicate: ::RDF::DC.title
-        property :description, predicate: ::RDF::DC.description
+        property :title, predicate: ::RDF::Vocab::DC.title
+        property :description, predicate: ::RDF::Vocab::DC.description
       end
       class BarHistory4 < ActiveFedora::Base
         has_metadata 'rdfish', type: BarRdfDatastream
@@ -468,8 +468,8 @@ describe ActiveFedora::Base do
   context "when a datastream is specified as a symbol" do
     before :all do
       class BarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :title, predicate: ::RDF::DC.title
-        property :description, predicate: ::RDF::DC.description
+        property :title, predicate: ::RDF::Vocab::DC.title
+        property :description, predicate: ::RDF::Vocab::DC.description
       end
       class BarHistory4 < ActiveFedora::Base
         has_metadata 'rdfish', type: BarRdfDatastream
@@ -494,10 +494,10 @@ describe ActiveFedora::Base do
   context "when properties are defined on an object" do
     before :all do
       class BarHistory4 < ActiveFedora::Base
-        property :title, predicate: ::RDF::DC.title do |index|
+        property :title, predicate: ::RDF::Vocab::DC.title do |index|
           index.as :symbol
         end
-        property :abstract, predicate: ::RDF::DC.abstract, multiple: false
+        property :abstract, predicate: ::RDF::Vocab::DC.abstract, multiple: false
       end
     end
 

@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "nested hash resources" do
   before do
     class NestedResource < ActiveTriples::Resource
-      property :title, predicate: ::RDF::DC.title
+      property :title, predicate: ::RDF::Vocab::DC.title
       ## Necessary to get AT to create hash URIs.
       def initialize(uri, parent)
         if uri.try(:node?)
@@ -19,7 +19,7 @@ describe "nested hash resources" do
       end
     end
     class ExampleOwner < ActiveFedora::Base
-      property :relation, predicate: ::RDF::DC.relation, class_name: NestedResource
+      property :relation, predicate: ::RDF::Vocab::DC.relation, class_name: NestedResource
       accepts_nested_attributes_for :relation
     end
   end

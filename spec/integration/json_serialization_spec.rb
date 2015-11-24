@@ -16,7 +16,7 @@ describe "Objects should be serialized to JSON" do
           has_attributes :foo, datastream: 'descMetadata', multiple: true
           has_attributes :bar, datastream: 'descMetadata', multiple: false
         end
-        property :title, predicate: ::RDF::DC.title
+        property :title, predicate: ::RDF::Vocab::DC.title
       end
     end
 
@@ -41,12 +41,12 @@ describe "Objects should be serialized to JSON" do
   context "with nested nodes" do
     before do
       class DummySubnode < ActiveTriples::Resource
-        property :relation, predicate: ::RDF::DC[:relation]
+        property :relation, predicate: ::RDF::Vocab::DC[:relation]
       end
 
       class DummyResource < ActiveFedora::RDFDatastream
         Deprecation.silence(ActiveFedora::RDFDatastream) do
-          property :license, predicate: ::RDF::DC[:license], class_name: DummySubnode do |index|
+          property :license, predicate: ::RDF::Vocab::DC[:license], class_name: DummySubnode do |index|
             index.as :searchable, :displayable
           end
         end

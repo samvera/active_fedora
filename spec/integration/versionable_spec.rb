@@ -4,7 +4,7 @@ describe ActiveFedora::Versionable do
   context "For ActiveFedora::Base" do
     before do
       class WithVersions < ActiveFedora::Base
-        property :title, predicate: ::RDF::DC.title
+        property :title, predicate: ::RDF::Vocab::DC.title
       end
     end
 
@@ -140,7 +140,7 @@ describe ActiveFedora::Versionable do
   describe ActiveFedora::NtriplesRDFDatastream do
     before(:all) do
       class VersionableDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :title, predicate: ::RDF::DC.title
+        property :title, predicate: ::RDF::Vocab::DC.title
       end
 
       class MockAFBase < ActiveFedora::Base

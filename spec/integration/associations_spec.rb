@@ -4,7 +4,7 @@ describe ActiveFedora::Base do
   describe "use a URI as the property" do
     before do
       class Book < ActiveFedora::Base
-        belongs_to :author, predicate: ::RDF::DC.creator, class_name: 'Person'
+        belongs_to :author, predicate: ::RDF::Vocab::DC.creator, class_name: 'Person'
       end
 
       class Person < ActiveFedora::Base

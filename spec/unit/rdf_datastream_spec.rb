@@ -11,8 +11,8 @@ describe ActiveFedora::RDFDatastream do
   describe "an instance that exists in the datastore, but hasn't been loaded" do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :title, predicate: ::RDF::DC.title
-        property :description, predicate: ::RDF::DC.description
+        property :title, predicate: ::RDF::Vocab::DC.title
+        property :description, predicate: ::RDF::Vocab::DC.description
       end
       class MyObj < ActiveFedora::Base
         has_metadata 'descMetadata', type: MyDatastream
@@ -42,7 +42,7 @@ describe ActiveFedora::RDFDatastream do
     it "clears stuff" do
       subject.title = ['one', 'two', 'three']
       subject.title.clear
-      expect(subject.graph.query([subject.rdf_subject, ::RDF::DC.title, nil]).first).to be_nil
+      expect(subject.graph.query([subject.rdf_subject, ::RDF::Vocab::DC.title, nil]).first).to be_nil
     end
 
     it "has a list of fields" do

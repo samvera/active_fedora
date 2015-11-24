@@ -27,10 +27,10 @@ describe ActiveFedora::Indexing do
   describe "#to_solr" do
     before :all do
       class SpecNode < ActiveFedora::Base
-        property :title, predicate: ::RDF::DC.title do |index|
+        property :title, predicate: ::RDF::Vocab::DC.title do |index|
           index.as :stored_searchable
         end
-        property :abstract, predicate: ::RDF::DC.abstract, multiple: false do |index|
+        property :abstract, predicate: ::RDF::Vocab::DC.abstract, multiple: false do |index|
           index.as :stored_sortable
         end
       end

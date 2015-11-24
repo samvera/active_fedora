@@ -4,7 +4,7 @@ describe ActiveFedora::Base do
   before do
     class Foo < ActiveFedora::Base
       # Date attributes are recognized by having index.type :Date or class_name: 'DateTime'
-      property :date, predicate: ::RDF::DC.date do |index|
+      property :date, predicate: ::RDF::Vocab::DC.date do |index|
         index.type :date
       end
       property :integer, predicate: ::RDF::URI.new('http://www.example.com/integer'), multiple: false do |index|

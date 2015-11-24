@@ -4,10 +4,10 @@ describe "Nested Rdf Objects" do
   describe "without type" do
     before do
       class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :parts, predicate: ::RDF::DC.hasPart, class_name: 'Component'
+        property :parts, predicate: ::RDF::Vocab::DC.hasPart, class_name: 'Component'
 
         class Component < ActiveTriples::Resource
-          property :label, predicate: ::RDF::DC.title
+          property :label, predicate: ::RDF::Vocab::DC.title
         end
       end
     end
@@ -128,11 +128,11 @@ END
     describe "one class per assertion" do
       before(:each) do
         class SpecDatastream < ActiveFedora::NtriplesRDFDatastream
-          property :mediator, predicate: ::RDF::DC.mediator, class_name: 'MediatorUser'
+          property :mediator, predicate: ::RDF::Vocab::DC.mediator, class_name: 'MediatorUser'
 
           class MediatorUser < ActiveTriples::Resource
-            configure type: ::RDF::DC.AgentClass
-            property :title, predicate: ::RDF::DC.title
+            configure type: ::RDF::Vocab::DC.AgentClass
+            property :title, predicate: ::RDF::Vocab::DC.title
           end
         end
       end

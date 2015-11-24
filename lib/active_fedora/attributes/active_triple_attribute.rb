@@ -3,8 +3,8 @@ module ActiveFedora
   #
   # @example
   #   class Book < ActiveFedora::Base
-  #     property :title, predicate: ::RDF::DC.title
-  #     property :author, predicate: ::RDF::DC.creator
+  #     property :title, predicate: ::RDF::Vocab::DC.title
+  #     property :author, predicate: ::RDF::Vocab::DC.creator
   #   end
   #
   #   Book.attribute_names

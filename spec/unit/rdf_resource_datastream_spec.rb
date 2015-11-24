@@ -3,19 +3,19 @@ require 'spec_helper'
 describe ActiveFedora::RDFDatastream do
   before do
     class DummySubnode < ActiveTriples::Resource
-      property :title, predicate: ::RDF::DC[:title], class_name: ::RDF::Literal
-      property :relation, predicate: ::RDF::DC[:relation]
+      property :title, predicate: ::RDF::Vocab::DC[:title], class_name: ::RDF::Literal
+      property :relation, predicate: ::RDF::Vocab::DC[:relation]
     end
 
     class DummyResource < ActiveFedora::RDFDatastream
       Deprecation.silence(ActiveFedora::RDFDatastream) do
-        property :title, predicate: ::RDF::DC[:title], class_name: ::RDF::Literal do |index|
+        property :title, predicate: ::RDF::Vocab::DC[:title], class_name: ::RDF::Literal do |index|
           index.as :searchable, :displayable
         end
-        property :license, predicate: ::RDF::DC[:license], class_name: DummySubnode do |index|
+        property :license, predicate: ::RDF::Vocab::DC[:license], class_name: DummySubnode do |index|
           index.as :searchable, :displayable
         end
-        property :creator, predicate: ::RDF::DC[:creator], class_name: 'DummyAsset' do |index|
+        property :creator, predicate: ::RDF::Vocab::DC[:creator], class_name: 'DummyAsset' do |index|
           index.as :searchable
         end
       end

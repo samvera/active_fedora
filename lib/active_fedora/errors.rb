@@ -56,7 +56,7 @@ module ActiveFedora #:nodoc:
   # Raised when the data has more than one statement for a predicate, but our constraints say it's singular
   # This helps to prevent overwriting multiple values with a single value when round tripping:
   #   class Book < ActiveFedora::Base
-  #     property :title, predicate: RDF::DC.title, multiple: false
+  #     property :title, predicate: RDF::Vocab::DC.title, multiple: false
   #   end
   #
   #   b = Book.new

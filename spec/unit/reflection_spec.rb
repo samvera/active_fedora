@@ -22,7 +22,7 @@ describe ActiveFedora::Reflection::AssociationReflection do
   describe "#automatic_inverse_of" do
     before do
       class Dummy < ActiveFedora::Base
-        belongs_to :foothing, predicate: ::RDF::DC.extent
+        belongs_to :foothing, predicate: ::RDF::Vocab::DC.extent
       end
     end
 

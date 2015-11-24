@@ -51,11 +51,11 @@ describe ActiveFedora::Associations::HasManyAssociation do
   context "when inverse doesn't have a predictable name" do
     before do
       class TimeSpan < ActiveFedora::Base
-        has_many :images, inverse_of: :created # predicate: ::RDF::DC.created
+        has_many :images, inverse_of: :created # predicate: ::RDF::Vocab::DC.created
       end
 
       class Image < ActiveFedora::Base
-        has_and_belongs_to_many :created, predicate: ::RDF::DC.created, class_name: 'TimeSpan'
+        has_and_belongs_to_many :created, predicate: ::RDF::Vocab::DC.created, class_name: 'TimeSpan'
       end
     end
 

@@ -6,7 +6,7 @@ describe ActiveFedora::Predicates do
       expect(described_class.short_predicate('http://www.openarchives.org/OAI/2.0/itemID')).to eq :oai_item_id
     end
     it 'parses uris' do
-      expect(described_class.short_predicate(RDF::DC.creator)).to eq 'dc_terms_creator'
+      expect(described_class.short_predicate(RDF::Vocab::DC.creator)).to eq 'dc_terms_creator'
       expect(described_class.short_predicate(RDF::SKOS.hasTopConcept)).to eq '2004_02_skos_core_has_top_concept'
     end
     before do

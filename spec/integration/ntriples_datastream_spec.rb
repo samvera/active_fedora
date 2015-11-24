@@ -8,10 +8,10 @@ describe ActiveFedora::NtriplesRDFDatastream do
 
     Deprecation.silence(ActiveFedora::RDFDatastream) do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :title, predicate: ::RDF::DC.title do |index|
+        property :title, predicate: ::RDF::Vocab::DC.title do |index|
           index.as :stored_searchable, :facetable
         end
-        property :date_uploaded, predicate: ::RDF::DC.dateSubmitted do |index|
+        property :date_uploaded, predicate: ::RDF::Vocab::DC.dateSubmitted do |index|
           index.type :date
           index.as :stored_searchable, :sortable
         end
@@ -19,7 +19,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
           index.type :integer
           index.as :stored_sortable
         end
-        property :part, predicate: ::RDF::DC.hasPart
+        property :part, predicate: ::RDF::Vocab::DC.hasPart
         property :based_near, predicate: ::RDF::FOAF.based_near
         property :related_url, predicate: ::RDF::RDFS.seeAlso
       end
@@ -159,7 +159,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       # reopening existing class
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         rdf_subject { |ds| RDF::URI.new("http://oregondigital.org/ns/#{parent_uri(ds).split('/')[-1].split(':')[1]}") }
-        property :dctype, predicate: ::RDF::DC.type
+        property :dctype, predicate: ::RDF::Vocab::DC.type
       end
       subject.rdf.dctype = "Frog"
       subject.save!
@@ -213,7 +213,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "term proxy methods" do
     before(:each) do
       class TitleDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :title, predicate: ::RDF::DC.title
+        property :title, predicate: ::RDF::Vocab::DC.title
       end
       class Foobar < ActiveFedora::Base
         has_metadata 'rdf', type: TitleDatastream

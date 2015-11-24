@@ -6,16 +6,16 @@ class <%= class_name %> < ActiveFedora::Base
   <% else %>
   # Define some properties to store:
   #
-  property :title, predicate: ::RDF::DC.title do |index|
+  property :title, predicate: ::RDF::Vocab::DC.title do |index|
     index.as :stored_searchable, :facetable
   end
-  property :creator, predicate: ::RDF::DC.creator do |index|
+  property :creator, predicate: ::RDF::Vocab::DC.creator do |index|
     index.as :stored_searchable, :facetable
   end
-  property :contributor, predicate: ::RDF::DC.contributor do |index|
+  property :contributor, predicate: ::RDF::Vocab::DC.contributor do |index|
     index.as :stored_searchable, :facetable
   end
-  property :description, predicate: ::RDF::DC.description do |index|
+  property :description, predicate: ::RDF::Vocab::DC.description do |index|
     index.as :stored_searchable
   end
   <%- end -%>
