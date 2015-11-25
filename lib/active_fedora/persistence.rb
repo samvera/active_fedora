@@ -114,14 +114,18 @@ module ActiveFedora
         gone?(uri) ? delete_tombstone(uri) : false
       end
 
-      private
+      # Allows the user to find out if an id has been used in the system and then been deleted
+      # @param uri id in fedora that may or may not have been deleted
+      def gone?(uri)
+        ActiveFedora::Base.find(uri)
+        false
+      rescue Ldp::Gone
+        true
+      rescue ActiveFedora::ObjectNotFoundError
+        false
+      end
 
-        def gone?(uri)
-          ActiveFedora::Base.find(uri)
-          false
-        rescue Ldp::Gone
-          true
-        end
+      private
 
         def delete_tombstone(uri)
           tombstone = ActiveFedora::Base.id_to_uri(uri) + "/fcr:tombstone"
