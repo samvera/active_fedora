@@ -1,3 +1,22 @@
+v9.7.0
+ 2015-11-25 : Allowing access to the gone? method from outside the object [Carolyn Cole]
+ 
+ 2015-11-24 : Use rdf-vocab gem for DC vocab [Justin Coyne]
+ 
+ 2015-11-24 : Silence deprecation warning in test [Justin Coyne]
+ 
+ 2015-11-24 : Test deprecation using mocks [Justin Coyne]
+ 
+ 2015-11-24 : Give an error when the user queries for a non-existant reflection [Justin Coyne]
+ 
+ 2015-11-20 : Re-add get_config_path method (removed in 9.6.0) with deprecation warning. [Jim Coble]
+ 
+ 2015-11-11 : Don't try to parse empty dates [Adam Wead]
+ 
+ 2015-11-10 : Adds explicit require of 'rdf/vocab'. [David Chandek-Stark]
+ 
+ 2015-11-09 : ids_reader should not return duplicates. [Trey Terrell]
+
 v9.6.2
   2015-11-07: Fixes for new version of rubocop [Justin Coyne]
 
