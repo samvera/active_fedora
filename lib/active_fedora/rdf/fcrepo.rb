@@ -157,6 +157,12 @@ module ActiveFedora::RDF
                comment: %(indicates the owner of an object).freeze,
                label: "ownerId".freeze,
                type: "rdf:Property".freeze
+      property :PID,
+               comment: %(the Fedora 3 PID for an object).freeze,
+               label: "PID".freeze,
+               domain: "info:fedora/fedora-system:def/model#FedoraObject".freeze,
+               range: "xsd:string".freeze,
+               type: "rdf:Property".freeze
       property :state,
                comment: %(indicates the state of the object or datastream).freeze,
                label: "state".freeze,
