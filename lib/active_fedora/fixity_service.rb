@@ -52,7 +52,7 @@ module ActiveFedora
       # See https://jira.duraspace.org/browse/FCREPO-1247
       # @param [String] uri
       def encoded_url(uri)
-        if uri.match("fcr:versions")
+        if uri =~ /fcr:versions/
           uri.gsub(/fcr:versions/, "fcr%3aversions")
         else
           uri

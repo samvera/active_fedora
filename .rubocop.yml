@@ -1,17 +1,13 @@
 require: rubocop-rspec
 
 AllCops:
-  RunRailsCops: true
+  TargetRubyVersion: 2.2
   DisplayCopNames: true
   Include:
     - '**/Rakefile'
   Exclude:
     - 'script/**/*'
     - 'vendor/**/*'
-
-Lint/RescueException:
-  Exclude:
-    - 'lib/active_fedora/ldp_cache.rb'
 
 Lint/HandleExceptions:
   Exclude:
@@ -184,9 +180,6 @@ Style/ClassAndModuleChildren:
 Style/Documentation:
   Enabled: false
 
-Style/HashSyntax:
-  Exclude:
-
 Style/GlobalVars:
   Exclude:
     - 'spec/**/*'
@@ -209,6 +202,9 @@ Style/FileName:
   Exclude:
     - 'lib/active-fedora.rb'
     - 'spec/samples/hydra-mods_article_datastream.rb'
+
+Rails:
+  Enabled: true
 
 Rails/Output:
   Exclude:
@@ -242,4 +238,3 @@ RSpec/DescribeClass:
 RSpec/DescribedClass:
   Exclude:
     - 'spec/unit/finder_methods_spec.rb'
-

@@ -12,7 +12,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
         property :based_near, predicate: ::RDF::FOAF.based_near
         property :related_url, predicate: ::RDF::RDFS.seeAlso
       end
-      @subject = MyDatastream.new(ActiveFedora::Base.id_to_uri '/test:1/descMetadata')
+      @subject = MyDatastream.new(ActiveFedora::Base.id_to_uri('/test:1/descMetadata'))
       @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
     end
     after do

@@ -10,7 +10,7 @@ module ActiveFedora
     def initialize(host, args)
       host = 'http://localhost:8080/solr' unless host
       args = { read_timeout: 120, open_timeout: 120 }.merge(args.dup)
-      args.merge!(url: host)
+      args[:url] = host
       @conn = RSolr.connect args
     end
 

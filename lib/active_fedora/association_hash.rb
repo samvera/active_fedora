@@ -44,8 +44,8 @@ module ActiveFedora
     def key?(key)
       keys.include?(key) || keys.map(&:to_s).include?(key)
     end
-    alias_method :include?, :key?
-    alias_method :has_key?, :key?
+    alias include? key?
+    alias has_key? key?
 
     def values
       keys.map { |k| self[k] }

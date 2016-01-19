@@ -37,7 +37,7 @@ module ActiveFedora
       save
     end
 
-    alias_method :update_attributes, :update
+    alias update_attributes update
 
     # Deletes an object from Fedora and deletes the indexed record from Solr.
     # Delete does not run any callbacks, so consider using _destroy_ instead.
@@ -186,7 +186,7 @@ module ActiveFedora
       end
 
       def base_path_for_resource
-        init_root_path if self.has_uri_prefix?
+        init_root_path if has_uri_prefix?
         root_resource_path
       end
 

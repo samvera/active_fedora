@@ -34,11 +34,11 @@ module ActiveFedora
         term.values.each do |v|
           Array(term.options[:index]).each do |index_as|
             solr_doc[index_as] ||= []
-            if v.is_a? Nokogiri::XML::Node
-              solr_doc[index_as] << v.text
-            else
-              solr_doc[index_as] << v
-            end
+            solr_doc[index_as] << if v.is_a? Nokogiri::XML::Node
+                                    v.text
+                                  else
+                                    v
+                                  end
           end
         end
       end

@@ -98,13 +98,9 @@ module ActiveFedora
         # Returns the RDF node that contains metadata like RDF.type assertions for the record
         # Sometimes this is the record, other times it's record.metadata_node
         def metadata_node_for_record(record)
-          if record.respond_to?(:type) && record.respond_to?(:set_value)
-            return record
-          elsif record.respond_to?(:metadata_node)
-            return record.metadata_node
-          else
-            raise ArgumentError, "record must either have a metadata node or must respond to .type"
-          end
+          return record if record.respond_to?(:type) && record.respond_to?(:set_value)
+          return record.metadata_node if record.respond_to?(:metadata_node)
+          raise ArgumentError, "record must either have a metadata node or must respond to .type"
         end
     end
   end

@@ -4,7 +4,7 @@ describe ActiveFedora::Attributes, ".new" do
   before(:all) do
     class ProtectedParams < ActiveSupport::HashWithIndifferentAccess
       attr_accessor :permitted
-      alias_method :permitted?, :permitted
+      alias permitted? permitted
 
       def initialize(attributes)
         super(attributes)

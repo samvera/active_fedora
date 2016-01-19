@@ -1,7 +1,7 @@
 require 'active_fedora/associations'
 module ActiveFedora::Associations::Builder
   class CollectionAssociation < Association #:nodoc:
-    CALLBACKS = [:before_add, :after_add, :before_remove, :after_remove]
+    CALLBACKS = [:before_add, :after_add, :before_remove, :after_remove].freeze
 
     self.valid_options += [
       :before_add, :after_add, :before_remove, :after_remove

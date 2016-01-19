@@ -217,7 +217,7 @@ module ActiveFedora
         [self]
       end
 
-      alias_method :source_macro, :macro
+      alias source_macro macro
 
       def has_inverse?
         inverse_name
@@ -265,8 +265,8 @@ module ActiveFedora
         end
       end
 
-      VALID_AUTOMATIC_INVERSE_MACROS = [:has_many, :has_and_belongs_to_many, :belongs_to]
-      INVALID_AUTOMATIC_INVERSE_OPTIONS = [:conditions, :through, :polymorphic, :foreign_key]
+      VALID_AUTOMATIC_INVERSE_MACROS = [:has_many, :has_and_belongs_to_many, :belongs_to].freeze
+      INVALID_AUTOMATIC_INVERSE_OPTIONS = [:conditions, :through, :polymorphic, :foreign_key].freeze
 
       private
 

@@ -10,7 +10,7 @@ module ActiveFedora
     module Persistence
       extend ActiveSupport::Concern
 
-      BASE_URI = 'info:fedora/'
+      BASE_URI = 'info:fedora/'.freeze
 
       included do
         configure base_uri: BASE_URI unless base_uri
@@ -25,7 +25,7 @@ module ActiveFedora
 
       # Overrides ActiveTriples::Resource
       def persisted?
-        @persisted ||= (!datastream.new_record?)
+        @persisted ||= !datastream.new_record?
       end
     end
   end

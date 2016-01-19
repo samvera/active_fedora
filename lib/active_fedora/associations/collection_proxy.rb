@@ -835,7 +835,7 @@ module ActiveFedora
         @association.include?(record)
       end
 
-      alias_method :new, :build
+      alias new build
 
       def proxy_association
         @association
@@ -845,17 +845,17 @@ module ActiveFedora
       def scope
         @association.scope
       end
-      alias_method :spawn, :scope
+      alias spawn scope
 
       def to_ary
         load_target.dup
       end
-      alias_method :to_a, :to_ary
+      alias to_a to_ary
 
       def <<(*records)
         proxy_association.concat(records) && self
       end
-      alias_method :push, :<<
+      alias push <<
 
       def clear
         delete_all

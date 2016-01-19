@@ -13,8 +13,8 @@ module ActiveFedora
     include OM::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
     include Datastreams::NokogiriDatastreams
 
-    alias_method(:om_term_values, :term_values) unless method_defined?(:om_term_values)
-    alias_method(:om_update_values, :update_values) unless method_defined?(:om_update_values)
+    alias om_term_values term_values unless method_defined?(:om_term_values)
+    alias om_update_values update_values unless method_defined?(:om_update_values)
 
     def default_mime_type
       'text/xml'

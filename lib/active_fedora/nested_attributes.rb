@@ -113,7 +113,7 @@ module ActiveFedora
 
       # Attribute hash keys that should not be assigned as normal attributes.
       # These hash keys are nested attributes implementation details.
-      UNASSIGNABLE_KEYS = %w( id _destroy )
+      UNASSIGNABLE_KEYS = %w( id _destroy ).freeze
 
       def assign_nested_attributes_for_collection_association(association_name, attributes_collection)
         options = nested_attributes_options[association_name]

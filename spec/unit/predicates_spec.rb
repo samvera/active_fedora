@@ -77,7 +77,7 @@ describe ActiveFedora::Predicates do
     expect(described_class.predicate_lookup(:is_part_of)).to eq "isPartOf"
     expect(described_class.predicate_lookup(:is_member_of)).to eq "isMemberOf"
     expect(described_class.predicate_lookup("isPartOfCollection")).to eq "isPartOfCollection"
-    described_class.predicate_config[:predicate_mapping].merge!("some_namespace" => { has_foo: "hasFOO" })
+    described_class.predicate_config[:predicate_mapping]["some_namespace"] = { has_foo: "hasFOO" }
     expect(described_class.find_predicate(:has_foo)).to eq ["hasFOO", "some_namespace"]
     expect(described_class.predicate_lookup(:has_foo, "some_namespace")).to eq "hasFOO"
     expect(lambda { described_class.predicate_lookup(:has_foo) }).to raise_error ActiveFedora::UnregisteredPredicateError
