@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::QualifiedDublinCoreDatastream do
-  DC_ELEMENTS = [:contributor, :coverage, :creator, :date, :description, :identifier, :language, :publisher, :relation, :rights, :source]
+  DC_ELEMENTS = [:contributor, :coverage, :creator, :date, :description, :identifier, :language, :publisher, :relation, :rights, :source].freeze
 
   let(:sample_xml) do "<dc xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:dcterms='http://purl.org/dc/terms/'>
           <dcterms:type xsi:type='DCMITYPE'>sound</dcterms:type>

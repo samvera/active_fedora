@@ -52,7 +52,7 @@ module ActiveFedora::Associations::Builder
           send(name).delete_all
         end
       end
-      alias_method :define_nullify_dependency_method, :define_delete_all_dependency_method
+      alias define_nullify_dependency_method define_delete_all_dependency_method
 
       def define_restrict_dependency_method
         name = self.name

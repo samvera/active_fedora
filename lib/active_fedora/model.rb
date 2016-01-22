@@ -1,4 +1,4 @@
-SOLR_DOCUMENT_ID = "id" unless defined?(SOLR_DOCUMENT_ID)
+SOLR_DOCUMENT_ID = "id".freeze unless defined?(SOLR_DOCUMENT_ID)
 
 module ActiveFedora
   # = ActiveFedora
@@ -17,14 +17,13 @@ module ActiveFedora
       ActiveFedora.class_from_string(model_value)
     end
 
-    private
-
-      def self.class_exists?(class_name)
-        return false if class_name.empty?
-        klass = class_name.constantize
-        return klass.is_a?(Class)
-      rescue NameError
-        return false
-      end
+    def self.class_exists?(class_name)
+      return false if class_name.empty?
+      klass = class_name.constantize
+      return klass.is_a?(Class)
+    rescue NameError
+      return false
+    end
+    private_class_method :class_exists?
   end
 end

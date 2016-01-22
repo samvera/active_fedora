@@ -19,7 +19,7 @@ describe ActiveFedora::Persistence do
     context 'when a block is provided' do
       it 'passes the block to initialize' do
         expect_any_instance_of(ActiveFedora::Base).to receive(:save)
-        expect { |b| ActiveFedora::Base.create(&b) }.to yield_with_args(an_instance_of ActiveFedora::Base)
+        expect { |b| ActiveFedora::Base.create(&b) }.to yield_with_args(an_instance_of(ActiveFedora::Base))
       end
     end
   end

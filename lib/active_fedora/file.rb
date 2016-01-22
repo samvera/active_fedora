@@ -188,6 +188,11 @@ module ActiveFedora
       false
     end
 
+    def self.relation
+      FileRelation.new(self)
+    end
+    private_class_method :relation
+
     protected
 
       # The string to prefix all solr fields with. Override this method if you want
@@ -197,10 +202,6 @@ module ActiveFedora
       end
 
     private
-
-      def self.relation
-        FileRelation.new(self)
-      end
 
       # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
       def behaves_like_io?(obj)

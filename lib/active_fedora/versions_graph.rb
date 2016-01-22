@@ -3,7 +3,7 @@ module ActiveFedora
     def all(opts = {})
       versions = fedora_versions
       unless opts[:include_auto_save]
-        versions.reject! { |version| version.label.match("auto") }
+        versions.reject! { |version| version.label =~ /auto/ }
       end
       versions.sort_by { |version| DateTime.parse(version.created) }
     rescue ArgumentError, NoMethodError

@@ -149,14 +149,12 @@ module ActiveFedora
     # Given the solr_config that's been loaded for this environment,
     # determine which solr url to use
     def solr_url(solr_config)
+      return solr_config[:url] if solr_config.key?(:url)
+      return solr_config['url'] if solr_config.key?('url')
       if @index_full_text == true && solr_config.key?(:fulltext) && solr_config[:fulltext].key?('url')
-        return solr_config[:fulltext]['url']
+        solr_config[:fulltext]['url']
       elsif solr_config.key?(:default) && solr_config[:default].key?('url')
-        return solr_config[:default]['url']
-      elsif solr_config.key?('url')
-        return solr_config['url']
-      elsif solr_config.key?(:url)
-        return solr_config[:url]
+        solr_config[:default]['url']
       else
         raise URI::InvalidURIError
       end
@@ -208,11 +206,8 @@ module ActiveFedora
     # Checks the existing fedora_config.path to see if there is a solr.yml there
     def check_fedora_path_for_solr
       path = ::File.dirname(self.path) + "/solr.yml"
-      if ::File.file? path
-        return path
-      else
-        return nil
-      end
+      return unless ::File.file? path
+      path
     end
 
     def predicate_config

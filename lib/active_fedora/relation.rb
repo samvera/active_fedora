@@ -5,7 +5,7 @@ module ActiveFedora
 
     attr_reader :loaded
     attr_accessor :default_scoped
-    alias_method :loaded?, :loaded
+    alias loaded? loaded
 
     attr_accessor :values, :klass
 
@@ -129,7 +129,7 @@ module ActiveFedora
 
     private
 
-      VALID_FIND_OPTIONS = [:order, :limit, :start, :conditions, :cast]
+      VALID_FIND_OPTIONS = [:order, :limit, :start, :conditions, :cast].freeze
 
       def apply_finder_options(options)
         relation = clone

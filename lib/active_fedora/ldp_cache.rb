@@ -29,7 +29,7 @@ module ActiveFedora
       end
 
       response
-    rescue Exception => e
+    rescue StandardError => e
       reset_cache_settings
       raise e
     end

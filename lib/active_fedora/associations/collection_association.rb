@@ -129,7 +129,7 @@ module ActiveFedora
       def to_ary
         load_target.dup
       end
-      alias_method :to_a, :to_ary
+      alias to_a to_ary
 
       def build(attributes = {}, &block)
         if attributes.is_a?(Array)

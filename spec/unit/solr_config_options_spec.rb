@@ -14,14 +14,14 @@ describe ActiveFedora do
 
   describe "SOLR_DOCUMENT_ID" do
     before(:all) do
-      SOLR_DOCUMENT_ID = "MY_SAMPLE_ID"
+      SOLR_DOCUMENT_ID = "MY_SAMPLE_ID".freeze
     end
     after(:all) do
-      SOLR_DOCUMENT_ID = "id"
+      SOLR_DOCUMENT_ID = "id".freeze
     end
     it "is used by ActiveFedora::Base.to_solr" do
       allow(@test_object).to receive(:id).and_return('changeme:123')
-      SOLR_DOCUMENT_ID = "MY_SAMPLE_ID"
+      SOLR_DOCUMENT_ID = "MY_SAMPLE_ID".freeze
       expect(@test_object.to_solr[SOLR_DOCUMENT_ID.to_sym]).to eq 'changeme:123'
       expect(@test_object.to_solr[:id]).to be_nil
     end

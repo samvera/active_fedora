@@ -216,7 +216,7 @@ module ActiveFedora
       :before_save, :around_save, :after_save, :before_create, :around_create,
       :after_create, :before_update, :around_update, :after_update,
       :before_destroy, :around_destroy, :after_destroy
-    ]
+    ].freeze
 
     included do
       extend ActiveModel::Callbacks

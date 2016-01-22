@@ -40,7 +40,7 @@ describe ActiveFedora::Querying do
         expect(result).to be_instance_of(Array)
         # this test is meaningless if the array length is zero
         expect(result.length > 0).to be true
-        expect(result).to all(be_an ModelIntegrationSpec::Basic)
+        expect(result).to all(be_an(ModelIntegrationSpec::Basic))
       end
     end
 
@@ -90,7 +90,7 @@ describe ActiveFedora::Querying do
         first_condition = { ActiveFedora::SolrQueryBuilder.solr_name('bar', type: :string) => 'Peanuts' }
         second_condition = "foo_tesim:bar"
         where_values = ModelIntegrationSpec::Basic.where(first_condition)
-                       .where(second_condition).where_values
+                                                  .where(second_condition).where_values
         expect(where_values).to eq ["bar_tesim:Peanuts",
                                     "(foo_tesim:bar)"]
       end

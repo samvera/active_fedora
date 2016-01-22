@@ -15,12 +15,12 @@ module ActiveFedora
 
       def ng_xml
         @ng_xml ||= begin
-          if new_record?
-            ## Load up the template
-            xml = self.class.xml_template
-          else
-            xml = Nokogiri::XML::Document.parse(remote_content)
-          end
+          xml = if new_record?
+                  ## Load up the template
+                  self.class.xml_template
+                else
+                  Nokogiri::XML::Document.parse(remote_content)
+                end
           self.class.decorate_ng_xml xml
         end
       end

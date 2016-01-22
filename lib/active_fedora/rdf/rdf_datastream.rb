@@ -122,7 +122,7 @@ module ActiveFedora
                     end
     end
 
-    alias_method :graph, :resource
+    alias graph resource
 
     def refresh_attributes
       @resource = nil

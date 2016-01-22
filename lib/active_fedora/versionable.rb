@@ -15,7 +15,7 @@ module ActiveFedora
     end
 
     def model_type
-      if self.respond_to?(:metadata)
+      if respond_to?(:metadata)
         metadata.ldp_source.graph.query(predicate: ::RDF.type).objects
       else
         resource.query(subject: resource.rdf_subject, predicate: ::RDF.type).objects
@@ -50,7 +50,7 @@ module ActiveFedora
       resp = ActiveFedora.fedora.connection.patch(versions.with_label(label).uri, nil)
       @versions = nil
       reload
-      refresh_attributes if self.respond_to?("refresh_attributes")
+      refresh_attributes if respond_to?("refresh_attributes")
       resp.success?
     end
 

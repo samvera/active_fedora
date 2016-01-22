@@ -59,8 +59,7 @@ module ActiveFedora
     end
 
     def internal?
-      value.object.to_s.start_with?("http://www.jcp.org") ||
-        value.object.to_s.start_with?("http://fedora.info") ||
+      value.object.to_s.start_with?("http://www.jcp.org", "http://fedora.info") ||
         value.predicate.to_s.start_with?("http://fedora.info")
     end
   end
