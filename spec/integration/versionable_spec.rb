@@ -75,9 +75,7 @@ describe ActiveFedora::Versionable do
         subject.create_version
       end
 
-      it "sets model_type to versionable" do
-        expect(subject.reload.model_type).to include ::RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
-      end
+      it { is_expected.to have_versions }
 
       it "has one version" do
         expect(subject.versions).to be_kind_of ActiveFedora::VersionsGraph

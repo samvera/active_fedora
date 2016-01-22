@@ -57,16 +57,10 @@ module ActiveFedora
     private
 
       def versions_request
-        resp = begin
-          ActiveFedora.fedora.connection.get(versions_uri)
-        rescue Ldp::NotFound
-          return ''
-        end
-        if !resp.success?
-          raise "unexpected return value #{resp.status} for when getting datastream content at #{uri}\n\t#{resp.body}"
-        elsif resp.headers['content-type'] != 'text/turtle'
-          raise "unknown response format. got '#{resp.headers['content-type']}', but was expecting 'text/turtle'"
-        end
+        return '' unless has_versions?
+        resp = ActiveFedora.fedora.connection.get(versions_uri)
+        raise ActiveFedoraError, status_message(resp) unless resp.success?
+        raise ActiveFedoraError, bad_headers(resp) unless resp.headers['content-type'] == 'text/turtle'
         resp.body
       end
 
@@ -80,6 +74,14 @@ module ActiveFedora
         else
           "version" + (versions.all.count + 1).to_s
         end
+      end
+
+      def status_message(response)
+        "Unexpected return value #{response.status} when retrieving datastream content at #{uri}\n\t#{response.body}"
+      end
+
+      def bad_headers(response)
+        "Unknown response format. Got '#{response.headers['content-type']}', but was expecting 'text/turtle'"
       end
   end
 end
