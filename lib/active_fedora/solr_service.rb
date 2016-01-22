@@ -71,7 +71,7 @@ module ActiveFedora
       end
 
       def construct_query_for_pids(id_array)
-        Deprecation.warn SolrService, "construct_query_for_pids is deprecated and will be removed in active-fedora 10.0"
+        Deprecation.warn SolrService, "SolrService.construct_query_for_pids is deprecated. Use SolrQueryBuilder.construct_query_for_ids instead. This will be removed in active-fedora 10.0"
         SolrQueryBuilder.construct_query_for_ids(id_array)
       end
 
