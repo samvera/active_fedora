@@ -70,10 +70,12 @@ module ActiveFedora::RDF
       end
     end
 
-    # Builds a FieldMap entry for a resource such as an ActiveFedora::Base object and returns the uri as the value.
+    # Builds a FieldMap entry for a resource such as an ActiveFedora::Base object and returns the uri as the value
+    # unless :using has been set as an option to the index.as block on the property in question. In that case, the
+    # symbol assigned to :using will used as the value.
     class ResourceBuilder < Builder
       def find_values
-        object.send(name).map(&:uri)
+        object.send(name).map(&index_field_config.term.fetch(:using, :uri))
       end
     end
 

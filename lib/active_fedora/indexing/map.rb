@@ -16,7 +16,7 @@ module ActiveFedora::Indexing
 
     # this enables a cleaner API for solr integration
     class IndexObject
-      attr_accessor :data_type, :behaviors
+      attr_accessor :data_type, :behaviors, :term
       attr_reader :key
 
       def initialize(name, &_block)
@@ -27,6 +27,7 @@ module ActiveFedora::Indexing
       end
 
       def as(*args)
+        @term = args.last.is_a?(Hash) ? args.pop : {}
         @behaviors = args
       end
 
