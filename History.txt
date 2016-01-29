@@ -1,3 +1,12 @@
+v9.7.1
+ 2016-01-22 : The jcr/mix versionable predicate is no longer used [Adam Wead]
+ 
+ 2016-01-22 : Add detail to SolrQueryBuilder.construct_query_for_pids deprecation warning [David Chandek-Stark]
+ 
+ 2016-01-21 : Updating to the latest Rubocop [Michael J. Giarlo]
+ 
+ 2015-12-04 : Adds :PID property to ActiveFedora::RDF::Fcrepo::Model vocab [David Chandek-Stark]
+
 v9.7.0
  2015-11-25 : Allowing access to the gone? method from outside the object [Carolyn Cole]
  
