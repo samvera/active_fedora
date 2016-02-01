@@ -49,6 +49,10 @@ module ActiveFedora
       end
 
       if options.present?
+        if options.keys.count == 1 && options[:id]
+          Deprecation.warn(ActiveFedora::Base, "Calling .find with an id via a hash has been deprecated and will not be allowed in active-fedora 10.0. Use .find('your-id') instead")
+          return find_with_ids([options[:id]], cast)
+        end
         options = args.first unless args.empty?
         Deprecation.warn(ActiveFedora::Base, "Calling .find with a hash has been deprecated and will not be allowed in active-fedora 10.0. Use .where instead")
         options = { conditions: options }
