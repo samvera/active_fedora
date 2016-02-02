@@ -17,7 +17,8 @@ module ActiveFedora
     # @return [Hash<RDF::URI, RDF::Queryable::Enumerator>] hash of predicate uris to statements
     def changes
       @changes ||= changed_attributes.each_with_object({}) do |key, result|
-        if object.respond_to?(:association) && object.association(key.to_sym).present?
+        if object.association(key.to_sym).present?
+          # This is always an ActiveFedora::Reflection::RDFPropertyReflection
           predicate = object.association(key.to_sym).reflection.predicate
           result[predicate] = graph.query(subject: object.rdf_subject, predicate: predicate)
         elsif object.class.properties.keys.include?(key)
