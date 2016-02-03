@@ -1,6 +1,7 @@
 APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/../../")
 
-require 'jettywrapper'
+require 'solr_wrapper'
+require 'fcrepo_wrapper'
 
 namespace :active_fedora do
   # Use yard to build docs
@@ -50,14 +51,18 @@ namespace :active_fedora do
   desc "CI build"
   task :ci do
     ENV['environment'] = "test"
-    Rake::Task["active_fedora:configure_jetty"].invoke
-    jetty_params = Jettywrapper.load_config
-    error = Jettywrapper.wrap(jetty_params) do
-      Rake::Task['active_fedora:coverage'].invoke
+    # Rake::Task["active_fedora:configure_jetty"].invoke
+    # jetty_params = Jettywrapper.load_config
+    solr_params = { port: 8983, verbose: true, managed: true }
+    fcrepo_params = { port: 8984, verbose: true, managed: true }
+    error = nil
+    SolrWrapper.wrap(solr_params) do |solr|
+      solr.with_collection(name: 'hydra-test', dir: File.join(File.expand_path("../..", File.dirname(__FILE__)), "solr", "config")) do
+        FcrepoWrapper.wrap(fcrepo_params) do
+          Rake::Task['active_fedora:coverage'].invoke
+        end
+      end
     end
-    raise "test failures: #{error}" if error
-    # Only create documentation if the tests have passed
-    Rake::Task["active_fedora:doc"].invoke
   end
 
   desc "Execute specs with coverage"

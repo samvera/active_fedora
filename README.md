@@ -63,12 +63,8 @@ You can test ActiveFedora using the same process as our continuous
 integration server. To do that, unzip a copy of hydra-jetty first. This includes copies of Fedora and Solr which are
 used during the testing process.
 
-```bash
-rake jetty:unzip
-```
-
-Once hydra-jetty is unzipped, the ci rake task will spin up jetty,
-import the fixtures, and run the tests for you.
+The `ci` rake task will download solr and fedora, start them,
+and run the tests for you.
 
 ```bash
 rake active_fedora:ci
@@ -76,18 +72,21 @@ rake active_fedora:ci
 
 ### Testing Manually
 
-If you want to run the tests manually, follow these instructions.
-
-You need to have a copy of hydra-jetty running. To do this, download a
-working copy of
-[hydra-jetty](https://github.com/projecthydra/hydra-jetty), cd into its
-root and run:
+If you want to run the tests manually, follow these instructions:
 
 ```bash
-java -jar start.jar
+solr_wrapper -d solr/config/ --collection_name hydra-test
 ```
 
-Now you’re ready to run the tests. In the directory where active_fedora
+You can switch `hydra-test` to `hydra-dev` if you want to create a collection for development.
+
+To start FCRepo, open another shell and run:
+
+```bash
+fedora_wrapper -p 8984
+```
+
+Now you’re ready to run the tests. In the directory where active\_fedora
 is installed, run:
 
 ```bash

@@ -6,7 +6,6 @@ module ActiveFedora
 
     def generate
       # Overwrite the configuration files that Blacklight has installed
-      copy_file 'jetty.yml', 'config/jetty.yml', force: true
       copy_file 'solr.yml', 'config/solr.yml', force: true
       directory 'solr_conf', 'solr_conf'
     end

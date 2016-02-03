@@ -49,12 +49,23 @@ describe ActiveFedora::NtriplesRDFDatastream do
     @subject.save
   end
 
+  let(:remote_content) do
+    <<EOF
+<#{ActiveFedora.fedora.host}/test/test:1> <http://purl.org/dc/terms/created> "2010-12-31"^^<http://www.w3.org/2001/XMLSchema#date> .
+<#{ActiveFedora.fedora.host}/test/test:1> <http://purl.org/dc/terms/title> "Title of work" .
+<#{ActiveFedora.fedora.host}/test/test:1> <http://purl.org/dc/terms/publisher> "Penn State" .
+<#{ActiveFedora.fedora.host}/test/test:1> <http://xmlns.com/foaf/0.1/based_near> "New York, NY, US" .
+<#{ActiveFedora.fedora.host}/test/test:1> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://google.com/> .
+<#{ActiveFedora.fedora.host}/test/test:1/content> <http://purl.org/dc/terms/title> "Title of datastream" .
+EOF
+  end
+
   it "saves content properly upon save" do
     foo = RdfTest.new('test:1') # ID needs to match the subject in the loaded file
     foo.title = 'Hamlet'
     foo.save
     expect(foo.title).to eq 'Hamlet'
-    foo.rdf.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
+    foo.rdf.content = remote_content
     foo.save
     expect(foo.title).to eq 'Title of work'
   end
