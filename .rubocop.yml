@@ -203,6 +203,12 @@ Style/FileName:
     - 'lib/active-fedora.rb'
     - 'spec/samples/hydra-mods_article_datastream.rb'
 
+Style/ZeroLengthPredicate:
+  Enabled: false # https://github.com/bbatsov/rubocop/issues/2782
+
+Performance/RedundantMerge:
+  Enabled: false # https://github.com/bbatsov/rubocop/issues/2781
+
 Rails:
   Enabled: true
 
