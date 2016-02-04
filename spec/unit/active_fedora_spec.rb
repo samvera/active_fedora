@@ -99,7 +99,6 @@ describe ActiveFedora do
             solr_config_path = File.expand_path(File.join(File.dirname(__FILE__), "../fixtures/rails_root/config/solr.yml"))
             allow(File).to receive(:open).with(fedora_config_path).and_return(fedora_config)
             allow(File).to receive(:open).with(solr_config_path).and_return(solr_config)
-            allow(ActiveFedora::SolrService).to receive(:load_mappings) # For the solrizer solr_mappings.yml
 
             described_class.init(fedora_config_path: fedora_config_path, solr_config_path: solr_config_path)
             expect(described_class.solr.class).to eq ActiveFedora::SolrService
@@ -108,8 +107,6 @@ describe ActiveFedora do
 
         describe "with no explicit config path" do
           it "looks for the file in the path defined at Rails.root" do
-            allow(ActiveFedora::SolrService).to receive(:load_mappings) # necessary or else it will load the solrizer config and it breaks other tests in the suite.
-
             stub_rails(root: File.join(File.dirname(__FILE__), "../fixtures/rails_root"))
             described_class.init
             expect(described_class.config.credentials[:url]).to eq "http://testhost.com:8983/fedora"
