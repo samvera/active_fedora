@@ -51,11 +51,9 @@ namespace :active_fedora do
   desc "CI build"
   task :ci do
     ENV['environment'] = "test"
-    # Rake::Task["active_fedora:configure_jetty"].invoke
-    # jetty_params = Jettywrapper.load_config
-    solr_params = { port: 8983, verbose: true, managed: true }
-    fcrepo_params = { port: 8984, verbose: true, managed: true }
-    error = nil
+    solr_params = { port: 8985, verbose: true, managed: true }
+    fcrepo_params = { port: 8986, verbose: true, managed: true,
+                      no_jms: true, fcrepo_home_dir: 'fcrepo4-test-data' }
     SolrWrapper.wrap(solr_params) do |solr|
       solr.with_collection(name: 'hydra-test', dir: File.join(File.expand_path("../..", File.dirname(__FILE__)), "solr", "config")) do
         FcrepoWrapper.wrap(fcrepo_params) do

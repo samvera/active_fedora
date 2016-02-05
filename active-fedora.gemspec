@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "yard"
   s.add_development_dependency "rake"
   s.add_development_dependency "solr_wrapper", "~> 0.4"
-  s.add_development_dependency 'fcrepo_wrapper', '~> 0.1'
+  s.add_development_dependency 'fcrepo_wrapper', '~> 0.2'
   s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "rspec-its"
   s.add_development_dependency "equivalent-xml"
