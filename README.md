@@ -83,7 +83,7 @@ You can switch `hydra-test` to `hydra-dev` if you want to create a collection fo
 To start FCRepo, open another shell and run:
 
 ```bash
-fedora_wrapper -p 8984
+fcrepo_wrapper -p 8984
 ```
 
 Now you’re ready to run the tests. In the directory where active\_fedora
