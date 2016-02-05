@@ -65,6 +65,59 @@ describe "delegating attributes" do
     end
   end
 
+  context "with multiple datastreams" do
+    subject { RdfObject.create }
+
+    describe "getting attributes" do
+      before do
+        subject.depositor = "foo"
+        subject.resource_type = ["bar"]
+        subject.save
+      end
+
+      specify "using strings for keys" do
+        expect(subject["depositor"]).to eq("foo")
+        expect(subject["resource_type"]).to eq(["bar"])
+      end
+      specify "using symbols for keys" do
+        expect(subject[:depositor]).to eq("foo")
+        expect(subject[:resource_type]).to eq(["bar"])
+      end
+    end
+
+    describe "setting attributes" do
+      specify "using strings for keys" do
+        subject["depositor"] = "foo"
+        subject["resource_type"] = ["bar"]
+        subject.save
+        expect(subject.depositor).to eq("foo")
+        expect(subject.resource_type).to eq(["bar"])
+      end
+
+      specify "using symbols for keys" do
+        subject[:depositor] = "foo"
+        subject[:resource_type] = ["bar"]
+        subject.save
+        expect(subject.depositor).to eq("foo")
+        expect(subject.resource_type).to eq(["bar"])
+      end
+
+      # TODO: bug logged in issue #540
+      describe "using shift", pending: "has_changed? not returning true" do
+        specify "with rdf properties" do
+          subject.resource_type << "bar"
+          subject.save
+          expect(subject.resource_type).to eq(["bar"])
+        end
+        specify "with om terms" do
+          subject.wrangler << "bar"
+          subject.save
+          expect(subject.wrangler).to eql(["bar"])
+        end
+      end
+    end
+  end
+
   describe "#changes" do
     subject do
       TitledObject.create(title: ["Hydra for Dummies"])

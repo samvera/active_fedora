@@ -196,8 +196,8 @@ EOF
       subject.title.delete("title1", "title2", "title3")
       expect(subject.title).to be_empty
     end
-    it "supports the is_a? method" do
-      expect(subject.title.is_a?(Array)).to eq true
+    it "supports the each method" do
+      expect(@subject.title.respond_to?(:each)).to eq true
     end
   end
 end

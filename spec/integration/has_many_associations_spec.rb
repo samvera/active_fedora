@@ -409,7 +409,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       subject { library.books(true) }
 
       it "saves the new title" do
-        expect(subject.first.title).to eql ["Better book"]
+        expect(subject.first.title).to eq ["Better book"]
       end
     end
   end

@@ -106,7 +106,7 @@ describe ActiveFedora::Versionable do
           end
 
           it "will return to the first version's values" do
-            expect(subject.title).to eql(["Greetings Earthlings"])
+            expect(subject.title).to eq(["Greetings Earthlings"])
           end
 
           context "and creating additional versions" do
@@ -118,7 +118,7 @@ describe ActiveFedora::Versionable do
 
             it "has three versions" do
               expect(subject.versions.all.size).to eq 3
-              expect(subject.title).to eql(["Now, surrender and prepare to be boarded"])
+              expect(subject.title).to eq(["Now, surrender and prepare to be boarded"])
             end
           end
         end
@@ -179,7 +179,7 @@ describe ActiveFedora::Versionable do
         end
 
         it "has a title" do
-          expect(subject.title).to eql(["Greetings Earthlings"])
+          expect(subject.title).to eq(["Greetings Earthlings"])
         end
 
         it "has a size" do
@@ -202,7 +202,7 @@ describe ActiveFedora::Versionable do
           end
 
           it "has the new title" do
-            expect(subject.title).to eql(["Surrender and prepare to be boarded"])
+            expect(subject.title).to eq(["Surrender and prepare to be boarded"])
           end
 
           it "has a new size" do
@@ -221,7 +221,7 @@ describe ActiveFedora::Versionable do
             end
 
             it "loads the restored file's content" do
-              expect(subject.title).to eql(["Greetings Earthlings"])
+              expect(subject.title).to eq(["Greetings Earthlings"])
             end
 
             it "is the same size as the original file" do
@@ -240,7 +240,7 @@ describe ActiveFedora::Versionable do
               end
 
               it "has a new title" do
-                expect(subject.title).to eql(["Now, surrender and prepare to be boarded"])
+                expect(subject.title).to eq(["Now, surrender and prepare to be boarded"])
               end
 
               it "has a new size" do
