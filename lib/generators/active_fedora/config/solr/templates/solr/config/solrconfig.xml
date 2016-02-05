@@ -32,6 +32,8 @@
   
   <lib dir="${solr.install.dir:../../../..}/contrib/analysis-extras/lib" />
   <lib dir="${solr.install.dir:../../../..}/contrib/analysis-extras/lucene-libs" />
+  <lib dir="${solr.install.dir:../../../..}/contrib/extraction/lib" regex=".*\.jar" />
+  <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-cell-\d.*\.jar" />
 
   <directoryFactory name="DirectoryFactory" 
                     class="${solr.directoryFactory:solr.NRTCachingDirectoryFactory}">
@@ -45,7 +47,7 @@
   <dataDir>${solr.blacklight-core.data.dir:}</dataDir>
   
   <requestDispatcher handleSelect="true" >
-    <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048" />
+    <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048000" />
   </requestDispatcher>
   
   <requestHandler name="/analysis/field" startup="lazy" class="solr.FieldAnalysisRequestHandler" />
@@ -415,5 +417,18 @@
     </arr>
   </requestHandler>
 
+  <requestHandler name="/update/extract" class="org.apache.solr.handler.extraction.ExtractingRequestHandler">
+    <lst name="defaults">
+      <str name="fmap.Last-Modified">last_modified</str>
+      <str name="uprefix">ignored_</str>
+    </lst>
+    <!--Optional.  Specify a path to a tika configuration file. See the Tika docs for details.-->
+    <!-- <str name="tika.config">/my/path/to/tika.config</str> -->
+    <!-- Optional. Specify one or more date formats to parse. See DateUtil.DEFAULT_DATE_FORMATS
+         for default date formats -->
+    <!-- <lst name="date.formats"> -->
+    <!--   <str>yyyy&#45;MM&#45;dd</str> -->
+    <!-- </lst> -->
+  </requestHandler>
 </config>
 
