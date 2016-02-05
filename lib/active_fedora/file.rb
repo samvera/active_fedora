@@ -23,7 +23,7 @@ module ActiveFedora
 
     generate_method 'content'
 
-    define_model_callbacks :save, :create, :destroy
+    define_model_callbacks :update, :save, :create, :destroy
     define_model_callbacks :initialize, only: :after
 
     # @param parent_or_url_or_hash [ActiveFedora::Base, RDF::URI, String, Hash, NilClass] the parent resource or the URI of this resource
@@ -32,29 +32,31 @@ module ActiveFedora
     # @yield [self] Yields self
     # @yieldparam [File] self the newly created file
     def initialize(parent_or_url_or_hash = nil, path = nil, _options = {}, &_block)
-      case parent_or_url_or_hash
-      when Hash
-        @ldp_source = build_ldp_resource_via_uri
-      when nil
-        @ldp_source = build_ldp_resource_via_uri nil
-      when String, ::RDF::URI
-        id = ActiveFedora::Associations::IDComposite.new([parent_or_url_or_hash], translate_uri_to_id).first
-        @ldp_source = build_ldp_resource id
-      when ActiveFedora::Base
-        Deprecation.warn File, "Initializing a file by passing a container is deprecated. Initialize with a uri instead. This capability will be removed in active-fedora 10.0"
-        uri = if parent_or_url_or_hash.uri.is_a?(::RDF::URI) && parent_or_url_or_hash.uri.value.empty?
-                nil
-              else
-                "#{parent_or_url_or_hash.uri}/#{path}"
-              end
-        @ldp_source = build_ldp_resource_via_uri(uri, nil)
+      run_callbacks(:initialize) do
+        case parent_or_url_or_hash
+        when Hash
+          @ldp_source = build_ldp_resource_via_uri
+        when nil
+          @ldp_source = build_ldp_resource_via_uri nil
+        when String, ::RDF::URI
+          id = ActiveFedora::Associations::IDComposite.new([parent_or_url_or_hash], translate_uri_to_id).first
+          @ldp_source = build_ldp_resource id
+        when ActiveFedora::Base
+          Deprecation.warn File, "Initializing a file by passing a container is deprecated. Initialize with a uri instead. This capability will be removed in active-fedora 10.0"
+          uri = if parent_or_url_or_hash.uri.is_a?(::RDF::URI) && parent_or_url_or_hash.uri.value.empty?
+                  nil
+                else
+                  "#{parent_or_url_or_hash.uri}/#{path}"
+                end
+          @ldp_source = build_ldp_resource_via_uri(uri, nil)
 
-      else
-        raise "The first argument to #{self} must be a String or an ActiveFedora::Base. You provided a #{parent_or_url_or_hash.class}"
+        else
+          raise "The first argument to #{self} must be a String or an ActiveFedora::Base. You provided a #{parent_or_url_or_hash.class}"
+        end
+
+        @attributes = {}.with_indifferent_access
+        yield self if block_given?
       end
-
-      @attributes = {}.with_indifferent_access
-      yield self if block_given?
     end
 
     # @return [true, false] true if the objects are equal or when the objects have uris
@@ -188,6 +190,10 @@ module ActiveFedora
       false
     end
 
+    def destroy(*)
+      run_callbacks(:destroy) { super }
+    end
+
     def self.relation
       FileRelation.new(self)
     end
@@ -219,21 +225,29 @@ module ActiveFedora
       end
 
       def create_record(_options = {})
-        return false if content.nil?
-        ldp_source.content = content
-        ldp_source.create do |req|
-          req.headers.merge!(ldp_headers)
+        run_callbacks(:create) do
+          run_callbacks(:save) do
+            return false if content.nil?
+            ldp_source.content = content
+            ldp_source.create do |req|
+              req.headers.merge!(ldp_headers)
+            end
+            refresh
+          end
         end
-        refresh
       end
 
       def update_record(_options = {})
-        return true unless content_changed?
-        ldp_source.content = content
-        ldp_source.update do |req|
-          req.headers.merge!(ldp_headers)
+        run_callbacks(:update) do
+          run_callbacks(:save) do
+            return true unless content_changed?
+            ldp_source.content = content
+            ldp_source.update do |req|
+              req.headers.merge!(ldp_headers)
+            end
+            refresh
+          end
         end
-        refresh
       end
 
       def build_ldp_resource(id)
