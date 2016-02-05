@@ -1,3 +1,12 @@
+v9.8.0
+2016-02-04: Remove unused files [Justin Coyne]
+
+2016-02-03: Test on Solr 5 [Justin Coyne]
+
+2016-02-04: Fix rubocop [Justin Coyne]
+
+2016-01-29: Pass hash of options to index.as [Adam Wead]
+
 v9.7.1
  2016-01-22 : The jcr/mix versionable predicate is no longer used [Adam Wead]
  
