@@ -204,7 +204,7 @@ describe ActiveFedora::Base do
     context "when its saved" do
       before do
         allow(@test_object).to receive(:new_record?).and_return(false)
-        allow(@test_object).to receive(:uri).and_return('http://localhost:8983/fedora/rest/test/one/two/three')
+        allow(@test_object).to receive(:uri).and_return("#{ActiveFedora.fedora.host}/test/one/two/three")
       end
 
       context "#to_param" do

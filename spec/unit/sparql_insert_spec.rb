@@ -25,7 +25,7 @@ describe ActiveFedora::SparqlInsert do
     let(:base) { Book.create }
 
     it "returns the string" do
-      expect(subject.build).to eq "DELETE { <> <info:fedora/fedora-system:def/relations-external#hasConstituent> ?change . }\n  WHERE { <> <info:fedora/fedora-system:def/relations-external#hasConstituent> ?change . } ;\nDELETE { <> <http://purl.org/dc/terms/title> ?change . }\n  WHERE { <> <http://purl.org/dc/terms/title> ?change . } ;\nINSERT { \n<> <info:fedora/fedora-system:def/relations-external#hasConstituent> <http://localhost:8983/fedora/rest/test/foo> .\n<> <http://purl.org/dc/terms/title> \"bar\" .\n}\n WHERE { }"
+      expect(subject.build).to eq "DELETE { <> <info:fedora/fedora-system:def/relations-external#hasConstituent> ?change . }\n  WHERE { <> <info:fedora/fedora-system:def/relations-external#hasConstituent> ?change . } ;\nDELETE { <> <http://purl.org/dc/terms/title> ?change . }\n  WHERE { <> <http://purl.org/dc/terms/title> ?change . } ;\nINSERT { \n<> <info:fedora/fedora-system:def/relations-external#hasConstituent> <#{ActiveFedora.fedora.host}/test/foo> .\n<> <http://purl.org/dc/terms/title> \"bar\" .\n}\n WHERE { }"
     end
   end
 end

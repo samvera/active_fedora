@@ -1,6 +1,17 @@
 require 'spec_helper'
 
 describe ActiveFedora::NtriplesRDFDatastream do
+  let(:remote_content) do
+    <<EOF
+<#{ActiveFedora.fedora.host}/test/test:1> <http://purl.org/dc/terms/created> "2010-12-31"^^<http://www.w3.org/2001/XMLSchema#date> .
+<#{ActiveFedora.fedora.host}/test/test:1> <http://purl.org/dc/terms/title> "Title of work" .
+<#{ActiveFedora.fedora.host}/test/test:1> <http://purl.org/dc/terms/publisher> "Penn State" .
+<#{ActiveFedora.fedora.host}/test/test:1> <http://xmlns.com/foaf/0.1/based_near> "New York, NY, US" .
+<#{ActiveFedora.fedora.host}/test/test:1> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://google.com/> .
+<#{ActiveFedora.fedora.host}/test/test:1/content> <http://purl.org/dc/terms/title> "Title of datastream" .
+EOF
+  end
+
   describe "an instance with content" do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
@@ -13,13 +24,13 @@ describe ActiveFedora::NtriplesRDFDatastream do
         property :related_url, predicate: ::RDF::RDFS.seeAlso
       end
       @subject = MyDatastream.new(ActiveFedora::Base.id_to_uri('/test:1/descMetadata'))
-      @subject.content = File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
+      @subject.content = remote_content
     end
     after do
       Object.send(:remove_const, :MyDatastream)
     end
     it "has a subject" do
-      expect(@subject.rdf_subject).to eq "http://localhost:8983/fedora/rest/test/test:1"
+      expect(@subject.rdf_subject).to eq "#{ActiveFedora.fedora.host}/test/test:1"
     end
     it "has mime_type" do
       expect(@subject.mime_type).to eq 'text/plain'
@@ -83,7 +94,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
   describe "an instance with a custom subject" do
     before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-        rdf_subject { |ds| "http://localhost:8983/fedora/rest/test/#{ds.id}/content" }
+        rdf_subject { |ds| "#{ActiveFedora.fedora.host}/test/#{ds.id}/content" }
         property :created, predicate: ::RDF::Vocab::DC.created
         property :title, predicate: ::RDF::Vocab::DC.title
         property :publisher, predicate: ::RDF::Vocab::DC.publisher
@@ -96,10 +107,6 @@ describe ActiveFedora::NtriplesRDFDatastream do
       allow(@subject).to receive(:remote_content).and_return remote_content
     end
 
-    let(:remote_content) do
-      File.new('spec/fixtures/mixed_rdf_descMetadata.nt').read
-    end
-
     after do
       Object.send(:remove_const, :MyDatastream)
     end
@@ -109,20 +116,22 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
 
     it "has a custom subject" do
-      expect(@subject.rdf_subject).to eq 'http://localhost:8983/fedora/rest/test/test:1/content'
+      expect(@subject.rdf_subject).to eq "#{ActiveFedora.fedora.host}/test/test:1/content"
     end
   end
 
   describe "a new instance" do
-    before(:each) do
+    before do
       class MyDatastream < ActiveFedora::NtriplesRDFDatastream
         property :publisher, predicate: ::RDF::Vocab::DC.publisher
       end
       @subject = MyDatastream.new
     end
-    after(:each) do
+
+    after do
       Object.send(:remove_const, :MyDatastream)
     end
+
     it "supports to_s method" do
       expect(@subject.publisher.to_s).to eq [].to_s
       @subject.publisher = "Bob"
@@ -183,6 +192,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
       doc = {}
       expect(@subject.to_solr(doc)).to eq doc
     end
+
     describe "with an actual object" do
       before(:each) do
         class Foo < ActiveFedora::Base
