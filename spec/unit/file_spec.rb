@@ -292,4 +292,109 @@ describe ActiveFedora::File do
       it { is_expected.to be_a(DateTime) }
     end
   end
+
+  describe "callbacks" do
+    before do
+      class MyFile < ActiveFedora::File
+        after_initialize :a_init
+        before_create :b_create
+        after_create :a_create
+        before_update :b_update
+        after_update :a_update
+        before_save :b_save
+        after_save :a_save
+        before_destroy :b_destroy
+        after_destroy :a_destroy
+
+        def a_init; end
+
+        def b_create; end
+
+        def a_create; end
+
+        def b_save; end
+
+        def a_save; end
+
+        def b_destroy; end
+
+        def a_destroy; end
+
+        def b_update; end
+
+        def a_update; end
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :MyFile)
+    end
+
+    subject { MyFile.new }
+
+    describe "initialize" do
+      specify {
+        expect_any_instance_of(MyFile).to receive(:a_init)
+        MyFile.new
+      }
+    end
+
+    describe "create" do
+      describe "when content is not nil" do
+        specify {
+          expect(subject).to receive(:b_create).once
+          expect(subject).to receive(:a_create).once
+          expect(subject).to receive(:b_save).once
+          expect(subject).to receive(:a_save).once
+          subject.content = "foo"
+          subject.save
+        }
+      end
+      describe "when content is nil" do
+        specify {
+          expect(subject).to receive(:b_create).once
+          expect(subject).not_to receive(:a_create)
+          expect(subject).to receive(:b_save).once
+          expect(subject).not_to receive(:a_save)
+          subject.save
+        }
+      end
+    end
+
+    describe "update" do
+      describe "when content has changed" do
+        specify {
+          subject.content = "foo"
+          subject.save
+          expect(subject).to receive(:b_save).once
+          expect(subject).to receive(:a_save).once
+          expect(subject).to receive(:b_update).once
+          expect(subject).to receive(:a_update).once
+          subject.content = "bar"
+          subject.save
+        }
+      end
+      describe "when content has not changed" do
+        specify {
+          subject.content = "foo"
+          subject.save
+          expect(subject).to receive(:b_save).once
+          expect(subject).not_to receive(:a_save)
+          expect(subject).to receive(:b_update).once
+          expect(subject).not_to receive(:a_update)
+          subject.save
+        }
+      end
+    end
+
+    describe "destroy" do
+      specify {
+        subject.content = "foo"
+        subject.save
+        expect(subject).to receive(:b_destroy).once
+        expect(subject).to receive(:a_destroy).once
+        subject.destroy
+      }
+    end
+  end
 end
