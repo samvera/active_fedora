@@ -153,7 +153,7 @@ module ActiveFedora
       # @param attribute_name [String] the name of the attribute to adapt
       # @return [Object] the adapted value
       def adapt_attribute_value(attrs, attribute_name)
-        reflection = self.class.reflect_on_property(attribute_name)
+        reflection = property_reflection(attribute_name)
         # if this isn't a property, copy value verbatim
         return attrs[attribute_name] unless reflection
         multiple = reflection.multiple?
@@ -167,6 +167,11 @@ module ActiveFedora
         else
           adapt_single_attribute_value(attrs[attribute_name], attribute_name)
         end
+      end
+
+      def property_reflection(attribute_name)
+        self.class.reflect_on_property(attribute_name)
+      rescue ActiveTriples::UndefinedPropertyError
       end
 
       def date_attribute?(attribute_name)
