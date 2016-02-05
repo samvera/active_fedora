@@ -14,3 +14,4 @@ bin
 .ruby-gemset
 gemfiles/*.gemfile.lock
 /fcrepo4-data
+/fcrepo4-test-data
