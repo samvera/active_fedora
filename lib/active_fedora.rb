@@ -21,7 +21,7 @@ module RDF
       ALTERNATIVE_FORMAT   = '%Y-%m-%dT%H:%M:%S'.freeze
       DOT                  = '.'.freeze
       EMPTY                = ''.freeze
-      TIMEZONE_FORMAT      = '%z'.freeze
+      TIMEZONE_FORMAT      = '%:z'.freeze
 
       def to_s
         @string ||= begin

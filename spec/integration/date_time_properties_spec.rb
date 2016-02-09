@@ -22,17 +22,28 @@ describe ActiveFedora::Base do
 
   let(:date) { DateTime.parse("2015-10-22T10:20:03.653+01:00") }
   let(:date2) { DateTime.parse("2015-10-22T15:34:20.323-11:00") }
-  subject { Foo.create(date: [date], single_date: date2, empty_date: '', integer: 1).reload }
 
   describe "saving and loading in Fedora" do
+    let(:object) { Foo.create!(date: [date], single_date: date2, empty_date: '', integer: 1).reload }
     it "loads the correct time" do
-      expect(subject.date.first).to eql date
-      expect(subject.single_date).to eql date2
+      expect(object.date.first).to eql date
+      expect(object.single_date).to eql date2
+    end
+  end
+
+  describe 'serializing' do
+    let(:object) { Foo.new(date: [date]) }
+    let(:triple) { object.resource.query(predicate: ::RDF::Vocab::DC.date).to_a.first }
+    subject { triple.to_s }
+    it 'time zone must have semicolin to be a cannonical XMLSchema#dateTime' do
+      expect(subject).to match(/\+01:00/)
     end
   end
 
   describe "saving and loading in Solr" do
-    let(:subject_solr) { subject.class.load_instance_from_solr(subject.id) }
+    let(:object) { Foo.create!(date: [date], single_date: date2, empty_date: '', integer: 1) }
+
+    let(:subject_solr) { object.class.load_instance_from_solr(object.id) }
     it "uses DateTime objects" do
       expect(subject_solr.date.first).to be_a DateTime
       expect(subject_solr.single_date).to be_a DateTime
