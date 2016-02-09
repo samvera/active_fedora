@@ -8,11 +8,8 @@ module ActiveFedora::Associations::Builder
     def validate_options
       super
       Deprecation.warn HasAndBelongsToMany, ":solr_page_size doesn't do anything anymore and will be removed in ActiveFedora 10" if options.key?(:solr_page_size)
-      if !options[:predicate]
-        raise "You must specify a predicate for #{name}"
-      elsif !options[:predicate].is_a?(RDF::URI)
-        raise ArgumentError, "Predicate must be a kind of RDF::URI"
-      end
+      raise "You must specify a predicate for #{name}" unless options[:predicate]
+      raise ArgumentError, "Predicate must be a kind of RDF::URI" unless options[:predicate].is_a?(RDF::URI)
     end
   end
 end
