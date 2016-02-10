@@ -82,7 +82,7 @@ namespace :active_fedora do
     # setting port: nil assigns a random port.
     solr_params = { port: nil, verbose: true, managed: true }
     fcrepo_params = { port: nil, verbose: true, managed: true,
-                      no_jms: true, fcrepo_home_dir: 'fcrepo4-test-data' }
+                      enable_jms: false, fcrepo_home_dir: 'fcrepo4-test-data' }
     SolrWrapper.wrap(solr_params) do |solr|
       ENV['SOLR_TEST_PORT'] = solr.port
       solr.with_collection(name: 'hydra-test', dir: File.join(File.expand_path("../..", File.dirname(__FILE__)), "solr", "config")) do
