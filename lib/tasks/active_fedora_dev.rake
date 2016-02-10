@@ -51,6 +51,34 @@ namespace :active_fedora do
   desc "CI build"
   task :ci do
     ENV['environment'] = "test"
+    with_test_server do
+      Rake::Task['active_fedora:rubocop'].invoke unless ENV['NO_RUBOCOP']
+      Rake::Task['active_fedora:coverage'].invoke
+    end
+  end
+
+  desc "Execute specs with coverage"
+  task :coverage do
+    # Put spec opts in a file named .rspec in root
+    ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
+    ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
+    Rake::Task["active_fedora:spec"].invoke
+  end
+
+  desc "Execute specs with coverage"
+  task :spec do
+    with_test_server do
+      Rake::Task["active_fedora:rspec"].invoke
+    end
+  end
+
+  # Starts a fedora server and a solr server on a random port and then
+  # yields the passed block
+  def with_test_server
+    return yield if ENV['SERVER_STARTED']
+
+    ENV['SERVER_STARTED'] = 'true'
+
     # setting port: nil assigns a random port.
     solr_params = { port: nil, verbose: true, managed: true }
     fcrepo_params = { port: nil, verbose: true, managed: true,
@@ -60,18 +88,10 @@ namespace :active_fedora do
       solr.with_collection(name: 'hydra-test', dir: File.join(File.expand_path("../..", File.dirname(__FILE__)), "solr", "config")) do
         FcrepoWrapper.wrap(fcrepo_params) do |fcrepo|
           ENV['FCREPO_TEST_PORT'] = fcrepo.port
-          Rake::Task['active_fedora:coverage'].invoke
+          yield
         end
       end
     end
+    ENV['SERVER_STARTED'] = 'false'
   end
-
-  desc "Execute specs with coverage"
-  task coverage: :rubocop do
-    # Put spec opts in a file named .rspec in root
-    ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
-    ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
-    Rake::Task["active_fedora:rspec"].invoke
-  end
-
 end
