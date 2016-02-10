@@ -2,3 +2,11 @@ test:
   user: fedoraAdmin
   password: fedoraAdmin
   url: http://testhost.com:8983/fedora
+test_ssl:
+  user: fedoraAdmin
+  password: fedoraAdmin
+  url: https://testhost.com:8443/fedora
+  ssl:
+    verify: false
+    ca_path: /path/to/certs
+  
