@@ -21,6 +21,10 @@ module ActiveFedora
       @config[:password]
     end
 
+    def ssl_options
+      @config[:ssl]
+    end
+
     def connection
       # The InboundRelationConnection does provide more data, useful for
       # things like ldp:IndirectContainers, but it's imposes a significant
@@ -58,7 +62,9 @@ module ActiveFedora
     end
 
     def authorized_connection
-      connection = Faraday.new(host)
+      options = {}
+      options[:ssl] = ssl_options if ssl_options
+      connection = Faraday.new(host, options)
       connection.basic_auth(user, password)
       connection
     end
