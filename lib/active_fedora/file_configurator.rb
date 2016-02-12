@@ -143,7 +143,8 @@ module ActiveFedora
 
       config = solr_yml.symbolize_keys
       raise "The #{ActiveFedora.environment.to_sym} environment settings were not found in the solr.yml config.  If you already have a solr.yml file defined, make sure it defines settings for the #{ActiveFedora.environment.to_sym} environment" unless config[ActiveFedora.environment.to_sym]
-      @solr_config = { url: solr_url(config[ActiveFedora.environment.to_sym].symbolize_keys) }
+      config = config[ActiveFedora.environment.to_sym].symbolize_keys
+      @solr_config = { url: solr_url(config) }.merge(config.slice(:update_path, :select_path))
     end
 
     # Given the solr_config that's been loaded for this environment,

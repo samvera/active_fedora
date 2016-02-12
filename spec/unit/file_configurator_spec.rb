@@ -230,6 +230,15 @@ describe ActiveFedora::FileConfigurator do
         expect(subject.load_solr_config).to eq(url: "http://mysolr:8081")
         expect(subject.solr_config).to eq(url: "http://mysolr:8081")
       end
+
+      it "includes update_path and select_path in solr_config" do
+        allow(subject).to receive(:load_solrizer_config)
+        expect(subject).to receive(:config_path).with(:solr).and_return("/path/to/solr.yml")
+        expect(subject).to receive(:load_fedora_config)
+        expect(IO).to receive(:read).with("/path/to/solr.yml").and_return("test:\n  url: http://mysolr:8080\n  update_path: update_test\n  select_path: select_test\n")
+        expect(subject.solr_config[:update_path]).to eq('update_test')
+        expect(subject.solr_config[:select_path]).to eq('select_test')
+      end
     end
 
     describe "load_configs" do

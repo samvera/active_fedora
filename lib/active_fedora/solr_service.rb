@@ -23,11 +23,15 @@ module ActiveFedora
         Thread.current[:solr_service] = nil
       end
 
+      def select_path
+        ActiveFedora.solr_config.fetch(:select_path, 'select')
+      end
+
       def instance
         # Register Solr
 
         unless Thread.current[:solr_service]
-          register(ActiveFedora.solr_config[:url])
+          register(ActiveFedora.solr_config[:url], ActiveFedora.solr_config)
         end
 
         raise SolrNotInitialized unless Thread.current[:solr_service]
@@ -104,7 +108,7 @@ module ActiveFedora
       def query(query, args = {})
         raw = args.delete(:raw)
         args = args.merge(q: query, qt: 'standard')
-        result = SolrService.instance.conn.get('select', params: args)
+        result = SolrService.instance.conn.get(select_path, params: args)
         return result if raw
         result['response']['docs']
       end
