@@ -33,6 +33,13 @@ describe ActiveFedora::SolrService do
     expect(described_class).to receive(:register)
     expect(proc { described_class.instance }).to raise_error(ActiveFedora::SolrNotInitialized)
   end
+  it "passes on solr_config when initializing the service" do
+    allow(RSolr).to receive(:connect)
+    expect(Thread.current[:solr_service]).to be_nil
+    allow(ActiveFedora).to receive(:solr_config).and_return(url: 'http://fubar', update_path: 'update_test')
+    expect(described_class).to receive(:register).with('http://fubar', hash_including(update_path: 'update_test')).and_call_original
+    described_class.instance
+  end
 
   describe '#construct_query_for_pids' do
     it "generates a useable solr query from an array of Fedora ids" do
@@ -46,6 +53,14 @@ describe ActiveFedora::SolrService do
       mock_conn = double("Connection")
       stub_result = double("Result")
       expect(mock_conn).to receive(:get).with('select', params: { q: 'querytext', qt: 'standard' }).and_return(stub_result)
+      allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
+      expect(described_class.query('querytext', raw: true)).to eq stub_result
+    end
+    it "uses select_path" do
+      mock_conn = double("Connection")
+      stub_result = double("Result")
+      expect(mock_conn).to receive(:get).with('select_test', params: { q: 'querytext', qt: 'standard' }).and_return(stub_result)
+      expect(described_class).to receive(:select_path).and_return('select_test')
       allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
       expect(described_class.query('querytext', raw: true)).to eq stub_result
     end
@@ -64,6 +79,16 @@ describe ActiveFedora::SolrService do
       expect(mock_conn).to receive(:get).with('select', params: { rows: 0, q: 'querytext', qt: 'standard', fq: 'filter' }).and_return(stub_result)
       allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
       expect(described_class.count('querytext', fq: 'filter', rows: 10)).to eq 7
+    end
+  end
+  describe ".select_path" do
+    it "gets :select_path from solr_config" do
+      expect(ActiveFedora).to receive(:solr_config).and_return(select_path: 'select_test')
+      expect(described_class.select_path).to eq 'select_test'
+    end
+    it "uses 'select' as default" do
+      expect(ActiveFedora).to receive(:solr_config).and_return({})
+      expect(described_class.select_path).to eq 'select'
     end
   end
 

@@ -6,6 +6,14 @@ describe ActiveFedora::FinderMethods do
       def self.delegated_attributes
         {}
       end
+
+      def self.solr_query_handler
+        'standard'
+      end
+
+      def self.default_sort_params
+        ["system_create_dtsi asc"]
+      end
     end
   end
 
@@ -45,6 +53,32 @@ describe ActiveFedora::FinderMethods do
       let(:value) { ['one', 'four'] }
       it { is_expected.to eq "_query_:\"{!raw f=library_id}one\" AND " \
                              "_query_:\"{!raw f=library_id}four\"" }
+    end
+  end
+
+  describe "#find_in_batches" do
+    let(:docs) { double('docs', has_next?: false) }
+    let(:select_handler) { 'select' }
+    let(:connection) { double('conn') }
+    before do
+      expect(finder).to receive(:create_query).with('age_t' => '21').and_return('dummy query')
+      allow(ActiveFedora::SolrService.instance).to receive(:conn).and_return(connection)
+      allow(ActiveFedora::SolrService).to receive(:select_path).and_return(select_handler)
+      expect(connection).to receive(:paginate) \
+        .with(1, 1000, select_handler, params: hash_including(other_opt: 'test')) \
+        .and_return('response' => { 'docs' => docs })
+    end
+    it "yields the docs" do
+      expect { |b|
+        finder.find_in_batches({ 'age_t' => '21' }, { other_opt: 'test' }, &b)
+      }.to yield_with_args(docs)
+    end
+
+    context "with custom select handler" do
+      let(:select_handler) { 'select_test' }
+      it "uses the custom select handler" do
+        finder.find_in_batches({ 'age_t' => '21' }, other_opt: 'test') do end
+      end
     end
   end
 end

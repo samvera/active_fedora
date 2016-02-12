@@ -151,11 +151,12 @@ module ActiveFedora
       opts[:sort] = @klass.default_sort_params unless opts[:sort].present?
 
       batch_size = opts.delete(:batch_size) || 1000
+      select_path = ActiveFedora::SolrService.select_path
 
       counter = 0
       loop do
         counter += 1
-        response = ActiveFedora::SolrService.instance.conn.paginate counter, batch_size, "select", params: opts
+        response = ActiveFedora::SolrService.instance.conn.paginate counter, batch_size, select_path, params: opts
         docs = response["response"]["docs"]
         yield docs
         break unless docs.has_next?
