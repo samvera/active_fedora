@@ -1,3 +1,32 @@
+v9.9.0
+2016-02-15: Update development configs to use environment variables [Justin
+Coyne]
+
+2016-02-15: Pin to a version of rubocop-rspec that doesn't complain about our
+code [Justin Coyne]
+
+2016-02-15: Generalize the with_server method [Justin Coyne]
+
+2016-02-12: Use local configurations for solr [Justin Coyne]
+
+2016-02-12: Share the test server method with downstream apps [Justin Coyne]
+
+2016-02-12: Add support for customizable Solr request handlers. [Olli Lyytinen]
+
+2016-02-10: Adds SSL options to config (closes #985) [David Chandek-Stark]
+
+2016-02-09: XMLSchema#dateTime requires a colon in the timezone [Justin Coyne]
+
+2016-02-09: Add a rake task for running spec without rubocop [Justin Coyne]
+
+2016-02-09: Use the correct flag to fcrepo_wrapper [Justin Coyne]
+
+2016-02-09: Fixes for rubocop 0.37.1 [Justin Coyne]
+
+2016-02-08: Don't default facet.limit [Justin Coyne]
+
+2016-02-05: Start solr and fedora on a random open port [Justin Coyne]
+
 v9.8.0
 2016-02-04: Remove unused files [Justin Coyne]
 

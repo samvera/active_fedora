@@ -1,3 +1,3 @@
 module ActiveFedora
-  VERSION = "9.8.2".freeze
+  VERSION = "9.9.0".freeze
 end
