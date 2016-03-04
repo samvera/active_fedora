@@ -204,10 +204,8 @@ Style/FileName:
     - 'spec/samples/hydra-mods_article_datastream.rb'
 
 Style/ZeroLengthPredicate:
-  Enabled: false # https://github.com/bbatsov/rubocop/issues/2782
-
-Performance/RedundantMerge:
-  Enabled: false # https://github.com/bbatsov/rubocop/issues/2781
+  Exclude:
+    - 'lib/active_fedora/file/attributes.rb'
 
 Rails:
   Enabled: true
@@ -220,6 +218,9 @@ Rails/Date:
   Enabled: false
 
 Rails/TimeZone:
+  Enabled: false
+
+RSpec/AnyInstance:
   Enabled: false
 
 RSpec/ExampleWording:
@@ -244,3 +245,6 @@ RSpec/DescribeClass:
 RSpec/DescribedClass:
   Exclude:
     - 'spec/unit/finder_methods_spec.rb'
+
+RSpec/NotToNot:
+  Enabled: false

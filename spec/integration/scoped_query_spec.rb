@@ -39,7 +39,7 @@ describe ActiveFedora::Querying do
         result = ModelIntegrationSpec::Basic.all.to_a
         expect(result).to be_instance_of(Array)
         # this test is meaningless if the array length is zero
-        expect(result.length > 0).to be true
+        expect(result.length).to be > 0
         expect(result).to all(be_an(ModelIntegrationSpec::Basic))
       end
     end
