@@ -1,3 +1,8 @@
+v9.9.1
+2016-03-05: Restore autocommit in the update handler [Justin Coyne]
+
+2016-03-04: Update rubocop [Chris Beer]
+
 v9.9.0
 2016-02-15: Update development configs to use environment variables [Justin
 Coyne]
