@@ -49,7 +49,7 @@ module ActiveFedora
     deprecation_deprecate :clear_datastreams
 
     def contains_assertions
-      resource.query(subject: resource, predicate: Ldp.contains).objects.map(&:to_s)
+      resource.query(subject: resource, predicate: ::RDF::Vocab::LDP.contains).objects.map(&:to_s)
     end
 
     def load_attached_files

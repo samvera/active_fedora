@@ -25,10 +25,14 @@ module ActiveFedora
     # Returns an array of ActiveFedora::VersionsGraph::ResourceVersion objects.
     # Excludes auto-snapshot versions from Fedora.
     def versions(reload = false)
+      response = versions_request
+
+      return ActiveFedora::VersionsGraph.new unless response
+
       if reload
-        @versions = ActiveFedora::VersionsGraph.new << ::RDF::Reader.for(:ttl).new(versions_request)
+        @versions = ActiveFedora::VersionsGraph.new << versions_request.reader
       else
-        @versions ||= ActiveFedora::VersionsGraph.new << ::RDF::Reader.for(:ttl).new(versions_request)
+        @versions ||= ActiveFedora::VersionsGraph.new << versions_request.reader
       end
     end
 
@@ -57,11 +61,8 @@ module ActiveFedora
     private
 
       def versions_request
-        return '' unless has_versions?
-        resp = ActiveFedora.fedora.connection.get(versions_uri)
-        raise ActiveFedoraError, status_message(resp) unless resp.success?
-        raise ActiveFedoraError, bad_headers(resp) unless resp.headers['content-type'] == 'text/turtle'
-        resp.body
+        return false unless has_versions?
+        ActiveFedora.fedora.connection.get(versions_uri)
       end
 
       def versions_uri

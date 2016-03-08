@@ -104,7 +104,7 @@ module ActiveFedora
           resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
           # GET could be slow if it's a big resource, we're using HEAD to avoid this problem,
           # but this causes more requests to Fedora.
-          return [] unless Ldp::Response.rdf_source?(resource.head)
+          return [] unless resource.head.rdf_source?
           immediate_descendant_uris = resource.graph.query(predicate: ::RDF::Vocab::LDP.contains).map { |descendant| descendant.object.to_s }
           all_descendants_uris = [uri]
           immediate_descendant_uris.each do |descendant_uri|

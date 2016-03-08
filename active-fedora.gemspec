@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.license = "APACHE2"
   s.required_ruby_version     = '>= 1.9.3'
 
-  s.add_dependency 'rsolr', "~> 1.0.10"
+  s.add_dependency 'rsolr', '~> 1.0', '>= 1.0.10'
   s.add_dependency 'om', '~> 3.1'
   s.add_dependency 'nom-xml', '>= 0.5.1'
   s.add_dependency "activesupport", '>= 4.1.0'
@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency "rdf-rdfxml", '~> 1.1'
   s.add_dependency "linkeddata"
   s.add_dependency "deprecation"
-  s.add_dependency "ldp", '~> 0.4.0'
+  s.add_dependency "ldp", '~> 0.5.0'
 
   s.add_development_dependency "rdoc"
   s.add_development_dependency "yard"
@@ -32,7 +32,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "rspec-its"
   s.add_development_dependency "equivalent-xml"
-  s.add_development_dependency "simplecov", '~> 0.7.1'
+  s.add_development_dependency "simplecov", '~> 0.8'
   s.add_development_dependency "rubocop", '~> 0.37'
   s.add_development_dependency "rubocop-rspec", '~> 1.4'
 
