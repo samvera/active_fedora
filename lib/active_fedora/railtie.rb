@@ -8,7 +8,10 @@ module ActiveFedora
     end
 
     initializer "active_fedora.logger" do
-      ActiveSupport.on_load(:active_fedora) { self.logger ||= ::Rails.logger }
+      ActiveSupport.on_load(:active_fedora) do
+        self.logger ||= ::Rails.logger
+        Solrizer.logger ||= logger
+      end
     end
 
     generators do
