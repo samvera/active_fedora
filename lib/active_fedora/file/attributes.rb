@@ -21,7 +21,7 @@ module ActiveFedora::File::Attributes
   end
 
   def persisted_size
-    ldp_source.head.headers['Content-Length'].to_i unless new_record?
+    ldp_source.head.content_length unless new_record?
   end
 
   def dirty_size
@@ -60,7 +60,7 @@ module ActiveFedora::File::Attributes
     end
 
     def links
-      @links ||= Ldp::Response.links(ldp_source.head)
+      @links ||= ldp_source.head.links
     end
 
     def default_mime_type
@@ -69,12 +69,11 @@ module ActiveFedora::File::Attributes
 
     def fetch_mime_type
       return default_mime_type if new_record?
-      ldp_source.head.headers['Content-Type']
+      ldp_source.head.content_type
     end
 
     def fetch_original_name
       return if new_record?
-      m = ldp_source.head.headers['Content-Disposition'].match(/filename="(?<filename>[^"]*)";/)
-      URI.decode(m[:filename])
+      ldp_source.head.content_disposition_filename
     end
 end

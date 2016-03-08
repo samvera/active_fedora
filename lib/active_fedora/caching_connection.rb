@@ -1,6 +1,6 @@
 module ActiveFedora
   class CachingConnection < Ldp::Client
-    def initialize(host)
+    def initialize(host, options = {})
       super
       @cache = {}
       @cache_enabled = false
