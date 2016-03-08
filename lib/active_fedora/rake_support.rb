@@ -8,11 +8,16 @@ def with_server(environment, fcrepo_port: nil, solr_port: nil)
   return yield if ENV["#{environment}_SERVER_STARTED"]
 
   ENV["#{environment}_SERVER_STARTED"] = 'true'
+  fcrepo_home = ENV.fetch('FCREPO_HOME', "fcrepo4-#{environment}-data")
 
   # setting port: nil assigns a random port.
   solr_params = { port: solr_port, verbose: true, managed: true }
   fcrepo_params = { port: fcrepo_port, verbose: true, managed: true,
-                    enable_jms: false, fcrepo_home_dir: "fcrepo4-#{environment}-data" }
+                    enable_jms: false,
+                    fcrepo_home_dir: fcrepo_home }
+
+  fcrepo_params[:download_dir] = ENV['FCREPO_DOWNLOAD_DIR'] if ENV.key? 'FCREPO_DOWNLOAD_DIR'
+
   SolrWrapper.wrap(solr_params) do |solr|
     ENV["SOLR_#{environment.upcase}_PORT"] = solr.port
     solr_config_path = File.join('solr', 'config')
