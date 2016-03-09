@@ -53,7 +53,7 @@ module ActiveFedora
         ActiveFedora::Base.logger.warn "'#{model_value}' is not a real class" if ActiveFedora::Base.logger
         return nil
       end
-      ActiveFedora.class_from_string(model_value)
+      ActiveFedora::Model.class_from_string(model_value)
     end
 
     def self.class_exists?(class_name)

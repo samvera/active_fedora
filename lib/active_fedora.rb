@@ -68,6 +68,7 @@ module ActiveFedora #:nodoc:
       autoload :OmAttribute
       autoload :RdfDatastreamAttribute
     end
+    autoload :DefaultModelMapper
     autoload :Fedora
     autoload :FedoraAttributes
     autoload :File
@@ -250,7 +251,7 @@ module ActiveFedora #:nodoc:
     end
 
     def model_mapper
-      Model
+      ActiveFedora::DefaultModelMapper
     end
   end
 
