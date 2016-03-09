@@ -29,20 +29,13 @@ module ActiveFedora
     # Returns the best singular class for the solr object
     def self.class_from_solr_document(hit, opts = {})
       # Set the default starting point to the class specified, if available.
-      best_model_match = Model.from_class_uri(opts[:class]) unless opts[:class].nil?
-      Array(hit[HAS_MODEL_SOLR_FIELD]).each do |value|
-        model_value = Model.from_class_uri(value)
-        next unless model_value
+      default_model = Model.from_class_uri(opts[:class]) unless opts[:class].nil?
 
-        # Set as the first model in case opts[:class] was nil
-        best_model_match ||= model_value
-
-        # If there is an inheritance structure, use the most specific case.
-        best_model_match = model_value if best_model_match > model_value
-      end
+      models = Array(hit[HAS_MODEL_SOLR_FIELD])
+      best_model_match = Model.best_class_from_uris(models, default: default_model)
 
       ActiveFedora::Base.logger.warn "Could not find a model for #{hit['id']}, defaulting to ActiveFedora::Base" if ActiveFedora::Base.logger && !best_model_match
-      best_model_match || ActiveFedora::Base
+      best_model_match
     end
 
     HAS_MODEL_SOLR_FIELD = SolrQueryBuilder.solr_name("has_model", :symbol).freeze

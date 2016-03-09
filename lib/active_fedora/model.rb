@@ -5,6 +5,21 @@ module ActiveFedora
   # This module mixes various methods into the including class,
   # much in the way ActiveRecord does.
   module Model
+    def self.best_class_from_uris(uris, default: nil)
+      best_model_match = default
+
+      uris.each do |uri|
+        model_value = from_class_uri(uri)
+        next unless model_value
+        best_model_match ||= model_value
+
+        # If there is an inheritance structure, use the most specific case.
+        best_model_match = model_value if best_model_match > model_value
+      end
+
+      best_model_match || ActiveFedora::Base
+    end
+
     # Convenience method for getting class constant based on a string
     # @example
     #   ActiveFedora::Model.class_from_string("Om")
