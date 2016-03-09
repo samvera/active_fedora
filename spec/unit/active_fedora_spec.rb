@@ -138,7 +138,7 @@ describe ActiveFedora do
     it "raises a NameError if the class isn't found" do
       expect {
         described_class.class_from_string("FooClass", ParentClass::OtherSiblingClass)
-      }.to raise_error NameError, "uninitialized constant FooClass"
+      }.to raise_error NameError, /uninitialized constant (Object::)?FooClass/
     end
   end
 end
