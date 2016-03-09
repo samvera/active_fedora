@@ -3,7 +3,6 @@ require 'spec_helper'
 require 'active_fedora'
 require 'active_fedora/model'
 require "rexml/document"
-include ActiveFedora::Model
 
 describe 'bugs' do
   before do
