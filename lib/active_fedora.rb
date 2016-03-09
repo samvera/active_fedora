@@ -88,6 +88,7 @@ module ActiveFedora #:nodoc:
     autoload :LdpResourceService
     autoload :LoadableFromJson
     autoload :Model
+    autoload :ModelClassifier
     autoload :NestedAttributes
     autoload :NomDatastream
     autoload :NullRelation
@@ -247,11 +248,11 @@ module ActiveFedora #:nodoc:
     #   ActiveFedora.class_from_string("TermProxy", ActiveFedora::RdfNode)
     #   => ActiveFedora::RdfNode::TermProxy
     def class_from_string(*args)
-      model_mapper.class_from_string(*args)
+      ActiveFedora::ModelClassifier.class_from_string(*args)
     end
 
     def model_mapper
-      ActiveFedora::DefaultModelMapper
+      ActiveFedora::DefaultModelMapper.new
     end
   end
 

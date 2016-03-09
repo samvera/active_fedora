@@ -19,12 +19,12 @@ module ActiveFedora
 
     # Returns all possible classes for the solr object
     def self.classes_from_solr_document(hit, _opts = {})
-      ActiveFedora.model_mapper.from_solr_document(hit).models
+      ActiveFedora.model_mapper.classifier(hit).models
     end
 
     # Returns the best singular class for the solr object
     def self.class_from_solr_document(hit, opts = {})
-      best_model_match = ActiveFedora.model_mapper.from_solr_document(hit).best_model(opts)
+      best_model_match = ActiveFedora.model_mapper.classifier(hit).best_model(opts)
       ActiveFedora::Base.logger.warn "Could not find a model for #{hit['id']}, defaulting to ActiveFedora::Base" if ActiveFedora::Base.logger && best_model_match == ActiveFedora::Base
       best_model_match
     end

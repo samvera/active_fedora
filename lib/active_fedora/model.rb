@@ -5,21 +5,6 @@ module ActiveFedora
   # This module mixes various methods into the including class,
   # much in the way ActiveRecord does.
   module Model
-    def self.best_class_from_uris(uris, default: nil)
-      best_model_match = default
-
-      uris.each do |uri|
-        model_value = from_class_uri(uri)
-        next unless model_value
-        best_model_match ||= model_value
-
-        # If there is an inheritance structure, use the most specific case.
-        best_model_match = model_value if best_model_match > model_value
-      end
-
-      best_model_match || ActiveFedora::Base
-    end
-
     # Convenience method for getting class constant based on a string
     # @example
     #   ActiveFedora::Model.class_from_string("Om")
@@ -29,19 +14,8 @@ module ActiveFedora
     # @example Search within ActiveFedora::RdfNode for a class called "TermProxy"
     #   ActiveFedora::Model.class_from_string("TermProxy", ActiveFedora::RdfNode)
     #   => ActiveFedora::RdfNode::TermProxy
-    def self.class_from_string(full_class_name, container_class = Kernel)
-      container_class = container_class.name if container_class.is_a? Module
-      container_parts = container_class.split('::')
-      (container_parts + full_class_name.split('::')).flatten.inject(Kernel) do |mod, class_name|
-        if mod == Kernel
-          Object.const_get(class_name)
-        elsif mod.const_defined? class_name.to_sym
-          mod.const_get(class_name)
-        else
-          container_parts.pop
-          class_from_string(class_name, container_parts.join('::'))
-        end
-      end
+    def self.class_from_string(*args)
+      ActiveFedora::ModelClassifier.class_from_string(*args)
     end
 
     # Takes a Fedora URI for a cModel, and returns a
@@ -49,20 +23,7 @@ module ActiveFedora
     # This method should reverse ClassMethods#to_class_uri
     # @return [Class, False] the class of the model or false, if it does not exist
     def self.from_class_uri(model_value)
-      unless class_exists?(model_value)
-        ActiveFedora::Base.logger.warn "'#{model_value}' is not a real class" if ActiveFedora::Base.logger
-        return nil
-      end
-      ActiveFedora::Model.class_from_string(model_value)
+      ActiveFedora::ModelClassifier.new(Array(model_value)).best_model
     end
-
-    def self.class_exists?(class_name)
-      return false if class_name.empty?
-      klass = class_name.constantize
-      return klass.is_a?(Class)
-    rescue NameError
-      return false
-    end
-    private_class_method :class_exists?
   end
 end

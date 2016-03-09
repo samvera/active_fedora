@@ -193,7 +193,6 @@ module ActiveFedora
         if @klass == ActiveFedora::Base && cast == false
           ActiveFedora::Base
         else
-          # The true class may be a subclass of @klass, so always use from_class_uri
           resource_class = has_model_value(resource)
           unless equivalent_class?(resource_class)
             raise ActiveFedora::ActiveFedoraError, "Model mismatch. Expected #{@klass}. Got: #{resource_class}"
@@ -203,7 +202,7 @@ module ActiveFedora
       end
 
       def has_model_value(resource)
-        ActiveFedora.model_mapper.from_resource(resource).best_model
+        ActiveFedora.model_mapper.classifier(resource).best_model
       end
 
       def equivalent_class?(other_class)
