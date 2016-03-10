@@ -15,6 +15,16 @@ module ActiveFedora
       autoload :Map
     end
 
+    included do
+      # Because the previous method of setting indexer was to override
+      # the class method, we must ensure that we aren't using the instance
+      # reader so that the old method still works.
+      class_attribute :indexer, instance_accessor: false
+
+      # This is the default indexer class to use for this model.
+      self.indexer = IndexingService
+    end
+
     # Return a Hash representation of this object where keys in the hash are appropriate Solr field names.
     # @param [Hash] _solr_doc (optional) Hash to insert the fields into
     # @param [Hash] _opts (optional)
@@ -70,10 +80,6 @@ module ActiveFedora
                             else
                               ActiveFedora::Indexing::Map.new
                             end
-        end
-
-        def indexer
-          IndexingService
         end
 
         def reindex_everything
