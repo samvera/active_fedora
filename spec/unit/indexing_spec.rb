@@ -1,6 +1,20 @@
 require 'spec_helper'
 
 describe ActiveFedora::Indexing do
+  describe '.indexer' do
+    let(:indexing_class) { Class.new }
+    let(:klass) { Class.new }
+    before do
+      klass.include described_class
+    end
+
+    it "is settable as a class attribute" do
+      expect(klass.indexer).to eq ActiveFedora::IndexingService
+      klass.indexer = indexing_class
+      expect(klass.indexer).to eq indexing_class
+    end
+  end
+
   context "internal methods" do
     before :all do
       class SpecNode
