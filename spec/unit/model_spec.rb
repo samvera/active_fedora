@@ -27,13 +27,4 @@ describe ActiveFedora::Model do
       it { should eq 'search' }
     end
   end
-
-  describe ".from_class_uri" do
-    subject { described_class.from_class_uri(uri) }
-    context "a blank string" do
-      before { expect(ActiveFedora::Base.logger).to receive(:warn) }
-      let(:uri) { '' }
-      it { should be_nil }
-    end
-  end
 end

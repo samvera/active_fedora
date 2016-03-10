@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::QueryResultBuilder do
   describe "reify solr results" do
     before(:all) do
-      class AudioRecord
+      class AudioRecord < ActiveFedora::Base
         attr_accessor :id
         def self.connection_for_id(_id)
         end

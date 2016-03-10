@@ -193,8 +193,7 @@ module ActiveFedora
         if @klass == ActiveFedora::Base && cast == false
           ActiveFedora::Base
         else
-          # The true class may be a subclass of @klass, so always use from_class_uri
-          resource_class = Model.from_class_uri(has_model_value(resource)) || ActiveFedora::Base
+          resource_class = has_model_value(resource)
           unless equivalent_class?(resource_class)
             raise ActiveFedora::ActiveFedoraError, "Model mismatch. Expected #{@klass}. Got: #{resource_class}"
           end
@@ -203,18 +202,7 @@ module ActiveFedora
       end
 
       def has_model_value(resource)
-        best_model_match = nil
-
-        resource.graph.query([nil, ActiveFedora::RDF::Fcrepo::Model.hasModel, nil]).each do |rg|
-          model_value = Model.from_class_uri(rg.object.to_s)
-          next unless model_value
-          best_model_match ||= model_value
-
-          # If there is an inheritance structure, use the most specific case.
-          best_model_match = model_value if best_model_match > model_value
-        end
-
-        best_model_match.to_s
+        ActiveFedora.model_mapper.classifier(resource).best_model
       end
 
       def equivalent_class?(other_class)

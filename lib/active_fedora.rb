@@ -68,6 +68,7 @@ module ActiveFedora #:nodoc:
       autoload :OmAttribute
       autoload :RdfDatastreamAttribute
     end
+    autoload :DefaultModelMapper
     autoload :Fedora
     autoload :FedoraAttributes
     autoload :File
@@ -87,6 +88,7 @@ module ActiveFedora #:nodoc:
     autoload :LdpResourceService
     autoload :LoadableFromJson
     autoload :Model
+    autoload :ModelClassifier
     autoload :NestedAttributes
     autoload :NomDatastream
     autoload :NullRelation
@@ -245,19 +247,12 @@ module ActiveFedora #:nodoc:
     # @example Search within ActiveFedora::RdfNode for a class called "TermProxy"
     #   ActiveFedora.class_from_string("TermProxy", ActiveFedora::RdfNode)
     #   => ActiveFedora::RdfNode::TermProxy
-    def class_from_string(full_class_name, container_class = Kernel)
-      container_class = container_class.name if container_class.is_a? Module
-      container_parts = container_class.split('::')
-      (container_parts + full_class_name.split('::')).flatten.inject(Kernel) do |mod, class_name|
-        if mod == Kernel
-          Object.const_get(class_name)
-        elsif mod.const_defined? class_name.to_sym
-          mod.const_get(class_name)
-        else
-          container_parts.pop
-          class_from_string(class_name, container_parts.join('::'))
-        end
-      end
+    def class_from_string(*args)
+      ActiveFedora::ModelClassifier.class_from_string(*args)
+    end
+
+    def model_mapper
+      ActiveFedora::DefaultModelMapper.new
     end
   end
 
