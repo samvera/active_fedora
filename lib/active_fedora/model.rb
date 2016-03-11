@@ -1,5 +1,3 @@
-SOLR_DOCUMENT_ID = "id".freeze unless defined?(SOLR_DOCUMENT_ID)
-
 module ActiveFedora
   # = ActiveFedora
   # This module mixes various methods into the including class,

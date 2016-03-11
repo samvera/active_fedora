@@ -47,13 +47,13 @@ module ActiveFedora
       # Determines whether a create operation causes a solr index of this object by default.
       # Override this if you need different behavior.
       def create_needs_index?
-        ENABLE_SOLR_UPDATES
+        ActiveFedora.enable_solr_updates?
       end
 
       # Determines whether an update operation causes a solr index of this object by default.
       # Override this if you need different behavior
       def update_needs_index?
-        ENABLE_SOLR_UPDATES
+        ActiveFedora.enable_solr_updates?
       end
 
     private

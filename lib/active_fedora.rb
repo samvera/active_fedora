@@ -9,9 +9,6 @@ require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/core_ext/hash/except'
 require 'active_triples'
 
-SOLR_DOCUMENT_ID = Solrizer.default_field_mapper.id_field unless defined?(SOLR_DOCUMENT_ID)
-ENABLE_SOLR_UPDATES = true unless defined?(ENABLE_SOLR_UPDATES)
-
 # Monkey patching RDF::Literal::DateTime to support fractional seconds.
 # See https://github.com/projecthydra/active_fedora/issues/497
 # Also monkey patches in a fix for timezones to be stored properly.
@@ -257,6 +254,24 @@ module ActiveFedora #:nodoc:
 
     def index_field_mapper
       Solrizer.default_field_mapper
+    end
+
+    def id_field
+      if defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?
+        SOLR_DOCUMENT_ID
+      elsif defined?(Solrizer)
+        Solrizer.default_field_mapper.id_field
+      else
+        'id'.freeze
+      end
+    end
+
+    def enable_solr_updates?
+      if defined?(ENABLE_SOLR_UPDATES)
+        ENABLE_SOLR_UPDATES
+      else
+        true
+      end
     end
   end
 
