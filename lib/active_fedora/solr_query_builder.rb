@@ -21,7 +21,7 @@ module ActiveFedora
       end
 
       def solr_name(*args)
-        Solrizer.default_field_mapper.solr_name(*args)
+        ActiveFedora.index_field_mapper.solr_name(*args)
       end
 
       # Create a query with a clause for each key, value

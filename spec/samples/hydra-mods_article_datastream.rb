@@ -508,8 +508,8 @@ module Hydra
     def to_solr(solr_doc = {}, opts = {})
       solr_doc = super
 
-      ::Solrizer::Extractor.insert_solr_field_value(solr_doc, Solrizer.default_field_mapper.solr_name('object_type', :facetable), "Article")
-      ::Solrizer::Extractor.insert_solr_field_value(solr_doc, Solrizer.default_field_mapper.solr_name('mods_journal_title_info', :facetable), "Unknown") if solr_doc["mods_journal_title_info_facet"].nil?
+      ::Solrizer::Extractor.insert_solr_field_value(solr_doc, ActiveFedora.index_field_mapper.solr_name('object_type', :facetable), "Article")
+      ::Solrizer::Extractor.insert_solr_field_value(solr_doc, ActiveFedora.index_field_mapper.solr_name('mods_journal_title_info', :facetable), "Unknown") if solr_doc["mods_journal_title_info_facet"].nil?
 
       solr_doc
     end

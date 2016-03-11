@@ -254,6 +254,10 @@ module ActiveFedora #:nodoc:
     def model_mapper
       ActiveFedora::DefaultModelMapper.new
     end
+
+    def index_field_mapper
+      Solrizer.default_field_mapper
+    end
   end
 
   self.configurator ||= ActiveFedora::FileConfigurator.new
