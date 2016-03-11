@@ -49,7 +49,7 @@ module ActiveFedora
 
       def validate_solr_doc_and_id!(document)
         return true if document.nil?
-        solr_id = document[SOLR_DOCUMENT_ID]
+        solr_id = document[ActiveFedora.id_field]
         return if id == solr_id
         raise ActiveFedora::FedoraSolrMismatchError, id, solr_id
       end

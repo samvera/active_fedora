@@ -118,12 +118,12 @@ module ActiveFedora
     # @option opts [Boolean] :cast (true) when true, examine the model and cast it to the first known cModel
     def find_each(conditions = {}, opts = {})
       cast = opts.delete(:cast)
-      find_in_batches(conditions, opts.merge(fl: SOLR_DOCUMENT_ID)) do |group|
+      find_in_batches(conditions, opts.merge(fl: ActiveFedora.id_field)) do |group|
         group.each do |hit|
           begin
-            yield(load_from_fedora(hit[SOLR_DOCUMENT_ID], cast))
+            yield(load_from_fedora(hit[ActiveFedora.id_field], cast))
           rescue Ldp::Gone
-            ActiveFedora::Base.logger.error "Although #{hit[SOLR_DOCUMENT_ID]} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch." if ActiveFedora::Base.logger
+            ActiveFedora::Base.logger.error "Although #{hit[ActiveFedora.id_field]} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch." if ActiveFedora::Base.logger
           end
         end
       end
@@ -174,7 +174,7 @@ module ActiveFedora
       if where_values.empty?
         load_from_fedora(id, cast)
       else
-        conditions = where_values + [ActiveFedora::SolrQueryBuilder.raw_query(SOLR_DOCUMENT_ID, id)]
+        conditions = where_values + [ActiveFedora::SolrQueryBuilder.raw_query(ActiveFedora.id_field, id)]
         query = conditions.join(" AND ".freeze)
         to_enum(:find_each, query, {}).to_a.first
       end
@@ -266,7 +266,7 @@ module ActiveFedora
           # TODO: Check to see if `key' is a possible solr field for this class, if it isn't try :searchable instead
           ActiveFedora::SolrQueryBuilder.solr_name(key, :stored_searchable, type: :string)
         elsif key == :id
-          SOLR_DOCUMENT_ID
+          ActiveFedora.id_field
         else
           key.to_s
         end

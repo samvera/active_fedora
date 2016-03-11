@@ -14,7 +14,7 @@ module ActiveFedora
 
     def self.reify_solr_result(hit, _opts = {})
       klass = class_from_solr_document(hit)
-      klass.find(hit[SOLR_DOCUMENT_ID], cast: true)
+      klass.find(hit[ActiveFedora.id_field], cast: true)
     end
 
     # Returns all possible classes for the solr object

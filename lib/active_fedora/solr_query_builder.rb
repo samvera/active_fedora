@@ -10,7 +10,7 @@ module ActiveFedora
       def construct_query_for_ids(id_array)
         ids = id_array.reject(&:blank?)
         return "id:NEVER_USE_THIS_ID" if ids.empty?
-        "{!terms f=#{SOLR_DOCUMENT_ID}}#{ids.join(',')}"
+        "{!terms f=#{ActiveFedora.id_field}}#{ids.join(',')}"
       end
 
       # Create a raw query clause suitable for sending to solr as an fq element
@@ -21,7 +21,7 @@ module ActiveFedora
       end
 
       def solr_name(*args)
-        Solrizer.default_field_mapper.solr_name(*args)
+        ActiveFedora.index_field_mapper.solr_name(*args)
       end
 
       # Create a query with a clause for each key, value
