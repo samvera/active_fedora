@@ -1,15 +1,15 @@
 module ActiveFedora
   module QueryResultBuilder
     def self.lazy_reify_solr_results(solr_results, opts = {})
-      Enumerator.new do |yielder|
-        solr_results.each do |hit|
-          yielder.yield(reify_solr_result(hit, opts))
-        end
+      return to_enum(:lazy_reify_solr_results, solr_results, opts) unless block_given?
+
+      solr_results.each do |hit|
+        yield reify_solr_result(hit, opts)
       end
     end
 
     def self.reify_solr_results(solr_results, opts = {})
-      solr_results.collect { |hit| reify_solr_result(hit, opts) }
+      lazy_reify_solr_results(solr_results, opts).to_a
     end
 
     def self.reify_solr_result(hit, _opts = {})
