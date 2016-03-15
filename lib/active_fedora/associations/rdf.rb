@@ -60,26 +60,7 @@ module ActiveFedora
           ids = candidate_uris.map { |uri| ActiveFedora::Base.uri_to_id(uri) }
           results = ActiveFedora::SolrService.query(ActiveFedora::SolrQueryBuilder.construct_query_for_ids(ids), rows: 10_000)
 
-          docs = results.select do |result|
-            ActiveFedora::QueryResultBuilder.classes_from_solr_document(result).any? do |klass|
-              class_ancestors(klass).include? reflection.klass
-            end
-          end
-
-          docs.map { |doc| ::RDF::URI.new(ActiveFedora::Base.id_to_uri(doc['id'])) }
-        end
-
-        ##
-        # Returns a list of all the ancestor classes up to ActiveFedora::Base including the class itself
-        # @param [Class] klass
-        # @return [Array<Class>]
-        # @example
-        #   class Car < ActiveFedora::Base; end
-        #   class SuperCar < Car; end
-        #   class_ancestors(SuperCar)
-        #   # => [SuperCar, Car, ActiveFedora::Base]
-        def class_ancestors(klass)
-          klass.ancestors.select { |k| k.instance_of?(Class) } - [Object, BasicObject]
+          results.select { |result| result.model? reflection.klass }.map(&:rdf_uri)
         end
     end
   end

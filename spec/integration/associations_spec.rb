@@ -234,8 +234,8 @@ describe ActiveFedora::Base do
 
           solr_resp = @library.books(response_format: :solr)
           expect(solr_resp.size).to eq 2
-          expect(solr_resp[0]['id']).to eq @book.id
-          expect(solr_resp[1]['id']).to eq @book2.id
+          expect(solr_resp[0].id).to eq @book.id
+          expect(solr_resp[1].id).to eq @book2.id
         end
       end
 

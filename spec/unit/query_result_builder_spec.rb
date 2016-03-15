@@ -12,12 +12,6 @@ describe ActiveFedora::QueryResultBuilder do
                            { "id" => "my:_ID2_", ActiveFedora::SolrQueryBuilder.solr_name("has_model", :symbol) => ["AudioRecord"] },
                            { "id" => "my:_ID3_", ActiveFedora::SolrQueryBuilder.solr_name("has_model", :symbol) => ["AudioRecord"] }]
     end
-    describe ".reify_solr_result" do
-      it "uses .find to instantiate objects" do
-        expect(AudioRecord).to receive(:find).with("my:_ID1_", cast: true)
-        described_class.reify_solr_result(@sample_solr_hits.first)
-      end
-    end
     describe ".reify_solr_results" do
       it "uses AudioRecord.find to instantiate objects" do
         expect(AudioRecord).to receive(:find).with("my:_ID1_", cast: true)
