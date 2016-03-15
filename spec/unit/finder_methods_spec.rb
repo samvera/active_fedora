@@ -56,7 +56,7 @@ describe ActiveFedora::FinderMethods do
     end
   end
 
-  describe "#find_in_batches" do
+  describe "#search_in_batches" do
     let(:docs) { double('docs', has_next?: false) }
     let(:select_handler) { 'select' }
     let(:connection) { double('conn') }
@@ -70,14 +70,14 @@ describe ActiveFedora::FinderMethods do
     end
     it "yields the docs" do
       expect { |b|
-        finder.find_in_batches({ 'age_t' => '21' }, { other_opt: 'test' }, &b)
+        finder.search_in_batches({ 'age_t' => '21' }, { other_opt: 'test' }, &b)
       }.to yield_with_args(docs)
     end
 
     context "with custom select handler" do
       let(:select_handler) { 'select_test' }
       it "uses the custom select handler" do
-        finder.find_in_batches({ 'age_t' => '21' }, other_opt: 'test') do end
+        finder.search_in_batches({ 'age_t' => '21' }, other_opt: 'test') do end
       end
     end
   end

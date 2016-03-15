@@ -87,7 +87,7 @@ module ActiveFedora
       return false unless conditions
       case conditions
       when Hash
-        find_with_conditions(conditions, rows: 1).present?
+        search_with_conditions(conditions, rows: 1).present?
       when String
         find(conditions).present?
       else
@@ -102,13 +102,19 @@ module ActiveFedora
     # hash representing the query part of an solr statement. If a hash is
     # provided, this method will generate conditions based simple equality
     # combined using the boolean AND operator.
-    # @param[Hash] options
+    # @param [Hash] options
     # @option opts [Array] :sort a list of fields to sort by
     # @option opts [Array] :rows number of rows to return
-    def find_with_conditions(conditions, opts = {})
+    def search_with_conditions(conditions, opts = {})
       # set default sort to created date ascending
       opts[:sort] = @klass.default_sort_params unless opts.include?(:sort)
       SolrService.query(create_query(conditions), opts)
+    end
+
+    # @deprecated
+    def find_with_conditions(*args)
+      Deprecation.warn(ActiveFedora::Base, '.find_with_conditions is deprecated and will be removed in active-fedora 10.0; use .search_with_conditions instead')
+      search_with_conditions(*args)
     end
 
     # Yields the found ActiveFedora::Base object to the passed block
@@ -118,7 +124,7 @@ module ActiveFedora
     # @option opts [Boolean] :cast (true) when true, examine the model and cast it to the first known cModel
     def find_each(conditions = {}, opts = {})
       cast = opts.delete(:cast)
-      find_in_batches(conditions, opts.merge(fl: ActiveFedora.id_field)) do |group|
+      search_in_batches(conditions, opts.merge(fl: ActiveFedora.id_field)) do |group|
         group.each do |hit|
           begin
             yield(load_from_fedora(hit[ActiveFedora.id_field], cast))
@@ -140,11 +146,10 @@ module ActiveFedora
     # @option opts [Array] :rows number of rows to return
     #
     # @example
-    #  Person.find_in_batches('age_t'=>'21', {:batch_size=>50}) do |group|
+    #  Person.search_in_batches('age_t'=>'21', {:batch_size=>50}) do |group|
     #  group.each { |person| puts person['name_t'] }
     #  end
-
-    def find_in_batches(conditions, opts = {})
+    def search_in_batches(conditions, opts = {})
       opts[:q] = create_query(conditions)
       opts[:qt] = @klass.solr_query_handler
       # set default sort to created date ascending
@@ -161,6 +166,12 @@ module ActiveFedora
         yield docs
         break unless docs.has_next?
       end
+    end
+
+    # @deprecated
+    def find_in_batches(*args)
+      Deprecation.warn(ActiveFedora::Base, '.find_in_batches is deprecated and will be removed in active-fedora 10.0; use .search_in_batches instead')
+      search_in_batches(*args)
     end
 
     # Retrieve the Fedora object with the given id, explore the returned object

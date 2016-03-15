@@ -153,7 +153,7 @@ describe ActiveFedora::Base do
     end
   end
 
-  describe '#find_in_batches' do
+  describe '#search_in_batches' do
     describe "with conditions hash" do
       let(:solr) { ActiveFedora::SolrService.instance.conn }
       let(:expected_query) { "#{model_query} AND " \
@@ -168,7 +168,7 @@ describe ActiveFedora::Base do
         expect(solr).to receive(:paginate).with(1, 1002, 'select', expected_params).and_return('response' => { 'docs' => mock_docs })
         yielded = double("yielded method")
         expect(yielded).to receive(:run).with(mock_docs)
-        SpecModel::Basic.find_in_batches({ foo: 'bar', baz: ['quix', 'quack'] }, batch_size: 1002, fl: 'id') { |group| yielded.run group }
+        SpecModel::Basic.search_in_batches({ foo: 'bar', baz: ['quix', 'quack'] }, batch_size: 1002, fl: 'id') { |group| yielded.run group }
       end
     end
   end
@@ -240,10 +240,10 @@ describe ActiveFedora::Base do
     end
   end
 
-  describe '#find_with_conditions' do
+  describe '#search_with_conditions' do
     let(:mock_result) { double('Result') }
     let(:klass) { SpecModel::Basic }
-    subject { klass.find_with_conditions(conditions) }
+    subject { klass.search_with_conditions(conditions) }
 
     before do
       expect(ActiveFedora::SolrService).to receive(:query)
