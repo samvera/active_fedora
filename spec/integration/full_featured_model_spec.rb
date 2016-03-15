@@ -131,7 +131,7 @@ describe ActiveFedora::Base do
 
     @test_history.save
 
-    @solr_result = OralHistory.find_with_conditions(id: @test_history.id)[0]
+    @solr_result = OralHistory.search_with_conditions(id: @test_history.id)[0]
     @properties_sample_values.each_pair do |field, value|
       next if field == :hard_copy_availability # FIXME: HYDRA-824
       next if field == :location # FIXME HYDRA-825
@@ -153,8 +153,8 @@ describe ActiveFedora::Base do
     expect(dc_xml.root.elements["dcterms:subject"].text).to eq "My Subject Heading"
   end
 
-  it "supports #find_with_conditions" do
-    solr_result = OralHistory.find_with_conditions({})
+  it "supports #search_with_conditions" do
+    solr_result = OralHistory.search_with_conditions({})
     expect(solr_result).to_not be_nil
   end
 end

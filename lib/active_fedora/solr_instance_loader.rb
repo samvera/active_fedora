@@ -37,7 +37,7 @@ module ActiveFedora
 
       def solr_doc
         @solr_doc ||= begin
-          result = context.find_with_conditions(id: id)
+          result = context.search_with_conditions(id: id)
           if result.empty?
             raise ActiveFedora::ObjectNotFoundError, "Object #{id} not found in solr"
           end
