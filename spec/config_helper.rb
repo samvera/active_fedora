@@ -19,8 +19,3 @@ end
 def unstub_rails
   Object.send(:remove_const, :Rails) if defined?(Rails)
 end
-
-def setup_pretest_env
-  ENV['RAILS_ENV'] = 'test'
-  ENV['environment'] = 'test'
-end
