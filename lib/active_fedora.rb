@@ -120,6 +120,7 @@ module ActiveFedora #:nodoc:
     autoload :Serialization
     autoload :SimpleDatastream
     autoload :SchemaIndexingStrategy
+    autoload :SolrHit
     autoload :SolrInstanceLoader
     autoload :SolrQueryBuilder
     autoload :SolrService

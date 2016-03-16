@@ -42,8 +42,7 @@ module ActiveFedora::Associations
         query = ActiveFedora::SolrQueryBuilder.construct_query_for_rel(
           [[:has_model, proxy_class.to_class_uri], [:proxyFor, record.id]]
         )
-        results = ActiveFedora::SolrService.query(query, fl: 'id')
-        results.map { |res| ::RDF::URI(ActiveFedora::Base.id_to_uri(res['id'])) }
+        ActiveFedora::SolrService.query(query, fl: 'id').map(&:rdf_uri)
       end
   end
 end

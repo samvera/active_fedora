@@ -49,19 +49,19 @@ module ActiveFedora
       end
 
       def reify_solr_result(hit, opts = {})
-        Deprecation.warn SolrService, "SolrService.reify_solr_result is deprecated. Use QueryResultBuilder.reify_solr_result instead. This will be removed in active-fedora 10.0"
+        Deprecation.warn SolrService, "SolrService.reify_solr_result is deprecated. Use SolrHit#reify instead. This will be removed in active-fedora 10.0"
         QueryResultBuilder.reify_solr_result(hit, opts)
       end
 
       # Returns all possible classes for the solr object
       def classes_from_solr_document(hit, opts = {})
-        Deprecation.warn SolrService, "SolrService.classes_from_solr_document is deprecated. Use QueryResultBuilder.classes_from_solr_document instead. This will be removed in active-fedora 10.0"
+        Deprecation.warn SolrService, "SolrService.classes_from_solr_document is deprecated. Use SolrHit#models instead. This will be removed in active-fedora 10.0"
         QueryResultBuilder.classes_from_solr_document(hit, opts)
       end
 
       # Returns the best singular class for the solr object
       def class_from_solr_document(hit, opts = {})
-        Deprecation.warn SolrService, "SolrService.class_from_solr_document is deprecated. Use QueryResultBuilder.class_from_solr_document instead. This will be removed in active-fedora 10.0"
+        Deprecation.warn SolrService, "SolrService.class_from_solr_document is deprecated. Use SolrHit#model instead. This will be removed in active-fedora 10.0"
         QueryResultBuilder.class_from_solr_document(hit, opts)
       end
 
@@ -110,7 +110,9 @@ module ActiveFedora
         args = args.merge(q: query, qt: 'standard')
         result = SolrService.instance.conn.get(select_path, params: args)
         return result if raw
-        result['response']['docs']
+        result['response']['docs'].map do |doc|
+          ActiveFedora::SolrHit.new(doc)
+        end
       end
 
       def delete(id)

@@ -61,7 +61,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
         expect(library.books).to be_loaded
       end
       it "loads from solr" do
-        expect(library.books.load_from_solr.map { |r| r["id"] }).to eq([book.id])
+        expect(library.books.load_from_solr.map(&:id)).to eq([book.id])
       end
       it "loads from solr with options" do
         expect(library.books.load_from_solr(rows: 0).size).to eq(0)

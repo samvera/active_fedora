@@ -27,9 +27,7 @@ module ActiveFedora
         if loaded?
           load_target.map(&:id)
         else
-          load_from_solr.map do |solr_record|
-            solr_record['id']
-          end
+          load_from_solr.map(&:id)
         end
       end
 
