@@ -1,5 +1,7 @@
 module ActiveFedora
   module SolrQueryBuilder
+    extend Deprecation
+
     class << self
       # Construct a solr query for a list of ids
       # This is used to get a solr response based on the list of ids in an object's RELS-EXT relationhsips
@@ -15,13 +17,13 @@ module ActiveFedora
       # @param [String] key
       # @param [String] value
       def raw_query(key, value)
-        Deprecation.warn(ActiveFedora::Base, 'ActiveFedora::SolrQueryBuilder.raw_query is deprecated and will be removed in ActiveFedora 10.0. Use .construct_query instead.')
+        Deprecation.warn(ActiveFedora::SolrQueryBuilder, 'ActiveFedora::SolrQueryBuilder.raw_query is deprecated and will be removed in ActiveFedora 10.0. Use .construct_query instead.')
         "_query_:\"{!raw f=#{key}}#{value.gsub('"', '\"')}\""
       end
 
       # @deprecated
       def solr_name(*args)
-        Deprecation.warn(ActiveFedora::Base, 'ActiveFedora::SolrQueryBuilder.solr_name is deprecated and will be removed in ActiveFedora 10.0. Use ActiveFedora.index_field_mapper.solr_name instead.')
+        Deprecation.warn(ActiveFedora::SolrQueryBuilder, 'ActiveFedora::SolrQueryBuilder.solr_name is deprecated and will be removed in ActiveFedora 10.0. Use ActiveFedora.index_field_mapper.solr_name instead.')
         ActiveFedora.index_field_mapper.solr_name(*args)
       end
 
