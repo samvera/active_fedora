@@ -7,7 +7,7 @@ describe ActiveFedora::Base do
       end
     end
   end
-  let(:sort_query) { ActiveFedora::SolrQueryBuilder.solr_name("system_create", :stored_sortable, type: :date) + ' asc' }
+  let(:sort_query) { ActiveFedora.index_field_mapper.solr_name("system_create", :stored_sortable, type: :date) + ' asc' }
   let(:model_query) { "_query_:\"{!raw f=has_model_ssim}SpecModel::Basic\"" }
 
   after(:all) do

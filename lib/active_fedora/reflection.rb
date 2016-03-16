@@ -198,7 +198,7 @@ module ActiveFedora
 
       def solr_key
         @solr_key ||= begin
-          ActiveFedora::SolrQueryBuilder.solr_name(predicate_for_solr, :symbol)
+          ActiveFedora.index_field_mapper.solr_name(predicate_for_solr, :symbol)
         end
       end
 

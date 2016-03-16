@@ -13,7 +13,7 @@ module ActiveFedora::RDF
       config = self.class.config_for_term_or_uri(field)
       return nil unless config && config.behaviors # punt on index names for deep nodes!
       config.behaviors.each do |behavior|
-        result = ActiveFedora::SolrQueryBuilder.solr_name(apply_prefix(field, file_path), behavior, type: config.type)
+        result = ActiveFedora.index_field_mapper.solr_name(apply_prefix(field, file_path), behavior, type: config.type)
         return result if Solrizer::DefaultDescriptors.send(behavior).evaluate_suffix(:text).stored?
       end
       raise RuntimeError "no stored fields were found"

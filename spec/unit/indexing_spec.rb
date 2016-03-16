@@ -66,13 +66,13 @@ describe ActiveFedora::Indexing do
       expect(test_object).to receive(:modified_date).and_return(DateTime.parse("2012-03-07T03:12:02Z")).twice
       allow(test_object).to receive(:id).and_return('changeme:123')
       solr_doc = test_object.to_solr
-      expect(solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("system_create", :stored_sortable, type: :date)]).to eql("2012-03-04T03:12:02Z")
-      expect(solr_doc[ActiveFedora::SolrQueryBuilder.solr_name("system_modified", :stored_sortable, type: :date)]).to eql("2012-03-07T03:12:02Z")
+      expect(solr_doc[ActiveFedora.index_field_mapper.solr_name("system_create", :stored_sortable, type: :date)]).to eql("2012-03-04T03:12:02Z")
+      expect(solr_doc[ActiveFedora.index_field_mapper.solr_name("system_modified", :stored_sortable, type: :date)]).to eql("2012-03-07T03:12:02Z")
       expect(solr_doc[:id]).to eql("changeme:123")
     end
 
     it "adds self.class as the :active_fedora_model" do
-      expect(subject[ActiveFedora::SolrQueryBuilder.solr_name("active_fedora_model", :stored_sortable)]).to eql "SpecNode"
+      expect(subject[ActiveFedora.index_field_mapper.solr_name("active_fedora_model", :stored_sortable)]).to eql "SpecNode"
     end
 
     context "with attached files" do

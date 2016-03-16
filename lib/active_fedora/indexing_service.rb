@@ -16,15 +16,15 @@ module ActiveFedora
     end
 
     def self.profile_solr_name
-      @profile_solr_name ||= ActiveFedora::SolrQueryBuilder.solr_name("object_profile", :displayable)
+      @profile_solr_name ||= ActiveFedora.index_field_mapper.solr_name("object_profile", :displayable)
     end
 
     def self.create_time_solr_name
-      @create_time_solr_name ||= ActiveFedora::SolrQueryBuilder.solr_name('system_create', :stored_sortable, type: :date)
+      @create_time_solr_name ||= ActiveFedora.index_field_mapper.solr_name('system_create', :stored_sortable, type: :date)
     end
 
     def self.modified_time_solr_name
-      @modified_time_solr_name ||= ActiveFedora::SolrQueryBuilder.solr_name('system_modified', :stored_sortable, type: :date)
+      @modified_time_solr_name ||= ActiveFedora.index_field_mapper.solr_name('system_modified', :stored_sortable, type: :date)
     end
 
     def rdf_service

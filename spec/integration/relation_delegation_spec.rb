@@ -16,7 +16,7 @@ describe ActiveFedora::Model do
 
         def to_solr(doc = {})
           doc = super
-          doc[ActiveFedora::SolrQueryBuilder.solr_name('foo', :sortable)] = doc[ActiveFedora::SolrQueryBuilder.solr_name('foo', type: :string)]
+          doc[ActiveFedora.index_field_mapper.solr_name('foo', :sortable)] = doc[ActiveFedora.index_field_mapper.solr_name('foo', type: :string)]
           doc
         end
       end
