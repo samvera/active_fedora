@@ -105,11 +105,20 @@ module ActiveFedora
         SolrQueryBuilder.construct_query_for_rel(field_pairs, join_with)
       end
 
+      def get(query, args = {})
+        args = args.merge(q: query, qt: 'standard')
+        SolrService.instance.conn.get(select_path, params: args)
+      end
+
       def query(query, args = {})
         raw = args.delete(:raw)
-        args = args.merge(q: query, qt: 'standard')
-        result = SolrService.instance.conn.get(select_path, params: args)
-        return result if raw
+        result = get(query, args)
+
+        if raw
+          Deprecation.warn SolrService, "SolrService.query with raw: true is deprecated. Use SolrService.get instead. This will be removed in active-fedora 10.0"
+          return result
+        end
+
         result['response']['docs'].map do |doc|
           ActiveFedora::SolrHit.new(doc)
         end
@@ -124,8 +133,8 @@ module ActiveFedora
       # @param [Hash] args arguments to pass through to `args' param of SolrService.query (note that :rows will be overwritten to 0)
       # @return [Integer] number of records matching
       def count(query, args = {})
-        args = args.merge(raw: true, rows: 0)
-        SolrService.query(query, args)['response']['numFound'].to_i
+        args = args.merge(rows: 0)
+        SolrService.get(query, args)['response']['numFound'].to_i
       end
 
       # @param [Hash] doc the document to index
