@@ -23,7 +23,7 @@ describe ActiveFedora::Base do
         expect(obj.foo).to_not be_new_record
         expect(obj.foo.person).to eq ['bob']
         person_field = ActiveFedora.index_field_mapper.solr_name('foo__person', type: :string)
-        solr_result = ActiveFedora::SolrService.query("{!raw f=id}#{@obj.id}", fl: "id #{person_field}").first
+        solr_result = ActiveFedora::SolrService.query("{!field f=id}#{@obj.id}", fl: "id #{person_field}").first
         expect(solr_result).to eq("id" => @obj.id, person_field => ['bob'])
       end
     end

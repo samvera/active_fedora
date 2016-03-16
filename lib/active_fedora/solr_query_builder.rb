@@ -1,7 +1,5 @@
 module ActiveFedora
   module SolrQueryBuilder
-    PARSED_SUFFIX = '_tesim'.freeze
-
     class << self
       # Construct a solr query for a list of ids
       # This is used to get a solr response based on the list of ids in an object's RELS-EXT relationhsips
@@ -32,7 +30,7 @@ module ActiveFedora
       # @param [String] join_with ('AND') the value we're joining the clauses with
       # @example
       #   construct_query_for_rel [[:has_model, "info:fedora/afmodel:ComplexCollection"], [:has_model, "info:fedora/afmodel:ActiveFedora_Base"]], 'OR'
-      #   # => _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ComplexCollection" OR _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ActiveFedora_Base"
+      #   # => _query_:"{!field f=has_model_ssim}info:fedora/afmodel:ComplexCollection" OR _query_:"{!field f=has_model_ssim}info:fedora/afmodel:ActiveFedora_Base"
       #
       #   construct_query_for_rel [[Book.reflect_on_association(:library), "foo/bar/baz"]]
       def construct_query_for_rel(field_pairs, join_with = ' AND ')
@@ -46,7 +44,7 @@ module ActiveFedora
       # @return [String] a solr query
       # @example
       #   construct_query([['library_id_ssim', '123'], ['owner_ssim', 'Fred']])
-      #   # => "_query_:\"{!raw f=library_id_ssim}123\" AND _query_:\"{!raw f=owner_ssim}Fred\""
+      #   # => "_query_:\"{!field f=library_id_ssim}123\" AND _query_:\"{!field f=owner_ssim}Fred\""
       def construct_query(field_pairs, join_with = ' AND ')
         pairs_to_clauses(field_pairs).join(join_with)
       end
@@ -69,27 +67,12 @@ module ActiveFedora
           values << nil if values.empty?
           values.map do |value|
             if value.present?
-              if parsed?(field)
-                # If you do a raw query on a parsed field you won't get the matches you expect.
-                "#{field}:#{solr_escape(value)}"
-              else
-                raw_query(field, value)
-              end
+              field_query(field, value)
             else
               # Check that the field is not present. In SQL: "WHERE field IS NULL"
               "-#{field}:[* TO *]"
             end
           end
-        end
-
-        def parsed?(field)
-          field.end_with?(PARSED_SUFFIX)
-        end
-
-        # Adds esaping for spaces which are not handled by RSolr.solr_escape
-        # See rsolr/rsolr#101
-        def solr_escape(terms)
-          RSolr.solr_escape(terms).gsub(/\s+/, "\\ ")
         end
 
         # Given a list of pairs (e.g. [field name, values]), convert the field names
@@ -100,8 +83,8 @@ module ActiveFedora
         #   property_values_to_solr([['library_id', '123'], ['owner', 'Fred']])
         #   # => [['library_id_ssim', '123'], ['owner_ssim', 'Fred']]
         def property_values_to_solr(pairs)
-          pairs.each_with_object([]) do |(property, value), list|
-            list << [solr_field(property), value]
+          pairs.map do |(property, value)|
+            [solr_field(property), value]
           end
         end
 
@@ -114,6 +97,13 @@ module ActiveFedora
           else
             ActiveFedora.index_field_mapper.solr_name(field, :symbol)
           end
+        end
+
+        # Create a raw query clause suitable for sending to solr as an fq element
+        # @param [String] key
+        # @param [String] value
+        def field_query(key, value)
+          "_query_:\"{!field f=#{key}}#{value.gsub('"', '\"')}\""
         end
     end
   end

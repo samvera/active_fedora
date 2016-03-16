@@ -91,7 +91,7 @@ describe ActiveFedora::Querying do
         second_condition = "foo_tesim:bar"
         where_values = ModelIntegrationSpec::Basic.where(first_condition)
                                                   .where(second_condition).where_values
-        expect(where_values).to eq ["bar_tesim:Peanuts",
+        expect(where_values).to eq ["_query_:\"{!field f=bar_tesim}Peanuts\"",
                                     "(foo_tesim:bar)"]
       end
 

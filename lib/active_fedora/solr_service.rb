@@ -97,7 +97,7 @@ module ActiveFedora
       # @param [String] join_with ('AND') the value we're joining the clauses with
       # @example
       #   construct_query_for_rel [[:has_model, "info:fedora/afmodel:ComplexCollection"], [:has_model, "info:fedora/afmodel:ActiveFedora_Base"]], 'OR'
-      #   # => _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ComplexCollection" OR _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ActiveFedora_Base"
+      #   # => _query_:"{!field f=has_model_ssim}info:fedora/afmodel:ComplexCollection" OR _query_:"{!field f=has_model_ssim}info:fedora/afmodel:ActiveFedora_Base"
       #
       #   construct_query_for_rel [[Book.reflect_on_association(:library), "foo/bar/baz"]]
       def construct_query_for_rel(field_pairs, join_with = 'AND')
