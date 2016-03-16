@@ -20,7 +20,9 @@ module ActiveFedora
         "_query_:\"{!raw f=#{key}}#{value.gsub('"', '\"')}\""
       end
 
+      # @deprecated
       def solr_name(*args)
+        Deprecation.warn(ActiveFedora::Base, 'ActiveFedora::SolrQueryBuilder.solr_name is deprecated and will be removed in ActiveFedora 10.0. Use ActiveFedora.index_field_mapper.solr_name instead.')
         ActiveFedora.index_field_mapper.solr_name(*args)
       end
 
@@ -109,7 +111,7 @@ module ActiveFedora
           when ActiveFedora::Reflection::AssociationReflection
             field.solr_key
           else
-            solr_name(field, :symbol)
+            ActiveFedora.index_field_mapper.solr_name(field, :symbol)
           end
         end
     end

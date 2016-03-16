@@ -54,8 +54,8 @@ describe ActiveFedora::SimpleDatastream do
   describe "#to_solr" do
     it "has title" do
       solr = @test_ds.to_solr
-      expect(solr[ActiveFedora::SolrQueryBuilder.solr_name('publisher', type: :string)]).to eq "publisher1"
-      expect(solr[ActiveFedora::SolrQueryBuilder.solr_name('creation_date', type: :date)]).to eq "2012-01-15"
+      expect(solr[ActiveFedora.index_field_mapper.solr_name('publisher', type: :string)]).to eq "publisher1"
+      expect(solr[ActiveFedora.index_field_mapper.solr_name('creation_date', type: :date)]).to eq "2012-01-15"
     end
   end
 

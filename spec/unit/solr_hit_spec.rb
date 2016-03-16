@@ -9,7 +9,7 @@ describe ActiveFedora::SolrHit do
     end
   end
 
-  subject { described_class.new "id" => "my:_ID1_", ActiveFedora::SolrQueryBuilder.solr_name("has_model", :symbol) => ["AudioRecord"] }
+  subject { described_class.new "id" => "my:_ID1_", ActiveFedora.index_field_mapper.solr_name("has_model", :symbol) => ["AudioRecord"] }
 
   describe "#reify" do
     it "uses .find to instantiate objects" do

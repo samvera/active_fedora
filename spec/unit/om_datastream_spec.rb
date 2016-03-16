@@ -257,16 +257,16 @@ describe ActiveFedora::OmDatastream do
   end
 
   describe '.has_solr_name?' do
-    let(:name0_role0) { ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_0_role_0_roleTerm", type: :string) }
-    let(:name1_role1) { ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_1_role_1_roleTerm", type: :string) }
+    let(:name0_role0) { ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_0_role_0_roleTerm", type: :string) }
+    let(:name1_role1) { ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_1_role_1_roleTerm", type: :string) }
     let(:solr_doc) do
       { "id" => "mods_article1",
-        ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_role_roleTerm", type: :string) => ["creator", "submitter", "teacher"],
-        ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_0_role", type: :string) => "\r\ncreator\r\nsubmitter\r\n",
-        ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_1_role", type: :string) => "\r\n teacher \r\n",
+        ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_role_roleTerm", type: :string) => ["creator", "submitter", "teacher"],
+        ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_0_role", type: :string) => "\r\ncreator\r\nsubmitter\r\n",
+        ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_1_role", type: :string) => "\r\n teacher \r\n",
         name0_role0 => "creator",
-        ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_0_role_1_roleTerm", type: :string) => "submitter",
-        ActiveFedora::SolrQueryBuilder.solr_name("desc_metadata__name_1_role_0_roleTerm", type: :string) => ["teacher"] }
+        ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_0_role_1_roleTerm", type: :string) => "submitter",
+        ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_1_role_0_roleTerm", type: :string) => ["teacher"] }
     end
 
     it "returns true if the given key exists in the solr document passed in" do
