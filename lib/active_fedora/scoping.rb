@@ -14,6 +14,11 @@ module ActiveFedora
       def current_scope=(scope) #:nodoc:
         Thread.current["#{self}_current_scope"] = scope
       end
+
+      # Are there attributes associated with this scope?
+      def scope_attributes? # :nodoc:
+        current_scope
+      end
     end
   end
 end

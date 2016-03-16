@@ -62,6 +62,23 @@ module ActiveFedora
       @records
     end
 
+    # Scope all queries to the current scope.
+    #
+    #   Comment.where(post_id: 1).scoping do
+    #     Comment.first
+    #   end
+    #   # => SELECT "comments".* FROM "comments" WHERE "comments"."post_id" = 1 ORDER BY "comments"."id" ASC LIMIT 1
+    #
+    # Please check unscoped if you want to remove all previous scopes (including
+    # the default_scope) during the execution of a block.
+    def scoping
+      previous = klass.current_scope
+      klass.current_scope = self
+      yield
+    ensure
+      klass.current_scope = previous
+    end
+
     def ==(other)
       case other
       when Relation

@@ -78,6 +78,11 @@ module ActiveFedora
       rescue ActiveFedora::ObjectNotFoundError, Ldp::Gone
         ActiveTriples::Resource.new(uri)
       end
+
+      # Abstract classes can't have default scopes.
+      def abstract_class?
+        self == Base
+      end
     end
   end
 end

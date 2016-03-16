@@ -21,9 +21,17 @@ module ActiveFedora
           if current_scope
             current_scope.clone
           else
-            scope = relation
-            scope.default_scoped = true
-            scope
+            default_scoped
+          end
+        end
+
+        def default_scoped
+          scope = build_default_scope
+
+          if scope
+            relation.spawn.merge!(scope)
+          else
+            relation
           end
         end
       end
