@@ -29,6 +29,6 @@ module ActiveFedora
       ActiveFedora::SolrHit.for(hit).model(opts)
     end
 
-    HAS_MODEL_SOLR_FIELD = SolrQueryBuilder.solr_name("has_model", :symbol).freeze
+    HAS_MODEL_SOLR_FIELD = ActiveFedora.index_field_mapper.solr_name("has_model", :symbol).freeze
   end
 end

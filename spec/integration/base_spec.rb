@@ -22,7 +22,7 @@ describe ActiveFedora::Base do
         obj = described_class.find(@obj.id)
         expect(obj.foo).to_not be_new_record
         expect(obj.foo.person).to eq ['bob']
-        person_field = ActiveFedora::SolrQueryBuilder.solr_name('foo__person', type: :string)
+        person_field = ActiveFedora.index_field_mapper.solr_name('foo__person', type: :string)
         solr_result = ActiveFedora::SolrService.query("{!raw f=id}#{@obj.id}", fl: "id #{person_field}").first
         expect(solr_result).to eq("id" => @obj.id, person_field => ['bob'])
       end
@@ -41,7 +41,7 @@ describe ActiveFedora::Base do
         end
         it "saves the datastream." do
           expect(MockAFBaseRelationship.find(@release.id).foo.person).to eq ['frank']
-          person_field = ActiveFedora::SolrQueryBuilder.solr_name('foo__person', type: :string)
+          person_field = ActiveFedora.index_field_mapper.solr_name('foo__person', type: :string)
           expect(ActiveFedora::SolrService.query("id:\"#{@release.id}\"", fl: "id #{person_field}").first).to eq("id" => @release.id, person_field => ['frank'])
         end
       end
@@ -164,7 +164,7 @@ describe ActiveFedora::Base do
     let(:obj) { ExampleBase.new }
     it "configures properties and solrize them" do
       obj.title = ["Test"]
-      expect(obj.to_solr[ActiveFedora::SolrQueryBuilder.solr_name("title", :symbol)]).to eq ["Test"]
+      expect(obj.to_solr[ActiveFedora.index_field_mapper.solr_name("title", :symbol)]).to eq ["Test"]
     end
   end
 

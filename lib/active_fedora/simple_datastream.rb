@@ -79,7 +79,7 @@ module ActiveFedora
         next if field_key == :location ## FIXME HYDRA-825
         things = send(field_key)
         next unless things
-        field_symbol = ActiveFedora::SolrQueryBuilder.solr_name(field_key, type: field_info[:type])
+        field_symbol = ActiveFedora.index_field_mapper.solr_name(field_key, type: field_info[:type])
         things.val.each do |val|
           ::Solrizer::Extractor.insert_solr_field_value(solr_doc, field_symbol, val.to_s)
         end
