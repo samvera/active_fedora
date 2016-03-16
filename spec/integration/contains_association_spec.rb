@@ -5,6 +5,15 @@ RSpec.describe ActiveFedora::Base do
     class Source < ActiveFedora::Base
       contains :sub_resource, class_name: "Source"
       property :title, predicate: ::RDF::Vocab::DC.title, multiple: false
+      def save(*args)
+        opts = args.first
+        super.tap do
+          if opts && opts[:container]
+            opts[:container].title = "Demolished"
+            opts[:container].save
+          end
+        end
+      end
     end
   end
   after do
@@ -20,6 +29,7 @@ RSpec.describe ActiveFedora::Base do
       s.reload
       expect(s.sub_resource.title).to eq "Test"
       expect(s.sub_resource.uri).to eq s.uri.to_s + "/sub_resource"
+      expect(s.title).to eq "Demolished"
     end
     it "is able to add RDF sources" do
       s = Source.create
