@@ -2,11 +2,6 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
   before :each do
-    begin
-      described_class.find('test:123').delete
-    rescue
-    end
-
     class CallbackStub < ActiveFedora::Base
       has_metadata type: ActiveFedora::SimpleDatastream, name: "someData" do |m|
         m.field "fubar", :string
@@ -43,7 +38,7 @@ describe ActiveFedora::Base do
     allow_any_instance_of(CallbackStub).to receive :a_create
     allow_any_instance_of(CallbackStub).to receive(:b_save)
     allow_any_instance_of(CallbackStub).to receive(:a_save)
-    @cb = CallbackStub.new 'test:123'
+    @cb = CallbackStub.new
     @cb.save
   end
 
@@ -53,7 +48,7 @@ describe ActiveFedora::Base do
     allow_any_instance_of(CallbackStub).to receive(:a_create)
     allow_any_instance_of(CallbackStub).to receive(:b_save)
     allow_any_instance_of(CallbackStub).to receive(:a_save)
-    @cb = CallbackStub.new 'test:123'
+    @cb = CallbackStub.new
     @cb.save
     allow_any_instance_of(CallbackStub).to receive(:a_init)
     allow_any_instance_of(CallbackStub).to receive(:b_save)
@@ -63,7 +58,7 @@ describe ActiveFedora::Base do
     allow_any_instance_of(CallbackStub).to receive(:a_update)
     allow_any_instance_of(CallbackStub).to receive(:do_stuff)
 
-    @cb = CallbackStub.find('test:123')
+    @cb = CallbackStub.find(@cb.id)
     @cb.save!
 
     @cb.destroy
