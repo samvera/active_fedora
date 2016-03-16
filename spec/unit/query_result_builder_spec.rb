@@ -8,9 +8,9 @@ describe ActiveFedora::QueryResultBuilder do
         def self.connection_for_id(_id)
         end
       end
-      @sample_solr_hits = [{ "id" => "my:_ID1_", ActiveFedora::SolrQueryBuilder.solr_name("has_model", :symbol) => ["AudioRecord"] },
-                           { "id" => "my:_ID2_", ActiveFedora::SolrQueryBuilder.solr_name("has_model", :symbol) => ["AudioRecord"] },
-                           { "id" => "my:_ID3_", ActiveFedora::SolrQueryBuilder.solr_name("has_model", :symbol) => ["AudioRecord"] }]
+      @sample_solr_hits = [{ "id" => "my:_ID1_", ActiveFedora.index_field_mapper.solr_name("has_model", :symbol) => ["AudioRecord"] },
+                           { "id" => "my:_ID2_", ActiveFedora.index_field_mapper.solr_name("has_model", :symbol) => ["AudioRecord"] },
+                           { "id" => "my:_ID3_", ActiveFedora.index_field_mapper.solr_name("has_model", :symbol) => ["AudioRecord"] }]
     end
     describe ".reify_solr_results" do
       it "uses AudioRecord.find to instantiate objects" do

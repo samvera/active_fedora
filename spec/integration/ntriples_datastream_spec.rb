@@ -92,21 +92,21 @@ EOF
       subject.date_uploaded = [Date.parse('2012-11-02')]
       expect(subject.date_uploaded.first).to be_kind_of Date
       solr_document = subject.to_solr
-      expect(solr_document[ActiveFedora::SolrQueryBuilder.solr_name('rdf__date_uploaded', type: :date)]).to eq ['2012-11-02T00:00:00Z']
+      expect(solr_document[ActiveFedora.index_field_mapper.solr_name('rdf__date_uploaded', type: :date)]).to eq ['2012-11-02T00:00:00Z']
     end
     it "handles integers" do
       subject.filesize = 12_345
       expect(subject.filesize).to be_kind_of Fixnum
       solr_document = subject.to_solr
-      expect(solr_document[ActiveFedora::SolrQueryBuilder.solr_name('rdf__filesize', :stored_sortable, type: :integer)]).to eq '12345'
+      expect(solr_document[ActiveFedora.index_field_mapper.solr_name('rdf__filesize', :stored_sortable, type: :integer)]).to eq '12345'
     end
   end
 
   it "produces a solr document" do
     @subject = RdfTest.new(title: "War and Peace")
     solr_document = @subject.to_solr
-    expect(solr_document[ActiveFedora::SolrQueryBuilder.solr_name('rdf__title', :facetable)]).to eq ["War and Peace"]
-    expect(solr_document[ActiveFedora::SolrQueryBuilder.solr_name('rdf__title', type: :string)]).to eq ["War and Peace"]
+    expect(solr_document[ActiveFedora.index_field_mapper.solr_name('rdf__title', :facetable)]).to eq ["War and Peace"]
+    expect(solr_document[ActiveFedora.index_field_mapper.solr_name('rdf__title', type: :string)]).to eq ["War and Peace"]
   end
 
   it "sets and recall values" do
