@@ -8,11 +8,7 @@ module ActiveFedora
       opts[:rows] = limit_value if limit_value
       opts[:sort] = order_values if order_values
 
-      calculate :count, where_values, opts
-    end
-
-    def calculate(_calculation, conditions, _opts = {})
-      SolrService.query(create_query(conditions), raw: true, rows: 0).fetch('response'.freeze)['numFound'.freeze]
+      SolrService.count(create_query(where_values))
     end
   end
 end
