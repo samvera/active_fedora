@@ -48,13 +48,13 @@ describe ActiveFedora::SolrService do
     end
   end
 
-  describe ".query" do
+  describe "#get" do
     it "calls solr" do
       mock_conn = double("Connection")
       stub_result = double("Result")
       expect(mock_conn).to receive(:get).with('select', params: { q: 'querytext', qt: 'standard' }).and_return(stub_result)
       allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
-      expect(described_class.query('querytext', raw: true)).to eq stub_result
+      expect(described_class.get('querytext')).to eq stub_result
     end
     it "uses select_path" do
       mock_conn = double("Connection")
@@ -62,9 +62,25 @@ describe ActiveFedora::SolrService do
       expect(mock_conn).to receive(:get).with('select_test', params: { q: 'querytext', qt: 'standard' }).and_return(stub_result)
       expect(described_class).to receive(:select_path).and_return('select_test')
       allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
-      expect(described_class.query('querytext', raw: true)).to eq stub_result
+      expect(described_class.get('querytext')).to eq stub_result
     end
   end
+
+  describe "#query" do
+    let(:doc) { { 'id' => 'x' } }
+    let(:docs) { [doc] }
+
+    it "wraps the solr response documents in Solr hits" do
+      mock_conn = double("Connection")
+      stub_result = { 'response' => { 'docs' => docs } }
+      expect(mock_conn).to receive(:get).with('select', params: { q: 'querytext', qt: 'standard' }).and_return(stub_result)
+      allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
+      result = described_class.query('querytext')
+      expect(result.size).to eq 1
+      expect(result.first.id).to eq 'x'
+    end
+  end
+
   describe ".count" do
     it "returns a count of matching records" do
       mock_conn = double("Connection")
