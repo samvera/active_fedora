@@ -17,6 +17,7 @@ module ActiveFedora
       # @param [String] key
       # @param [String] value
       def raw_query(key, value)
+        Deprecation.warn(ActiveFedora::Base, 'ActiveFedora::SolrQueryBuilder.raw_query is deprecated and will be removed in ActiveFedora 10.0. Use .construct_query instead.')
         "_query_:\"{!raw f=#{key}}#{value.gsub('"', '\"')}\""
       end
 

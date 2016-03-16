@@ -83,8 +83,8 @@ module ActiveFedora
       # @param [String] key
       # @param [String] value
       def raw_query(key, value)
-        Deprecation.warn SolrService, "SolrService.raw_query is deprecated. Use SolrQueryBuilder.raw_query instead. This will be removed in active-fedora 10.0"
-        SolrQueryBuilder.raw_query(key, value)
+        Deprecation.warn SolrService, "SolrService.raw_query is deprecated. Use SolrQueryBuilder.construct_query instead. This will be removed in active-fedora 10.0"
+        SolrQueryBuilder.construct_query(key, value)
       end
 
       def solr_name(*args)

@@ -199,7 +199,7 @@ module ActiveFedora
       if where_values.empty?
         load_from_fedora(id, cast)
       else
-        conditions = where_values + [ActiveFedora::SolrQueryBuilder.raw_query(ActiveFedora.id_field, id)]
+        conditions = where_values + [ActiveFedora::SolrQueryBuilder.construct_query(ActiveFedora.id_field => id)]
         query = conditions.join(" AND ".freeze)
         to_enum(:find_each, query, {}).to_a.first
       end
