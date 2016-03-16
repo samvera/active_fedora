@@ -81,4 +81,28 @@ describe ActiveFedora::FinderMethods do
       end
     end
   end
+
+  describe '#search_by_id' do
+    context 'with a document in solr' do
+      let(:doc) { double('Document') }
+
+      before do
+        expect(finder).to receive(:search_with_conditions).with({ id: 'x' }, hash_including(rows: 1)).and_return([doc])
+      end
+
+      it "returns the document" do
+        expect(finder.search_by_id('x')).to eq doc
+      end
+    end
+
+    context 'without a document in solr' do
+      before do
+        expect(finder).to receive(:search_with_conditions).with({ id: 'x' }, hash_including(rows: 1)).and_return([])
+      end
+
+      it "returns the document" do
+        expect { finder.search_by_id('x') }.to raise_error ActiveFedora::ObjectNotFoundError
+      end
+    end
+  end
 end

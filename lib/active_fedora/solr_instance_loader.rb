@@ -12,8 +12,7 @@ module ActiveFedora
     def initialize(context, id, solr_doc = nil)
       @context = context
       @id = id
-      @solr_doc = solr_doc
-      validate_solr_doc_and_id!(@solr_doc)
+      self.solr_doc = solr_doc
     end
 
     def object
@@ -37,18 +36,16 @@ module ActiveFedora
 
       def solr_doc
         @solr_doc ||= begin
-          result = context.search_with_conditions(id: id)
-          if result.empty?
-            raise ActiveFedora::ObjectNotFoundError, "Object #{id} not found in solr"
-          end
-          @solr_doc = result.first
-          validate_solr_doc_and_id!(@solr_doc)
-          @solr_doc
+          self.solr_doc = context.search_by_id(id)
         end
       end
 
+      def solr_doc=(solr_doc)
+        validate_solr_doc_and_id!(@solr_doc) unless @solr_doc.nil?
+        @solr_doc = solr_doc
+      end
+
       def validate_solr_doc_and_id!(document)
-        return true if document.nil?
         solr_id = document[ActiveFedora.id_field]
         return if id == solr_id
         raise ActiveFedora::FedoraSolrMismatchError, id, solr_id

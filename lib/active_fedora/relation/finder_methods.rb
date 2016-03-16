@@ -111,6 +111,20 @@ module ActiveFedora
       SolrService.query(create_query(conditions), opts)
     end
 
+    # Returns a single solr hit matching the given id
+    # @param [String] id document id
+    # @param [Hash] opts
+    def search_by_id(id, opts = {})
+      opts[:rows] = 1
+      result = search_with_conditions({ id: id }, opts)
+
+      if result.empty?
+        raise ActiveFedora::ObjectNotFoundError, "Object #{id} not found in solr"
+      end
+
+      result.first
+    end
+
     # @deprecated
     def find_with_conditions(*args)
       Deprecation.warn(ActiveFedora::Base, '.find_with_conditions is deprecated and will be removed in active-fedora 10.0; use .search_with_conditions instead')
