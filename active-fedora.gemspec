@@ -15,6 +15,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version     = '>= 1.9.3'
 
   s.add_dependency 'rsolr', '~> 1.0', '>= 1.0.10'
+  s.add_dependency 'solrizer', '~> 3.4'
   s.add_dependency 'om', '~> 3.1'
   s.add_dependency 'nom-xml', '>= 0.5.1'
   s.add_dependency "activesupport", '>= 4.1.0'
