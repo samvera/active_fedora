@@ -14,6 +14,7 @@ module ActiveFedora
     end
 
     def self.find_graph_predicate(predicate)
+      Deprecation.warn("find_graph_predicate has been deprecated and will be removed in ActiveFedora 10.0")
       # TODO, these could be cached
       case predicate
       when :has_model, "hasModel", :hasModel
@@ -42,6 +43,7 @@ module ActiveFedora
     end
 
     def self.vocabularies(vocabs = {})
+      Deprecation.warn("vocabularies has been deprecated and will be removed in ActiveFedora 10.0")
       @vocabularies ||= vocabs
       predicate_mappings.keys.each do |ns|
         @vocabularies[ns] = ::RDF::Vocabulary.new(ns) unless @vocabularies.key? ns
@@ -75,6 +77,7 @@ module ActiveFedora
     end
 
     def self.predicate_namespaces
+      Deprecation.warn("predicate_namespaces has been deprecated and will be removed in ActiveFedora 10.0")
       predicate_config[:predicate_namespaces] ||= {}
     end
 
