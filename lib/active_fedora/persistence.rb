@@ -205,7 +205,7 @@ module ActiveFedora
 
       def save_contained_resources
         contained_resources.changed.each do |_, resource|
-          resource.save
+          resource.save(container: self)
         end
       end
 
