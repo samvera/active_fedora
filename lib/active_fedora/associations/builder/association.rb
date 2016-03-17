@@ -30,11 +30,22 @@ module ActiveFedora::Associations::Builder
       end
 
       extension = define_extensions model, name, &block
-      reflection = new(model, name, options).build
+      reflection = create_reflection model, name, nil, options, extension
       define_accessors(model, reflection)
       define_callbacks(model, reflection)
       define_validations model, reflection
       reflection
+    end
+
+    def self.create_reflection(model, name, _scope, options, _extension = nil)
+      unless name.is_a?(Symbol)
+        name = name.to_sym
+        Deprecation.warn(ActiveFedora::Base, "association names must be a Symbol")
+      end
+
+      validate_options(options)
+
+      new(model, name, options).build
     end
 
     def initialize(model, name, options)
