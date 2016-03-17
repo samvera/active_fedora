@@ -1,19 +1,33 @@
 module ActiveFedora::Associations::Builder
   class Association #:nodoc:
-    class_attribute :valid_options
-    self.valid_options = [:class_name, :predicate, :type_validator]
+    class << self
+      attr_accessor :extensions
+    end
+    self.extensions = []
+
+    VALID_OPTIONS = [:class_name, :predicate, :type_validator].freeze
 
     def self.macro
       raise NotImplementedError
     end
 
+    def self.valid_options(_options)
+      VALID_OPTIONS + Association.extensions.flat_map(&:valid_options)
+    end
+
+    def self.validate_options(options)
+      options.assert_valid_keys(valid_options(options))
+    end
+
     attr_reader :model, :name, :options, :mixin
 
     # configure_dependency
-    def self.build(model, name, options)
+    def self.build(model, name, options, &block)
+      extension = define_extensions model, name, &block
       reflection = new(model, name, options).build
       define_accessors(model, reflection)
       define_callbacks(model, reflection)
+      define_validations model, reflection
       reflection
     end
 
@@ -37,7 +51,7 @@ module ActiveFedora::Associations::Builder
     end
 
     def validate_options
-      options.assert_valid_keys(self.class.valid_options)
+      self.class.validate_options(options)
     end
 
     # Returns the RDF predicate as defined by the :property attribute
@@ -46,13 +60,26 @@ module ActiveFedora::Associations::Builder
       ActiveFedora::Predicates.find_graph_predicate(property)
     end
 
+    def self.define_extensions(_model, _name)
+    end
+
     def self.define_callbacks(model, reflection)
       if dependent = reflection.options[:dependent]
         check_dependent_options(dependent)
         add_destroy_callbacks(model, reflection)
       end
+
+      Association.extensions.each do |extension|
+        extension.build model, reflection
+      end
     end
 
+    # Defines the setter and getter methods for the association
+    # class Post < ActiveRecord::Base
+    #   has_many :comments
+    # end
+    #
+    # Post.first.comments and Post.first.comments= methods are defined by this method...
     def self.define_accessors(model, reflection)
       mixin = model.generated_association_methods
       name = reflection.name
@@ -61,15 +88,28 @@ module ActiveFedora::Associations::Builder
     end
 
     def self.define_readers(mixin, name)
-      mixin.send(:define_method, name) do |*params|
-        association(name).reader(*params)
-      end
+      mixin.class_eval <<-CODE, __FILE__, __LINE__ + 1
+        def #{name}(*args)
+          association(:#{name}).reader(*args)
+        end
+      CODE
     end
 
     def self.define_writers(mixin, name)
-      mixin.send(:define_method, "#{name}=") do |value|
-        association(name).writer(value)
-      end
+      mixin.class_eval <<-CODE, __FILE__, __LINE__ + 1
+        def #{name}=(value)
+          association(:#{name}).writer(value)
+        end
+      CODE
+    end
+
+    def self.define_validations(_model, _reflection)
+      # noop
+    end
+
+    def self.add_destroy_callbacks(model, reflection)
+      name = reflection.name
+      model.before_destroy lambda { |o| o.association(name).handle_dependency }
     end
 
     def configure_dependency

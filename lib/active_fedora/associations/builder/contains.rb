@@ -4,7 +4,9 @@ module ActiveFedora::Associations::Builder
       :contains
     end
 
-    self.valid_options += [:autocreate, :block]
+    def self.valid_options(options)
+      super + [:autocreate, :block]
+    end
 
     def initialize(model, name, options)
       super

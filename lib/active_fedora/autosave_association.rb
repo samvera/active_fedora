@@ -75,24 +75,20 @@ module ActiveFedora
   module AutosaveAssociation
     extend ActiveSupport::Concern
 
-    ASSOCIATION_TYPES = %w( HasMany BelongsTo HasAndBelongsToMany DirectlyContains IndirectlyContains).freeze
+    ASSOCIATION_TYPES = [:has_many, :belongs_to, :has_and_belongs_to_many, :directly_contains, :indirectly_contains].freeze
 
     module AssociationBuilderExtension #:nodoc:
-      def self.included(base)
-        base.valid_options << :autosave
+      def self.valid_options
+        [:autosave]
       end
 
-      def build
-        reflection = super
-        model.send(:add_autosave_association_callbacks, reflection)
-        reflection
+      def self.build(model, reflection)
+        model.send(:add_autosave_association_callbacks, reflection) if ASSOCIATION_TYPES.include? reflection.macro
       end
     end
 
     included do
-      ASSOCIATION_TYPES.each do |type|
-        Associations::Builder.const_get(type).send(:include, AssociationBuilderExtension)
-      end
+      Associations::Builder::Association.extensions << AssociationBuilderExtension
     end
 
     module ClassMethods

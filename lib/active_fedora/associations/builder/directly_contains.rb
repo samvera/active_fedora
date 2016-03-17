@@ -4,8 +4,9 @@ module ActiveFedora::Associations::Builder
       :directly_contains
     end
 
-    self.valid_options += [:has_member_relation, :is_member_of_relation]
-    self.valid_options -= [:predicate]
+    def self.valid_options(options)
+      super + [:has_member_relation, :is_member_of_relation] - [:predicate]
+    end
 
     def build
       reflection = super

@@ -4,7 +4,9 @@ module ActiveFedora::Associations::Builder
       :rdf
     end
 
-    self.valid_options = [:class_name, :predicate, :type_validator]
+    def self.valid_options(options)
+      super
+    end
 
     def initialize(model, name, options)
       super

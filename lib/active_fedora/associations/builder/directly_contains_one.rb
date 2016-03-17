@@ -4,8 +4,9 @@ module ActiveFedora::Associations::Builder
       :directly_contains_one
     end
 
-    self.valid_options += [:has_member_relation, :is_member_of_relation, :type, :through]
-    self.valid_options -= [:predicate]
+    def self.valid_options(options)
+      super + [:has_member_relation, :is_member_of_relation, :type, :through] - [:predicate]
+    end
 
     def validate_options
       raise ArgumentError, "you must specify a :through option on #{name}.  #{name} will use the container from that directly_contains association." unless options[:through]
