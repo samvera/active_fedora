@@ -115,7 +115,10 @@ module ActiveFedora::Associations::Builder
 
     def self.add_destroy_callbacks(model, reflection)
       name = reflection.name
-      model.before_destroy lambda { |o| o.association(name).handle_dependency }
+      model.before_destroy lambda do |o|
+        a = o.association(name)
+        a.handle_dependency if a.respond_to? :handle_dependency
+      end
     end
 
     def self.valid_dependent_options
@@ -130,6 +133,8 @@ module ActiveFedora::Associations::Builder
 
     def configure_dependency
       return unless options[:dependent]
+      return if model.association(name).respond_to? :handle_dependency
+
       unless [:destroy, :delete].include?(options[:dependent])
         raise ArgumentError, "The :dependent option expects either :destroy or :delete (#{options[:dependent].inspect})"
       end
