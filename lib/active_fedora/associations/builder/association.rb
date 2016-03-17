@@ -23,6 +23,12 @@ module ActiveFedora::Associations::Builder
 
     # configure_dependency
     def self.build(model, name, options, &block)
+      if model.dangerous_attribute_method?(name)
+        Deprecation.warn(ActiveFedora::Base, "You tried to define an association named #{name} on the model #{model.name}, but " \
+                             "this will conflict with a method #{name} already defined by ActiveFedora. " \
+                             "Please choose a different association name.")
+      end
+
       extension = define_extensions model, name, &block
       reflection = new(model, name, options).build
       define_accessors(model, reflection)

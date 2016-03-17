@@ -110,6 +110,24 @@ module ActiveFedora
         include @generated_attribute_methods
       end
 
+      # A method name is 'dangerous' if it is already (re)defined by Active Fedora, but
+      # not by any ancestors. (So 'puts' is not dangerous but 'save' is.)
+      def dangerous_attribute_method?(name) # :nodoc:
+        method_defined_within?(name, Base)
+      end
+
+      def method_defined_within?(name, klass, superklass = klass.superclass) # :nodoc:
+        if klass.method_defined?(name) || klass.private_method_defined?(name)
+          if superklass.method_defined?(name) || superklass.private_method_defined?(name)
+            klass.instance_method(name).owner != superklass.instance_method(name).owner
+          else
+            true
+          end
+        else
+          false
+        end
+      end
+
       private
 
         # @param name [Symbol] name of the attribute to generate

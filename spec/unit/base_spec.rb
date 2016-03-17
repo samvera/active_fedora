@@ -333,4 +333,24 @@ describe ActiveFedora::Base do
       end
     end
   end
+
+  describe '.dangerous_attribute_method?' do
+    before do
+      class FooHistory < ActiveFedora::Base
+        type ::RDF::URI.new('http://example.com/foo')
+        property :title, predicate: ::RDF::Vocab::DC.title
+      end
+    end
+    after do
+      Object.send(:remove_const, :FooHistory)
+    end
+
+    it 'is dangerous if it is defined by the class' do
+      expect(FooHistory.dangerous_attribute_method?(:save)).to eq true
+    end
+
+    it 'is not dangerous if it is defined outside of ActiveFedora' do
+      expect(FooHistory.dangerous_attribute_method?(:puts)).to eq false
+    end
+  end
 end
