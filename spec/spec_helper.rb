@@ -1,15 +1,11 @@
 ENV["environment"] ||= 'test'
 require "bundler/setup"
 
-if ENV["COVERAGE"]
-  require 'simplecov'
-  require 'coveralls'
+require 'simplecov'
+require 'coveralls'
 
-  SimpleCov.formatter = Coveralls::SimpleCov::Formatter
-  SimpleCov.start do
-    add_filter "/spec/"
-    add_filter "/gemfiles/"
-  end
+SimpleCov.start do
+  add_filter "/spec/"
 end
 
 require 'active-fedora'
