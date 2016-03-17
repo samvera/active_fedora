@@ -118,6 +118,16 @@ module ActiveFedora::Associations::Builder
       model.before_destroy lambda { |o| o.association(name).handle_dependency }
     end
 
+    def self.valid_dependent_options
+      raise NotImplementedError
+    end
+
+    def self.check_dependent_options(dependent)
+      unless valid_dependent_options.include? dependent
+        raise ArgumentError, "The :dependent option must be one of #{valid_dependent_options}, but is :#{dependent}"
+      end
+    end
+
     def configure_dependency
       return unless options[:dependent]
       unless [:destroy, :delete].include?(options[:dependent])
