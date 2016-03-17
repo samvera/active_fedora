@@ -1,6 +1,9 @@
 module ActiveFedora::Associations::Builder
   class DirectlyContains < CollectionAssociation #:nodoc:
-    self.macro = :directly_contains
+    def self.macro
+      :directly_contains
+    end
+
     self.valid_options += [:has_member_relation, :is_member_of_relation]
     self.valid_options -= [:predicate]
 

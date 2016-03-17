@@ -1,6 +1,9 @@
 module ActiveFedora::Associations::Builder
   class Property < Association
-    self.macro = :rdf
+    def self.macro
+      :rdf
+    end
+
     self.valid_options = [:class_name, :predicate, :type_validator]
 
     def initialize(model, name, options)

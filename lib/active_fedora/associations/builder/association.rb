@@ -3,8 +3,9 @@ module ActiveFedora::Associations::Builder
     class_attribute :valid_options
     self.valid_options = [:class_name, :predicate, :type_validator]
 
-    # Set by subclasses
-    class_attribute :macro
+    def self.macro
+      raise NotImplementedError
+    end
 
     attr_reader :model, :name, :options, :mixin
 

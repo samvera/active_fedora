@@ -1,6 +1,9 @@
 module ActiveFedora::Associations::Builder
   class DirectlyContainsOne < SingularAssociation #:nodoc:
-    self.macro = :directly_contains_one
+    def self.macro
+      :directly_contains_one
+    end
+
     self.valid_options += [:has_member_relation, :is_member_of_relation, :type, :through]
     self.valid_options -= [:predicate]
 

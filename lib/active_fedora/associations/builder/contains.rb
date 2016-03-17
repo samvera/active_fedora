@@ -1,6 +1,9 @@
 module ActiveFedora::Associations::Builder
   class Contains < SingularAssociation #:nodoc:
-    self.macro = :contains
+    def self.macro
+      :contains
+    end
+
     self.valid_options += [:autocreate, :block]
 
     def initialize(model, name, options)
