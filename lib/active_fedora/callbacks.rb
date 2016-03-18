@@ -227,21 +227,21 @@ module ActiveFedora
     end
 
     def destroy(*) #:nodoc:
-      run_callbacks(:destroy) { super }
+      _run_destroy_callbacks { super }
     end
 
     private
 
+      def create_or_update(*)
+        _run_save_callbacks { super }
+      end
+
       def create_record(*) #:nodoc:
-        run_callbacks(:create) do
-          run_callbacks(:save) { super }
-        end
+        _run_create_callbacks { super }
       end
 
       def update_record(*) #:nodoc:
-        run_callbacks(:update) do
-          run_callbacks(:save) { super }
-        end
+        _run_update_callbacks { super }
       end
   end
 end
