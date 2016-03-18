@@ -98,7 +98,7 @@ describe "Indirect containers" do
     context "when the class is implied" do
       before do
         class FooHistory < ActiveFedora::Base
-          # TODO: inserted_content_relation can look up the predicate at options[:through].constantize.reflect_on_association(options[:foreign_key]).predicate
+          # TODO: inserted_content_relation can look up the predicate at options[:through].constantize._reflect_on_association(options[:foreign_key]).predicate
           indirectly_contains :related_objects,
                               has_member_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/aggregates'),
                               inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'),

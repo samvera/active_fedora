@@ -66,7 +66,7 @@ module ActiveFedora
 
         # Returns the Reflection corresponding to the direct container association that's being filtered
         def container_reflection
-          @container_reflection ||= @owner.class.reflect_on_association(@reflection.options[:through])
+          @container_reflection ||= @owner.class._reflect_on_association(@reflection.options[:through])
         end
 
         # Returns the DirectContainerAssociation corresponding to the direct container that's being filtered

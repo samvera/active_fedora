@@ -50,10 +50,10 @@ module ActiveFedora
 
       # Returns the AssociationReflection object for the +association+ (use the symbol).
       #
-      #   Account.reflect_on_association(:owner)             # returns the owner AssociationReflection
-      #   Invoice.reflect_on_association(:line_items).macro  # returns :has_many
+      #   Account._reflect_on_association(:owner)             # returns the owner AssociationReflection
+      #   Invoice._reflect_on_association(:line_items).macro  # returns :has_many
       #
-      def reflect_on_association(association)
+      def _reflect_on_association(association)
         val = reflections[association].is_a?(AssociationReflection) ? reflections[association] : nil
         unless val
           # When a has_many is paired with a has_and_belongs_to_many the assocation will have a plural name
@@ -92,7 +92,7 @@ module ActiveFedora
       #     has_many :books
       #   end
       #
-      #   Author.reflect_on_association(:books).klass
+      #   Author._reflect_on_association(:books).klass
       #   # => Book
       #
       # <b>Note:</b> Do not call +klass.new+ or +klass.create+ to instantiate
@@ -108,6 +108,12 @@ module ActiveFedora
         @options = options
         @active_fedora = active_fedora
         @automatic_inverse_of = nil
+      end
+
+      def autosave=(autosave)
+        @options[:autosave] = autosave
+        parent_reflection = self.parent_reflection
+        parent_reflection.autosave = autosave if parent_reflection
       end
 
       # Returns a new, unsaved instance of the associated class. +options+ will
@@ -171,6 +177,8 @@ module ActiveFedora
     # Holds all the meta-data about an association as it was specified in the
     # Active Record class.
     class AssociationReflection < MacroReflection #:nodoc:
+      attr_accessor :parent_reflection # Reflection
+
       def initialize(macro, name, options, active_fedora)
         super
         @collection = [:has_many, :has_and_belongs_to_many, :directly_contains, :indirectly_contains].include?(macro)
@@ -226,7 +234,7 @@ module ActiveFedora
       def inverse_of
         return unless inverse_name
 
-        @inverse_of ||= klass.reflect_on_association inverse_name
+        @inverse_of ||= klass._reflect_on_association inverse_name
       end
 
       # Returns whether or not the association should be validated as part of
@@ -299,7 +307,7 @@ module ActiveFedora
             inverse_name = ActiveSupport::Inflector.underscore(options[:as] || active_fedora.name.demodulize).to_sym
 
             begin
-              reflection = klass.reflect_on_association(inverse_name)
+              reflection = klass._reflect_on_association(inverse_name)
             rescue NameError
               # Give up: we couldn't compute the klass type so we won't be able
               # to find any associations either.

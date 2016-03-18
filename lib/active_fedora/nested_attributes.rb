@@ -60,9 +60,9 @@ module ActiveFedora
         options[:reject_if] = REJECT_ALL_BLANK_PROC if options[:reject_if] == :all_blank
 
         attr_names.each do |association_name|
-          if reflection = reflect_on_association(association_name)
-            reflection.options[:autosave] = true
-            add_autosave_association_callbacks(reflection)
+          if reflection = _reflect_on_association(association_name)
+            reflection.autosave = true
+            define_autosave_association_callbacks(reflection)
             ## TODO this ought to work, but doesn't seem to do the class inheritance right
 
             nested_attributes_options = self.nested_attributes_options.dup
