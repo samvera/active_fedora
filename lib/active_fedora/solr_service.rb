@@ -99,7 +99,7 @@ module ActiveFedora
       #   construct_query_for_rel [[:has_model, "info:fedora/afmodel:ComplexCollection"], [:has_model, "info:fedora/afmodel:ActiveFedora_Base"]], 'OR'
       #   # => _query_:"{!field f=has_model_ssim}info:fedora/afmodel:ComplexCollection" OR _query_:"{!field f=has_model_ssim}info:fedora/afmodel:ActiveFedora_Base"
       #
-      #   construct_query_for_rel [[Book.reflect_on_association(:library), "foo/bar/baz"]]
+      #   construct_query_for_rel [[Book._reflect_on_association(:library), "foo/bar/baz"]]
       def construct_query_for_rel(field_pairs, join_with = 'AND')
         Deprecation.warn SolrService, "SolrService.construct_query_for_rel is deprecated. Use SolrQueryBuilder.construct_query_for_rel instead. This will be removed in active-fedora 10.0"
         SolrQueryBuilder.construct_query_for_rel(field_pairs, join_with)

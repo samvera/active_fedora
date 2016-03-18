@@ -83,7 +83,7 @@ module ActiveFedora
       end
 
       def self.build(model, reflection)
-        model.send(:add_autosave_association_callbacks, reflection) if ASSOCIATION_TYPES.include? reflection.macro
+        model.send(:define_autosave_association_callbacks, reflection) if ASSOCIATION_TYPES.include? reflection.macro
       end
     end
 
@@ -123,7 +123,7 @@ module ActiveFedora
         # the callbacks to get defined multiple times, there are guards that
         # check if the save or validation methods have already been defined
         # before actually defining them.
-        def add_autosave_association_callbacks(reflection)
+        def define_autosave_association_callbacks(reflection)
           save_method = :"autosave_associated_records_for_#{reflection.name}"
           validation_method = :"validate_associated_records_for_#{reflection.name}"
           collection = reflection.collection?

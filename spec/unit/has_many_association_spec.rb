@@ -65,7 +65,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
     end
 
     let(:owner) { TimeSpan.new }
-    let(:reflection) { TimeSpan.reflect_on_association(:images) }
+    let(:reflection) { TimeSpan._reflect_on_association(:images) }
 
     it "finds the predicate" do
       expect { described_class.new(owner, reflection) }.not_to raise_error

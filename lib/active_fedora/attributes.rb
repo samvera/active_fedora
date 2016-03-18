@@ -239,7 +239,7 @@ module ActiveFedora
           # @param [String] dsid the datastream id
           # @return [Class] the class of the datastream
           def datastream_class_for_name(dsid)
-            reflection = reflect_on_association(dsid.to_sym)
+            reflection = _reflect_on_association(dsid.to_sym)
             reflection ? reflection.klass : ActiveFedora::File
           end
 

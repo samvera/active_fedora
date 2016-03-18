@@ -395,7 +395,7 @@ describe ActiveFedora::Base do
       end
 
       context "when the has_and_belongs_to_many provides an inverse_of" do
-        let(:reflection) { Component.reflect_on_association(:items) }
+        let(:reflection) { Component._reflect_on_association(:items) }
         before do
           reflection.options[:inverse_of] = :components
         end

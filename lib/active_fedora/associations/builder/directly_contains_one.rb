@@ -38,7 +38,7 @@ module ActiveFedora::Associations::Builder
       end
 
       def lookup_reflection(association_name)
-        model.reflect_on_association(association_name)
+        model._reflect_on_association(association_name)
       end
   end
 end
