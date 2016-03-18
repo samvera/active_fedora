@@ -65,6 +65,7 @@ Metrics/ModuleLength:
     - 'lib/active_fedora/attributes.rb'
     - 'lib/active_fedora/autosave_association.rb'
     - 'lib/active_fedora/attached_files.rb'
+    - 'lib/active_fedora/nested_attributes.rb'
 
 Metrics/ClassLength:
   Exclude:

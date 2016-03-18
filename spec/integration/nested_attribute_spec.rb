@@ -102,6 +102,12 @@ describe "NestedAttribute behavior" do
         it "creates a new record" do
           expect {
             car.update bars_attributes: [{ uno: "bar1 uno", _destroy: "1" }]
+          }.to change { car.bars(true).count }.by(1)
+        end
+
+        it "does not create a new record if reject_if conditions are triggered" do
+          expect {
+            car.update bars_attributes: [{ uno: "", _destroy: "1" }]
           }.not_to change { car.bars(true).count }
         end
       end

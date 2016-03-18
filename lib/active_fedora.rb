@@ -126,6 +126,7 @@ module ActiveFedora #:nodoc:
     autoload :SolrService
     autoload :SparqlInsert
     autoload :Predicates
+    autoload :Type
     autoload :Validations
     autoload :Versionable
     autoload :VersionsGraph

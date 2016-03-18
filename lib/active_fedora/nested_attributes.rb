@@ -70,10 +70,8 @@ module ActiveFedora
             self.nested_attributes_options = nested_attributes_options
 
             type = (reflection.collection? ? :collection : :one_to_one)
+            generate_association_writer(association_name, type)
 
-            # def pirate_attributes=(attributes)
-            #   assign_nested_attributes_for_one_to_one_association(:pirate, attributes)
-            # end
             class_eval <<-eoruby, __FILE__, __LINE__ + 1
               remove_possible_method(:#{association_name}_attributes=)
 
@@ -83,6 +81,7 @@ module ActiveFedora
             eoruby
           elsif reflect_on_property(association_name)
             resource_class.accepts_nested_attributes_for(association_name, options)
+            generate_property_writer(association_name, type)
 
             # Delegate the setter to the resource.
             class_eval <<-eoruby, __FILE__, __LINE__ + 1
@@ -98,6 +97,53 @@ module ActiveFedora
           end
         end
       end
+
+      private
+
+        # Generates a writer method for this association. Serves as a point for
+        # accessing the objects in the association. For example, this method
+        # could generate the following:
+        #
+        #   def pirate_attributes=(attributes)
+        #     assign_nested_attributes_for_one_to_one_association(:pirate, attributes)
+        #   end
+        #
+        # This redirects the attempts to write objects in an association through
+        # the helper methods defined below. Makes it seem like the nested
+        # associations are just regular associations.
+        def generate_association_writer(association_name, type)
+          generated_association_methods.module_eval <<-eoruby, __FILE__, __LINE__ + 1
+            if method_defined?(:#{association_name}_attributes=)
+              remove_method(:#{association_name}_attributes=)
+            end
+            def #{association_name}_attributes=(attributes)
+              assign_nested_attributes_for_#{type}_association(:#{association_name}, attributes)
+            end
+          eoruby
+        end
+
+        # Generates a writer method for this association. Serves as a point for
+        # accessing the objects in the association. For example, this method
+        # could generate the following:
+        #
+        #   def pirate_attributes=(attributes)
+        #     assign_nested_attributes_for_one_to_one_association(:pirate, attributes)
+        #   end
+        #
+        # This redirects the attempts to write objects in an association through
+        # the helper methods defined below. Makes it seem like the nested
+        # associations are just regular associations.
+        def generate_property_writer(association_name, _type)
+          generated_association_methods.module_eval <<-eoruby, __FILE__, __LINE__ + 1
+            if method_defined?(:#{association_name}_attributes=)
+              remove_method(:#{association_name}_attributes=)
+            end
+            def #{association_name}_attributes=(attributes)
+              attribute_will_change!(:#{association_name})
+              resource.#{association_name}_attributes=(attributes)
+            end
+          eoruby
+        end
     end
 
     # Returns ActiveFedora::Base#marked_for_destruction? It's
@@ -115,12 +161,62 @@ module ActiveFedora
       # These hash keys are nested attributes implementation details.
       UNASSIGNABLE_KEYS = %w( id _destroy ).freeze
 
+      # Assigns the given attributes to the association.
+      #
+      # If an associated record does not yet exist, one will be instantiated. If
+      # an associated record already exists, the method's behavior depends on
+      # the value of the update_only option. If update_only is +false+ and the
+      # given attributes include an <tt>:id</tt> that matches the existing record's
+      # id, then the existing record will be modified. If no <tt>:id</tt> is provided
+      # it will be replaced with a new record. If update_only is +true+ the existing
+      # record will be modified regardless of whether an <tt>:id</tt> is provided.
+      #
+      # If the given attributes include a matching <tt>:id</tt> attribute, or
+      # update_only is true, and a <tt>:_destroy</tt> key set to a truthy value,
+      # then the existing record will be marked for destruction.
+      def assign_nested_attributes_for_one_to_one_association(association_name, attributes)
+        options = nested_attributes_options[association_name]
+
+        attributes = attributes.to_h if attributes.respond_to?(:permitted?)
+        attributes = attributes.with_indifferent_access
+        existing_record = send(association_name)
+
+        if (options[:update_only] || !attributes['id'].blank?) && existing_record &&
+           (options[:update_only] || existing_record.id.to_s == attributes['id'].to_s)
+          assign_to_or_mark_for_destruction(existing_record, attributes, options[:allow_destroy]) unless call_reject_if(association_name, attributes)
+
+        elsif attributes['id'].present?
+          raise_nested_attributes_record_not_found!(association_name, attributes['id'])
+
+        elsif !reject_new_record?(association_name, attributes)
+          assignable_attributes = attributes.except(*UNASSIGNABLE_KEYS)
+
+          if existing_record && existing_record.new_record?
+            existing_record.assign_attributes(assignable_attributes)
+            association(association_name).initialize_attributes(existing_record)
+          else
+            method = "build_#{association_name}"
+            if respond_to?(method)
+              send(method, assignable_attributes)
+            else
+              raise ArgumentError, "Cannot build association `#{association_name}'. Are you trying to build a polymorphic one-to-one association?"
+            end
+          end
+        end
+      end
+
       def assign_nested_attributes_for_collection_association(association_name, attributes_collection)
         options = nested_attributes_options[association_name]
 
-        if options[:limit] && attributes_collection.size > options[:limit]
-          raise TooManyRecords, "Maximum #{options[:limit]} records are allowed. Got #{attributes_collection.size} records instead."
+        if attributes_collection.respond_to?(:permitted?)
+          attributes_collection = attributes_collection.to_h
         end
+
+        unless attributes_collection.is_a?(Hash) || attributes_collection.is_a?(Array)
+          raise ArgumentError, "Hash or Array expected, got #{attributes_collection.class.name} (#{attributes_collection.inspect})"
+        end
+
+        check_record_limit!(options[:limit], attributes_collection)
 
         if attributes_collection.is_a? Hash
           keys = attributes_collection.keys
@@ -134,13 +230,14 @@ module ActiveFedora
         association = send(association_name)
 
         existing_records = if association.loaded?
-                             association.to_a
+                             association.target
                            else
                              attribute_ids = attributes_collection.map { |a| a['id'] || a[:id] }.compact
                              attribute_ids.present? ? association.to_a.select { |x| attribute_ids.include?(x.id) } : []
                            end
 
         attributes_collection.each do |attributes|
+          attributes = attributes.to_h if attributes.respond_to?(:permitted)
           attributes = attributes.with_indifferent_access
 
           if attributes['id'].blank?
@@ -156,9 +253,29 @@ module ActiveFedora
             end
 
           else
-            raise_nested_attributes_record_not_found(association_name, attributes['id'])
+            raise_nested_attributes_record_not_found!(association_name, attributes['id'])
           end
         end
+      end
+
+      # Takes in a limit and checks if the attributes_collection has too many
+      # records. It accepts limit in the form of symbol, proc, or
+      # number-like object (anything that can be compared with an integer).
+      #
+      # Raises TooManyRecords error if the attributes_collection is
+      # larger than the limit.
+      def check_record_limit!(limit, attributes_collection)
+        return unless limit
+        limit = case limit
+                when Symbol
+                  send(limit)
+                when Proc
+                  limit.call
+                else
+                  limit
+                end
+
+        raise TooManyRecords, "Maximum #{limit} records are allowed. Got #{attributes_collection.size} records instead." if limit && attributes_collection.size > limit
       end
 
       # Updates a record with the +attributes+ or marks it for destruction if
@@ -170,19 +287,14 @@ module ActiveFedora
 
       # Determines if a hash contains a truthy _destroy key.
       def has_destroy_flag?(hash)
-        ["1", "true"].include?(hash['_destroy'].to_s)
+        Type::Boolean.new.cast(hash['_destroy'])
       end
 
       # Determines if a new record should be rejected by checking
       # has_destroy_flag? or if a <tt>:reject_if</tt> proc exists for this
       # association and evaluates to +true+.
       def reject_new_record?(association_name, attributes)
-        has_destroy_flag?(attributes) || call_reject_if(association_name, attributes)
-      end
-
-      def raise_nested_attributes_record_not_found(association_name, record_id)
-        reflection = self.class.reflect_on_association(association_name)
-        raise ObjectNotFoundError, "Couldn't find #{reflection.klass.name} with ID=#{record_id} for #{self.class.name} with ID=#{id}"
+        will_be_destroyed?(association_name, attributes) || call_reject_if(association_name, attributes)
       end
 
       # Determines if a record with the particular +attributes+ should be
@@ -191,14 +303,29 @@ module ActiveFedora
       #
       # Returns false if there is a +destroy_flag+ on the attributes.
       def call_reject_if(association_name, attributes)
+        return false if will_be_destroyed?(association_name, attributes)
+
         opts = nested_attributes_options[association_name]
-        return false if has_destroy_flag?(attributes) && opts[:allow_destroy]
         case callback = opts[:reject_if]
         when Symbol
           method(callback).arity == 0 ? send(callback) : send(callback, attributes)
         when Proc
           callback.call(attributes)
         end
+      end
+
+      # Only take into account the destroy flag if <tt>:allow_destroy</tt> is true
+      def will_be_destroyed?(association_name, attributes)
+        allow_destroy?(association_name) && has_destroy_flag?(attributes)
+      end
+
+      def allow_destroy?(association_name)
+        nested_attributes_options[association_name][:allow_destroy]
+      end
+
+      def raise_nested_attributes_record_not_found!(association_name, record_id)
+        reflection = self.class._reflect_on_association(association_name).klass.name
+        raise ObjectNotFoundError, "Couldn't find #{reflection.klass.name} with ID=#{record_id} for #{self.class.name} with ID=#{id}"
       end
   end
 end
