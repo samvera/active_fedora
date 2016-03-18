@@ -14,9 +14,10 @@ module ActiveFedora
 
     include ActiveFedora::File::Attributes
     include ActiveFedora::File::Streaming
-    include ActiveFedora::Persistence
+    include ActiveFedora::FilePersistence
     include ActiveFedora::Versionable
     include ActiveModel::Dirty
+    include ActiveFedora::Callbacks
     include AttributeMethods # allows 'content' to be tracked
     include Identifiable
     include Scoping
@@ -190,10 +191,6 @@ module ActiveFedora
       false
     end
 
-    def destroy(*)
-      run_callbacks(:destroy) { super }
-    end
-
     def self.relation
       FileRelation.new(self)
     end
@@ -222,32 +219,6 @@ module ActiveFedora
         headers = { 'Content-Type'.freeze => mime_type, 'Content-Length'.freeze => content.size.to_s }
         headers['Content-Disposition'.freeze] = "attachment; filename=\"#{URI.encode(@original_name)}\"" if @original_name
         headers
-      end
-
-      def _create_record(_options = {})
-        run_callbacks(:create) do
-          run_callbacks(:save) do
-            return false if content.nil?
-            ldp_source.content = content
-            ldp_source.create do |req|
-              req.headers.merge!(ldp_headers)
-            end
-            refresh
-          end
-        end
-      end
-
-      def _update_record(_options = {})
-        run_callbacks(:update) do
-          run_callbacks(:save) do
-            return true unless content_changed?
-            ldp_source.content = content
-            ldp_source.update do |req|
-              req.headers.merge!(ldp_headers)
-            end
-            refresh
-          end
-        end
       end
 
       def build_ldp_resource(id)
