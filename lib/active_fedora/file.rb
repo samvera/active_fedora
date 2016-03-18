@@ -224,7 +224,7 @@ module ActiveFedora
         headers
       end
 
-      def create_record(_options = {})
+      def _create_record(_options = {})
         run_callbacks(:create) do
           run_callbacks(:save) do
             return false if content.nil?
@@ -237,7 +237,7 @@ module ActiveFedora
         end
       end
 
-      def update_record(_options = {})
+      def _update_record(_options = {})
         run_callbacks(:update) do
           run_callbacks(:save) do
             return true unless content_changed?

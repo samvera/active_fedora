@@ -212,7 +212,7 @@ module ActiveFedora
         if attrs.is_a?(Array)
           attrs.collect { |attr| create(attr) }
         else
-          create_record(attrs) do |record|
+          _create_record(attrs) do |record|
             yield(record) if block_given?
             record.save
           end
@@ -220,7 +220,7 @@ module ActiveFedora
       end
 
       def create!(attrs = {})
-        create_record(attrs) do |record|
+        _create_record(attrs) do |record|
           yield(record) if block_given?
           record.save!
         end
@@ -340,7 +340,7 @@ module ActiveFedora
           end
         end
 
-        def create_record(attributes, raise = false)
+        def _create_record(attributes, raise = false)
           attributes.update(@reflection.options[:conditions]) if @reflection.options[:conditions].is_a?(Hash)
           ensure_owner_is_not_new
 

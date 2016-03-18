@@ -149,12 +149,12 @@ module ActiveFedora
 
       def create_or_update(*args)
         raise ReadOnlyRecord if readonly?
-        result = new_record? ? create_record(*args) : update_record(*args)
+        result = new_record? ? _create_record(*args) : _update_record(*args)
         result != false
       end
 
       # Deals with preparing new object to be saved to Fedora, then pushes it and its attached files into Fedora.
-      def create_record(_options = {})
+      def _create_record(_options = {})
         assign_rdf_subject
         serialize_attached_files
         @ldp_source = @ldp_source.create
@@ -163,7 +163,7 @@ module ActiveFedora
         refresh
       end
 
-      def update_record(_options = {})
+      def _update_record(_options = {})
         serialize_attached_files
         execute_sparql_update
         save_contained_resources

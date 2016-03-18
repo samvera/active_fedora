@@ -47,7 +47,7 @@ describe ActiveFedora::Base do
   end
 
   describe "#save!" do
-    before { allow(subject).to receive(:create_record) } # prevent saving to Fedora/Solr
+    before { allow(subject).to receive(:_create_record) } # prevent saving to Fedora/Solr
 
     it "validates only once" do
       expect(subject).to receive(:perform_validations).once.and_return(true)
