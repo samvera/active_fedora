@@ -1,6 +1,8 @@
 module ActiveFedora::Associations::Builder
   class BelongsTo < SingularAssociation #:nodoc:
-    self.macro = :belongs_to
+    def self.macro
+      :belongs_to
+    end
 
     def validate_options
       super

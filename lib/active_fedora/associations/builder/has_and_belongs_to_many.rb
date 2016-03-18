@@ -1,9 +1,13 @@
 module ActiveFedora::Associations::Builder
   class HasAndBelongsToMany < CollectionAssociation #:nodoc:
     extend Deprecation
-    self.macro = :has_and_belongs_to_many
+    def self.macro
+      :has_and_belongs_to_many
+    end
 
-    self.valid_options += [:inverse_of, :solr_page_size]
+    def self.valid_options(options)
+      super + [:inverse_of, :solr_page_size]
+    end
 
     def validate_options
       super

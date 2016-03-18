@@ -74,6 +74,7 @@ Metrics/ClassLength:
     - 'lib/active_fedora/qualified_dublin_core_datastream.rb'
     - 'lib/active_fedora/file_configurator.rb'
     - 'lib/active_fedora/file.rb'
+    - 'lib/active_fedora/associations/builder/association.rb'
     - 'lib/active_fedora/associations/collection_proxy.rb'
     - 'lib/active_fedora/associations/collection_association.rb'
 

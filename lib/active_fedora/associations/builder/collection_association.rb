@@ -3,13 +3,14 @@ module ActiveFedora::Associations::Builder
   class CollectionAssociation < Association #:nodoc:
     CALLBACKS = [:before_add, :after_add, :before_remove, :after_remove].freeze
 
-    self.valid_options += [
-      :before_add, :after_add, :before_remove, :after_remove
-    ]
+    def self.valid_options(options)
+      super + CALLBACKS
+    end
 
     def self.define_callbacks(model, reflection)
       name = reflection.name
       options = reflection.options
+      super
       CALLBACKS.each { |callback_name| define_callback(model, callback_name, name, options) }
     end
 
