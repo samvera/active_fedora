@@ -71,4 +71,26 @@ describe ActiveFedora::Associations::HasManyAssociation do
       expect { described_class.new(owner, reflection) }.not_to raise_error
     end
   end
+
+  describe "scope" do
+    before do
+      class Library < ActiveFedora::Base
+        has_many :images
+      end
+
+      class Image < ActiveFedora::Base
+        belongs_to :library, predicate: ::RDF::URI('http://example.com/library')
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :Library)
+      Object.send(:remove_const, :Image)
+    end
+
+    context "of an unsaved target" do
+      subject { Library.new.images.scope }
+      it { is_expected.to be_kind_of ActiveFedora::NullRelation }
+    end
+  end
 end

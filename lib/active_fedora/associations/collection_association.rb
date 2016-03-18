@@ -14,7 +14,13 @@ module ActiveFedora
           force_reload = opts
         end
         reload if force_reload || stale_target?
-        @proxy ||= CollectionProxy.new(self)
+        if null_scope?
+          # Cache the proxy separately before the owner has an id
+          # or else a post-save proxy will still lack the id
+          @null_proxy ||= CollectionProxy.new(self)
+        else
+          @proxy ||= CollectionProxy.new(self)
+        end
       end
 
       # Implements the writer method, e.g. foo.items= for Foo.has_many :items
@@ -223,7 +229,7 @@ module ActiveFedora
       # Count all records using solr. Construct options and pass them with
       # scope to the target class's +count+.
       def count(_options = {})
-        @reflection.klass.count(conditions: construct_query)
+        scope.count
       end
 
       # Sets the target of this proxy to <tt>\target</tt>, and the \loaded flag to +true+.

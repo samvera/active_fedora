@@ -38,7 +38,7 @@ module ActiveFedora
       def initialize(association)
         @association = association
         super association.klass
-        merge! association.scope
+        merge! association.scope(nullify: false)
       end
 
       def target
