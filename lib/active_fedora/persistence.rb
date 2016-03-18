@@ -70,6 +70,17 @@ module ActiveFedora
       delete(*opts)
     end
 
+    # Deletes the record in the database and freezes this instance to reflect
+    # that no changes should be made (since they can't be persisted).
+    #
+    # There's a series of callbacks associated with #destroy!. If the
+    # <tt>before_destroy</tt> callback throws +:abort+ the action is cancelled
+    # and #destroy! raises ActiveFedora::RecordNotDestroyed.
+    # See ActiveFedora::Callbacks for further details.
+    def destroy!
+      destroy || _raise_record_not_destroyed
+    end
+
     def eradicate
       self.class.eradicate(id)
     end
@@ -157,6 +168,13 @@ module ActiveFedora
         execute_sparql_update
         save_contained_resources
         refresh
+      end
+
+      def _raise_record_not_destroyed
+        @_association_destroy_exception ||= nil
+        raise @_association_destroy_exception || RecordNotDestroyed.new("Failed to destroy the record", self)
+      ensure
+        @_association_destroy_exception = nil
       end
 
       def refresh

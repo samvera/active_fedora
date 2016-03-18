@@ -44,6 +44,25 @@ module ActiveFedora #:nodoc:
   class RecordNotSaved < ActiveFedoraError
   end
 
+  # Raised by {ActiveFedora::Base#destroy!}[rdoc-ref:Persistence#destroy!]
+  # when a call to {#destroy}[rdoc-ref:Persistence#destroy!]
+  # would return false.
+  #
+  #   begin
+  #     complex_operation_that_internally_calls_destroy!
+  #   rescue ActiveFedora::RecordNotDestroyed => invalid
+  #     puts invalid.record.errors
+  #   end
+  #
+  class RecordNotDestroyed < ActiveFedoraError
+    attr_reader :record
+
+    def initialize(message = nil, record = nil)
+      @record = record
+      super(message)
+    end
+  end
+
   # Raised on attempt to update record that is instantiated as read only.
   class ReadOnlyRecord < ActiveFedoraError
   end
