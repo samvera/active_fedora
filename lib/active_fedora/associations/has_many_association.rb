@@ -14,11 +14,7 @@ module ActiveFedora
       # If the collection is empty the target is set to an empty array and
       # the loaded flag is set to true as well.
       def count_records
-        count = if loaded?
-                  @target.size
-                else
-                  @reflection.klass.count(conditions: construct_query)
-                end
+        count = scope.count
 
         # If there's nothing in the database and @target has no new records
         # we are certain the current target is an empty array. This is a

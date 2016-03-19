@@ -27,6 +27,35 @@ describe ActiveFedora::Associations::HasManyAssociation do
         end
       end
 
+      context "when the owner is not saved, and potential targets (Books) exist" do
+        let!(:book) { Book.create }
+        let(:library) { Library.new }
+        subject { library.books.count }
+        it "it excludes the books that aren't associated" do
+          expect(subject).to eq 0
+        end
+      end
+
+      context "when the owner is saved with associations" do
+        let(:book) { Book.create }
+        let!(:library) { Library.create(books: [book]) }
+        subject { library.reload; library.books.count }
+        it "it excludes the books that are associated" do
+          expect(subject).to eq 1
+        end
+      end
+
+      context "when the owner is not saved after checking the count" do
+        let!(:book) { Book.create }
+        let(:library) { Library.new }
+        it "refreshes the cache" do
+          expect(library.books.count).to eq 0
+          library.books << book
+          library.save!
+          expect(library.books.count).to eq 1
+        end
+      end
+
       context "loading the association prior to a save that affects the association" do
         let(:library) { Library.new }
         before do
