@@ -82,6 +82,7 @@ module ActiveFedora #:nodoc:
     autoload :Indexing
     autoload :IndexingService
     autoload :InheritableAccessors
+    autoload :Inheritance
     autoload :InboundRelationConnection
     autoload :LdpCache
     autoload :LdpResource

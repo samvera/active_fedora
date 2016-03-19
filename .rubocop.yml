@@ -44,6 +44,8 @@ Metrics/CyclomaticComplexity:
     - 'lib/active_fedora/file.rb'
     - 'lib/active_fedora/datastreams/nokogiri_datastreams.rb'
     - 'lib/active_fedora/attribute_methods.rb'
+    - 'lib/active_fedora/scoping/named.rb'
+    - 'lib/active_fedora/inheritance.rb'
 
 Metrics/PerceivedComplexity:
   Exclude:
@@ -59,6 +61,8 @@ Metrics/PerceivedComplexity:
     - 'lib/active_fedora/associations/builder/directly_contains_one.rb'
     - 'lib/active_fedora/associations/collection_association.rb'
     - 'lib/active_fedora/attribute_methods.rb'
+    - 'lib/active_fedora/scoping/named.rb'
+    - 'lib/active_fedora/inheritance.rb'
 
 Metrics/ModuleLength:
   Exclude:
