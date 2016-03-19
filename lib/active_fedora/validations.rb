@@ -53,7 +53,7 @@ module ActiveFedora
     # Attempts to save the record just like Base#save but will raise a +RecordInvalid+ exception instead of returning false
     # if the record is not valid.
     def save!(options = {})
-      perform_validations(options) ? super : raise(RecordInvalid, self)
+      perform_validations(options) ? super : raise_validation_error
     end
 
     # Runs all the validations within the specified context. Returns true if no errors are found,
@@ -65,10 +65,12 @@ module ActiveFedora
     # Validations with no <tt>:on</tt> option will run no matter the context. Validations with
     # some <tt>:on</tt> option will only run in the specified context.
     def valid?(context = nil)
-      context ||= (new_record? ? :create : :update)
+      context ||= default_validation_context
       output = super(context)
       errors.empty? && output
     end
+
+    alias validate valid?
 
     # Test to see if the given field is required
     # @param [Symbol] key a field
@@ -79,9 +81,16 @@ module ActiveFedora
 
     protected
 
-      def perform_validations(options = {})
-        perform_validation = options[:validate] != false
-        perform_validation ? valid?(options[:context]) : true
+      def default_validation_context
+        new_record? ? :create : :update
+      end
+
+      def raise_validation_error
+        raise RecordInvalid, self
+      end
+
+      def perform_validations(options = {}) # :nodoc:
+        options[:validate] == false || valid?(options[:context])
       end
   end
 end
