@@ -11,8 +11,6 @@ describe ActiveFedora::Base do
   end
 
   let(:library) { Library.create! }
-  let!(:book1) { Book.create!(library: library) }
-  let!(:book2) { Book.create!(library: library) }
 
   after do
     Object.send(:remove_const, :Library)
@@ -20,6 +18,9 @@ describe ActiveFedora::Base do
   end
 
   describe "load_from_solr" do
+    let!(:book1) { Book.create!(library: library) }
+    let!(:book2) { Book.create!(library: library) }
+
     it "sets rows to count, if not specified" do
       expect(library.books(response_format: :solr).size).to eq 2
     end
@@ -35,6 +36,8 @@ describe ActiveFedora::Base do
   end
 
   describe "#delete_all" do
+    let!(:book1) { Book.create!(library: library) }
+    let!(:book2) { Book.create!(library: library) }
     it "deletes em" do
       expect {
         library.books.delete_all
@@ -59,6 +62,8 @@ describe ActiveFedora::Base do
   end
 
   describe "#destroy_all" do
+    let!(:book1) { Book.create!(library: library) }
+    let!(:book2) { Book.create!(library: library) }
     it "deletes em" do
       expect {
         library.books.destroy_all
@@ -67,6 +72,8 @@ describe ActiveFedora::Base do
   end
 
   describe "#find" do
+    let!(:book1) { Book.create!(library: library) }
+    let!(:book2) { Book.create!(library: library) }
     it "finds the record that matches" do
       expected = library.books.find(book1.id)
       expect(expected).to eq book1
@@ -80,12 +87,36 @@ describe ActiveFedora::Base do
   end
 
   describe "#select" do
+    let!(:book1) { Book.create!(library: library) }
+    let!(:book2) { Book.create!(library: library) }
+
     # TODO: Bug described in issue #609
-    xit "should choose a subset of objects in the relationship" do
+    xit "chooses a subset of objects in the relationship" do
       expect(library.books.select([:id])).to include(book1.id)
     end
     it "works as a block" do
       expect(library.books.select { |x| x.id == book1.id }).to eq [book1]
+    end
+  end
+
+  describe "#size" do
+    context "with associations in memory" do
+      context "and the association is already loaded" do
+        before do
+          library.books.to_a # force the association to be loaded
+          library.books.build
+        end
+        subject { library.books.size }
+        it { is_expected.to eq 1 }
+      end
+
+      context "and the association is not loaded" do
+        before do
+          library.books.build
+        end
+        subject { library.books.size }
+        it { is_expected.to eq 1 }
+      end
     end
   end
 

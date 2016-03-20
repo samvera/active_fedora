@@ -72,10 +72,10 @@ module ActiveFedora
       # This method is abstract in the sense that it relies on
       # +count_records+, which is a method descendants have to provide.
       def size
-        if @owner.new_record? && @target
-          @target.size
-        elsif !loaded? && @target.is_a?(Array)
-          unsaved_records = @target.select(&:new_record?)
+        if !find_target? || loaded?
+          target.size
+        elsif !loaded? && target.is_a?(Array)
+          unsaved_records = target.select(&:new_record?)
           unsaved_records.size + count_records
         else
           count_records
