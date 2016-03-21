@@ -33,13 +33,6 @@ module ActiveFedora
       attribute_names.each_with_object("id" => id) { |key, hash| hash[key] = self[key] }
     end
 
-    # Calling inspect may trigger a bunch of datastream loads, but it's mainly for debugging, so no worries.
-    def inspect
-      values = ["id: #{id.inspect}"]
-      values << self.class.attribute_names.map { |attr| "#{attr}: #{self[attr].inspect}" }
-      "#<#{self.class} #{values.flatten.join(', ')}>"
-    end
-
     def [](key)
       if assoc = association(key.to_sym)
         # This is for id attributes stored in the rdf graph.

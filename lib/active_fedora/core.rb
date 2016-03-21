@@ -83,6 +83,15 @@ module ActiveFedora
 
     delegate :frozen?, to: :attached_files
 
+    # Returns the contents of the record as a nicely formatted string.
+    def inspect
+      inspection = ["id: #{id.inspect}"]
+      inspection += self.class.attribute_names.collect do |name|
+        "#{name}: #{attribute_for_inspect(name)}" if has_attribute?(name)
+      end
+
+      "#<#{self.class} #{inspection.compact.join(', ')}>"
+    end
 
     protected
 
