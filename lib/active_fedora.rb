@@ -50,6 +50,7 @@ module ActiveFedora #:nodoc:
     autoload :Checksum
     autoload :CleanConnection
     autoload :Config
+    autoload :Common
     autoload :Core
     autoload_under 'containers' do
       autoload :Container

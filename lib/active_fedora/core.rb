@@ -2,6 +2,7 @@ module ActiveFedora
   module Core
     extend ActiveSupport::Autoload
     extend ActiveSupport::Concern
+    include ActiveFedora::Common
 
     autoload :FedoraIdTranslator
     autoload :FedoraUriTranslator
@@ -13,10 +14,6 @@ module ActiveFedora
       # Accepts a logger conforming to the interface of Log4r which can be
       # retrieved on both a class and instance level by calling +logger+.
       mattr_accessor :logger, instance_writer: false
-    end
-
-    def ldp_source
-      @ldp_source
     end
 
     # Constructor.  You may supply a custom +:id+, or we call the Fedora Rest API for the
@@ -77,13 +74,6 @@ module ActiveFedora
       self
     end
 
-    def ==(other)
-      other.equal?(self) ||
-        (other.instance_of?(self.class) &&
-          other.id == id &&
-          !other.new_record?)
-    end
-
     def freeze
       @resource.freeze
       # @attributes = @attributes.clone.freeze
@@ -93,16 +83,6 @@ module ActiveFedora
 
     delegate :frozen?, to: :attached_files
 
-    # Returns +true+ if the record is read only. Records loaded through joins with piggy-back
-    # attributes will be marked as read only since they cannot be saved.
-    def readonly?
-      @readonly
-    end
-
-    # Marks this record as read only.
-    def readonly!
-      @readonly = true
-    end
 
     protected
 
@@ -113,8 +93,6 @@ module ActiveFedora
       end
 
       module ClassMethods
-        SLASH = '/'.freeze
-
         def generated_association_methods
           @generated_association_methods ||= begin
             mod = const_set(:GeneratedAssociationMethods, Module.new)
