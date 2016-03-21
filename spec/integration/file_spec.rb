@@ -108,7 +108,7 @@ describe ActiveFedora::File do
         test_object.save
       end
 
-      it "does not be changed" do
+      it "is not changed" do
         expect(test_object.attached_files[path]).to_not be_changed
       end
 

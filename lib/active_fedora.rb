@@ -71,6 +71,7 @@ module ActiveFedora #:nodoc:
     autoload :File
     autoload :FileConfigurator
     autoload :FilePathBuilder
+    autoload :FilePersistence
     autoload :FileRelation
     autoload :FilesHash
     autoload :FixityService

@@ -379,9 +379,9 @@ describe ActiveFedora::File do
           subject.content = "foo"
           subject.save
           expect(subject).to receive(:b_save).once
-          expect(subject).not_to receive(:a_save)
+          expect(subject).to receive(:a_save)
           expect(subject).to receive(:b_update).once
-          expect(subject).not_to receive(:a_update)
+          expect(subject).to receive(:a_update)
           subject.save
         }
       end

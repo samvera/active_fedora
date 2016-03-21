@@ -59,14 +59,14 @@ module ActiveFedora
     private
 
       # index the record after it has been persisted to Fedora
-      def create_record(options = {})
+      def _create_record(options = {})
         super
         update_index if create_needs_index? && options.fetch(:update_index, true)
         true
       end
 
       # index the record after it has been updated in Fedora
-      def update_record(options = {})
+      def _update_record(options = {})
         super
         update_index if update_needs_index? && options.fetch(:update_index, true)
         true

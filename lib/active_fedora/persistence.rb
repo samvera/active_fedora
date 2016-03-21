@@ -70,6 +70,17 @@ module ActiveFedora
       delete(*opts)
     end
 
+    # Deletes the record in the database and freezes this instance to reflect
+    # that no changes should be made (since they can't be persisted).
+    #
+    # There's a series of callbacks associated with #destroy!. If the
+    # <tt>before_destroy</tt> callback throws +:abort+ the action is cancelled
+    # and #destroy! raises ActiveFedora::RecordNotDestroyed.
+    # See ActiveFedora::Callbacks for further details.
+    def destroy!
+      destroy || _raise_record_not_destroyed
+    end
+
     def eradicate
       self.class.eradicate(id)
     end
@@ -138,12 +149,12 @@ module ActiveFedora
 
       def create_or_update(*args)
         raise ReadOnlyRecord if readonly?
-        result = new_record? ? create_record(*args) : update_record(*args)
+        result = new_record? ? _create_record(*args) : _update_record(*args)
         result != false
       end
 
       # Deals with preparing new object to be saved to Fedora, then pushes it and its attached files into Fedora.
-      def create_record(_options = {})
+      def _create_record(_options = {})
         assign_rdf_subject
         serialize_attached_files
         @ldp_source = @ldp_source.create
@@ -152,11 +163,18 @@ module ActiveFedora
         refresh
       end
 
-      def update_record(_options = {})
+      def _update_record(_options = {})
         serialize_attached_files
         execute_sparql_update
         save_contained_resources
         refresh
+      end
+
+      def _raise_record_not_destroyed
+        @_association_destroy_exception ||= nil
+        raise @_association_destroy_exception || RecordNotDestroyed.new("Failed to destroy the record", self)
+      ensure
+        @_association_destroy_exception = nil
       end
 
       def refresh
