@@ -29,6 +29,7 @@ module ActiveFedora
     include AttributeAssignment
     include Core
     include Identifiable
+    include Inheritance
     include Persistence
     include Indexing
     include Scoping

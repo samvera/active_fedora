@@ -21,6 +21,7 @@ module ActiveFedora
     include ActiveFedora::Callbacks
     include AttributeMethods # allows 'content' to be tracked
     include Identifiable
+    include Inheritance
     include Scoping
 
     generate_method 'content'

@@ -46,6 +46,10 @@ module ActiveFedora
           super || default_scopes.any? || respond_to?(:default_scope)
         end
 
+        def before_remove_const #:nodoc:
+          self.current_scope = nil
+        end
+
         protected
 
           # Use this macro in your model to set a default scope for all operations on
@@ -125,11 +129,11 @@ module ActiveFedora
           end
 
           def ignore_default_scope? # :nodoc:
-            Thread.current["#{self}_ignore_default_scope"]
+            ScopeRegistry.value_for(:ignore_default_scope, base_class)
           end
 
           def ignore_default_scope=(ignore) # :nodoc:
-            Thread.current["#{self}_ignore_default_scope"] = ignore
+            ScopeRegistry.set_value_for(:ignore_default_scope, base_class, ignore)
           end
 
           # The ignore_default_scope flag is used to prevent an infinite recursion
