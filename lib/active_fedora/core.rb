@@ -28,7 +28,7 @@ module ActiveFedora
       raise IllegalOperation, "Attempting to recreate existing ldp_source: `#{ldp_source.subject}'" unless ldp_source.new?
       assert_content_model
       load_attached_files
-      self.attributes = attributes
+      assign_attributes(attributes) if attributes
 
       yield self if block_given?
       run_callbacks :initialize

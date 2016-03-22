@@ -185,6 +185,26 @@ module ActiveFedora
       end
     end
 
+    # Returns +true+ if the specified +attribute+ has been set by the user or by a
+    # database load and is neither +nil+ nor <tt>empty?</tt> (the latter only applies
+    # to objects that respond to <tt>empty?</tt>, most notably Strings). Otherwise, +false+.
+    # Note that it always returns +true+ with boolean attributes.
+    #
+    #   class Task < ActiveRecord::Base
+    #   end
+    #
+    #   task = Task.new(title: '', is_done: false)
+    #   task.attribute_present?(:title)   # => false
+    #   task.attribute_present?(:is_done) # => true
+    #   task.title = 'Buy milk'
+    #   task.is_done = true
+    #   task.attribute_present?(:title)   # => true
+    #   task.attribute_present?(:is_done) # => true
+    def attribute_present?(attribute)
+      value = self[attribute]
+      !value.nil? && !(value.respond_to?(:empty?) && value.empty?)
+    end
+
     # Returns the value of the attribute identified by <tt>attr_name</tt> after it has been typecast (for example,
     # "2004-12-12" in a date column is cast to a date object, like Date.new(2004, 12, 12)). It raises
     # <tt>ActiveModel::MissingAttributeError</tt> if the identified attribute is missing.

@@ -33,7 +33,7 @@ module ActiveFedora
 
     # Pushes the object and all of its new or dirty attached files into Fedora
     def update(attributes)
-      self.attributes = attributes
+      assign_attributes(attributes)
       save
     end
 

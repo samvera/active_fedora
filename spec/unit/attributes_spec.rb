@@ -294,17 +294,17 @@ describe ActiveFedora::Base do
         end
 
         it "raises an error on the reader when the field isn't delegated" do
-          expect { subject['donkey'] }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `donkey'"
+          expect { subject['donkey'] }.to raise_error ActiveFedora::UnknownAttributeError, "unknown attribute 'donkey' for BarHistory2."
         end
 
         it "raises an error on the setter when the field isn't delegated" do
-          expect { subject['donkey'] = "bray" }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `donkey'"
+          expect { subject['donkey'] = "bray" }.to raise_error ActiveFedora::UnknownAttributeError, "unknown attribute 'donkey' for BarHistory2."
         end
       end
 
       describe "attributes=" do
         it "raises an error on an invalid attribute" do
-          expect { subject.attributes = { 'donkey' => "bray" } }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `donkey'"
+          expect { subject.attributes = { 'donkey' => "bray" } }.to raise_error ActiveFedora::UnknownAttributeError, "unknown attribute 'donkey' for BarHistory2."
         end
       end
 
@@ -330,7 +330,7 @@ describe ActiveFedora::Base do
         end
 
         it 'raises an error if the attribute does not exist' do
-          expect { BarHistory2.multiple?(:arbitrary_nonexistent_attribute) }.to raise_error ActiveFedora::UnknownAttributeError, "BarHistory2 does not have an attribute `arbitrary_nonexistent_attribute'"
+          expect { BarHistory2.multiple?(:arbitrary_nonexistent_attribute) }.to raise_error ActiveFedora::UnknownAttributeError, "unknown attribute 'arbitrary_nonexistent_attribute' for BarHistory2."
         end
       end
 

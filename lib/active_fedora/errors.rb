@@ -9,6 +9,13 @@ module ActiveFedora #:nodoc:
 
   # Raised when attempting to access an attribute that has not been defined
   class UnknownAttributeError < NoMethodError
+    attr_reader :record, :attribute
+
+    def initialize(record, attribute, klass = nil)
+      @record = record
+      @attribute = attribute
+      super("unknown attribute '#{attribute}' for #{klass || @record.class}.")
+    end
   end
 
   # Raised when there is an error with the configuration files.
@@ -32,6 +39,9 @@ module ActiveFedora #:nodoc:
   #   # Comments are not patches, this assignment raises AssociationTypeMismatch.
   #   @ticket.patches << Comment.new(content: "Please attach tests to your patch.")
   class AssociationTypeMismatch < ActiveFedoraError
+  end
+
+  class AssociationNotFoundError < ConfigurationError #:nodoc:
   end
 
   # Raised when ActiveFedora cannot find the predicate corresponding to the given property

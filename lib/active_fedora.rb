@@ -40,6 +40,7 @@ module ActiveFedora #:nodoc:
     autoload :AssociationRelation
     autoload :Associations
     autoload :AttachedFiles
+    autoload :AttributeAssignment
     autoload :AttributeMethods
     autoload :Attributes
     autoload :AutosaveAssociation
