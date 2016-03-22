@@ -38,7 +38,9 @@ describe ActiveFedora::Base do
         before do
           class BarHistory4 < ActiveFedora::Base
             has_metadata type: BarStream2, name: "xmlish"
-            property :cow, delegate_to: 'xmlish'
+            Deprecation.silence(ActiveFedora::Attributes) do
+              property :cow, delegate_to: 'xmlish'
+            end
           end
         end
         after do
@@ -63,7 +65,9 @@ describe ActiveFedora::Base do
         before do
           class BarHistory4 < ActiveFedora::Base
             has_metadata type: BarStream2, name: "xmlish"
-            property :cow, delegate_to: 'xmlish', multiple: false
+            Deprecation.silence(ActiveFedora::Attributes) do
+              property :cow, delegate_to: 'xmlish', multiple: false
+            end
           end
         end
         after do
@@ -83,7 +87,9 @@ describe ActiveFedora::Base do
         before do
           class BarHistory4 < ActiveFedora::Base
             has_metadata type: BarStream2, name: "xmlish"
-            property :cow, delegate_to: 'xmlish', multiple: false
+            Deprecation.silence(ActiveFedora::Attributes) do
+              property :cow, delegate_to: 'xmlish', multiple: false
+            end
           end
         end
         after do
