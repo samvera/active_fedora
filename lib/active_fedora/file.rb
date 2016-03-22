@@ -12,6 +12,7 @@ module ActiveFedora
     autoload :Streaming
     autoload :Attributes
 
+    include Common
     include ActiveFedora::File::Attributes
     include ActiveFedora::File::Streaming
     include ActiveFedora::FilePersistence
@@ -56,21 +57,9 @@ module ActiveFedora
         end
 
         @attributes = {}.with_indifferent_access
+        @readonly = false
         yield self if block_given?
       end
-    end
-
-    # @return [true, false] true if the objects are equal or when the objects have uris
-    #   and the uris are equal
-    def ==(other)
-      super ||
-        other.instance_of?(self.class) &&
-          uri.value.present? &&
-          other.uri == uri
-    end
-
-    def ldp_source
-      @ldp_source || raise("NO source")
     end
 
     def described_by
@@ -161,15 +150,6 @@ module ActiveFedora
       false
     end
 
-    # Freeze datastreams such that they can be loaded from Fedora, but can't be changed
-    def freeze
-      @frozen = true
-    end
-
-    def frozen?
-      @frozen.present?
-    end
-
     # serializes any changed data into the content field
     def serialize!
     end
@@ -185,10 +165,6 @@ module ActiveFedora
 
     def content
       local_or_remote_content(true)
-    end
-
-    def readonly?
-      false
     end
 
     def self.relation

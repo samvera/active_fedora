@@ -19,25 +19,12 @@ module ActiveFedora
       end
     end
 
-    def attributes=(properties)
-      sanitize_for_mass_assignment(properties).each do |k, v|
-        respond_to?(:"#{k}=") ? send(:"#{k}=", v) : raise(UnknownAttributeError, "#{self.class} does not have an attribute `#{k}'")
-      end
-    end
-
     def attribute_names
       self.class.attribute_names
     end
 
     def attributes
       attribute_names.each_with_object("id" => id) { |key, hash| hash[key] = self[key] }
-    end
-
-    # Calling inspect may trigger a bunch of datastream loads, but it's mainly for debugging, so no worries.
-    def inspect
-      values = ["id: #{id.inspect}"]
-      values << self.class.attribute_names.map { |attr| "#{attr}: #{self[attr].inspect}" }
-      "#<#{self.class} #{values.flatten.join(', ')}>"
     end
 
     def [](key)
@@ -93,14 +80,14 @@ module ActiveFedora
     private
 
       def array_reader(field, *args)
-        raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.delegated_attributes.key?(field)
+        raise UnknownAttributeError.new(self, field) unless self.class.delegated_attributes.key?(field)
 
         val = self.class.delegated_attributes[field].reader(self, *args)
         self.class.multiple?(field) ? val : val.first
       end
 
       def array_setter(field, args)
-        raise UnknownAttributeError, "#{self.class} does not have an attribute `#{field}'" unless self.class.delegated_attributes.key?(field)
+        raise UnknownAttributeError.new(self, field) unless self.class.delegated_attributes.key?(field)
         if self.class.multiple?(field)
           if args.present? && !args.respond_to?(:each)
             raise ArgumentError, "You attempted to set the attribute `#{field}' on `#{self.class}' to a scalar value. However, this attribute is declared as being multivalued."
@@ -172,7 +159,7 @@ module ActiveFedora
         # @param [Symbol] field the field to query
         # @return [Boolean]
         def multiple?(field)
-          raise UnknownAttributeError, "#{self} does not have an attribute `#{field}'" unless delegated_attributes.key?(field)
+          raise UnknownAttributeError.new(nil, field, self) unless delegated_attributes.key?(field)
           delegated_attributes[field].multiple
         end
 

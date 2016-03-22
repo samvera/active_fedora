@@ -1,18 +1,24 @@
 module ActiveFedora
   module AttributeMethods
     module Write
-      WriterMethodCache = Class.new(AttributeMethodCache) do
-                            private
+      module ClassMethods
+        protected
 
-        def method_body(method_name, const_name)
-          <<-EOMETHOD
-          def #{method_name}(value)
-            name = ::ActiveFedora::AttributeMethods::AttrNames::ATTR_#{const_name}
-            write_attribute(name, value)
+          def define_method_attribute=(name)
+            name = name.to_s
+            safe_name = name.unpack('h*'.freeze).first
+            ActiveFedora::AttributeMethods::AttrNames.set_name_cache safe_name, name
+
+            generated_attribute_methods.module_eval <<-STR, __FILE__, __LINE__ + 1
+              def __temp__#{safe_name}=(value)
+                name = ::ActiveRecord::AttributeMethods::AttrNames::ATTR_#{safe_name}
+                write_attribute(name, value)
+              end
+              alias_method #{(name + '=').inspect}, :__temp__#{safe_name}=
+              undef_method :__temp__#{safe_name}=
+            STR
           end
-          EOMETHOD
-        end
-      end.new
+      end
 
       extend ActiveSupport::Concern
 
@@ -32,15 +38,6 @@ module ActiveFedora
 
         def attribute=(attribute_name, value)
           write_attribute(attribute_name, value)
-        end
-
-        module ClassMethods
-          def define_method_attribute=(name)
-            method = WriterMethodCache[name.to_s]
-            generated_attribute_methods.module_eval do
-              define_method "#{name}=", method
-            end
-          end
         end
     end
   end

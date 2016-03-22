@@ -40,6 +40,7 @@ module ActiveFedora #:nodoc:
     autoload :AssociationRelation
     autoload :Associations
     autoload :AttachedFiles
+    autoload :AttributeAssignment
     autoload :AttributeMethods
     autoload :Attributes
     autoload :AutosaveAssociation
@@ -50,6 +51,7 @@ module ActiveFedora #:nodoc:
     autoload :Checksum
     autoload :CleanConnection
     autoload :Config
+    autoload :Common
     autoload :Core
     autoload_under 'containers' do
       autoload :Container
