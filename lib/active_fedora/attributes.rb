@@ -156,8 +156,8 @@ module ActiveFedora
           options = fields.pop
           delegate_target = options.delete(:datastream)
           raise ArgumentError, "You must provide a datastream to has_attributes" if delegate_target.blank?
-          Deprecation.warn(Attributes, "has_attributes is deprecated and will be removed in ActiveFedora 10.0. Instead use:\n  property #{fields.first.inspect}, delegate_to: '#{delegate_target}', ...")
 
+          Deprecation.warn Attributes, "has_attributes is deprecated and will be removed in ActiveFedora 10.0. Consider using the Form pattern to save all related models or directly delegate the properties and save the target separately"
           define_delegated_accessor(fields, delegate_target, options, &block)
         end
 
@@ -180,6 +180,7 @@ module ActiveFedora
           if properties.key?(:predicate)
             define_active_triple_accessor(name, properties, &block)
           elsif properties.key?(:delegate_to)
+            Deprecation.warn Attributes, "delegated properties are deprecated and will be removed in ActiveFedora 10.0. Consider using the Form pattern to save all related models or directly delegate the properties and save the target separately"
             define_delegated_accessor([name], properties.delete(:delegate_to), properties.reverse_merge(multiple: true), &block)
           else
             raise "You must provide `:delegate_to' or `:predicate' options to property"
