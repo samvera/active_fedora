@@ -9,5 +9,9 @@ module ActiveFedora
       copy_file 'solr.yml', 'config/solr.yml', force: true
       directory 'solr', 'solr'
     end
+
+    def solr_wrapper_config
+      copy_file '.solr_wrapper', '.solr_wrapper'
+    end
   end
 end
