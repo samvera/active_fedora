@@ -7,20 +7,6 @@ module ActiveFedora::Associations::Builder
 
     VALID_OPTIONS = [:class_name, :predicate, :type_validator].freeze
 
-    def self.macro
-      raise NotImplementedError
-    end
-
-    def self.valid_options(_options)
-      VALID_OPTIONS + Association.extensions.flat_map(&:valid_options)
-    end
-
-    def self.validate_options(options)
-      options.assert_valid_keys(valid_options(options))
-    end
-
-    attr_reader :model, :name, :options, :mixin
-
     # configure_dependency
     def self.build(model, name, options, &block)
       if model.dangerous_attribute_method?(name)
@@ -37,42 +23,58 @@ module ActiveFedora::Associations::Builder
       reflection
     end
 
-    def self.create_reflection(model, name, _scope, options, _extension = nil)
+    def self.create_reflection(model, name, scope, options, extension = nil)
       unless name.is_a?(Symbol)
         name = name.to_sym
         Deprecation.warn(ActiveFedora::Base, "association names must be a Symbol")
       end
-
       validate_options(options)
+      translate_property_to_predicate(options)
 
-      new(model, name, options).build
+      scope = build_scope(scope, extension)
+      name = better_name(name)
+
+      ActiveFedora::Reflection.create(macro, name, scope, options, model)
     end
 
-    def initialize(model, name, options)
-      @model = model
-      @name = name
-      @options = options
-      translate_property_to_predicate
-      validate_options
+    def self.build_scope(scope, extension)
+      new_scope = scope
+
+      new_scope = proc { instance_exec(&scope) } if scope && scope.arity == 0
+
+      new_scope = wrap_scope new_scope, extension if extension
+
+      new_scope
     end
 
-    def build
-      configure_dependency if options[:dependent] # see https://github.com/rails/rails/commit/9da52a5e55cc665a539afb45783f84d9f3607282
-      model.create_reflection(self.class.macro, name, options, model)
+    def self.wrap_scope(scope, _extension)
+      scope
     end
 
-    def translate_property_to_predicate
+    def self.macro
+      raise NotImplementedError
+    end
+
+    def self.valid_options(_options)
+      VALID_OPTIONS + Association.extensions.flat_map(&:valid_options)
+    end
+
+    def self.validate_options(options)
+      options.assert_valid_keys(valid_options(options))
+    end
+
+    def self.better_name(name)
+      name
+    end
+
+    def self.translate_property_to_predicate(options)
       return unless options[:property]
       Deprecation.warn Association, "the :property option to `#{model}.#{macro} :#{name}' is deprecated and will be removed in active-fedora 10.0. Use :predicate instead", caller(5)
       options[:predicate] = predicate(options.delete(:property))
     end
 
-    def validate_options
-      self.class.validate_options(options)
-    end
-
     # Returns the RDF predicate as defined by the :property attribute
-    def predicate(property)
+    def self.predicate(property)
       return property if property.is_a? RDF::URI
       ActiveFedora::Predicates.find_graph_predicate(property)
     end
@@ -140,24 +142,6 @@ module ActiveFedora::Associations::Builder
       unless valid_dependent_options.include? dependent
         raise ArgumentError, "The :dependent option must be one of #{valid_dependent_options}, but is :#{dependent}"
       end
-    end
-
-    def configure_dependency
-      return unless options[:dependent]
-      return if model.association(name).respond_to? :handle_dependency
-
-      unless [:destroy, :delete].include?(options[:dependent])
-        raise ArgumentError, "The :dependent option expects either :destroy or :delete (#{options[:dependent].inspect})"
-      end
-
-      method_name = "belongs_to_dependent_#{options[:dependent]}_for_#{name}"
-      model.send(:class_eval, <<-eoruby, __FILE__, __LINE__ + 1)
-        def #{method_name}
-          association = #{name}
-          association.#{options[:dependent]} if association
-        end
-      eoruby
-      model.after_destroy method_name
     end
   end
 end

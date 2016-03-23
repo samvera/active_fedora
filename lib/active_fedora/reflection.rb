@@ -3,29 +3,35 @@ module ActiveFedora
     extend ActiveSupport::Concern
 
     included do
-      class_attribute :reflections
-      self.reflections = {}
+      class_attribute :_reflections
+      self._reflections = {}
     end
 
-    module ClassMethods
-      def create_reflection(macro, name, options, active_fedora)
+    def reflections
+      self.class.reflections
+    end
+
+    class << self
+      def create(macro, name, scope, options, active_fedora)
         klass = case macro
                 when :has_many, :belongs_to, :has_and_belongs_to_many, :contains, :directly_contains, :directly_contains_one, :indirectly_contains
                   AssociationReflection
                 when :rdf, :singular_rdf
                   RDFPropertyReflection
                 end
-        reflection = klass.new(macro, name, options, active_fedora)
-        add_reflection name, reflection
-
+        reflection = klass.new(macro, name, scope, options, active_fedora)
+        add_reflection(active_fedora, name, reflection)
         reflection
       end
 
-      def add_reflection(name, reflection)
+      def add_reflection(active_fedora, name, reflection)
+        active_fedora.clear_reflections_cache
         # FIXME: this is where the problem with association_spec is caused (key is string now)
-        self.reflections = reflections.merge(name => reflection)
+        active_fedora._reflections = active_fedora._reflections.merge(name => reflection)
       end
+    end
 
+    module ClassMethods
       # Returns a hash containing all AssociationReflection objects for the current class.
       # Example:
       #
@@ -33,7 +39,47 @@ module ActiveFedora
       #   Account.reflections
       #
       def reflections
-        read_inheritable_attribute(:reflections) || write_inheritable_attribute(:reflections, {})
+        @__reflections ||= begin
+          ref = {}
+
+          _reflections.each do |name, reflection|
+            parent_reflection = reflection.parent_reflection
+
+            if parent_reflection
+              parent_name = parent_reflection.name
+              ref[parent_name.to_s] = parent_reflection
+            else
+              ref[name] = reflection
+            end
+          end
+
+          ref
+        end
+      end
+
+      # Returns an array of AssociationReflection objects for all the
+      # associations in the class. If you only want to reflect on a certain
+      # association type, pass in the symbol (<tt>:has_many</tt>, <tt>:has_one</tt>,
+      # <tt>:belongs_to</tt>) as the first parameter.
+      #
+      # Example:
+      #
+      #   Account.reflect_on_all_associations             # returns an array of all associations
+      #   Account.reflect_on_all_associations(:has_many)  # returns an array of all has_many associations
+      #
+      def reflect_on_all_associations(macro = nil)
+        association_reflections = reflections.dup
+        association_reflections.select! { |_k, reflection| reflection.macro == macro } if macro
+        association_reflections
+      end
+
+      # Returns the AssociationReflection object for the +association+ (use the symbol).
+      #
+      #   Account.reflect_on_association(:owner)             # returns the owner AssociationReflection
+      #   Invoice.reflect_on_association(:line_items).macro  # returns :has_many
+      #
+      def reflect_on_association(association)
+        __reflect_on_association(association)
       end
 
       def outgoing_reflections
@@ -41,11 +87,11 @@ module ActiveFedora
       end
 
       def child_resource_reflections
-        reflections.select { |_, reflection| reflection.is_a?(AssociationReflection) && reflection.macro == :contains && reflection.klass <= ActiveFedora::File }
+        reflect_on_all_associations(:contains).select { |_, reflection| reflection.klass <= ActiveFedora::File }
       end
 
       def contained_rdf_source_reflections
-        reflections.select { |_, reflection| reflection.is_a?(AssociationReflection) && reflection.macro == :contains && !(reflection.klass <= ActiveFedora::File) }
+        reflect_on_all_associations(:contains).select { |_, reflection| !(reflection.klass <= ActiveFedora::File) }
       end
 
       # Returns the AssociationReflection object for the +association+ (use the symbol).
@@ -66,13 +112,78 @@ module ActiveFedora
       def reflect_on_all_autosave_associations
         reflections.values.select { |reflection| reflection.options[:autosave] }
       end
+
+      def clear_reflections_cache # :nodoc:
+        @__reflections = nil
+      end
     end
 
-    class MacroReflection
+    # Holds all the methods that are shared between MacroReflection and ThroughReflection.
+    #
+    #   AbstractReflection
+    #     MacroReflection
+    #       AggregateReflection
+    #       AssociationReflection
+    #         HasManyReflection
+    #         HasOneReflection
+    #         BelongsToReflection
+    #         HasAndBelongsToManyReflection
+    #     ThroughReflection
+    #       PolymorphicReflection
+    #         RuntimeReflection
+    class AbstractReflection # :nodoc:
+      def through_reflection?
+        false
+      end
+
+      # Returns a new, unsaved instance of the associated class. +attributes+ will
+      # be passed to the class's constructor.
+      def build_association(attributes, &block)
+        klass.new(attributes, &block)
+      end
+
+      # Returns the class name for the macro.
+      #
+      # <tt>composed_of :balance, class_name: 'Money'</tt> returns <tt>'Money'</tt>
+      # <tt>has_many :clients</tt> returns <tt>'Client'</tt>
+      def class_name
+        @class_name ||= (options[:class_name] || derive_class_name).to_s
+      end
+
+      def constraints
+        scope_chain.flatten
+      end
+
+      def inverse_of
+        return unless inverse_name
+
+        @inverse_of ||= klass._reflect_on_association inverse_name
+      end
+
+      def check_validity_of_inverse!
+        unless polymorphic?
+          if has_inverse? && inverse_of.nil?
+            raise InverseOfAssociationNotFoundError, self
+          end
+        end
+      end
+
+      def alias_candidate(name)
+        "#{plural_name}_#{name}"
+      end
+
+      def chain
+        collect_join_chain
+      end
+    end
+
+    class MacroReflection < AbstractReflection
       # Returns the name of the macro.
       #
       # <tt>has_many :clients</tt> returns <tt>:clients</tt>
       attr_reader :name
+
+      attr_reader :scope
 
       # Returns the macro type.
       #
@@ -86,27 +197,13 @@ module ActiveFedora
 
       attr_reader :active_fedora
 
-      # Returns the target association's class.
-      #
-      #   class Author < ActiveRecord::Base
-      #     has_many :books
-      #   end
-      #
-      #   Author._reflect_on_association(:books).klass
-      #   # => Book
-      #
-      # <b>Note:</b> Do not call +klass.new+ or +klass.create+ to instantiate
-      # a new association object. Use +build_association+ or +create_association+
-      # instead. This allows plugins to hook into association object creation.
-      def klass
-        @klass ||= class_name.constantize
-      end
-
-      def initialize(macro, name, options, active_fedora)
+      def initialize(macro, name, scope, options, active_fedora)
         @macro = macro
         @name = name
+        @scope = scope
         @options = options
         @active_fedora = active_fedora
+        @klass         = options[:anonymous_class]
         @automatic_inverse_of = nil
       end
 
@@ -116,37 +213,26 @@ module ActiveFedora
         parent_reflection.autosave = autosave if parent_reflection
       end
 
-      # Returns a new, unsaved instance of the associated class. +options+ will
-      # be passed to the class's constructor.
-      def build_association(*options, &block)
-        klass.new(*options, &block)
-      end
-
-      # Returns the class name for the macro.
+      # Returns the class for the macro.
       #
-      # <tt>has_many :clients</tt> returns <tt>'Client'</tt>
-      def class_name
-        @class_name ||= options[:class_name] || derive_class_name
+      # <tt>composed_of :balance, class_name: 'Money'</tt> returns the Money class
+      # <tt>has_many :clients</tt> returns the Client class
+      def klass
+        @klass ||= compute_class(class_name)
       end
 
-      # Returns whether or not this association reflection is for a collection
-      # association. Returns +true+ if the +macro+ is either +has_many+ or
-      # +has_and_belongs_to_many+, +false+ otherwise.
-      def collection?
-        @collection
+      def compute_class(name)
+        name.constantize
       end
 
-      # Returns +true+ if +self+ is a +belongs_to+ reflection.
-      def belongs_to?
-        macro == :belongs_to
-      end
-
-      def has_many?
-        macro == :has_many
-      end
-
-      def has_and_belongs_to_many?
-        macro == :has_and_belongs_to_many
+      # Returns +true+ if +self+ and +other_aggregation+ have the same +name+ attribute, +active_record+ attribute,
+      # and +other_aggregation+ has an options hash assigned to it.
+      def ==(other)
+        super ||
+          other.is_a?(self.class) &&
+            name == other.name &&
+            !other.options.nil? &&
+            active_record == other.active_record
       end
 
       private
@@ -156,22 +242,6 @@ module ActiveFedora
           class_name = class_name.singularize if collection?
           class_name
         end
-
-        def derive_foreign_key
-          if belongs_to?
-            "#{name}_id"
-          elsif has_and_belongs_to_many?
-            "#{name.to_s.singularize}_ids"
-          elsif options[:as]
-            "#{options[:as]}_id"
-          elsif inverse_of && inverse_of.collection?
-            # for a has_many that is the inverse of a has_and_belongs_to_many
-            "#{options[:inverse_of].to_s.singularize}_ids"
-          else
-            # for a has_many that is the inverse of a belongs_to
-            active_fedora.name.foreign_key
-          end
-        end
     end
 
     # Holds all the meta-data about an association as it was specified in the
@@ -179,9 +249,13 @@ module ActiveFedora
     class AssociationReflection < MacroReflection #:nodoc:
       attr_accessor :parent_reflection # Reflection
 
-      def initialize(macro, name, options, active_fedora)
+      def initialize(macro, name, scope, options, active_fedora)
         super
-        @collection = [:has_many, :has_and_belongs_to_many, :directly_contains, :indirectly_contains].include?(macro)
+        @constructable = calculate_constructable(macro, options)
+      end
+
+      def constructable? # :nodoc:
+        @constructable
       end
 
       # Creates a new instance of the associated class, and immediately saves it
@@ -221,11 +295,17 @@ module ActiveFedora
 
       # A chain of reflections from this one back to the owner. For more see the explanation in
       # ThroughReflection.
-      def chain
+      def collect_join_chain
         [self]
       end
+      alias chain collect_join_chain # todo
 
-      alias source_macro macro
+      # Returns whether or not this association reflection is for a collection
+      # association. Returns +true+ if the +macro+ is either +has_many+ or
+      # +has_and_belongs_to_many+, +false+ otherwise.
+      def collection?
+        [:has_many, :has_and_belongs_to_many, :directly_contains, :indirectly_contains].include?(macro)
+      end
 
       def has_inverse?
         inverse_name
@@ -276,7 +356,24 @@ module ActiveFedora
       VALID_AUTOMATIC_INVERSE_MACROS = [:has_many, :has_and_belongs_to_many, :belongs_to].freeze
       INVALID_AUTOMATIC_INVERSE_OPTIONS = [:conditions, :through, :polymorphic, :foreign_key].freeze
 
+      # Returns +true+ if +self+ is a +belongs_to+ reflection.
+      def belongs_to?
+        macro == :belongs_to
+      end
+
+      def has_many?
+        macro == :has_many
+      end
+
+      def has_and_belongs_to_many?
+        macro == :has_and_belongs_to_many
+      end
+
       private
+
+        def calculate_constructable(_macro, _options)
+          true
+        end
 
         def inverse_name
           options.fetch(:inverse_of) do
@@ -336,9 +433,30 @@ module ActiveFedora
             !INVALID_AUTOMATIC_INVERSE_OPTIONS.any? { |opt| reflection.options[opt] }
           # && !reflection.scope
         end
+
+        def derive_foreign_key
+          if belongs_to?
+            "#{name}_id"
+          elsif has_and_belongs_to_many?
+            "#{name.to_s.singularize}_ids"
+          elsif options[:as]
+            "#{options[:as]}_id"
+          elsif inverse_of && inverse_of.collection?
+            # for a has_many that is the inverse of a has_and_belongs_to_many
+            "#{options[:inverse_of].to_s.singularize}_ids"
+          else
+            # for a has_many that is the inverse of a belongs_to
+            active_fedora.name.foreign_key
+          end
+        end
     end
 
     class RDFPropertyReflection < AssociationReflection
+      def initialize(*args)
+        super
+        active_fedora.index_config[name] = build_index_config
+      end
+
       def derive_foreign_key
         name
       end
@@ -348,6 +466,12 @@ module ActiveFedora
         class_name = class_name.singularize if collection?
         class_name
       end
+
+      private
+
+        def build_index_config
+          ActiveFedora::Indexing::Map::IndexObject.new(predicate_for_solr) { |index| index.as :symbol }
+        end
     end
   end
 end

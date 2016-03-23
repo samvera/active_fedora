@@ -19,7 +19,30 @@ module ActiveFedora::Associations::Builder
 
       # TODO : why do i need method_defined? I think its because of the inheritance chain
       model.class_attribute full_callback_name.to_sym unless model.method_defined?(full_callback_name)
-      model.send("#{full_callback_name}=", Array(options[callback_name.to_sym]))
+
+      callbacks = Array(options[callback_name.to_sym]).map do |callback|
+        case callback
+        when Symbol
+          ->(_method, owner, record) { owner.send(callback, record) }
+        when Proc
+          ->(_method, owner, record) { callback.call(owner, record) }
+        else
+          ->(method, owner, record) { callback.send(method, owner, record) }
+        end
+      end
+      model.send("#{full_callback_name}=", callbacks)
+    end
+
+    def self.wrap_scope(scope, mod)
+      if scope
+        if scope.arity > 0
+          proc { |owner| instance_exec(owner, &scope).extending(mod) }
+        else
+          proc { instance_exec(&scope).extending(mod) }
+        end
+      else
+        proc { extending(mod) }
+      end
     end
   end
 end

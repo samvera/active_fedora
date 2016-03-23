@@ -5,7 +5,7 @@ describe ActiveFedora::Reflection::AssociationReflection do
     let(:name) { 'dummy' }
     let(:options) { { inverse_of: :default_permissions } }
     let(:active_fedora) { double }
-    let(:instance) { described_class.new(macro, name, options, active_fedora) }
+    let(:instance) { described_class.new(macro, name, nil, options, active_fedora) }
     subject { instance.send :derive_foreign_key }
 
     context "when a has_many" do
@@ -30,7 +30,7 @@ describe ActiveFedora::Reflection::AssociationReflection do
     let(:name) { 'dummy' }
     let(:options) { { as: 'foothing' } }
     let(:active_fedora) { double }
-    let(:instance) { described_class.new(macro, name, options, active_fedora) }
+    let(:instance) { described_class.new(macro, name, nil, options, active_fedora) }
     subject { instance.send :automatic_inverse_of }
 
     context "when a has_many" do

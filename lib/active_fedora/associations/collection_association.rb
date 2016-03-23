@@ -374,20 +374,13 @@ module ActiveFedora
 
         def callback(method, record)
           callbacks_for(method).each do |callback|
-            case callback
-            when Symbol
-              @owner.send(callback, record)
-            when Proc
-              callback.call(@owner, record)
-            else
-              callback.send(method, @owner, record)
-            end
+            callback.call(method, owner, record)
           end
         end
 
         def callbacks_for(callback_name)
-          full_callback_name = "#{callback_name}_for_#{@reflection.name}"
-          @owner.class.send(full_callback_name.to_sym) || []
+          full_callback_name = "#{callback_name}_for_#{reflection.name}"
+          owner.class.send(full_callback_name)
         end
 
         def ensure_owner_is_not_new

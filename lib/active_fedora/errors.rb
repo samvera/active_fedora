@@ -44,6 +44,19 @@ module ActiveFedora #:nodoc:
   class AssociationNotFoundError < ConfigurationError #:nodoc:
   end
 
+  # This error is raised when trying to destroy a parent instance in N:1 or 1:1 associations
+  # (has_many, has_one) when there is at least 1 child associated instance.
+  # ex: if @project.tasks.size > 0, DeleteRestrictionError will be raised when trying to destroy @project
+  class DeleteRestrictionError < ActiveFedoraError #:nodoc:
+    def initialize(name = nil)
+      if name
+        super("Cannot delete record because of dependent #{name}")
+      else
+        super("Delete restriction error.")
+      end
+    end
+  end
+
   # Raised when ActiveFedora cannot find the predicate corresponding to the given property
   # in the predicate registy
   class UnregisteredPredicateError < ActiveFedoraError

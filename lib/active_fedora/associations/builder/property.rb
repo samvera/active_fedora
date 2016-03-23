@@ -8,19 +8,8 @@ module ActiveFedora::Associations::Builder
       super
     end
 
-    def initialize(model, name, options)
-      super
-      @name = :"#{name.to_s.singularize}_ids"
-    end
-
-    def build
-      super.tap do |reflection|
-        model.index_config[name] = build_index_config(reflection)
-      end
-    end
-
-    def build_index_config(reflection)
-      ActiveFedora::Indexing::Map::IndexObject.new(reflection.predicate_for_solr) { |index| index.as :symbol }
+    def self.better_name(name)
+      :"#{name.to_s.singularize}_ids"
     end
   end
 end

@@ -9,7 +9,7 @@ module ActiveFedora::Associations::Builder
       super + [:inverse_of, :solr_page_size]
     end
 
-    def validate_options
+    def self.validate_options(options)
       super
       Deprecation.warn HasAndBelongsToMany, ":solr_page_size doesn't do anything anymore and will be removed in ActiveFedora 10" if options.key?(:solr_page_size)
       raise "You must specify a predicate for #{name}" unless options[:predicate]

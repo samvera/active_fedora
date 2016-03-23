@@ -19,10 +19,10 @@ module ActiveFedora
 
         def add_constraints(scope)
           chain.each_with_index do |reflection, i|
-            if reflection.source_macro == :belongs_to
+            if reflection.macro == :belongs_to
               # Create a partial solr query using the ids. We may add additional filters such as class_name later
               scope = scope.where(ActiveFedora::SolrQueryBuilder.construct_query_for_ids([owner[reflection.foreign_key]]))
-            elsif reflection.source_macro == :has_and_belongs_to_many
+            elsif reflection.macro == :has_and_belongs_to_many
             else
               scope = scope.where(ActiveFedora::SolrQueryBuilder.construct_query_for_rel(association.send(:find_reflection) => owner.id))
             end

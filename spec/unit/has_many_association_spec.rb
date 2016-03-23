@@ -22,7 +22,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       allow(ActiveFedora::SolrService).to receive(:query).and_return([])
     end
 
-    let(:reflection) { Book.create_reflection(:has_many, 'pages', { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf }, Book) }
+    let(:reflection) { ActiveFedora::Reflection.create(:has_many, 'pages', nil, { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf }, Book) }
     let(:association) { described_class.new(book, reflection) }
 
     it "sets the book_id attribute" do
@@ -38,7 +38,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       Page.has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
       Page.has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
     end
-    let(:book_reflection) { Book.create_reflection(:has_many, 'pages', { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf }, Book) }
+    let(:book_reflection) { ActiveFedora::Reflection.create(:has_many, 'pages', nil, { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf }, Book) }
     let(:association) { described_class.new(book, book_reflection) }
 
     subject { association.send(:find_polymorphic_inverse, page) }
