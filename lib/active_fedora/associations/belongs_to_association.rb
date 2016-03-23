@@ -26,6 +26,10 @@ module ActiveFedora
         @updated
       end
 
+      def handle_dependency
+        target.send(options[:dependent]) if load_target
+      end
+
       private
 
         def replace_keys(record)

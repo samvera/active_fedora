@@ -1,16 +1,12 @@
 module ActiveFedora::Associations::Builder
   class SingularAssociation < Association #:nodoc:
     def self.valid_options(options)
-      super + [:dependent, :inverse_of]
-    end
-
-    def self.constructable?
-      true
+      super + [:dependent, :inverse_of, :required]
     end
 
     def self.define_accessors(model, reflection)
       super
-      define_constructors(model.generated_association_methods, reflection.name) if constructable?
+      define_constructors(model.generated_association_methods, reflection.name) if reflection.constructable?
     end
 
     def self.define_constructors(mixin, name)

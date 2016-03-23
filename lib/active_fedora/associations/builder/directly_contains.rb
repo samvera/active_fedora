@@ -8,13 +8,7 @@ module ActiveFedora::Associations::Builder
       super + [:has_member_relation, :is_member_of_relation] - [:predicate]
     end
 
-    def build
-      reflection = super
-      configure_dependency
-      reflection
-    end
-
-    def validate_options
+    def self.validate_options(options)
       super
       if !options[:has_member_relation] && !options[:is_member_of_relation]
         raise ArgumentError, "You must specify a :has_member_relation or :is_member_of_relation predicate for #{name}"

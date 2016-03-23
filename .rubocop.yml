@@ -86,6 +86,7 @@ Metrics/ClassLength:
     - 'lib/active_fedora/associations/builder/association.rb'
     - 'lib/active_fedora/associations/collection_proxy.rb'
     - 'lib/active_fedora/associations/collection_association.rb'
+    - 'lib/active_fedora/reflection.rb'
 
 Metrics/MethodLength:
   Enabled: false

@@ -8,12 +8,12 @@ module ActiveFedora::Associations::Builder
       super + [:autocreate, :block]
     end
 
-    def initialize(model, name, options)
-      super
+    def self.create_reflection(model, name, scope, options, extension = nil)
       options[:class_name] = 'ActiveFedora::File' if options[:class_name].blank?
+      super(model, name, scope, options, extension)
     end
 
-    def validate_options
+    def self.validate_options(options)
       super
       return unless options[:class_name] && !options[:class_name].is_a?(String)
       raise ArgumentError, ":class_name must be a string for contains '#{name}'"

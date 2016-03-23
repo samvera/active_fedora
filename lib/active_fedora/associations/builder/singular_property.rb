@@ -4,9 +4,8 @@ module ActiveFedora::Associations::Builder
       :singular_rdf
     end
 
-    def initialize(model, name, options)
-      super
-      @name = :"#{name}_id"
+    def self.better_name(name)
+      :"#{name}_id"
     end
   end
 end

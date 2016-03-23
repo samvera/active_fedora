@@ -57,6 +57,29 @@ module ActiveFedora
         end
       end
 
+      def handle_dependency
+        case options[:dependent]
+        when :restrict_with_exception
+          raise ActiveFedora::DeleteRestrictionError, reflection.name unless empty?
+
+        when :restrict_with_error
+          unless empty?
+            record = owner.class.human_attribute_name(reflection.name).downcase
+            owner.errors.add(:base, message || :'restrict_dependent_destroy.has_many', record: record)
+            throw(:abort)
+          end
+
+        else
+          if options[:dependent] == :destroy
+            # No point in executing the counter update since we're going to destroy the parent anyway
+            load_target.each { |t| t.destroyed_by_association = reflection }
+            destroy_all
+          else
+            delete_all
+          end
+        end
+      end
+
       protected
 
         def find_polymorphic_inverse(record)

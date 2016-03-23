@@ -8,12 +8,6 @@ module ActiveFedora::Associations::Builder
       super + [:has_member_relation, :is_member_of_relation, :inserted_content_relation, :foreign_key, :through] - [:predicate]
     end
 
-    def build
-      reflection = super
-      configure_dependency
-      reflection
-    end
-
     def self.define_readers(mixin, name)
       super
 
@@ -22,7 +16,7 @@ module ActiveFedora::Associations::Builder
       end
     end
 
-    def validate_options
+    def self.validate_options(options)
       super
       if !options[:has_member_relation] && !options[:is_member_of_relation]
         raise ArgumentError, "You must specify a predicate for #{name}"

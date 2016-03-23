@@ -14,6 +14,7 @@ module ActiveFedora
       # Accepts a logger conforming to the interface of Log4r which can be
       # retrieved on both a class and instance level by calling +logger+.
       mattr_accessor :logger, instance_writer: false
+      mattr_accessor :belongs_to_required_by_default, instance_accessor: false
     end
 
     # Constructor.  You may supply a custom +:id+, or we call the Fedora Rest API for the
