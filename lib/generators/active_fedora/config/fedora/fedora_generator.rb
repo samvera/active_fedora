@@ -7,5 +7,9 @@ module ActiveFedora
     def generate
       copy_file('fedora.yml', 'config/fedora.yml')
     end
+
+    def fcrepo_wrapper_config
+      copy_file '.fcrepo_wrapper', '.fcrepo_wrapper'
+    end
   end
 end

@@ -1,0 +1,3 @@
+# Place any default configuration for solr_wrapper here
+port: 8984
+enable_jms: false
