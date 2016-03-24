@@ -1,16 +1,19 @@
 module ActiveFedora
   module Associations
     class BelongsToAssociation < SingularAssociation #:nodoc:
+      def handle_dependency
+        target.send(options[:dependent]) if load_target
+      end
+
       def replace(record)
         if record
-          raise_on_type_mismatch(record)
-          run_type_validator(record)
-          # update_counters(record)
+          raise_on_type_mismatch!(record)
+          update_counters_on_replace(record)
           replace_keys(record)
           set_inverse_instance(record)
           @updated = true
         else
-          # decrement_counters
+          decrement_counters
           remove_keys
         end
 
@@ -26,11 +29,23 @@ module ActiveFedora
         @updated
       end
 
-      def handle_dependency
-        target.send(options[:dependent]) if load_target
+      def decrement_counters # :nodoc:
+        # noop
+      end
+
+      def increment_counters # :nodoc:
+        # noop
       end
 
       private
+
+        def find_target?
+          !loaded? && foreign_key_present? && klass
+        end
+
+        def update_counters_on_replace(_record)
+          # noop
+        end
 
         def replace_keys(record)
           owner[reflection.foreign_key] = record.id

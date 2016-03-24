@@ -18,7 +18,7 @@ module ActiveFedora
 
       private
 
-        def raise_on_type_mismatch(record)
+        def raise_on_type_mismatch!(record)
           return if record.is_a? LoadableFromJson::SolrBackedMetadataFile
           super
         end
@@ -35,8 +35,7 @@ module ActiveFedora
 
         def replace(record)
           if record
-            raise_on_type_mismatch(record)
-            run_type_validator(record)
+            raise_on_type_mismatch!(record)
             @updated = true
           end
 

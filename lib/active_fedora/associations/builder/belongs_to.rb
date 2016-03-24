@@ -4,6 +4,10 @@ module ActiveFedora::Associations::Builder
       :belongs_to
     end
 
+    def self.valid_options(options)
+      super + [:optional]
+    end
+
     def self.valid_dependent_options
       [:destroy, :delete]
     end

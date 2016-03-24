@@ -100,7 +100,7 @@ module ActiveFedora
       # Replace this collection with +other_array+
       # This will perform a diff and delete/add only records that have changed.
       def replace(other_array)
-        other_array.each { |val| raise_on_type_mismatch(val) }
+        other_array.each { |val| raise_on_type_mismatch!(val) }
 
         load_target
         other   = other_array.size < 100 ? other_array : other_array.to_set
@@ -156,8 +156,7 @@ module ActiveFedora
         result = true
 
         records.flatten.each do |record|
-          raise_on_type_mismatch(record)
-          run_type_validator(record)
+          raise_on_type_mismatch!(record)
           add_to_target(record) do |_r|
             result &&= insert_record(record) unless owner.new_record?
           end
@@ -356,7 +355,7 @@ module ActiveFedora
 
         def delete_or_destroy(records, method)
           records = records.flatten.select { |x| load_target.include?(x) }
-          records.each { |record| raise_on_type_mismatch(record) }
+          records.each { |record| raise_on_type_mismatch!(record) }
           existing_records = records.select(&:persisted?)
 
           records.each { |record| callback(:before_remove, record) }
