@@ -27,6 +27,10 @@ module ActiveFedora::Associations
       @target_proxy ||= ActiveFedora::Orders::TargetProxy.new(self)
     end
 
+    def target_ids_reader
+      target_reader.ids
+    end
+
     def find_reflection
       reflection
     end

@@ -14,6 +14,9 @@ module ActiveFedora::Associations::Builder
       mixin.redefine_method(target_accessor(name)) do
         association(name).target_reader
       end
+      mixin.redefine_method("#{target_accessor(name, pluralize: false)}_ids") do
+        association(name).target_ids_reader
+      end
       mixin.redefine_method("#{target_accessor(name)}=") do |nodes|
         association(name).target_writer(nodes)
       end
@@ -27,7 +30,7 @@ module ActiveFedora::Associations::Builder
       model.send(:define_method, :apply_first_and_last) do
         source = send(options[:through])
         source.save
-        return if head.map(&:rdf_subject) == source.head_id && tail.map(&:rdf_subject) == source.tail_id
+        return if head_ids == source.head_id && tail_ids == source.tail_id
         self.head = source.head_id
         self.tail = source.tail_id
         save! if changed?
@@ -50,8 +53,13 @@ module ActiveFedora::Associations::Builder
       end
     end
 
-    def self.target_accessor(name)
-      name.to_s.gsub("_proxies", "").pluralize
+    def self.target_accessor(name, pluralize: true)
+      name = name.to_s.gsub("_proxies", "")
+      if pluralize
+        name.pluralize
+      else
+        name
+      end
     end
     private_class_method :target_accessor
 

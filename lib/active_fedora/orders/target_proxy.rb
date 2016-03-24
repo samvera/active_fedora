@@ -24,6 +24,10 @@ module ActiveFedora
         self
       end
 
+      def ids
+        association.reader.map(&:target_id)
+      end
+
       # Deletes the element at the specified index, returning that element, or nil if
       # the index is out of range.
       def delete_at(loc)

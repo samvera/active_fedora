@@ -232,6 +232,7 @@ describe ActiveFedora::Orders do
       subject.save
       subject.reload
       expect(subject.ordered_members).to eq [member, member]
+      expect(subject.ordered_member_ids).to eq [member.id, member.id]
       expect(subject.list_source.resource.query([nil, ::RDF::Vocab::ORE.proxyIn, subject.resource.rdf_subject]).to_a.length).to eq 2
       expect(subject.head_ids).to eq subject.list_source.head_id
       expect(subject.tail_ids).to eq subject.list_source.tail_id
