@@ -1,9 +1,9 @@
 module ActiveFedora::File::Attributes
-  attr_writer :mime_type
-
   def mime_type
-    @mime_type ||= fetch_mime_type
+    fetch_mime_type
   end
+
+  delegate :mime_type=, to: :metadata
 
   def original_name
     @original_name ||= fetch_original_name
@@ -25,7 +25,7 @@ module ActiveFedora::File::Attributes
   end
 
   def dirty_size
-    content.size if changed? && content.respond_to?(:size)
+    content.size if content_changed? && content.respond_to?(:size)
   end
 
   def size
@@ -68,8 +68,8 @@ module ActiveFedora::File::Attributes
     end
 
     def fetch_mime_type
-      return default_mime_type if new_record?
-      ldp_source.head.content_type
+      return default_mime_type if new_record? && metadata.mime_type.blank?
+      metadata.mime_type.first
     end
 
     def fetch_original_name
