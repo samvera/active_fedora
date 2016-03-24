@@ -1,3 +1,144 @@
+v9.10.0
+2016-03-24: Continued alignment of associations with upstream changes [Chris
+Beer]
+
+2016-03-24: ActiveFedora::File.mime_type should be updatable [Chris Colvard]
+
+2016-03-23: Update reflections and associations to reflect upstream changes
+[Chris Beer]
+
+2016-03-23: Generate default configs for fcrepo_wrapper [Justin Coyne]
+
+2016-03-23: Generate solr_wrapper config file [Justin Coyne]
+
+2016-03-22: Bump version to 9.10.0.pre2 [Justin Coyne]
+
+2016-03-19: Update scoping with latest upstream changes [Chris Beer]
+
+2016-03-22: Deprecate delegating attributes to associated objects [Justin Coyne]
+
+2016-03-22: Add AttributeAssignment module from upstream [Chris Beer]
+
+2016-03-21: Update AF::AttributeMethods with upstream changes [Chris Beer]
+
+2016-03-21: Extract ActiveFedora::Common to share methods between AF::Base and
+AF::File [Chris Beer]
+
+2016-03-18: Update AF::File update callbacks to align with Rails [Chris Beer]
+
+2016-03-18: Extract ActiveFedora::FilePersistence, so ActiveFedora::File can
+work with AF::Callbacks [Chris Beer]
+
+2016-03-18: Prefix internal create_ and update_record callbacks with an
+underscore [Chris Beer]
+
+2016-03-18: Add create_or_update to provide save callbacks [Chris Beer]
+
+2016-03-18: Add ActiveFedora::Persistence#destroy! [Chris Beer]
+
+2016-03-20: Correctly find the size of a collection in memory [Justin Coyne]
+
+2016-03-18: Bump version to 9.10.0.pre1 [Justin Coyne]
+
+2016-03-18: Update Validations with latest upstream changes [Chris Beer]
+
+2016-03-18: Delegate count to the scope [Justin Coyne]
+
+2016-03-18: Update nested attributes with upstream improvements [Chris Beer]
+
+2016-03-18: Update reflection methods to match new upstream names [Chris Beer]
+
+2016-03-18: Add explicit ActiveModel dependency [Chris Beer]
+
+2016-03-18: Update minimum versions of ruby and activesupport [Chris Beer]
+
+2016-03-17: Extract Builder::Association.create_reflection [Chris Beer]
+
+2016-03-17: Delegate responsibility for cleaning up dependencies to association
+instances [Chris Beer]
+
+2016-03-17: validate dependent options [Chris Beer]
+
+2016-03-17: Port .dangerous_attribute_method? from Rails [Chris Beer]
+
+2016-03-17: Migrate valid_options from a class attribute to a method [Chris
+Beer]
+
+2016-03-17: Convert Assocations::Builder.macro from a class variable to a class
+method [Chris Beer]
+
+2016-03-15: Add default scopes [Justin Coyne]
+
+2016-03-16: Unconditionally run coverage reports when running tests [Chris Beer]
+
+2016-03-16: Remove or deprecate unused code [Chris Beer]
+
+2016-03-16: Silence SolrQueryBuilder deprecation warnings when running tests
+[Chris Beer]
+
+2016-03-16: Update relation calculations to use SolrService.count [Chris Beer]
+
+2016-03-16: Extract SolrService.get to send requests to Solr and get the
+original response [Chris Beer]
+
+2016-03-16: Use field queries instead of raw queries [Chris Beer]
+
+2016-03-16: Deprecate ActiveFedora::SolrQueryBuilder.raw_query in favor of
+.construct_query [Chris Beer]
+
+2016-03-16: Deprecate ActiveFedora::SolrQueryBuilder.solr_name in favor of using
+ActiveFedora.index_field_mapper directly [Chris Beer]
+
+2016-03-15: Extract SolrHit class to wrap Solr response documents [Chris Beer]
+
+2016-03-15: Deprecate unused methods [Justin Coyne]
+
+2016-03-15: ActiveFedora depends on Solrizer [Justin Coyne]
+
+2016-03-15: Don't rely on exceptions for flow control [Justin Coyne]
+
+2016-03-15: Update testing versions of Ruby and Rails [Justin Coyne]
+
+2016-03-15: Push .search_by_id into ActiveFedora::FinderMethod [Chris Beer]
+
+2016-03-15: Rename find_with_conditions and find_in_batches to
+search_with_conditions and search_in_batches [Chris Beer]
+
+2016-03-11: Provide class-level accessors in place of global constants for
+configuration [Chris Beer]
+
+2016-03-11: Use ActiveFedora.index_field_mapper instead of accessing Solrizer
+directly [Chris Beer]
+
+2016-03-11: Use the same logic for lazy_reify_solr_results and
+reify_solr_results [Chris Beer]
+
+2016-03-10: Move indexer to a class attribute [Justin Coyne]
+
+2016-03-09: Decompose ActiveFedora::Model into a generic model mapper and a
+classifier [Chris Beer]
+
+2016-03-09: Add DefaultModelMapper class to encapsulate model selection logic
+[Chris Beer]
+
+2016-03-09: Use ActiveFedora.model_mapper accessor to get the type to class
+mapper [Chris Beer]
+
+2016-03-09: Unify class lookup for Fedora types to ActiveFedora models [Chris
+Beer]
+
+2016-03-09: Move ActiveFedora.class_from_string into ActiveFedora::Model [Chris
+Beer]
+
+2016-03-09: Remove require of rubocop-rspec [Justin Coyne]
+
+2016-03-09: Pin rake to ~> 10.0 [Justin Coyne]
+
+2016-03-09: Update test to support ActiveModel 4.2.6 [Justin Coyne]
+
+2016-03-08: Update to use ldp 0.5 [Chris Beer]
+
+
 v9.9.1
 2016-03-05: Restore autocommit in the update handler [Justin Coyne]
 
