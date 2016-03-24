@@ -31,3 +31,18 @@ def with_server(environment, fcrepo_port: nil, solr_port: nil)
   end
   ENV["#{environment}_SERVER_STARTED"] = 'false'
 end
+
+# Run a fedora server and a solr server until interrupted by the user
+def run_server(environment, solr_port: nil, fcrepo_port: nil)
+  with_server(environment, solr_port: solr_port, fcrepo_port: fcrepo_port) do
+    puts "\n#{environment.titlecase} servers running:\n"
+    puts "    Fedora..: http://localhost:#{fcrepo_port}/rest/"
+    puts "    Solr....: http://localhost:#{solr_port}/solr/hydra-#{environment}/"
+    puts "\n^C to stop"
+    begin
+      yield
+    rescue Interrupt
+      puts "Shutting down..."
+    end
+  end
+end
