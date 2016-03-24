@@ -64,8 +64,7 @@ describe "Nested Rdf Objects" do
       comp2 = SpecDatastream::Component.new nil, ds.graph
       comp2.label = ["Crankshaft"]
       ds.parts = [comp1, comp2]
-      expect(ds.parts.first.label).to eq ["Alternator"]
-      expect(ds.parts.last.label).to eq ["Crankshaft"]
+      expect(ds.parts.map(&:label)).to contain_exactly ["Alternator"], ["Crankshaft"]
     end
 
     it "is able to clear complex objects" do
@@ -85,7 +84,7 @@ _:g70350851837440 <http://purl.org/dc/terms/title> "Alternator" .
 <#{ActiveFedora.fedora.host}/test/test:124> <http://purl.org/dc/terms/hasPart> _:g70350851833380 .
 _:g70350851833380 <http://purl.org/dc/terms/title> "Crankshaft" .
 END
-      expect(ds.parts.first.label).to eq ["Alternator"]
+      expect(ds.parts.map(&:label)).to contain_exactly ["Alternator"], ["Crankshaft"]
     end
 
     it "builds complex objects when a parent node doesn't exist" do
@@ -111,7 +110,6 @@ END
     describe "#first_or_create" do
       it "returns a result if the predicate exists" do
         part1 = ds.parts.build
-        ds.parts.build
         expect(ds.parts.first_or_create).to eq part1
       end
 
@@ -165,7 +163,7 @@ END
   _:g70350851837440 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.ebu.ch/metadata/ontologies/ebucore#Organisation> .
   <#{ActiveFedora.fedora.host}/test/test:124> <http://purl.org/dc/terms/mediator> _:g70350851837440 .
 END
-        expect(ds.mediator.first.type.first.to_s).to eq "http://www.ebu.ch/metadata/ontologies/ebucore#Organisation"
+        expect(ds.mediator.first.type.map(&:to_s)).to include "http://www.ebu.ch/metadata/ontologies/ebucore#Organisation"
       end
     end
 
@@ -205,6 +203,7 @@ END
       let(:file) { parent.info }
 
       it "stores the type of complex objects when type is specified" do
+        pending "This is no longer supported by ActiveTriples - can we deprecate this altogether?"
         series = SpecDatastream::Series.new nil, file.graph
         series.title = ["renovating bathrooms"]
         file.series = series

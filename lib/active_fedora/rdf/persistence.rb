@@ -25,6 +25,7 @@ module ActiveFedora
 
       # Overrides ActiveTriples::Resource
       def persisted?
+        return true if frozen? && !datastream.new_record?
         @persisted ||= !datastream.new_record?
       end
     end

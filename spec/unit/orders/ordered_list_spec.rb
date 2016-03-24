@@ -316,7 +316,7 @@ RSpec.describe ActiveFedora::Orders::OrderedList do
       graph = subject.to_graph
 
       expect(graph.statements.to_a.length).to eq 5
-      expect(graph.subjects.to_a).to eq subject.to_a.map(&:rdf_subject)
+      expect(graph.subjects.to_a).to contain_exactly(*subject.to_a.map(&:rdf_subject))
       expect(graph.query([nil, RDF::Vocab::ORE.proxyFor, nil]).to_a.last.object).to be_kind_of RDF::URI
     end
   end

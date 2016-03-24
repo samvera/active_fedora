@@ -197,7 +197,7 @@ describe ActiveFedora::Base do
 
         it "lets you set an array of objects" do
           @library.books = [@book, @book2]
-          expect(@library.books).to eq [@book, @book2]
+          expect(@library.books).to contain_exactly @book, @book2
           @library.save
 
           @library.books = [@book]
@@ -205,7 +205,7 @@ describe ActiveFedora::Base do
         end
         it "lets you set an array of object ids" do
           @library.book_ids = [@book.id, @book2.id]
-          expect(@library.books).to eq [@book, @book2]
+          expect(@library.books).to contain_exactly @book, @book2
         end
 
         it "setter should wipe out previously saved relations" do
@@ -219,7 +219,7 @@ describe ActiveFedora::Base do
           @library.books = [@book, @book2]
           @library.save
           @library = Library.find(@library.id)
-          expect(@library.books).to eq [@book, @book2]
+          expect(@library.books).to contain_exactly @book, @book2
         end
 
         it "lets you lookup an array of objects with solr" do
@@ -230,7 +230,7 @@ describe ActiveFedora::Base do
           @book2.save
 
           @library = Library.find(@library.id)
-          expect(@library.books).to eq [@book, @book2]
+          expect(@library.books).to contain_exactly @book, @book2
 
           solr_resp = @library.books(response_format: :solr)
           expect(solr_resp.size).to eq 2
@@ -462,7 +462,7 @@ describe ActiveFedora::Base do
 
       it "loads the association stored in the parent" do
         @reloaded_course = Course.find(@course.id)
-        expect(@reloaded_course.textbooks).to eq [@t1, @t2]
+        expect(@reloaded_course.textbooks).to contain_exactly @t1, @t2
       end
 
       it "allows a parent to be deleted from the has_many association" do
@@ -480,7 +480,7 @@ describe ActiveFedora::Base do
         @course.textbooks = [@t3, @t4]
         @course.save
 
-        expect(@course.reload.textbooks).to eq [@t3, @t4]
+        expect(@course.reload.textbooks).to contain_exactly @t3, @t4
       end
 
       it "allows a child to be deleted from the has_and_belongs_to_many association" do

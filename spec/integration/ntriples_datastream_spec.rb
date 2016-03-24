@@ -6,13 +6,23 @@ describe ActiveFedora::NtriplesRDFDatastream do
       property :size
     end
 
-    class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-      property :title, predicate: ::RDF::Vocab::DC.title
-      property :date_uploaded, predicate: ::RDF::Vocab::DC.dateSubmitted
-      property :filesize, predicate: FileVocabulary.size
-      property :part, predicate: ::RDF::Vocab::DC.hasPart
-      property :based_near, predicate: ::RDF::FOAF.based_near
-      property :related_url, predicate: ::RDF::RDFS.seeAlso
+    Deprecation.silence(ActiveFedora::RDFDatastream) do
+      class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+        property :title, predicate: ::RDF::Vocab::DC.title do |index|
+          index.as :stored_searchable, :facetable
+        end
+        property :date_uploaded, predicate: ::RDF::Vocab::DC.dateSubmitted do |index|
+          index.type :date
+          index.as :stored_searchable, :sortable
+        end
+        property :filesize, predicate: FileVocabulary.size do |index|
+          index.type :integer
+          index.as :stored_sortable
+        end
+        property :part, predicate: ::RDF::Vocab::DC.hasPart
+        property :based_near, predicate: ::RDF::Vocab::FOAF.based_near
+        property :related_url, predicate: ::RDF::RDFS.seeAlso
+      end
     end
 
     class RdfTest < ActiveFedora::Base
@@ -52,7 +62,7 @@ EOF
     end
     it "handles integers" do
       subject.filesize = 12_345
-      expect(subject.filesize).to be_kind_of Array
+      expect(subject.filesize).to eq [12_345]
       expect(subject.filesize.first).to be_kind_of Fixnum
     end
   end
@@ -89,7 +99,7 @@ EOF
     subject.save
 
     loaded = MyDatastream.new(subject.uri)
-    expect(loaded.part).to eq ['part 1', 'part 2']
+    expect(loaded.part).to contain_exactly 'part 1', 'part 2'
   end
 
   it "appends values" do
@@ -97,7 +107,12 @@ EOF
     subject.save
 
     subject.part << "thing 2"
-    expect(subject.part).to eq ["thing 1", "thing 2"]
+    expect(subject.part).to contain_exactly "thing 1", "thing 2"
+  end
+
+  it "is able to save a blank document" do
+    subject.title = ""
+    subject.save
   end
 
   it "loads n-triples into the graph" do
@@ -105,7 +120,7 @@ EOF
 <http://oregondigital.org/ns/62> <http://purl.org/dc/terms/spatial> "Benton County (Ore.)" .
 '
     subject.content = ntrip
-    expect(subject.graph.dump(:ntriples)).to eq ntrip
+    expect(subject.graph.statements.to_a).to contain_exactly(*RDF::NTriples::Reader.new(ntrip).statements.to_a)
   end
 
   describe "using rdf_subject" do
@@ -155,15 +170,15 @@ EOF
     subject.part = ["MacBeth"]
     subject.part << "Hamlet"
     subject.part << "Romeo & Juliet"
-    expect(subject.part.first).to eq "MacBeth"
-    subject.part.delete("MacBeth", "Romeo & Juliet")
+    expect(subject.part).to include "MacBeth"
+    subject.part.subtract(["MacBeth", "Romeo & Juliet"])
     expect(subject.part).to eq ["Hamlet"]
     expect(subject.part.first).to eq "Hamlet"
   end
   it "ignores values to be deleted that do not exist" do
     subject.part = ["title1", "title2", "title3"]
-    subject.part.delete("title2", "title4", "title6")
-    expect(subject.part).to eq ["title1", "title3"]
+    subject.part.subtract(["title2", "title4", "title6"])
+    expect(subject.part).to contain_exactly "title1", "title3"
   end
 
   describe "term proxy methods" do
@@ -185,19 +200,16 @@ EOF
     it "iterates over multiple values" do
       expect(subject.title).to respond_to(:each)
     end
-    it "gets the first value" do
-      expect(subject.title.first).to eq "title1"
-    end
     it "evaluates equality predictably" do
-      expect(subject.title).to eq ["title1", "title2", "title3"]
+      expect(subject.title).to contain_exactly "title1", "title2", "title3"
     end
     it "supports the empty? method" do
       expect(subject.title).to_not be_empty
-      subject.title.delete("title1", "title2", "title3")
+      subject.title.subtract(["title1", "title2", "title3"])
       expect(subject.title).to be_empty
     end
-    it "supports the is_a? method" do
-      expect(subject.title.is_a?(Array)).to eq true
+    it "supports the each method" do
+      expect(subject.title.respond_to?(:each)).to eq true
     end
   end
 end

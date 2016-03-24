@@ -14,7 +14,7 @@ RSpec.describe ActiveFedora::CleanConnection do
       it "returns a clean graph" do
         graph = result.graph
         expect(graph.statements.to_a.length).to eq 1
-        expect(graph.statements.to_a.first).to eq [asset.rdf_subject, RDF::Vocab::DC.title, "test"]
+        expect(graph.statements.to_a.first).to contain_exactly asset.rdf_subject, RDF::Vocab::DC.title, RDF::Literal.new("test")
       end
     end
   end

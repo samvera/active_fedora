@@ -55,7 +55,7 @@ describe ActiveFedora::Associations::FilterAssociation do
         image.child_collections = [another_collection]
       end
       it "overwrites existing matches" do
-        expect(image.members).to eq [test_object, another_collection]
+        expect(image.members).to contain_exactly test_object, another_collection
       end
     end
   end
@@ -75,7 +75,7 @@ describe ActiveFedora::Associations::FilterAssociation do
       end
 
       it "updates the parent" do
-        expect(image.members).to eq [test_object, test_collection, another_collection]
+        expect(image.members).to contain_exactly test_object, test_collection, another_collection
       end
     end
   end
@@ -128,6 +128,6 @@ describe ActiveFedora::Associations::FilterAssociation do
 
     subject { image.members }
 
-    it { is_expected.to eq [test_collection, another_object] }
+    it { is_expected.to contain_exactly test_collection, another_object }
   end
 end

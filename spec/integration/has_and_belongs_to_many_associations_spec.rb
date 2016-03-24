@@ -5,11 +5,11 @@ describe ActiveFedora::Base do
     context "that is also a HABTM" do
       before do
         class Book < ActiveFedora::Base
-          has_and_belongs_to_many :topics, predicate: ::RDF::FOAF.primaryTopic, inverse_of: :books
+          has_and_belongs_to_many :topics, predicate: ::RDF::Vocab::FOAF.primaryTopic, inverse_of: :books
         end
 
         class Topic < ActiveFedora::Base
-          has_and_belongs_to_many :books, predicate: ::RDF::FOAF.isPrimaryTopicOf
+          has_and_belongs_to_many :books, predicate: ::RDF::Vocab::FOAF.isPrimaryTopicOf
         end
       end
 
@@ -208,7 +208,7 @@ describe ActiveFedora::Base do
       end
 
       it "delete should cause the entries to be removed from RELS-EXT, but not destroy the original record" do
-        expect(book.collections).to eq [collection1, collection2]
+        expect(book.collections).to contain_exactly collection1, collection2
         book.collections.delete(collection1)
         expect(book.collections).to eq [collection2]
         book.save!
@@ -218,7 +218,7 @@ describe ActiveFedora::Base do
       end
 
       it "destroy should cause the entries to be removed from RELS-EXT, but not destroy the original record" do
-        expect(book.collections).to eq [collection1, collection2]
+        expect(book.collections).to contain_exactly collection1, collection2
         book.collections.destroy(collection1)
         expect(book.collections).to eq [collection2]
         book.save!

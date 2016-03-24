@@ -24,8 +24,8 @@ describe ActiveFedora::Attributes, ".new" do
     end
 
     class Person < ActiveFedora::Base
-      property :first_name, predicate: ::RDF::FOAF.firstName, multiple: false
-      property :gender, predicate: ::RDF::FOAF.gender, multiple: false
+      property :first_name, predicate: ::RDF::Vocab::FOAF.firstName, multiple: false
+      property :gender, predicate: ::RDF::Vocab::FOAF.gender, multiple: false
     end
   end
 

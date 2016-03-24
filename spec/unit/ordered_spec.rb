@@ -97,7 +97,7 @@ describe ActiveFedora::Orders do
         subject.ordered_members = [member_2, member_2]
         expect(subject.ordered_members).to eq [member_2, member_2]
         # Removing from ordering is not the same as removing from aggregation.
-        expect(subject.members).to eq [member, member_2]
+        expect(subject.members).to contain_exactly member, member_2
       end
     end
     describe "+=" do
@@ -133,6 +133,12 @@ describe ActiveFedora::Orders do
         it "deletes all occurences of the object" do
           expect(subject.ordered_members.delete(member)).to eq member
           expect(subject.ordered_members.to_a).to eq [member_2]
+        end
+        it "can delete all" do
+          expect(subject.ordered_members.delete(member)).to eq member
+          expect(subject.ordered_members.delete(member_2)).to eq member_2
+          subject.save!
+          expect(subject.reload.ordered_members.to_a).to eq []
         end
       end
 

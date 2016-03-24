@@ -50,6 +50,10 @@ module ActiveFedora
         @hash[k]
       end
 
+      def persist!(*)
+        true
+      end
+
       # FakeQuery exists to adapt the hash to the RDF interface used by RDF associations in ActiveFedora
       class FakeQuery
         include ::Enumerable
@@ -153,7 +157,7 @@ module ActiveFedora
       # @param attribute_name [String] the name of the attribute to adapt
       # @return [Object] the adapted value
       def adapt_attribute_value(attrs, attribute_name)
-        reflection = self.class.reflect_on_property(attribute_name)
+        reflection = property_reflection(attribute_name)
         # if this isn't a property, copy value verbatim
         return attrs[attribute_name] unless reflection
         multiple = reflection.multiple?
@@ -167,6 +171,13 @@ module ActiveFedora
         else
           adapt_single_attribute_value(attrs[attribute_name], attribute_name)
         end
+      end
+
+      def property_reflection(attribute_name)
+        self.class.reflect_on_property(attribute_name)
+      rescue ActiveTriples::UndefinedPropertyError
+        ActiveFedora::Base.logger.info "Undefined property #{attribute_name} reflected."
+        nil
       end
 
       def date_attribute?(attribute_name)

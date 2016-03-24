@@ -30,7 +30,7 @@ describe ActiveFedora::WithMetadata do
       file.title = ['one', 'two']
     end
     it "sets and retrieve properties" do
-      expect(file.title).to eq ['one', 'two']
+      expect(file.title).to contain_exactly 'one', 'two'
     end
 
     it "tracks changes" do
