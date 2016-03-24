@@ -1,6 +1,10 @@
 module ActiveFedora
   module Associations
     class AssociationScope #:nodoc:
+      def self.scope(association)
+        new(association).scope
+      end
+
       attr_reader :association
 
       delegate :klass, :owner, :reflection, :interpolate, to: :association

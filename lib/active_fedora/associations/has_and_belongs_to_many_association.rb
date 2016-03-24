@@ -37,7 +37,7 @@ module ActiveFedora
         result = true
 
         records.flatten.each do |record|
-          raise_on_type_mismatch(record)
+          raise_on_type_mismatch!(record)
           add_to_target(record) do |_r|
             result &&= insert_record(record)
           end

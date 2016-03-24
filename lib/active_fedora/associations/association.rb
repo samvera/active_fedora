@@ -76,7 +76,7 @@ module ActiveFedora
       # by scope.scoping { ... } or with_scope { ... } etc, which affects the scope which
       # actually gets built.
       def association_scope
-        @association_scope ||= AssociationScope.new(self).scope if klass
+        @association_scope ||= AssociationScope.scope(self) if klass
       end
 
       def reset_scope
@@ -115,12 +115,17 @@ module ActiveFedora
         @target = find_target if (@stale_state && stale_target?) || find_target?
         loaded! unless loaded?
         target
+      rescue ActiveFedora::ObjectNotFoundError
+        reset
       end
 
-      def initialize_attributes(record) #:nodoc:
+      def initialize_attributes(record, except_from_scope_attributes = nil) #:nodoc:
+        except_from_scope_attributes ||= {}
         skip_assign = [reflection.foreign_key].compact
-        attributes = create_scope.except(*(record.changed - skip_assign))
-        record.attributes = attributes
+        assigned_keys = record.changed
+        assigned_keys += except_from_scope_attributes.keys.map(&:to_s)
+        attributes = create_scope.except(*(assigned_keys - skip_assign))
+        record.assign_attributes(attributes)
         set_inverse_instance(record)
       end
 
@@ -128,6 +133,25 @@ module ActiveFedora
 
         def find_target?
           !loaded? && (!owner.new_record? || foreign_key_present?) && klass
+        end
+
+        def creation_attributes
+          attributes = {}
+
+          if (reflection.has_one? || reflection.collection?) && !options[:through]
+            attributes[reflection.foreign_key] = owner[reflection.active_record_primary_key]
+
+            if reflection.options[:as]
+              attributes[reflection.type] = owner.class.base_class.name
+            end
+          end
+
+          attributes
+        end
+
+        # Sets the owner attributes on the given record
+        def set_owner_attributes(record)
+          creation_attributes.each { |key, value| record[key] = value }
         end
 
         # Returns true if there is a foreign key present on the owner which
@@ -144,10 +168,16 @@ module ActiveFedora
         # Raises ActiveFedora::AssociationTypeMismatch unless +record+ is of
         # the kind of the class of the associated objects. Meant to be used as
         # a sanity check when you are about to assign an associated record.
-        def raise_on_type_mismatch(record)
-          return if record.is_a?(@reflection.klass) || record.is_a?(@reflection.class_name.constantize)
-          message = "#{@reflection.class_name}(##{@reflection.klass.object_id}) expected, got #{record.class}(##{record.class.object_id})"
-          raise ActiveFedora::AssociationTypeMismatch, message
+        def raise_on_type_mismatch!(record)
+          unless record.is_a?(reflection.klass)
+            fresh_class = reflection.class_name.safe_constantize
+            unless fresh_class && record.is_a?(fresh_class)
+              message = "#{reflection.class_name}(##{reflection.klass.object_id}) expected, got #{record.class}(##{record.class.object_id})"
+              raise ActiveFedora::AssociationTypeMismatch, message
+            end
+          end
+
+          type_validator.validate!(self, record)
         end
 
         def type_validator
@@ -179,10 +209,6 @@ module ActiveFedora
           reflection.build_association(attributes) do |record|
             initialize_attributes(record)
           end
-        end
-
-        def run_type_validator(record)
-          type_validator.validate!(self, record)
         end
     end
   end

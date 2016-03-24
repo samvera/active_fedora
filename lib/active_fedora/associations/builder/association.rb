@@ -126,14 +126,6 @@ module ActiveFedora::Associations::Builder
       # noop
     end
 
-    def self.add_destroy_callbacks(model, reflection)
-      name = reflection.name
-      model.before_destroy lambda do |o|
-        a = o.association(name)
-        a.handle_dependency if a.respond_to? :handle_dependency
-      end
-    end
-
     def self.valid_dependent_options
       raise NotImplementedError
     end
@@ -142,6 +134,11 @@ module ActiveFedora::Associations::Builder
       unless valid_dependent_options.include? dependent
         raise ArgumentError, "The :dependent option must be one of #{valid_dependent_options}, but is :#{dependent}"
       end
+    end
+
+    def self.add_destroy_callbacks(model, reflection)
+      name = reflection.name
+      model.before_destroy ->(o) { o.association(name).handle_dependency }
     end
   end
 end

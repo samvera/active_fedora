@@ -8,10 +8,18 @@ module ActiveFedora::Associations::Builder
     end
 
     def self.define_callbacks(model, reflection)
+      super
       name = reflection.name
       options = reflection.options
-      super
       CALLBACKS.each { |callback_name| define_callback(model, callback_name, name, options) }
+    end
+
+    def self.define_extensions(model, name)
+      if block_given?
+        extension_module_name = "#{model.name.demodulize}#{name.to_s.camelize}AssociationExtension"
+        extension = Module.new(&Proc.new)
+        model.parent.const_set(extension_module_name, extension)
+      end
     end
 
     def self.define_callback(model, callback_name, name, options)

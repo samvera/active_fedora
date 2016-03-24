@@ -32,7 +32,7 @@ module ActiveFedora
       assign_attributes(attributes) if attributes
 
       yield self if block_given?
-      run_callbacks :initialize
+      _run_initialize_callbacks
     end
 
     ##
