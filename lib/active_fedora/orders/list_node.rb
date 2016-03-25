@@ -4,7 +4,7 @@ module ActiveFedora::Orders
     attr_accessor :prev, :next, :target
     attr_writer :next_uri, :prev_uri
     attr_accessor :proxy_in, :proxy_for
-    def initialize(node_cache, rdf_subject, graph=RDF::Graph.new)
+    def initialize(node_cache, rdf_subject, graph = RDF::Graph.new)
       @rdf_subject = rdf_subject
       @graph = graph
       @node_cache = node_cache
@@ -44,7 +44,7 @@ module ActiveFedora::Orders
       g.proxy_for = target_uri
       g.proxy_in = proxy_in.try(:uri)
       g.next = self.next.try(:rdf_subject)
-      g.prev = self.prev.try(:rdf_subject)
+      g.prev = prev.try(:rdf_subject)
       g
     end
 
@@ -60,9 +60,7 @@ module ActiveFedora::Orders
     end
 
     def target_uri
-      if target_id
-        RDF::URI(ActiveFedora::Base.id_to_uri(target_id))
-      end
+      RDF::URI(ActiveFedora::Base.id_to_uri(target_id)) if target_id
     end
 
     def target_id
@@ -95,13 +93,13 @@ module ActiveFedora::Orders
 
       private
 
-      def id_composite
-        ActiveFedora::Associations::IDComposite
-      end
+        def id_composite
+          ActiveFedora::Associations::IDComposite
+        end
 
-      def translator
-        ActiveFedora::Base.translate_uri_to_id
-      end
+        def translator
+          ActiveFedora::Base.translate_uri_to_id
+        end
     end
 
     # Methods necessary for association functionality
@@ -127,37 +125,37 @@ module ActiveFedora::Orders
 
     private
 
-    attr_reader :next_uri, :prev_uri, :graph, :node_cache
+      attr_reader :next_uri, :prev_uri, :graph, :node_cache
 
-    class Builder
-      attr_reader :uri, :graph
-      def initialize(uri, graph)
-        @uri = uri
-        @graph = graph
+      class Builder
+        attr_reader :uri, :graph
+        def initialize(uri, graph)
+          @uri = uri
+          @graph = graph
+        end
+
+        def populate(instance)
+          instance.proxy_for = resource.proxy_for.first
+          instance.proxy_in = resource.proxy_in.first
+          instance.next_uri = resource.next.first
+          instance.prev_uri = resource.prev.first
+        end
+
+        private
+
+          def resource
+            @resource ||= Resource.new(uri, graph)
+          end
       end
 
-      def populate(instance)
-        instance.proxy_for = resource.proxy_for.first
-        instance.proxy_in = resource.proxy_in.first
-        instance.next_uri = resource.next.first
-        instance.prev_uri = resource.prev.first
+      class Resource < ActiveTriples::Resource
+        property :proxy_for, predicate: ::RDF::Vocab::ORE.proxyFor, cast: false
+        property :proxy_in, predicate: ::RDF::Vocab::ORE.proxyIn, cast: false
+        property :next, predicate: ::RDF::Vocab::IANA.next, cast: false
+        property :prev, predicate: ::RDF::Vocab::IANA.prev, cast: false
+        def final_parent
+          parent
+        end
       end
-
-      private
-
-      def resource
-        @resource ||= Resource.new(uri, graph)
-      end
-    end
-
-    class Resource < ActiveTriples::Resource
-      property :proxy_for, predicate: ::RDF::Vocab::ORE.proxyFor, cast: false
-      property :proxy_in, predicate: ::RDF::Vocab::ORE.proxyIn, cast: false
-      property :next, predicate: ::RDF::Vocab::IANA.next, cast: false
-      property :prev, predicate: ::RDF::Vocab::IANA.prev, cast: false
-      def final_parent
-        parent
-      end
-    end
   end
 end

@@ -28,9 +28,7 @@ module ActiveFedora
       # the index is out of range.
       def delete_at(loc)
         result = association.delete_at(loc)
-        if result
-          result.target
-        end
+        result.target if result
       end
 
       # Deletes all items from self that are equal to obj.
@@ -41,22 +39,20 @@ module ActiveFedora
       end
 
       def clear
-        while to_ary.present?
-          association.delete_at(0)
-        end
+        association.delete_at(0) while to_ary.present?
       end
 
       def to_ary
         association.reader.map(&:target).dup
       end
-      alias_method :to_a, :to_ary
+      alias to_a to_ary
 
-      def ==(other_obj)
-        case other_obj
+      def ==(other)
+        case other
         when TargetProxy
           super
         when Array
-          to_a == other_obj
+          to_a == other
         end
       end
     end

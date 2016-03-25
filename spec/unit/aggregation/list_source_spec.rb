@@ -2,9 +2,9 @@ require 'spec_helper'
 
 RSpec.describe ActiveFedora::Aggregation::ListSource do
   subject { described_class.new }
-  
+
   describe "#head" do
-    it "should be nil by default" do
+    it "is nil by default" do
       expect(subject.head).to eq nil
     end
 
@@ -29,7 +29,7 @@ RSpec.describe ActiveFedora::Aggregation::ListSource do
   end
 
   describe "#tail" do
-    it "should be nil by default" do
+    it "is nil by default" do
       expect(subject.tail).to eq nil
     end
 
@@ -87,7 +87,7 @@ RSpec.describe ActiveFedora::Aggregation::ListSource do
       end
     end
     context "when ordered list has changed" do
-      it "should persist it" do
+      it "persists it" do
         allow(subject.ordered_self).to receive(:to_graph).and_call_original
         allow(subject.ordered_self).to receive(:changed?).and_return(true)
 
@@ -128,12 +128,7 @@ RSpec.describe ActiveFedora::Aggregation::ListSource do
       m = Member.create
       proxy_in = RDF::URI(ActiveFedora::Base.translate_id_to_uri.call("banana"))
       subject.ordered_self.append_target m, proxy_in: proxy_in
-      expect(subject.to_solr).to include (
-        {
-          ordered_targets_ssim: [m.id],
-          proxy_in_ssi: "banana"
-        }
-      )
+      expect(subject.to_solr).to include ordered_targets_ssim: [m.id], proxy_in_ssi: "banana"
     end
   end
 end

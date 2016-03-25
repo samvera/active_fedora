@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe "Filtering" do
+describe ActiveFedora::Filter do
   before do
     class Image < ActiveFedora::Base
       ordered_aggregation :members, through: :list_source, class_name: 'ActiveFedora::Base'
@@ -81,14 +81,14 @@ describe "Filtering" do
   end
 
   describe "#size" do
-      it "should return the size" do
-        # Need to persist so that count_records will be called.
-        image.save
-        test_object.save
-        image.members = [test_object]
+    it "returns the size" do
+      # Need to persist so that count_records will be called.
+      image.save
+      test_object.save
+      image.members = [test_object]
 
-        expect(image.reload.child_objects.size).to eq 1
-      end
+      expect(image.reload.child_objects.size).to eq 1
+    end
   end
 
   describe "reading" do
@@ -113,7 +113,7 @@ describe "Filtering" do
     end
 
     describe "#_ids" do
-      it "should return just the ids" do
+      it "returns just the ids" do
         expect(image.child_object_ids).to eq [test_object.id]
       end
     end

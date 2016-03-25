@@ -5,9 +5,7 @@ module ActiveFedora::Filter
     end
 
     # delegates to extending_from
-    def klass
-      extending_from.klass
-    end
+    delegate :klass, to: :extending_from
 
     def extending_from
       @extending_from ||= active_fedora._reflect_on_association(options.fetch(:extending_from))
@@ -18,4 +16,3 @@ module ActiveFedora::Filter
     end
   end
 end
-

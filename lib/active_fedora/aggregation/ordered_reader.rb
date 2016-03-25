@@ -13,17 +13,15 @@ module ActiveFedora::Aggregation
       while proxy
         yield proxy unless proxy.nil?
         next_proxy = proxy.next
-        if next_proxy && next_proxy.prev != proxy
-          next_proxy.try(:prev=, proxy)
-        end
+        next_proxy.try(:prev=, proxy) if next_proxy && next_proxy.prev != proxy
         proxy = next_proxy
       end
     end
 
     private
 
-    def first_head
-      root.head
-    end
+      def first_head
+        root.head
+      end
   end
 end

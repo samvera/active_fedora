@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe ActiveFedora::Orders::OrderedList do
   subject { described_class.new(graph, head_uri, tail_uri) }
 
-  let(:graph) { ActiveTriples::Resource.new(RDF::URI("stuff"))}
+  let(:graph) { ActiveTriples::Resource.new(RDF::URI("stuff")) }
   let(:head_uri) { nil }
   let(:tail_uri) { nil }
   describe "#last" do
@@ -184,7 +184,7 @@ RSpec.describe ActiveFedora::Orders::OrderedList do
   end
 
   describe "#append_target" do
-    it "should be able to append multiple targets" do
+    it "appends multiple targets" do
       member = instance_double(ActiveFedora::Base)
       proxy_in = instance_double(ActiveFedora::Base, uri: RDF::URI("obj1"))
       600.times do
@@ -322,7 +322,7 @@ RSpec.describe ActiveFedora::Orders::OrderedList do
   end
 
   describe "#changes_committed!" do
-    it "should set changed back to false" do
+    it "sets changed back to false" do
       member = instance_double(ActiveFedora::Base, uri: RDF::URI("http://test.org"))
       subject.append_target member
       expect(subject).to be_changed

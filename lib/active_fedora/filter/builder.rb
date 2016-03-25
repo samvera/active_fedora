@@ -16,4 +16,3 @@ module ActiveFedora::Filter
     end
   end
 end
-

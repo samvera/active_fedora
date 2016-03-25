@@ -5,14 +5,14 @@ RSpec.describe ActiveFedora::Aggregation::OrderedReader do
   let(:root) { instance_double(ActiveFedora::Aggregation::ListSource) }
 
   describe "#each" do
-    it "should iterate a linked list" do
+    it "iterates a linked list" do
       head = build_node
       tail = build_node(prev_node: head)
       allow(head).to receive(:next).and_return(tail)
       allow(root).to receive(:head).and_return(head)
       expect(subject.to_a).to eq [head, tail]
     end
-    it "should only go as deep as necessary" do
+    it "only goes as deep as necessary" do
       head = build_node
       tail = build_node(prev_node: head)
       allow(head).to receive(:next).and_return(tail)

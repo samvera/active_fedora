@@ -9,13 +9,13 @@ RSpec.describe ActiveFedora::Orders::Reflection do
   let(:active_fedora) { double("active_fedora") }
 
   describe "#klass" do
-    it "should be a proxy" do
+    it "is a proxy" do
       expect(subject.klass).to eq ActiveFedora::Orders::ListNode
     end
   end
 
   describe "#class_name" do
-    it "should be a list node" do
+    it "is a list node" do
       expect(subject.class_name).to eq "ActiveFedora::Orders::ListNode"
     end
   end

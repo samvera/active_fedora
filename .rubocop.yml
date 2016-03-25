@@ -87,6 +87,7 @@ Metrics/ClassLength:
     - 'lib/active_fedora/associations/collection_proxy.rb'
     - 'lib/active_fedora/associations/collection_association.rb'
     - 'lib/active_fedora/reflection.rb'
+    - 'lib/active_fedora/orders/ordered_list.rb'
 
 Metrics/MethodLength:
   Enabled: false
@@ -123,6 +124,8 @@ Style/PredicateName:
     - 'lib/active_fedora/attached_files.rb'
     - 'lib/active_fedora/associations.rb'
     - 'lib/active_fedora/association_hash.rb'
+    - 'lib/active_fedora/aggregation/list_source.rb'
+    - 'lib/active_fedora/orders/aggregation_builder.rb'
 
 Style/GuardClause:
   Exclude:

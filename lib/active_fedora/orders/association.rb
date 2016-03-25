@@ -1,6 +1,5 @@
 module ActiveFedora::Orders
   class Association < ::ActiveFedora::Associations::CollectionAssociation
-
     def initialize(*args)
       super
       @target = find_target
@@ -33,11 +32,10 @@ module ActiveFedora::Orders
     end
 
     def replace(new_ordered_list)
-      raise unless new_ordered_list.kind_of? ActiveFedora::Orders::OrderedList
+      raise unless new_ordered_list.is_a? ActiveFedora::Orders::OrderedList
       list_container.ordered_self = new_ordered_list
       @target = find_target
     end
-
 
     def find_target
       ordered_proxies
@@ -49,7 +47,7 @@ module ActiveFedora::Orders
 
     # Append a target node to the end of the order.
     # @param [ActiveFedora::Base] record Record to append
-    def append_target(record, skip_callbacks=false, &block)
+    def append_target(record, _skip_callbacks = false)
       unless unordered_association.target.include?(record)
         unordered_association.concat(record)
       end
@@ -70,28 +68,24 @@ module ActiveFedora::Orders
     # @param [Integer] loc Position to insert record ID
     # @param [String] id ID of record to insert.
     def insert_target_id_at(loc, id)
-      raise ArgumentError.new "ID can not be nil" if id.nil?
+      raise ArgumentError, "ID can not be nil" if id.nil?
       unless unordered_association.ids_reader.include?(id)
-        raise ArgumentError.new "#{id} is not a part of #{unordered_association.reflection.name}"
+        raise ArgumentError, "#{id} is not a part of #{unordered_association.reflection.name}"
       end
       target.insert_proxy_for_at(loc, ActiveFedora::Base.id_to_uri(id), proxy_in: owner)
     end
 
     # Delete whatever node is at a specific position
     # @param [Integer] loc Position to delete
-    def delete_at(loc)
-      target.delete_at(loc)
-    end
+    delegate :delete_at, to: :target
 
     # Delete all occurences of the specified target
     # @param obj object to delete
-    def delete_target(obj)
-      target.delete_target(obj)
-    end
+    delegate :delete_target, to: :target
 
     # Delete multiple list nodes.
     # @param [Array<ActiveFedora::Orders::ListNode>] records
-    def delete_records(records, _method=nil)
+    def delete_records(records, _method = nil)
       records.each do |record|
         delete_record(record)
       end
@@ -103,7 +97,7 @@ module ActiveFedora::Orders
       target.delete_node(record)
     end
 
-    def insert_record(record, force=true, validate=true)
+    def insert_record(record, _force = true, _validate = true)
       record.save_target
       list_container.save
       # NOTE: This turns out to be pretty cheap, but should we be doing it
@@ -115,41 +109,41 @@ module ActiveFedora::Orders
       end
     end
 
-    def scope(*args)
+    def scope(*_args)
       @scope ||= ActiveFedora::Relation.new(klass)
     end
 
     private
 
-    def ordered_proxies
-      list_container.ordered_self
-    end
+      def ordered_proxies
+        list_container.ordered_self
+      end
 
-    def create_list_node(record)
-      node = ListNode.new(RDF::URI.new("#{list_container.uri}##{::RDF::Node.new.id}"), list_container.resource)
-      node.proxyIn = owner
-      node.proxyFor = record
-      node
-    end
+      def create_list_node(record)
+        node = ListNode.new(RDF::URI.new("#{list_container.uri}##{::RDF::Node.new.id}"), list_container.resource)
+        node.proxyIn = owner
+        node.proxyFor = record
+        node
+      end
 
-    def association_scope
-      nil
-    end
+      def association_scope
+        nil
+      end
 
-    def list_container
-      list_container_association.reader
-    end
-    
-    def list_container_association
-      owner.association(options[:through])
-    end
+      def list_container
+        list_container_association.reader
+      end
 
-    def unordered_association
-      owner.association(unordered_reflection_name)
-    end
+      def list_container_association
+        owner.association(options[:through])
+      end
 
-    def unordered_reflection_name
-      reflection.unordered_reflection.name
-    end
+      def unordered_association
+        owner.association(unordered_reflection_name)
+      end
+
+      def unordered_reflection_name
+        reflection.unordered_reflection.name
+      end
   end
 end

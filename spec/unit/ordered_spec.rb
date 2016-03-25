@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe "orders" do
+describe ActiveFedora::Orders do
   subject { Image.new }
   before do
     class Member < ActiveFedora::Base
@@ -17,9 +17,9 @@ RSpec.describe "orders" do
     Object.send(:remove_const, :BadClass)
   end
   describe "<<" do
-    it "should not accept base objects" do
+    it "does not accept base objects" do
       member = Member.new
-      expect{subject.ordered_member_proxies << member}.to raise_error ActiveFedora::AssociationTypeMismatch
+      expect { subject.ordered_member_proxies << member }.to raise_error ActiveFedora::AssociationTypeMismatch
       expect(subject).not_to be_changed
       expect(subject.list_source).not_to be_changed
     end
@@ -53,7 +53,7 @@ RSpec.describe "orders" do
         image2.ordered_members << m
         image.save
         image2.save
-        expect(m.ordered_by).to contain_exactly(image2,image)
+        expect(m.ordered_by).to contain_exactly(image2, image)
       end
     end
   end
@@ -64,7 +64,7 @@ RSpec.describe "orders" do
     subject.save!
     solr_doc = ActiveFedora::SolrService.query("id:#{subject.id}").first
 
-    expect{ActiveFedora::Base.load_instance_from_solr(subject.id, solr_doc)}.not_to raise_error
+    expect { ActiveFedora::Base.load_instance_from_solr(subject.id, solr_doc) }.not_to raise_error
   end
 
   describe "#ordered_members" do
@@ -204,7 +204,7 @@ RSpec.describe "orders" do
     end
     it "can't add items not accepted by indirect container" do
       bad_class = BadClass.new
-      expect{subject.ordered_member_proxies.append_target bad_class}.to raise_error ActiveFedora::AssociationTypeMismatch
+      expect { subject.ordered_member_proxies.append_target bad_class }.to raise_error ActiveFedora::AssociationTypeMismatch
     end
     it "adds a member if it doesn't exist in members" do
       member = Member.new
@@ -280,12 +280,12 @@ RSpec.describe "orders" do
     end
     context "when given a nil id" do
       it "raises an ArgumentError" do
-        expect{subject.ordered_member_proxies.insert_target_id_at(0, nil)}.to raise_error ArgumentError, "ID can not be nil"
+        expect { subject.ordered_member_proxies.insert_target_id_at(0, nil) }.to raise_error ArgumentError, "ID can not be nil"
       end
     end
     context "when given an ID not in members" do
       it "raises an ArgumentError" do
-        expect{subject.ordered_member_proxies.insert_target_id_at(0, "test")}.to raise_error "test is not a part of members"
+        expect { subject.ordered_member_proxies.insert_target_id_at(0, "test") }.to raise_error "test is not a part of members"
       end
     end
   end

@@ -43,7 +43,7 @@ module ActiveFedora
       # @param [Integer] key Position of the proxy
       # @return [ListNode] Node for the proxy at the given position
       def [](key)
-        list = ordered_reader.take(key+1)
+        list = ordered_reader.take(key + 1)
         list[key]
       end
 
@@ -58,8 +58,8 @@ module ActiveFedora
 
       # @param [Array<ListNode>] Nodes to remove.
       # @return [OrderedList] List with node removed.
-      def -(nodes)
-        nodes.each do |node|
+      def -(other)
+        other.each do |node|
           delete_node(node)
         end
         self
@@ -108,7 +108,7 @@ module ActiveFedora
 
       # @param [ListNode] node Node to delete
       def delete_node(node)
-        node = ordered_reader.find{|x| x == node}
+        node = ordered_reader.find { |x| x == node }
         if node
           prev_node = node.prev
           next_node = node.next
@@ -116,20 +116,14 @@ module ActiveFedora
           node.next.prev = prev_node
           @changed = true
           node
-        else
-          nil
         end
       end
 
       # @param [Integer] loc Index of node to delete.
       def delete_at(loc)
-        return nil if loc == nil
-        arr = ordered_reader.take(loc+1)
-        if arr.length == loc+1
-          delete_node(arr.last)
-        else
-          nil
-        end
+        return nil if loc.nil?
+        arr = ordered_reader.take(loc + 1)
+        delete_node(arr.last) if arr.length == loc + 1
       end
 
       # @param obj target of node to delete.
@@ -183,100 +177,88 @@ module ActiveFedora
 
       private
 
-      attr_reader :node_cache
+        attr_reader :node_cache
 
-      def append_to(source, append_node)
-        source.prev = append_node
-        if append_node.next
-          append_node.next.prev = source
-          source.next = append_node.next
-        else
-          self.tail = source
-        end
-        append_node.next = source
-        @changed = true
-      end
-
-      def ordered_reader
-        ActiveFedora::Aggregation::OrderedReader.new(self)
-      end
-
-      def build_node(subject=nil)
-        return nil unless subject
-        node_cache.fetch(subject) do
-          ActiveFedora::Orders::ListNode.new(node_cache, subject, graph)
-        end
-      end
-
-      def new_node_subject
-        node = ::RDF::URI("##{::RDF::Node.new.id}")
-        while node_cache.has_key?(node)
-          node = ::RDF::URI("##{::RDF::Node.new.id}")
-        end
-        node
-      end
-
-      class NodeCache
-        def initialize
-          @cache ||= {}
-        end
-
-        def fetch(uri)
-          if @cache[uri]
-            @cache[uri]
+        def append_to(source, append_node)
+          source.prev = append_node
+          if append_node.next
+            append_node.next.prev = source
+            source.next = append_node.next
           else
-            if block_given?
-              @cache[uri] = yield
-            end
+            self.tail = source
+          end
+          append_node.next = source
+          @changed = true
+        end
+
+        def ordered_reader
+          ActiveFedora::Aggregation::OrderedReader.new(self)
+        end
+
+        def build_node(subject = nil)
+          return nil unless subject
+          node_cache.fetch(subject) do
+            ActiveFedora::Orders::ListNode.new(node_cache, subject, graph)
           end
         end
 
-        def has_key?(key)
-          @cache.has_key?(key)
-        end
-      end
-
-      class Sentinel
-        attr_reader :parent
-        attr_writer :next, :prev
-        def initialize(parent, next_node: nil, prev_node: nil)
-          @parent = parent
-          @next = next_node
-          @prev = prev_node
+        def new_node_subject
+          node = ::RDF::URI("##{::RDF::Node.new.id}")
+          while node_cache.key?(node)
+            node = ::RDF::URI("##{::RDF::Node.new.id}")
+          end
+          node
         end
 
-        def next
-          @next
-        end
+        class NodeCache
+          def initialize
+            @cache ||= {}
+          end
 
-        def prev
-          @prev
-        end
+          def fetch(uri)
+            @cache[uri] ||= yield if block_given?
+          end
 
-        def nil?
-          true
-        end
-
-        def rdf_subject
-          nil
-        end
-      end
-
-      class HeadSentinel < Sentinel
-        def initialize(*args)
-          super
-          @next ||= TailSentinel.new(parent, prev_node: self)
-        end
-      end
-
-      class TailSentinel < Sentinel
-        def initialize(*args)
-          super
-          if prev && prev.next != self
-            prev.next = self
+          def key?(key)
+            @cache.key?(key)
           end
         end
-      end
+
+        class Sentinel
+          attr_reader :parent
+          attr_writer :next, :prev
+          def initialize(parent, next_node: nil, prev_node: nil)
+            @parent = parent
+            @next = next_node
+            @prev = prev_node
+          end
+
+          attr_reader :next
+
+          attr_reader :prev
+
+          def nil?
+            true
+          end
+
+          def rdf_subject
+            nil
+          end
+        end
+
+        class HeadSentinel < Sentinel
+          def initialize(*args)
+            super
+            @next ||= TailSentinel.new(parent, prev_node: self)
+          end
+        end
+
+        class TailSentinel < Sentinel
+          def initialize(*args)
+            super
+            prev.next = self if prev && prev.next != self
+          end
+        end
     end
   end
 end

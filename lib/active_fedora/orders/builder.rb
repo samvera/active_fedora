@@ -20,7 +20,7 @@ module ActiveFedora::Orders
     end
 
     def self.build(model, name, options)
-      options = { unordered_reflection: unordered_reflection(model, name)}.merge(options)
+      options = { unordered_reflection: unordered_reflection(model, name) }.merge(options)
       name = :"ordered_#{name.to_s.singularize}_proxies"
       model.property :head, predicate: ::RDF::Vocab::IANA['first']
       model.property :tail, predicate: ::RDF::Vocab::IANA.last
@@ -39,29 +39,25 @@ module ActiveFedora::Orders
     module FixFirstLast
       def save(*args)
         super.tap do |result|
-          if result
-            apply_first_and_last
-          end
+          apply_first_and_last if result
         end
       end
+
       def save!(*args)
         super.tap do |result|
-          if result
-            apply_first_and_last
-          end
+          apply_first_and_last if result
         end
       end
     end
 
-    private
-
     def self.target_accessor(name)
-      name.to_s.gsub("_proxies","").pluralize
+      name.to_s.gsub("_proxies", "").pluralize
     end
+    private_class_method :target_accessor
 
     def self.unordered_reflection(model, original_name)
       model._reflect_on_association(original_name)
     end
+    private_class_method :unordered_reflection
   end
 end
-

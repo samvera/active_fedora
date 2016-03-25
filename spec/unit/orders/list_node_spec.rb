@@ -5,7 +5,7 @@ RSpec.describe ActiveFedora::Orders::ListNode do
   let(:node_cache) { {} }
   let(:rdf_subject) { RDF::URI("#bla") }
   let(:graph) { RDF::Graph.new }
-  
+
   describe "#target" do
     context "when a target is set" do
       it "returns it" do
