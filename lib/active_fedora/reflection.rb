@@ -79,7 +79,7 @@ module ActiveFedora
       #   Invoice.reflect_on_association(:line_items).macro  # returns :has_many
       #
       def reflect_on_association(association)
-        __reflect_on_association(association)
+        _reflect_on_association(association)
       end
 
       def outgoing_reflections
