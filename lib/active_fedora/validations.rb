@@ -9,7 +9,7 @@ module ActiveFedora
   #   rescue ActiveFedora::RecordInvalid => invalid
   #     puts invalid.record.errors
   #   end
-  class RecordInvalid < StandardError
+  class RecordInvalid < ActiveFedoraError
     attr_reader :record
     def initialize(record)
       @record = record
