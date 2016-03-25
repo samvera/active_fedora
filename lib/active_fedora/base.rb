@@ -51,6 +51,7 @@ module ActiveFedora
     include LoadableFromJson
     include Schema
     include Pathing
+    include Aggregation::BaseExtension
   end
 
   ActiveSupport.run_load_hooks(:active_fedora, Base)

@@ -36,6 +36,7 @@ module ActiveFedora #:nodoc:
   extend ActiveSupport::Autoload
 
   eager_autoload do
+    autoload :Aggregation
     autoload :AssociationHash
     autoload :AssociationRelation
     autoload :Associations
@@ -76,6 +77,7 @@ module ActiveFedora #:nodoc:
     autoload :FilePersistence
     autoload :FileRelation
     autoload :FilesHash
+    autoload :Filter
     autoload :FixityService
     autoload :Identifiable
     autoload :Indexers
@@ -94,6 +96,7 @@ module ActiveFedora #:nodoc:
     autoload :NomDatastream
     autoload :NullRelation
     autoload :OmDatastream
+    autoload :Orders
     autoload :Pathing
     autoload :Persistence
     autoload :ProfileIndexingService
