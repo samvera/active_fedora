@@ -183,9 +183,9 @@ module ActiveFedora
     end
 
     # @deprecated
-    def find_in_batches(*args)
+    def find_in_batches(*args, &block)
       Deprecation.warn(ActiveFedora::Base, '.find_in_batches is deprecated and will be removed in active-fedora 10.0; use .search_in_batches instead')
-      search_in_batches(*args)
+      search_in_batches(*args, &block)
     end
 
     # Retrieve the Fedora object with the given id, explore the returned object
