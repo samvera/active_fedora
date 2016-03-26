@@ -1,5 +1,9 @@
 module ActiveFedora::Orders
   class Reflection < ActiveFedora::Reflection::AssociationReflection
+    def macro
+      :orders
+    end
+
     def association_class
       Association
     end

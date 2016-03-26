@@ -1,5 +1,9 @@
 module ActiveFedora::Filter
   class Reflection < ActiveFedora::Reflection::AssociationReflection
+    def macro
+      :filter
+    end
+
     def association_class
       Association
     end
