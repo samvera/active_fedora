@@ -280,6 +280,40 @@ module ActiveFedora
           Builder::HasAndBelongsToMany.build(self, name, options)
           Builder::Property.build(self, name, options.slice(:class_name, :predicate))
         end
+
+        ##
+        # Allows ordering of an association
+        # @example
+        #   class Image < ActiveFedora::Base
+        #     contains :list_resource, class_name:
+        #       "ActiveFedora::Aggregation::ListSource"
+        #     orders :generic_files, through: :list_resource
+        #   end
+        def orders(name, options = {})
+          ActiveFedora::Orders::Builder.build(self, name, options)
+        end
+
+        ##
+        # Convenience method for building an ordered aggregation.
+        # @example
+        #   class Image < ActiveFedora::Base
+        #     ordered_aggregation :members, through: :list_source
+        #   end
+        def ordered_aggregation(name, options = {})
+          ActiveFedora::Orders::AggregationBuilder.build(self, name, options)
+        end
+
+        ##
+        # Create an association filter on the class
+        # @example
+        #   class Image < ActiveFedora::Base
+        #     aggregates :generic_files
+        #     filters_association :generic_files, as: :large_files, condition: :big_file?
+        #   end
+        def filters_association(extending_from, options = {})
+          name = options.delete(:as)
+          ActiveFedora::Filter::Builder.build(self, name, options.merge(extending_from: extending_from))
+        end
       end
   end
 end

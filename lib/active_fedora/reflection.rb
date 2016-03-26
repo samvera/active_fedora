@@ -18,6 +18,10 @@ module ActiveFedora
                   AssociationReflection
                 when :rdf, :singular_rdf
                   RDFPropertyReflection
+                when :filter
+                  Filter::Reflection
+                when :aggregation, :orders
+                  Orders::Reflection
                 end
         reflection = klass.new(macro, name, scope, options, active_fedora)
         add_reflection(active_fedora, name, reflection)
