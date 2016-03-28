@@ -1,5 +1,5 @@
-module ActiveFedora::Filter
-  class Builder < ActiveFedora::Associations::Builder::CollectionAssociation
+module ActiveFedora::Associations::Builder
+  class Filter < ActiveFedora::Associations::Builder::CollectionAssociation
     def self.valid_options(options)
       super + [:extending_from, :condition]
     end

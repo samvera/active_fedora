@@ -29,6 +29,8 @@ module ActiveFedora
     autoload :DirectlyContainsOneAssociation
     autoload :IndirectlyContainsAssociation
     autoload :ContainsAssociation
+    autoload :FilterAssociation
+    autoload :OrdersAssociation
     autoload :DeleteProxy
     autoload :ContainedFinder
     autoload :RecordComposite
@@ -50,6 +52,10 @@ module ActiveFedora
 
       autoload :Property,         'active_fedora/associations/builder/property'
       autoload :SingularProperty, 'active_fedora/associations/builder/singular_property'
+
+      autoload :Aggregation, 'active_fedora/associations/builder/aggregation'
+      autoload :Filter, 'active_fedora/associations/builder/filter'
+      autoload :Orders, 'active_fedora/associations/builder/orders'
     end
 
     eager_autoload do
@@ -290,7 +296,7 @@ module ActiveFedora
         #     orders :generic_files, through: :list_resource
         #   end
         def orders(name, options = {})
-          ActiveFedora::Orders::Builder.build(self, name, options)
+          Builder::Orders.build(self, name, options)
         end
 
         ##
@@ -300,7 +306,7 @@ module ActiveFedora
         #     ordered_aggregation :members, through: :list_source
         #   end
         def ordered_aggregation(name, options = {})
-          ActiveFedora::Orders::AggregationBuilder.build(self, name, options)
+          Builder::Aggregation.build(self, name, options)
         end
 
         ##
@@ -312,7 +318,7 @@ module ActiveFedora
         #   end
         def filters_association(extending_from, options = {})
           name = options.delete(:as)
-          ActiveFedora::Filter::Builder.build(self, name, options.merge(extending_from: extending_from))
+          Builder::Filter.build(self, name, options.merge(extending_from: extending_from))
         end
       end
   end

@@ -1,5 +1,5 @@
-module ActiveFedora::Orders
-  class AggregationBuilder < ActiveFedora::Associations::Builder::Association
+module ActiveFedora::Associations::Builder
+  class Aggregation < ActiveFedora::Associations::Builder::Association
     def self.valid_options(_options)
       [:through, :class_name, :has_member_relation, :type_validator]
     end

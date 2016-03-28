@@ -1,5 +1,5 @@
-module ActiveFedora::Orders
-  class Builder < ActiveFedora::Associations::Builder::CollectionAssociation
+module ActiveFedora::Associations::Builder
+  class Orders < ActiveFedora::Associations::Builder::CollectionAssociation
     include ActiveFedora::AutosaveAssociation::AssociationBuilderExtension
     def self.macro
       :orders
@@ -32,7 +32,7 @@ module ActiveFedora::Orders
         self.tail = source.tail_id
         save! if changed?
       end
-      model.include ActiveFedora::Orders::Builder::FixFirstLast
+      model.include ActiveFedora::Associations::Builder::Orders::FixFirstLast
       super
     end
 

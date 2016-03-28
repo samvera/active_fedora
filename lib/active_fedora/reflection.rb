@@ -14,16 +14,32 @@ module ActiveFedora
     class << self
       def create(macro, name, scope, options, active_fedora)
         klass = case macro
-                when :has_many, :belongs_to, :has_and_belongs_to_many, :contains, :directly_contains, :directly_contains_one, :indirectly_contains
-                  AssociationReflection
-                when :rdf, :singular_rdf
+                when :has_many
+                  HasManyReflection
+                when :belongs_to
+                  BelongsToReflection
+                when :has_and_belongs_to_many
+                  HasAndBelongsToManyReflection
+                when :contains
+                  ContainsReflection
+                when :directly_contains
+                  DirectlyContainsReflection
+                when :directly_contains_one
+                  DirectlyContainsOneReflection
+                when :indirectly_contains
+                  IndirectlyContainsReflection
+                when :rdf
                   RDFPropertyReflection
+                when :singular_rdf
+                  SingularRDFPropertyReflection
                 when :filter
-                  Filter::Reflection
+                  FilterReflection
                 when :aggregation, :orders
-                  Orders::Reflection
+                  OrdersReflection
+                else
+                  raise "Unsupported Macro: #{macro}"
                 end
-        reflection = klass.new(macro, name, scope, options, active_fedora)
+        reflection = klass.new(name, scope, options, active_fedora)
         add_reflection(active_fedora, name, reflection)
         reflection
       end
@@ -189,11 +205,6 @@ module ActiveFedora
 
       attr_reader :scope
 
-      # Returns the macro type.
-      #
-      # <tt>has_many :clients</tt> returns <tt>:has_many</tt>
-      attr_reader :macro
-
       # Returns the hash of options used for the macro.
       #
       # <tt>has_many :clients</tt> returns +{}+
@@ -201,8 +212,7 @@ module ActiveFedora
 
       attr_reader :active_fedora
 
-      def initialize(macro, name, scope, options, active_fedora)
-        @macro = macro
+      def initialize(name, scope, options, active_fedora)
         @name = name
         @scope = scope
         @options = options
@@ -253,7 +263,7 @@ module ActiveFedora
     class AssociationReflection < MacroReflection #:nodoc:
       attr_accessor :parent_reflection # Reflection
 
-      def initialize(macro, name, scope, options, active_fedora)
+      def initialize(name, scope, options, active_fedora)
         super
         @constructable = calculate_constructable(macro, options)
       end
@@ -304,13 +314,6 @@ module ActiveFedora
       end
       alias chain collect_join_chain # todo
 
-      # Returns whether or not this association reflection is for a collection
-      # association. Returns +true+ if the +macro+ is either +has_many+ or
-      # +has_and_belongs_to_many+, +false+ otherwise.
-      def collection?
-        [:has_many, :has_and_belongs_to_many, :directly_contains, :indirectly_contains].include?(macro)
-      end
-
       def has_inverse?
         inverse_name
       end
@@ -319,6 +322,20 @@ module ActiveFedora
         return unless inverse_name
 
         @inverse_of ||= klass._reflect_on_association inverse_name
+      end
+
+      # Returns the macro type.
+      #
+      # <tt>has_many :clients</tt> returns <tt>:has_many</tt>
+      def macro
+        raise NotImplementedError
+      end
+
+      # Returns whether or not this association reflection is for a collection
+      # association. Returns +true+ if the +macro+ is either +has_many+ or
+      # +has_and_belongs_to_many+, +false+ otherwise.
+      def collection?
+        false
       end
 
       # Returns whether or not the association should be validated as part of
@@ -335,26 +352,7 @@ module ActiveFedora
       end
 
       def association_class
-        case macro
-        when :contains
-          Associations::BasicContainsAssociation
-        when :belongs_to
-          Associations::BelongsToAssociation
-        when :has_and_belongs_to_many
-          Associations::HasAndBelongsToManyAssociation
-        when :has_many
-          Associations::HasManyAssociation
-        when :singular_rdf
-          Associations::SingularRDF
-        when :rdf
-          Associations::RDF
-        when :directly_contains
-          Associations::DirectlyContainsAssociation
-        when :directly_contains_one
-          Associations::DirectlyContainsOneAssociation
-        when :indirectly_contains
-          Associations::IndirectlyContainsAssociation
-        end
+        raise NotImplementedError
       end
 
       VALID_AUTOMATIC_INVERSE_MACROS = [:has_many, :has_and_belongs_to_many, :belongs_to].freeze
@@ -362,15 +360,15 @@ module ActiveFedora
 
       # Returns +true+ if +self+ is a +belongs_to+ reflection.
       def belongs_to?
-        macro == :belongs_to
+        false
       end
 
       def has_many?
-        macro == :has_many
+        false
       end
 
       def has_and_belongs_to_many?
-        macro == :has_and_belongs_to_many
+        false
       end
 
       private
@@ -455,10 +453,120 @@ module ActiveFedora
         end
     end
 
+    class HasManyReflection < AssociationReflection # :nodoc:
+      def macro
+        :has_many
+      end
+
+      def collection?
+        true
+      end
+
+      def has_many?
+        true
+      end
+
+      def association_class
+        Associations::HasManyAssociation
+      end
+    end
+
+    class BelongsToReflection < AssociationReflection # :nodoc:
+      def macro
+        :belongs_to
+      end
+
+      def belongs_to?
+        true
+      end
+
+      def association_class
+        Associations::BelongsToAssociation
+      end
+    end
+
+    class HasAndBelongsToManyReflection < AssociationReflection # :nodoc:
+      def macro
+        :has_and_belongs_to_many
+      end
+
+      def collection?
+        true
+      end
+
+      def has_and_belongs_to_many?
+        true
+      end
+
+      def association_class
+        Associations::HasAndBelongsToManyAssociation
+      end
+    end
+
+    class ContainsReflection < AssociationReflection # :nodoc:
+      def macro
+        :contains
+      end
+
+      def association_class
+        Associations::BasicContainsAssociation
+      end
+    end
+
+    class DirectlyContainsReflection < AssociationReflection # :nodoc:
+      def macro
+        :directly_contains
+      end
+
+      def collection?
+        true
+      end
+
+      def association_class
+        Associations::DirectlyContainsAssociation
+      end
+    end
+
+    class DirectlyContainsOneReflection < AssociationReflection # :nodoc:
+      def macro
+        :directly_contains_one
+      end
+
+      def association_class
+        Associations::DirectlyContainsOneAssociation
+      end
+    end
+
+    class IndirectlyContainsReflection < AssociationReflection # :nodoc:
+      def macro
+        :indirectly_contains
+      end
+
+      def collection?
+        true
+      end
+
+      def association_class
+        Associations::IndirectlyContainsAssociation
+      end
+    end
+
     class RDFPropertyReflection < AssociationReflection
       def initialize(*args)
         super
         active_fedora.index_config[name] = build_index_config
+      end
+
+      def macro
+        :rdf
+      end
+
+      def association_class
+        Associations::RDF
+      end
+
+      def collection?
+        true
       end
 
       def derive_foreign_key
@@ -476,6 +584,67 @@ module ActiveFedora
         def build_index_config
           ActiveFedora::Indexing::Map::IndexObject.new(predicate_for_solr) { |index| index.as :symbol }
         end
+    end
+
+    class SingularRDFPropertyReflection < RDFPropertyReflection
+      def macro
+        :singular_rdf
+      end
+
+      def collection?
+        false
+      end
+
+      def association_class
+        Associations::SingularRDF
+      end
+    end
+
+    class FilterReflection < AssociationReflection
+      def macro
+        :filter
+      end
+
+      def association_class
+        Associations::FilterAssociation
+      end
+
+      # delegates to extending_from
+      delegate :klass, to: :extending_from
+
+      def extending_from
+        @extending_from ||= active_fedora._reflect_on_association(options.fetch(:extending_from))
+      end
+
+      def collection?
+        true
+      end
+    end
+
+    class OrdersReflection < AssociationReflection
+      def macro
+        :orders
+      end
+
+      def association_class
+        Associations::OrdersAssociation
+      end
+
+      def collection?
+        true
+      end
+
+      def class_name
+        klass.to_s
+      end
+
+      def unordered_reflection
+        options[:unordered_reflection]
+      end
+
+      def klass
+        ActiveFedora::Orders::ListNode
+      end
     end
   end
 end
