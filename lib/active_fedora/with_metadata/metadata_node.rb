@@ -2,7 +2,6 @@ module ActiveFedora
   module WithMetadata
     class MetadataNode < ActiveTriples::Resource
       include ActiveModel::Dirty
-      property :mime_type, predicate: ::RDF::URI("http://www.ebu.ch/metadata/ontologies/ebucore/ebucore#hasMimeType")
       attr_reader :file
 
       def initialize(file)
@@ -46,7 +45,7 @@ module ActiveFedora
 
       def changed_attributes
         super.tap do |changed|
-          changed['type'] = true if type.present? && new_record?
+          changed['type'] = true if type.present?
         end
       end
 

@@ -63,13 +63,13 @@ describe ActiveFedora::AttachedFiles do
 
     it "creates datastreams from the spec on new objects" do
       has_file.file_ds.content = "blah blah blah"
-      expect(has_file.file_ds).to be_content_changed
-      expect(has_file.file_ds2).to_not be_content_changed # no autocreate
+      expect(has_file.file_ds).to be_changed
+      expect(has_file.file_ds2).to_not be_changed # no autocreate
       expect(has_file.file_ds2).to be_new_record
       has_file.save
       has_file.reload
-      expect(has_file.file_ds).to_not be_content_changed
-      expect(has_file.file_ds2).to_not be_content_changed # no autocreate
+      expect(has_file.file_ds).to_not be_changed
+      expect(has_file.file_ds2).to_not be_changed # no autocreate
       expect(has_file.file_ds2).to be_new_record
     end
   end
