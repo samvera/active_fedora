@@ -423,4 +423,27 @@ describe ActiveFedora::Associations::HasManyAssociation do
       end
     end
   end
+
+  describe "when destroying the owner" do
+    before do
+      class Book < ActiveFedora::Base
+        has_many :permissions, dependent: :destroy
+      end
+
+      class Permission < ActiveFedora::Base
+        belongs_to :book, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
+      end
+    end
+    let(:book) { Book.create! }
+    let!(:permissions) { Permission.create!(book: book) }
+
+    after do
+      Object.send(:remove_const, :Book)
+      Object.send(:remove_const, :Permission)
+    end
+
+    it "the object is destroyed" do
+      expect { book.destroy }.to change { Permission.count }.by(-1)
+    end
+  end
 end
