@@ -1,3 +1,7 @@
+v9.10.2
+2016-03-26: Pass the block from find_in_batches to search_in_batches [Justin
+Coyne]
+
 v9.10.1
 2016-03-26: Fix #reflect_on_association. [Trey Pendragon]
 
