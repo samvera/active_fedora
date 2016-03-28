@@ -1,3 +1,6 @@
+v9.10.4
+2016-03-28: Use a version of activesupport >= 4.2.4 [Justin Coyne]
+
 v9.10.3
 2016-03-28: Revert "ActiveFedora::File.mime_type should be updatable" [Justin
 Coyne]
