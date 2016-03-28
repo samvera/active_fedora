@@ -1,3 +1,9 @@
+v9.10.3
+2016-03-28: Revert "ActiveFedora::File.mime_type should be updatable" [Justin
+Coyne]
+
+2016-03-28: Pin to rubocop 0.38 [Justin Coyne]
+
 v9.10.2
 2016-03-26: Pass the block from find_in_batches to search_in_batches [Justin
 Coyne]
