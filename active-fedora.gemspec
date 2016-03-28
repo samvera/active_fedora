@@ -36,7 +36,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec-its"
   s.add_development_dependency "equivalent-xml"
   s.add_development_dependency "simplecov", '~> 0.8'
-  s.add_development_dependency "rubocop", '~> 0.37'
+  # Pin to rubocop 0.38.0 due to https://github.com/nevir/rubocop-rspec/issues/78
+  s.add_development_dependency "rubocop", '~> 0.38.0'
   s.add_development_dependency "rubocop-rspec", '~> 1.4'
 
   s.files         = `git ls-files`.split("\n")
