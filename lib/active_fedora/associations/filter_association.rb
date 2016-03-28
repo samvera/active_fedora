@@ -1,5 +1,5 @@
-module ActiveFedora::Filter
-  class Association < ::ActiveFedora::Associations::CollectionAssociation
+module ActiveFedora::Associations
+  class FilterAssociation < ::ActiveFedora::Associations::CollectionAssociation
     # @param [Array] records a list of records to replace the current association with
     # @raise [ArgumentError] if one of the records doesn't match the prescribed condition
     def writer(records)

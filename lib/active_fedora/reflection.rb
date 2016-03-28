@@ -33,9 +33,9 @@ module ActiveFedora
                 when :singular_rdf
                   SingularRDFPropertyReflection
                 when :filter
-                  Filter::Reflection
+                  FilterReflection
                 when :aggregation, :orders
-                  Orders::Reflection
+                  OrdersReflection
                 else
                   raise "Unsupported Macro: #{macro}"
                 end
@@ -597,6 +597,53 @@ module ActiveFedora
 
       def association_class
         Associations::SingularRDF
+      end
+    end
+
+    class FilterReflection < AssociationReflection
+      def macro
+        :filter
+      end
+
+      def association_class
+        Associations::FilterAssociation
+      end
+
+      # delegates to extending_from
+      delegate :klass, to: :extending_from
+
+      def extending_from
+        @extending_from ||= active_fedora._reflect_on_association(options.fetch(:extending_from))
+      end
+
+      def collection?
+        true
+      end
+    end
+
+    class OrdersReflection < AssociationReflection
+      def macro
+        :orders
+      end
+
+      def association_class
+        Associations::OrdersAssociation
+      end
+
+      def collection?
+        true
+      end
+
+      def class_name
+        klass.to_s
+      end
+
+      def unordered_reflection
+        options[:unordered_reflection]
+      end
+
+      def klass
+        ActiveFedora::Orders::ListNode
       end
     end
   end

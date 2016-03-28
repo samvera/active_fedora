@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ActiveFedora::Filter do
+describe ActiveFedora::Associations::FilterAssociation do
   before do
     class Image < ActiveFedora::Base
       ordered_aggregation :members, through: :list_source, class_name: 'ActiveFedora::Base'

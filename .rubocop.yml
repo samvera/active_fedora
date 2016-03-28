@@ -125,7 +125,7 @@ Style/PredicateName:
     - 'lib/active_fedora/associations.rb'
     - 'lib/active_fedora/association_hash.rb'
     - 'lib/active_fedora/aggregation/list_source.rb'
-    - 'lib/active_fedora/orders/aggregation_builder.rb'
+    - 'lib/active_fedora/associations/builder/aggregation.rb'
 
 Style/GuardClause:
   Exclude:

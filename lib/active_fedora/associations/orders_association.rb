@@ -1,12 +1,12 @@
-module ActiveFedora::Orders
-  class Association < ::ActiveFedora::Associations::CollectionAssociation
+module ActiveFedora::Associations
+  class OrdersAssociation < ::ActiveFedora::Associations::CollectionAssociation
     def initialize(*args)
       super
       @target = find_target
     end
 
     def inspect
-      "#<ActiveFedora::Orders::Association:#{object_id}>"
+      "#<ActiveFedora::Associations::OrdersAssociation:#{object_id}>"
     end
 
     def reader(*args)
@@ -24,7 +24,7 @@ module ActiveFedora::Orders
     end
 
     def target_reader
-      @target_proxy ||= TargetProxy.new(self)
+      @target_proxy ||= ActiveFedora::Orders::TargetProxy.new(self)
     end
 
     def find_reflection
