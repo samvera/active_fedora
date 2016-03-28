@@ -63,12 +63,6 @@ module ActiveFedora
       end
     end
 
-    def save
-      super.tap do
-        metadata.save if metadata.changed?
-      end
-    end
-
     def described_by
       raise "#{self} isn't persisted yet" if new_record?
       links['describedby'].first
@@ -120,7 +114,6 @@ module ActiveFedora
     def attribute_will_change!(attr)
       if attr == 'content'
         changed_attributes['content'] = true
-      elsif attr == 'type'
       else
         super
       end
@@ -145,15 +138,7 @@ module ActiveFedora
     end
 
     def changed?
-      super || content_changed? || metadata_changed?
-    end
-
-    def metadata_changed?
-      if new_record? || links['describedby'].blank?
-        false
-      else
-        metadata.changed?
-      end
+      super || content_changed?
     end
 
     def inspect
