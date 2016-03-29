@@ -12,7 +12,7 @@ describe ActiveFedora::Fedora do
         }
       }
       specify {
-        expect(Faraday).to receive(:new).with("https://example.com", ssl: { ca_path: '/path/to/certs' }).twice.and_call_original
+        expect(Faraday).to receive(:new).with("https://example.com", ssl: { ca_path: '/path/to/certs' }).and_call_original
         subject.authorized_connection
       }
     end

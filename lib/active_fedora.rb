@@ -230,6 +230,10 @@ module ActiveFedora #:nodoc:
       ActiveFedora::SolrService.instance
     end
 
+    def reset_fedora!
+      @fedora = nil
+    end
+
     def fedora
       @fedora ||= Fedora.new(fedora_config.credentials)
     end
