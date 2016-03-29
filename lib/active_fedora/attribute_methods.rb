@@ -31,23 +31,23 @@ module ActiveFedora
         super
       end
 
-      # Raises an ActiveRecord::DangerousAttributeError exception when an
+      # Raises an ActiveFedora::DangerousAttributeError exception when an
       # \Active \Record method is defined in the model, otherwise +false+.
       #
       #   class Person < ActiveRecord::Base
       #     def save
-      #       'already defined by Active Record'
+      #       'already defined by Active Fedora'
       #     end
       #   end
       #
       #   Person.instance_method_already_implemented?(:save)
-      #   # => ActiveRecord::DangerousAttributeError: save is defined by Active Record. Check to make sure that you don't have an attribute or method with the same name.
+      #   # => ActiveFedora::DangerousAttributeError: save is defined by Active Record. Check to make sure that you don't have an attribute or method with the same name.
       #
       #   Person.instance_method_already_implemented?(:name)
       #   # => false
       def instance_method_already_implemented?(method_name)
         if dangerous_attribute_method?(method_name)
-          raise DangerousAttributeError, "#{method_name} is defined by Active Record. Check to make sure that you don't have an attribute or method with the same name."
+          raise DangerousAttributeError, "#{method_name} is defined by Active Fedora. Check to make sure that you don't have an attribute or method with the same name."
         end
 
         if superclass == Base

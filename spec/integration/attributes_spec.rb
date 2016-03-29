@@ -147,4 +147,12 @@ describe "delegating attributes" do
       end
     end
   end
+
+  describe 'dangerous attributes' do
+    it 'raises an exception if a dangerous attribute is defined' do
+      Deprecation.silence(ActiveFedora::Attributes) do
+        expect { TitledObject.has_attributes :save, datastream: 'foo', multiple: false }.to raise_error ActiveFedora::DangerousAttributeError
+      end
+    end
+  end
 end
