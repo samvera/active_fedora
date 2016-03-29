@@ -28,7 +28,7 @@ describe ActiveFedora do
     it "does not connect and warn" do
       expect(ActiveFedora::Base.logger).to receive(:warn)
       expect {
-        ActiveFedora::Fedora.new(url: bad_url, base_path: '/test', user: user, password: password)
+        ActiveFedora::Fedora.new(url: bad_url, base_path: '/test', user: user, password: password).connection
       }.to raise_error Ldp::HttpError
     end
   end

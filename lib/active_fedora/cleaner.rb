@@ -44,7 +44,7 @@ module ActiveFedora
     end
 
     def self.reinitialize_repo
-      ActiveFedora.fedora.init_base_path
+      ActiveFedora.reset_fedora!
     end
 
     def self.log(message)
