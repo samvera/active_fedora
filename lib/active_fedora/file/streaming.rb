@@ -22,7 +22,7 @@ module ActiveFedora::File::Streaming
       @headers = headers
     end
 
-    def each(no_of_requests_limit = 3)
+    def each(no_of_requests_limit = 3, &block)
       raise ArgumentError, 'HTTP redirect too deep' if no_of_requests_limit == 0
       Net::HTTP.start(uri.host, uri.port) do |http|
         request = Net::HTTP::Get.new uri, headers
@@ -35,9 +35,7 @@ module ActiveFedora::File::Streaming
           when Net::HTTPRedirection
             no_of_requests_limit -= 1
             @uri = URI(response["location"])
-            each no_of_requests_limit do |chunk|
-              yield chunk
-            end
+            each(no_of_requests_limit, &block)
           else
             raise "Couldn't get data from Fedora (#{uri}). Response: #{response.code}"
           end
