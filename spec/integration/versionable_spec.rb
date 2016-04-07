@@ -179,8 +179,8 @@ describe ActiveFedora::Versionable do
           @original_size = subject.size
         end
 
-        it "sets model_type to versionable" do
-          expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
+        it "links to versions endpoint" do
+          expect(subject.metadata.ldp_source.graph.query(predicate: ::RDF::Vocab::Fcrepo4.hasVersions).objects).to_not be_empty
         end
 
         it "has one version" do
@@ -305,8 +305,8 @@ describe ActiveFedora::Versionable do
           @original_size = subject.size
         end
 
-        it "sets model_type to versionable" do
-          expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
+        it "links to versions endpoint" do
+          expect(subject.metadata.ldp_source.graph.query(predicate: ::RDF::Vocab::Fcrepo4.hasVersions).objects).to_not be_empty
         end
 
         it "has one version" do
@@ -427,8 +427,8 @@ describe ActiveFedora::Versionable do
           subject.create_version
         end
 
-        it "sets model_type to versionable" do
-          expect(subject.model_type).to include RDF::URI.new('http://www.jcp.org/jcr/mix/1.0versionable')
+        it "links to versions endpoint" do
+          expect(subject.metadata.ldp_source.graph.query(predicate: ::RDF::Vocab::Fcrepo4.hasVersions).objects).to_not be_empty
         end
 
         it "has one version" do
