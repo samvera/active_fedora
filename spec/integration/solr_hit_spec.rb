@@ -24,8 +24,7 @@ describe ActiveFedora::SolrHit do
     title: 'My Title'
   ) }
 
-  let(:profile) { { "foo" => ["baz"], "bar" => "quix", "title" => "My Title" }.to_json }
-  let(:doc) { { 'id' => 'test-123', 'has_model_ssim' => ['Foo'], 'object_profile_ssm' => profile } }
+  let(:doc) { obj.to_solr }
   let(:solr_hit) { described_class.new(doc) }
 
   after do
