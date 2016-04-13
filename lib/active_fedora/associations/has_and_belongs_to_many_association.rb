@@ -14,7 +14,6 @@ module ActiveFedora
             return false unless record.save(validate: validate)
           end
         end
-
         owner[reflection.foreign_key] ||= []
         owner[reflection.foreign_key] += [record.id]
 
