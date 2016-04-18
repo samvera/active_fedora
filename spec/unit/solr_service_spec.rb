@@ -2,43 +2,50 @@ require 'spec_helper'
 
 describe ActiveFedora::SolrService do
   before do
-    Thread.current[:solr_service] = nil
+    described_class.reset!
   end
 
-  after(:all) do
-    described_class.register(ActiveFedora.solr_config[:url])
+  after do
+    described_class.reset!
   end
 
-  it "takes a n-arg constructor and configure for localhost" do
-    expect(RSolr).to receive(:connect).with(read_timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr')
-    described_class.register
-  end
-  it "accepts host arg into constructor" do
-    expect(RSolr).to receive(:connect).with(read_timeout: 120, open_timeout: 120, url: 'http://fubar')
-    described_class.register('http://fubar')
-  end
-  it "clobbers options" do
-    expect(RSolr).to receive(:connect).with(read_timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr', autocommit: :off, foo: :bar)
-    described_class.register(nil, autocommit: :off, foo: :bar)
+  describe '#conn' do
+    it "takes a n-arg constructor and configure for localhost" do
+      expect(RSolr).to receive(:connect).with(read_timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr')
+      described_class.register.conn
+    end
+    it "accepts host arg into constructor" do
+      expect(RSolr).to receive(:connect).with(read_timeout: 120, open_timeout: 120, url: 'http://fubar')
+      Deprecation.silence(described_class) do
+        described_class.register('http://fubar').conn
+      end
+    end
+    it "clobbers options" do
+      expect(RSolr).to receive(:connect).with(read_timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr', autocommit: :off, foo: :bar)
+      described_class.register(autocommit: :off, foo: :bar).conn
+    end
   end
 
-  it "sets the threadlocal solr service" do
-    expect(RSolr).to receive(:connect).with(read_timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr', autocommit: :off, foo: :bar)
-    ss = described_class.register(nil, autocommit: :off, foo: :bar)
-    expect(Thread.current[:solr_service]).to eq ss
-    expect(described_class.instance).to eq ss
+  describe '#conn=' do
+    let(:new_connection) { double }
+    it 'is settable' do
+      described_class.instance.conn = new_connection
+      expect(described_class.instance.conn).to eq new_connection
+    end
   end
-  it "tries to initialize if the service not initialized, and fail if it does not succeed" do
-    expect(Thread.current[:solr_service]).to be_nil
-    expect(described_class).to receive(:register)
-    expect(proc { described_class.instance }).to raise_error(ActiveFedora::SolrNotInitialized)
-  end
-  it "passes on solr_config when initializing the service" do
-    allow(RSolr).to receive(:connect)
-    expect(Thread.current[:solr_service]).to be_nil
-    allow(ActiveFedora).to receive(:solr_config).and_return(url: 'http://fubar', update_path: 'update_test')
-    expect(described_class).to receive(:register).with('http://fubar', hash_including(update_path: 'update_test')).and_call_original
-    described_class.instance
+
+  describe '.instance' do
+    it "sets the threadlocal solr service" do
+      ss = described_class.register(autocommit: :off, foo: :bar)
+      expect(ActiveFedora::RuntimeRegistry.solr_service).to eq ss
+      expect(described_class.instance).to eq ss
+    end
+    it "passes on solr_config when initializing the service" do
+      allow(RSolr).to receive(:connect)
+      allow(ActiveFedora).to receive(:solr_config).and_return(url: 'http://fubar', update_path: 'update_test')
+      expect(described_class).to receive(:register).with(hash_including(url: 'http://fubar', update_path: 'update_test')).and_call_original
+      described_class.instance
+    end
   end
 
   describe '#construct_query_for_pids' do

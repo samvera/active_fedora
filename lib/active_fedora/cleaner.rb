@@ -44,7 +44,7 @@ module ActiveFedora
     end
 
     def self.reinitialize_repo
-      ActiveFedora.reset_fedora!
+      ActiveFedora::Fedora.reset!
     end
 
     def self.log(message)
