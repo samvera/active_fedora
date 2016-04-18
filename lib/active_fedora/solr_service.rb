@@ -46,8 +46,6 @@ module ActiveFedora
           register(ActiveFedora.solr_config)
         end
 
-        raise SolrNotInitialized unless ActiveFedora::RuntimeRegistry.solr_service
-
         ActiveFedora::RuntimeRegistry.solr_service
       end
 
@@ -163,5 +161,4 @@ module ActiveFedora
       end
     end
   end # SolrService
-  class SolrNotInitialized < StandardError; end
 end # ActiveFedora
