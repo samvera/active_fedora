@@ -171,6 +171,8 @@ module ActiveFedora #:nodoc:
     end
   end
 
+  extend Deprecation
+
   class << self
     attr_reader :fedora_config, :solr_config, :config_options
     attr_accessor :configurator
@@ -232,11 +234,12 @@ module ActiveFedora #:nodoc:
     end
 
     def reset_fedora!
-      @fedora = nil
+      Deprecation.warn(ActiveFedora, 'ActiveFedora.reset_fedora! is deprecated; use ActiveFedora::Fedora.reset! instead. This will be removed in active-fedora 10.0')
+      ActiveFedora::Fedora.reset!
     end
 
     def fedora
-      @fedora ||= Fedora.new(fedora_config.credentials)
+      ActiveFedora::Fedora.instance
     end
 
     delegate :predicate_config, to: :configurator

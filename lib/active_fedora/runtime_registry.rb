@@ -4,6 +4,6 @@ module ActiveFedora
   class RuntimeRegistry
     extend ActiveSupport::PerThreadRegistry
 
-    attr_accessor :solr_service
+    attr_accessor :solr_service, :fedora_connection
   end
 end

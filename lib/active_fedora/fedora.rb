@@ -1,5 +1,21 @@
 module ActiveFedora
   class Fedora
+    class << self
+      def register(options = {})
+        ActiveFedora::RuntimeRegistry.fedora_connection = Fedora.new(ActiveFedora.fedora_config.credentials.merge(options))
+      end
+
+      def instance
+        register unless ActiveFedora::RuntimeRegistry.fedora_connection
+
+        ActiveFedora::RuntimeRegistry.fedora_connection
+      end
+
+      def reset!
+        ActiveFedora::RuntimeRegistry.fedora_connection = nil
+      end
+    end
+
     def initialize(config)
       @config = config
     end
