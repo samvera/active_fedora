@@ -122,6 +122,7 @@ module ActiveFedora #:nodoc:
       autoload :FinderMethods
     end
 
+    autoload :RuntimeRegistry
     autoload :Schema
     autoload :Scoping
     autoload :Serialization

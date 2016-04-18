@@ -28,17 +28,15 @@ describe ActiveFedora::SolrService do
     it "sets the threadlocal solr service" do
       expect(RSolr).to receive(:connect).with(read_timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr', autocommit: :off, foo: :bar)
       ss = described_class.register(nil, autocommit: :off, foo: :bar)
-      expect(Thread.current[:solr_service]).to eq ss
+      expect(ActiveFedora::RuntimeRegistry.solr_service).to eq ss
       expect(described_class.instance).to eq ss
     end
     it "tries to initialize if the service not initialized, and fail if it does not succeed" do
-      expect(Thread.current[:solr_service]).to be_nil
       expect(described_class).to receive(:register)
       expect(proc { described_class.instance }).to raise_error(ActiveFedora::SolrNotInitialized)
     end
     it "passes on solr_config when initializing the service" do
       allow(RSolr).to receive(:connect)
-      expect(Thread.current[:solr_service]).to be_nil
       allow(ActiveFedora).to receive(:solr_config).and_return(url: 'http://fubar', update_path: 'update_test')
       expect(described_class).to receive(:register).with('http://fubar', hash_including(update_path: 'update_test')).and_call_original
       described_class.instance

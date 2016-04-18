@@ -16,11 +16,11 @@ module ActiveFedora
 
     class << self
       def register(host = nil, args = {})
-        Thread.current[:solr_service] = new(host, args)
+        ActiveFedora::RuntimeRegistry.solr_service = new(host, args)
       end
 
       def reset!
-        Thread.current[:solr_service] = nil
+        ActiveFedora::RuntimeRegistry.solr_service = nil
       end
 
       def select_path
@@ -30,12 +30,13 @@ module ActiveFedora
       def instance
         # Register Solr
 
-        unless Thread.current[:solr_service]
+        unless ActiveFedora::RuntimeRegistry.solr_service
           register(ActiveFedora.solr_config[:url], ActiveFedora.solr_config)
         end
 
-        raise SolrNotInitialized unless Thread.current[:solr_service]
-        Thread.current[:solr_service]
+        raise SolrNotInitialized unless ActiveFedora::RuntimeRegistry.solr_service
+
+        ActiveFedora::RuntimeRegistry.solr_service
       end
 
       def lazy_reify_solr_results(solr_results, opts = {})
