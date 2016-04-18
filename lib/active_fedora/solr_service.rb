@@ -5,18 +5,30 @@ module ActiveFedora
   class SolrService
     extend Deprecation
 
-    attr_reader :conn
+    attr_writer :conn
 
-    def initialize(host, args)
-      host = 'http://localhost:8080/solr' unless host
-      args = { read_timeout: 120, open_timeout: 120 }.merge(args.dup)
-      args[:url] = host
-      @conn = RSolr.connect args
+    def initialize(options = {})
+      @options = { read_timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr' }.merge(options)
+    end
+
+    def conn
+      @conn ||= RSolr.connect @options
     end
 
     class << self
-      def register(host = nil, args = {})
-        ActiveFedora::RuntimeRegistry.solr_service = new(host, args)
+      def register(*args)
+        options = args.extract_options!
+
+        if args.length == 1
+          Deprecation.warn(SolrService, "SolrService.register with a host argument is deprecated. Use `SolrService.register(url: host)` instead. This will be removed in active-fedora 10.0")
+
+          host = args.first
+          options[:url] = host if host
+        elsif args.length > 1
+          raise ArgumentError, "wrong number of arguments (#{args.length} for 0..2)"
+        end
+
+        ActiveFedora::RuntimeRegistry.solr_service = new(options)
       end
 
       def reset!
@@ -31,7 +43,7 @@ module ActiveFedora
         # Register Solr
 
         unless ActiveFedora::RuntimeRegistry.solr_service
-          register(ActiveFedora.solr_config[:url], ActiveFedora.solr_config)
+          register(ActiveFedora.solr_config)
         end
 
         raise SolrNotInitialized unless ActiveFedora::RuntimeRegistry.solr_service
