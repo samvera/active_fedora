@@ -21,6 +21,7 @@ module ActiveFedora
     attr_reader :document
 
     def initialize(document)
+      document = document.with_indifferent_access
       super
       @document = document
     end

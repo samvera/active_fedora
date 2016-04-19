@@ -24,8 +24,7 @@ describe ActiveFedora::SolrHit do
     title: 'My Title'
   ) }
 
-  let(:profile) { { "foo" => ["baz"], "bar" => "quix", "title" => "My Title" }.to_json }
-  let(:doc) { { 'id' => 'test-123', 'has_model_ssim' => ['Foo'], 'object_profile_ssm' => profile } }
+  let(:doc) { obj.to_solr }
   let(:solr_hit) { described_class.new(doc) }
 
   after do
@@ -43,6 +42,8 @@ describe ActiveFedora::SolrHit do
 
   describe "#instantiate_with_json" do
     subject { solr_hit.instantiate_with_json }
+
+    it { is_expected.to be_persisted }
 
     it "finds the document in solr" do
       expect(subject).to be_instance_of Foo
