@@ -4,11 +4,12 @@ module ActiveFedora
       def replace(values)
         ids = Array(values).reject(&:blank?)
         raise "can't modify frozen #{owner.class}" if owner.frozen?
-        destroy
-        ids.each do |id|
-          uri = ::RDF::URI(ActiveFedora::Base.id_to_uri(id))
-          owner.resource.insert [owner.rdf_subject, reflection.predicate, uri]
-        end
+        current_objects = filtered_results
+        incoming_objects = ids.map { |id| ::RDF::URI(ActiveFedora::Base.id_to_uri(id)) }
+        deletions = current_objects - incoming_objects
+        additions = incoming_objects - current_objects
+        deletions.each { |object| owner.resource.delete([owner.rdf_subject, reflection.predicate, object]) }
+        additions.each { |object| owner.resource.insert([owner.rdf_subject, reflection.predicate, object]) }
         owner.send(:attribute_will_change!, reflection.name)
       end
 

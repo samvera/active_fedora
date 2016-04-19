@@ -103,11 +103,11 @@ module ActiveFedora
         other_array.each { |val| raise_on_type_mismatch!(val) }
 
         load_target
-        other   = other_array.size < 100 ? other_array : other_array.to_set
-        current = @target.size < 100 ? @target : @target.to_set
+        deletions = @target - other_array
+        additions = other_array - @target
 
-        delete(@target.select { |v| !other.include?(v) })
-        concat(other_array.select { |v| !current.include?(v) })
+        delete(deletions)
+        concat(additions)
       end
 
       def include?(record)
@@ -254,7 +254,7 @@ module ActiveFedora
       end
 
       def add_to_target(record, skip_callbacks = false)
-        #  transaction do
+        # Start transaction
         callback(:before_add, record) unless skip_callbacks
         yield(record) if block_given?
 
@@ -266,7 +266,7 @@ module ActiveFedora
 
         callback(:after_add, record) unless skip_callbacks
         set_inverse_instance(record)
-        # end
+        # End transaction
 
         record
       end
