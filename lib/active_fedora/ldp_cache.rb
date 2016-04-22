@@ -29,9 +29,8 @@ module ActiveFedora
       end
 
       response
-    rescue StandardError => e
+    ensure
       reset_cache_settings
-      raise e
     end
 
     private
