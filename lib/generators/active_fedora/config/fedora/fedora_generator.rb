@@ -10,6 +10,7 @@ module ActiveFedora
 
     def fcrepo_wrapper_config
       copy_file '.fcrepo_wrapper', '.fcrepo_wrapper'
+      copy_file 'fcrepo_wrapper_test.yml', 'config/fcrepo_wrapper_test.yml'
     end
   end
 end
