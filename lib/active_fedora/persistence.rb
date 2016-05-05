@@ -5,6 +5,8 @@ module ActiveFedora
 
     def new_record?
       @ldp_source.new?
+    rescue Ldp::Gone
+      false
     end
 
     def persisted?

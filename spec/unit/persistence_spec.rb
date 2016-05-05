@@ -1,6 +1,19 @@
 require 'spec_helper'
 
 describe ActiveFedora::Persistence do
+  describe '#new_record?' do
+    context 'with an new object' do
+      subject { ActiveFedora::Base.new }
+      it { is_expected.to be_new_record }
+    end
+
+    context 'with an destroyed object' do
+      subject { ActiveFedora::Base.create }
+      before { subject.delete }
+      it { is_expected.not_to be_new_record }
+    end
+  end
+
   describe '.delete' do
     context 'with an unsaved object' do
       subject { ActiveFedora::Base.new }
