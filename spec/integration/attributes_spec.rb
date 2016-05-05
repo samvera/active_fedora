@@ -18,7 +18,7 @@ describe "delegating attributes" do
       end
     end
     class RdfObject < ActiveFedora::Base
-      contains 'foo', class_name: 'PropertiesDatastream'
+      has_subresource 'foo', class_name: 'PropertiesDatastream'
       Deprecation.silence(ActiveFedora::Attributes) do
         has_attributes :depositor, datastream: :foo, multiple: false do |index|
           index.as :stored_searchable

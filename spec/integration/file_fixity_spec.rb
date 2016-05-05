@@ -3,7 +3,7 @@ require 'spec_helper'
 describe "Checking fixity" do
   before(:all) do
     class MockAFBase < ActiveFedora::Base
-      contains "data", autocreate: true
+      has_subresource "data", autocreate: true
     end
   end
 

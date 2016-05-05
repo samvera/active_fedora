@@ -2,15 +2,15 @@ require 'spec_helper'
 
 describe ActiveFedora::AttachedFiles do
   subject { ActiveFedora::Base.new }
-  describe "contains" do
+  describe "has_subresource" do
     before do
       class Z < ActiveFedora::File
       end
       class FooHistory < ActiveFedora::Base
-        contains 'dsid', class_name: 'ActiveFedora::SimpleDatastream'
-        contains 'complex_ds', autocreate: true, class_name: 'Z'
-        contains 'thumbnail'
-        contains 'child_resource', class_name: 'ActiveFedora::Base'
+        has_subresource 'dsid', class_name: 'ActiveFedora::SimpleDatastream'
+        has_subresource 'complex_ds', autocreate: true, class_name: 'Z'
+        has_subresource 'thumbnail'
+        has_subresource 'child_resource', class_name: 'ActiveFedora::Base'
       end
     end
     after do
@@ -30,8 +30,8 @@ describe ActiveFedora::AttachedFiles do
     end
 
     it "raises an error if you don't give a dsid" do
-      expect { FooHistory.contains nil, type: ActiveFedora::SimpleDatastream }.to raise_error ArgumentError,
-                                                                                              "You must provide a name (dsid) for the datastream"
+      expect { FooHistory.has_subresource nil, type: ActiveFedora::SimpleDatastream }.to raise_error ArgumentError,
+                                                                                                     "You must provide a path name (f.k.a. dsid) for the resource"
     end
   end
 
@@ -72,7 +72,7 @@ describe ActiveFedora::AttachedFiles do
 
     it "raises an error if you don't give a dsid" do
       expect { FooHistory.has_metadata type: ActiveFedora::SimpleDatastream }.to raise_error ArgumentError,
-                                                                                             "You must provide a name (dsid) for the datastream"
+                                                                                             "You must provide a path name (f.k.a. dsid) for the resource"
     end
 
     describe "creates accessors" do
@@ -105,7 +105,7 @@ describe ActiveFedora::AttachedFiles do
       class Bar < ActiveFedora::File; end
 
       class FooHistory < ActiveFedora::Base
-        contains :content, class_name: 'Bar'
+        has_subresource :content, class_name: 'Bar'
       end
     end
 
@@ -183,7 +183,7 @@ describe ActiveFedora::AttachedFiles do
     context "when there are declared attached files" do
       before do
         class FooHistory < ActiveFedora::Base
-          contains 'thumbnail'
+          has_subresource 'thumbnail'
         end
       end
 

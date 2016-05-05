@@ -1,7 +1,7 @@
 module ActiveFedora::Associations::Builder
-  class Contains < SingularAssociation #:nodoc:
+  class HasSubresource < SingularAssociation #:nodoc:
     def self.macro
-      :contains
+      :has_subresource
     end
 
     def self.valid_options(options)

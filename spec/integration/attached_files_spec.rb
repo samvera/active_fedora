@@ -1,10 +1,10 @@
 require 'spec_helper'
 
 describe ActiveFedora::AttachedFiles do
-  describe "#contains" do
+  describe "#has_subresource" do
     before do
       class FooHistory < ActiveFedora::Base
-        contains 'child'
+        has_subresource 'child'
       end
     end
     after do

@@ -1,6 +1,6 @@
 module ActiveFedora
   module Associations
-    class BasicContainsAssociation < SingularAssociation #:nodoc:
+    class HasSubresourceAssociation < SingularAssociation #:nodoc:
       # Implements the reader method, e.g. foo.bar for Foo.has_one :bar
       def reader(force_reload = false)
         super || build

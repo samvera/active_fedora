@@ -12,7 +12,7 @@ Lint/HandleExceptions:
     - 'spec/unit/**/*'
     - 'spec/integration/**/*'
     - 'lib/active_fedora/cleaner.rb'
-    - 'lib/active_fedora/associations/builder/contains.rb'
+    - 'lib/active_fedora/associations/builder/has_subresource.rb'
 
 Lint/AssignmentInCondition:
   Enabled: false
