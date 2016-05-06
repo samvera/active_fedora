@@ -132,7 +132,7 @@ module ActiveFedora
       def create_singleton_association(file_path)
         undeclared_files << file_path.to_sym
 
-        association = Associations::BasicContainsAssociation.new(self, Reflection::ContainsReflection.new(file_path, nil, { class_name: 'ActiveFedora::File' }, self.class))
+        association = Associations::HasSubresourceAssociation.new(self, Reflection::HasSubresourceReflection.new(file_path, nil, { class_name: 'ActiveFedora::File' }, self.class))
         @association_cache[file_path.to_sym] = association
 
         singleton_class.send :define_method, accessor_name(file_path) do
@@ -187,7 +187,7 @@ module ActiveFedora
           name = args.delete(:name)
           raise ArgumentError, "You must provide a :type property for the datastream '#{name}'" unless args[:type]
           args[:class_name] = args.delete(:type).to_s
-          contains(name, args, &block)
+          has_subresource(name, args, &block)
         end
         deprecation_deprecate :has_metadata
 
@@ -213,7 +213,7 @@ module ActiveFedora
           end
           name = args.delete(:name)
           args[:class_name] = args.delete(:type).to_s
-          contains(name, args)
+          has_subresource(name, args)
         end
         deprecation_deprecate :has_file_datastream
       end

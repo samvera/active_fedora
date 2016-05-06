@@ -6,7 +6,7 @@ module ActiveFedora::Associations::Builder
 
     def self.build(model, name, options)
       model.indirectly_contains name, { has_member_relation: has_member_relation(options), through: proxy_class, foreign_key: proxy_foreign_key, inserted_content_relation: inserted_content_relation }.merge(indirect_options(options))
-      model.contains contains_key(options), class_name: list_source_class
+      model.has_subresource contains_key(options), class_name: list_source_class
       model.orders name, through: contains_key(options)
     end
 

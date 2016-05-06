@@ -142,7 +142,7 @@ describe ActiveFedora::Versionable do
       end
 
       class MockAFBase < ActiveFedora::Base
-        contains "descMetadata", class_name: 'VersionableDatastream', autocreate: true
+        has_subresource "descMetadata", class_name: 'VersionableDatastream', autocreate: true
       end
     end
 
@@ -272,7 +272,7 @@ describe ActiveFedora::Versionable do
       end
 
       class MockAFBase < ActiveFedora::Base
-        contains "descMetadata", class_name: 'VersionableDatastream', autocreate: true
+        has_subresource "descMetadata", class_name: 'VersionableDatastream', autocreate: true
       end
     end
 
@@ -395,7 +395,7 @@ describe ActiveFedora::Versionable do
       end
 
       class MockAFBase < ActiveFedora::Base
-        contains "content", class_name: 'BinaryDatastream', autocreate: true
+        has_subresource "content", class_name: 'BinaryDatastream', autocreate: true
       end
     end
 

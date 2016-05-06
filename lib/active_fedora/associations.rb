@@ -24,7 +24,7 @@ module ActiveFedora
     autoload :HasManyAssociation
     autoload :BelongsToAssociation
     autoload :HasAndBelongsToManyAssociation
-    autoload :BasicContainsAssociation
+    autoload :HasSubresourceAssociation
     autoload :DirectlyContainsAssociation
     autoload :DirectlyContainsOneAssociation
     autoload :IndirectlyContainsAssociation
@@ -45,7 +45,7 @@ module ActiveFedora
       autoload :BelongsTo,           'active_fedora/associations/builder/belongs_to'
       autoload :HasMany,             'active_fedora/associations/builder/has_many'
       autoload :HasAndBelongsToMany, 'active_fedora/associations/builder/has_and_belongs_to_many'
-      autoload :Contains,            'active_fedora/associations/builder/contains'
+      autoload :HasSubresource,      'active_fedora/associations/builder/has_subresource'
       autoload :DirectlyContains,    'active_fedora/associations/builder/directly_contains'
       autoload :DirectlyContainsOne, 'active_fedora/associations/builder/directly_contains_one'
       autoload :IndirectlyContains,  'active_fedora/associations/builder/indirectly_contains'
@@ -176,9 +176,25 @@ module ActiveFedora
         # @option options [Boolean] :autocreate Always create this resource on new objects
         # @yield block executed by some types of child resources
         def contains(name, options = {}, &block)
+          Deprecation.warn(Associations, "contains is deprecated. Use has_subresource instead. This will be removed in ActiveFedora 10")
+          has_subresource(name, options, &block)
+        end
+
+        # This method is used to specify the details of a contained resource.
+        # Pass the name as the first argument and a hash of options as the second argument
+        # Note that this method doesn't actually execute the block, but stores it, to be executed
+        # by any the implementation of the resource(specified as :class_name)
+        #
+        # @param [String] name the handle to refer to this child as
+        # @param [Hash] options
+        # @option options [Class] :class_name The class that will represent this child, should extend ``ActiveFedora::File'' or ``ActiveFedora::Base''
+        # @option options [String] :url
+        # @option options [Boolean] :autocreate Always create this resource on new objects
+        # @yield block executed by some types of child resources
+        def has_subresource(name, options = {}, &block)
           options[:block] = block if block
-          raise ArgumentError, "You must provide a name (dsid) for the datastream" unless name
-          Associations::Builder::Contains.build(self, name.to_sym, options)
+          raise ArgumentError, "You must provide a path name (f.k.a. dsid) for the resource" unless name
+          Associations::Builder::HasSubresource.build(self, name.to_sym, options)
         end
 
         # Specifies a one-to-one association with another class. This method should only be used

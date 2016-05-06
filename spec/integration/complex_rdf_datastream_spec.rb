@@ -177,7 +177,7 @@ END
         end
 
         class SpecContainer < ActiveFedora::Base
-          contains :info, class_name: 'SpecDatastream'
+          has_subresource :info, class_name: 'SpecDatastream'
         end
 
         class SpecDatastream < ActiveFedora::NtriplesRDFDatastream

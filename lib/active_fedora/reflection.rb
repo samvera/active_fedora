@@ -20,8 +20,8 @@ module ActiveFedora
                   BelongsToReflection
                 when :has_and_belongs_to_many
                   HasAndBelongsToManyReflection
-                when :contains
-                  ContainsReflection
+                when :has_subresource
+                  HasSubresourceReflection
                 when :directly_contains
                   DirectlyContainsReflection
                 when :directly_contains_one
@@ -107,11 +107,11 @@ module ActiveFedora
       end
 
       def child_resource_reflections
-        reflect_on_all_associations(:contains).select { |_, reflection| reflection.klass <= ActiveFedora::File }
+        reflect_on_all_associations(:has_subresource).select { |_, reflection| reflection.klass <= ActiveFedora::File }
       end
 
       def contained_rdf_source_reflections
-        reflect_on_all_associations(:contains).select { |_, reflection| !(reflection.klass <= ActiveFedora::File) }
+        reflect_on_all_associations(:has_subresource).select { |_, reflection| !(reflection.klass <= ActiveFedora::File) }
       end
 
       # Returns the AssociationReflection object for the +association+ (use the symbol).
@@ -503,13 +503,13 @@ module ActiveFedora
       end
     end
 
-    class ContainsReflection < AssociationReflection # :nodoc:
+    class HasSubresourceReflection < AssociationReflection # :nodoc:
       def macro
-        :contains
+        :has_subresource
       end
 
       def association_class
-        Associations::BasicContainsAssociation
+        Associations::HasSubresourceAssociation
       end
     end
 
