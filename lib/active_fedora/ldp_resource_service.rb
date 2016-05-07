@@ -10,8 +10,14 @@ module ActiveFedora
       if id
         LdpResource.new(connection, to_uri(klass, id))
       else
-        LdpResource.new(connection, nil, nil, ActiveFedora.fedora.host + ActiveFedora.fedora.base_path)
+        parent_uri = ActiveFedora.fedora.host + ActiveFedora.fedora.base_path
+        LdpResource.new(connection, nil, nil, parent_uri)
       end
+    end
+
+    def build_resource_under_path(graph, parent_uri)
+      parent_uri ||= ActiveFedora.fedora.host + ActiveFedora.fedora.base_path
+      LdpResource.new(connection, nil, graph, parent_uri)
     end
 
     def update(change_set, klass, id)

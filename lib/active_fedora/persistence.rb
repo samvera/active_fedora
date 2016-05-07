@@ -87,6 +87,11 @@ module ActiveFedora
       self.class.eradicate(id)
     end
 
+    # Used when setting containment
+    def base_path_for_resource=(path)
+      @base_path = path
+    end
+
     module ClassMethods
       # Creates an object (or multiple objects) and saves it to the repository, if validations pass.
       # The resulting object is returned whether the object was saved successfully to the repository or not.
@@ -201,11 +206,15 @@ module ActiveFedora
         @ldp_source = if !id && new_id = assign_id
                         LdpResource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_id), @resource)
                       else
-                        LdpResource.new(ActiveFedora.fedora.connection, @ldp_source.subject, @resource, ActiveFedora.fedora.host + base_path_for_resource)
+                        LdpResource.new(ActiveFedora.fedora.connection, @ldp_source.subject, @resource, base_path_for_resource)
                       end
       end
 
       def base_path_for_resource
+        @base_path ||= ActiveFedora.fedora.host + default_base_path_for_resource
+      end
+
+      def default_base_path_for_resource
         init_root_path if has_uri_prefix?
         root_resource_path
       end

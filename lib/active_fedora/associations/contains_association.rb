@@ -1,7 +1,15 @@
-# This is the parent class of DirectlyContainsAssociation and IndirectlyContainsAssociation
+# This is the parent class of BasicContainsAssociation, DirectlyContainsAssociation and IndirectlyContainsAssociation
 module ActiveFedora
   module Associations
     class ContainsAssociation < CollectionAssociation #:nodoc:
+      def insert_record(record, force = true, validate = true)
+        if force
+          record.save!
+        else
+          record.save(validate: validate)
+        end
+      end
+
       def reader
         @records ||= ContainerProxy.new(self)
       end
@@ -26,6 +34,16 @@ module ActiveFedora
         def uri
           raise "Can't get uri. Owner isn't saved" if @owner.new_record?
           "#{@owner.uri}/#{@reflection.name}"
+        end
+
+      private
+
+        def delete_records(records, method)
+          if method == :destroy
+            records.each(&:destroy)
+          else
+            records.each(&:delete)
+          end
         end
     end
   end

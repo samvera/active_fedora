@@ -24,6 +24,7 @@ module ActiveFedora
     autoload :HasManyAssociation
     autoload :BelongsToAssociation
     autoload :HasAndBelongsToManyAssociation
+    autoload :BasicContainsAssociation
     autoload :HasSubresourceAssociation
     autoload :DirectlyContainsAssociation
     autoload :DirectlyContainsOneAssociation
@@ -45,6 +46,7 @@ module ActiveFedora
       autoload :BelongsTo,           'active_fedora/associations/builder/belongs_to'
       autoload :HasMany,             'active_fedora/associations/builder/has_many'
       autoload :HasAndBelongsToMany, 'active_fedora/associations/builder/has_and_belongs_to_many'
+      autoload :BasicContains,       'active_fedora/associations/builder/basic_contains'
       autoload :HasSubresource,      'active_fedora/associations/builder/has_subresource'
       autoload :DirectlyContains,    'active_fedora/associations/builder/directly_contains'
       autoload :DirectlyContainsOne, 'active_fedora/associations/builder/directly_contains_one'
@@ -104,6 +106,23 @@ module ActiveFedora
       end
 
       module ClassMethods
+        # This method is used to declare this resource acts like an LDP BasicContainer
+        #
+        # @param [Hash] options
+        # @option options [String] :class_name ('ActiveFedora::File') The name of the
+        #   class that will represent the contained resources
+        #
+        # example:
+        #   class FooHistory < ActiveFedora::Base
+        #     is_a_container class_name: 'Thing'
+        #   end
+        #
+        def is_a_container(options = {})
+          defaults = { class_name: 'ActiveFedora::File',
+                       predicate: ::RDF::Vocab::LDP.contains }
+          Builder::BasicContains.build(self, :contains, defaults.merge(options))
+        end
+
         # This method is used to declare an ldp:DirectContainer on a resource
         # you must specify an is_member_of_relation or a has_member_relation
         #

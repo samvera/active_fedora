@@ -28,6 +28,8 @@ module ActiveFedora
                   DirectlyContainsOneReflection
                 when :indirectly_contains
                   IndirectlyContainsReflection
+                when :is_a_container
+                  BasicContainsReflection
                 when :rdf
                   RDFPropertyReflection
                 when :singular_rdf
@@ -510,6 +512,20 @@ module ActiveFedora
 
       def association_class
         Associations::HasSubresourceAssociation
+      end
+    end
+
+    class BasicContainsReflection < AssociationReflection # :nodoc:
+      def macro
+        :is_a_container
+      end
+
+      def collection?
+        true
+      end
+
+      def association_class
+        Associations::BasicContainsAssociation
       end
     end
 
