@@ -1,25 +1,19 @@
 require 'spec_helper'
 
 describe ActiveFedora::Model do
-  before(:each) do
+  before do
     module ModelIntegrationSpec
       class Base < ActiveFedora::Base
         include ActiveFedora::Model
-        def self.id_namespace
-          "foo"
-        end
-        has_metadata name: "properties", type: ActiveFedora::SimpleDatastream, autocreate: true
       end
       class Basic < Base
       end
     end
-
-    @test_instance = ModelIntegrationSpec::Basic.new
-    @test_instance.save
   end
+  let!(:test_instance) { ModelIntegrationSpec::Basic.create! }
 
-  after(:each) do
-    @test_instance.delete
+  after do
+    test_instance.delete
     Object.send(:remove_const, :ModelIntegrationSpec)
   end
 
@@ -37,15 +31,15 @@ describe ActiveFedora::Model do
 
   describe '#find' do
     describe "#find with a valid id without cast" do
-      subject { ActiveFedora::Base.find(@test_instance.id) }
+      subject { ActiveFedora::Base.find(test_instance.id) }
       it { should be_instance_of ModelIntegrationSpec::Basic }
     end
     describe "#find with a valid id with cast of false" do
-      subject { ActiveFedora::Base.find(@test_instance.id, cast: false) }
+      subject { ActiveFedora::Base.find(test_instance.id, cast: false) }
       it { should be_instance_of ActiveFedora::Base }
     end
     describe "#find with a valid id without cast on a model extending Base" do
-      subject { ModelIntegrationSpec::Basic.find(@test_instance.id) }
+      subject { ModelIntegrationSpec::Basic.find(test_instance.id) }
       it { should be_instance_of ModelIntegrationSpec::Basic }
     end
   end

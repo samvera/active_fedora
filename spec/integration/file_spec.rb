@@ -53,7 +53,10 @@ describe ActiveFedora::File do
   context "when autocreate is true" do
     before do
       class MockAFBase < ActiveFedora::Base
-        has_metadata "descMetadata", type: ActiveFedora::QualifiedDublinCoreDatastream, autocreate: true
+        extend Deprecation
+        Deprecation.silence(MockAFBase) do
+          has_metadata "descMetadata", type: ActiveFedora::QualifiedDublinCoreDatastream, autocreate: true
+        end
       end
     end
 

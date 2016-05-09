@@ -67,6 +67,14 @@ describe ActiveFedora::Base do
         SpecModel::Basic.find(id: "_ID_")
       end
     end
+
+    context "with a blank string" do
+      it 'raises ActiveFedora::ObjectNotFoundError' do
+        expect {
+          SpecModel::Basic.find('')
+        }.to raise_error(ActiveFedora::ObjectNotFoundError)
+      end
+    end
   end
 
   describe "#where" do

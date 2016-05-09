@@ -3,14 +3,6 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   before :each do
     class CallbackStub < ActiveFedora::Base
-      has_metadata type: ActiveFedora::SimpleDatastream, name: "someData" do |m|
-        m.field "fubar", :string
-        m.field "swank", :text
-      end
-      Deprecation.silence(ActiveFedora::Attributes) do
-        has_attributes :fubar, :swank, datastream: 'someData', multiple: true
-      end
-
       after_initialize :a_init
       before_save :b_save
       after_save :a_save

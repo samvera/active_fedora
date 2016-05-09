@@ -2,19 +2,19 @@ require 'spec_helper'
 
 describe "An object with RDF backed attributes" do
   before do
-    class TestOne < ActiveFedora::Base
-      class MyMetadata < ActiveFedora::NtriplesRDFDatastream
-        Deprecation.silence(ActiveFedora::RDFDatastream) do
-          property :title, predicate: ::RDF::Vocab::DC.title do |index|
-            index.as :stored_searchable
-          end
-          property :date_uploaded, predicate: ::RDF::Vocab::DC.dateSubmitted do |index|
-            index.type :date
-            index.as :stored_searchable, :sortable
-          end
+    class MyMetadata < ActiveFedora::NtriplesRDFDatastream
+      Deprecation.silence(ActiveFedora::RDFDatastream) do
+        property :title, predicate: ::RDF::Vocab::DC.title do |index|
+          index.as :stored_searchable
+        end
+        property :date_uploaded, predicate: ::RDF::Vocab::DC.dateSubmitted do |index|
+          index.type :date
+          index.as :stored_searchable, :sortable
         end
       end
-      has_metadata 'descMetadata', type: MyMetadata
+    end
+    class TestOne < ActiveFedora::Base
+      has_subresource 'descMetadata', class_name: 'MyMetadata'
       Deprecation.silence(ActiveFedora::Attributes) do
         has_attributes :title, :date_uploaded, datastream: 'descMetadata'
       end
@@ -23,6 +23,7 @@ describe "An object with RDF backed attributes" do
 
   after do
     Object.send(:remove_const, :TestOne)
+    Object.send(:remove_const, :MyMetadata)
   end
 
   it "is able to grab the solr name" do

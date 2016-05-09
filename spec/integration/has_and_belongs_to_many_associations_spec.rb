@@ -350,22 +350,12 @@ describe ActiveFedora::Base do
     before do
       class Item < ActiveFedora::Base
         has_many :components
-        has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
-          m.field "title", :string
-        end
-        Deprecation.silence(ActiveFedora::Attributes) do
-          has_attributes :title, datastream: 'foo'
-        end
+        property :title, predicate: ::RDF::Vocab::DC.title
       end
 
       class Component < ActiveFedora::Base
         has_and_belongs_to_many :items, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
-        has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
-          m.field "description", :string
-        end
-        Deprecation.silence(ActiveFedora::Attributes) do
-          has_attributes :description, datastream: 'foo'
-        end
+        property :description, predicate: ::RDF::Vocab::DC.description
       end
     end
 
@@ -376,11 +366,11 @@ describe ActiveFedora::Base do
 
     describe "From the has_and_belongs_to_many side" do
       describe "dependent records" do
-        let(:component) { Component.create(items: [Item.new(title: 'my title')]) }
+        let(:component) { Component.create(items: [Item.new(title: ['my title'])]) }
 
         it "is saved" do
           component.reload
-          expect(component.items.first.title).to eq 'my title'
+          expect(component.items.first.title).to eq ['my title']
         end
       end
 
@@ -413,11 +403,11 @@ describe ActiveFedora::Base do
     end
 
     describe "From the has_many side" do
-      let(:item) { Item.create(components: [Component.new(description: 'my description')]) }
+      let(:item) { Item.create(components: [Component.new(description: ['my description'])]) }
 
       it "saves dependent records" do
         item.reload
-        expect(item.components.first.description).to eq 'my description'
+        expect(item.components.first.description).to eq ['my description']
       end
     end
   end

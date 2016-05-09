@@ -6,52 +6,55 @@ include ActiveFedora
 describe ActiveFedora::Base do
   before(:all) do
     class OralHistory < ActiveFedora::Base
-      # These are all the properties that don't quite fit into Qualified DC
-      # Put them on the object itself (in the properties datastream) for now.
-      has_metadata name: "properties", type: ActiveFedora::SimpleDatastream do |m|
-        m.field "narrator", :string
-        m.field "interviewer", :string
-        m.field "transcript_editor", :text
-        m.field "bio", :string
-        m.field "notes", :text
-        m.field "hard_copy_availability", :text
-        m.field "hard_copy_location", :text
-        m.field "other_contributor", :string
-        m.field "restrictions", :text
-        m.field "series", :string
-        m.field "location", :string
-      end
+      extend Deprecation
+      Deprecation.silence(OralHistory) do
+        # These are all the properties that don't quite fit into Qualified DC
+        # Put them on the object itself (in the properties datastream) for now.
+        has_metadata name: "properties", type: ActiveFedora::SimpleDatastream do |m|
+          m.field "narrator", :string
+          m.field "interviewer", :string
+          m.field "transcript_editor", :text
+          m.field "bio", :string
+          m.field "notes", :text
+          m.field "hard_copy_availability", :text
+          m.field "hard_copy_location", :text
+          m.field "other_contributor", :string
+          m.field "restrictions", :text
+          m.field "series", :string
+          m.field "location", :string
+        end
 
-      has_metadata name: "mods_article", type: Hydra::ModsArticleDatastream
+        has_metadata name: "mods_article", type: Hydra::ModsArticleDatastream
 
-      has_metadata name: "dublin_core", type: ActiveFedora::QualifiedDublinCoreDatastream do |_m|
-        # Default :multiple => true
-        #
-        # on retrieval, these will be pluralized and returned as arrays
-        # ie. subject_entries = my_oral_history.dublin_core.subjects
-        #
-        # aimint to use method-missing to support calling methods like
-        # my_oral_history.subjects  OR   my_oral_history.titles  OR EVEN my_oral_history.title whenever possible
+        has_metadata name: "dublin_core", type: ActiveFedora::QualifiedDublinCoreDatastream do |_m|
+          # Default :multiple => true
+          #
+          # on retrieval, these will be pluralized and returned as arrays
+          # ie. subject_entries = my_oral_history.dublin_core.subjects
+          #
+          # aimint to use method-missing to support calling methods like
+          # my_oral_history.subjects  OR   my_oral_history.titles  OR EVEN my_oral_history.title whenever possible
 
-        # Setting new Types for dates and text content
-        # m.field "creation_date", :date, :xml_node => "date"
-        # m.field "abstract", :text, :xml_node => "abstract"
-        # m.field "rights", :text, :xml_node => "rights"
+          # Setting new Types for dates and text content
+          # m.field "creation_date", :date, :xml_node => "date"
+          # m.field "abstract", :text, :xml_node => "abstract"
+          # m.field "rights", :text, :xml_node => "rights"
 
-        # Setting up special named fields
-        # m.field "subject_heading", :string, :xml_node => "subject", :encoding => "LCSH"
-        # m.field "spatial_coverage", :string, :xml_node => "spatial", :encoding => "TGN"
-        # m.field "temporal_coverage", :string, :xml_node => "temporal", :encoding => "Period"
-        # m.field "type", :string, :xml_node => "type", :encoding => "DCMITYPE"
-        # m.field "alt_title", :string, :xml_node => "alternative"
-      end
+          # Setting up special named fields
+          # m.field "subject_heading", :string, :xml_node => "subject", :encoding => "LCSH"
+          # m.field "spatial_coverage", :string, :xml_node => "spatial", :encoding => "TGN"
+          # m.field "temporal_coverage", :string, :xml_node => "temporal", :encoding => "Period"
+          # m.field "type", :string, :xml_node => "type", :encoding => "DCMITYPE"
+          # m.field "alt_title", :string, :xml_node => "alternative"
+        end
 
-      has_metadata name: "significant_passages", type: ActiveFedora::SimpleDatastream do |m|
-        m.field "significant_passage", :text
-      end
+        has_metadata name: "significant_passages", type: ActiveFedora::SimpleDatastream do |m|
+          m.field "significant_passage", :text
+        end
 
-      has_metadata name: "sensitive_passages", type: ActiveFedora::SimpleDatastream do |m|
-        m.field "sensitive_passage", :text
+        has_metadata name: "sensitive_passages", type: ActiveFedora::SimpleDatastream do |m|
+          m.field "sensitive_passage", :text
+        end
       end
     end
     sample_location = "Boston, Massachusetts"

@@ -156,13 +156,10 @@ module ActiveFedora
       end
 
       module ClassMethods
-        extend Deprecation
-        self.deprecation_horizon = 'active-fedora version 10.0'
-
         def ds_specs
+          Deprecation.warn(self, "ds_specs is deprecated and will be removed in ActiveFedora 10.0")
           child_resource_reflections
         end
-        deprecation_deprecate :ds_specs
 
         # This method is used to specify the details of a datastream.
         # You can pass the name as the first argument and a hash of options as the second argument
@@ -177,6 +174,7 @@ module ActiveFedora
         # @option args [Boolean] :autocreate Always create this datastream on new objects
         # @yield block executed by some kinds of datastreams
         def has_metadata(*args, &block)
+          Deprecation.warn(self, "has_metadata is deprecated and will be removed in ActiveFedora 10.0. Use has_subresource instead.")
           if args.first.is_a? String
             name = args.first
             args = args[1] || {}
@@ -189,7 +187,6 @@ module ActiveFedora
           args[:class_name] = args.delete(:type).to_s
           has_subresource(name, args, &block)
         end
-        deprecation_deprecate :has_metadata
 
         # @overload has_file_datastream(name, args)
         #   Declares a file datastream exists for objects of this type
@@ -204,6 +201,7 @@ module ActiveFedora
         #     @option args :type (ActiveFedora::File) The class the datastream should have
         #     @option args [Boolean] :autocreate Always create this datastream on new objects
         def has_file_datastream(*args)
+          Deprecation.warn(self, "has_file_datastream is deprecated and will be removed in ActiveFedora 10.0. Use has_subresource instead.")
           if args.first.is_a? String
             name = args.first
             args = args[1] || {}
@@ -215,7 +213,6 @@ module ActiveFedora
           args[:class_name] = args.delete(:type).to_s
           has_subresource(name, args)
         end
-        deprecation_deprecate :has_file_datastream
       end
   end
 end

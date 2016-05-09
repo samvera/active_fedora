@@ -35,6 +35,14 @@ describe ActiveFedora::Persistence do
         expect { |b| ActiveFedora::Base.create(&b) }.to yield_with_args(an_instance_of(ActiveFedora::Base))
       end
     end
+
+    context "when trying to create it again" do
+      let(:object) { ActiveFedora::Base.create! }
+
+      it "raises an error" do
+        expect { ActiveFedora::Base.create(id: object.id) }.to raise_error(ActiveFedora::IllegalOperation, "Attempting to recreate existing ldp_source: `#{object.uri}'")
+      end
+    end
   end
 
   describe '.destroy' do

@@ -26,7 +26,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
 
     class RdfTest < ActiveFedora::Base
-      has_metadata 'rdf', type: MyDatastream
+      has_subresource 'rdf', class_name: 'MyDatastream'
       Deprecation.silence(ActiveFedora::Attributes) do
         has_attributes :based_near, :related_url, :part, :date_uploaded, datastream: 'rdf', multiple: true
         has_attributes :title, :filesize, datastream: 'rdf', multiple: false
@@ -227,7 +227,7 @@ EOF
         property :title, predicate: ::RDF::Vocab::DC.title
       end
       class Foobar < ActiveFedora::Base
-        has_metadata 'rdf', type: TitleDatastream
+        has_subresource 'rdf', class_name: 'TitleDatastream'
         Deprecation.silence(ActiveFedora::Attributes) do
           has_attributes :title, datastream: 'rdf', multiple: true
         end

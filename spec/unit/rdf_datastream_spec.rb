@@ -15,7 +15,7 @@ describe ActiveFedora::RDFDatastream do
         property :description, predicate: ::RDF::Vocab::DC.description
       end
       class MyObj < ActiveFedora::Base
-        has_metadata 'descMetadata', type: MyDatastream
+        has_subresource 'descMetadata', class_name: 'MyDatastream'
       end
       @obj = MyObj.new
       @obj.descMetadata.title = 'Foobar'

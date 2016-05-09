@@ -3,9 +3,12 @@ require 'spec_helper'
 describe ActiveFedora::SolrInstanceLoader do
   before do
     class Foo < ActiveFedora::Base
-      has_metadata 'descMetadata', type: ActiveFedora::SimpleDatastream do |m|
-        m.field "foo", :text
-        m.field "bar", :text
+      extend Deprecation
+      Deprecation.silence(Foo) do
+        has_metadata 'descMetadata', type: ActiveFedora::SimpleDatastream do |m|
+          m.field "foo", :text
+          m.field "bar", :text
+        end
       end
       Deprecation.silence(ActiveFedora::Attributes) do
         has_attributes :foo, datastream: 'descMetadata', multiple: true

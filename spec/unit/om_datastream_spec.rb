@@ -306,7 +306,7 @@ describe ActiveFedora::OmDatastream do
   describe "an instance that exists in the datastore, but hasn't been loaded" do
     before do
       class MyObj < ActiveFedora::Base
-        has_metadata 'descMetadata', type: Hydra::ModsArticleDatastream
+        has_subresource 'descMetadata', class_name: 'Hydra::ModsArticleDatastream'
       end
       @obj = MyObj.new
       @obj.descMetadata.title = 'Foobar'

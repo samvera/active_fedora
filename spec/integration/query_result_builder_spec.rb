@@ -8,7 +8,7 @@ describe ActiveFedora::QueryResultBuilder do
           "foo"
         end
 
-        has_metadata name: "descMetadata", type: ActiveFedora::QualifiedDublinCoreDatastream
+        has_subresource :descMetadata, class_name: 'ActiveFedora::QualifiedDublinCoreDatastream'
       end
       @test_object = ActiveFedora::Base.new
       @foo_object = FooObject.new

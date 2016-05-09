@@ -196,7 +196,7 @@ EOF
     describe "with an actual object" do
       before(:each) do
         class Foo < ActiveFedora::Base
-          has_metadata "descMetadata", type: MyDatastream
+          has_subresource "descMetadata", class_name: 'MyDatastream'
           Deprecation.silence(ActiveFedora::Attributes) do
             has_attributes :created, :title, :publisher, :based_near, :related_url, :rights, datastream: :descMetadata, multiple: true
           end

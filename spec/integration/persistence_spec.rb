@@ -4,9 +4,6 @@ describe "persisting objects" do
   describe "#create!" do
     before do
       class MockAFBaseRelationship < ActiveFedora::Base
-        has_metadata type: ActiveFedora::SimpleDatastream, name: "foo" do |m|
-          m.field "name", :string
-        end
         property :name, predicate: ::RDF::Vocab::DC.title, multiple: false
         validates :name, presence: true
       end

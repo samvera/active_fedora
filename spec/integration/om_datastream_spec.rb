@@ -4,7 +4,7 @@ describe ActiveFedora::OmDatastream do
   before(:all) do
     class ModsArticle2 < ActiveFedora::Base
       # Uses the Hydra MODS Article profile for tracking most of the descriptive metadata
-      has_metadata "descMetadata", type: Hydra::ModsArticleDatastream, autocreate: true
+      has_subresource "descMetadata", class_name: 'Hydra::ModsArticleDatastream'
     end
   end
 

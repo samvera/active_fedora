@@ -70,8 +70,11 @@ describe ActiveFedora::SimpleDatastream do
 
     before do
       class FooHistory < ActiveFedora::Base
-        has_metadata type: ActiveFedora::SimpleDatastream, name: "someData" do |m|
-          m.field "fubar", :string
+        extend Deprecation
+        Deprecation.silence(FooHistory) do
+          has_metadata type: ActiveFedora::SimpleDatastream, name: "someData" do |m|
+            m.field "fubar", :string
+          end
         end
         Deprecation.silence(ActiveFedora::Attributes) do
           has_attributes :fubar, datastream: 'someData', multiple: false
