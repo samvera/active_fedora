@@ -1,30 +1,25 @@
 require 'spec_helper'
 
-describe ActiveFedora::Model do
+describe ActiveFedora::Scoping::Named do
   before do
-    module ModelIntegrationSpec
-      class Base < ActiveFedora::Base
-        include ActiveFedora::Model
-      end
-      class Basic < Base
-      end
+    class TestClass < ActiveFedora::Base
     end
   end
-  let!(:test_instance) { ModelIntegrationSpec::Basic.create! }
+  let!(:test_instance) { TestClass.create! }
 
   after do
     test_instance.delete
-    Object.send(:remove_const, :ModelIntegrationSpec)
+    Object.send(:remove_const, :TestClass)
   end
 
   describe "#all" do
     it "returns an array of instances of the calling Class" do
-      result = ModelIntegrationSpec::Basic.all.to_a
+      result = TestClass.all.to_a
       expect(result).to be_instance_of(Array)
       # this test is meaningless if the array length is zero
       expect(result).to_not be_empty
       result.each do |obj|
-        expect(obj.class).to eq ModelIntegrationSpec::Basic
+        expect(obj.class).to eq TestClass
       end
     end
   end
@@ -32,15 +27,16 @@ describe ActiveFedora::Model do
   describe '#find' do
     describe "#find with a valid id without cast" do
       subject { ActiveFedora::Base.find(test_instance.id) }
-      it { should be_instance_of ModelIntegrationSpec::Basic }
+      it { should be_instance_of TestClass }
     end
     describe "#find with a valid id with cast of false" do
       subject { ActiveFedora::Base.find(test_instance.id, cast: false) }
       it { should be_instance_of ActiveFedora::Base }
     end
+
     describe "#find with a valid id without cast on a model extending Base" do
-      subject { ModelIntegrationSpec::Basic.find(test_instance.id) }
-      it { should be_instance_of ModelIntegrationSpec::Basic }
+      subject { TestClass.find(test_instance.id) }
+      it { should be_instance_of TestClass }
     end
   end
 end

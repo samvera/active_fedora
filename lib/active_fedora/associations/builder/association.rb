@@ -10,7 +10,7 @@ module ActiveFedora::Associations::Builder
     # configure_dependency
     def self.build(model, name, options, &block)
       if model.dangerous_attribute_method?(name)
-        Deprecation.warn(ActiveFedora::Base, "You tried to define an association named #{name} on the model #{model.name}, but " \
+        ActiveFedora::Base.logger.error("You tried to define an association named #{name} on the model #{model.name}, but " \
                              "this will conflict with a method #{name} already defined by ActiveFedora. " \
                              "Please choose a different association name.")
       end
@@ -24,12 +24,8 @@ module ActiveFedora::Associations::Builder
     end
 
     def self.create_reflection(model, name, scope, options, extension = nil)
-      unless name.is_a?(Symbol)
-        name = name.to_sym
-        Deprecation.warn(ActiveFedora::Base, "association names must be a Symbol")
-      end
+      raise ArgumentError, "association names must be a Symbol. You provided #{name.inspect}" unless name.is_a?(Symbol)
       validate_options(options)
-      translate_property_to_predicate(options)
 
       scope = build_scope(scope, extension)
       name = better_name(name)
@@ -65,18 +61,6 @@ module ActiveFedora::Associations::Builder
 
     def self.better_name(name)
       name
-    end
-
-    def self.translate_property_to_predicate(options)
-      return unless options[:property]
-      Deprecation.warn Association, "the :property option to `#{model}.#{macro} :#{name}' is deprecated and will be removed in active-fedora 10.0. Use :predicate instead", caller(5)
-      options[:predicate] = predicate(options.delete(:property))
-    end
-
-    # Returns the RDF predicate as defined by the :property attribute
-    def self.predicate(property)
-      return property if property.is_a? RDF::URI
-      ActiveFedora::Predicates.find_graph_predicate(property)
     end
 
     def self.define_extensions(_model, _name)

@@ -22,10 +22,6 @@ module ActiveFedora #:nodoc:
   class ConfigurationError < ActiveFedoraError
   end
 
-  # Raised when ActiveFedora cannot find the predicate mapping configuration file
-  class PredicateMappingsNotFoundError < ConfigurationError
-  end
-
   # Raised when an object assigned to an association has an incorrect type.
   #
   #   class Ticket < ActiveFedora::Base
@@ -55,11 +51,6 @@ module ActiveFedora #:nodoc:
         super("Delete restriction error.")
       end
     end
-  end
-
-  # Raised when ActiveFedora cannot find the predicate corresponding to the given property
-  # in the predicate registy
-  class UnregisteredPredicateError < ActiveFedoraError
   end
 
   # Raised by ActiveFedora::Base.save! and ActiveFedora::Base.create! methods when record cannot be

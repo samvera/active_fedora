@@ -50,13 +50,10 @@ describe ActiveFedora::File do
     end
   end
 
-  context "when autocreate is true" do
+  context "with a sub-resource that autocreates" do
     before do
       class MockAFBase < ActiveFedora::Base
-        extend Deprecation
-        Deprecation.silence(MockAFBase) do
-          has_metadata "descMetadata", type: ActiveFedora::QualifiedDublinCoreDatastream, autocreate: true
-        end
+        has_subresource "descMetadata", class_name: 'ActiveFedora::QualifiedDublinCoreDatastream', autocreate: true
       end
     end
 
@@ -65,13 +62,7 @@ describe ActiveFedora::File do
     end
 
     let(:test_object) { MockAFBase.create }
-
-    let(:descMetadata) { test_object.attached_files["descMetadata"] }
-
-    describe "the metadata file" do
-      subject { descMetadata }
-      it { should be_a_kind_of(described_class) }
-    end
+    let(:descMetadata) { test_object.descMetadata }
 
     describe "#content" do
       subject { descMetadata.content }
@@ -89,7 +80,6 @@ describe ActiveFedora::File do
       before do
         title.content = "Test Title"
         xml_content.root.add_child title
-
         allow(descMetadata).to receive(:before_save)
         descMetadata.content = xml_content.to_s
         descMetadata.save
@@ -99,6 +89,26 @@ describe ActiveFedora::File do
 
       subject { found.xpath('//dc/title/text()').first.inner_text }
       it { should eq title.content }
+    end
+  end
+
+  context "with a sub-resource" do
+    before do
+      class MockAFBase < ActiveFedora::Base
+        has_subresource "descMetadata", class_name: 'ActiveFedora::QualifiedDublinCoreDatastream'
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :MockAFBase)
+    end
+
+    let(:test_object) { MockAFBase.create }
+    let(:descMetadata) { test_object.descMetadata }
+
+    describe "the metadata file" do
+      subject { descMetadata }
+      it { should be_a_kind_of(described_class) }
     end
 
     context "a binary file" do

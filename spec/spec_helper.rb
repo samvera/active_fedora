@@ -35,9 +35,6 @@ def restore_spec_configuration
 end
 restore_spec_configuration
 
-# Shut those Rails deprecation warnings up
-ActiveSupport::Deprecation.behavior = proc { |_message, _callstack| }
-
 require 'active_fedora/cleaner'
 RSpec.configure do |config|
   # Stub out test stuff.

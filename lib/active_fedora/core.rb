@@ -151,12 +151,6 @@ module ActiveFedora
           attributes = { id: attributes_or_id }.with_indifferent_access
         when Hash
           attributes = attributes_or_id.with_indifferent_access
-          # TODO: Remove when we decide using 'pid' is no longer supported.
-          if !attributes.key?(:id) && attributes.key?(:pid)
-            Deprecation.warn Core, 'Initializing with :pid is deprecated and will be removed in active-fedora 10.0. Use :id instead'
-            attributes[:id] = attributes.delete(:pid)
-          end
-
         when NilClass
           attributes = {}.with_indifferent_access
         else

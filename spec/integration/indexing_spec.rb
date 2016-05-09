@@ -31,15 +31,15 @@ describe ActiveFedora::Base do
 
     context 'when some of the decendants are not RDFSources' do
       let(:ids) { ['foo', 'foo/bar'] }
-      let(:datastream) { ActiveFedora::Datastream.new(described_class.id_to_uri('foo/bar/bax')) }
+      let(:file) { ActiveFedora::File.new(described_class.id_to_uri('foo/bar/bax')) }
 
       before do
-        datastream.content = "Hello!!!"
-        datastream.save
+        file.content = "Hello!!!"
+        file.save
       end
 
       it "does not put the datastream in the decendants list" do
-        expect(described_class.descendant_uris(root_uri(ids))).not_to include datastream.uri
+        expect(described_class.descendant_uris(root_uri(ids))).not_to include file.uri
       end
     end
 

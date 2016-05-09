@@ -1,17 +1,9 @@
 module ActiveFedora
   module Versionable
     extend ActiveSupport::Concern
-    extend Deprecation
 
     included do
       class_attribute :versionable
-    end
-
-    module ClassMethods
-      def has_many_versions
-        Deprecation.warn Versionable, "has_many_versions is deprecated and will be removed in ActiveFedora 11."
-        # self.versionable = true
-      end
     end
 
     def model_type

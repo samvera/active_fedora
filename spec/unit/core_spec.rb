@@ -2,19 +2,12 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
   before do
-    class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-      property :publisher, predicate: ::RDF::Vocab::DC.publisher
-    end
     class Library < ActiveFedora::Base
     end
     class Book < ActiveFedora::Base
       belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
-      has_subresource "foo", class_name: 'ActiveFedora::QualifiedDublinCoreDatastream'
-      has_subresource "bar", class_name: 'MyDatastream'
-      Deprecation.silence(ActiveFedora::Attributes) do
-        has_attributes :title, datastream: 'foo' # Om backed property
-        has_attributes :publisher, datastream: 'bar' # RDF backed property
-      end
+      property :title, predicate: ::RDF::Vocab::DC.title, multiple: false
+      property :publisher, predicate: ::RDF::Vocab::DC.publisher, multiple: false
     end
   end
 
@@ -24,7 +17,6 @@ describe ActiveFedora::Base do
   after do
     Object.send(:remove_const, :Book)
     Object.send(:remove_const, :Library)
-    Object.send(:remove_const, :MyDatastream)
   end
 
   it "asserts a content model" do
@@ -60,14 +52,7 @@ describe ActiveFedora::Base do
       end
     end
 
-    it "makes the om properties immutable" do
-      expect {
-        subject.title = "HEY"
-      }.to raise_error RuntimeError, "can't modify frozen ActiveFedora::QualifiedDublinCoreDatastream"
-      expect(subject.title).to eq "War and Peace"
-    end
-
-    it "makes the RDF properties immutable" do
+    it "makes the properties immutable" do
       expect {
         subject.publisher = "HEY"
       }.to raise_error TypeError

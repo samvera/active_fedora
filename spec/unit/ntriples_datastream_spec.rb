@@ -143,28 +143,7 @@ EOF
 
   describe "solr integration" do
     before(:all) do
-      Deprecation.silence(ActiveFedora::RDFDatastream) do
-        class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-          property :created, predicate: ::RDF::Vocab::DC.created do |index|
-            index.as :sortable, :displayable
-            index.type :date
-          end
-          property :title, predicate: ::RDF::Vocab::DC.title do |index|
-            index.as :stored_searchable, :sortable
-            index.type :text
-          end
-          property :publisher, predicate: ::RDF::Vocab::DC.publisher do |index|
-            index.as :facetable, :sortable, :stored_searchable
-          end
-          property :based_near, predicate: ::RDF::FOAF.based_near do |index|
-            index.as :facetable, :stored_searchable
-            index.type :text
-          end
-          property :related_url, predicate: ::RDF::RDFS.seeAlso do |index|
-            index.as :stored_searchable
-          end
-          property :rights, predicate: ::RDF::Vocab::DC.rights
-        end
+      class MyDatastream < ActiveFedora::NtriplesRDFDatastream
       end
     end
 
@@ -183,60 +162,9 @@ EOF
       expect(@subject.to_solr).to be_kind_of(Hash)
     end
 
-    it "has a solr_name method" do
-      expect(MyDatastream.new.primary_solr_name(:based_near, 'descMetadata')).to eq 'desc_metadata__based_near_tesim'
-      expect(MyDatastream.new.primary_solr_name(:title, 'props')).to eq 'props__title_tesim'
-    end
-
-    it "optionallies allow you to provide the Solr::Document to add fields to and return that document when done" do
+    it "optionally allows you to provide the Solr::Document to add fields to and return that document when done" do
       doc = {}
       expect(@subject.to_solr(doc)).to eq doc
-    end
-
-    describe "with an actual object" do
-      before(:each) do
-        class Foo < ActiveFedora::Base
-          has_subresource "descMetadata", class_name: 'MyDatastream'
-          Deprecation.silence(ActiveFedora::Attributes) do
-            has_attributes :created, :title, :publisher, :based_near, :related_url, :rights, datastream: :descMetadata, multiple: true
-          end
-        end
-        @obj = MyDatastream.new
-        @obj.created = Date.parse("2012-03-04")
-        @obj.title = "Of Mice and Men, The Sequel"
-        @obj.publisher = "Bob's Blogtastic Publishing"
-        @obj.based_near = ["Tacoma, WA", "Renton, WA"]
-        @obj.related_url = "http://example.org/blogtastic/"
-        @obj.rights = "Totally open, y'all"
-      end
-      after do
-        Object.send(:remove_const, :Foo)
-      end
-
-      describe ".to_solr()" do
-        subject { @obj.to_solr({}, name: 'solrRdf') }
-        it "returns the right fields" do
-          expect(subject.keys).to include(ActiveFedora.index_field_mapper.solr_name("solr_rdf__related_url", type: :string),
-                                          ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", type: :string),
-                                          ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :sortable),
-                                          ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :facetable),
-                                          ActiveFedora.index_field_mapper.solr_name("solr_rdf__created", :sortable, type: :date),
-                                          ActiveFedora.index_field_mapper.solr_name("solr_rdf__created", :displayable),
-                                          ActiveFedora.index_field_mapper.solr_name("solr_rdf__title", type: :string),
-                                          ActiveFedora.index_field_mapper.solr_name("solr_rdf__title", :sortable),
-                                          ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", type: :string),
-                                          ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", :facetable))
-        end
-
-        it "returns the right values" do
-          expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__related_url", type: :string)]).to eq ["http://example.org/blogtastic/"]
-          expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", type: :string)]).to eq ["Tacoma, WA", "Renton, WA"]
-          expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", :facetable)]).to eq ["Tacoma, WA", "Renton, WA"]
-          expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", type: :string)]).to eq ["Bob's Blogtastic Publishing"]
-          expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :sortable)]).to eq "Bob's Blogtastic Publishing"
-          expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :facetable)]).to eq ["Bob's Blogtastic Publishing"]
-        end
-      end
     end
   end
 end

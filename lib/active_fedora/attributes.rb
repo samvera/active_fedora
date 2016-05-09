@@ -1,10 +1,7 @@
 require 'active_model/forbidden_attributes_protection'
-require 'deprecation'
 module ActiveFedora
   module Attributes
     extend ActiveSupport::Concern
-    extend Deprecation
-    self.deprecation_horizon = 'ActiveFedora 10.0'
     include ActiveModel::Dirty
     include ActiveModel::ForbiddenAttributesProtection
 
@@ -35,8 +32,7 @@ module ActiveFedora
         # Use the generated method so that single value assetions are single
         send(key)
       else
-        # The attribute is a delegate to a datastream
-        array_reader(key)
+        raise ArgumentError, "Unknown attribute #{key}"
       end
     end
 
@@ -49,19 +45,8 @@ module ActiveFedora
         # The attribute is stored in the RDF graph for this object
         send(key.to_s + "=", value)
       else
-        # The attribute is a delegate to a datastream
-        array_setter(key, value)
+        raise ArgumentError, "Unknown attribute #{key}"
       end
-    end
-
-    # @return [Boolean] true if there is an reader method and it returns a
-    # value different from the new_value.
-    def value_has_changed?(field, new_value)
-      new_value != array_reader(field)
-    end
-
-    def mark_as_changed(field)
-      send("#{field}_will_change!")
     end
 
     def local_attributes
@@ -75,27 +60,6 @@ module ActiveFedora
       # causes a load of all the datastreams.
       def attribute_method?(attr_name) #:nodoc:
         respond_to_without_attributes?(:attributes) && self.class.delegated_attributes.include?(attr_name)
-      end
-
-    private
-
-      def array_reader(field, *args)
-        raise UnknownAttributeError.new(self, field) unless self.class.delegated_attributes.key?(field)
-
-        val = self.class.delegated_attributes[field].reader(self, *args)
-        self.class.multiple?(field) ? val : val.first
-      end
-
-      def array_setter(field, args)
-        raise UnknownAttributeError.new(self, field) unless self.class.delegated_attributes.key?(field)
-        if self.class.multiple?(field)
-          if args.present? && !args.respond_to?(:each)
-            raise ArgumentError, "You attempted to set the attribute `#{field}' on `#{self.class}' to a scalar value. However, this attribute is declared as being multivalued."
-          end
-        elsif args.respond_to?(:each) # singular
-          raise ArgumentError, "You attempted to set the attribute `#{field}' on `#{self.class}' to an enumerable value. However, this attribute is declared as being singular."
-        end
-        self.class.delegated_attributes[field].writer(self, args)
       end
 
       module ClassMethods
@@ -123,11 +87,6 @@ module ActiveFedora
           outgoing_reflections.values.map { |reflection| reflection.foreign_key.to_s }
         end
 
-        def defined_attributes
-          Deprecation.warn Attributes, "defined_attributes has been renamed to delegated_attributes. defined_attributes will be removed in ActiveFedora 9"
-          delegated_attributes
-        end
-
         def delegated_attributes
           @delegated_attributes ||= {}.with_indifferent_access
           return @delegated_attributes unless superclass.respond_to?(:delegated_attributes) && value = superclass.delegated_attributes
@@ -137,15 +96,6 @@ module ActiveFedora
 
         def delegated_attributes=(val)
           @delegated_attributes = val
-        end
-
-        def has_attributes(*fields, &block)
-          options = fields.pop
-          delegate_target = options.delete(:datastream)
-          raise ArgumentError, "You must provide a datastream to has_attributes" if delegate_target.blank?
-
-          Deprecation.warn Attributes, "has_attributes is deprecated and will be removed in ActiveFedora 10.0. Consider using the Form pattern to save all related models or directly delegate the properties and save the target separately"
-          define_delegated_accessor(fields, delegate_target, options, &block)
         end
 
         # Reveal if the attribute has been declared unique
@@ -164,14 +114,8 @@ module ActiveFedora
         end
 
         def property(name, properties = {}, &block)
-          if properties.key?(:predicate)
-            define_active_triple_accessor(name, properties, &block)
-          elsif properties.key?(:delegate_to)
-            Deprecation.warn Attributes, "delegated properties are deprecated and will be removed in ActiveFedora 10.0. Consider using the Form pattern to save all related models or directly delegate the properties and save the target separately"
-            define_delegated_accessor([name], properties.delete(:delegate_to), properties.reverse_merge(multiple: true), &block)
-          else
-            raise "You must provide `:delegate_to' or `:predicate' options to property"
-          end
+          raise ArgumentError, "You must provide a `:predicate' option to property" unless properties.key?(:predicate)
+          define_active_triple_accessor(name, properties, &block)
         end
 
         private
@@ -185,19 +129,6 @@ module ActiveFedora
             ActiveTriples::Reflection.add_reflection self, name, reflection
 
             add_attribute_indexing_config(name, &block) if block_given?
-          end
-
-          def define_delegated_accessor(fields, delegate_target, options, &block)
-            define_attribute_methods fields
-            fields.each do |f|
-              klass = datastream_class_for_name(delegate_target)
-              attribute_properties = options.merge(delegate_target: delegate_target, klass: klass)
-              find_or_create_defined_attribute f, attribute_class(klass), attribute_properties
-
-              create_attribute_reader(f, delegate_target, options)
-              create_attribute_setter(f, delegate_target, options)
-              add_attribute_indexing_config(f, &block) if block_given?
-            end
           end
 
           def add_attribute_indexing_config(name, &block)
@@ -222,33 +153,6 @@ module ActiveFedora
           # @return [DelegatedAttribute] the found or created attribute
           def find_or_create_defined_attribute(field, klass, args)
             delegated_attributes[field] ||= klass.new(field, args)
-          end
-
-          # @param [String] dsid the datastream id
-          # @return [Class] the class of the datastream
-          def datastream_class_for_name(dsid)
-            reflection = _reflect_on_association(dsid.to_sym)
-            reflection ? reflection.klass : ActiveFedora::File
-          end
-
-          def create_attribute_reader(field, _dsid, _args)
-            define_method field do |*opts|
-              array_reader(field, *opts)
-            end
-          end
-
-          def create_attribute_setter(field, _dsid, _args)
-            define_method "#{field}=".to_sym do |v|
-              self[field] = v
-            end
-          end
-
-          def attribute_class(klass)
-            if klass < ActiveFedora::RDFDatastream
-              RdfDatastreamAttribute
-            else
-              OmAttribute
-            end
           end
       end
   end

@@ -39,7 +39,7 @@ describe ActiveFedora::Base do
     end
 
     after :all do
-      SpecModel.send(:remove_const, :CamelCased)
+      Object.send(:remove_const, :SpecModel)
     end
     subject { SpecModel::CamelCased.to_class_uri }
 

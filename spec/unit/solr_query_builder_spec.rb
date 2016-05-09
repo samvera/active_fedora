@@ -1,14 +1,6 @@
 require 'spec_helper'
 
 describe ActiveFedora::SolrQueryBuilder do
-  describe "raw_query" do
-    it "generates a raw query clause" do
-      Deprecation.silence(described_class) do
-        expect(described_class.raw_query('id', "my:_ID1_")).to eq '_query_:"{!raw f=id}my:_ID1_"'
-      end
-    end
-  end
-
   describe "construct_query" do
     it "generates a query clause" do
       expect(described_class.construct_query('id' => "my:_ID1_")).to eq '_query_:"{!field f=id}my:_ID1_"'

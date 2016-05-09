@@ -5,32 +5,19 @@ describe "Objects should be serialized to JSON" do
     expect(ActiveFedora::Base.new.to_json).to eq "{\"id\":null}"
   end
 
-  context "with properties and datastream attributes" do
+  context "with properties" do
     before do
-      class MyDS < ActiveFedora::OmDatastream
-        set_terminology do |t|
-          t.root(path: "durh")
-          t.foo
-          t.bar
-        end
-      end
-
       class Foo < ActiveFedora::Base
-        has_subresource 'descMetadata', class_name: 'MyDS'
-        Deprecation.silence(ActiveFedora::Attributes) do
-          has_attributes :foo, datastream: 'descMetadata', multiple: true
-          has_attributes :bar, datastream: 'descMetadata', multiple: false
-        end
         property :title, predicate: ::RDF::Vocab::DC.title
+        property :description, predicate: ::RDF::Vocab::DC.description, multiple: false
       end
     end
 
     after do
       Object.send(:remove_const, :Foo)
-      Object.send(:remove_const, :MyDS)
     end
 
-    let(:obj) { Foo.new(foo: ["baz"], bar: 'quix', title: ['My Title']) }
+    let(:obj) { Foo.new(title: ['My Title'], description: 'Wonderful stuff') }
 
     before { allow(obj).to receive(:id).and_return('test-123') }
 
@@ -38,48 +25,8 @@ describe "Objects should be serialized to JSON" do
 
     it "has to_json" do
       expect(subject['id']).to eq "test-123"
-      expect(subject['foo']).to eq ["baz"]
-      expect(subject['bar']).to eq "quix"
       expect(subject['title']).to eq ["My Title"]
+      expect(subject['description']).to eq "Wonderful stuff"
     end
-  end
-
-  context "with nested nodes" do
-    before do
-      class DummySubnode < ActiveTriples::Resource
-        property :relation, predicate: ::RDF::Vocab::DC[:relation]
-      end
-
-      class DummyResource < ActiveFedora::RDFDatastream
-        Deprecation.silence(ActiveFedora::RDFDatastream) do
-          property :license, predicate: ::RDF::Vocab::DC[:license], class_name: DummySubnode do |index|
-            index.as :searchable, :displayable
-          end
-        end
-        def serialization_format
-          :ntriples
-        end
-      end
-
-      class DummyAsset < ActiveFedora::Base
-        has_subresource 'descMetadata', class_name: 'DummyResource'
-        Deprecation.silence(ActiveFedora::Attributes) do
-          has_attributes :relation, datastream: 'descMetadata', at: [:license, :relation], multiple: false
-        end
-      end
-    end
-
-    after do
-      Object.send(:remove_const, "DummyAsset")
-      Object.send(:remove_const, "DummyResource")
-      Object.send(:remove_const, "DummySubnode")
-    end
-
-    let(:obj) { DummyAsset.new { |a| a.relation = 'Great Grandchild' } }
-    before { allow(obj).to receive(:id).and_return('test-123') }
-
-    subject { JSON.parse(obj.to_json) }
-
-    it { should eq("id" => "test-123", "relation" => "Great Grandchild") }
   end
 end

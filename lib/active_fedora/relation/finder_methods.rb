@@ -48,15 +48,8 @@ module ActiveFedora
         options[:order] ||= sort if sort.present?
       end
 
-      if options.present?
-        options = args.first unless args.empty?
-        Deprecation.warn(ActiveFedora::Base, "Calling .find with a hash has been deprecated and will not be allowed in active-fedora 10.0. Use .where instead")
-        options = { conditions: options }
-        apply_finder_options(options)
-      else
-        raise ArgumentError, "#{self}.find() expects an id. You provided `#{args.inspect}'" unless args.is_a? Array
-        find_with_ids(args, cast)
-      end
+      raise ArgumentError, "#{self}.find() expects an id. You provided `#{args.inspect}'" unless args.is_a? Array
+      find_with_ids(args, cast)
     end
 
     # Gives a record (or N records if a parameter is supplied) without any implied
@@ -125,12 +118,6 @@ module ActiveFedora
       result.first
     end
 
-    # @deprecated
-    def find_with_conditions(*args)
-      Deprecation.warn(ActiveFedora::Base, '.find_with_conditions is deprecated and will be removed in active-fedora 10.0; use .search_with_conditions instead')
-      search_with_conditions(*args)
-    end
-
     # Yields the found ActiveFedora::Base object to the passed block
     #
     # @param [Hash] conditions the conditions for the solr search to match
@@ -180,12 +167,6 @@ module ActiveFedora
         yield docs
         break unless docs.has_next?
       end
-    end
-
-    # @deprecated
-    def find_in_batches(*args, &block)
-      Deprecation.warn(ActiveFedora::Base, '.find_in_batches is deprecated and will be removed in active-fedora 10.0; use .search_in_batches instead')
-      search_in_batches(*args, &block)
     end
 
     # Retrieve the Fedora object with the given id, explore the returned object

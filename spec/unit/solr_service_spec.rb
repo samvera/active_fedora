@@ -14,12 +14,6 @@ describe ActiveFedora::SolrService do
       expect(RSolr).to receive(:connect).with(read_timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr')
       described_class.register.conn
     end
-    it "accepts host arg into constructor" do
-      expect(RSolr).to receive(:connect).with(read_timeout: 120, open_timeout: 120, url: 'http://fubar')
-      Deprecation.silence(described_class) do
-        described_class.register('http://fubar').conn
-      end
-    end
     it "clobbers options" do
       expect(RSolr).to receive(:connect).with(read_timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr', autocommit: :off, foo: :bar)
       described_class.register(autocommit: :off, foo: :bar).conn
@@ -45,13 +39,6 @@ describe ActiveFedora::SolrService do
       allow(ActiveFedora).to receive(:solr_config).and_return(url: 'http://fubar', update_path: 'update_test')
       expect(described_class).to receive(:register).with(hash_including(url: 'http://fubar', update_path: 'update_test')).and_call_original
       described_class.instance
-    end
-  end
-
-  describe '#construct_query_for_pids' do
-    it "generates a useable solr query from an array of Fedora ids" do
-      expect(Deprecation).to receive(:warn)
-      expect(described_class.construct_query_for_pids(["my:_ID1_", "my:_ID2_", "my:_ID3_"])).to eq '{!terms f=id}my:_ID1_,my:_ID2_,my:_ID3_'
     end
   end
 

@@ -35,82 +35,6 @@ describe ActiveFedora::AttachedFiles do
     end
   end
 
-  describe '.has_metadata' do
-    before do
-      class Z < ActiveFedora::File
-      end
-      class FooHistory < ActiveFedora::Base
-        extend Deprecation
-        Deprecation.silence(FooHistory) do
-          has_metadata name: 'dsid', type: ActiveFedora::QualifiedDublinCoreDatastream
-          has_metadata 'complex_ds', autocreate: true, type: 'Z'
-        end
-      end
-    end
-    after do
-      Object.send(:remove_const, :FooHistory)
-      Object.send(:remove_const, :Z)
-    end
-
-    it "has a child_resource_reflection" do
-      expect(FooHistory.child_resource_reflections).to have_key(:dsid)
-    end
-
-    it "has reasonable defaults" do
-      expect(FooHistory.child_resource_reflections[:dsid].options).to include(class_name: 'ActiveFedora::QualifiedDublinCoreDatastream')
-    end
-
-    it "lets you override defaults" do
-      expect(FooHistory.child_resource_reflections[:complex_ds].options).to include(autocreate: true)
-      expect(FooHistory.child_resource_reflections[:complex_ds].class_name).to eq 'Z'
-    end
-
-    it "raises an error if you don't give a type" do
-      expect {
-        Deprecation.silence(FooHistory) do
-          FooHistory.has_metadata "bob"
-        end
-      }.to raise_error ArgumentError,
-                       "You must provide a :type property for the datastream 'bob'"
-    end
-
-    it "raises an error if you don't give a dsid" do
-      expect {
-        Deprecation.silence(FooHistory) do
-          FooHistory.has_metadata type: ActiveFedora::QualifiedDublinCoreDatastream
-        end
-      }.to raise_error ArgumentError,
-                       "You must provide a path name (f.k.a. dsid) for the resource"
-    end
-
-    describe "creates accessors" do
-      subject { FooHistory.new }
-      it "exists on the instance" do
-        expect(subject.dsid).to eq subject.attached_files['dsid']
-      end
-    end
-  end
-
-  describe '.has_file_datastream' do
-    before do
-      class FooHistory < ActiveFedora::Base
-        extend Deprecation
-        Deprecation.silence(FooHistory) do
-          has_file_datastream name: 'dsid'
-          has_file_datastream 'another'
-        end
-      end
-    end
-    after do
-      Object.send(:remove_const, :FooHistory)
-    end
-
-    it "has reasonable defaults" do
-      expect(FooHistory.child_resource_reflections[:dsid].klass).to eq ActiveFedora::File
-      expect(FooHistory.child_resource_reflections[:another].klass).to eq ActiveFedora::File
-    end
-  end
-
   describe "#add_file" do
     before do
       class Bar < ActiveFedora::File; end
@@ -126,45 +50,9 @@ describe ActiveFedora::AttachedFiles do
     end
     let(:container) { FooHistory.new }
 
-    describe "#add_file_datastream" do
-      context "a reflection matches the :dsid property" do
-        it "builds the reflection" do
-          expect(Deprecation).to receive(:warn)
-          container.add_file_datastream('blah', path: 'content')
-          expect(container.content).to be_instance_of Bar
-          expect(container.content.content).to eq 'blah'
-        end
-      end
-    end
-    context "with the deprecated :dsid property" do
-      it "builds the reflection" do
-        expect(Deprecation).to receive(:warn)
-        container.add_file('blah', dsid: 'content')
-        expect(container.content).to be_instance_of Bar
-        expect(container.content.content).to eq 'blah'
-      end
-    end
     context "a reflection matches the :path property" do
       it "builds the reflection" do
         container.add_file('blah', path: 'content')
-        expect(container.content).to be_instance_of Bar
-        expect(container.content.content).to eq 'blah'
-      end
-    end
-
-    context "the deprecated 3 args erasure" do
-      it "builds the reflection" do
-        expect(Deprecation).to receive(:warn)
-        container.add_file('blah', 'content', 'name.png')
-        expect(container.content).to be_instance_of Bar
-        expect(container.content.content).to eq 'blah'
-      end
-    end
-
-    context "the deprecated 4 args erasure" do
-      it "builds the reflection" do
-        expect(Deprecation).to receive(:warn)
-        container.add_file('blah', 'content', 'name.png', 'image/png')
         expect(container.content).to be_instance_of Bar
         expect(container.content.content).to eq 'blah'
       end

@@ -3,26 +3,11 @@ require 'spec_helper'
 describe ActiveFedora::RDF::IndexingService do
   before do
     class MyDatastream < ActiveFedora::NtriplesRDFDatastream
-      Deprecation.silence(ActiveFedora::RDFDatastream) do
-        property :created, predicate: ::RDF::Vocab::DC.created do |index|
-          index.as :sortable, :displayable
-          index.type :date
-        end
-        property :title, predicate: ::RDF::Vocab::DC.title do |index|
-          index.as :stored_searchable, :sortable
-          index.type :text
-        end
-        property :publisher, predicate: ::RDF::Vocab::DC.publisher do |index|
-          index.as :facetable, :sortable, :stored_searchable
-        end
-        property :based_near, predicate: ::RDF::FOAF.based_near do |index|
-          index.as :facetable, :stored_searchable
-          index.type :text
-        end
-        property :related_url, predicate: ::RDF::RDFS.seeAlso do |index|
-          index.as :stored_searchable
-        end
-      end
+      property :created, predicate: ::RDF::Vocab::DC.created
+      property :title, predicate: ::RDF::Vocab::DC.title
+      property :publisher, predicate: ::RDF::Vocab::DC.publisher
+      property :based_near, predicate: ::RDF::FOAF.based_near
+      property :related_url, predicate: ::RDF::RDFS.seeAlso
       property :rights, predicate: ::RDF::Vocab::DC.rights
     end
   end
@@ -40,6 +25,33 @@ describe ActiveFedora::RDF::IndexingService do
       obj.related_url = "http://example.org/blogtastic/"
       obj.rights = "Totally open, y'all"
     end
+  end
+
+  let(:index_config) do
+    {}.tap do |index_config|
+      index_config[:created] = ActiveFedora::Indexing::Map::IndexObject.new(:created) do |index|
+        index.as :sortable, :displayable
+        index.type :date
+      end
+      index_config[:title] = ActiveFedora::Indexing::Map::IndexObject.new(:title) do |index|
+        index.as :stored_searchable, :sortable
+        index.type :text
+      end
+      index_config[:publisher] = ActiveFedora::Indexing::Map::IndexObject.new(:publisher) do |index|
+        index.as :facetable, :sortable, :stored_searchable
+      end
+      index_config[:based_near] = ActiveFedora::Indexing::Map::IndexObject.new(:based_near) do |index|
+        index.as :facetable, :stored_searchable
+        index.type :text
+      end
+      index_config[:related_url] = ActiveFedora::Indexing::Map::IndexObject.new(:related_url) do |index|
+        index.as :stored_searchable
+      end
+    end
+  end
+
+  before do
+    allow(MyDatastream).to receive(:index_config).and_return(index_config)
   end
 
   let(:indexer) { described_class.new(f2) }
