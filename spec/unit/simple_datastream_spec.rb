@@ -4,6 +4,8 @@ describe ActiveFedora::SimpleDatastream do
   let(:sample_xml) { "<fields><coverage>coverage1</coverage><coverage>coverage2</coverage><creation_date>2012-01-15</creation_date><mydate>fake-date</mydate><publisher>publisher1</publisher></fields>" }
 
   before do
+    @original_behavior = Deprecation.default_deprecation_behavior
+    Deprecation.default_deprecation_behavior = :silence
     @test_ds = described_class.new
     allow(@test_ds).to receive(:retrieve_content).and_return('') # DS grabs the old content to compare against the new
     @test_ds.content = sample_xml
@@ -90,6 +92,7 @@ describe ActiveFedora::SimpleDatastream do
 
     after do
       Object.send(:remove_const, :FooHistory)
+      Deprecation.default_deprecation_behavior = @original_behavior
     end
 
     subject { FooHistory.find(foo.id) }

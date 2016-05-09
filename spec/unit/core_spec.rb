@@ -8,14 +8,9 @@ describe ActiveFedora::Base do
     class Library < ActiveFedora::Base
     end
     class Book < ActiveFedora::Base
-      extend Deprecation
       belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
-      Deprecation.silence(Book) do
-        has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
-          m.field "title", :string
-        end
-        has_metadata "bar", type: MyDatastream
-      end
+      has_subresource "foo", class_name: 'ActiveFedora::QualifiedDublinCoreDatastream'
+      has_subresource "bar", class_name: 'MyDatastream'
       Deprecation.silence(ActiveFedora::Attributes) do
         has_attributes :title, datastream: 'foo' # Om backed property
         has_attributes :publisher, datastream: 'bar' # RDF backed property
@@ -68,7 +63,7 @@ describe ActiveFedora::Base do
     it "makes the om properties immutable" do
       expect {
         subject.title = "HEY"
-      }.to raise_error RuntimeError, "can't modify frozen ActiveFedora::SimpleDatastream"
+      }.to raise_error RuntimeError, "can't modify frozen ActiveFedora::QualifiedDublinCoreDatastream"
       expect(subject.title).to eq "War and Peace"
     end
 

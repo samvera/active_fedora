@@ -186,7 +186,7 @@ describe ActiveFedora::AttachedFiles do
     end
 
     describe ".metadata_streams" do
-      let(:mds1) { ActiveFedora::SimpleDatastream.new }
+      let(:mds1) { ActiveFedora::QualifiedDublinCoreDatastream.new }
       let(:mds2) { ActiveFedora::QualifiedDublinCoreDatastream.new }
       let(:fds) { ActiveFedora::File.new }
       before do

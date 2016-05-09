@@ -43,7 +43,7 @@ describe ActiveFedora do
       end
 
       it "prevents Base.save from calling update_index if false" do
-        dirty_ds = ActiveFedora::SimpleDatastream.new
+        dirty_ds = ActiveFedora::QualifiedDublinCoreDatastream.new
         @test_object.attached_files['ds1'] = dirty_ds
         allow(@test_object).to receive(:datastreams).and_return(ds1: dirty_ds)
         expect(@test_object).to receive(:update_index).never

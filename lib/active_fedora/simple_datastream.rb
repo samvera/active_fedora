@@ -1,6 +1,7 @@
 module ActiveFedora
   # This class represents a simple xml datastream.
   class SimpleDatastream < OmDatastream
+    extend Deprecation
     class_attribute :class_fields
     attr_accessor :fields
     self.class_fields = []
@@ -18,6 +19,7 @@ module ActiveFedora
     # Constructor. this class will call self.field for each DCTERM. In short, all DCTERMS fields will already exist
     # when this method returns. Each term is marked as a multivalue string.
     def initialize(digital_object = nil, dsid = nil, options = {}, &block)
+      Deprecation.warn(SimpleDatastream, "ActiveFedora::SimpleDatastream is deprecated and will be removed in ActiveFedora 10.0")
       self.fields = {}
       super
     end

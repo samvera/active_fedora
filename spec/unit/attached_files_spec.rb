@@ -7,7 +7,7 @@ describe ActiveFedora::AttachedFiles do
       class Z < ActiveFedora::File
       end
       class FooHistory < ActiveFedora::Base
-        has_subresource 'dsid', class_name: 'ActiveFedora::SimpleDatastream'
+        has_subresource 'dsid', class_name: 'ActiveFedora::QualifiedDublinCoreDatastream'
         has_subresource 'complex_ds', autocreate: true, class_name: 'Z'
         has_subresource 'thumbnail'
         has_subresource 'child_resource', class_name: 'ActiveFedora::Base'
@@ -30,8 +30,8 @@ describe ActiveFedora::AttachedFiles do
     end
 
     it "raises an error if you don't give a dsid" do
-      expect { FooHistory.has_subresource nil, type: ActiveFedora::SimpleDatastream }.to raise_error ArgumentError,
-                                                                                                     "You must provide a path name (f.k.a. dsid) for the resource"
+      expect { FooHistory.has_subresource nil, type: ActiveFedora::QualifiedDublinCoreDatastream }.to raise_error ArgumentError,
+                                                                                                                  "You must provide a path name (f.k.a. dsid) for the resource"
     end
   end
 
@@ -42,7 +42,7 @@ describe ActiveFedora::AttachedFiles do
       class FooHistory < ActiveFedora::Base
         extend Deprecation
         Deprecation.silence(FooHistory) do
-          has_metadata name: 'dsid', type: ActiveFedora::SimpleDatastream
+          has_metadata name: 'dsid', type: ActiveFedora::QualifiedDublinCoreDatastream
           has_metadata 'complex_ds', autocreate: true, type: 'Z'
         end
       end
@@ -57,7 +57,7 @@ describe ActiveFedora::AttachedFiles do
     end
 
     it "has reasonable defaults" do
-      expect(FooHistory.child_resource_reflections[:dsid].options).to include(class_name: 'ActiveFedora::SimpleDatastream')
+      expect(FooHistory.child_resource_reflections[:dsid].options).to include(class_name: 'ActiveFedora::QualifiedDublinCoreDatastream')
     end
 
     it "lets you override defaults" do
@@ -77,7 +77,7 @@ describe ActiveFedora::AttachedFiles do
     it "raises an error if you don't give a dsid" do
       expect {
         Deprecation.silence(FooHistory) do
-          FooHistory.has_metadata type: ActiveFedora::SimpleDatastream
+          FooHistory.has_metadata type: ActiveFedora::QualifiedDublinCoreDatastream
         end
       }.to raise_error ArgumentError,
                        "You must provide a path name (f.k.a. dsid) for the resource"

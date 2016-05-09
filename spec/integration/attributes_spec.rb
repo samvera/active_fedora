@@ -10,13 +10,7 @@ describe "delegating attributes" do
       end
     end
     class TitledObject < ActiveFedora::Base
-      extend Deprecation
-
-      Deprecation.silence(TitledObject) do
-        has_metadata 'foo', type: ActiveFedora::SimpleDatastream do |m|
-          m.field "title", :string
-        end
-      end
+      has_subresource 'foo', class_name: 'ActiveFedora::QualifiedDublinCoreDatastream'
       Deprecation.silence(ActiveFedora::Attributes) do
         has_attributes :title, datastream: 'foo', multiple: false
       end
