@@ -7,14 +7,16 @@ describe "Objects should be serialized to JSON" do
 
   context "with properties and datastream attributes" do
     before do
-      class Foo < ActiveFedora::Base
-        extend Deprecation
-        Deprecation.silence(Foo) do
-          has_metadata 'descMetadata', type: ActiveFedora::SimpleDatastream do |m|
-            m.field "foo", :text
-            m.field "bar", :text
-          end
+      class MyDS < ActiveFedora::OmDatastream
+        set_terminology do |t|
+          t.root(path: "durh")
+          t.foo
+          t.bar
         end
+      end
+
+      class Foo < ActiveFedora::Base
+        has_subresource 'descMetadata', class_name: 'MyDS'
         Deprecation.silence(ActiveFedora::Attributes) do
           has_attributes :foo, datastream: 'descMetadata', multiple: true
           has_attributes :bar, datastream: 'descMetadata', multiple: false
@@ -25,6 +27,7 @@ describe "Objects should be serialized to JSON" do
 
     after do
       Object.send(:remove_const, :Foo)
+      Object.send(:remove_const, :MyDS)
     end
 
     let(:obj) { Foo.new(foo: ["baz"], bar: 'quix', title: ['My Title']) }

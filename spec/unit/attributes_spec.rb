@@ -114,23 +114,18 @@ describe ActiveFedora::Base do
 
     describe "first level delegation" do
       before do
-        class BarHistory2 < ActiveFedora::Base
-          extend Deprecation
-          Deprecation.silence(self) do
-            has_metadata type: ActiveFedora::SimpleDatastream, name: "someData" do |m|
-              m.field "fubar", :string
-              m.field "bandana", :string
-              m.field "swank", :text
-              m.field "animal_id", :string
-            end
-            has_metadata type: ActiveFedora::SimpleDatastream, name: "withText" do |m|
-              m.field "fubar", :text
-            end
-            has_metadata type: ActiveFedora::SimpleDatastream, name: "withText2" do |m|
-              m.field "fubar", :text
-            end
+        class MyDS1 < ActiveFedora::NtriplesRDFDatastream
+          property :animal_id, predicate: ::RDF::Vocab::DC.publisher
+        end
+        class MyDS2 < ActiveFedora::OmDatastream
+          set_terminology do |t|
+            t.root(path: "durh")
+            t.fubar
           end
-
+        end
+        class BarHistory2 < ActiveFedora::Base
+          has_subresource 'someData', class_name: 'MyDS1'
+          has_subresource "withText", class_name: 'MyDS2'
           has_subresource 'xmlish', class_name: 'BarStream2'
           Deprecation.silence(ActiveFedora::Attributes) do
             has_attributes :cow, datastream: 'xmlish'                      # for testing the default value of multiple
@@ -345,7 +340,7 @@ describe ActiveFedora::Base do
 
       describe ".datastream_class_for_name" do
         it "returns the specifed class" do
-          expect(BarHistory2.send(:datastream_class_for_name, 'someData')).to eq ActiveFedora::SimpleDatastream
+          expect(BarHistory2.send(:datastream_class_for_name, 'someData')).to eq MyDS1
         end
       end
     end

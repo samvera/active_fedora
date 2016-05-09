@@ -2,14 +2,17 @@ require 'spec_helper'
 
 describe ActiveFedora::SolrInstanceLoader do
   before do
+    class MyDS < ActiveFedora::OmDatastream
+      set_terminology do |t|
+        t.root(path: "durh")
+        t.foo
+        t.bar
+      end
+    end
+
     class Foo < ActiveFedora::Base
       extend Deprecation
-      Deprecation.silence(Foo) do
-        has_metadata 'descMetadata', type: ActiveFedora::SimpleDatastream do |m|
-          m.field "foo", :text
-          m.field "bar", :text
-        end
-      end
+      has_subresource 'descMetadata', class_name: 'MyDS'
       Deprecation.silence(ActiveFedora::Attributes) do
         has_attributes :foo, datastream: 'descMetadata', multiple: true
         has_attributes :bar, datastream: 'descMetadata', multiple: false
@@ -41,6 +44,7 @@ describe ActiveFedora::SolrInstanceLoader do
   after do
     Object.send(:remove_const, :Foo)
     Object.send(:remove_const, :Bar)
+    Object.send(:remove_const, :MyDS)
   end
 
   context "without a solr doc" do
