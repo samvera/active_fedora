@@ -1,6 +1,10 @@
 module ActiveFedora::File::Attributes
   attr_writer :mime_type
 
+  def assign_attributes(_)
+    # nop
+  end
+
   def mime_type
     @mime_type ||= fetch_mime_type
   end

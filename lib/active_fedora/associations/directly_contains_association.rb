@@ -3,11 +3,7 @@ module ActiveFedora
     class DirectlyContainsAssociation < ContainsAssociation #:nodoc:
       def insert_record(record, force = true, validate = true)
         container.save!
-        if force
-          record.save!
-        else
-          record.save(validate: validate)
-        end
+        super
       end
 
       def find_target
@@ -38,16 +34,6 @@ module ActiveFedora
         def initialize_attributes(record) #:nodoc:
           record.uri = ActiveFedora::Base.id_to_uri(container.mint_id)
           set_inverse_instance(record)
-        end
-
-      private
-
-        def delete_records(records, method)
-          if method == :destroy
-            records.each(&:destroy)
-          else
-            records.each(&:delete)
-          end
         end
     end
   end

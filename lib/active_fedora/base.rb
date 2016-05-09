@@ -50,7 +50,6 @@ module ActiveFedora
     include Versionable
     include LoadableFromJson
     include Schema
-    include Pathing
     include Aggregation::BaseExtension
   end
 

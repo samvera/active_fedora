@@ -1,6 +1,7 @@
 module ActiveFedora
   module Common
     extend ActiveSupport::Concern
+    include Pathing
 
     module ClassMethods
       def initialize_generated_modules # :nodoc:
