@@ -5,6 +5,11 @@ module ActiveFedora
 
     autoload :MetadataNode
 
+    included do
+      class_attribute :metadata_class_factory
+      self.metadata_class_factory = DefaultMetadataClassFactory
+    end
+
     def metadata_node
       @metadata_node ||= self.class.metadata_schema.new(self)
     end
@@ -17,19 +22,11 @@ module ActiveFedora
 
     module ClassMethods
       def metadata(&block)
-        metadata_schema.exec_block(&block)
+        @metadata_schema = metadata_class_factory.build(self, &block)
       end
 
       def metadata_schema
-        @metadata_schema ||= MetadataNode(self)
-      end
-
-      # Make a subclass of MetadataNode named GeneratedMetadataSchema and set its
-      # parent_class attribute to have the value of the current class.
-      def MetadataNode(parent_klass)
-        klass = const_set(:GeneratedMetadataSchema, Class.new(MetadataNode))
-        klass.parent_class = parent_klass
-        klass
+        @metadata_schema ||= metadata_class_factory.build(self)
       end
     end
   end

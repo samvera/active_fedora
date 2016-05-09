@@ -68,6 +68,7 @@ module ActiveFedora #:nodoc:
       autoload :OmAttribute
       autoload :RdfDatastreamAttribute
     end
+    autoload :DefaultMetadataClassFactory
     autoload :DefaultModelMapper
     autoload :Fedora
     autoload :FedoraAttributes
