@@ -1,79 +1,32 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-  describe "A base object with metadata" do
-    before :each do
-      class MockAFBaseRelationship < ActiveFedora::Base
-        has_metadata 'foo', type: Hydra::ModsArticleDatastream
+  describe '#reload' do
+    before do
+      class Foo < ActiveFedora::Base
+        property :person, predicate: ::RDF::Vocab::DC.creator
       end
     end
-    after :each do
-      Object.send(:remove_const, :MockAFBaseRelationship)
+    after do
+      Object.send(:remove_const, :Foo)
     end
-    describe "a new document" do
+    context "when persisted" do
+      let(:object) { Foo.create(person: ['bob']) }
+      let(:object2) { Foo.find(object.id) }
       before do
-        @obj = MockAFBaseRelationship.new
-
-        @obj.foo.person = "bob"
-        @obj.save
+        object2.update(person: ['dave'])
       end
 
-      it "saves the datastream." do
-        obj = described_class.find(@obj.id)
-        expect(obj.foo).to_not be_new_record
-        expect(obj.foo.person).to eq ['bob']
-        person_field = ActiveFedora.index_field_mapper.solr_name('foo__person', type: :string)
-        solr_result = ActiveFedora::SolrService.query("{!field f=id}#{@obj.id}", fl: "id #{person_field}").first
-        expect(solr_result).to eq("id" => @obj.id, person_field => ['bob'])
+      it 're-queries Fedora' do
+        object.reload
+        expect(object.person).to eq ['dave']
       end
     end
 
-    describe "that already exists in the repo" do
-      before do
-        @release = MockAFBaseRelationship.create
-        @release.foo.person = "test foo content"
-        @release.save
-      end
-      describe "and has been changed" do
-        before do
-          @release.foo.person = 'frank'
-          @release.save!
-        end
-        it "saves the datastream." do
-          expect(MockAFBaseRelationship.find(@release.id).foo.person).to eq ['frank']
-          person_field = ActiveFedora.index_field_mapper.solr_name('foo__person', type: :string)
-          expect(ActiveFedora::SolrService.query("id:\"#{@release.id}\"", fl: "id #{person_field}").first).to eq("id" => @release.id, person_field => ['frank'])
-        end
-      end
-      describe "when trying to create it again" do
-        it "raises an error" do
-          expect { MockAFBaseRelationship.create(id: @release.id) }.to raise_error(ActiveFedora::IllegalOperation, "Attempting to recreate existing ldp_source: `#{@release.uri}'")
-          @release.reload
-          expect(@release.foo.person).to include('test foo content')
-        end
-      end
-    end
-
-    describe '#reload' do
-      before do
-        @object = MockAFBaseRelationship.new
-        @object.foo.person = 'bob'
-        @object.save
-
-        @object2 = @object.class.find(@object.id)
-
-        @object2.foo.person = 'dave'
-        @object2.save
-      end
-
-      it 'requeries Fedora' do
-        @object.reload
-        expect(@object.foo.person).to eq ['dave']
-      end
-
-      it 'raises an error if not persisted' do
-        @object = MockAFBaseRelationship.new
-        expect { @object.reload }.to raise_error(ActiveFedora::ObjectNotFoundError)
+    context "when not persisted" do
+      let(:object) { Foo.new }
+      it 'raises an error' do
+        expect { object.reload }.to raise_error(ActiveFedora::ObjectNotFoundError)
       end
     end
   end
@@ -93,12 +46,12 @@ describe ActiveFedora::Base do
 
     after { obj.destroy unless obj.destroyed? }
 
-    describe "errors" do
+    describe "#errors" do
       subject { obj.errors }
       it { should be_empty }
     end
 
-    describe "id" do
+    describe "#id" do
       subject { obj.id }
       it { should_not be_nil }
     end

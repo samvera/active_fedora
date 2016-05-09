@@ -15,19 +15,22 @@ describe ActiveFedora::Base do
       end
     end
 
-    class BarHistory < ActiveFedora::Base
-      has_metadata type: ActiveFedora::SimpleDatastream, name: "someData" do |m|
-        m.field "fubar", :string
-        m.field "swank", :text
-      end
-      has_metadata type: ActiveFedora::SimpleDatastream, name: "withText" do |m|
-        m.field "fubar", :text
-      end
-      has_metadata type: ActiveFedora::SimpleDatastream, name: "withText2" do |m|
-        m.field "fubar", :text
+    class BazStream < ActiveFedora::OmDatastream
+      set_terminology do |t|
+        t.root(path: "first", xmlns: "urn:foobar")
+        t.fubar
       end
 
-      has_metadata type: BarStream, name: "xmlish"
+      def self.xml_template
+        Nokogiri::XML::Document.parse '<first xmlns="urn:foobar">
+          <fubar></fubar>
+        </first>'
+      end
+    end
+
+    class BarHistory < ActiveFedora::Base
+      has_subresource 'xmlish', class_name: 'BarStream'
+      has_subresource 'withText', class_name: 'BazStream'
       Deprecation.silence(ActiveFedora::Attributes) do
         has_attributes :fubar, datastream: 'withText', multiple: false
         has_attributes :duck, datastream: 'xmlish', multiple: false

@@ -37,7 +37,7 @@ describe ActiveFedora::Base do
       context "with an xml property (default cardinality)" do
         before do
           class BarHistory4 < ActiveFedora::Base
-            has_metadata type: BarStream2, name: "xmlish"
+            has_subresource 'xmlish', class_name: 'BarStream2'
             Deprecation.silence(ActiveFedora::Attributes) do
               property :cow, delegate_to: 'xmlish'
             end
@@ -64,7 +64,7 @@ describe ActiveFedora::Base do
       context "with multiple set to false" do
         before do
           class BarHistory4 < ActiveFedora::Base
-            has_metadata type: BarStream2, name: "xmlish"
+            has_subresource 'xmlish', class_name: 'BarStream2'
             Deprecation.silence(ActiveFedora::Attributes) do
               property :cow, delegate_to: 'xmlish', multiple: false
             end
@@ -86,7 +86,7 @@ describe ActiveFedora::Base do
       context "when updating and saving a property" do
         before do
           class BarHistory4 < ActiveFedora::Base
-            has_metadata type: BarStream2, name: "xmlish"
+            has_subresource 'xmlish', class_name: 'BarStream2'
             Deprecation.silence(ActiveFedora::Attributes) do
               property :cow, delegate_to: 'xmlish', multiple: false
             end
@@ -113,22 +113,25 @@ describe ActiveFedora::Base do
     end
 
     describe "first level delegation" do
-      before :all do
+      before do
         class BarHistory2 < ActiveFedora::Base
-          has_metadata type: ActiveFedora::SimpleDatastream, name: "someData" do |m|
-            m.field "fubar", :string
-            m.field "bandana", :string
-            m.field "swank", :text
-            m.field "animal_id", :string
-          end
-          has_metadata type: ActiveFedora::SimpleDatastream, name: "withText" do |m|
-            m.field "fubar", :text
-          end
-          has_metadata type: ActiveFedora::SimpleDatastream, name: "withText2" do |m|
-            m.field "fubar", :text
+          extend Deprecation
+          Deprecation.silence(self) do
+            has_metadata type: ActiveFedora::SimpleDatastream, name: "someData" do |m|
+              m.field "fubar", :string
+              m.field "bandana", :string
+              m.field "swank", :text
+              m.field "animal_id", :string
+            end
+            has_metadata type: ActiveFedora::SimpleDatastream, name: "withText" do |m|
+              m.field "fubar", :text
+            end
+            has_metadata type: ActiveFedora::SimpleDatastream, name: "withText2" do |m|
+              m.field "fubar", :text
+            end
           end
 
-          has_metadata type: BarStream2, name: "xmlish"
+          has_subresource 'xmlish', class_name: 'BarStream2'
           Deprecation.silence(ActiveFedora::Attributes) do
             has_attributes :cow, datastream: 'xmlish'                      # for testing the default value of multiple
             has_attributes :fubar, datastream: 'withText', multiple: true  # test alternate datastream
@@ -142,7 +145,7 @@ describe ActiveFedora::Base do
         end
       end
 
-      after :all do
+      after do
         Object.send(:remove_const, :BarHistory2)
       end
 
@@ -350,7 +353,7 @@ describe ActiveFedora::Base do
     describe "with a superclass" do
       before :all do
         class BarHistory2 < ActiveFedora::Base
-          has_metadata 'xmlish', type: BarStream2
+          has_subresource 'xmlish', class_name: 'BarStream2'
           Deprecation.silence(ActiveFedora::Attributes) do
             has_attributes :donkey, :cow, datastream: 'xmlish', multiple: true
           end
@@ -386,7 +389,7 @@ describe ActiveFedora::Base do
         property :description, predicate: ::RDF::Vocab::DC.description
       end
       class BarHistory4 < ActiveFedora::Base
-        has_metadata 'rdfish', type: BarRdfDatastream
+        has_subresource 'rdfish', class_name: 'BarRdfDatastream'
         Deprecation.silence(ActiveFedora::Attributes) do
           has_attributes :title, datastream: 'rdfish', multiple: true
           has_attributes :description, datastream: 'rdfish', multiple: false
@@ -478,7 +481,7 @@ describe ActiveFedora::Base do
         property :description, predicate: ::RDF::Vocab::DC.description
       end
       class BarHistory4 < ActiveFedora::Base
-        has_metadata 'rdfish', type: BarRdfDatastream
+        has_subresource 'rdfish', class_name: 'BarRdfDatastream'
         Deprecation.silence(ActiveFedora::Attributes) do
           has_attributes :description, datastream: :rdfish
         end

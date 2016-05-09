@@ -111,34 +111,12 @@ describe ActiveFedora::Base do
   describe "With a test class" do
     before do
       class FooHistory < ActiveFedora::Base
-        has_metadata 'someData', type: ActiveFedora::SimpleDatastream, autocreate: true do |m|
-          m.field "fubar", :string
-          m.field "swank", :text
-        end
-        has_metadata "withText", type: ActiveFedora::SimpleDatastream, autocreate: true do |m|
-          m.field "fubar", :text
-        end
-        has_metadata "withText2", type: ActiveFedora::SimpleDatastream, autocreate: true do |m|
-          m.field "fubar", :text
-        end
-        Deprecation.silence(ActiveFedora::Attributes) do
-          has_attributes :fubar, datastream: 'withText', multiple: true
-          has_attributes :swank, datastream: 'someData', multiple: true
-        end
-      end
-
-      class FooAdaptation < ActiveFedora::Base
-        has_metadata 'someData', type: ActiveFedora::OmDatastream
-      end
-
-      class FooInherited < FooHistory
+        property :fubar, predicate: ::RDF::URI('http://example.com/fubar')
       end
     end
 
     after do
       Object.send(:remove_const, :FooHistory)
-      Object.send(:remove_const, :FooAdaptation)
-      Object.send(:remove_const, :FooInherited)
     end
 
     def increment_id
@@ -305,7 +283,7 @@ describe ActiveFedora::Base do
         obj = double
         expect(obj).to receive(:save)
         expect(FooHistory).to receive(:new).and_return(obj)
-        @hist = FooHistory.create(fubar: 'ta', swank: 'da')
+        FooHistory.create(fubar: 'ta')
       end
     end
 

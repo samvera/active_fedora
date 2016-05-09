@@ -3,7 +3,6 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   before :all do
     class MockAFBaseRelationship < ActiveFedora::Base
-      has_metadata name: 'foo', type: Hydra::ModsArticleDatastream
     end
   end
   after :all do

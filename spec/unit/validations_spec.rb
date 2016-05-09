@@ -3,14 +3,8 @@ require 'spec_helper'
 describe ActiveFedora::Base do
   before :all do
     class ValidationStub < ActiveFedora::Base
-      has_metadata type: ActiveFedora::SimpleDatastream, name: "someData" do |m|
-        m.field "fubar", :string
-        m.field "swank", :text
-      end
-      Deprecation.silence(ActiveFedora::Attributes) do
-        has_attributes :fubar, datastream: 'someData', multiple: true
-        has_attributes :swank, datastream: 'someData', multiple: false
-      end
+      property :fubar, predicate: ::RDF::URI('http://example.com/fubar')
+      property :swank, predicate: ::RDF::URI('http://example.com/swank'), multiple: false
 
       validates_presence_of :fubar
       validates_length_of :swank, minimum: 5

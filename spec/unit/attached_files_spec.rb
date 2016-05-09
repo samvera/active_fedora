@@ -37,17 +37,17 @@ describe ActiveFedora::AttachedFiles do
 
   describe '.has_metadata' do
     before do
-      @original_behavior = Deprecation.default_deprecation_behavior
-      Deprecation.default_deprecation_behavior = :silence
       class Z < ActiveFedora::File
       end
       class FooHistory < ActiveFedora::Base
-        has_metadata name: 'dsid', type: ActiveFedora::SimpleDatastream
-        has_metadata 'complex_ds', autocreate: true, type: 'Z'
+        extend Deprecation
+        Deprecation.silence(FooHistory) do
+          has_metadata name: 'dsid', type: ActiveFedora::SimpleDatastream
+          has_metadata 'complex_ds', autocreate: true, type: 'Z'
+        end
       end
     end
     after do
-      Deprecation.default_deprecation_behavior = @original_behavior
       Object.send(:remove_const, :FooHistory)
       Object.send(:remove_const, :Z)
     end
@@ -66,13 +66,21 @@ describe ActiveFedora::AttachedFiles do
     end
 
     it "raises an error if you don't give a type" do
-      expect { FooHistory.has_metadata "bob" }.to raise_error ArgumentError,
-                                                              "You must provide a :type property for the datastream 'bob'"
+      expect {
+        Deprecation.silence(FooHistory) do
+          FooHistory.has_metadata "bob"
+        end
+      }.to raise_error ArgumentError,
+                       "You must provide a :type property for the datastream 'bob'"
     end
 
     it "raises an error if you don't give a dsid" do
-      expect { FooHistory.has_metadata type: ActiveFedora::SimpleDatastream }.to raise_error ArgumentError,
-                                                                                             "You must provide a path name (f.k.a. dsid) for the resource"
+      expect {
+        Deprecation.silence(FooHistory) do
+          FooHistory.has_metadata type: ActiveFedora::SimpleDatastream
+        end
+      }.to raise_error ArgumentError,
+                       "You must provide a path name (f.k.a. dsid) for the resource"
     end
 
     describe "creates accessors" do
@@ -86,8 +94,11 @@ describe ActiveFedora::AttachedFiles do
   describe '.has_file_datastream' do
     before do
       class FooHistory < ActiveFedora::Base
-        has_file_datastream name: 'dsid'
-        has_file_datastream 'another'
+        extend Deprecation
+        Deprecation.silence(FooHistory) do
+          has_file_datastream name: 'dsid'
+          has_file_datastream 'another'
+        end
       end
     end
     after do

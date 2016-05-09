@@ -4,15 +4,13 @@ describe ActiveFedora::Querying do
   before do
     module ModelIntegrationSpec
       class Basic < ActiveFedora::Base
-        has_metadata "properties", type: ActiveFedora::SimpleDatastream do |m|
-          m.field "foo", :string
-          m.field "bar", :string
-          m.field "baz", :string
+        property :foo, predicate: ::RDF::URI('http://example.com/foo') do |index|
+          index.as :stored_searchable
         end
-
-        Deprecation.silence(ActiveFedora::Attributes) do
-          has_attributes :foo, :bar, :baz, datastream: 'properties', multiple: true
+        property :bar, predicate: ::RDF::URI('http://example.com/bar') do |index|
+          index.as :stored_searchable
         end
+        property :baz, predicate: ::RDF::URI('http://example.com/baz')
 
         def to_solr(doc = {})
           doc = super

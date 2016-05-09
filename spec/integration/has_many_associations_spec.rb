@@ -314,21 +314,11 @@ describe ActiveFedora::Associations::HasManyAssociation do
         before do
           class Item < ActiveFedora::Base
             has_many :components
-            has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
-              m.field "title", :string
-            end
-            Deprecation.silence(ActiveFedora::Attributes) do
-              has_attributes :title, datastream: 'foo'
-            end
+            property :title, predicate: ::RDF::Vocab::DC.title
           end
           class Component < ActiveFedora::Base
             belongs_to :item, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
-            has_metadata "foo", type: ActiveFedora::SimpleDatastream do |m|
-              m.field "description", :string
-            end
-            Deprecation.silence(ActiveFedora::Attributes) do
-              has_attributes :description, datastream: 'foo'
-            end
+            property :description, predicate: ::RDF::Vocab::DC.description
           end
         end
 
@@ -338,20 +328,20 @@ describe ActiveFedora::Associations::HasManyAssociation do
         end
 
         context "From the belongs_to side" do
-          let(:component) { Component.create(item: Item.new(title: 'my title')) }
+          let(:component) { Component.create(item: Item.new(title: ['my title'])) }
 
           it "saves dependent records" do
             component.reload
-            expect(component.item.title).to eq 'my title'
+            expect(component.item.title).to eq ['my title']
           end
         end
 
         context "From the has_many side" do
-          let(:item) { Item.create(components: [Component.new(description: 'my description')]) }
+          let(:item) { Item.create(components: [Component.new(description: ['my description'])]) }
 
           it "saves dependent records" do
             item.reload
-            expect(item.components.first.description).to eq 'my description'
+            expect(item.components.first.description).to eq ['my description']
           end
         end
       end
