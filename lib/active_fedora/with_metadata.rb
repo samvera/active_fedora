@@ -4,6 +4,10 @@ module ActiveFedora
     extend ActiveSupport::Autoload
 
     autoload :MetadataNode
+    autoload :SweetJPLTerms
+    autoload :DefaultStrategy
+    autoload :DefaultSchema
+    autoload :DefaultMetadataClassFactory
 
     included do
       class_attribute :metadata_class_factory
