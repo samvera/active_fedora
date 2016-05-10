@@ -1,500 +1,6 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-  context "with an om datastream" do
-    before :all do
-      class BarStream2 < ActiveFedora::OmDatastream
-        set_terminology do |t|
-          t.root(path: "animals", xmlns: "urn:zoobar")
-          t.waterfowl do
-            t.ducks do
-              t.duck
-            end
-          end
-          t.donkey
-          t.cow
-          t.pig
-          t.horse
-        end
-
-        def self.xml_template
-          Nokogiri::XML::Document.parse '<animals xmlns="urn:zoobar">
-            <waterfowl>
-              <ducks>
-                <duck/>
-              </ducks>
-            </waterfowl>
-            <cow></cow>
-          </animals>'
-        end
-      end
-    end
-    after :all do
-      Object.send(:remove_const, :BarStream2)
-    end
-
-    describe "#property" do
-      context "with an xml property (default cardinality)" do
-        before do
-          class BarHistory4 < ActiveFedora::Base
-            has_subresource 'xmlish', class_name: 'BarStream2'
-            Deprecation.silence(ActiveFedora::Attributes) do
-              property :cow, delegate_to: 'xmlish'
-            end
-          end
-        end
-        after do
-          Object.send(:remove_const, :BarHistory4)
-        end
-
-        let(:obj) { BarHistory4.new }
-
-        before { obj.cow = ['one', 'two'] }
-        describe "the object accessor" do
-          subject { obj.cow }
-          it { is_expected.to eq ['one', 'two'] }
-        end
-
-        describe "the datastream accessor" do
-          subject { obj.xmlish.cow }
-          it { is_expected.to eq ['one', 'two'] }
-        end
-      end
-
-      context "with multiple set to false" do
-        before do
-          class BarHistory4 < ActiveFedora::Base
-            has_subresource 'xmlish', class_name: 'BarStream2'
-            Deprecation.silence(ActiveFedora::Attributes) do
-              property :cow, delegate_to: 'xmlish', multiple: false
-            end
-          end
-        end
-        after do
-          Object.send(:remove_const, :BarHistory4)
-        end
-
-        let(:obj) { BarHistory4.new }
-
-        before { obj.cow = 'one' }
-        describe "the object accessor" do
-          subject { obj.cow }
-          it { is_expected.to eq 'one' }
-        end
-      end
-
-      context "when updating and saving a property" do
-        before do
-          class BarHistory4 < ActiveFedora::Base
-            has_subresource 'xmlish', class_name: 'BarStream2'
-            Deprecation.silence(ActiveFedora::Attributes) do
-              property :cow, delegate_to: 'xmlish', multiple: false
-            end
-          end
-        end
-        after do
-          Object.send(:remove_const, :BarHistory4)
-        end
-
-        let(:obj) { BarHistory4.new }
-
-        before do
-          obj.cow = 'two'
-          obj.save
-          obj.attached_files[:xmlish].content
-          obj.cow = 'three'
-          obj.save
-        end
-        describe "the attached datastream" do
-          subject { obj.attached_files[:xmlish].content }
-          it { is_expected.to include '<cow>three</cow>' }
-        end
-      end
-    end
-
-    describe "first level delegation" do
-      before do
-        class MyDS1 < ActiveFedora::NtriplesRDFDatastream
-          property :animal_id, predicate: ::RDF::Vocab::DC.publisher
-        end
-        class MyDS2 < ActiveFedora::OmDatastream
-          set_terminology do |t|
-            t.root(path: "durh")
-            t.fubar
-          end
-        end
-        class BarHistory2 < ActiveFedora::Base
-          has_subresource 'someData', class_name: 'MyDS1'
-          has_subresource "withText", class_name: 'MyDS2'
-          has_subresource 'xmlish', class_name: 'BarStream2'
-          Deprecation.silence(ActiveFedora::Attributes) do
-            has_attributes :cow, datastream: 'xmlish'                      # for testing the default value of multiple
-            has_attributes :fubar, datastream: 'withText', multiple: true  # test alternate datastream
-            has_attributes :pig, datastream: 'xmlish', multiple: false
-            has_attributes :horse, datastream: 'xmlish', multiple: true
-            has_attributes :duck, datastream: 'xmlish', at: [:waterfowl, :ducks, :duck], multiple: true
-            has_attributes :animal_id, datastream: 'someData', multiple: false
-          end
-
-          property :goose, predicate: ::RDF::URI.new('http://example.com#hasGoose')
-        end
-      end
-
-      after do
-        Object.send(:remove_const, :BarHistory2)
-      end
-
-      subject { BarHistory2.new }
-
-      describe "#attribute_names" do
-        context "on an instance" do
-          it "lists the attributes" do
-            expect(subject.attribute_names).to eq ["cow", "fubar", "pig", "horse", "duck", "animal_id", "goose"]
-          end
-        end
-
-        context "on a class" do
-          it "lists the attributes" do
-            expect(BarHistory2.attribute_names).to eq ["cow", "fubar", "pig", "horse", "duck", "animal_id", "goose"]
-          end
-        end
-      end
-
-      describe "inspect" do
-        it "shows the attributes" do
-          expect(subject.inspect).to eq "#<BarHistory2 id: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil, goose: []>"
-        end
-
-        describe "with a id" do
-          before { allow(subject).to receive(:id).and_return('test:123') }
-
-          it "shows a id" do
-            expect(subject.inspect).to eq "#<BarHistory2 id: \"test:123\", cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil, goose: []>"
-          end
-        end
-
-        describe "with no attributes" do
-          subject { described_class.new }
-          it "shows a id" do
-            expect(subject.inspect).to eq "#<ActiveFedora::Base id: nil>"
-          end
-        end
-
-        describe "with relationships" do
-          before do
-            class BarHistory3 < BarHistory2
-              belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent, class_name: 'BarHistory2'
-            end
-            subject.library = library
-          end
-
-          let(:library) { BarHistory2.create }
-          subject { BarHistory3.new }
-
-          after do
-            Object.send(:remove_const, :BarHistory3)
-          end
-
-          it "shows the library_id" do
-            expect(subject.inspect).to eq "#<BarHistory3 id: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil, goose: [], library_id: \"#{library.id}\">"
-          end
-        end
-      end
-
-      it "reveals the unique properties" do
-        expect(BarHistory2.unique?(:horse)).to be false
-        expect(BarHistory2.unique?(:pig)).to be true
-        expect(BarHistory2.unique?(:cow)).to be true
-      end
-
-      it "saves a delegated property" do
-        subject.fubar = ["Quack"]
-        expect(subject.fubar).to eq ["Quack"]
-        expect(subject.withText.get_values(:fubar).first).to eq 'Quack'
-        subject.cow = "Low"
-        expect(subject.cow).to eq "Low"
-        expect(subject.xmlish.term_values(:cow).first).to eq 'Low'
-
-        subject.pig = "Oink"
-        expect(subject.pig).to eq "Oink"
-      end
-
-      it "allows passing parameters to the delegate accessor" do
-        subject.fubar = ["one", "two"]
-        expect(subject.fubar(1)).to eq ['two']
-      end
-
-      describe "assigning wrong cardinality" do
-        it "does not allow passing a string to a multiple attribute writer" do
-          expect { subject.fubar = "Quack" }.to raise_error ArgumentError
-          expect { subject.fubar = ["Quack"] }.not_to raise_error
-          expect { subject.fubar = nil }.not_to raise_error
-        end
-
-        it "does not allow passing an enumerable to a unique attribute writer" do
-          expect { subject.cow = "Low" }.not_to raise_error
-          expect { subject.cow = ["Low"]
-          }.to raise_error ArgumentError, "You attempted to set the attribute `cow' on `BarHistory2' to an enumerable value. However, this attribute is declared as being singular."
-          expect { subject.cow = nil }.not_to raise_error
-        end
-      end
-
-      it "returns an array if marked as multiple" do
-        subject.horse = ["neigh", "whinny"]
-        expect(subject.horse).to eq ["neigh", "whinny"]
-      end
-
-      it "is able to delegate deeply into the terminology" do
-        subject.duck = ["Quack", "Peep"]
-        expect(subject.duck).to eq ["Quack", "Peep"]
-      end
-
-      context "change tracking" do
-        it "works for delegated attributes" do
-          expect {
-            subject.fubar = ["Meow"]
-          }.to change { subject.fubar_changed? }.from(false).to(true)
-        end
-
-        context "when a change is made to a property" do
-          it "is marked changed" do
-            expect {
-              subject.goose = ["honk!"]
-            }.to change { subject.goose_changed? }.from(false).to(true)
-          end
-        end
-
-        context "when a property is set to the same value" do
-          before do
-            subject.goose = ['honk!', 'Honk']
-            if ActiveModel.version < Gem::Version.new('4.2.0')
-              subject.send(:reset_changes)
-            else
-              subject.send(:clear_changes_information)
-            end
-          end
-
-          it "is not marked changed" do
-            subject.goose = ['honk!', 'Honk']
-            expect(subject.goose_changed?).to be false
-          end
-        end
-      end
-
-      describe "hash getters and setters" do
-        it "accepts symbol keys" do
-          subject[:duck] = ["Cluck", "Gobble"]
-          expect(subject[:duck]).to eq ["Cluck", "Gobble"]
-        end
-
-        it "accepts string keys" do
-          subject['duck'] = ["Cluck", "Gobble"]
-          expect(subject['duck']).to eq ["Cluck", "Gobble"]
-        end
-
-        it "accepts field names with _id that are not associations" do
-          subject['animal_id'] = "lemur"
-          expect(subject['animal_id']).to eq "lemur"
-        end
-
-        it "raises an error on the reader when the field isn't delegated" do
-          expect { subject['donkey'] }.to raise_error ActiveFedora::UnknownAttributeError, "unknown attribute 'donkey' for BarHistory2."
-        end
-
-        it "raises an error on the setter when the field isn't delegated" do
-          expect { subject['donkey'] = "bray" }.to raise_error ActiveFedora::UnknownAttributeError, "unknown attribute 'donkey' for BarHistory2."
-        end
-      end
-
-      describe "attributes=" do
-        it "raises an error on an invalid attribute" do
-          expect { subject.attributes = { 'donkey' => "bray" } }.to raise_error ActiveFedora::UnknownAttributeError, "unknown attribute 'donkey' for BarHistory2."
-        end
-      end
-
-      describe "attributes" do
-        let(:vals) { { 'cow' => "moo", 'pig' => 'oink', 'horse' => ['neigh'], "fubar" => [], 'duck' => ['quack'], 'animal_id' => '', 'goose' => [] } }
-        before { subject.attributes = vals }
-        it "returns a hash" do
-          expect(subject.attributes).to eq(vals.merge('id' => nil))
-        end
-      end
-
-      describe '.multiple?', focus: true do
-        it 'returns false if attribute has not been defined as multi-valued' do
-          expect(BarHistory2.multiple?(:pig)).to be false
-        end
-
-        it 'returns true if attribute is a ActiveTriples property' do
-          expect(BarHistory2.multiple?(:goose)).to be true
-        end
-
-        it 'returns true if attribute has been defined as multi-valued' do
-          expect(BarHistory2.multiple?(:horse)).to be true
-        end
-
-        it 'raises an error if the attribute does not exist' do
-          expect { BarHistory2.multiple?(:arbitrary_nonexistent_attribute) }.to raise_error ActiveFedora::UnknownAttributeError, "unknown attribute 'arbitrary_nonexistent_attribute' for BarHistory2."
-        end
-      end
-
-      describe ".datastream_class_for_name" do
-        it "returns the specifed class" do
-          expect(BarHistory2.send(:datastream_class_for_name, 'someData')).to eq MyDS1
-        end
-      end
-    end
-
-    describe "with a superclass" do
-      before :all do
-        class BarHistory2 < ActiveFedora::Base
-          has_subresource 'xmlish', class_name: 'BarStream2'
-          Deprecation.silence(ActiveFedora::Attributes) do
-            has_attributes :donkey, :cow, datastream: 'xmlish', multiple: true
-          end
-        end
-        class BarHistory3 < BarHistory2
-        end
-      end
-
-      after :all do
-        Object.send(:remove_const, :BarHistory3)
-        Object.send(:remove_const, :BarHistory2)
-      end
-
-      subject { BarHistory3.new }
-
-      it "is able to delegate deeply into the terminology" do
-        subject.donkey = ["Bray", "Hee-haw"]
-        expect(subject.donkey).to eq ["Bray", "Hee-haw"]
-      end
-
-      it "is able to track change status" do
-        expect {
-          subject.cow = ["Moo"]
-        }.to change { subject.cow_changed? }.from(false).to(true)
-      end
-    end
-  end
-
-  context "with a RDF datastream" do
-    before :all do
-      class BarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :title, predicate: ::RDF::Vocab::DC.title
-        property :description, predicate: ::RDF::Vocab::DC.description
-      end
-      class BarHistory4 < ActiveFedora::Base
-        has_subresource 'rdfish', class_name: 'BarRdfDatastream'
-        Deprecation.silence(ActiveFedora::Attributes) do
-          has_attributes :title, datastream: 'rdfish', multiple: true
-          has_attributes :description, datastream: 'rdfish', multiple: false
-        end
-      end
-    end
-
-    after :all do
-      Object.send(:remove_const, :BarHistory4)
-      Object.send(:remove_const, :BarRdfDatastream)
-    end
-
-    subject { BarHistory4.new }
-
-    context "with a multivalued field" do
-      it "is able to track change status" do
-        expect {
-          subject.title = ["Title1", "Title2"]
-        }.to change { subject.title_changed? }.from(false).to(true)
-      end
-    end
-
-    context "with a single-valued field" do
-      it "is able to track change status" do
-        expect {
-          subject.description = "A brief description"
-        }.to change { subject.description_changed? }.from(false).to(true)
-      end
-    end
-  end
-
-  context "without a datastream" do
-    before :all do
-      class BarHistory4 < ActiveFedora::Base
-      end
-    end
-
-    after :all do
-      Object.send(:remove_const, :BarHistory4)
-    end
-
-    subject { BarHistory4 }
-
-    describe "has_attributes" do
-      it "raises an error" do
-        Deprecation.silence(ActiveFedora::Attributes) do
-          expect { subject.has_attributes :title, :description, multiple: true }.to raise_error
-        end
-      end
-    end
-  end
-
-  context "when an unknown datastream is specified" do
-    before :all do
-      class BarHistory4 < ActiveFedora::Base
-        Deprecation.silence(ActiveFedora::Attributes) do
-          has_attributes :description, datastream: 'rdfish', multiple: true
-        end
-      end
-    end
-
-    after :all do
-      Object.send(:remove_const, :BarHistory4)
-    end
-
-    subject { BarHistory4.new }
-
-    let(:error_message) { "Undefined file: `rdfish' in property description" }
-
-    it "raises an error on get" do
-      expect { subject.description }.to raise_error(ArgumentError, error_message)
-    end
-
-    it "raises an error on set" do
-      expect { subject.description = ['Neat'] }.to raise_error(ArgumentError, error_message)
-    end
-
-    describe ".datastream_class_for_name" do
-      it "returns the default class" do
-        expect(BarHistory4.send(:datastream_class_for_name, 'content')).to eq ActiveFedora::File
-      end
-    end
-  end
-
-  context "when a datastream is specified as a symbol" do
-    before :all do
-      class BarRdfDatastream < ActiveFedora::NtriplesRDFDatastream
-        property :title, predicate: ::RDF::Vocab::DC.title
-        property :description, predicate: ::RDF::Vocab::DC.description
-      end
-      class BarHistory4 < ActiveFedora::Base
-        has_subresource 'rdfish', class_name: 'BarRdfDatastream'
-        Deprecation.silence(ActiveFedora::Attributes) do
-          has_attributes :description, datastream: :rdfish
-        end
-      end
-    end
-
-    after :all do
-      Object.send(:remove_const, :BarHistory4)
-      Object.send(:remove_const, :BarRdfDatastream)
-    end
-
-    subject { BarHistory4.new(description: 'test1') }
-
-    it "is able to access the attributes" do
-      expect(subject.description).to eq 'test1'
-    end
-  end
-
   context "when properties are defined on an object" do
     before :all do
       class BarHistory4 < ActiveFedora::Base
@@ -511,6 +17,68 @@ describe ActiveFedora::Base do
 
     let(:obj) { BarHistory4.new(title: ['test1']) }
     subject { obj }
+
+    describe "#attribute_names" do
+      context "on an instance" do
+        it "lists the attributes" do
+          expect(subject.attribute_names).to eq ["title", "abstract"]
+        end
+      end
+
+      context "on a class" do
+        it "lists the attributes" do
+          expect(BarHistory4.attribute_names).to eq ["title", "abstract"]
+        end
+      end
+    end
+
+    describe "#inspect" do
+      it "shows the attributes" do
+        expect(subject.inspect).to eq "#<BarHistory4 id: nil, title: [\"test1\"], abstract: nil>"
+      end
+
+      describe "with a id" do
+        before { allow(subject).to receive(:id).and_return('test:123') }
+
+        it "shows a id" do
+          expect(subject.inspect).to eq "#<BarHistory4 id: \"test:123\", title: [\"test1\"], abstract: nil>"
+        end
+      end
+
+      describe "with no attributes" do
+        subject { described_class.new }
+        it "shows a id" do
+          expect(subject.inspect).to eq "#<ActiveFedora::Base id: nil>"
+        end
+      end
+
+      describe "with relationships" do
+        before do
+          class BarHistory2 < BarHistory4
+            belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent, class_name: 'BarHistory4'
+          end
+          subject.library = library
+        end
+
+        let(:library) { BarHistory4.create }
+        subject { BarHistory2.new }
+
+        after do
+          Object.send(:remove_const, :BarHistory2)
+        end
+
+        it "shows the library_id" do
+          expect(subject.inspect).to eq "#<BarHistory2 id: nil, title: [], abstract: nil, library_id: \"#{library.id}\">"
+        end
+      end
+    end
+
+    describe "#unique?" do
+      it "reveals the unique properties" do
+        expect(BarHistory4.unique?(:abstract)).to be true
+        expect(BarHistory4.unique?(:title)).to be false
+      end
+    end
 
     describe "accessing attributes" do
       context "using generated methods" do
@@ -550,7 +118,15 @@ describe ActiveFedora::Base do
       end
     end
 
-    context "indexing" do
+    describe 'change tracking' do
+      it "is able to track change status" do
+        expect {
+          subject.abstract = "Moo"
+        }.to change { subject.abstract_changed? }.from(false).to(true)
+      end
+    end
+
+    describe "indexing" do
       let(:solr_doc) { obj.to_solr }
 
       it "indexs the attributes" do

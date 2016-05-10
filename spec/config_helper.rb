@@ -5,10 +5,6 @@ def mock_yaml(hash, path)
   allow(Psych).to receive(:load).and_return(hash)
 end
 
-def default_predicate_mapping_file
-  File.expand_path(File.join(File.dirname(__FILE__), "..", "config", "predicate_mappings.yml"))
-end
-
 def stub_rails(opts = {})
   Object.const_set("Rails", Class)
   Rails.send(:undef_method, :env) if Rails.respond_to?(:env)

@@ -8,17 +8,6 @@ module ActiveFedora::RDF
       end
     end
 
-    # Gives the primary solr name for a column. If there is more than one indexer on the field definition, it gives the first
-    def primary_solr_name(field, file_path)
-      config = self.class.config_for_term_or_uri(field)
-      return nil unless config && config.behaviors # punt on index names for deep nodes!
-      config.behaviors.each do |behavior|
-        result = ActiveFedora.index_field_mapper.solr_name(apply_prefix(field, file_path), behavior, type: config.type)
-        return result if Solrizer::DefaultDescriptors.send(behavior).evaluate_suffix(:text).stored?
-      end
-      raise RuntimeError "no stored fields were found"
-    end
-
     module ClassMethods
       def indexer
         ActiveFedora::RDF::IndexingService

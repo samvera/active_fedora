@@ -58,15 +58,6 @@ describe ActiveFedora::FileConfigurator do
     end
   end
 
-  describe "#get_config_path" do
-    it "calls #config_path" do
-      expect(subject).to receive(:config_path)
-      Deprecation.silence(described_class) do
-        subject.get_config_path(:fedora)
-      end
-    end
-  end
-
   describe "initialization methods" do
     describe "config_path(:fedora)" do
       it "uses the config_options[:config_path] if it exists" do
@@ -97,38 +88,6 @@ describe ActiveFedora::FileConfigurator do
         expect(File).to receive(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"), 'config', 'fedora.yml'))).and_return(true)
         expect(ActiveFedora::Base.logger).to receive(:warn).with("Using the default fedora.yml that comes with active-fedora.  If you want to override this, pass the path to fedora.yml to ActiveFedora - ie. ActiveFedora.init(:fedora_config_path => '/path/to/fedora.yml') - or set Rails.root and put fedora.yml into \#{Rails.root}/config.")
         expect(subject.config_path(:fedora)).to eql(File.expand_path(File.join(File.dirname("__FILE__"), 'config', 'fedora.yml')))
-      end
-    end
-
-    describe "config_path(:predicate_mappings)" do
-      it "uses the config_options[:config_path] if it exists" do
-        expect(subject).to receive(:config_options).and_return(predicate_mappings_config_path: "/path/to/predicate_mappings.yml")
-        expect(File).to receive(:file?).with("/path/to/predicate_mappings.yml").and_return(true)
-        expect(subject.config_path(:predicate_mappings)).to eql("/path/to/predicate_mappings.yml")
-      end
-
-      it "looks in Rails.root/config/predicate_mappings.yml if it exists and no predicate_mappings_config_path passed in" do
-        expect(subject).to receive(:config_options).and_return({})
-        stub_rails(root: "/rails/root")
-        expect(File).to receive(:file?).with("/rails/root/config/predicate_mappings.yml").and_return(true)
-        expect(subject.config_path(:predicate_mappings)).to eql("/rails/root/config/predicate_mappings.yml")
-        unstub_rails
-      end
-
-      it "looks in ./config/predicate_mappings.yml if neither rails.root nor :predicate_mappings_config_path are set" do
-        expect(subject).to receive(:config_options).and_return({})
-        allow(Dir).to receive(:getwd).and_return("/current/working/directory")
-        expect(File).to receive(:file?).with("/current/working/directory/config/predicate_mappings.yml").and_return(true)
-        expect(subject.config_path(:predicate_mappings)).to eql("/current/working/directory/config/predicate_mappings.yml")
-      end
-
-      it "returns default predicate_mappings.yml that ships with active-fedora if none of the above" do
-        expect(subject).to receive(:config_options).and_return({})
-        expect(Dir).to receive(:getwd).and_return("/current/working/directory")
-        expect(File).to receive(:file?).with("/current/working/directory/config/predicate_mappings.yml").and_return(false)
-        expect(File).to receive(:file?).with(File.expand_path(File.join(File.dirname("__FILE__"), 'config', 'predicate_mappings.yml'))).and_return(true)
-        expect(ActiveFedora::Base.logger).to receive(:warn).with("Using the default predicate_mappings.yml that comes with active-fedora.  If you want to override this, pass the path to predicate_mappings.yml to ActiveFedora - ie. ActiveFedora.init(:predicate_mappings_config_path => '/path/to/predicate_mappings.yml') - or set Rails.root and put predicate_mappings.yml into \#{Rails.root}/config.")
-        expect(subject.config_path(:predicate_mappings)).to eql(File.expand_path(File.join(File.dirname("__FILE__"), 'config', 'predicate_mappings.yml')))
       end
     end
 
@@ -340,45 +299,6 @@ describe ActiveFedora::FileConfigurator do
         subject.init
         expect(ActiveFedora.environment).to eql("development")
       end
-    end
-  end
-
-  ##########################
-
-  describe ".build_predicate_config_path" do
-    it "returns the path to the default config/predicate_mappings.yml if no valid path is given" do
-      expect(subject.send(:build_predicate_config_path)).to eq default_predicate_mapping_file
-    end
-  end
-
-  describe ".predicate_config" do
-    before do
-      subject.instance_variable_set :@config_loaded, nil
-    end
-    it "returns the default mapping if it has not been initialized" do
-      expect(subject.predicate_config).to eq Psych.load(File.read(default_predicate_mapping_file))
-    end
-  end
-
-  describe ".valid_predicate_mapping" do
-    it "returns true if the predicate mapping has the appropriate keys and value types" do
-      expect(subject.send(:valid_predicate_mapping?, default_predicate_mapping_file)).to be true
-    end
-    it "returns false if the mapping is missing the :default_namespace" do
-      mock_yaml({ default_namespace0: "my_namespace", predicate_mapping: { key0: "value0", key1: "value1" } }, "/path/to/predicate_mappings.yml")
-      expect(subject.send(:valid_predicate_mapping?, "/path/to/predicate_mappings.yml")).to be false
-    end
-    it "returns false if the :default_namespace is not a string" do
-      mock_yaml({ default_namespace: { foo: "bar" }, predicate_mapping: { key0: "value0", key1: "value1" } }, "/path/to/predicate_mappings.yml")
-      expect(subject.send(:valid_predicate_mapping?, "/path/to/predicate_mappings.yml")).to be false
-    end
-    it "returns false if the :predicate_mappings key is missing" do
-      mock_yaml({ default_namespace: "a string" }, "/path/to/predicate_mappings.yml")
-      expect(subject.send(:valid_predicate_mapping?, "/path/to/predicate_mappings.yml")).to be false
-    end
-    it "returns false if the :predicate_mappings key is not a hash" do
-      mock_yaml({ default_namespace: "a string", predicate_mapping: "another string" }, "/path/to/predicate_mappings.yml")
-      expect(subject.send(:valid_predicate_mapping?, "/path/to/predicate_mappings.yml")).to be false
     end
   end
 end

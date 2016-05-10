@@ -45,12 +45,6 @@ module ActiveFedora
       @ldp_source = build_ldp_resource(id.to_s)
     end
 
-    # TODO: Remove after we no longer support #pid.
-    def pid
-      Deprecation.warn FedoraAttributes, "#{self.class}#pid is deprecated and will be removed in active-fedora 10.0. Use #{self.class}#id instead."
-      id
-    end
-
     # @return [RDF::URI] the uri for this resource
     def uri
       @ldp_source.subject_uri

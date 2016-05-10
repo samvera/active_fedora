@@ -49,13 +49,6 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
           association.send(:find_target)
         end
       end
-
-      describe "solr page size option" do
-        it "sends a deprecation warning" do
-          expect(Deprecation).to receive(:warn)
-          Book.has_and_belongs_to_many(:pages, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection, solr_page_size: 123)
-        end
-      end
     end
 
     context "with an inverse reflection" do

@@ -8,7 +8,7 @@ module ActiveFedora::RDF
     include Solrizer::Common
     attr_reader :object
 
-    # @param obj [#resource, #rdf_subject] the object to build an solr document for. Its class must respond to 'properties'
+    # @param [#resource, #rdf_subject] obj the object to build an solr document for. Its class must respond to 'properties' and 'index_config'
     def initialize(obj)
       @object = obj
     end

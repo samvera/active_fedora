@@ -4,10 +4,7 @@ require 'yaml'
 
 module ActiveFedora
   class FileConfigurator
-    extend Deprecation
     # Initializes ActiveFedora's connection to Fedora and Solr based on the info in fedora.yml and solr.yml
-    # NOTE: this deprecates the use of a solr url in the fedora.yml
-    #
     #
     # If Rails.env is set, it will use that environment.  Defaults to "development".
     # @param [Hash] options (optional) a list of options for the configuration of active_fedora
@@ -49,7 +46,7 @@ module ActiveFedora
     #
 
     attr_accessor :config_env
-    attr_reader :config_options, :fedora_config_path, :solr_config_path, :predicate_mappings_config_path
+    attr_reader :config_options, :fedora_config_path, :solr_config_path
 
     # The configuration hash that gets used by RSolr.connect
     def initialize
@@ -84,7 +81,6 @@ module ActiveFedora
       @fedora_config = {}
       @solr_config = {}
       @config_options = {}
-      @predicate_config_path = nil
     end
 
     def config_loaded?
@@ -161,11 +157,6 @@ module ActiveFedora
       end
     end
 
-    def get_config_path(config_type)
-      Deprecation.warn(FileConfigurator, "get_config_path is deprecated and will be removed in ActiveFedora 10.  Use config_path instead.")
-      config_path(config_type)
-    end
-
     # Determine the fedora config file to use. Order of preference is:
     # 1. Use the config_options[:config_path] if it exists
     # 2. Look in +Rails.root+/config/fedora.yml
@@ -210,27 +201,5 @@ module ActiveFedora
       return unless ::File.file? path
       path
     end
-
-    def predicate_config
-      @predicate_config_path ||= build_predicate_config_path
-      YAML.load(::File.open(@predicate_config_path)) if ::File.exist?(@predicate_config_path)
-    end
-
-    protected
-
-      def build_predicate_config_path
-        testfile = ::File.expand_path(config_path(:predicate_mappings))
-        if ::File.exist?(testfile) && valid_predicate_mapping?(testfile)
-          return testfile
-        end
-        raise PredicateMappingsNotFoundError
-      end
-
-      def valid_predicate_mapping?(testfile)
-        mapping = YAML.load(::File.open(testfile))
-        return false unless mapping.key?(:default_namespace) && mapping[:default_namespace].is_a?(String)
-        return false unless mapping.key?(:predicate_mapping) && mapping[:predicate_mapping].is_a?(Hash)
-        true
-      end
   end
 end

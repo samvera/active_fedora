@@ -59,14 +59,10 @@ module ActiveFedora #:nodoc:
       autoload :DirectContainer
       autoload :IndirectContainer
     end
-    autoload :Datastream
     autoload :Datastreams
     autoload :DelegatedAttribute
     autoload_under 'attributes' do
-      autoload :StreamAttribute
       autoload :ActiveTripleAttribute
-      autoload :OmAttribute
-      autoload :RdfDatastreamAttribute
     end
     autoload :DefaultModelMapper
     autoload :Fedora
@@ -91,7 +87,6 @@ module ActiveFedora #:nodoc:
     autoload :LdpResource
     autoload :LdpResourceService
     autoload :LoadableFromJson
-    autoload :Model
     autoload :ModelClassifier
     autoload :NestedAttributes
     autoload :NomDatastream
@@ -127,14 +122,12 @@ module ActiveFedora #:nodoc:
     autoload :Schema
     autoload :Scoping
     autoload :Serialization
-    autoload :SimpleDatastream
     autoload :SchemaIndexingStrategy
     autoload :SolrHit
     autoload :SolrInstanceLoader
     autoload :SolrQueryBuilder
     autoload :SolrService
     autoload :SparqlInsert
-    autoload :Predicates
     autoload :Type
     autoload :Validations
     autoload :Versionable
@@ -172,8 +165,6 @@ module ActiveFedora #:nodoc:
     end
   end
 
-  extend Deprecation
-
   class << self
     attr_reader :fedora_config, :solr_config, :config_options
     attr_accessor :configurator
@@ -198,7 +189,6 @@ module ActiveFedora #:nodoc:
       end
       @fedora_config = nil
       SolrService.reset!
-      Predicates.predicate_config = nil
       configurator.init(options)
     end
 
@@ -234,16 +224,9 @@ module ActiveFedora #:nodoc:
       ActiveFedora::SolrService.instance
     end
 
-    def reset_fedora!
-      Deprecation.warn(ActiveFedora, 'ActiveFedora.reset_fedora! is deprecated; use ActiveFedora::Fedora.reset! instead. This will be removed in active-fedora 10.0')
-      ActiveFedora::Fedora.reset!
-    end
-
     def fedora
       ActiveFedora::Fedora.instance
     end
-
-    delegate :predicate_config, to: :configurator
 
     def root
       ::File.expand_path('../..', __FILE__)

@@ -93,25 +93,6 @@ is installed, run:
 rake spec
 ```
 
-Predicate Mappings
-------------------
-
-ActiveFedora versions 2.2.1 and higher provides specialized control over
-the predicate mappings used by SemanticNode. In order to provide your
-own mappings,
-you must supply a `predicate_mappings.yml` in the same format as the
-`config/predicate_mappings.yml` file shipped with the ActiveFedora gem.
-Place the file in the same directory
-as your `fedora.yml` file and use the current method of initializing
-ActiveFedora:
-
-```ruby
-ActiveFedora.init("/path/to/my/config/fedora.yml")
-```
-
-If no `predicate_mappings.yml` file is found, ActiveFedora will use the
-default mappings.
-
 Acknowledgements
 ----------------
 

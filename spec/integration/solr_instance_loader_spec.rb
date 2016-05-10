@@ -11,12 +11,7 @@ describe ActiveFedora::SolrInstanceLoader do
     end
 
     class Foo < ActiveFedora::Base
-      extend Deprecation
       has_subresource 'descMetadata', class_name: 'MyDS'
-      Deprecation.silence(ActiveFedora::Attributes) do
-        has_attributes :foo, datastream: 'descMetadata', multiple: true
-        has_attributes :bar, datastream: 'descMetadata', multiple: false
-      end
       property :title, predicate: ::RDF::Vocab::DC.title, multiple: false
       property :description, predicate: ::RDF::Vocab::DC.description
       belongs_to :another, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'Foo'
@@ -33,8 +28,6 @@ describe ActiveFedora::SolrInstanceLoader do
 
   let!(:obj) { Foo.create!(
     id: 'test-123',
-    foo: ["baz"],
-    bar: 'quix',
     title: 'My Title',
     description: ['first desc', 'second desc'],
     another_id: another.id,
@@ -58,7 +51,6 @@ describe ActiveFedora::SolrInstanceLoader do
         expect(subject.title).to eq 'My Title'
         expect(subject.description).to match_array ['first desc', 'second desc']
         expect(subject.another_id).to eq another.id
-        expect(subject.bar).to eq 'quix'
       end
 
       it "does not be mutable" do
@@ -78,19 +70,15 @@ describe ActiveFedora::SolrInstanceLoader do
       let(:loader) { described_class.new(ActiveFedora::Base, obj.id) }
 
       it "finds the document in solr" do
-        expect_any_instance_of(ActiveFedora::Datastream).to_not receive(:retrieve_content)
+        expect_any_instance_of(ActiveFedora::File).to_not receive(:retrieve_content)
         expect_any_instance_of(Ldp::Client).to_not receive(:get)
         object = loader.object
         expect(object).to be_instance_of Foo
         expect(object.title).to eq 'My Title' # object assertion
-        expect(object.foo).to eq ['baz'] # datastream assertion
 
         # and it's frozen
         expect { object.title = 'changed' }.to raise_error ActiveFedora::ReadOnlyRecord
         expect(object.title).to eq 'My Title'
-
-        expect { object.foo = ['changed'] }.to raise_error ActiveFedora::ReadOnlyRecord
-        expect(object.foo).to eq ['baz']
       end
     end
 

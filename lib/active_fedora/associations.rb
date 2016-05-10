@@ -194,22 +194,6 @@ module ActiveFedora
         # @option options [String] :url
         # @option options [Boolean] :autocreate Always create this resource on new objects
         # @yield block executed by some types of child resources
-        def contains(name, options = {}, &block)
-          Deprecation.warn(Associations, "contains is deprecated. Use has_subresource instead. This will be removed in ActiveFedora 10")
-          has_subresource(name, options, &block)
-        end
-
-        # This method is used to specify the details of a contained resource.
-        # Pass the name as the first argument and a hash of options as the second argument
-        # Note that this method doesn't actually execute the block, but stores it, to be executed
-        # by any the implementation of the resource(specified as :class_name)
-        #
-        # @param [String] name the handle to refer to this child as
-        # @param [Hash] options
-        # @option options [Class] :class_name The class that will represent this child, should extend ``ActiveFedora::File'' or ``ActiveFedora::Base''
-        # @option options [String] :url
-        # @option options [Boolean] :autocreate Always create this resource on new objects
-        # @yield block executed by some types of child resources
         def has_subresource(name, options = {}, &block)
           options[:block] = block if block
           raise ArgumentError, "You must provide a path name (f.k.a. dsid) for the resource" unless name

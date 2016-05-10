@@ -32,12 +32,6 @@ describe ActiveFedora::File do
 
     context "when the file is in an ldp:BasicContainer" do
       let(:parent) { ActiveFedora::Base.new(id: '1234') }
-      before { allow(Deprecation).to receive(:warn) }
-      let(:file) { described_class.new(parent, 'FOO1') }
-
-      it "sets the uri using the parent as the base" do
-        expect(subject).to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234/FOO1"
-      end
 
       context "and it's initialized with the URI" do
         let(:file) { described_class.new(parent.uri + "/FOO1") }

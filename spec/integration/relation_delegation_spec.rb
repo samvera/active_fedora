@@ -1,33 +1,31 @@
 require 'spec_helper'
 
-describe ActiveFedora::Model do
+describe ActiveFedora::Base do
   before(:all) do
-    module ModelIntegrationSpec
-      class Basic < ActiveFedora::Base
-        property :foo, predicate: ::RDF::URI('http://example.com/foo')
-        property :bar, predicate: ::RDF::URI('http://example.com/bar') do |index|
-          index.as :stored_searchable
-        end
+    class TestClass < ActiveFedora::Base
+      property :foo, predicate: ::RDF::URI('http://example.com/foo')
+      property :bar, predicate: ::RDF::URI('http://example.com/bar') do |index|
+        index.as :stored_searchable
+      end
 
-        def to_solr(doc = {})
-          doc = super
-          doc[ActiveFedora.index_field_mapper.solr_name('foo', :sortable)] = doc[ActiveFedora.index_field_mapper.solr_name('foo', type: :string)]
-          doc
-        end
+      def to_solr(doc = {})
+        doc = super
+        doc[ActiveFedora.index_field_mapper.solr_name('foo', :sortable)] = doc[ActiveFedora.index_field_mapper.solr_name('foo', type: :string)]
+        doc
       end
     end
   end
 
   after(:all) do
-    Object.send(:remove_const, :ModelIntegrationSpec)
+    Object.send(:remove_const, :TestClass)
   end
 
   describe "with multiple objects" do
-    let!(:instance1) { ModelIntegrationSpec::Basic.create!(foo: ['Beta'], bar: ['Chips']) }
-    let!(:instance2) { ModelIntegrationSpec::Basic.create!(foo: ['Alpha'], bar: ['Peanuts']) }
-    let!(:instance3) { ModelIntegrationSpec::Basic.create!(foo: ['Sigma'], bar: ['Peanuts']) }
+    let!(:instance1) { TestClass.create!(foo: ['Beta'], bar: ['Chips']) }
+    let!(:instance2) { TestClass.create!(foo: ['Alpha'], bar: ['Peanuts']) }
+    let!(:instance3) { TestClass.create!(foo: ['Sigma'], bar: ['Peanuts']) }
 
-    subject { ModelIntegrationSpec::Basic.where(bar: 'Peanuts') }
+    subject { TestClass.where(bar: 'Peanuts') }
 
     it "maps" do
       expect(subject.map(&:id)).to eq [instance2.id, instance3.id]

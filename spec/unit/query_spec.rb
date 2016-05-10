@@ -61,13 +61,6 @@ describe ActiveFedora::Base do
       end
     end
 
-    describe "using an options hash" do
-      it "is deprecated" do
-        expect(Deprecation).to receive(:warn)
-        SpecModel::Basic.find(id: "_ID_")
-      end
-    end
-
     context "with a blank string" do
       it 'raises ActiveFedora::ObjectNotFoundError' do
         expect {

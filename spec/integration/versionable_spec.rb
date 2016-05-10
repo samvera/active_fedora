@@ -124,15 +124,6 @@ describe ActiveFedora::Versionable do
         end
       end
     end
-
-    describe ".has_many_versions" do
-      it "has a warning" do
-        expect(Deprecation).to receive(:warn)
-        class WithVersions < ActiveFedora::Base
-          has_many_versions
-        end
-      end
-    end
   end
 
   describe ActiveFedora::NtriplesRDFDatastream do

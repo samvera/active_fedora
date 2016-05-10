@@ -5,12 +5,10 @@ describe ActiveFedora::Base do
     class MyDS < ActiveFedora::OmDatastream
     end
     class Foo < ActiveFedora::Base
-      extend Deprecation
       has_subresource 'foostream', class_name: 'MyDS'
       has_subresource 'dcstream', class_name: 'ActiveFedora::QualifiedDublinCoreDatastream'
     end
     class Bar < ActiveFedora::Base
-      extend Deprecation
       has_subresource 'barstream', class_name: 'MyDS'
     end
   end
@@ -21,16 +19,6 @@ describe ActiveFedora::Base do
     streams = f.attached_files.values.map { |x| x.class.to_s }.sort
     expect(streams.pop).to eq "MyDS"
     expect(streams.pop).to eq "ActiveFedora::QualifiedDublinCoreDatastream"
-  end
-
-  it "works for multiple types" do
-    b = Foo.new
-    f = Bar.new
-    Deprecation.silence(Foo) do
-      Deprecation.silence(Bar) do
-        expect(b.class.ds_specs).to_not eq f.class.ds_specs
-      end
-    end
   end
 
   after do

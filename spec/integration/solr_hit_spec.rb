@@ -2,40 +2,24 @@ require 'spec_helper'
 
 describe ActiveFedora::SolrHit do
   before do
-    class MyDS < ActiveFedora::OmDatastream
-      set_terminology do |t|
-        t.root(path: "durh")
-        t.foo
-        t.bar
-      end
-    end
-
     class Foo < ActiveFedora::Base
-      has_subresource 'descMetadata', class_name: 'MyDS'
-      Deprecation.silence(ActiveFedora::Attributes) do
-        has_attributes :foo, datastream: 'descMetadata', multiple: true
-        has_attributes :bar, datastream: 'descMetadata', multiple: false
-      end
       property :title, predicate: ::RDF::Vocab::DC.title, multiple: false
     end
+  end
+
+  after do
+    Object.send(:remove_const, :Foo)
   end
 
   let(:another) { Foo.create }
 
   let!(:obj) { Foo.create!(
     id: 'test-123',
-    foo: ["baz"],
-    bar: 'quix',
     title: 'My Title'
   ) }
 
   let(:doc) { obj.to_solr }
   let(:solr_hit) { described_class.new(doc) }
-
-  after do
-    Object.send(:remove_const, :Foo)
-    Object.send(:remove_const, :MyDS)
-  end
 
   describe "#reify" do
     subject { solr_hit.reify }
