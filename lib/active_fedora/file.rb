@@ -28,23 +28,20 @@ module ActiveFedora
     define_model_callbacks :update, :save, :create, :destroy
     define_model_callbacks :initialize, only: :after
 
-    # @param parent_or_url_or_hash [ActiveFedora::Base, RDF::URI, String, Hash, NilClass] the parent resource or the URI of this resource
-    # @param [String] path the path partial relative to the resource
-    # @param [Hash] _options
+    # @param [Hash, RDF::URI, String, NilClass] identifier the id (path) or URI of this resource. The hash gets passed when calling Reflection#build_association, but currently we don't do anything with it.
     # @yield [self] Yields self
     # @yieldparam [File] self the newly created file
-    def initialize(parent_or_url_or_hash = nil, _path = nil, _options = {}, &_block)
+    def initialize(identifier = nil, &_block)
+      identifier = nil if identifier.is_a? Hash
       run_callbacks(:initialize) do
-        case parent_or_url_or_hash
-        when Hash
-          @ldp_source = build_ldp_resource_via_uri
-        when nil
-          @ldp_source = build_ldp_resource_via_uri nil
-        when String, ::RDF::URI
-          id = ActiveFedora::Associations::IDComposite.new([parent_or_url_or_hash], translate_uri_to_id).first
+        case identifier
+        when nil, ::RDF::URI
+          @ldp_source = build_ldp_resource_via_uri identifier
+        when String
+          id = ActiveFedora::Associations::IDComposite.new([identifier], translate_uri_to_id).first
           @ldp_source = build_ldp_resource id
         else
-          raise "The first argument to #{self} must be a String or an ActiveFedora::Base. You provided a #{parent_or_url_or_hash.class}"
+          raise "The first argument to #{self} must be a Hash, String or RDF::URI. You provided a #{uri.class}"
         end
 
         @attributes = {}.with_indifferent_access

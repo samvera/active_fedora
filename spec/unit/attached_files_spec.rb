@@ -132,28 +132,42 @@ describe ActiveFedora::AttachedFiles do
   end
 
   describe "#attach_file" do
-    let(:dsid) { 'Abc' }
     let(:file) { ActiveFedora::File.new }
-    before do
-      subject.attach_file(file, dsid)
+
+    it "does not call save on the file" do
+      expect(file).to receive(:save).never
+      subject.attach_file(file, 'part1')
     end
 
-    it "adds the datastream to the object" do
-      expect(subject.attached_files['Abc']).to eq file
+    it "adds the file to the attached_files hash" do
+      expect {
+        subject.attach_file(file, 'part1')
+      }.to change { subject.attached_files.key?(:part1) }.from(false).to(true)
     end
 
-    describe "dynamic accessors" do
-      context "when the file is named with dash" do
-        let(:dsid) { 'eac-cpf' }
-        it "converts dashes to underscores" do
-          expect(subject.eac_cpf).to eq file
-        end
+    context "after attaching the file" do
+      let(:dsid) { 'Abc' }
+      before do
+        subject.attach_file(file, dsid)
       end
 
-      context "when the file is named with underscore" do
-        let(:dsid) { 'foo_bar' }
-        it "preserves the underscore" do
-          expect(subject.foo_bar).to eq file
+      it "adds the datastream to the object" do
+        expect(subject.attached_files['Abc']).to eq file
+      end
+
+      describe "dynamic accessors" do
+        context "when the file is named with dash" do
+          let(:dsid) { 'eac-cpf' }
+          it "converts dashes to underscores" do
+            expect(subject.eac_cpf).to eq file
+          end
+        end
+
+        context "when the file is named with underscore" do
+          let(:dsid) { 'foo_bar' }
+          it "preserves the underscore" do
+            expect(subject.foo_bar).to eq file
+          end
         end
       end
     end

@@ -126,7 +126,7 @@ describe ActiveFedora::AttachedFiles do
       let(:obj) { ActiveFedora::Base.create }
       after { obj.destroy }
 
-      let(:ds) { ActiveFedora::File.new(obj.uri + '/DS1').tap { |ds| ds.content = "foo"; ds.save } }
+      let(:ds) { ActiveFedora::File.new(obj.uri + '/DS1') { |ds| ds.content = "foo"; ds.save } }
 
       it "retrieves blobs that match the saved blobs" do
         obj.attach_file(ds, 'DS1')

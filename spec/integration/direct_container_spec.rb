@@ -226,7 +226,7 @@ describe "Direct containers" do
       end
 
       context "and it doesn't contain the file" do
-        let!(:file2) { ActiveFedora::File.new.tap { |f| f.content = 'hmm'; f.save } }
+        let!(:file2) { ActiveFedora::File.new { |f| f.content = 'hmm'; f.save } }
         subject { foo.reload.files.include? file2 }
         it { is_expected.to be false }
       end
@@ -241,7 +241,7 @@ describe "Direct containers" do
       end
 
       context "and it doesn't contain the file" do
-        let!(:file2) { ActiveFedora::File.new.tap { |f| f.content = 'hmm'; f.save } }
+        let!(:file2) { ActiveFedora::File.new { |f| f.content = 'hmm'; f.save } }
         subject { foo.files.include? file2 }
         it { is_expected.to be false }
       end
