@@ -48,7 +48,7 @@ describe "Direct containers" do
         describe "#append" do
           let(:file2) { o.files.build }
           it "has two files" do
-            expect(o.files).to eq [file, file2]
+            expect(o.files).to contain_exactly file, file2
           end
 
           context "and then saved/reloaded" do
@@ -57,7 +57,7 @@ describe "Direct containers" do
               o.save!
             end
             it "has two files" do
-              expect(reloaded.files).to eq [file, file2]
+              expect(reloaded.files).to contain_exactly file, file2
             end
           end
         end
@@ -171,7 +171,7 @@ describe "Direct containers" do
         end
 
         it "deletes the contained resource directly" do
-          expect(history.files).to eq [file1, file2]
+          expect(history.files).to contain_exactly file1, file2
           file1.delete
           history.reload
           expect(history.files).to eq [file2]
@@ -191,7 +191,7 @@ describe "Direct containers" do
         end
 
         it "deletes the contained resource via the collection proxy" do
-          expect(history.reload.files).to eq [file1, file2]
+          expect(history.reload.files).to contain_exactly file1, file2
           history.files.delete(file1)
           expect(history.reload.files).to eq [file2]
         end

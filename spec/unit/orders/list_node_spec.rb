@@ -4,7 +4,7 @@ RSpec.describe ActiveFedora::Orders::ListNode do
   subject { described_class.new(node_cache, rdf_subject, graph) }
   let(:node_cache) { {} }
   let(:rdf_subject) { RDF::URI("#bla") }
-  let(:graph) { RDF::Graph.new }
+  let(:graph) { ActiveTriples::Resource.new }
 
   describe "#target" do
     context "when a target is set" do

@@ -9,7 +9,7 @@ describe "Nesting attribute behavior of RDF resources" do
     end
 
     class CustomName < ActiveFedora::Base
-      property :pref_label, predicate: ::RDF::SKOS.prefLabel, multiple: false
+      property :pref_label, predicate: ::RDF::Vocab::SKOS.prefLabel, multiple: false
     end
 
     class CustomSource < ActiveFedora::Base
@@ -52,7 +52,7 @@ describe "Nesting attribute behavior of RDF resources" do
 
       it "sets the attributes" do
         expect(subject.topic.size).to eq 2
-        expect(subject.topic.map(&:subject)).to eq [['Foo'], ['Bar']]
+        expect(subject.topic.map(&:subject)).to contain_exactly ['Foo'], ['Bar']
       end
 
       it "marks the attributes as changed" do

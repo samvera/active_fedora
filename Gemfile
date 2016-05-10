@@ -8,7 +8,7 @@ gem 'byebug' unless ENV['TRAVIS']
 gem 'pry-byebug' unless ENV['CI']
 
 gem 'activemodel', ENV['RAILS_VERSION'] if ENV['RAILS_VERSION']
-gem 'active-triples', github: 'ActiveTriples/ActiveTriples', branch: :develop
+gem 'active-triples', path: "/Users/tterrell/Projects/ActiveTriples"#github: 'ActiveTriples/ActiveTriples', branch: "length"
 
 group :test do
   gem 'simplecov', require: false

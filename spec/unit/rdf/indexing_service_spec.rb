@@ -90,7 +90,7 @@ describe ActiveFedora::RDF::IndexingService do
 
     it "returns the right values" do
       expect(fields["related_url"].values).to eq ["http://example.org/blogtastic/"]
-      expect(fields["based_near"].values).to eq ["Tacoma, WA", "Renton, WA"]
+      expect(fields["based_near"].values).to contain_exactly "Tacoma, WA", "Renton, WA"
     end
 
     it "returns the right type information" do

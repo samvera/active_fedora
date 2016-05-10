@@ -67,13 +67,13 @@ describe ActiveFedora::Querying do
         expect(ModelIntegrationSpec::Basic.where('foo' => 'Beta')).to eq [test_instance1]
       end
       it "orders" do
-        expect(ModelIntegrationSpec::Basic.order(ActiveFedora.index_field_mapper.solr_name('foo', :sortable) + ' asc')).to eq [test_instance2, test_instance1, test_instance3]
+        expect(ModelIntegrationSpec::Basic.order(ActiveFedora.index_field_mapper.solr_name('foo', :sortable) + ' asc')).to contain_exactly test_instance2, test_instance1, test_instance3
       end
       it "limits" do
         expect(ModelIntegrationSpec::Basic.limit(1)).to eq [test_instance1]
       end
       it "offsets" do
-        expect(ModelIntegrationSpec::Basic.offset(1)).to eq [test_instance2, test_instance3]
+        expect(ModelIntegrationSpec::Basic.offset(1)).to contain_exactly test_instance2, test_instance3
       end
 
       it "chains queries" do
@@ -126,7 +126,7 @@ describe ActiveFedora::Querying do
       end
       it "logs an error" do
         expect(ActiveFedora::Base.logger).to receive(:error).with("Although #{id} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
-        expect(ModelIntegrationSpec::Basic.all).to eq [test_instance1, test_instance3]
+        expect(ModelIntegrationSpec::Basic.all).to contain_exactly test_instance1, test_instance3
       end
     end
   end

@@ -118,8 +118,8 @@ describe "Nesting attribute behavior of RDFDatastream" do
         it 'has attributes' do
           expect(subject.topic[0].elementList.first[0].elementValue).to eq ["Cosmology"]
           expect(subject.topic[1].elementList.first[0].elementValue).to eq ["Quantum Behavior"]
-          expect(subject.personalName.first.elementList.first.fullNameElement).to eq ["Jefferson, Thomas"]
-          expect(subject.personalName.first.elementList.first.dateNameElement).to eq ["1743-1826"]
+          expect(subject.personalName.first.elementList.first.fullNameElement).to contain_exactly "Jefferson, Thomas"
+          expect(subject.personalName.first.elementList.first.dateNameElement).to contain_exactly "1743-1826"
         end
 
         it 'builds nodes with ids' do
@@ -168,7 +168,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
       it "updates nested objects" do
         subject.parts_attributes = [{ id: replace_object_id, label: "Universal Joint" }, { label: "Oil Pump" }, { id: remove_object_id, _destroy: '1', label: "bar1 uno" }]
 
-        expect(subject.parts.map { |p| p.label.first }).to eq ['Alternator', 'Universal Joint', 'Transmission', 'Oil Pump']
+        expect(subject.parts.map { |p| p.label.first }).to contain_exactly 'Alternator', 'Universal Joint', 'Transmission', 'Oil Pump'
       end
       it "create a new object when the id is provided" do
         subject.parts_attributes = [{ id: 'http://example.com/part#1', label: "Universal Joint" }]

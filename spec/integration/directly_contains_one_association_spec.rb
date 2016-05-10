@@ -91,7 +91,7 @@ describe ActiveFedora::Base do
       replacement_file.content = "I'm a replacement"
       page_image.save
       expect(subject).to_not include(primary_file)
-      expect(subject).to eq([a_file, replacement_file])
+      expect(subject).to contain_exactly(a_file, replacement_file)
       expect(reloaded_page_image.primary_file).to eq(replacement_file)
     end
   end
