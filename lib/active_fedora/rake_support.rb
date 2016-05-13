@@ -9,7 +9,12 @@ def with_server(environment)
 
   ENV["#{environment}_SERVER_STARTED"] = 'true'
 
-  SolrWrapper.wrap(load_config(:solr, environment)) do |solr|
+  # setting port: nil assigns a random port.
+  solr_defaults = { port: nil, verbose: true, managed: true }
+  fcrepo_defaults = { port: nil, verbose: true, managed: true,
+                      enable_jms: false, fcrepo_home_dir: "fcrepo4-#{environment}-data" }
+
+  SolrWrapper.wrap(load_config(:solr, environment, solr_defaults)) do |solr|
     ENV["SOLR_#{environment.upcase}_PORT"] = solr.port.to_s
     solr_config_path = File.join('solr', 'config')
     # Check to see if configs exist in a path relative to the working directory
@@ -19,7 +24,7 @@ def with_server(environment)
       solr_config_path = File.join(File.expand_path("../..", File.dirname(__FILE__)), "solr", "config")
     end
     solr.with_collection(name: "hydra-#{environment}", dir: solr_config_path) do
-      FcrepoWrapper.wrap(load_config(:fcrepo, environment)) do |fcrepo|
+      FcrepoWrapper.wrap(load_config(:fcrepo, environment, fcrepo_defaults)) do |fcrepo|
         ENV["FCREPO_#{environment.upcase}_PORT"] = fcrepo.port.to_s
         yield
       end
@@ -30,8 +35,8 @@ end
 
 private
 
-def load_config(service, environment)
+def load_config(service, environment, defaults)
   config_file = environment == 'test' ? "config/#{service}_wrapper_test.yml" : ".#{service}_wrapper"
   return { config: config_file } if File.exist?(config_file)
-  {}
+  defaults
 end
