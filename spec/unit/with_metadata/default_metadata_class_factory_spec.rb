@@ -12,7 +12,16 @@ describe ActiveFedora::WithMetadata::DefaultMetadataClassFactory do
   describe "::build" do
     it "sets MetadataNode to the default schema using the default strategy" do
       expect(parent).to receive(:const_set)
-      expect(parent).to receive(:delegate).at_least(8).times
+      expect(parent).to receive(:delegate).with(:label, :label=, :label_changed?, to: :metadata_node)
+      expect(parent).to receive(:delegate).with(:file_name, :file_name=, :file_name_changed?, to: :metadata_node)
+      expect(parent).to receive(:delegate).with(:file_size, :file_size=, :file_size_changed?, to: :metadata_node)
+      expect(parent).to receive(:delegate).with(:date_created, :date_created=, :date_created_changed?, to: :metadata_node)
+      expect(parent).to receive(:delegate).with(:date_modified,
+                                                :date_modified=,
+                                                :date_modified_changed?,
+                                                to: :metadata_node)
+      expect(parent).to receive(:delegate).with(:byte_order, :byte_order=, :byte_order_changed?, to: :metadata_node)
+      expect(parent).to receive(:delegate).with(:file_hash, :file_hash=, :file_hash_changed?, to: :metadata_node)
       subject.class.build(parent)
     end
   end

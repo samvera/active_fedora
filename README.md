@@ -9,7 +9,7 @@ Description
 ActiveFedora is a Ruby gem for creating and
 managing objects in the Fedora Repository Architecture
 ([http://fedora-commons.org](http://fedora-commons.org)). ActiveFedora
-is loosely based on “ActiveRecord” in Rails. Version 9.0+ works with Fedora 4 and prior versions work on Fedora 3. Version 9.2+ works with Solr 4.10.
+is loosely based on “ActiveRecord” in Rails. Version 9.0+ works with Fedora 4 and prior versions work on Fedora 3. Version 9.2+ works with Solr 4.10. Version 10.0+ works with Fedora >= 4.5.1.
 
 Getting Help
 ------------
@@ -101,4 +101,3 @@ Creator: Matt Zumwalt ([MediaShelf](http://yourmediashelf.com))
 Developers:
 Justin Coyne, McClain Looney & Eddie Shin
 ([MediaShelf](http://yourmediashelf.com)), Rick Johnson (Notre Dame)
-

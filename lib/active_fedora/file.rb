@@ -50,6 +50,12 @@ module ActiveFedora
       end
     end
 
+    def save
+      super.tap do
+        metadata.save if metadata.changed?
+      end
+    end
+
     def described_by
       raise "#{self} isn't persisted yet" if new_record?
       links['describedby'].first
@@ -99,11 +105,8 @@ module ActiveFedora
     end
 
     def attribute_will_change!(attr)
-      if attr == 'content'
-        changed_attributes['content'] = true
-      else
-        super
-      end
+      return super unless attr == 'content'
+      changed_attributes['content'] = true
     end
 
     def remote_content
@@ -124,8 +127,13 @@ module ActiveFedora
       local_or_remote_content(false) != @ds_content
     end
 
+    def metadata_changed?
+      return false if new_record? || links['describedby'].blank?
+      metadata.changed?
+    end
+
     def changed?
-      super || content_changed?
+      super || content_changed? || metadata_changed?
     end
 
     def inspect
