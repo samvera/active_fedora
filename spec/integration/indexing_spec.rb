@@ -56,4 +56,35 @@ describe ActiveFedora::Base do
       end
     end
   end
+
+  describe "with an autosave association, where some records are deleted" do
+    before do
+      class GenericFile < ActiveFedora::Base
+        has_many :permissions, predicate: ::RDF::Vocab::ACL.accessTo
+        accepts_nested_attributes_for :permissions, allow_destroy: true
+        property :title, predicate: ::RDF::DC.title
+
+        def to_solr
+          super.tap do |doc|
+            doc['permissions_ssim'] = permission_ids
+          end
+        end
+      end
+
+      class Permission < ActiveFedora::Base
+        belongs_to :generic_file, predicate: ::RDF::Vocab::ACL.accessTo
+      end
+    end
+
+    let(:p1) { Permission.create! }
+    let(:p2) { Permission.create! }
+    let(:gf) { GenericFile.create(permissions: [p1, p2]) }
+
+    before { gf.update(permissions_attributes: [{ id: p1.id, _destroy: 'true' }]) }
+
+    it "saves to solr correctly" do
+      result = ActiveFedora::SolrService.query("id:#{gf.id}").first['permissions_ssim']
+      expect(result).to eq [p2.id]
+    end
+  end
 end
