@@ -1,5 +1,3 @@
-require 'deprecation'
-
 module ActiveFedora
   # An LDP NonRDFSource. The base class for a bytestream stored in the repository.
   class File
