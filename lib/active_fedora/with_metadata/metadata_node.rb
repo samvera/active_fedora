@@ -49,6 +49,11 @@ module ActiveFedora
         end
       end
 
+      # Conform to the ActiveFedora::Base API
+      def association(_)
+        []
+      end
+
       private
 
         def changes_for_update
