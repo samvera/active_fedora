@@ -43,7 +43,7 @@ describe ActiveFedora::WithMetadata do
       it { is_expected.to respond_to(:file_name) }
       it { is_expected.to respond_to(:file_size) }
       it { is_expected.to respond_to(:date_created) }
-      it { is_expected.to respond_to(:has_mime_type) }
+      it { is_expected.to respond_to(:mime_type) }
       it { is_expected.to respond_to(:date_modified) }
       it { is_expected.to respond_to(:byte_order) }
       it { is_expected.to respond_to(:file_hash) }

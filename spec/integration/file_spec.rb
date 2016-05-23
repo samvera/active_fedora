@@ -122,7 +122,7 @@ describe ActiveFedora::File do
       end
 
       it "is not changed" do
-        expect(test_object.attached_files[path]).to_not be_changed
+        expect(test_object.attached_files[path]).to_not be_content_changed
       end
 
       it "is able to read the content from fedora" do

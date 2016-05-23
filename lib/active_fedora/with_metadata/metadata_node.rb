@@ -4,6 +4,12 @@ module ActiveFedora
       include ActiveModel::Dirty
       attr_reader :file
 
+      # mime_type is treated differently than all the other metadata properties,
+      # in that it can be set at file-create time (as a HTTP post header) and be
+      # updated (using SPARQL update) on the metadata-node.  Therefore, it is in
+      # this class rather than being in the DefaultSchema.
+      property :mime_type, predicate: ::RDF::Vocab::EBUCore.hasMimeType
+
       def initialize(file)
         @file = file
         super(file.uri, ldp_source.graph)
@@ -45,7 +51,7 @@ module ActiveFedora
 
       def changed_attributes
         super.tap do |changed|
-          changed['type'] = true if type.present?
+          changed['type'] = true if type.present? && new_record?
         end
       end
 
