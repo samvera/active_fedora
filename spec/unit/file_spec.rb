@@ -7,6 +7,21 @@ describe ActiveFedora::File do
 
   it { is_expected.not_to be_metadata }
 
+  describe "#save!" do
+    context "when updating metadata" do
+      before do
+        file.content = 'foo'
+        file.save!
+        file.mime_type = 'application/pdf'
+      end
+
+      it "Updates metadata" do
+        expect(file.metadata).to receive(:save)
+        file.save!
+      end
+    end
+  end
+
   describe "#behaves_like_io?" do
     subject { file.send(:behaves_like_io?, object) }
 

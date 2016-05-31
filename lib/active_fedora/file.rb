@@ -48,12 +48,6 @@ module ActiveFedora
       end
     end
 
-    def save
-      super.tap do
-        metadata.save if metadata.changed?
-      end
-    end
-
     def described_by
       raise "#{self} isn't persisted yet" if new_record?
       links['describedby'].first
@@ -175,6 +169,12 @@ module ActiveFedora
       end
 
     private
+
+      def create_or_update(*options)
+        super.tap do
+          metadata.save if metadata.changed?
+        end
+      end
 
       # Rack::Test::UploadedFile is often set via content=, however it's not an IO, though it wraps an io object.
       def behaves_like_io?(obj)
