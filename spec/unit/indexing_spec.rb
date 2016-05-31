@@ -71,10 +71,6 @@ describe ActiveFedora::Indexing do
       expect(solr_doc[:id]).to eql("changeme:123")
     end
 
-    it "adds self.class as the :active_fedora_model" do
-      expect(subject[ActiveFedora.index_field_mapper.solr_name("active_fedora_model", :stored_sortable)]).to eql "SpecNode"
-    end
-
     context "with attached files" do
       let(:mock1) { double("ds1") }
       let(:mock2) { double("ds2") }

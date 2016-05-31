@@ -102,7 +102,6 @@
        -->
         <str name="qf">
           id
-          active_fedora_model_ssi
           title_tesim
           author_tesim
           subject_tesim
