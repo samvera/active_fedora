@@ -38,7 +38,6 @@ module ActiveFedora
       solr_doc = {}
       Solrizer.set_field(solr_doc, 'system_create', c_time, :stored_sortable)
       Solrizer.set_field(solr_doc, 'system_modified', m_time, :stored_sortable)
-      Solrizer.set_field(solr_doc, 'active_fedora_model', object.class.inspect, :stored_sortable)
       solr_doc[QueryResultBuilder::HAS_MODEL_SOLR_FIELD] = object.has_model
       solr_doc[ActiveFedora.id_field.to_sym] = object.id
       solr_doc[self.class.profile_solr_name] = profile_service.new(object).export

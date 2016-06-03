@@ -95,11 +95,11 @@ describe ActiveFedora::Base do
     end
 
     it "queries for empty strings" do
-      expect(SpecModel::Basic.where(active_fedora_model_ssi: '').count).to eq 0
+      expect(SpecModel::Basic.where(has_model_ssim: '').count).to eq 0
     end
 
     it 'queries for empty arrays' do
-      expect(SpecModel::Basic.where(active_fedora_model_ssi: []).count).to eq 0
+      expect(SpecModel::Basic.where(has_model_ssim: []).count).to eq 0
     end
 
     it "adds options" do
