@@ -119,7 +119,7 @@ describe ActiveFedora::Base do
   describe '#find_each' do
     before { allow(described_class).to receive(:relation).and_return(relation) }
     let(:relation) { ActiveFedora::Relation.new(SpecModel::Basic) }
-    it "queries solr for all objects with :active_fedora_model_s of self.class" do
+    it "queries solr for all objects with :has_model_ssim of self.class" do
       mock_docs = [{ "id" => "changeme-30" }, { "id" => "changeme-22" }]
       expect(mock_docs).to receive(:has_next?).and_return(false)
       expect(ActiveFedora::SolrService.instance.conn).to receive(:paginate)
