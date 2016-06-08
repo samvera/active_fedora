@@ -1,3 +1,3 @@
 module ActiveFedora
-  VERSION = "10.0.0.beta4".freeze
+  VERSION = "10.0.0".freeze
 end
