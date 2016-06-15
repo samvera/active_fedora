@@ -41,14 +41,6 @@ namespace :active_fedora do
     spec.rcov = true
   end
 
-  desc "Copies the default SOLR config for the bundled Testing Server"
-  task :configure_jetty do
-    FileList['lib/generators/active_fedora/config/solr/templates/solr_conf/conf/*'].each do |f|
-      cp("#{f}", 'jetty/solr/development-core/conf/', :verbose => true)
-      cp("#{f}", 'jetty/solr/test-core/conf/', :verbose => true)
-    end
-  end
-
   desc "CI build"
   task :ci do
     ENV['environment'] = "test"
