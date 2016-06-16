@@ -4,8 +4,17 @@ module ActiveFedora
     include RDF::DatastreamIndexing
     include ActiveTriples::Properties
     include ActiveTriples::Reflection
+    extend Deprecation
 
     delegate :rdf_subject, :set_value, :get_values, :attributes=, to: :resource
+    def initialize(*args)
+      super
+      deprecation_warning
+    end
+
+    def deprecation_warning
+      Deprecation.warn(RDFDatastream, "RDFDatastream is deprecated and will be removed in ActiveFedora 11", caller(2))
+    end
 
     class << self
       def rdf_subject(&block)

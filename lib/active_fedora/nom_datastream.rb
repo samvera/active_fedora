@@ -3,10 +3,16 @@ require "nom"
 module ActiveFedora
   class NomDatastream < File
     include Datastreams::NokogiriDatastreams
+    extend Deprecation
 
     def self.set_terminology(options = {}, &block)
       @terminology_options = options || {}
       @terminology = block
+    end
+
+    def initialize(*args)
+      super
+      Deprecation.warn(NomDatastream, "NomDatastream is deprecated and will be removed in ActiveFedora 11")
     end
 
     class << self
