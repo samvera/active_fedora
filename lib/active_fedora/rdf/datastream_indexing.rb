@@ -39,5 +39,11 @@ module ActiveFedora::RDF
       def apply_prefix(name, file_path)
         prefix(file_path) + name.to_s
       end
+
+      # The string to prefix all solr fields with. Override this method if you want
+      # a prefix other than the default
+      def prefix(path)
+        path ? "#{path.underscore}__" : ''
+      end
   end
 end
