@@ -122,5 +122,13 @@ module ActiveFedora
       result = om_update_values(params)
       result
     end
+
+    protected
+
+      # The string to prefix all solr fields with. Override this method if you want
+      # a prefix other than the default
+      def prefix(path)
+        path ? "#{path.underscore}__" : ''
+      end
   end
 end
