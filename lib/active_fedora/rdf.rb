@@ -4,7 +4,6 @@ module ActiveFedora
     autoload :DatastreamIndexing
     autoload :Fcrepo
     autoload :IndexingService
-    autoload :Identifiable
     autoload :Persistence
     autoload :ProjectHydra
     autoload :FieldMap
