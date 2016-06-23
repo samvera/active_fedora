@@ -33,28 +33,6 @@ module ActiveFedora
       solr_doc.merge super({}).each_with_object({}) { |(key, value), new| new[[prefix, key].join] = value }
     end
 
-    # ** Experimental **
-    # @return [Boolean] true if either the key for name exists in solr or if its string value exists
-    # @param [String] name Name of key to look for
-    # @param [Solr::Document] solr_doc Solr doc to query
-    def has_solr_name?(name, solr_doc = {})
-      !solr_doc[name].nil? || !solr_doc[name.to_s].nil?
-    end
-
-    # ** Experimental **
-    # @return true if the term_pointer contains an index
-    # ====Example:
-    #     [:image, {:title_set=>1}, :title] return true
-    #     [:image, :title_set, :title]      return false
-    def is_hierarchical_term_pointer?(*term_pointer)
-      if term_pointer.length > 1
-        term_pointer.each do |pointer|
-          return true if pointer.is_a?(Hash)
-        end
-      end
-      false
-    end
-
     # Update field values within the current datastream using {#update_values}, which is a wrapper for {http://rdoc.info/gems/om/1.2.4/OM/XML/TermValueOperators#update_values-instance_method OM::TermValueOperators#update_values}
     # Ignores any fields from params that this datastream's Terminology doesn't recognize
     #

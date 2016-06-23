@@ -256,37 +256,6 @@ describe ActiveFedora::OmDatastream do
     end
   end
 
-  describe '.has_solr_name?' do
-    let(:name0_role0) { ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_0_role_0_roleTerm", type: :string) }
-    let(:name1_role1) { ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_1_role_1_roleTerm", type: :string) }
-    let(:solr_doc) do
-      { "id" => "mods_article1",
-        ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_role_roleTerm", type: :string) => ["creator", "submitter", "teacher"],
-        ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_0_role", type: :string) => "\r\ncreator\r\nsubmitter\r\n",
-        ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_1_role", type: :string) => "\r\n teacher \r\n",
-        name0_role0 => "creator",
-        ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_0_role_1_roleTerm", type: :string) => "submitter",
-        ActiveFedora.index_field_mapper.solr_name("desc_metadata__name_1_role_0_roleTerm", type: :string) => ["teacher"] }
-    end
-
-    it "returns true if the given key exists in the solr document passed in" do
-      expect(subject).to have_solr_name(name0_role0, solr_doc)
-      expect(subject).to have_solr_name(name0_role0.to_sym, solr_doc)
-      expect(subject).to_not have_solr_name(name1_role1, solr_doc)
-      # if not doc passed in should be new empty solr doc and always return false
-      expect(subject).to_not have_solr_name(name0_role0)
-    end
-  end
-
-  describe '.is_hierarchical_term_pointer?' do
-    it "returns true only if the pointer passed in is an array that contains a hash" do
-      expect(subject.is_hierarchical_term_pointer?(*[:image, { tag1: 1 }, :tag2])).to be true
-      expect(subject.is_hierarchical_term_pointer?(*[:image, :tag1, { tag2: 1 }])).to be true
-      expect(subject.is_hierarchical_term_pointer?(*[:image, :tag1, :tag2])).to be false
-      expect(subject.is_hierarchical_term_pointer?(nil)).to be false
-    end
-  end
-
   describe '.update_values' do
     subject { described_class.new }
 
