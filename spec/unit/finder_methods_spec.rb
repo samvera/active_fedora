@@ -43,8 +43,8 @@ describe ActiveFedora::FinderMethods do
 
     context "when value is an array" do
       let(:value) { ['one', 'four'] }
-      it { is_expected.to eq "_query_:\"{!raw f=library_id}one\" AND " \
-                             "_query_:\"{!raw f=library_id}four\"" }
+      it { is_expected.to eq "(_query_:\"{!raw f=library_id}one\" AND " \
+                             "_query_:\"{!raw f=library_id}four\")" }
     end
   end
 end

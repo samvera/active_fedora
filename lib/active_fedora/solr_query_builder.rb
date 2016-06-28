@@ -32,7 +32,7 @@ module ActiveFedora
       #   # => _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ComplexCollection" OR _query_:"{!raw f=has_model_ssim}info:fedora/afmodel:ActiveFedora_Base"
       #
       #   construct_query_for_rel [[Book.reflect_on_association(:library), "foo/bar/baz"]]
-      def construct_query_for_rel(field_pairs, join_with = ' AND ')
+      def construct_query_for_rel(field_pairs, join_with = default_join_with)
         field_pairs = field_pairs.to_a if field_pairs.is_a? Hash
         construct_query(property_values_to_solr(field_pairs), join_with)
       end
@@ -44,8 +44,15 @@ module ActiveFedora
       # @example
       #   construct_query([['library_id_ssim', '123'], ['owner_ssim', 'Fred']])
       #   # => "_query_:\"{!raw f=library_id_ssim}123\" AND _query_:\"{!raw f=owner_ssim}Fred\""
-      def construct_query(field_pairs, join_with = ' AND ')
-        pairs_to_clauses(field_pairs).join(join_with)
+      def construct_query(field_pairs, join_with = default_join_with)
+        clauses = pairs_to_clauses(field_pairs)
+        return "" if clauses.count == 0
+        return clauses.first if clauses.count == 1
+        "(#{clauses.join(join_with)})"
+      end
+
+      def default_join_with
+        ' AND '
       end
 
       private
