@@ -75,7 +75,7 @@ module ActiveFedora
   module AutosaveAssociation
     extend ActiveSupport::Concern
 
-    ASSOCIATION_TYPES = %w( HasMany BelongsTo HasAndBelongsToMany DirectlyContains IndirectlyContains).freeze
+    ASSOCIATION_TYPES = %w(HasMany BelongsTo HasAndBelongsToMany DirectlyContains IndirectlyContains).freeze
 
     module AssociationBuilderExtension #:nodoc:
       def self.included(base)

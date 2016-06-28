@@ -1,5 +1,3 @@
-require: rubocop-rspec
-
 AllCops:
   TargetRubyVersion: 2.2
   DisplayCopNames: true
@@ -14,6 +12,7 @@ Lint/HandleExceptions:
     - 'spec/unit/**/*'
     - 'spec/integration/**/*'
     - 'lib/active_fedora/cleaner.rb'
+    - 'lib/active_fedora/associations/builder/has_subresource.rb'
     - 'lib/active_fedora/associations/builder/contains.rb'
 
 Lint/AssignmentInCondition:
@@ -45,6 +44,9 @@ Metrics/CyclomaticComplexity:
     - 'lib/active_fedora/file_configurator.rb'
     - 'lib/active_fedora/file.rb'
     - 'lib/active_fedora/datastreams/nokogiri_datastreams.rb'
+    - 'lib/active_fedora/attribute_methods.rb'
+    - 'lib/active_fedora/scoping/named.rb'
+    - 'lib/active_fedora/inheritance.rb'
 
 Metrics/PerceivedComplexity:
   Exclude:
@@ -58,6 +60,10 @@ Metrics/PerceivedComplexity:
     - 'lib/active_fedora/associations/has_and_belongs_to_many_association.rb'
     - 'lib/active_fedora/associations/builder/indirectly_contains.rb'
     - 'lib/active_fedora/associations/builder/directly_contains_one.rb'
+    - 'lib/active_fedora/associations/collection_association.rb'
+    - 'lib/active_fedora/attribute_methods.rb'
+    - 'lib/active_fedora/scoping/named.rb'
+    - 'lib/active_fedora/inheritance.rb'
 
 Metrics/ModuleLength:
   Exclude:
@@ -67,6 +73,7 @@ Metrics/ModuleLength:
     - 'lib/active_fedora/attributes.rb'
     - 'lib/active_fedora/autosave_association.rb'
     - 'lib/active_fedora/attached_files.rb'
+    - 'lib/active_fedora/nested_attributes.rb'
 
 Metrics/ClassLength:
   Exclude:
@@ -76,8 +83,13 @@ Metrics/ClassLength:
     - 'lib/active_fedora/qualified_dublin_core_datastream.rb'
     - 'lib/active_fedora/file_configurator.rb'
     - 'lib/active_fedora/file.rb'
+    - 'lib/active_fedora/associations/association.rb'
+    - 'lib/active_fedora/associations/builder/association.rb'
     - 'lib/active_fedora/associations/collection_proxy.rb'
     - 'lib/active_fedora/associations/collection_association.rb'
+    - 'lib/active_fedora/reflection.rb'
+    - 'lib/active_fedora/orders/ordered_list.rb'
+    - 'lib/active_fedora/solr_service.rb'
 
 Metrics/MethodLength:
   Enabled: false
@@ -101,6 +113,7 @@ Style/AccessorMethodName:
 
 Style/PredicateName:
   Exclude:
+    - 'lib/active_fedora/attribute_methods.rb'
     - 'lib/active_fedora/relation/finder_methods.rb'
     - 'lib/active_fedora/versionable.rb'
     - 'lib/active_fedora/reflection.rb'
@@ -113,10 +126,14 @@ Style/PredicateName:
     - 'lib/active_fedora/attached_files.rb'
     - 'lib/active_fedora/associations.rb'
     - 'lib/active_fedora/association_hash.rb'
+    - 'lib/active_fedora/aggregation/list_source.rb'
+    - 'lib/active_fedora/associations/builder/aggregation.rb'
 
 Style/GuardClause:
   Exclude:
     - 'lib/active_fedora/autosave_association.rb'
+    - 'lib/active_fedora/associations/builder/belongs_to.rb'
+    - 'lib/active_fedora/associations/builder/has_and_belongs_to_many.rb'
 
 Style/TrivialAccessors:
   Exclude:
@@ -203,6 +220,10 @@ Style/FileName:
     - 'lib/active-fedora.rb'
     - 'spec/samples/hydra-mods_article_datastream.rb'
 
+Style/ZeroLengthPredicate:
+  Exclude:
+    - 'lib/active_fedora/file/attributes.rb'
+
 Rails:
   Enabled: true
 
@@ -214,6 +235,9 @@ Rails/Date:
   Enabled: false
 
 Rails/TimeZone:
+  Enabled: false
+
+RSpec/AnyInstance:
   Enabled: false
 
 RSpec/ExampleWording:
@@ -238,3 +262,6 @@ RSpec/DescribeClass:
 RSpec/DescribedClass:
   Exclude:
     - 'spec/unit/finder_methods_spec.rb'
+
+RSpec/NotToNot:
+  Enabled: false

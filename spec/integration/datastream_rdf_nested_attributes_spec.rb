@@ -91,8 +91,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
               }
               # , "Hemings, Sally"
             ]
-          }
-        }
+          } }
       end
 
       describe "on lists" do
@@ -160,7 +159,8 @@ describe "Nesting attribute behavior of RDFDatastream" do
           { label: 'Alternator' },
           { label: 'Distributor' },
           { label: 'Transmission' },
-          { label: 'Fuel Filter' }] }
+          { label: 'Fuel Filter' }
+        ] }
       end
       let(:replace_object_id) { subject.parts[1].rdf_subject.to_s }
       let(:remove_object_id) { subject.parts[3].rdf_subject.to_s }
