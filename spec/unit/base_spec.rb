@@ -72,8 +72,8 @@ describe ActiveFedora::Base do
     context "on an inherited class" do
       before do
         class Agent < ActiveFedora::Base
-          rdf_label ::RDF::FOAF.name
-          property :foaf_name, predicate: ::RDF::FOAF.name
+          rdf_label ::RDF::Vocab::FOAF.name
+          property :foaf_name, predicate: ::RDF::Vocab::FOAF.name
         end
         class Person < Agent
           rdf_label ::RDF::URI('http://example.com/foo')

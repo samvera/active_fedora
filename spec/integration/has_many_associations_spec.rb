@@ -161,7 +161,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
 
     it "only returns relationships of the correct class" do
       @book.reload
-      expect(@book.people).to eq [@person1, @person2]
+      expect(@book.people).to contain_exactly @person1, @person2
       expect(@book.collections).to eq []
     end
   end
@@ -222,7 +222,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       end
       it "does not restrict relationships" do
         @book.reload
-        expect(@book.attachments).to eq [@image, @pdf]
+        expect(@book.attachments).to contain_exactly @image, @pdf
       end
     end
 
@@ -240,7 +240,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       it "does not restrict relationships" do
         email.attachment_ids = [image.id, pdf.id]
         email.reload
-        expect(email.attachments).to eq [image, pdf]
+        expect(email.attachments).to contain_exactly image, pdf
       end
     end
   end
@@ -409,7 +409,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       subject { library.books(true) }
 
       it "saves the new title" do
-        expect(subject.first.title).to eql ["Better book"]
+        expect(subject.first.title).to eq ["Better book"]
       end
     end
   end

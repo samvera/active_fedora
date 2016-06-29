@@ -40,11 +40,11 @@ module ActiveFedora
     include Associations
     include AutosaveAssociation
     include NestedAttributes
-    include Reflection
     include Serialization
 
     include AttachedFiles
     include FedoraAttributes
+    include Reflection
     include AttributeMethods
     include Attributes
     include Versionable

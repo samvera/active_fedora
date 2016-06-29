@@ -97,7 +97,7 @@ describe ActiveFedora::Orders do
         subject.ordered_members = [member_2, member_2]
         expect(subject.ordered_members).to eq [member_2, member_2]
         # Removing from ordering is not the same as removing from aggregation.
-        expect(subject.members).to eq [member, member_2]
+        expect(subject.members).to contain_exactly member, member_2
       end
     end
     describe "+=" do

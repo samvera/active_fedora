@@ -104,8 +104,8 @@ describe "Nesting attribute behavior of RDFDatastream" do
         end
         it "accepts an array" do
           subject.elementList_attributes = [{ topicElement_attributes: [{ elementValue: "Quantum Behavior" }, { elementValue: "Wave Function" }] }]
-          expect(subject.elementList.first[0].elementValue).to eq ["Quantum Behavior"]
-          expect(subject.elementList.first[1].elementValue).to eq ["Wave Function"]
+          element_values = subject.elementList.first.map(&:elementValue)
+          expect(element_values).to contain_exactly ["Quantum Behavior"], ["Wave Function"]
         end
       end
 
@@ -116,14 +116,15 @@ describe "Nesting attribute behavior of RDFDatastream" do
         end
 
         it 'has attributes' do
-          expect(subject.topic[0].elementList.first[0].elementValue).to eq ["Cosmology"]
-          expect(subject.topic[1].elementList.first[0].elementValue).to eq ["Quantum Behavior"]
-          expect(subject.personalName.first.elementList.first.fullNameElement).to eq ["Jefferson, Thomas"]
-          expect(subject.personalName.first.elementList.first.dateNameElement).to eq ["1743-1826"]
+          element_values = subject.topic.map { |x| x.elementList.first[0].elementValue }
+          expect(element_values).to contain_exactly ["Cosmology"], ["Quantum Behavior"]
+          expect(subject.personalName.first.elementList.first.fullNameElement).to contain_exactly "Jefferson, Thomas"
+          expect(subject.personalName.first.elementList.first.dateNameElement).to contain_exactly "1743-1826"
         end
 
         it 'builds nodes with ids' do
-          expect(subject.topic[0].elementList.first[0].rdf_subject).to eq 'http://library.ucsd.edu/ark:/20775/bb3333333x'
+          element_list_elements = subject.topic.flat_map { |y| y.elementList.first[0].rdf_subject }
+          expect(element_list_elements).to include 'http://library.ucsd.edu/ark:/20775/bb3333333x'
           expect(subject.personalName.first.rdf_subject).to eq 'http://library.ucsd.edu/ark:20775/jefferson'
         end
 
@@ -162,17 +163,17 @@ describe "Nesting attribute behavior of RDFDatastream" do
           { label: 'Transmission' },
           { label: 'Fuel Filter' }] }
       end
-      let(:replace_object_id) { subject.parts[1].rdf_subject.to_s }
-      let(:remove_object_id) { subject.parts[3].rdf_subject.to_s }
+      let(:replace_object_id) { subject.parts.find { |x| x.label == ['Distributor'] }.rdf_subject.to_s }
+      let(:remove_object_id) { subject.parts.find { |x| x.label == ['Fuel Filter'] }.rdf_subject.to_s }
 
       it "updates nested objects" do
         subject.parts_attributes = [{ id: replace_object_id, label: "Universal Joint" }, { label: "Oil Pump" }, { id: remove_object_id, _destroy: '1', label: "bar1 uno" }]
 
-        expect(subject.parts.map { |p| p.label.first }).to eq ['Alternator', 'Universal Joint', 'Transmission', 'Oil Pump']
+        expect(subject.parts.map { |p| p.label.first }).to contain_exactly 'Alternator', 'Universal Joint', 'Transmission', 'Oil Pump'
       end
       it "create a new object when the id is provided" do
         subject.parts_attributes = [{ id: 'http://example.com/part#1', label: "Universal Joint" }]
-        expect(subject.parts.last.rdf_subject).to eq RDF::URI('http://example.com/part#1')
+        expect(subject.parts.map(&:rdf_subject)).to include RDF::URI('http://example.com/part#1')
       end
     end
   end

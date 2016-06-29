@@ -114,7 +114,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
         it "clears the object set" do
           expect(collection.members).to eq [thing]
           collection.member_ids = [thing2.id, thing3.id]
-          expect(collection.members).to eq [thing2, thing3]
+          expect(collection.members).to contain_exactly thing2, thing3
         end
       end
 
