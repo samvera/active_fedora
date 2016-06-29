@@ -34,7 +34,7 @@ describe ActiveFedora::Base do
         end
 
         it "allows for more than 10 items" do
-          (1..12).each do
+          12.times do
             book.topics << Topic.create
           end
           book.save
