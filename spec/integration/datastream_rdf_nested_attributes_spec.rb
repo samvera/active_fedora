@@ -123,7 +123,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
         end
 
         it 'builds nodes with ids' do
-          element_list_elements = subject.topic.flat_map{|y| y.elementList.first[0].rdf_subject}
+          element_list_elements = subject.topic.flat_map { |y| y.elementList.first[0].rdf_subject }
           expect(element_list_elements).to include 'http://library.ucsd.edu/ark:/20775/bb3333333x'
           expect(subject.personalName.first.rdf_subject).to eq 'http://library.ucsd.edu/ark:20775/jefferson'
         end
