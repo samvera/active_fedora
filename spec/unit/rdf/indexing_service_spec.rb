@@ -6,8 +6,8 @@ describe ActiveFedora::RDF::IndexingService do
       property :created, predicate: ::RDF::Vocab::DC.created
       property :title, predicate: ::RDF::Vocab::DC.title
       property :publisher, predicate: ::RDF::Vocab::DC.publisher
-      property :based_near, predicate: ::RDF::FOAF.based_near
-      property :related_url, predicate: ::RDF::RDFS.seeAlso
+      property :based_near, predicate: ::RDF::Vocab::FOAF.based_near
+      property :related_url, predicate: ::RDF::Vocab::RDFS.seeAlso
       property :rights, predicate: ::RDF::Vocab::DC.rights
     end
   end

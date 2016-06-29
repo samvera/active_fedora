@@ -177,7 +177,7 @@ EOF
   end
   it "ignores values to be deleted that do not exist" do
     subject.part = ["title1", "title2", "title3"]
-    subject.part.subtract([ "title2", "title4", "title6" ])
+    subject.part.subtract(["title2", "title4", "title6"])
     expect(subject.part).to contain_exactly "title1", "title3"
   end
 
@@ -205,7 +205,7 @@ EOF
     end
     it "supports the empty? method" do
       expect(subject.title).to_not be_empty
-      subject.title.subtract([ "title1", "title2", "title3" ])
+      subject.title.subtract(["title1", "title2", "title3"])
       expect(subject.title).to be_empty
     end
     it "supports the each method" do
