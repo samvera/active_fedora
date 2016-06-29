@@ -133,7 +133,7 @@ describe ActiveFedora::RDFDatastream do
       subject.title = ["bla"]
       subject.creator = @new_object
     end
-    
+
     it "can set sub-properties to AF objects" do
       expect(subject.creator).to eq [@new_object]
     end

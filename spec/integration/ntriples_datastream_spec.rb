@@ -171,7 +171,7 @@ EOF
     subject.part << "Hamlet"
     subject.part << "Romeo & Juliet"
     expect(subject.part).to include "MacBeth"
-    subject.part.subtract([ "MacBeth", "Romeo & Juliet" ])
+    subject.part.subtract(["MacBeth", "Romeo & Juliet"])
     expect(subject.part).to eq ["Hamlet"]
     expect(subject.part.first).to eq "Hamlet"
   end

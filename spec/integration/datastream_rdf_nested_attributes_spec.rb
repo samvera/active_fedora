@@ -116,7 +116,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
         end
 
         it 'has attributes' do
-          element_values = subject.topic.map{|x| x.elementList.first[0].elementValue}
+          element_values = subject.topic.map { |x| x.elementList.first[0].elementValue }
           expect(element_values).to contain_exactly ["Cosmology"], ["Quantum Behavior"]
           expect(subject.personalName.first.elementList.first.fullNameElement).to contain_exactly "Jefferson, Thomas"
           expect(subject.personalName.first.elementList.first.dateNameElement).to contain_exactly "1743-1826"
@@ -162,8 +162,8 @@ describe "Nesting attribute behavior of RDFDatastream" do
           { label: 'Transmission' },
           { label: 'Fuel Filter' }] }
       end
-      let(:replace_object_id) { subject.parts.find{|x| x.label == ['Distributor']}.rdf_subject.to_s }
-      let(:remove_object_id) { subject.parts.find{|x| x.label == ['Fuel Filter']}.rdf_subject.to_s }
+      let(:replace_object_id) { subject.parts.find { |x| x.label == ['Distributor'] }.rdf_subject.to_s }
+      let(:remove_object_id) { subject.parts.find { |x| x.label == ['Fuel Filter'] }.rdf_subject.to_s }
 
       it "updates nested objects" do
         subject.parts_attributes = [{ id: replace_object_id, label: "Universal Joint" }, { label: "Oil Pump" }, { id: remove_object_id, _destroy: '1', label: "bar1 uno" }]
