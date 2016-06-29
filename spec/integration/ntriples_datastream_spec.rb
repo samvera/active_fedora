@@ -62,7 +62,7 @@ EOF
     end
     it "handles integers" do
       subject.filesize = 12_345
-      expect(subject.filesize).to be_kind_of Array
+      expect(subject.filesize).to eq [12_345]
       expect(subject.filesize.first).to be_kind_of Fixnum
     end
   end
@@ -120,7 +120,7 @@ EOF
 <http://oregondigital.org/ns/62> <http://purl.org/dc/terms/spatial> "Benton County (Ore.)" .
 '
     subject.content = ntrip
-    expect(subject.rdf.graph.statements.to_a).to eq RDF::NTriples::Reader.new(ntrip).statements.to_a
+    expect(subject.graph.statements.to_a).to contain_exactly(*RDF::NTriples::Reader.new(ntrip).statements.to_a)
   end
 
   describe "using rdf_subject" do
@@ -171,7 +171,7 @@ EOF
     subject.part << "Hamlet"
     subject.part << "Romeo & Juliet"
     expect(subject.part).to include "MacBeth"
-    subject.part.delete("MacBeth", "Romeo & Juliet")
+    subject.part.subtract([ "MacBeth", "Romeo & Juliet" ])
     expect(subject.part).to eq ["Hamlet"]
     expect(subject.part.first).to eq "Hamlet"
   end
@@ -209,7 +209,7 @@ EOF
       expect(subject.title).to be_empty
     end
     it "supports the each method" do
-      expect(@subject.title.respond_to?(:each)).to eq true
+      expect(subject.title.respond_to?(:each)).to eq true
     end
   end
 end

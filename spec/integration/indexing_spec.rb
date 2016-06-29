@@ -62,7 +62,7 @@ describe ActiveFedora::Base do
       class GenericFile < ActiveFedora::Base
         has_many :permissions, predicate: ::RDF::Vocab::ACL.accessTo
         accepts_nested_attributes_for :permissions, allow_destroy: true
-        property :title, predicate: ::RDF::DC.title
+        property :title, predicate: ::RDF::Vocab::DC.title
 
         def to_solr
           super.tap do |doc|
