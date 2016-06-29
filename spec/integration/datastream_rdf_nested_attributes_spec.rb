@@ -104,8 +104,8 @@ describe "Nesting attribute behavior of RDFDatastream" do
         end
         it "accepts an array" do
           subject.elementList_attributes = [{ topicElement_attributes: [{ elementValue: "Quantum Behavior" }, { elementValue: "Wave Function" }] }]
-          expect(subject.elementList.first[0].elementValue).to eq ["Quantum Behavior"]
-          expect(subject.elementList.first[1].elementValue).to eq ["Wave Function"]
+          element_values = subject.elementList.first.map(&:elementValue)
+          expect(element_values).to contain_exactly ["Quantum Behavior"], ["Wave Function"]
         end
       end
 
@@ -116,8 +116,8 @@ describe "Nesting attribute behavior of RDFDatastream" do
         end
 
         it 'has attributes' do
-          expect(subject.topic[0].elementList.first[0].elementValue).to eq ["Cosmology"]
-          expect(subject.topic[1].elementList.first[0].elementValue).to eq ["Quantum Behavior"]
+          element_values = subject.topic.map{|x| x.elementList.first[0].elementValue}
+          expect(element_values).to contain_exactly ["Cosmology"], ["Quantum Behavior"]
           expect(subject.personalName.first.elementList.first.fullNameElement).to contain_exactly "Jefferson, Thomas"
           expect(subject.personalName.first.elementList.first.dateNameElement).to contain_exactly "1743-1826"
         end
@@ -162,8 +162,8 @@ describe "Nesting attribute behavior of RDFDatastream" do
           { label: 'Transmission' },
           { label: 'Fuel Filter' }] }
       end
-      let(:replace_object_id) { subject.parts[1].rdf_subject.to_s }
-      let(:remove_object_id) { subject.parts[3].rdf_subject.to_s }
+      let(:replace_object_id) { subject.parts.find{|x| x.label == ['Distributor']}.rdf_subject.to_s }
+      let(:remove_object_id) { subject.parts.find{|x| x.label == ['Fuel Filter']}.rdf_subject.to_s }
 
       it "updates nested objects" do
         subject.parts_attributes = [{ id: replace_object_id, label: "Universal Joint" }, { label: "Oil Pump" }, { id: remove_object_id, _destroy: '1', label: "bar1 uno" }]
@@ -172,7 +172,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
       end
       it "create a new object when the id is provided" do
         subject.parts_attributes = [{ id: 'http://example.com/part#1', label: "Universal Joint" }]
-        expect(subject.parts.last.rdf_subject).to eq RDF::URI('http://example.com/part#1')
+        expect(subject.parts.map(&:rdf_subject)).to include RDF::URI('http://example.com/part#1')
       end
     end
   end

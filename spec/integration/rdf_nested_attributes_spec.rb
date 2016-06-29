@@ -56,7 +56,7 @@ describe "Nesting attribute behavior of RDF resources" do
       end
 
       it "marks the attributes as changed" do
-        expect(subject.changed_attributes).to eq('topic' => [])
+        expect(subject.changed_attributes.keys).to eq ["topic"]
       end
     end
 
