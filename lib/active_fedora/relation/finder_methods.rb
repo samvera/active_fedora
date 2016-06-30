@@ -260,13 +260,13 @@ module ActiveFedora
       # @param [Hash<Symbol,String>] conditions
       # @return [Array<String>]
       def create_query_from_hash(conditions)
-        conditions.map { |key, value| condition_to_clauses(key, value) }.compact
+        conditions.map { |key, value| condition_to_clauses(key, value, ' OR ') }.compact
       end
 
       # @param [Symbol] key
       # @param [String] value
-      def condition_to_clauses(key, value)
-        SolrQueryBuilder.construct_query([[field_name_for(key), value]])
+      def condition_to_clauses(key, value, join_with = SolrQueryBuilder.default_join_with)
+        SolrQueryBuilder.construct_query([[field_name_for(key), value]], join_with)
       end
 
       # If the key is a property name, turn it into a solr field

@@ -67,6 +67,7 @@ describe ActiveFedora::Querying do
         field = ActiveFedora::SolrQueryBuilder.solr_name('foo', type: :string)
         expect(ModelIntegrationSpec::Basic.where(field => 'Beta')).to eq [test_instance1]
         expect(ModelIntegrationSpec::Basic.where('foo' => 'Beta')).to eq [test_instance1]
+        expect(ModelIntegrationSpec::Basic.where('foo' => ['Beta', 'Alpha'])).to eq [test_instance1, test_instance2]
       end
       it "orders" do
         expect(ModelIntegrationSpec::Basic.order(ActiveFedora::SolrQueryBuilder.solr_name('foo', :sortable) + ' asc')).to eq [test_instance2, test_instance1, test_instance3]
