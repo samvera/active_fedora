@@ -1,3 +1,8 @@
+v9.7.2
+ 2016-06-30 : Sending multiple values from a where cluase will join with OR [Carolyn Cole]
+
+ 2016-06-29 : Fixing rubocop for latest version [Carolyn Cole]
+
 v9.7.1
  2016-01-22 : The jcr/mix versionable predicate is no longer used [Adam Wead]
  
