@@ -13,6 +13,7 @@ module ActiveFedora
         #
         #   fruits = Fruit.all
         #   fruits = fruits.where(color: 'red') if options[:red_only]
+        #   fruits = fruits.where(size: ['big', 'little']) # gets big or little fruit
         #   fruits = fruits.limit(10) if limited?
         #
         # You can define a scope that applies to all finders using

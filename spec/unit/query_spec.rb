@@ -79,8 +79,8 @@ describe ActiveFedora::Base do
     let(:solr) { ActiveFedora::SolrService.instance.conn }
     let(:expected_query) { "#{model_query} AND " \
                            "_query_:\"{!field f=foo}bar\" AND " \
-                           "_query_:\"{!field f=baz}quix\" AND " \
-                           "_query_:\"{!field f=baz}quack\"" }
+                           "(_query_:\"{!field f=baz}quix\" OR " \
+                           "_query_:\"{!field f=baz}quack\")" }
     let(:expected_params) { { params: { sort: [sort_query], fl: 'id', q: expected_query, qt: 'standard' } } }
     let(:expected_sort_params) { { params: { sort: ["title_t desc"], fl: 'id', q: expected_query, qt: 'standard' } } }
     let(:mock_docs) { [{ "id" => "changeme:30" }, { "id" => "changeme:22" }] }
@@ -138,8 +138,8 @@ describe ActiveFedora::Base do
       let(:solr) { ActiveFedora::SolrService.instance.conn }
       let(:expected_query) { "#{model_query} AND " \
                              "_query_:\"{!field f=foo}bar\" AND " \
-                             "_query_:\"{!field f=baz}quix\" AND " \
-                             "_query_:\"{!field f=baz}quack\"" }
+                             "(_query_:\"{!field f=baz}quix\" OR " \
+                             "_query_:\"{!field f=baz}quack\")" }
       let(:expected_params) { { params: { sort: [sort_query], fl: 'id', q: expected_query, qt: 'standard' } } }
       let(:mock_docs) { [{ "id" => "changeme-30" }, { "id" => "changeme-22" }] }
 
@@ -159,8 +159,8 @@ describe ActiveFedora::Base do
       let(:solr) { ActiveFedora::SolrService.instance.conn }
       let(:expected_query) { "#{model_query} AND " \
                              "_query_:\"{!field f=foo}bar\" AND " \
-                             "_query_:\"{!field f=baz}quix\" AND " \
-                             "_query_:\"{!field f=baz}quack\"" }
+                             "(_query_:\"{!field f=baz}quix\" OR " \
+                             "_query_:\"{!field f=baz}quack\")" }
       let(:expected_params) { { params: { sort: [sort_query], fl: 'id', q: expected_query, qt: 'standard' } } }
       let(:mock_docs) { double('docs') }
 
@@ -254,8 +254,8 @@ describe ActiveFedora::Base do
     context "with a hash of conditions" do
       let(:expected_query) { "#{model_query} AND " \
                              "_query_:\"{!field f=foo}bar\" AND " \
-                             "_query_:\"{!field f=baz}quix\" AND " \
-                             "_query_:\"{!field f=baz}quack\"" }
+                             "(_query_:\"{!field f=baz}quix\" OR " \
+                             "_query_:\"{!field f=baz}quack\")" }
       let(:conditions) { { foo: 'bar', baz: ['quix', 'quack'] } }
 
       it "makes a query to solr and returns the results" do
@@ -266,8 +266,8 @@ describe ActiveFedora::Base do
     context "with quotes in the params" do
       let(:expected_query) { "#{model_query} AND " \
                              "_query_:\"{!field f=foo}9\\\" Nails\" AND " \
-                             "_query_:\"{!field f=baz}7\\\" version\" AND " \
-                             "_query_:\"{!field f=baz}quack\"" }
+                             "(_query_:\"{!field f=baz}7\\\" version\" OR " \
+                             "_query_:\"{!field f=baz}quack\")" }
       let(:conditions) { { foo: '9" Nails', baz: ['7" version', 'quack'] } }
 
       it "escapes quotes" do
