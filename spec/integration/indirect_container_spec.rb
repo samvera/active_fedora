@@ -160,7 +160,7 @@ describe "Indirect containers" do
         describe "#append" do
           let(:file2) { o.related_objects.build }
           it "has two related_objects" do
-            expect(o.related_objects).to eq [file, file2]
+            expect(o.related_objects).to contain_exactly file, file2
           end
 
           context "and then saved/reloaded" do
@@ -170,7 +170,7 @@ describe "Indirect containers" do
             end
 
             it "has two related_objects" do
-              expect(reloaded.related_objects).to eq [file, file2]
+              expect(reloaded.related_objects).to contain_exactly file, file2
             end
           end
         end
@@ -196,7 +196,7 @@ describe "Indirect containers" do
             end
 
             it "returns the ids" do
-              expect(reloaded.related_object_ids).to eq [file.id, file2.id]
+              expect(reloaded.related_object_ids).to contain_exactly file.id, file2.id
             end
           end
         end

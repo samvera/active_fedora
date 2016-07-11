@@ -6,8 +6,8 @@ describe ActiveFedora::RDF::IndexingService do
       property :created, predicate: ::RDF::Vocab::DC.created
       property :title, predicate: ::RDF::Vocab::DC.title
       property :publisher, predicate: ::RDF::Vocab::DC.publisher
-      property :based_near, predicate: ::RDF::FOAF.based_near
-      property :related_url, predicate: ::RDF::RDFS.seeAlso
+      property :based_near, predicate: ::RDF::Vocab::FOAF.based_near
+      property :related_url, predicate: ::RDF::Vocab::RDFS.seeAlso
       property :rights, predicate: ::RDF::Vocab::DC.rights
     end
   end
@@ -73,8 +73,8 @@ describe ActiveFedora::RDF::IndexingService do
 
     it "returns the right values" do
       expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__related_url", type: :string)]).to eq ["http://example.org/blogtastic/"]
-      expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", type: :string)]).to eq ["Tacoma, WA", "Renton, WA"]
-      expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", :facetable)]).to eq ["Tacoma, WA", "Renton, WA"]
+      expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", type: :string)]).to contain_exactly "Tacoma, WA", "Renton, WA"
+      expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", :facetable)]).to contain_exactly "Tacoma, WA", "Renton, WA"
       expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", type: :string)]).to eq ["Bob's Blogtastic Publishing"]
       expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :sortable)]).to eq "Bob's Blogtastic Publishing"
       expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :facetable)]).to eq ["Bob's Blogtastic Publishing"]
@@ -90,7 +90,7 @@ describe ActiveFedora::RDF::IndexingService do
 
     it "returns the right values" do
       expect(fields["related_url"].values).to eq ["http://example.org/blogtastic/"]
-      expect(fields["based_near"].values).to eq ["Tacoma, WA", "Renton, WA"]
+      expect(fields["based_near"].values).to contain_exactly "Tacoma, WA", "Renton, WA"
     end
 
     it "returns the right type information" do

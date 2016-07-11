@@ -73,6 +73,8 @@ module ActiveFedora
           # Assert head and tail
           self.head = ordered_self.head.next.rdf_subject
           self.tail = ordered_self.tail.prev.rdf_subject
+          head_will_change!
+          tail_will_change!
           graph = ordered_self.to_graph
           resource << graph
           # Set node subjects to a term in AF JUST so that AF will persist the

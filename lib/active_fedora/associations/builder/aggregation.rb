@@ -19,7 +19,7 @@ module ActiveFedora::Associations::Builder
     private_class_method :indirect_options
 
     def self.has_member_relation(options)
-      options[:has_member_relation] || ::RDF::DC.hasPart
+      options[:has_member_relation] || ::RDF::Vocab::DC.hasPart
     end
     private_class_method :has_member_relation
 

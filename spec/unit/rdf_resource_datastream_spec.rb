@@ -134,6 +134,10 @@ describe ActiveFedora::RDFDatastream do
       subject.creator = @new_object
     end
 
+    it "can set sub-properties to AF objects" do
+      expect(subject.creator).to eq [@new_object]
+    end
+
     it "has accessible relationship attributes" do
       expect(subject.creator.first.something).to eq ["subbla"]
     end

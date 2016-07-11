@@ -10,6 +10,7 @@ module ActiveFedora
         additions = incoming_objects - current_objects
         deletions.each { |object| owner.resource.delete([owner.rdf_subject, reflection.predicate, object]) }
         additions.each { |object| owner.resource.insert([owner.rdf_subject, reflection.predicate, object]) }
+        owner.resource.persist!
         owner.send(:attribute_will_change!, reflection.name)
       end
 
@@ -21,6 +22,7 @@ module ActiveFedora
         filtered_results.each do |candidate|
           owner.resource.delete([owner.rdf_subject, reflection.predicate, candidate])
         end
+        owner.resource.persist!
       end
 
       private

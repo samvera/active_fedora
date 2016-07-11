@@ -28,11 +28,11 @@ describe ActiveFedora::Base do
     subject { TestClass.where(bar: 'Peanuts') }
 
     it "maps" do
-      expect(subject.map(&:id)).to eq [instance2.id, instance3.id]
+      expect(subject.map(&:id)).to contain_exactly instance2.id, instance3.id
     end
 
     it "collects" do
-      expect(subject.collect(&:id)).to eq [instance2.id, instance3.id]
+      expect(subject.collect(&:id)).to contain_exactly instance2.id, instance3.id
     end
 
     it "has each" do

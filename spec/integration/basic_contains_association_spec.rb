@@ -86,7 +86,7 @@ describe ActiveFedora::Base do
 
       it "has the two contained objects" do
         expect(model.contains.size).to eq 2
-        expect(model.contains.map(&:title)).to eq [['title 1'], ['title 2']]
+        expect(model.contains.map(&:title)).to contain_exactly ['title 1'], ['title 2']
       end
     end
 
