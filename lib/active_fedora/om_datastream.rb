@@ -12,9 +12,15 @@ module ActiveFedora
     include OM::XML::Document
     include OM::XML::TerminologyBasedSolrizer # this adds support for calling .to_solr
     include Datastreams::NokogiriDatastreams
+    extend Deprecation
 
     alias om_term_values term_values unless method_defined?(:om_term_values)
     alias om_update_values update_values unless method_defined?(:om_update_values)
+
+    def initialize(*args)
+      super
+      Deprecation.warn(OmDatastream, "OmDatastream is deprecated and will be removed in ActiveFedora 11")
+    end
 
     def default_mime_type
       'text/xml'

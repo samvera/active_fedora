@@ -37,6 +37,12 @@ restore_spec_configuration
 
 require 'active_fedora/cleaner'
 RSpec.configure do |config|
+  config.before(:suite) do
+    ActiveFedora::RDFDatastream.deprecation_behavior = :silence
+    ActiveFedora::NtriplesRDFDatastream.deprecation_behavior = :silence
+    ActiveFedora::OmDatastream.deprecation_behavior = :silence
+    ActiveFedora::NomDatastream.deprecation_behavior = :silence
+  end
   # Stub out test stuff.
   config.before(:each) do
     begin
