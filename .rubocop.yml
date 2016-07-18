@@ -89,6 +89,7 @@ Metrics/ClassLength:
     - 'lib/active_fedora/reflection.rb'
     - 'lib/active_fedora/orders/ordered_list.rb'
     - 'lib/active_fedora/solr_service.rb'
+    - 'lib/active_fedora/associations/orders_association.rb'
 
 Metrics/MethodLength:
   Enabled: false

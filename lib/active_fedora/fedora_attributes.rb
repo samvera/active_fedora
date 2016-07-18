@@ -43,7 +43,7 @@ module ActiveFedora
       # Appending the graph at the end is necessary because adding it as the
       # parent leaves behind triples not related to the ldp_source's rdf
       # subject.
-      @resource ||= self.class.resource_class.new(@ldp_source.graph.rdf_subject, @ldp_source.graph) << @ldp_source.graph
+      @resource ||= self.class.resource_class.new(@ldp_source.graph.rdf_subject, data: @ldp_source.graph.send(:graph).data)
     end
 
     # You can set the URI to use for the rdf_label on ClassMethods.rdf_label, then on
