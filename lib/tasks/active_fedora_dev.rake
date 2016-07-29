@@ -43,9 +43,9 @@ namespace :active_fedora do
 
   desc "CI build"
   task :ci do
+    Rake::Task['active_fedora:rubocop'].invoke unless ENV['NO_RUBOCOP']
     ENV['environment'] = "test"
     with_test_server do
-      Rake::Task['active_fedora:rubocop'].invoke unless ENV['NO_RUBOCOP']
       Rake::Task['active_fedora:coverage'].invoke
     end
   end
