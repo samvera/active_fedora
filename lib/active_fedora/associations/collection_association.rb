@@ -94,7 +94,7 @@ module ActiveFedora
         if loaded?
           size.zero?
         else
-          @target.blank? && count_records == 0
+          @target.blank? && count_records.zero?
         end
       end
 
@@ -250,7 +250,7 @@ module ActiveFedora
         finder_query = construct_query
         return [] if finder_query.empty?
         rows = opts.delete(:rows) { count }
-        return [] if rows == 0
+        return [] if rows.zero?
         SolrService.query(finder_query, { rows: rows }.merge(opts))
       end
 

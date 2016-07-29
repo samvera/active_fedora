@@ -253,8 +253,7 @@ module Hydra
         "edt" => "Editor",
         "ill" => "Illustrator",
         "oth" => "Other",
-        "trl" => "Translator"
-       }
+        "trl" => "Translator" }
     end
 
     def self.person_relator_terms
@@ -268,8 +267,7 @@ module Hydra
         "res" => "Researcher",
         "rth" => "Research team head",
         "rtm" => "Research team member",
-        "trl" => "Translator"
-       }
+        "trl" => "Translator" }
     end
 
     def self.conference_relator_terms

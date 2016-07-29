@@ -90,7 +90,7 @@ module ActiveFedora
         node = build_node(new_node_subject)
         node.target = target
         node.proxy_in = proxy_in
-        if loc == 0
+        if loc.zero?
           append_to(node, head)
         else
           append_to(node, ordered_reader.take(loc).last)
@@ -103,7 +103,7 @@ module ActiveFedora
         node = build_node(new_node_subject)
         node.proxy_for = proxy_for
         node.proxy_in = proxy_in
-        if loc == 0
+        if loc.zero?
           append_to(node, head)
         else
           append_to(node, ordered_reader.take(loc).last)
