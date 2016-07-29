@@ -7,7 +7,7 @@ module ActiveFedora
 
     class_option :directory, type: :string, default: 'models', desc: "Which directory to generate? (i.e. app/DIRECTORY)"
     class_option :datastream_directory, type: :string, default: 'models/datastreams', desc: "Which datastream directory to generate? (i.e. models/datastreams)"
-    class_option :contains, type: :string, default: nil, desc: "Name a file to attach"
+    class_option :has_subresource, type: :string, default: nil, desc: "Name a file to attach"
     class_option :datastream, type: :string, default: nil, desc: "Name a metadata datastream to create"
 
     def install

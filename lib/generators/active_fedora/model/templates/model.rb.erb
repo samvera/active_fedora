@@ -2,7 +2,7 @@
 #  `rails generate active_fedora:model <%= class_name %>`
 class <%= class_name %> < ActiveFedora::Base
   <% if options['datastream'] %>
-  contains :descMetadata, class_name: "<%= options['datastream'] %>"
+  has_subresource :descMetadata, class_name: "<%= options['datastream'] %>"
   <% else %>
   # Define some properties to store:
   #
@@ -19,12 +19,12 @@ class <%= class_name %> < ActiveFedora::Base
     index.as :stored_searchable
   end
   <%- end -%>
-  <% if options['contains'] %>
-  contains :<%= options['contains'] %>"
+  <% if options['has_subresource'] %>
+  has_subresource :<%= options['has_subresource'] %>"
   <% else %>
   # Uncomment the following lines to add an #attachment method that is a file
   #
-  # contains "attachment"
+  # has_subresource "attachment"
   <% end %>
   #
   # If you need to add additional attributes to the SOLR document, extend the default indexer:
