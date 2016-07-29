@@ -29,15 +29,4 @@ describe ActiveFedora::SolrHit do
       expect(subject.title).to eq 'My Title'
     end
   end
-
-  describe "#instantiate_with_json" do
-    subject { solr_hit.instantiate_with_json }
-
-    it { is_expected.to be_persisted }
-
-    it "finds the document in solr" do
-      expect(subject).to be_instance_of Foo
-      expect(subject.title).to eq 'My Title'
-    end
-  end
 end

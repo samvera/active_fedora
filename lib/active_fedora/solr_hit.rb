@@ -46,15 +46,6 @@ module ActiveFedora
       end
     end
 
-    def instantiate_with_json
-      model.allocate.init_with_json(profile_json) do |allocated_object|
-        create_key = allocated_object.indexing_service.class.create_time_solr_name
-        modified_key = allocated_object.indexing_service.class.modified_time_solr_name
-        allocated_object.resource.set_value(:create_date, DateTime.parse(document[create_key])) if document[create_key]
-        allocated_object.resource.set_value(:modified_date, DateTime.parse(document[modified_key])) if document[modified_key]
-      end
-    end
-
     def reify(opts = {})
       model(opts).find(id, cast: true)
     end

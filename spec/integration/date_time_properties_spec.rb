@@ -39,18 +39,4 @@ describe ActiveFedora::Base do
       expect(subject).to match(/\+01:00/)
     end
   end
-
-  describe "saving and loading in Solr" do
-    let(:object) { Foo.create!(date: [date], single_date: date2, empty_date: '', integer: 1) }
-
-    let(:subject_solr) { object.class.load_instance_from_solr(object.id) }
-    it "uses DateTime objects" do
-      expect(subject_solr.date.first).to be_a DateTime
-      expect(subject_solr.single_date).to be_a DateTime
-    end
-    it "loads the correct time" do
-      expect(subject_solr.date.first).to eql date
-      expect(subject_solr.single_date).to eql date2
-    end
-  end
 end

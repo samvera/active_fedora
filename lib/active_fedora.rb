@@ -95,7 +95,6 @@ module ActiveFedora #:nodoc:
     autoload :Orders
     autoload :Pathing
     autoload :Persistence
-    autoload :ProfileIndexingService
     autoload :Property
     autoload :QualifiedDublinCoreDatastream
     autoload :Querying
@@ -124,7 +123,6 @@ module ActiveFedora #:nodoc:
     autoload :Serialization
     autoload :SchemaIndexingStrategy
     autoload :SolrHit
-    autoload :SolrInstanceLoader
     autoload :SolrQueryBuilder
     autoload :SolrService
     autoload :SparqlInsert
