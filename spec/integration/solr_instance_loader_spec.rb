@@ -139,6 +139,7 @@ describe ActiveFedora::SolrInstanceLoader do
   end
 
   describe "loading system properties" do
+    before { allow(Deprecation).to receive(:warn) }
     let(:obj_solr) { Foo.load_instance_from_solr(obj.id) }
     it "loads create_date from solr" do
       expect(obj.create_date).to be_present

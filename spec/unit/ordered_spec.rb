@@ -64,6 +64,7 @@ describe ActiveFedora::Orders do
     subject.save!
     solr_doc = ActiveFedora::SolrService.query("id:#{subject.id}").first
 
+    allow(Deprecation).to receive(:warn)
     expect { ActiveFedora::Base.load_instance_from_solr(subject.id, solr_doc) }.not_to raise_error
   end
 
