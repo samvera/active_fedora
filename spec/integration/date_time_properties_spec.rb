@@ -42,6 +42,7 @@ describe ActiveFedora::Base do
 
   describe "saving and loading in Solr" do
     let(:object) { Foo.create!(date: [date], single_date: date2, empty_date: '', integer: 1) }
+    before { allow(Deprecation).to receive(:warn) }
 
     let(:subject_solr) { object.class.load_instance_from_solr(object.id) }
     it "uses DateTime objects" do
