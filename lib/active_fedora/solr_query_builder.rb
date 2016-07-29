@@ -33,7 +33,7 @@ module ActiveFedora
       #   # => "_query_:\"{!field f=library_id_ssim}123\" AND _query_:\"{!field f=owner_ssim}Fred\""
       def construct_query(field_pairs, join_with = default_join_with)
         clauses = pairs_to_clauses(field_pairs)
-        return "" if clauses.count == 0
+        return "" if clauses.count.zero?
         return clauses.first if clauses.count == 1
         "(#{clauses.join(join_with)})"
       end

@@ -8,8 +8,7 @@ describe ActiveFedora::Fedora do
         { url: "https://example.com",
           user: "fedoraAdmin",
           password: "fedoraAdmin",
-          ssl: { ca_path: '/path/to/certs' }
-        }
+          ssl: { ca_path: '/path/to/certs' } }
       }
       specify {
         expect(Faraday).to receive(:new).with("https://example.com", ssl: { ca_path: '/path/to/certs' }).and_call_original

@@ -159,7 +159,7 @@ module ActiveFedora
 
       # Attribute hash keys that should not be assigned as normal attributes.
       # These hash keys are nested attributes implementation details.
-      UNASSIGNABLE_KEYS = %w( id _destroy ).freeze
+      UNASSIGNABLE_KEYS = %w(id _destroy).freeze
 
       # Assigns the given attributes to the association.
       #
@@ -308,7 +308,7 @@ module ActiveFedora
         opts = nested_attributes_options[association_name]
         case callback = opts[:reject_if]
         when Symbol
-          method(callback).arity == 0 ? send(callback) : send(callback, attributes)
+          method(callback).arity.zero? ? send(callback) : send(callback, attributes)
         when Proc
           callback.call(attributes)
         end

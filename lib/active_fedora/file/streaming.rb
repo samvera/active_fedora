@@ -23,7 +23,7 @@ module ActiveFedora::File::Streaming
     end
 
     def each(no_of_requests_limit = 3, &block)
-      raise ArgumentError, 'HTTP redirect too deep' if no_of_requests_limit == 0
+      raise ArgumentError, 'HTTP redirect too deep' if no_of_requests_limit.zero?
       Net::HTTP.start(uri.host, uri.port, use_ssl: (uri.scheme == 'https')) do |http|
         request = Net::HTTP::Get.new uri, headers
         http.request request do |response|

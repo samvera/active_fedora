@@ -31,7 +31,7 @@ module ActiveFedora
               scope = scope.where(ActiveFedora::SolrQueryBuilder.construct_query_for_rel(association.send(:find_reflection) => owner.id))
             end
 
-            is_first_chain = i == 0
+            is_first_chain = i.zero?
             is_first_chain ? klass : reflection.klass
           end
 
