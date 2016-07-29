@@ -10,6 +10,7 @@ module ActiveFedora
   module Indexing
     extend ActiveSupport::Concern
     extend ActiveSupport::Autoload
+    extend Deprecation
 
     eager_autoload do
       autoload :Map
@@ -105,6 +106,7 @@ module ActiveFedora
         def load_instance_from_solr(id, solr_doc = nil)
           SolrInstanceLoader.new(self, id, solr_doc).object
         end
+        deprecation_deprecate :load_instance_from_solr
 
         def descendant_uris(uri)
           resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
