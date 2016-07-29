@@ -40,7 +40,6 @@ module ActiveFedora
       Solrizer.set_field(solr_doc, 'system_modified', m_time, :stored_sortable)
       solr_doc[QueryResultBuilder::HAS_MODEL_SOLR_FIELD] = object.has_model
       solr_doc[ActiveFedora.id_field.to_sym] = object.id
-      solr_doc[self.class.profile_solr_name] = profile_service.new(object).export
       object.declared_attached_files.each do |name, file|
         solr_doc.merge! file.to_solr(solr_doc, name: name.to_s)
       end
@@ -50,10 +49,6 @@ module ActiveFedora
     end
 
     protected
-
-      def profile_service
-        ProfileIndexingService
-      end
 
       def c_time
         c_time = object.create_date.present? ? object.create_date : DateTime.now

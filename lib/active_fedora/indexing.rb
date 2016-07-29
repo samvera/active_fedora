@@ -91,21 +91,6 @@ module ActiveFedora
           end
         end
 
-        # This method can be used instead of ActiveFedora::Model::ClassMethods.find.
-        # It works similarly except it populates an object from Solr instead of Fedora.
-        # It is most useful for objects used in read-only displays in order to speed up loading time.  If only
-        # a id is passed in it will query solr for a corresponding solr document and then use it
-        # to populate this object.
-        #
-        # If a value is passed in for optional parameter solr_doc it will not query solr again and just use the
-        # one passed to populate the object.
-        #
-        # It will anything stored within solr such as metadata and relationships.  Non-metadata attached files will not
-        # be loaded and if needed you should use find instead.
-        def load_instance_from_solr(id, solr_doc = nil)
-          SolrInstanceLoader.new(self, id, solr_doc).object
-        end
-
         def descendant_uris(uri)
           resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
           # GET could be slow if it's a big resource, we're using HEAD to avoid this problem,

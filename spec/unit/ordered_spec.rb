@@ -58,15 +58,6 @@ describe ActiveFedora::Orders do
     end
   end
 
-  it "can load from solr" do
-    member = Member.new
-    subject.ordered_members << member
-    subject.save!
-    solr_doc = ActiveFedora::SolrService.query("id:#{subject.id}").first
-
-    expect { ActiveFedora::Base.load_instance_from_solr(subject.id, solr_doc) }.not_to raise_error
-  end
-
   describe "#ordered_members" do
     describe "<<" do
       it "appends" do
