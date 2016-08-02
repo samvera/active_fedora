@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::OmDatastream do
-  subject { described_class.new }
+  subject(:datastream) { described_class.new }
   it { should be_metadata }
 
   it "includes the Solrizer::XML::TerminologyBasedSolrizer for .to_solr support" do
@@ -23,16 +23,16 @@ describe ActiveFedora::OmDatastream do
   end
 
   describe "#prefix" do
-    subject { described_class.new }
+    subject(:datastream) { described_class.new }
     it "reflects the dsid" do
-      expect(subject.send(:prefix, 'descMetadata')).to eq "desc_metadata__"
+      expect(datastream.send(:prefix, 'descMetadata')).to eq "desc_metadata__"
     end
   end
 
   describe '#xml_template' do
-    subject { described_class.xml_template.to_xml }
+    subject(:datastream) { described_class.xml_template.to_xml }
     it "returns an empty xml document" do
-      expect(subject).to be_equivalent_to("<?xml version=\"1.0\"?>\n<xml/>\n")
+      expect(datastream).to be_equivalent_to("<?xml version=\"1.0\"?>\n<xml/>\n")
     end
   end
 
@@ -54,17 +54,17 @@ describe ActiveFedora::OmDatastream do
             "foo__"
           end
         end
-        subject.title = 'Science'
+        datastream.title = 'Science'
       end
       after do
         Object.send(:remove_const, :MyDatastream)
       end
-      subject { MyDatastream.new }
+      subject(:datastream) { MyDatastream.new }
       it "uses the prefix" do
-        expect(subject.to_solr).to have_key('foo__title_tesim')
+        expect(datastream.to_solr).to have_key('foo__title_tesim')
       end
       it "does not prefix fields that aren't defined by this datastream" do
-        expect(subject.to_solr('id' => 'test:123')).to have_key('id')
+        expect(datastream.to_solr('id' => 'test:123')).to have_key('id')
       end
     end
   end
@@ -170,55 +170,55 @@ describe ActiveFedora::OmDatastream do
     end
 
     before do
-      allow(subject).to receive(:ldp_source).and_return(ldp_source)
+      allow(datastream).to receive(:ldp_source).and_return(ldp_source)
     end
 
     it "persists the product of .to_xml in fedora" do
-      subject.serialize!
-      subject.save
-      expect(subject.mime_type).to eq 'text/xml'
+      datastream.serialize!
+      datastream.save
+      expect(datastream.mime_type).to eq 'text/xml'
     end
   end
 
   describe 'setting content' do
-    subject { described_class.new }
-    before { subject.content = "<a />" }
+    subject(:datastream) { described_class.new }
+    before { datastream.content = "<a />" }
 
     it "updates the content" do
-      expect(subject.content).to eq "<?xml version=\"1.0\"?>\n<a/>"
+      expect(datastream.content).to eq "<?xml version=\"1.0\"?>\n<a/>"
     end
 
     it "marks the object as changed" do
-      expect(subject).to be_changed
+      expect(datastream).to be_changed
     end
 
     it "update ngxml and mark the xml as loaded" do
-      expect(subject.ng_xml.to_xml).to match(/<a\/>/)
-      expect(subject.xml_loaded).to be true
+      expect(datastream.ng_xml.to_xml).to match(/<a\/>/)
+      expect(datastream.xml_loaded).to be true
     end
   end
 
   describe 'ng_xml=' do
     let(:sample_raw_xml) { "<foo><xmlelement/></foo>" }
 
-    subject { described_class.new }
+    subject(:datastream) { described_class.new }
 
     it "parses raw xml for you" do
-      subject.ng_xml = sample_raw_xml
-      expect(subject.ng_xml).to be_kind_of Nokogiri::XML::Document
-      expect(subject.ng_xml.to_xml).to be_equivalent_to(sample_raw_xml)
+      datastream.ng_xml = sample_raw_xml
+      expect(datastream.ng_xml).to be_kind_of Nokogiri::XML::Document
+      expect(datastream.ng_xml.to_xml).to be_equivalent_to(sample_raw_xml)
     end
 
     it "alwayses set a document when an Element is passed" do
-      subject.ng_xml = Nokogiri::XML(sample_raw_xml).xpath('//xmlelement').first
-      expect(subject.ng_xml).to be_kind_of Nokogiri::XML::Document
-      expect(subject.ng_xml.to_xml).to be_equivalent_to("<xmlelement/>")
+      datastream.ng_xml = Nokogiri::XML(sample_raw_xml).xpath('//xmlelement').first
+      expect(datastream.ng_xml).to be_kind_of Nokogiri::XML::Document
+      expect(datastream.ng_xml.to_xml).to be_equivalent_to("<xmlelement/>")
     end
 
     it "marks the datastream as changed" do
       expect {
-        subject.ng_xml = sample_raw_xml
-      }.to change { subject.changed? }.from(false).to(true)
+        datastream.ng_xml = sample_raw_xml
+      }.to change { datastream.changed? }.from(false).to(true)
     end
   end
 
@@ -226,23 +226,23 @@ describe ActiveFedora::OmDatastream do
     let(:doc) { Nokogiri::XML::Document.parse("<text_document/>") }
 
     it "ng_xml.to_xmls" do
-      allow(subject).to receive(:ng_xml).and_return(doc)
-      expect(subject.to_xml).to eq "<?xml version=\"1.0\"?>\n<text_document/>"
+      allow(datastream).to receive(:ng_xml).and_return(doc)
+      expect(datastream.to_xml).to eq "<?xml version=\"1.0\"?>\n<text_document/>"
     end
 
     it 'accepts an optional Nokogiri::XML Document as an argument and insert its fields into that (mocked test)' do
       expect(doc.root).to receive(:add_child) # .with(test_ds.ng_xml.root)
-      subject.to_xml(doc)
+      datastream.to_xml(doc)
     end
 
     context "with some existing content" do
       before do
-        subject.content = "<test_xml/>"
+        datastream.content = "<test_xml/>"
       end
       it 'accepts an optional Nokogiri::XML Document as an argument and insert its fields into that (functional test)' do
         expected_result = "<test_document><foo/><test_xml/></test_document>"
         doc = Nokogiri::XML::Document.parse("<test_document><foo/></test_document>")
-        result = subject.to_xml(doc)
+        result = datastream.to_xml(doc)
         expect(doc).to be_equivalent_to expected_result
         expect(result).to be_equivalent_to expected_result
       end
@@ -250,25 +250,25 @@ describe ActiveFedora::OmDatastream do
       it 'adds to root of Nokogiri::XML::Documents, but add directly to the elements if a Nokogiri::XML::Node is passed in' do
         doc = Nokogiri::XML::Document.parse("<test_document/>")
         el = Nokogiri::XML::Node.new("test_element", Nokogiri::XML::Document.new)
-        expect(subject.to_xml(doc)).to be_equivalent_to "<test_document><test_xml/></test_document>"
-        expect(subject.to_xml(el)).to be_equivalent_to "<test_element/>"
+        expect(datastream.to_xml(doc)).to be_equivalent_to "<test_document><test_xml/></test_document>"
+        expect(datastream.to_xml(el)).to be_equivalent_to "<test_element/>"
       end
     end
   end
 
   describe '.update_values' do
-    subject { described_class.new }
+    subject(:datastream) { described_class.new }
 
-    before { subject.content = fixture(File.join("mods_articles", "mods_article1.xml")).read }
+    before { datastream.content = fixture(File.join("mods_articles", "mods_article1.xml")).read }
 
     it "updates a value internally call OM::XML::TermValueOperators::update_values if internal_solr_doc is not set" do
-      expect(subject).to receive(:om_update_values)
-      subject.update_values([{ ":person" => "0" }, "role", "text"] => { "0" => "role1", "1" => "role2", "2" => "role3" })
+      expect(datastream).to receive(:om_update_values)
+      datastream.update_values([{ ":person" => "0" }, "role", "text"] => { "0" => "role1", "1" => "role2", "2" => "role3" })
     end
 
     it "sets changed to true" do
-      subject.update_values([{ ":person" => "0" }, "role", "text"] => { "0" => "role1", "1" => "role2", "2" => "role3" })
-      expect(subject).to be_changed
+      datastream.update_values([{ ":person" => "0" }, "role", "text"] => { "0" => "role1", "1" => "role2", "2" => "role3" })
+      expect(datastream).to be_changed
     end
   end
 
@@ -285,10 +285,10 @@ describe ActiveFedora::OmDatastream do
       @obj.destroy
       Object.send(:remove_const, :MyObj)
     end
-    subject { @obj.reload.descMetadata }
+    subject(:datastream) { @obj.reload.descMetadata }
     it "does not load the descMetadata datastream when calling content_changed?" do
       expect(@obj).to_not receive(:content)
-      expect(subject).to_not be_content_changed
+      expect(datastream).to_not be_content_changed
     end
   end
 end

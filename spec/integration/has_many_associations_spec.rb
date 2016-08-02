@@ -31,18 +31,16 @@ describe ActiveFedora::Associations::HasManyAssociation do
         let!(:book) { Book.create }
         let(:library) { Library.new }
         subject { library.books.count }
-        it "it excludes the books that aren't associated" do
-          expect(subject).to eq 0
-        end
+        # it excludes the books that aren't associated
+        it { is_expected.to eq 0 }
       end
 
       context "when the owner is saved with associations" do
         let(:book) { Book.create }
         let!(:library) { Library.create(books: [book]) }
         subject { library.reload; library.books.count }
-        it "it excludes the books that are associated" do
-          expect(subject).to eq 1
-        end
+        # it excludes the books that are associated
+        it { is_expected.to eq 1 }
       end
 
       context "when the owner is not saved after checking the count" do
@@ -406,10 +404,10 @@ describe ActiveFedora::Associations::HasManyAssociation do
         library.save
       end
 
-      subject { library.books(true) }
+      subject(:books) { library.books(true) }
 
       it "saves the new title" do
-        expect(subject.first.title).to eq ["Better book"]
+        expect(books.first.title).to eq ["Better book"]
       end
     end
   end

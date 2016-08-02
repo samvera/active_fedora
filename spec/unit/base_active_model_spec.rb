@@ -6,22 +6,22 @@ describe ActiveFedora::Base do
       property :fubar, predicate: ::RDF::URI('http://example.com/fubar'), multiple: false
       property :duck, predicate: ::RDF::URI('http://example.com/duck'), multiple: false
     end
-    subject { BarHistory.new }
+    subject(:history) { BarHistory.new }
 
     describe "attributes=" do
       it "sets attributes" do
-        subject.attributes = { fubar: "baz", duck: "Quack" }
-        expect(subject.fubar).to eq "baz"
-        expect(subject.duck).to eq "Quack"
+        history.attributes = { fubar: "baz", duck: "Quack" }
+        expect(history.fubar).to eq "baz"
+        expect(history.duck).to eq "Quack"
       end
     end
 
     describe "update_attributes" do
       it "sets attributes and save" do
-        subject.update_attributes(fubar: "baz", duck: "Quack")
-        subject.reload
-        expect(subject.fubar).to eq "baz"
-        expect(subject.duck).to eq "Quack"
+        history.update_attributes(fubar: "baz", duck: "Quack")
+        history.reload
+        expect(history.fubar).to eq "baz"
+        expect(history.duck).to eq "Quack"
       end
     end
   end

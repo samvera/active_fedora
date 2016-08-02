@@ -10,30 +10,30 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
       allow_any_instance_of(Book).to receive(:load_datastreams).and_return(false)
       allow_any_instance_of(Page).to receive(:load_datastreams).and_return(false)
 
-      allow(subject).to receive(:new_record?).and_return(false)
-      allow(subject).to receive(:save).and_return(true)
+      allow(book).to receive(:new_record?).and_return(false)
+      allow(book).to receive(:save).and_return(true)
     end
 
     after do
       Object.send(:remove_const, :Book)
       Object.send(:remove_const, :Page)
     end
-    subject { Book.new('subject-a') }
+    subject(:book) { Book.new('subject-a') }
 
     context "a one way relationship " do
       describe "adding memeber" do
         it "sets the relationship attribute" do
           reflection = ActiveFedora::Reflection.create(:has_and_belongs_to_many, :pages, nil, { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection }, Book)
           allow(ActiveFedora::SolrService).to receive(:query).and_return([])
-          ac = described_class.new(subject, reflection)
+          ac = described_class.new(book, reflection)
           expect(ac).to receive(:callback).twice
           object = Page.new
           allow(object).to receive(:new_record?).and_return(false)
           allow(object).to receive(:save).and_return(true)
           allow(object).to receive(:id).and_return('1234')
 
-          allow(subject).to receive(:[]).with('page_ids').and_return([])
-          expect(subject).to receive(:[]=).with('page_ids', ['1234'])
+          allow(book).to receive(:[]).with('page_ids').and_return([])
+          expect(book).to receive(:[]=).with('page_ids', ['1234'])
 
           ac.concat object
         end
@@ -42,9 +42,9 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
       describe "finding member" do
         let(:ids) { (0..15).map(&:to_s) }
         let(:reflection) { ActiveFedora::Reflection.create(:has_and_belongs_to_many, :pages, nil, { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection }, Book) }
-        let(:association) { described_class.new(subject, reflection) }
+        let(:association) { described_class.new(book, reflection) }
         it "calls ActiveFedora::Base.find" do
-          expect(subject).to receive(:[]).with('page_ids').and_return(ids)
+          expect(book).to receive(:[]).with('page_ids').and_return(ids)
           expect(ActiveFedora::Base).to receive(:find).with(ids)
           association.send(:find_target)
         end
@@ -54,7 +54,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     context "with an inverse reflection" do
       let!(:inverse) { ActiveFedora::Reflection.create(:has_and_belongs_to_many, :books, nil, { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection }, Page) }
       let(:reflection) { ActiveFedora::Reflection.create(:has_and_belongs_to_many, :pages, nil, { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasCollectionMember, inverse_of: 'books' }, Book) }
-      let(:ac) { described_class.new(subject, reflection) }
+      let(:ac) { described_class.new(book, reflection) }
       let(:object) { Page.new }
 
       it "sets the relationship attribute on subject and object when inverse_of is given" do
@@ -63,11 +63,11 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
         allow(object).to receive(:new_record?).and_return(false)
         allow(object).to receive(:save).and_return(true)
 
-        allow(subject).to receive(:[]).with('page_ids').and_return([])
-        expect(subject).to receive(:[]=).with('page_ids', [object.id])
+        allow(book).to receive(:[]).with('page_ids').and_return([])
+        expect(book).to receive(:[]=).with('page_ids', [object.id])
 
         expect(object).to receive(:[]).with('book_ids').and_return([]).twice
-        expect(object).to receive(:[]=).with('book_ids', [subject.id])
+        expect(object).to receive(:[]=).with('book_ids', [book.id])
 
         ac.concat object
       end

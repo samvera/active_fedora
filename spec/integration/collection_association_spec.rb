@@ -135,10 +135,9 @@ describe ActiveFedora::Base do
       end
 
       let(:instance) { SpecContainer.new }
-      subject { instance.items }
 
       it "raises an error" do
-        expect { subject }.to raise_error "No :inverse_of or :predicate attribute was set or could be inferred for has_many :items on SpecContainer"
+        expect { instance.items }.to raise_error "No :inverse_of or :predicate attribute was set or could be inferred for has_many :items on SpecContainer"
       end
     end
 
@@ -161,9 +160,7 @@ describe ActiveFedora::Base do
       let(:instance) { Foo::Container.new }
       subject { instance.items }
 
-      it "finds the association" do
-        expect(subject).to eq []
-      end
+      it { is_expected.to eq [] }
     end
   end
 end

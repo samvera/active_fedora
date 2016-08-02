@@ -60,7 +60,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
         Object.send(:remove_const, :ComplexRDFDatastream)
         Object.send(:remove_const, :DummyMADS)
       end
-      subject { ComplexRDFDatastream.new }
+      subject(:complex_datastream) { ComplexRDFDatastream.new }
       let(:params) do
         { myResource:
           {
@@ -95,15 +95,15 @@ describe "Nesting attribute behavior of RDFDatastream" do
       end
 
       describe "on lists" do
-        subject { ComplexRDFDatastream::PersonalName.new(nil) }
+        subject(:personal_name) { ComplexRDFDatastream::PersonalName.new(nil) }
         it "accepts a hash" do
-          subject.elementList_attributes = [{ topicElement_attributes: { '0' => { elementValue: "Quantum Behavior" }, '1' => { elementValue: "Wave Function" } } }]
-          expect(subject.elementList.first[0].elementValue).to eq ["Quantum Behavior"]
-          expect(subject.elementList.first[1].elementValue).to eq ["Wave Function"]
+          personal_name.elementList_attributes = [{ topicElement_attributes: { '0' => { elementValue: "Quantum Behavior" }, '1' => { elementValue: "Wave Function" } } }]
+          expect(personal_name.elementList.first[0].elementValue).to eq ["Quantum Behavior"]
+          expect(personal_name.elementList.first[1].elementValue).to eq ["Wave Function"]
         end
         it "accepts an array" do
-          subject.elementList_attributes = [{ topicElement_attributes: [{ elementValue: "Quantum Behavior" }, { elementValue: "Wave Function" }] }]
-          element_values = subject.elementList.first.map(&:elementValue)
+          personal_name.elementList_attributes = [{ topicElement_attributes: [{ elementValue: "Quantum Behavior" }, { elementValue: "Wave Function" }] }]
+          element_values = personal_name.elementList.first.map(&:elementValue)
           expect(element_values).to contain_exactly ["Quantum Behavior"], ["Wave Function"]
         end
       end
@@ -111,30 +111,30 @@ describe "Nesting attribute behavior of RDFDatastream" do
       context "from nested objects" do
         before do
           # Replace the graph's contents with the Hash
-          subject.attributes = params[:myResource]
+          complex_datastream.attributes = params[:myResource]
         end
 
         it 'has attributes' do
-          element_values = subject.topic.map { |x| x.elementList.first[0].elementValue }
+          element_values = complex_datastream.topic.map { |x| x.elementList.first[0].elementValue }
           expect(element_values).to contain_exactly ["Cosmology"], ["Quantum Behavior"]
-          expect(subject.personalName.first.elementList.first.fullNameElement).to contain_exactly "Jefferson, Thomas"
-          expect(subject.personalName.first.elementList.first.dateNameElement).to contain_exactly "1743-1826"
+          expect(complex_datastream.personalName.first.elementList.first.fullNameElement).to contain_exactly "Jefferson, Thomas"
+          expect(complex_datastream.personalName.first.elementList.first.dateNameElement).to contain_exactly "1743-1826"
         end
 
         it 'builds nodes with ids' do
-          element_list_elements = subject.topic.flat_map { |y| y.elementList.first[0].rdf_subject }
+          element_list_elements = complex_datastream.topic.flat_map { |y| y.elementList.first[0].rdf_subject }
           expect(element_list_elements).to include 'http://library.ucsd.edu/ark:/20775/bb3333333x'
-          expect(subject.personalName.first.rdf_subject).to eq 'http://library.ucsd.edu/ark:20775/jefferson'
+          expect(complex_datastream.personalName.first.rdf_subject).to eq 'http://library.ucsd.edu/ark:20775/jefferson'
         end
 
         it 'fails when writing to a non-predicate' do
           attributes = { topic_attributes: { '0' => { elementList_attributes: [{ topicElement_attributes: [{ fake_predicate: "Cosmology" }] }] } } }
-          expect { subject.attributes = attributes }.to raise_error ArgumentError
+          expect { complex_datastream.attributes = attributes }.to raise_error ArgumentError
         end
 
         it 'fails when writing to a non-predicate with a setter method' do
           attributes = { topic_attributes: { '0' => { elementList_attributes: [{ topicElement_attributes: [{ name: "Cosmology" }] }] } } }
-          expect { subject.attributes = attributes }.to raise_error ArgumentError
+          expect { complex_datastream.attributes = attributes }.to raise_error ArgumentError
         end
       end
     end
@@ -154,26 +154,26 @@ describe "Nesting attribute behavior of RDFDatastream" do
       after(:each) do
         Object.send(:remove_const, :SpecDatastream)
       end
-      subject { SpecDatastream.new }
+      subject(:spec_datastream) { SpecDatastream.new }
       before do
-        subject.attributes = { parts_attributes: [
+        spec_datastream.attributes = { parts_attributes: [
           { label: 'Alternator' },
           { label: 'Distributor' },
           { label: 'Transmission' },
           { label: 'Fuel Filter' }
         ] }
       end
-      let(:replace_object_id) { subject.parts.find { |x| x.label == ['Distributor'] }.rdf_subject.to_s }
-      let(:remove_object_id) { subject.parts.find { |x| x.label == ['Fuel Filter'] }.rdf_subject.to_s }
+      let(:replace_object_id) { spec_datastream.parts.find { |x| x.label == ['Distributor'] }.rdf_subject.to_s }
+      let(:remove_object_id) { spec_datastream.parts.find { |x| x.label == ['Fuel Filter'] }.rdf_subject.to_s }
 
       it "updates nested objects" do
-        subject.parts_attributes = [{ id: replace_object_id, label: "Universal Joint" }, { label: "Oil Pump" }, { id: remove_object_id, _destroy: '1', label: "bar1 uno" }]
+        spec_datastream.parts_attributes = [{ id: replace_object_id, label: "Universal Joint" }, { label: "Oil Pump" }, { id: remove_object_id, _destroy: '1', label: "bar1 uno" }]
 
-        expect(subject.parts.map { |p| p.label.first }).to contain_exactly 'Alternator', 'Universal Joint', 'Transmission', 'Oil Pump'
+        expect(spec_datastream.parts.map { |p| p.label.first }).to contain_exactly 'Alternator', 'Universal Joint', 'Transmission', 'Oil Pump'
       end
       it "create a new object when the id is provided" do
-        subject.parts_attributes = [{ id: 'http://example.com/part#1', label: "Universal Joint" }]
-        expect(subject.parts.map(&:rdf_subject)).to include RDF::URI('http://example.com/part#1')
+        spec_datastream.parts_attributes = [{ id: 'http://example.com/part#1', label: "Universal Joint" }]
+        expect(spec_datastream.parts.map(&:rdf_subject)).to include RDF::URI('http://example.com/part#1')
       end
     end
   end

@@ -5,7 +5,7 @@ describe ActiveFedora::DefaultModelMapper do
   let(:classifier_instance) { double }
   let(:solr_field) { 'solr_field' }
   let(:predicate) { 'info:predicate' }
-  subject { described_class.new classifier_class: classifier, solr_field: solr_field, predicate: predicate }
+  subject(:mapper) { described_class.new classifier_class: classifier, solr_field: solr_field, predicate: predicate }
 
   describe '#classifier' do
     context 'with a solr document' do
@@ -16,7 +16,7 @@ describe ActiveFedora::DefaultModelMapper do
       end
 
       it 'creates a classifier from the solr field data' do
-        expect(subject.classifier(solr_document)).to eq classifier_instance
+        expect(mapper.classifier(solr_document)).to eq classifier_instance
       end
     end
 
@@ -32,7 +32,7 @@ describe ActiveFedora::DefaultModelMapper do
       end
 
       it 'creates a classifier from the resource model predicate' do
-        expect(subject.classifier(resource)).to eq classifier_instance
+        expect(mapper.classifier(resource)).to eq classifier_instance
       end
     end
   end

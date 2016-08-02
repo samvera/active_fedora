@@ -11,7 +11,7 @@ describe ActiveFedora::Base do
     end
   end
 
-  subject { ValidationStub.new }
+  subject(:validation_stub) { ValidationStub.new }
 
   after :all do
     Object.send(:remove_const, :ValidationStub)
@@ -19,19 +19,19 @@ describe ActiveFedora::Base do
 
   describe "a valid object" do
     before do
-      subject.attributes = { fubar: ['here'], swank: 'long enough' }
+      validation_stub.attributes = { fubar: ['here'], swank: 'long enough' }
     end
 
     it { should be_valid }
   end
   describe "an invalid object" do
     before do
-      subject.attributes = { swank: 'smal' }
+      validation_stub.attributes = { swank: 'smal' }
     end
     it "has errors" do
-      expect(subject).to_not be_valid
-      expect(subject.errors[:fubar]).to eq ["can't be blank"]
-      expect(subject.errors[:swank]).to eq ["is too short (minimum is 5 characters)"]
+      expect(validation_stub).to_not be_valid
+      expect(validation_stub.errors[:fubar]).to eq ["can't be blank"]
+      expect(validation_stub.errors[:swank]).to eq ["is too short (minimum is 5 characters)"]
     end
   end
 
@@ -41,11 +41,11 @@ describe ActiveFedora::Base do
   end
 
   describe "#save!" do
-    before { allow(subject).to receive(:_create_record) } # prevent saving to Fedora/Solr
+    before { allow(validation_stub).to receive(:_create_record) } # prevent saving to Fedora/Solr
 
     it "validates only once" do
-      expect(subject).to receive(:perform_validations).once.and_return(true)
-      subject.save!
+      expect(validation_stub).to receive(:perform_validations).once.and_return(true)
+      validation_stub.save!
     end
   end
 end

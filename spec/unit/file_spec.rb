@@ -3,7 +3,7 @@ require 'spec_helper'
 describe ActiveFedora::File do
   let(:file) { described_class.new }
 
-  subject { file }
+  subject(:af_file) { file }
 
   it { is_expected.not_to be_metadata }
 
@@ -43,7 +43,7 @@ describe ActiveFedora::File do
   end
 
   describe "#uri" do
-    subject { file.uri }
+    subject(:uri) { file.uri }
 
     context "when the file is in an ldp:BasicContainer" do
       let(:parent) { ActiveFedora::Base.new(id: '1234') }
@@ -51,14 +51,14 @@ describe ActiveFedora::File do
       context "and it's initialized with the URI" do
         let(:file) { described_class.new(parent.uri + "/FOO1") }
         it "works" do
-          expect(subject.to_s).to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234/FOO1"
+          expect(uri.to_s).to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234/FOO1"
         end
       end
 
       context "and it's initialized with an ID" do
         let(:file) { described_class.new(parent.id + "/FOO1") }
         it "works" do
-          expect(subject.to_s).to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234/FOO1"
+          expect(uri.to_s).to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234/FOO1"
         end
       end
     end
@@ -91,18 +91,18 @@ describe ActiveFedora::File do
     let(:ldp_source) { Ldp::Resource.new(mock_client, path) }
 
     before do
-      allow(subject).to receive(:ldp_source).and_return(ldp_source)
+      allow(af_file).to receive(:ldp_source).and_return(ldp_source)
     end
 
     describe '#persisted_size' do
       it 'loads the file size attribute from the fedora repository' do
-        expect(subject.size).to eq 9999
+        expect(af_file.size).to eq 9999
       end
 
       it 'returns nil without making a head request to Ldp::Resource::BinarySource if it is a new record' do
-        allow(subject).to receive(:new_record?).and_return(true)
-        expect(subject.ldp_source).not_to receive(:head)
-        expect(subject.persisted_size).to eq nil
+        allow(af_file).to receive(:new_record?).and_return(true)
+        expect(af_file.ldp_source).not_to receive(:head)
+        expect(af_file.persisted_size).to eq nil
       end
     end
 
@@ -112,15 +112,15 @@ describe ActiveFedora::File do
           it 'returns the size of the dirty content' do
             dirty_content = double
             allow(dirty_content).to receive(:size) { 8_675_309 }
-            subject.content = dirty_content
-            expect(subject.size).to eq dirty_content.size
+            af_file.content = dirty_content
+            expect(af_file.size).to eq dirty_content.size
           end
         end
       end
 
       context 'when content has not changed from what is currently persisted' do
         it 'returns nil, indicating that the content is not "dirty", but its not necessarily 0 either.' do
-          expect(subject.dirty_size).to be_nil
+          expect(af_file.dirty_size).to be_nil
         end
       end
     end
@@ -128,55 +128,55 @@ describe ActiveFedora::File do
     describe '#size' do
       context 'when content has not changed' do
         it 'returns the value of .persisted_size' do
-          expect(subject.size).to eq subject.persisted_size
+          expect(af_file.size).to eq af_file.persisted_size
         end
       end
 
       context 'when content has changed' do
         it 'returns the value of .dirty_size' do
-          subject.content = "i have changed!"
-          expect(subject.size).to eq subject.dirty_size
+          af_file.content = "i have changed!"
+          expect(af_file.size).to eq af_file.dirty_size
         end
       end
 
       it 'returns nil when #persisted_size and #dirty_size return nil' do
-        allow(subject).to receive(:persisted_size) { nil }
-        allow(subject).to receive(:dirty_size) { nil }
-        expect(subject.size).to be_nil
+        allow(af_file).to receive(:persisted_size) { nil }
+        allow(af_file).to receive(:dirty_size) { nil }
+        expect(af_file.size).to be_nil
       end
     end
 
     describe ".empty?" do
       it "does not be empty" do
-        expect(subject.empty?).to be false
+        expect(af_file.empty?).to be false
       end
     end
 
     describe ".has_content?" do
       context "when there's content" do
         before do
-          allow(subject).to receive(:size).and_return(10)
+          allow(af_file).to receive(:size).and_return(10)
         end
         it "returns true" do
-          expect(subject.has_content?).to be true
+          expect(af_file.has_content?).to be true
         end
       end
 
       context "when size is nil" do
         before do
-          allow(subject).to receive(:size).and_return(nil)
+          allow(af_file).to receive(:size).and_return(nil)
         end
         it "does not have content" do
-          expect(subject).to_not have_content
+          expect(af_file).to_not have_content
         end
       end
 
       context "when content is zero" do
         before do
-          allow(subject).to receive(:size).and_return(0)
+          allow(af_file).to receive(:size).and_return(0)
         end
         it "returns false" do
-          expect(subject.has_content?).to be false
+          expect(af_file.has_content?).to be false
         end
       end
     end
@@ -286,14 +286,14 @@ describe ActiveFedora::File do
   describe "#checksum" do
     let(:digest) { RDF::URI.new("urn:sha1:f1d2d2f924e986ac86fdf7b36c94bcdf32beec15") }
     before do
-      allow(subject).to receive(:digest) { [digest] }
+      allow(af_file).to receive(:digest) { [digest] }
     end
     its(:checksum) { is_expected.to be_a(ActiveFedora::Checksum) }
     it "has the right value" do
-      expect(subject.checksum.value).to eq("f1d2d2f924e986ac86fdf7b36c94bcdf32beec15")
+      expect(af_file.checksum.value).to eq("f1d2d2f924e986ac86fdf7b36c94bcdf32beec15")
     end
     it "has the right algorithm" do
-      expect(subject.checksum.algorithm).to eq("SHA1")
+      expect(af_file.checksum.algorithm).to eq("SHA1")
     end
   end
 
@@ -358,7 +358,7 @@ describe ActiveFedora::File do
       Object.send(:remove_const, :MyFile)
     end
 
-    subject { MyFile.new }
+    subject(:my_file) { MyFile.new }
 
     describe "initialize" do
       specify {
@@ -370,21 +370,21 @@ describe ActiveFedora::File do
     describe "create" do
       describe "when content is not nil" do
         specify {
-          expect(subject).to receive(:b_create).once
-          expect(subject).to receive(:a_create).once
-          expect(subject).to receive(:b_save).once
-          expect(subject).to receive(:a_save).once
-          subject.content = "foo"
-          subject.save
+          expect(my_file).to receive(:b_create).once
+          expect(my_file).to receive(:a_create).once
+          expect(my_file).to receive(:b_save).once
+          expect(my_file).to receive(:a_save).once
+          my_file.content = "foo"
+          my_file.save
         }
       end
       describe "when content is nil" do
         specify {
-          expect(subject).to receive(:b_create).once
-          expect(subject).not_to receive(:a_create)
-          expect(subject).to receive(:b_save).once
-          expect(subject).not_to receive(:a_save)
-          subject.save
+          expect(my_file).to receive(:b_create).once
+          expect(my_file).not_to receive(:a_create)
+          expect(my_file).to receive(:b_save).once
+          expect(my_file).not_to receive(:a_save)
+          my_file.save
         }
       end
     end
@@ -392,36 +392,36 @@ describe ActiveFedora::File do
     describe "update" do
       describe "when content has changed" do
         specify {
-          subject.content = "foo"
-          subject.save
-          expect(subject).to receive(:b_save).once
-          expect(subject).to receive(:a_save).once
-          expect(subject).to receive(:b_update).once
-          expect(subject).to receive(:a_update).once
-          subject.content = "bar"
-          subject.save
+          my_file.content = "foo"
+          my_file.save
+          expect(my_file).to receive(:b_save).once
+          expect(my_file).to receive(:a_save).once
+          expect(my_file).to receive(:b_update).once
+          expect(my_file).to receive(:a_update).once
+          my_file.content = "bar"
+          my_file.save
         }
       end
       describe "when content has not changed" do
         specify {
-          subject.content = "foo"
-          subject.save
-          expect(subject).to receive(:b_save).once
-          expect(subject).to receive(:a_save)
-          expect(subject).to receive(:b_update).once
-          expect(subject).to receive(:a_update)
-          subject.save
+          my_file.content = "foo"
+          my_file.save
+          expect(my_file).to receive(:b_save).once
+          expect(my_file).to receive(:a_save)
+          expect(my_file).to receive(:b_update).once
+          expect(my_file).to receive(:a_update)
+          my_file.save
         }
       end
     end
 
     describe "destroy" do
       specify {
-        subject.content = "foo"
-        subject.save
-        expect(subject).to receive(:b_destroy).once
-        expect(subject).to receive(:a_destroy).once
-        subject.destroy
+        my_file.content = "foo"
+        my_file.save
+        expect(my_file).to receive(:b_destroy).once
+        expect(my_file).to receive(:a_destroy).once
+        my_file.destroy
       }
     end
   end

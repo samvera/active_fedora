@@ -24,7 +24,8 @@ describe ActiveFedora::WithMetadata::MetadataNode do
   end
 
   describe "changes_for_update" do
-    subject { node.send(:changes_for_update) }
+    let(:changes_for_update) { node.send(:changes_for_update) }
+    subject { changes_for_update }
 
     context "when type is not set" do
       it { is_expected.to eq({}) }
@@ -36,7 +37,7 @@ describe ActiveFedora::WithMetadata::MetadataNode do
       end
 
       it "is expected to have the rdf type statement" do
-        expect(subject[::RDF.type]).to be_kind_of RDF::Queryable::Enumerator
+        expect(changes_for_update[::RDF.type]).to be_kind_of RDF::Queryable::Enumerator
       end
     end
   end

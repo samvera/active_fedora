@@ -21,12 +21,12 @@ describe "Objects should be serialized to JSON" do
 
     before { allow(obj).to receive(:id).and_return('test-123') }
 
-    subject { JSON.parse(obj.to_json) }
+    let(:json) { JSON.parse(obj.to_json) }
 
     it "has to_json" do
-      expect(subject['id']).to eq "test-123"
-      expect(subject['title']).to eq ["My Title"]
-      expect(subject['description']).to eq "Wonderful stuff"
+      expect(json['id']).to eq "test-123"
+      expect(json['title']).to eq ["My Title"]
+      expect(json['description']).to eq "Wonderful stuff"
     end
   end
 end

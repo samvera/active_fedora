@@ -130,18 +130,17 @@ describe "Indirect containers" do
         end
 
         describe "#first" do
-          subject { reloaded.related_objects.first }
+          subject(:first) { reloaded.related_objects.first }
           it "has the content" do
-            expect(subject.title).to eq 'HMMM'
+            expect(first.title).to eq 'HMMM'
           end
         end
 
         describe "#==" do
           subject { reloaded.related_objects }
 
-          it "delegates to to_a" do
-            expect(subject).to eq [file]
-          end
+          # it delegates to to_a
+          it { is_expected.to eq [file] }
         end
 
         describe "#concat" do
@@ -242,9 +241,9 @@ describe "Indirect containers" do
         end
 
         describe "#first" do
-          subject { reloaded.related_objects.first }
+          subject(:first) { reloaded.related_objects.first }
           it "has the content" do
-            expect(subject.title).to eq 'HMMM'
+            expect(first.title).to eq 'HMMM'
           end
         end
       end
@@ -280,9 +279,9 @@ describe "Indirect containers" do
         end
 
         describe "#first" do
-          subject { reloaded.related_objects.first }
+          subject(:first) { reloaded.related_objects.first }
           it "has the content" do
-            expect(subject.title).to eq 'HMMM'
+            expect(first.title).to eq 'HMMM'
           end
         end
       end

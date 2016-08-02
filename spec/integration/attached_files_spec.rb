@@ -65,14 +65,14 @@ describe ActiveFedora::AttachedFiles do
     let(:obj) { ActiveFedora::Base.new }
 
     describe ".attached_files" do
-      subject { obj.attached_files }
+      subject(:attached_files) { obj.attached_files }
       it "returns a Hash of datastreams from fedora" do
-        expect(subject).to be_a_kind_of(ActiveFedora::FilesHash)
-        expect(subject).to be_empty
+        expect(attached_files).to be_a_kind_of(ActiveFedora::FilesHash)
+        expect(attached_files).to be_empty
       end
 
       it "initializes the datastream pointers with @new_object=false" do
-        subject.each_value do |ds|
+        attached_files.each_value do |ds|
           expect(ds).to_not be_new
         end
       end

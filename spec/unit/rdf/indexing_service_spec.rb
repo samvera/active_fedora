@@ -57,27 +57,27 @@ describe ActiveFedora::RDF::IndexingService do
   let(:indexer) { described_class.new(f2) }
 
   describe "#generate_solr_document" do
-    subject { indexer.generate_solr_document(lambda { |key| "solr_rdf__#{key}" }) }
+    let(:solr_obj) { indexer.generate_solr_document(lambda { |key| "solr_rdf__#{key}" }) }
     it "returns the right fields" do
-      expect(subject.keys).to include(ActiveFedora.index_field_mapper.solr_name("solr_rdf__related_url", type: :string),
-                                      ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", type: :string),
-                                      ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :sortable),
-                                      ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :facetable),
-                                      ActiveFedora.index_field_mapper.solr_name("solr_rdf__created", :sortable, type: :date),
-                                      ActiveFedora.index_field_mapper.solr_name("solr_rdf__created", :displayable),
-                                      ActiveFedora.index_field_mapper.solr_name("solr_rdf__title", type: :string),
-                                      ActiveFedora.index_field_mapper.solr_name("solr_rdf__title", :sortable),
-                                      ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", type: :string),
-                                      ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", :facetable))
+      expect(solr_obj.keys).to include(ActiveFedora.index_field_mapper.solr_name("solr_rdf__related_url", type: :string),
+                                       ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", type: :string),
+                                       ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :sortable),
+                                       ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :facetable),
+                                       ActiveFedora.index_field_mapper.solr_name("solr_rdf__created", :sortable, type: :date),
+                                       ActiveFedora.index_field_mapper.solr_name("solr_rdf__created", :displayable),
+                                       ActiveFedora.index_field_mapper.solr_name("solr_rdf__title", type: :string),
+                                       ActiveFedora.index_field_mapper.solr_name("solr_rdf__title", :sortable),
+                                       ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", type: :string),
+                                       ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", :facetable))
     end
 
     it "returns the right values" do
-      expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__related_url", type: :string)]).to eq ["http://example.org/blogtastic/"]
-      expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", type: :string)]).to contain_exactly "Tacoma, WA", "Renton, WA"
-      expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", :facetable)]).to contain_exactly "Tacoma, WA", "Renton, WA"
-      expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", type: :string)]).to eq ["Bob's Blogtastic Publishing"]
-      expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :sortable)]).to eq "Bob's Blogtastic Publishing"
-      expect(subject[ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :facetable)]).to eq ["Bob's Blogtastic Publishing"]
+      expect(solr_obj[ActiveFedora.index_field_mapper.solr_name("solr_rdf__related_url", type: :string)]).to eq ["http://example.org/blogtastic/"]
+      expect(solr_obj[ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", type: :string)]).to contain_exactly "Tacoma, WA", "Renton, WA"
+      expect(solr_obj[ActiveFedora.index_field_mapper.solr_name("solr_rdf__based_near", :facetable)]).to contain_exactly "Tacoma, WA", "Renton, WA"
+      expect(solr_obj[ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", type: :string)]).to eq ["Bob's Blogtastic Publishing"]
+      expect(solr_obj[ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :sortable)]).to eq "Bob's Blogtastic Publishing"
+      expect(solr_obj[ActiveFedora.index_field_mapper.solr_name("solr_rdf__publisher", :facetable)]).to eq ["Bob's Blogtastic Publishing"]
     end
   end
 

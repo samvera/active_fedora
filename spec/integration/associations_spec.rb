@@ -17,7 +17,7 @@ describe ActiveFedora::Base do
     end
 
     let(:person) { Person.create }
-    let(:book) { Book.new(author: person) }
+    subject(:book) { Book.new(author: person) }
 
     it "goes" do
       book.save
@@ -524,18 +524,19 @@ describe ActiveFedora::Base do
       end
 
       describe "removing association" do
-        subject { LibraryBook.create }
-        before do
-          @p1 = Page.create
-          @p2 = Page.create
-          subject.pages << @p1 << @p2
-          subject.save!
+        let(:p1) { Page.create }
+        let(:p2) { Page.create }
+        subject(:book) do
+          book = LibraryBook.create
+          book.pages << p1 << p2
+          book.save!
+          book
         end
         it "saves between the before and after hooks" do
-          expect(subject).to receive(:before_count).with(1)
-          expect(subject).to receive(:after_count).with(0)
-          expect(subject).to receive(:say_hi).with(@p2).twice
-          subject.pages.delete(@p2)
+          expect(book).to receive(:before_count).with(1)
+          expect(book).to receive(:after_count).with(0)
+          expect(book).to receive(:say_hi).with(p2).twice
+          book.pages.delete(p2)
         end
       end
     end
@@ -555,14 +556,12 @@ describe ActiveFedora::Base do
       end
 
       describe "removing association" do
-        subject { LibraryBook.new }
-        before do
-          @p1 = subject.pages.build
-          @p2 = subject.pages.build
-        end
+        let(:p1) { book.pages.build }
+        let(:p2) { book.pages.build }
+        let(:book) { LibraryBook.new }
         it "runs the hooks" do
-          expect(subject).to receive(:say_hi).with(@p2)
-          subject.pages.delete(@p2)
+          expect(book).to receive(:say_hi).with(p2)
+          book.pages.delete(p2)
         end
       end
     end

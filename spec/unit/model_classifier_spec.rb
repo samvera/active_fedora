@@ -11,7 +11,7 @@ describe ActiveFedora::ModelClassifier do
   end
 
   let(:class_names) { ["ParentClass::SiblingClass", "ParentClass::OtherSiblingClass", "ParentClass::SubclassClass", "ParentClass::NoSuchClass"] }
-  subject { described_class.new class_names }
+  subject(:classifier) { described_class.new class_names }
 
   describe ".class_from_string" do
     it "returns class constants based on strings" do
@@ -33,17 +33,17 @@ describe ActiveFedora::ModelClassifier do
 
   describe '#models' do
     it 'converts class names to classes' do
-      expect(subject.models).to match_array [ParentClass::SiblingClass, ParentClass::OtherSiblingClass, ParentClass::SubclassClass]
+      expect(classifier.models).to match_array [ParentClass::SiblingClass, ParentClass::OtherSiblingClass, ParentClass::SubclassClass]
     end
   end
 
   describe '#best_model' do
     it 'selects the most specific matching model' do
-      expect(subject.best_model(default: nil)).to eq ParentClass::SubclassClass
+      expect(classifier.best_model(default: nil)).to eq ParentClass::SubclassClass
     end
 
     it 'filters models to subclasses of the default' do
-      expect(subject.best_model(default: ActiveFedora::Base)).to eq ActiveFedora::Base
+      expect(classifier.best_model(default: ActiveFedora::Base)).to eq ActiveFedora::Base
     end
   end
 end

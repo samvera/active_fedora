@@ -244,7 +244,7 @@ describe ActiveFedora::Base do
   describe '#search_with_conditions' do
     let(:mock_result) { double('Result') }
     let(:klass) { SpecModel::Basic }
-    subject { klass.search_with_conditions(conditions) }
+    subject(:search_with_conditions) { klass.search_with_conditions(conditions) }
 
     before do
       expect(ActiveFedora::SolrService).to receive(:query)
@@ -259,7 +259,7 @@ describe ActiveFedora::Base do
       let(:conditions) { { foo: 'bar', baz: ['quix', 'quack'] } }
 
       it "makes a query to solr and returns the results" do
-        expect(subject).to eq mock_result
+        expect(search_with_conditions).to eq mock_result
       end
     end
 
@@ -271,7 +271,7 @@ describe ActiveFedora::Base do
       let(:conditions) { { foo: '9" Nails', baz: ['7" version', 'quack'] } }
 
       it "escapes quotes" do
-        expect(subject).to eq mock_result
+        expect(search_with_conditions).to eq mock_result
       end
     end
 
@@ -282,7 +282,7 @@ describe ActiveFedora::Base do
         let(:conditions) { { baz: 'quack' } }
         let(:expected_query) { "_query_:\"{!field f=baz}quack\"" }
         it "doesn't use the class if it's called on AF:Base " do
-          expect(subject).to eq mock_result
+          expect(search_with_conditions).to eq mock_result
         end
       end
 
@@ -290,7 +290,7 @@ describe ActiveFedora::Base do
         let(:conditions) { 'chunky:monkey' }
         let(:expected_query) { '(chunky:monkey)' }
         it "uses the query string if it's provided and wrap it in parentheses" do
-          expect(subject).to eq mock_result
+          expect(search_with_conditions).to eq mock_result
         end
       end
     end

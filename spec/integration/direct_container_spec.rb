@@ -32,16 +32,16 @@ describe "Direct containers" do
         end
 
         describe "#first" do
-          subject { reloaded.files.first }
+          subject(:first_file) { reloaded.files.first }
           it "has the content" do
-            expect(subject.content).to eq 'HMMM'
+            expect(first_file.content).to eq 'HMMM'
           end
         end
 
         describe "#to_a" do
-          subject { reloaded.files }
+          subject(:files) { reloaded.files }
           it "has the content" do
-            expect(subject.to_a).to eq [file]
+            expect(files.to_a).to eq [file]
           end
         end
 
@@ -102,9 +102,9 @@ describe "Direct containers" do
         end
 
         describe "#first" do
-          subject { reloaded.files.first }
+          subject(:first_file) { reloaded.files.first }
           it "has the content" do
-            expect(subject.content).to eq 'HMMM'
+            expect(first_file.content).to eq 'HMMM'
           end
         end
       end
@@ -140,9 +140,9 @@ describe "Direct containers" do
         end
 
         describe "#first" do
-          subject { reloaded.files.first }
+          subject(:first_file) { reloaded.files.first }
           it "has the content" do
-            expect(subject.content).to eq 'HMMM'
+            expect(first_file.content).to eq 'HMMM'
           end
         end
       end

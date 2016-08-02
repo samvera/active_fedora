@@ -14,17 +14,17 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :FooHistory)
     end
 
-    subject { FooHistory.new(title: ["A good title"]) }
-    before { subject.id = 9 }
+    subject(:history) { FooHistory.new(title: ["A good title"]) }
+    before { history.id = 9 }
 
     it "is settable" do
-      expect(subject.id).to eq '9'
-      expect(subject.title).to eq ["A good title"]
+      expect(history.id).to eq '9'
+      expect(history.title).to eq ["A good title"]
     end
 
     it "is only settable once" do
-      expect { subject.id = 10 }.to raise_error "ID has already been set to 9"
-      expect(subject.id).to eq '9'
+      expect { history.id = 10 }.to raise_error "ID has already been set to 9"
+      expect(history.id).to eq '9'
     end
   end
 
@@ -39,14 +39,14 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :FooHistory)
     end
 
-    subject { FooHistory.new.type }
+    subject(:history) { FooHistory.new.type }
 
     it { is_expected.to eq [RDF::URI('http://example.com/foo')] }
 
     context "when type is called before propertes" do
-      subject { FooHistory.resource_class.reflect_on_property(:title) }
+      subject(:history) { FooHistory.resource_class.reflect_on_property(:title) }
       it "does not wipe out the properties" do
-        expect(subject).to be_kind_of ActiveTriples::NodeConfig
+        expect(history).to be_kind_of ActiveTriples::NodeConfig
       end
     end
   end

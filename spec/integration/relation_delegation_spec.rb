@@ -25,30 +25,30 @@ describe ActiveFedora::Base do
     let!(:instance2) { TestClass.create!(foo: ['Alpha'], bar: ['Peanuts']) }
     let!(:instance3) { TestClass.create!(foo: ['Sigma'], bar: ['Peanuts']) }
 
-    subject { TestClass.where(bar: 'Peanuts') }
+    subject(:peanuts) { TestClass.where(bar: 'Peanuts') }
 
     it "maps" do
-      expect(subject.map(&:id)).to contain_exactly instance2.id, instance3.id
+      expect(peanuts.map(&:id)).to contain_exactly instance2.id, instance3.id
     end
 
     it "collects" do
-      expect(subject.collect(&:id)).to contain_exactly instance2.id, instance3.id
+      expect(peanuts.collect(&:id)).to contain_exactly instance2.id, instance3.id
     end
 
     it "has each" do
       t = double
       expect(t).to receive(:foo).twice
-      subject.each { t.foo }
+      peanuts.each { t.foo }
     end
 
     it "has all?" do
-      expect(subject.all? { |t| t.foo == ['Alpha'] }).to be false
-      expect(subject.all? { |t| t.bar == ['Peanuts'] }).to be true
+      expect(peanuts.all? { |t| t.foo == ['Alpha'] }).to be false
+      expect(peanuts.all? { |t| t.bar == ['Peanuts'] }).to be true
     end
 
     it "has include?" do
-      expect(subject.include?(instance1)).to be false
-      expect(subject.include?(instance2)).to be true
+      expect(peanuts.include?(instance1)).to be false
+      expect(peanuts.include?(instance2)).to be true
     end
   end
 end
