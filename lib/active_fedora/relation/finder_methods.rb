@@ -189,7 +189,8 @@ module ActiveFedora
     protected
 
       def load_from_fedora(id, cast)
-        raise ActiveFedora::ObjectNotFoundError if id.empty?
+        raise ActiveFedora::ObjectNotFoundError, "No ID provided for #{klass.name}." if id.empty?
+
         resource = ActiveFedora.fedora.ldp_resource_service.build(klass, id)
         raise_record_not_found_exception!(id) if resource.new?
         class_to_load(resource, cast).allocate.init_with_resource(resource) # Triggers the find callback

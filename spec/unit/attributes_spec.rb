@@ -16,7 +16,7 @@ describe ActiveFedora::Base do
     end
 
     subject(:history) { obj }
-    let(:obj) { BarHistory4.new(title: ['test1']) }
+    let(:obj) { BarHistory4.new(title: ['test1'], id: 'test:123') }
 
     describe "#attribute_names" do
       context "on an instance" do
@@ -34,15 +34,7 @@ describe ActiveFedora::Base do
 
     describe "#inspect" do
       it "shows the attributes" do
-        expect(history.inspect).to eq "#<BarHistory4 id: nil, title: [\"test1\"], abstract: nil>"
-      end
-
-      describe "with a id" do
-        before { allow(history).to receive(:id).and_return('test:123') }
-
-        it "shows a id" do
-          expect(history.inspect).to eq "#<BarHistory4 id: \"test:123\", title: [\"test1\"], abstract: nil>"
-        end
+        expect(history.inspect).to eq "#<BarHistory4 id: \"test:123\", title: [\"test1\"], abstract: nil>"
       end
 
       describe "with no attributes" do
@@ -98,7 +90,7 @@ describe ActiveFedora::Base do
               history.resource[:abstract] = ['foo', 'bar']
             end
             it "raises an error if just returning the first value would cause data loss" do
-              expect { history[:abstract] }.to raise_error ActiveFedora::ConstraintError, "Expected \"abstract\" to have 0-1 statements, but there are 2"
+              expect { history[:abstract] }.to raise_error ActiveFedora::ConstraintError, "Expected \"abstract\" of test:123 to have 0-1 statements, but there are 2"
             end
           end
         end
@@ -144,7 +136,7 @@ describe ActiveFedora::Base do
       it "does not allow an enumerable to a unique attribute writer" do
         expect { history.abstract = "Low" }.not_to raise_error
         expect { history.abstract = ["Low"]
-        }.to raise_error ArgumentError, "You attempted to set the property `abstract' to an enumerable value. However, this property is declared as singular."
+        }.to raise_error ArgumentError, "You attempted to set the property `abstract' of test:123 to an enumerable value. However, this property is declared as singular."
         expect { history.abstract = nil }.not_to raise_error
       end
     end
