@@ -99,21 +99,21 @@ describe ActiveFedora::QualifiedDublinCoreDatastream do
   end
 
   describe 'custom fields' do
-    subject { described_class.new }
+    subject(:datastream) { described_class.new }
     it 'grabs the term' do
       sample_xml = "<dc xmlns:dcterms='http://purl.org/dc/terms/' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'><dcterms:cust>custom</dcterms:cust></dc>"
-      subject.content = sample_xml
-      subject.field :cust
-      expect(subject.cust).to eq ['custom']
+      datastream.content = sample_xml
+      datastream.field :cust
+      expect(datastream.cust).to eq ['custom']
     end
   end
 
   describe "#field should accept :path option" do
-    subject { described_class.new }
+    subject(:datastream) { described_class.new }
     it "is able to map :dc_type to the path 'type'" do
-      subject.content = sample_xml
-      subject.field :dc_type, :string, path: "type", multiple: true
-      expect(subject.dc_type).to eq ['sound']
+      datastream.content = sample_xml
+      datastream.field :dc_type, :string, path: "type", multiple: true
+      expect(datastream.dc_type).to eq ['sound']
     end
   end
 end

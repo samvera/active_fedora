@@ -9,16 +9,16 @@ describe ActiveFedora::Base do
     Object.send(:remove_const, :MockAFBaseRelationship)
   end
 
-  subject { MockAFBaseRelationship.new }
+  subject(:relationship) { MockAFBaseRelationship.new }
 
   context '#changed_for_autosave?' do
     before(:each) do
-      expect(subject).to receive(:new_record?).and_return(false)
-      expect(subject).to receive(:changed?).and_return(false)
-      expect(subject).to receive(:marked_for_destruction?).and_return(false)
+      expect(relationship).to receive(:new_record?).and_return(false)
+      expect(relationship).to receive(:changed?).and_return(false)
+      expect(relationship).to receive(:marked_for_destruction?).and_return(false)
     end
     it {
-      expect { subject.changed_for_autosave? }.to_not raise_error
+      expect { relationship.changed_for_autosave? }.to_not raise_error
     }
   end
 end

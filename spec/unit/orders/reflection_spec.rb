@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe ActiveFedora::Reflection::OrdersReflection do
-  subject { described_class.new(name, scope, options, active_fedora) }
+  let(:orders_reflection) { described_class.new(name, scope, options, active_fedora) }
   let(:macro) { :orders }
   let(:name) { "ordered_member_proxies" }
   let(:options) { {} }
@@ -10,13 +10,13 @@ RSpec.describe ActiveFedora::Reflection::OrdersReflection do
 
   describe "#klass" do
     it "is a proxy" do
-      expect(subject.klass).to eq ActiveFedora::Orders::ListNode
+      expect(orders_reflection.klass).to eq ActiveFedora::Orders::ListNode
     end
   end
 
   describe "#class_name" do
     it "is a list node" do
-      expect(subject.class_name).to eq "ActiveFedora::Orders::ListNode"
+      expect(orders_reflection.class_name).to eq "ActiveFedora::Orders::ListNode"
     end
   end
 end

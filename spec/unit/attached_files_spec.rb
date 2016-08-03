@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::AttachedFiles do
-  subject { ActiveFedora::Base.new }
+  subject(:af_base) { ActiveFedora::Base.new }
   describe "has_subresource" do
     before do
       class Z < ActiveFedora::File
@@ -101,33 +101,33 @@ describe ActiveFedora::AttachedFiles do
 
       expect(m1).to receive(:serialize!)
       expect(m2).to receive(:serialize!)
-      allow(subject).to receive(:declared_attached_files).and_return(m1: m1, m2: m2)
-      subject.serialize_attached_files
+      allow(af_base).to receive(:declared_attached_files).and_return(m1: m1, m2: m2)
+      af_base.serialize_attached_files
     end
   end
 
   describe "#accessor_name" do
     it "uses the name" do
-      expect(subject.send(:accessor_name, 'abc')).to eq 'abc'
+      expect(af_base.send(:accessor_name, 'abc')).to eq 'abc'
     end
 
     it "uses the name" do
-      expect(subject.send(:accessor_name, 'ARCHIVAL_XML')).to eq 'ARCHIVAL_XML'
+      expect(af_base.send(:accessor_name, 'ARCHIVAL_XML')).to eq 'ARCHIVAL_XML'
     end
 
     it "uses the name" do
-      expect(subject.send(:accessor_name, 'descMetadata')).to eq 'descMetadata'
+      expect(af_base.send(:accessor_name, 'descMetadata')).to eq 'descMetadata'
     end
 
     it "hash-erizes underscores" do
-      expect(subject.send(:accessor_name, 'a-b')).to eq 'a_b'
+      expect(af_base.send(:accessor_name, 'a-b')).to eq 'a_b'
     end
   end
 
   describe "#attached_files" do
     it "returns the datastream hash proxy" do
-      allow(subject).to receive(:load_datastreams)
-      expect(subject.attached_files).to be_a_kind_of(ActiveFedora::FilesHash)
+      allow(af_base).to receive(:load_datastreams)
+      expect(af_base.attached_files).to be_a_kind_of(ActiveFedora::FilesHash)
     end
   end
 
@@ -136,37 +136,37 @@ describe ActiveFedora::AttachedFiles do
 
     it "does not call save on the file" do
       expect(file).to receive(:save).never
-      subject.attach_file(file, 'part1')
+      af_base.attach_file(file, 'part1')
     end
 
     it "adds the file to the attached_files hash" do
       expect {
-        subject.attach_file(file, 'part1')
-      }.to change { subject.attached_files.key?(:part1) }.from(false).to(true)
+        af_base.attach_file(file, 'part1')
+      }.to change { af_base.attached_files.key?(:part1) }.from(false).to(true)
     end
 
     context "after attaching the file" do
       let(:dsid) { 'Abc' }
       before do
-        subject.attach_file(file, dsid)
+        af_base.attach_file(file, dsid)
       end
 
       it "adds the datastream to the object" do
-        expect(subject.attached_files['Abc']).to eq file
+        expect(af_base.attached_files['Abc']).to eq file
       end
 
       describe "dynamic accessors" do
         context "when the file is named with dash" do
           let(:dsid) { 'eac-cpf' }
           it "converts dashes to underscores" do
-            expect(subject.eac_cpf).to eq file
+            expect(af_base.eac_cpf).to eq file
           end
         end
 
         context "when the file is named with underscore" do
           let(:dsid) { 'foo_bar' }
           it "preserves the underscore" do
-            expect(subject.foo_bar).to eq file
+            expect(af_base.foo_bar).to eq file
           end
         end
       end
@@ -179,9 +179,9 @@ describe ActiveFedora::AttachedFiles do
       ds2 = double(metadata?: true)
       ds3 = double(metadata?: true)
       file_ds = double(metadata?: false)
-      allow(subject).to receive(:attached_files).and_return(a: ds1, b: ds2, c: ds3, e: file_ds)
-      expect(subject.metadata_streams).to include(ds1, ds2, ds3)
-      expect(subject.metadata_streams).to_not include(file_ds)
+      allow(af_base).to receive(:attached_files).and_return(a: ds1, b: ds2, c: ds3, e: file_ds)
+      expect(af_base.metadata_streams).to include(ds1, ds2, ds3)
+      expect(af_base.metadata_streams).to_not include(file_ds)
     end
   end
 end

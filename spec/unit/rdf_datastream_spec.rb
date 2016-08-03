@@ -27,22 +27,22 @@ describe ActiveFedora::RDFDatastream do
       Object.send(:remove_const, :MyObj)
     end
 
-    subject { @obj.reload.descMetadata }
+    subject(:desc_metadata) { @obj.reload.descMetadata }
 
     it "does not load the descMetadata datastream when calling content_changed?" do
-      expect(subject).to_not receive(:retrieve_content)
-      expect(subject).to_not be_content_changed
+      expect(desc_metadata).to_not receive(:retrieve_content)
+      expect(desc_metadata).to_not be_content_changed
     end
 
     it "allows asserting an empty string" do
-      subject.title = ['']
-      expect(subject.title).to eq ['']
+      desc_metadata.title = ['']
+      expect(desc_metadata.title).to eq ['']
     end
 
     it "clears stuff" do
-      subject.title = ['one', 'two', 'three']
-      subject.title.clear
-      expect(subject.graph.query([subject.rdf_subject, ::RDF::Vocab::DC.title, nil]).first).to be_nil
+      desc_metadata.title = ['one', 'two', 'three']
+      desc_metadata.title.clear
+      expect(desc_metadata.graph.query([desc_metadata.rdf_subject, ::RDF::Vocab::DC.title, nil]).first).to be_nil
     end
 
     it "has a list of fields" do
@@ -51,12 +51,12 @@ describe ActiveFedora::RDFDatastream do
   end
 
   describe "deserialize" do
-    subject { ActiveFedora::NtriplesRDFDatastream.new }
+    subject(:datastream) { ActiveFedora::NtriplesRDFDatastream.new }
     it "is able to handle non-utf-8 characters" do
       # see https://github.com/ruby-rdf/rdf/issues/142
       data = "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n\xE2\x80\x99 \" .\n".force_encoding('ASCII-8BIT')
 
-      result = subject.deserialize(data)
+      result = datastream.deserialize(data)
       expect(result.dump(:ntriples)).to eq "<info:fedora/scholarsphere:qv33rx50r> <http://purl.org/dc/terms/description> \"\\n’ \" .\n"
     end
   end

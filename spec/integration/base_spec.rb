@@ -159,7 +159,7 @@ describe ActiveFedora::Base do
   end
 
   describe "overriding resource_class_factory" do
-    subject { TestBase.new }
+    subject(:test_base) { TestBase.new }
     before do
       class TestResource < ActiveTriples::Resource
       end
@@ -174,7 +174,7 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :TestBase)
     end
     it "uses that factory for #resource" do
-      expect(subject.resource.class.ancestors).to include TestResource
+      expect(test_base.resource.class.ancestors).to include TestResource
     end
   end
 end

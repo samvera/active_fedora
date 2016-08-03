@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
+  subject(:object) { described_class.new }
   describe ".update_index" do
     before do
       mock_conn = double("SolrConnection")
@@ -13,20 +14,20 @@ describe ActiveFedora::Base do
     end
 
     it "makes the solr_document with to_solr and add it" do
-      expect(subject).to receive(:to_solr)
-      subject.update_index
+      expect(object).to receive(:to_solr)
+      object.update_index
     end
   end
 
   describe ".delete" do
     before do
-      allow(subject).to receive(:new_record?).and_return(false)
+      allow(object).to receive(:new_record?).and_return(false)
       allow(ActiveFedora.fedora.connection).to receive(:delete)
     end
 
     it "deletes object from repository and index" do
       expect(ActiveFedora::SolrService).to receive(:delete).with(nil)
-      subject.delete
+      object.delete
     end
   end
 

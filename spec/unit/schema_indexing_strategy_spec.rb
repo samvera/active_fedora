@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe ActiveFedora::SchemaIndexingStrategy do
-  subject { described_class.new(property_indexer_factory) }
+  subject(:index_strategy) { described_class.new(property_indexer_factory) }
 
   describe "#apply" do
     let(:property) do
@@ -40,9 +40,9 @@ RSpec.describe ActiveFedora::SchemaIndexingStrategy do
     end
     let(:index_types) {}
     context "with no index types" do
-      subject { described_class.new }
+      subject(:index_strategy) { described_class.new }
       it "does not try to index it" do
-        subject.apply(object, property)
+        index_strategy.apply(object, property)
 
         expect(object).to have_received(:property).with(property.name, property.to_h)
         expect(index_configuration).not_to have_received(:as)
@@ -51,7 +51,7 @@ RSpec.describe ActiveFedora::SchemaIndexingStrategy do
     context "with one index type" do
       let(:index_types) { :symbol }
       it "applies that one" do
-        subject.apply(object, property)
+        index_strategy.apply(object, property)
 
         expect(index_configuration).to have_received(:as).with(:symbol)
       end
@@ -59,7 +59,7 @@ RSpec.describe ActiveFedora::SchemaIndexingStrategy do
     context "with multiple index types" do
       let(:index_types) { [:symbol, :stored_searchable] }
       it "applies all of them" do
-        subject.apply(object, property)
+        index_strategy.apply(object, property)
 
         expect(index_configuration).to have_received(:as).with(:symbol, :stored_searchable)
       end

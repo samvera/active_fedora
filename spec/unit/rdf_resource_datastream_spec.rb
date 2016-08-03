@@ -29,49 +29,49 @@ describe ActiveFedora::RDFDatastream do
     Object.send(:remove_const, "DummySubnode")
   end
 
-  subject { DummyResource.new("#{ActiveFedora.fedora.host}/test/test:1") }
+  subject(:resource) { DummyResource.new("#{ActiveFedora.fedora.host}/test/test:1") }
 
   describe "attribute setting" do
     context "on text attributes" do
       before do
-        subject.title = "bla"
+        resource.title = "bla"
       end
 
       it "lets you access" do
-        expect(subject.title).to eq ["bla"]
+        expect(resource.title).to eq ["bla"]
       end
 
       it "marks it as changed" do
-        expect(subject).to be_changed
+        expect(resource).to be_changed
       end
 
       context "after it is persisted" do
         before do
-          subject.save
-          subject.reload
+          resource.save
+          resource.reload
         end
 
         it "is persisted" do
-          expect(subject.resource).to be_persisted
+          expect(resource.resource).to be_persisted
         end
 
         context "and it's reloaded" do
           before do
-            subject.reload
+            resource.reload
           end
 
           it "is accessible after being saved" do
-            expect(subject.title).to eq ["bla"]
+            expect(resource.title).to eq ["bla"]
           end
 
           it "serializes to content" do
-            expect(subject.content).not_to be_blank
+            expect(resource.content).not_to be_blank
           end
         end
 
         context "and it is found again" do
           before do
-            @object = DummyResource.new(subject.uri)
+            @object = DummyResource.new(resource.uri)
           end
 
           it "serializes to content" do
@@ -94,15 +94,15 @@ describe ActiveFedora::RDFDatastream do
         before do
           dummy = DummySubnode.new
           dummy.title = 'subbla'
-          subject.license = dummy
+          resource.license = dummy
         end
 
         it "lets you access" do
-          expect(subject.license.first.title).to eq ['subbla']
+          expect(resource.license.first.title).to eq ['subbla']
         end
 
         it "marks it as changed" do
-          expect(subject).to be_changed
+          expect(resource).to be_changed
         end
       end
       context "persisted to repository" do
@@ -113,15 +113,15 @@ describe ActiveFedora::RDFDatastream do
           # We want to have to manually persist to the repository.
           # Parent objects shouldn't be persisting children they share with other parents
           dummy.persist!
-          subject.license = dummy
+          resource.license = dummy
         end
 
         it "lets you access" do
-          expect(subject.license.first.title).to eq ['subbla']
+          expect(resource.license.first.title).to eq ['subbla']
         end
 
         it "marks it as changed" do
-          expect(subject).to be_changed
+          expect(resource).to be_changed
         end
       end
     end
@@ -130,28 +130,28 @@ describe ActiveFedora::RDFDatastream do
   describe "relationships" do
     before do
       @new_object = DummyAsset.create(something: ["subbla"])
-      subject.title = ["bla"]
-      subject.creator = @new_object
+      resource.title = ["bla"]
+      resource.creator = @new_object
     end
 
     it "can set sub-properties to AF objects" do
-      expect(subject.creator).to eq [@new_object]
+      expect(resource.creator).to eq [@new_object]
     end
 
     it "has accessible relationship attributes" do
-      expect(subject.creator.first.something).to eq ["subbla"]
+      expect(resource.creator.first.something).to eq ["subbla"]
     end
 
     it "lets me get to an AF:Base object" do
-      subject.save
-      resource = DummyResource.new(subject.uri)
-      expect(resource.creator.first).to be_kind_of(ActiveFedora::Base)
+      resource.save
+      new_resource = DummyResource.new(resource.uri)
+      expect(new_resource.creator.first).to be_kind_of(ActiveFedora::Base)
     end
 
     context "when the AF:Base object is deleted" do
       before do
-        subject.save
-        @resource = DummyResource.new(subject.uri)
+        resource.save
+        @resource = DummyResource.new(resource.uri)
         @new_object.destroy
       end
       it "gives back an ActiveTriples::Resource" do
@@ -161,8 +161,8 @@ describe ActiveFedora::RDFDatastream do
     end
 
     it "allows for deep attributes to be set directly" do
-      subject.creator.first.something = ["Bla"]
-      expect(subject.creator.first.something).to eq ["Bla"]
+      resource.creator.first.something = ["Bla"]
+      expect(resource.creator.first.something).to eq ["Bla"]
     end
 
     context "when the subject is set with base_uri" do
@@ -171,37 +171,37 @@ describe ActiveFedora::RDFDatastream do
         DummyResource.resource_class.configure base_uri: 'http://example.org/'
         new_object = DummyAsset.new
         new_object.save
-        subject.creator = new_object
+        resource.creator = new_object
       end
       after do
         DummyResource.resource_class.configure base_uri: @old_uri
       end
 
       it "lets me get to an AF:Base object" do
-        subject.save
-        resource = DummyResource.new(subject.uri)
-        expect(resource.creator.first).to be_kind_of(ActiveFedora::Base)
+        resource.save
+        new_resource = DummyResource.new(resource.uri)
+        expect(new_resource.creator.first).to be_kind_of(ActiveFedora::Base)
       end
     end
 
     context "when the object with a relationship is saved" do
       before do
-        subject.save
+        resource.save
       end
 
       it "is retrievable" do
-        expect(subject.creator.first.something).to eq ["subbla"]
+        expect(resource.creator.first.something).to eq ["subbla"]
       end
     end
 
     context "when the object with a relationship is frozen" do
       before do
-        subject.save
-        subject.freeze
+        resource.save
+        resource.freeze
       end
 
       it "is retrievable" do
-        expect(subject.creator.first.something).to eq ["subbla"]
+        expect(resource.creator.first.something).to eq ["subbla"]
       end
     end
   end

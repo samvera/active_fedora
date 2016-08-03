@@ -25,7 +25,7 @@ describe ActiveFedora::Indexing do
       Object.send(:remove_const, :SpecNode)
     end
 
-    subject { SpecNode.new }
+    subject(:node) { SpecNode.new }
 
     describe "#create_needs_index?" do
       subject { SpecNode.new.send(:create_needs_index?) }
@@ -55,10 +55,10 @@ describe ActiveFedora::Indexing do
 
     let(:test_object) { SpecNode.new(title: ['first title'], abstract: 'The abstract') }
 
-    subject { test_object.to_solr }
+    subject(:solr_doc) { test_object.to_solr }
 
     it "indexs the rdf properties" do
-      expect(subject).to include('title_tesim' => ['first title'], 'abstract_ssi' => 'The abstract')
+      expect(solr_doc).to include('title_tesim' => ['first title'], 'abstract_ssi' => 'The abstract')
     end
 
     it "adds id, system_create_date, system_modified_date from object attributes" do
@@ -80,7 +80,7 @@ describe ActiveFedora::Indexing do
         expect(mock2).to receive(:to_solr).and_return("two" => "title two")
 
         allow(test_object).to receive(:declared_attached_files).and_return(ds1: mock1, ds2: mock2)
-        expect(subject).to include('one' => 'title one', 'two' => 'title two')
+        expect(solr_doc).to include('one' => 'title one', 'two' => 'title two')
       end
     end
   end

@@ -2,6 +2,7 @@ require 'spec_helper'
 
 describe ActiveFedora::WithMetadata::DefaultMetadataClassFactory do
   let(:parent) { double("Parent") }
+  let(:object) { described_class.new }
 
   describe "default class attributes" do
     its(:metadata_base_class)    { is_expected.to eq(ActiveFedora::WithMetadata::MetadataNode) }
@@ -22,7 +23,7 @@ describe ActiveFedora::WithMetadata::DefaultMetadataClassFactory do
                                                 to: :metadata_node)
       expect(parent).to receive(:delegate).with(:byte_order, :byte_order=, :byte_order_changed?, to: :metadata_node)
       expect(parent).to receive(:delegate).with(:file_hash, :file_hash=, :file_hash_changed?, to: :metadata_node)
-      subject.class.build(parent)
+      object.class.build(parent)
     end
   end
 end

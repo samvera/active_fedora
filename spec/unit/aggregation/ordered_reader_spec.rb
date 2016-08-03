@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe ActiveFedora::Aggregation::OrderedReader do
-  subject { described_class.new(root) }
+  subject(:ordered_reader) { described_class.new(root) }
   let(:root) { instance_double(ActiveFedora::Aggregation::ListSource) }
 
   describe "#each" do
@@ -10,14 +10,14 @@ RSpec.describe ActiveFedora::Aggregation::OrderedReader do
       tail = build_node(prev_node: head)
       allow(head).to receive(:next).and_return(tail)
       allow(root).to receive(:head).and_return(head)
-      expect(subject.to_a).to eq [head, tail]
+      expect(ordered_reader.to_a).to eq [head, tail]
     end
     it "only goes as deep as necessary" do
       head = build_node
       tail = build_node(prev_node: head)
       allow(head).to receive(:next).and_return(tail)
       allow(root).to receive(:head).and_return(head)
-      expect(subject.first).to eq head
+      expect(ordered_reader.first).to eq head
       expect(head).not_to have_received(:next)
     end
     context "when the prev is wrong" do
@@ -28,7 +28,7 @@ RSpec.describe ActiveFedora::Aggregation::OrderedReader do
         allow(head).to receive(:next).and_return(tail)
         allow(root).to receive(:head).and_return(head)
         allow(tail).to receive(:prev=)
-        expect(subject.to_a).to eq [head, tail]
+        expect(ordered_reader.to_a).to eq [head, tail]
         expect(tail).to have_received(:prev=).with(head)
       end
     end

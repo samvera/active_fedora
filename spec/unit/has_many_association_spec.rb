@@ -41,10 +41,10 @@ describe ActiveFedora::Associations::HasManyAssociation do
     let(:book_reflection) { ActiveFedora::Reflection.create(:has_many, 'pages', nil, { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf }, Book) }
     let(:association) { described_class.new(book, book_reflection) }
 
-    subject { association.send(:find_polymorphic_inverse, page) }
+    subject(:af_page) { association.send(:find_polymorphic_inverse, page) }
 
     it "finds the HABTM reflection" do
-      expect(subject.name).to eq :contents
+      expect(af_page.name).to eq :contents
     end
   end
 

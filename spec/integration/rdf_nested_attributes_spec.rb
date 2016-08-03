@@ -38,25 +38,25 @@ describe "Nesting attribute behavior of RDF resources" do
   end
 
   context "with an AT resource as a property" do
-    subject { ComplexResource.new }
+    subject(:complex_resource) { ComplexResource.new }
 
     let(:params) { [{ subject: 'Foo' }, { subject: 'Bar' }] }
 
     before do
       ComplexResource.accepts_nested_attributes_for(*args)
-      subject.topic_attributes = params
+      complex_resource.topic_attributes = params
     end
 
     context "when no options are set" do
       let(:args) { [:topic] }
 
       it "sets the attributes" do
-        expect(subject.topic.size).to eq 2
-        expect(subject.topic.map(&:subject)).to contain_exactly ['Foo'], ['Bar']
+        expect(complex_resource.topic.size).to eq 2
+        expect(complex_resource.topic.map(&:subject)).to contain_exactly ['Foo'], ['Bar']
       end
 
       it "marks the attributes as changed" do
-        expect(subject.changed_attributes.keys).to eq ["topic"]
+        expect(complex_resource.changed_attributes.keys).to eq ["topic"]
       end
     end
 
@@ -66,7 +66,7 @@ describe "Nesting attribute behavior of RDF resources" do
       let(:params) { [{ subject: 'Foo' }, { subject: 'Bar' }] }
 
       it "does not add terms for which the proc is true" do
-        expect(subject.topic.map(&:subject)).to eq [['Foo']]
+        expect(complex_resource.topic.map(&:subject)).to eq [['Foo']]
       end
     end
   end

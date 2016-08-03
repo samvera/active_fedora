@@ -3,27 +3,27 @@ require 'spec_helper'
 describe ActiveFedora::Persistence do
   describe '#new_record?' do
     context 'with an new object' do
-      subject { ActiveFedora::Base.new }
+      subject(:persistence) { ActiveFedora::Base.new }
       it { is_expected.to be_new_record }
     end
 
     context 'with an destroyed object' do
-      subject { ActiveFedora::Base.create }
-      before { subject.delete }
+      subject(:persistence) { ActiveFedora::Base.create }
+      before { persistence.delete }
       it { is_expected.not_to be_new_record }
     end
   end
 
   describe '.delete' do
     context 'with an unsaved object' do
-      subject { ActiveFedora::Base.new }
-      before { subject.delete }
-      it { is_expected.to eq subject }
+      subject(:persistence) { ActiveFedora::Base.new }
+      before { persistence.delete }
+      it { is_expected.to eq persistence }
     end
 
     context 'with a saved object' do
-      subject { ActiveFedora::Base.create! }
-      before { subject.delete }
+      subject(:persistence) { ActiveFedora::Base.create! }
+      before { persistence.delete }
       it { is_expected.to be_frozen }
     end
   end
@@ -46,68 +46,68 @@ describe ActiveFedora::Persistence do
   end
 
   describe '.destroy' do
-    subject { ActiveFedora::Base.create! }
+    subject(:persistence) { ActiveFedora::Base.create! }
     context 'with no options' do
-      before { subject.destroy }
+      before { persistence.destroy }
       it 'does not clear the id' do
-        expect(subject.id).not_to be_nil
+        expect(persistence.id).not_to be_nil
       end
     end
 
     context 'with option eradicate: true' do
       it 'deletes the tombstone' do
-        expect(subject.class).to receive(:eradicate).with(subject.id).and_return(true)
-        subject.destroy(eradicate: true)
+        expect(persistence.class).to receive(:eradicate).with(persistence.id).and_return(true)
+        persistence.destroy(eradicate: true)
       end
     end
   end
 
   describe "save" do
-    subject { ActiveFedora::Base.new }
+    subject(:persistence) { ActiveFedora::Base.new }
 
     context "when called with option update_index: false" do
       context "on a new record" do
         it "does not update the index" do
-          expect(subject).to_not receive(:update_index)
-          subject.save(update_index: false)
+          expect(persistence).to_not receive(:update_index)
+          persistence.save(update_index: false)
         end
       end
 
       context "on a persisted record" do
         before do
-          allow(subject).to receive(:new_record?) { false }
+          allow(persistence).to receive(:new_record?) { false }
           allow_any_instance_of(Ldp::Orm).to receive(:save) { true }
-          allow(subject).to receive(:update_modified_date)
+          allow(persistence).to receive(:update_modified_date)
         end
 
         it "does not update the index" do
-          expect(subject).to_not receive(:update_index)
-          subject.save(update_index: false)
+          expect(persistence).to_not receive(:update_index)
+          persistence.save(update_index: false)
         end
       end
     end
 
     context "when called with option :update_index=>true" do
       context "on create" do
-        before { allow(subject).to receive(:create_needs_index?) { false } }
+        before { allow(persistence).to receive(:create_needs_index?) { false } }
 
         it "does not override `create_needs_index?'" do
-          expect(subject).to_not receive(:update_index)
-          subject.save(update_index: true)
+          expect(persistence).to_not receive(:update_index)
+          persistence.save(update_index: true)
         end
       end
 
       context "on update" do
         before do
-          allow(subject).to receive(:new_record?) { false }
+          allow(persistence).to receive(:new_record?) { false }
           allow_any_instance_of(Ldp::Orm).to receive(:save) { true }
-          allow(subject).to receive(:update_needs_index?) { false }
-          allow(subject).to receive(:update_modified_date)
+          allow(persistence).to receive(:update_needs_index?) { false }
+          allow(persistence).to receive(:update_modified_date)
         end
 
         it "does not override `update_needs_index?'" do
-          expect(subject).to_not receive(:update_index)
-          subject.save(update_index: true)
+          expect(persistence).to_not receive(:update_index)
+          persistence.save(update_index: true)
         end
       end
     end

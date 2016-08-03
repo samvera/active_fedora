@@ -18,9 +18,9 @@ describe "fedora_solr_sync_issues" do
   end
 
   let(:parent) { ParentThing.create }
-  subject { ChildThing.create parent: parent }
+  subject(:child) { ChildThing.create parent: parent }
 
-  before { Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, subject.uri).delete }
+  before { Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, child.uri).delete }
 
   it "does not go into an infinite loop" do
     parent.reload

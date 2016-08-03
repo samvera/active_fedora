@@ -2,12 +2,12 @@ require 'spec_helper'
 
 describe ActiveFedora::RDFXMLDatastream do
   describe "a new instance" do
+    subject(:my_datastream) { MyRdfxmlDatastream.new }
     before(:each) do
       class MyRdfxmlDatastream < ActiveFedora::RDFXMLDatastream
         property :publisher, predicate: ::RDF::Vocab::DC.publisher
       end
-      @subject = MyRdfxmlDatastream.new
-      allow(@subject).to receive(:id).and_return('test:1')
+      allow(my_datastream).to receive(:id).and_return('test:1')
     end
 
     after(:each) do
@@ -15,8 +15,8 @@ describe ActiveFedora::RDFXMLDatastream do
     end
 
     it "saves and reload" do
-      @subject.publisher = ["St. Martin's Press"]
-      expect(@subject.serialize).to match(/<rdf:RDF/)
+      my_datastream.publisher = ["St. Martin's Press"]
+      expect(my_datastream.serialize).to match(/<rdf:RDF/)
     end
   end
 
@@ -79,27 +79,27 @@ describe ActiveFedora::RDFXMLDatastream do
     end
 
     describe "a new instance" do
-      subject { MyDatastream.new(about: "http://library.ucsd.edu/ark:/20775/") }
+      let(:my_datastream) { MyDatastream.new(about: "http://library.ucsd.edu/ark:/20775/") }
       it "has a subject" do
-        expect(subject.rdf_subject.to_s).to eq "http://library.ucsd.edu/ark:/20775/"
+        expect(my_datastream.rdf_subject.to_s).to eq "http://library.ucsd.edu/ark:/20775/"
       end
     end
 
     describe "an instance with content" do
-      subject do
-        subject = MyDatastream.new(about: "http://library.ucsd.edu/ark:/20775/")
-        subject.content = File.new('spec/fixtures/damsObjectModel.xml').read
-        subject
+      let(:my_datastream) do
+        my_datastream = MyDatastream.new(about: "http://library.ucsd.edu/ark:/20775/")
+        my_datastream.content = File.new('spec/fixtures/damsObjectModel.xml').read
+        my_datastream
       end
       it "has a subject" do
-        expect(subject.rdf_subject.to_s).to eq "http://library.ucsd.edu/ark:/20775/"
+        expect(my_datastream.rdf_subject.to_s).to eq "http://library.ucsd.edu/ark:/20775/"
       end
       it "has mimeType" do
-        expect(subject.mime_type).to eq 'text/xml'
+        expect(my_datastream.mime_type).to eq 'text/xml'
       end
       it "has fields" do
-        expect(subject.resource_type).to eq ["image"]
-        expect(subject.title.first.value).to eq ["example title"]
+        expect(my_datastream.resource_type).to eq ["image"]
+        expect(my_datastream.title.first.value).to eq ["example title"]
       end
     end
   end

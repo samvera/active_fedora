@@ -15,24 +15,22 @@ describe "Checking fixity" do
     obj = MockAFBase.create
     obj.data.content = "some content"
     obj.save
-    obj.data
+    obj.data.check_fixity
   end
 
   context "with a valid resource" do
-    it "returns true for a successful fixity check" do
-      expect(subject.check_fixity).to be true
-    end
+    it { is_expected.to be true }
   end
   context "when no uri has been set" do
-    subject { ActiveFedora::File.new }
+    subject(:file) { ActiveFedora::File.new }
     it "raises an error" do
-      expect { subject.check_fixity }.to raise_error(ArgumentError, "You must provide a uri")
+      expect { file.check_fixity }.to raise_error(ArgumentError, "You must provide a uri")
     end
   end
   context "with missing resource" do
-    subject { ActiveFedora::File.new(ActiveFedora::Base.id_to_uri('123')) }
+    subject(:file) { ActiveFedora::File.new(ActiveFedora::Base.id_to_uri('123')) }
     it "raises an error" do
-      expect { subject.check_fixity }.to raise_error(Ldp::NotFound)
+      expect { file.check_fixity }.to raise_error(Ldp::NotFound)
     end
   end
 end

@@ -18,40 +18,40 @@ describe ActiveFedora::OmDatastream do
     obj.destroy
   end
 
-  subject { obj.descMetadata }
+  subject(:desc_metadata) { obj.descMetadata }
 
   describe "#changed?" do
     it "is not changed when no fields have been set" do
-      expect(subject).to_not be_content_changed
+      expect(desc_metadata).to_not be_content_changed
     end
     it "is changed when a field has been set" do
-      subject.title = 'Foobar'
-      expect(subject).to be_content_changed
+      desc_metadata.title = 'Foobar'
+      expect(desc_metadata).to be_content_changed
     end
     it "is not changed if the new xml matches the old xml" do
-      subject.content = subject.content
-      expect(subject).to_not be_content_changed
+      desc_metadata.content = desc_metadata.content
+      expect(desc_metadata).to_not be_content_changed
     end
 
     it "is changed if there are minor differences in whitespace" do
-      subject.content = "<a><b>1</b></a>"
+      desc_metadata.content = "<a><b>1</b></a>"
       obj.save
-      expect(subject).to_not be_content_changed
-      subject.content = "<a>\n<b>1</b>\n</a>"
-      expect(subject).to be_content_changed
+      expect(desc_metadata).to_not be_content_changed
+      desc_metadata.content = "<a>\n<b>1</b>\n</a>"
+      expect(desc_metadata).to be_content_changed
     end
   end
 
   describe "empty datastream content" do
     it "does not break when there is empty datastream content" do
-      subject.content = ""
+      desc_metadata.content = ""
       obj.save
     end
   end
 
   describe '.update_values' do
     before do
-      subject.content = File.read(fixture('mods_articles/mods_article1.xml'))
+      desc_metadata.content = File.read(fixture('mods_articles/mods_article1.xml'))
       obj.save
       obj.reload
     end
@@ -67,7 +67,7 @@ describe ActiveFedora::OmDatastream do
 
   describe ".to_solr" do
     before do
-      subject.journal.issue.publication_date = Date.parse('2012-11-02')
+      desc_metadata.journal.issue.publication_date = Date.parse('2012-11-02')
       obj.save!
       obj.reload
     end

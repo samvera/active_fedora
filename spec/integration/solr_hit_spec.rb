@@ -19,14 +19,14 @@ describe ActiveFedora::SolrHit do
   ) }
 
   let(:doc) { obj.to_solr }
-  let(:solr_hit) { described_class.new(doc) }
+  subject(:solr_hit) { described_class.new(doc) }
 
   describe "#reify" do
-    subject { solr_hit.reify }
+    let(:solr_reified) { solr_hit.reify }
 
     it "finds the document in solr" do
-      expect(subject).to be_instance_of Foo
-      expect(subject.title).to eq 'My Title'
+      expect(solr_reified).to be_instance_of Foo
+      expect(solr_reified.title).to eq 'My Title'
     end
   end
 end

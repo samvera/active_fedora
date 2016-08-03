@@ -36,15 +36,15 @@ describe ActiveFedora::Base do
         primary_file.content = "I'm in a container all alone!"
         page_image.save!
       end
-      subject { reloaded_page_image.primary_file }
+      subject(:reloaded_file) { reloaded_page_image.primary_file }
       it "initializes an object within the container" do
-        expect(subject.content).to eq("I'm in a container all alone!")
-        expect(subject.metadata_node.type).to include(::RDF::URI.new("http://example.com/primaryFile"))
+        expect(reloaded_file.content).to eq("I'm in a container all alone!")
+        expect(reloaded_file.metadata_node.type).to include(::RDF::URI.new("http://example.com/primaryFile"))
       end
       it "relies on info from the :through association, including class_name" do
         expect(page_image.files).to include(primary_file)
         expect(primary_file.uri.to_s).to include("/files/")
-        expect(subject.class).to eq FileWithMetadata
+        expect(reloaded_file.class).to eq FileWithMetadata
       end
     end
   end
@@ -61,9 +61,7 @@ describe ActiveFedora::Base do
         primary_file.content = "I am too"
         page_image.save!
       end
-      it "returns the matching object" do
-        expect(subject).to eq primary_file
-      end
+      it { is_expected.to eq primary_file }
     end
     context "if class_name is set" do
       before do
@@ -71,10 +69,10 @@ describe ActiveFedora::Base do
         alternative_file.content = "I am too"
         page_image.save!
       end
-      subject { reloaded_page_image.alternative_file }
+      subject(:reloaded_file) { reloaded_page_image.alternative_file }
       it "uses the specified class to load objects" do
-        expect(subject).to eq alternative_file
-        expect(subject).to be_instance_of AlternativeFileWithMetadata
+        expect(reloaded_file).to eq alternative_file
+        expect(reloaded_file).to be_instance_of AlternativeFileWithMetadata
       end
     end
   end
@@ -85,13 +83,13 @@ describe ActiveFedora::Base do
       primary_file.content = "I am too"
       page_image.save!
     end
-    subject { reloaded_page_image.files }
+    subject(:reloaded_file) { reloaded_page_image.files }
     it "replaces existing record without disturbing the other contents of the container" do
       replacement_file = page_image.primary_file = FileWithMetadata.new
       replacement_file.content = "I'm a replacement"
       page_image.save
-      expect(subject).to_not include(primary_file)
-      expect(subject).to contain_exactly(a_file, replacement_file)
+      expect(reloaded_file).to_not include(primary_file)
+      expect(reloaded_file).to contain_exactly(a_file, replacement_file)
       expect(reloaded_page_image.primary_file).to eq(replacement_file)
     end
   end

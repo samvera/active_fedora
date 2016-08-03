@@ -4,19 +4,20 @@ require 'active_fedora'
 require "rexml/document"
 
 describe ActiveFedora::File do
+  let(:file) { described_class.new }
   describe "#save" do
     context "with new files" do
       context "with a string" do
-        before { subject.content = "hello" }
+        before { file.content = "hello" }
         it "saves" do
-          expect(subject.save).to be true
+          expect(file.save).to be true
         end
       end
 
       context "with no content" do
-        before { subject.content = nil }
+        before { file.content = nil }
         it "does not save" do
-          expect(subject.save).to be false
+          expect(file.save).to be false
         end
       end
     end
@@ -43,9 +44,9 @@ describe ActiveFedora::File do
       end
 
       it "saves" do
-        subject.content = ActionDispatch::Http::UploadedFile.new
-        subject.save
-        expect(subject).not_to be_new_record
+        file.content = ActionDispatch::Http::UploadedFile.new
+        file.save
+        expect(file).not_to be_new_record
       end
     end
   end
@@ -149,9 +150,7 @@ describe ActiveFedora::File do
           end
           context "open ended" do
             let(:range) { 'bytes=0-' }
-            it "gets a response" do
-              expect(subject).to eq 'one1two2threfour'
-            end
+            it { should eq 'one1two2threfour' }
           end
           context "not starting at the beginning" do
             let(:range) { 'bytes=3-15' }

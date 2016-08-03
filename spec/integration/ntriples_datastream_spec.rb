@@ -30,7 +30,7 @@ describe ActiveFedora::NtriplesRDFDatastream do
     end
   end
 
-  subject { MyDatastream.new(described_class.id_to_uri('test:1')) }
+  subject(:my_datastream) { MyDatastream.new(described_class.id_to_uri('test:1')) }
 
   after do
     Object.send(:remove_const, :RdfTest)
@@ -50,44 +50,44 @@ EOF
   end
 
   it "delegates as_json to the fields" do
-    subject.title = "Title of work"
-    expect(subject.title.as_json).to eq ["Title of work"]
-    expect(subject.title.to_json).to eq "\[\"Title of work\"\]"
+    my_datastream.title = "Title of work"
+    expect(my_datastream.title.as_json).to eq ["Title of work"]
+    expect(my_datastream.title.to_json).to eq "\[\"Title of work\"\]"
   end
 
   describe "serializing" do
     it "handles dates" do
-      subject.date_uploaded = [Date.parse('2012-11-02')]
-      expect(subject.date_uploaded.first).to be_kind_of Date
+      my_datastream.date_uploaded = [Date.parse('2012-11-02')]
+      expect(my_datastream.date_uploaded.first).to be_kind_of Date
     end
     it "handles integers" do
-      subject.filesize = 12_345
-      expect(subject.filesize).to eq [12_345]
-      expect(subject.filesize.first).to be_kind_of Fixnum
+      my_datastream.filesize = 12_345
+      expect(my_datastream.filesize).to eq [12_345]
+      expect(my_datastream.filesize.first).to be_kind_of Fixnum
     end
   end
 
   it "sets and recall values" do
-    subject.title = 'War and Peace'
-    expect(subject).to be_changed
-    subject.based_near = ["Moscow, Russia"]
-    subject.related_url = ["http://en.wikipedia.org/wiki/War_and_Peace"]
-    subject.part = ["this is a part"]
-    subject.save
-    expect(subject.title).to eq ['War and Peace']
-    expect(subject.based_near).to eq ["Moscow, Russia"]
-    expect(subject.related_url).to eq ["http://en.wikipedia.org/wiki/War_and_Peace"]
-    expect(subject.part).to eq ["this is a part"]
+    my_datastream.title = 'War and Peace'
+    expect(my_datastream).to be_changed
+    my_datastream.based_near = ["Moscow, Russia"]
+    my_datastream.related_url = ["http://en.wikipedia.org/wiki/War_and_Peace"]
+    my_datastream.part = ["this is a part"]
+    my_datastream.save
+    expect(my_datastream.title).to eq ['War and Peace']
+    expect(my_datastream.based_near).to eq ["Moscow, Russia"]
+    expect(my_datastream.related_url).to eq ["http://en.wikipedia.org/wiki/War_and_Peace"]
+    expect(my_datastream.part).to eq ["this is a part"]
   end
 
   it "set, persist, and recall values" do
-    subject.title = 'War and Peace'
-    subject.based_near = ["Moscow, Russia"]
-    subject.related_url = ["http://en.wikipedia.org/wiki/War_and_Peace"]
-    subject.part = ["this is a part"]
-    subject.save
+    my_datastream.title = 'War and Peace'
+    my_datastream.based_near = ["Moscow, Russia"]
+    my_datastream.related_url = ["http://en.wikipedia.org/wiki/War_and_Peace"]
+    my_datastream.part = ["this is a part"]
+    my_datastream.save
 
-    loaded = MyDatastream.new(subject.uri)
+    loaded = MyDatastream.new(my_datastream.uri)
     expect(loaded.title).to eq ['War and Peace']
     expect(loaded.based_near).to eq ['Moscow, Russia']
     expect(loaded.related_url).to eq ['http://en.wikipedia.org/wiki/War_and_Peace']
@@ -95,32 +95,32 @@ EOF
   end
 
   it "sets multiple values" do
-    subject.part = ["part 1", "part 2"]
-    subject.save
+    my_datastream.part = ["part 1", "part 2"]
+    my_datastream.save
 
-    loaded = MyDatastream.new(subject.uri)
+    loaded = MyDatastream.new(my_datastream.uri)
     expect(loaded.part).to contain_exactly 'part 1', 'part 2'
   end
 
   it "appends values" do
-    subject.part = ["thing 1"]
-    subject.save
+    my_datastream.part = ["thing 1"]
+    my_datastream.save
 
-    subject.part << "thing 2"
-    expect(subject.part).to contain_exactly "thing 1", "thing 2"
+    my_datastream.part << "thing 2"
+    expect(my_datastream.part).to contain_exactly "thing 1", "thing 2"
   end
 
   it "is able to save a blank document" do
-    subject.title = ""
-    subject.save
+    my_datastream.title = ""
+    my_datastream.save
   end
 
   it "loads n-triples into the graph" do
     ntrip = '<http://oregondigital.org/ns/62> <http://purl.org/dc/terms/type> "Image" .
 <http://oregondigital.org/ns/62> <http://purl.org/dc/terms/spatial> "Benton County (Ore.)" .
 '
-    subject.content = ntrip
-    expect(subject.graph.statements.to_a).to contain_exactly(*RDF::NTriples::Reader.new(ntrip).statements.to_a)
+    my_datastream.content = ntrip
+    expect(my_datastream.graph.statements.to_a).to contain_exactly(*RDF::NTriples::Reader.new(ntrip).statements.to_a)
   end
 
   describe "using rdf_subject" do
@@ -130,55 +130,55 @@ EOF
         rdf_subject { |ds| RDF::URI.new("http://oregondigital.org/ns/#{parent_uri(ds).split('/')[-1].split(':')[1]}") }
         property :dctype, predicate: ::RDF::Vocab::DC.type
       end
-      subject.rdf.dctype = "Frog"
-      subject.save!
+      rdf_test.rdf.dctype = "Frog"
+      rdf_test.save!
     end
 
     after do
-      subject.destroy
+      rdf_test.destroy
     end
 
-    subject { RdfTest.new('/test:99') }
+    subject(:rdf_test) { RdfTest.new('/test:99') }
 
     it "writes rdf with proper subjects" do
-      subject.reload
-      expect(subject.rdf.graph.dump(:ntriples)).to eq "<http://oregondigital.org/ns/99> <http://purl.org/dc/terms/type> \"Frog\" .\n"
-      subject.rdf.dctype == ['Frog']
+      rdf_test.reload
+      expect(rdf_test.rdf.graph.dump(:ntriples)).to eq "<http://oregondigital.org/ns/99> <http://purl.org/dc/terms/type> \"Frog\" .\n"
+      rdf_test.rdf.dctype == ['Frog']
     end
   end
 
   it "deletes values" do
-    subject.title = "Hamlet"
-    subject.related_url = ["http://psu.edu/"]
-    subject.related_url << "http://projecthydra.org/"
+    my_datastream.title = "Hamlet"
+    my_datastream.related_url = ["http://psu.edu/"]
+    my_datastream.related_url << "http://projecthydra.org/"
 
-    expect(subject.title).to eq ["Hamlet"]
-    expect(subject.related_url).to include("http://psu.edu/")
-    expect(subject.related_url).to include("http://projecthydra.org/")
+    expect(my_datastream.title).to eq ["Hamlet"]
+    expect(my_datastream.related_url).to include("http://psu.edu/")
+    expect(my_datastream.related_url).to include("http://projecthydra.org/")
 
-    subject.title = "" # empty string can be meaningful, don't assume delete.
-    expect(subject.title).to eq ['']
+    my_datastream.title = "" # empty string can be meaningful, don't assume delete.
+    expect(my_datastream.title).to eq ['']
 
-    subject.title = nil
-    subject.related_url.delete("http://projecthydra.org/")
+    my_datastream.title = nil
+    my_datastream.related_url.delete("http://projecthydra.org/")
 
-    expect(subject.title).to eq []
-    expect(subject.related_url).to eq ["http://psu.edu/"]
+    expect(my_datastream.title).to eq []
+    expect(my_datastream.related_url).to eq ["http://psu.edu/"]
   end
 
   it "deletes multiple values at once" do
-    subject.part = ["MacBeth"]
-    subject.part << "Hamlet"
-    subject.part << "Romeo & Juliet"
-    expect(subject.part).to include "MacBeth"
-    subject.part.subtract(["MacBeth", "Romeo & Juliet"])
-    expect(subject.part).to eq ["Hamlet"]
-    expect(subject.part.first).to eq "Hamlet"
+    my_datastream.part = ["MacBeth"]
+    my_datastream.part << "Hamlet"
+    my_datastream.part << "Romeo & Juliet"
+    expect(my_datastream.part).to include "MacBeth"
+    my_datastream.part.subtract(["MacBeth", "Romeo & Juliet"])
+    expect(my_datastream.part).to eq ["Hamlet"]
+    expect(my_datastream.part.first).to eq "Hamlet"
   end
   it "ignores values to be deleted that do not exist" do
-    subject.part = ["title1", "title2", "title3"]
-    subject.part.subtract(["title2", "title4", "title6"])
-    expect(subject.part).to contain_exactly "title1", "title3"
+    my_datastream.part = ["title1", "title2", "title3"]
+    my_datastream.part.subtract(["title2", "title4", "title6"])
+    expect(my_datastream.part).to contain_exactly "title1", "title3"
   end
 
   describe "term proxy methods" do
@@ -187,29 +187,29 @@ EOF
         property :title, predicate: ::RDF::Vocab::DC.title
       end
     end
-    subject { TitleDatastream.new }
-    before { subject.title = ["title1", "title2", "title3"] }
+    subject(:title_datastream) { TitleDatastream.new }
+    before { title_datastream.title = ["title1", "title2", "title3"] }
 
     after(:each) do
       Object.send(:remove_const, :TitleDatastream)
     end
 
     it "supports the count method to determine # of values" do
-      expect(subject.title.count).to eq 3
+      expect(title_datastream.title.count).to eq 3
     end
     it "iterates over multiple values" do
-      expect(subject.title).to respond_to(:each)
+      expect(title_datastream.title).to respond_to(:each)
     end
     it "evaluates equality predictably" do
-      expect(subject.title).to contain_exactly "title1", "title2", "title3"
+      expect(title_datastream.title).to contain_exactly "title1", "title2", "title3"
     end
     it "supports the empty? method" do
-      expect(subject.title).to_not be_empty
-      subject.title.subtract(["title1", "title2", "title3"])
-      expect(subject.title).to be_empty
+      expect(title_datastream.title).to_not be_empty
+      title_datastream.title.subtract(["title1", "title2", "title3"])
+      expect(title_datastream.title).to be_empty
     end
     it "supports the each method" do
-      expect(subject.title.respond_to?(:each)).to eq true
+      expect(title_datastream.title.respond_to?(:each)).to eq true
     end
   end
 end
