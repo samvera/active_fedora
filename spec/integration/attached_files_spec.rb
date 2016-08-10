@@ -79,14 +79,24 @@ describe ActiveFedora::AttachedFiles do
     end
 
     describe ".metadata_streams" do
-      let(:mds1) { ActiveFedora::QualifiedDublinCoreDatastream.new }
-      let(:mds2) { ActiveFedora::QualifiedDublinCoreDatastream.new }
-      let(:fds) { ActiveFedora::File.new }
       before do
-        fds = ActiveFedora::File.new
+        class Metadata < ActiveFedora::File
+          def metadata?
+            true
+          end
+        end
+
         obj.attach_file(mds1, 'md1')
         obj.attach_file(mds2, 'qdc')
         obj.attach_file(fds, 'fds')
+      end
+
+      let(:mds1) { Metadata.new }
+      let(:mds2) { Metadata.new }
+      let(:fds) { ActiveFedora::File.new }
+
+      after do
+        Object.send(:remove_const, :Metadata)
       end
 
       it "returns all of the datastreams from the object that are kinds of OmDatastream" do

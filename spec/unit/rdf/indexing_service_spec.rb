@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe ActiveFedora::RDF::IndexingService do
   before do
-    class MyDatastream < ActiveFedora::NtriplesRDFDatastream
+    class MyObj < ActiveFedora::Base
       property :created, predicate: ::RDF::Vocab::DC.created
       property :title, predicate: ::RDF::Vocab::DC.title
       property :publisher, predicate: ::RDF::Vocab::DC.publisher
@@ -13,17 +13,17 @@ describe ActiveFedora::RDF::IndexingService do
   end
 
   after do
-    Object.send(:remove_const, :MyDatastream)
+    Object.send(:remove_const, :MyObj)
   end
 
   let(:f2) do
-    MyDatastream.new.tap do |obj|
-      obj.created = Date.parse("2012-03-04")
-      obj.title = "Of Mice and Men, The Sequel"
-      obj.publisher = "Bob's Blogtastic Publishing"
+    MyObj.new.tap do |obj|
+      obj.created = [Date.parse("2012-03-04")]
+      obj.title = ["Of Mice and Men, The Sequel"]
+      obj.publisher = ["Bob's Blogtastic Publishing"]
       obj.based_near = ["Tacoma, WA", "Renton, WA"]
-      obj.related_url = "http://example.org/blogtastic/"
-      obj.rights = "Totally open, y'all"
+      obj.related_url = ["http://example.org/blogtastic/"]
+      obj.rights = ["Totally open, y'all"]
     end
   end
 
@@ -51,7 +51,7 @@ describe ActiveFedora::RDF::IndexingService do
   end
 
   before do
-    allow(MyDatastream).to receive(:index_config).and_return(index_config)
+    allow(MyObj).to receive(:index_config).and_return(index_config)
   end
 
   let(:indexer) { described_class.new(f2) }

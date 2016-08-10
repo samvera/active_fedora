@@ -144,7 +144,7 @@ module ActiveFedora
 
           # @param [Symbol] field the field to find or create
           # @param [Class] klass the class to use to delegate the attribute (e.g.
-          #                ActiveTripleAttribute, OmAttribute, or RdfDatastreamAttribute)
+          #                ActiveTripleAttribute)
           # @param [Hash] args
           # @option args [String] :delegate_target the path to the delegate
           # @option args [Class] :klass the class to create
