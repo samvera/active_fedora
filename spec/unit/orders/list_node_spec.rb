@@ -35,7 +35,7 @@ RSpec.describe ActiveFedora::Orders::ListNode do
         end
         context "and it doesn't exist" do
           it "returns an AT::Resource" do
-            member = Member.new("testing")
+            member = Member.new(id: "testing")
             graph << [rdf_subject, RDF::Vocab::ORE.proxyFor, member.resource.rdf_subject]
             expect(list_node.target.rdf_subject).to eq member.uri
           end
