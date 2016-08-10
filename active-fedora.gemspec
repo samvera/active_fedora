@@ -22,7 +22,6 @@ Gem::Specification.new do |s|
   s.add_dependency "activemodel", '>= 4.2', '< 6'
   s.add_dependency "active-triples", '~> 0.10.0'
   s.add_dependency "rdf-rdfxml"
-  s.add_dependency "linkeddata"
   s.add_dependency "deprecation"
   s.add_dependency "ldp", '~> 0.5.0'
 
