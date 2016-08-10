@@ -25,12 +25,12 @@ module ActiveFedora
 
         def find_or_initialize_target(&block)
           if reflection.klass < ActiveFedora::File
-            reflection.build_association(target_uri, &block)
+            reflection.build_association(id: target_uri, &block)
           else
             reflection.klass.find(target_uri)
           end
         rescue ActiveFedora::ObjectNotFoundError
-          reflection.build_association(target_uri, &block)
+          reflection.build_association(id: target_uri, &block)
         end
 
         def replace(record)

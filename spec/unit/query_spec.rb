@@ -128,9 +128,9 @@ describe ActiveFedora::Base do
         .and_return('response' => { 'docs' => mock_docs })
 
       allow(relation).to receive(:load_from_fedora).with("changeme-30", nil)
-        .and_return(SpecModel::Basic.new('changeme-30'))
+        .and_return(SpecModel::Basic.new(id: 'changeme-30'))
       allow(relation).to receive(:load_from_fedora).with("changeme-22", nil)
-        .and_return(SpecModel::Basic.new('changeme-22'))
+        .and_return(SpecModel::Basic.new(id: 'changeme-22'))
       SpecModel::Basic.find_each { |obj| obj.class == SpecModel::Basic }
     end
 
@@ -144,8 +144,8 @@ describe ActiveFedora::Base do
       let(:mock_docs) { [{ "id" => "changeme-30" }, { "id" => "changeme-22" }] }
 
       it "filters by the provided fields" do
-        expect(relation).to receive(:load_from_fedora).with("changeme-30", nil).and_return(SpecModel::Basic.new('changeme-30'))
-        expect(relation).to receive(:load_from_fedora).with("changeme-22", nil).and_return(SpecModel::Basic.new('changeme-22'))
+        expect(relation).to receive(:load_from_fedora).with("changeme-30", nil).and_return(SpecModel::Basic.new(id: 'changeme-30'))
+        expect(relation).to receive(:load_from_fedora).with("changeme-22", nil).and_return(SpecModel::Basic.new(id: 'changeme-22'))
 
         expect(mock_docs).to receive(:has_next?).and_return(false)
         expect(solr).to receive(:paginate).with(1, 1000, 'select', expected_params).and_return('response' => { 'docs' => mock_docs })

@@ -12,8 +12,8 @@ describe ActiveFedora::Associations::HasManyAssociation do
     Object.send(:remove_const, :Book)
     Object.send(:remove_const, :Page)
   end
-  let(:book) { Book.new('subject-a') }
-  let(:page) { Page.new('object-b') }
+  let(:book) { Book.new(id: 'subject-a') }
+  let(:page) { Page.new(id: 'object-b') }
 
   describe "setting the foreign key" do
     before do

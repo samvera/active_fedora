@@ -141,6 +141,7 @@ describe ActiveFedora::Base do
 
       context "with an id argument" do
         it "is able to create with a custom id" do
+          expect(Deprecation).to receive(:warn)
           expect(FooHistory).to receive(:id_to_uri).and_call_original
           f = FooHistory.new('baz_1')
           expect(f.id).to eq 'baz_1'
