@@ -22,14 +22,14 @@ module ActiveFedora
     # Also, if +attrs+ does not contain +:id+ but does contain +:namespace+ it will pass the
     # +:namespace+ value to Fedora::Repository.nextid to generate the next id available within
     # the given namespace.
-    def initialize(attributes_or_id = nil, &_block)
+    def initialize(attributes = nil, &_block)
       init_internals
-      attributes = initialize_attributes(attributes_or_id)
-      @ldp_source = build_ldp_resource(attributes.delete(:id))
+      id = attributes && (attributes.delete(:id) || attributes.delete('id'))
+      @ldp_source = build_ldp_resource(id)
       raise IllegalOperation, "Attempting to recreate existing ldp_source: `#{ldp_source.subject}'" unless ldp_source.new?
+      assign_attributes(attributes) if attributes
       assert_content_model
       load_attached_files
-      assign_attributes(attributes) if attributes
 
       yield self if block_given?
       _run_initialize_callbacks
@@ -143,20 +143,6 @@ module ActiveFedora
         else
           raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved"
         end
-      end
-
-      def initialize_attributes(attributes_or_id)
-        case attributes_or_id
-        when String
-          attributes = { id: attributes_or_id }.with_indifferent_access
-        when Hash
-          attributes = attributes_or_id.with_indifferent_access
-        when NilClass
-          attributes = {}.with_indifferent_access
-        else
-          raise ArgumentError, "#{attributes_or_id.class} is not acceptable"
-        end
-        attributes
       end
   end
 end

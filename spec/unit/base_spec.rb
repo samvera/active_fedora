@@ -133,18 +133,10 @@ describe ActiveFedora::Base do
       before do
         allow_any_instance_of(FooHistory).to receive(:assign_id).and_return(@this_id)
       end
+
       context "with no arguments" do
         it "does not get an id on init" do
           expect(FooHistory.new.id).to be_nil
-        end
-      end
-
-      context "with an id argument" do
-        it "is able to create with a custom id" do
-          expect(FooHistory).to receive(:id_to_uri).and_call_original
-          f = FooHistory.new('baz_1')
-          expect(f.id).to eq 'baz_1'
-          expect(f.id).to eq 'baz_1'
         end
       end
 

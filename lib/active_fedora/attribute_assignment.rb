@@ -48,7 +48,6 @@ module ActiveFedora
 
       def _assign_attribute(k, v)
         raise UnknownAttributeError.new(self, k) unless respond_to?("#{k}=")
-
         public_send("#{k}=", v)
       end
   end

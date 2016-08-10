@@ -19,7 +19,7 @@ describe ActiveFedora::Base do
     end
     context "in a typical sitation" do
       specify "it cannot be reused" do
-        expect { described_class.create(ghost) }.to raise_error(Ldp::Gone)
+        expect { described_class.create(id: ghost) }.to raise_error(Ldp::Gone)
       end
     end
     specify "remove its tombstone" do

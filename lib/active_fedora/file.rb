@@ -30,7 +30,7 @@ module ActiveFedora
     # @yield [self] Yields self
     # @yieldparam [File] self the newly created file
     def initialize(identifier = nil, &_block)
-      identifier = nil if identifier.is_a? Hash
+      identifier = identifier.delete(:id) if identifier.is_a? Hash
       run_callbacks(:initialize) do
         case identifier
         when nil, ::RDF::URI
