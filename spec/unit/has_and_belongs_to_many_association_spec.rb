@@ -18,7 +18,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
       Object.send(:remove_const, :Book)
       Object.send(:remove_const, :Page)
     end
-    subject { Book.new('subject-a') }
+    subject { Book.new(id: 'subject-a') }
 
     context "a one way relationship " do
       describe "adding memeber" do

@@ -2,6 +2,7 @@ module ActiveFedora
   module Core
     extend ActiveSupport::Autoload
     extend ActiveSupport::Concern
+    extend Deprecation
     include ActiveFedora::Common
 
     autoload :FedoraIdTranslator
@@ -148,6 +149,7 @@ module ActiveFedora
       def initialize_attributes(attributes_or_id)
         case attributes_or_id
         when String
+          Deprecation.warn(Core, "calling #{self.class}.new with a string is deprecated. Pass a hash with id instead.")
           attributes = { id: attributes_or_id }.with_indifferent_access
         when Hash
           attributes = attributes_or_id.with_indifferent_access

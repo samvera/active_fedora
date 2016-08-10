@@ -123,7 +123,7 @@ EOF
       subject.destroy
     end
 
-    subject { RdfTest.new('/test:99') }
+    subject { RdfTest.new(id: '/test:99') }
 
     it "writes rdf with proper subjects" do
       subject.reload
