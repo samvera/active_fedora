@@ -75,10 +75,8 @@ rake active_fedora:ci
 If you want to run the tests manually, follow these instructions:
 
 ```bash
-solr_wrapper -d solr/config/ --collection_name hydra-test
+solr_wrapper
 ```
-
-You can switch `hydra-test` to `hydra-dev` if you want to create a collection for development.
 
 To start FCRepo, open another shell and run:
 

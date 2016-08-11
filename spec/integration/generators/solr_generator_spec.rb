@@ -9,17 +9,14 @@ describe ActiveFedora::Config::SolrGenerator do
       '.solr_wrapper'
     ]}
 
-    before do
-      generator.solr_wrapper_config
-    end
-
-    after do
-      files_to_test.each { |file| File.delete(file) if File.exist?(file) }
-    end
-
     it "creates config files" do
-      files_to_test.each do |file|
-        expect(File).to exist(file), "Expected #{file} to exist"
+      Dir.mktmpdir do |dir|
+        Dir.chdir(dir) do
+          generator.solr_wrapper_config
+          files_to_test.each do |file|
+            expect(File).to exist(file), "Expected #{file} to exist"
+          end
+        end
       end
     end
   end
