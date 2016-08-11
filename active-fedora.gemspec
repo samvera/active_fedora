@@ -30,14 +30,14 @@ Gem::Specification.new do |s|
   s.add_development_dependency "yard"
   # Pin rake to 10.0 due to https://github.com/lsegal/yard/issues/947
   s.add_development_dependency "rake", '~> 10.0'
-  s.add_development_dependency "solr_wrapper", "~> 0.4"
+  s.add_development_dependency "solr_wrapper", "~> 0.15"
   s.add_development_dependency 'fcrepo_wrapper', '~> 0.2'
   s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "rspec-its"
   s.add_development_dependency "equivalent-xml"
   s.add_development_dependency "simplecov", '~> 0.8'
   s.add_development_dependency "rubocop", '~> 0.42.0'
-  s.add_development_dependency "rubocop-rspec", '~> 1.4'
+  s.add_development_dependency "rubocop-rspec", '~> 1.6'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {spec}/*`.split("\n")
