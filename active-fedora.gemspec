@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency "active-triples", '~> 0.10.0'
   s.add_dependency "rdf-rdfxml"
   s.add_dependency "deprecation"
-  s.add_dependency "ldp", '~> 0.5.0'
+  s.add_dependency "ldp", '~> 0.6.0'
 
   s.add_development_dependency "rails"
   s.add_development_dependency "rdoc"
