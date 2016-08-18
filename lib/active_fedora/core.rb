@@ -26,7 +26,7 @@ module ActiveFedora
     def initialize(attributes_or_id = nil, &_block)
       init_internals
       attributes = initialize_attributes(attributes_or_id)
-      @ldp_source = build_ldp_resource(attributes.delete(:id))
+      @ldp_source = build_ldp_resource(attributes.delete('id'.freeze))
       raise IllegalOperation, "Attempting to recreate existing ldp_source: `#{ldp_source.subject}'" unless ldp_source.new?
       assert_content_model
       load_attached_files
@@ -150,15 +150,15 @@ module ActiveFedora
         case attributes_or_id
         when String
           Deprecation.warn(Core, "calling #{self.class}.new with a string is deprecated. Pass a hash with id instead.")
-          attributes = { id: attributes_or_id }.with_indifferent_access
-        when Hash
-          attributes = attributes_or_id.with_indifferent_access
+          { 'id': attributes_or_id }
         when NilClass
-          attributes = {}.with_indifferent_access
+          {}
         else
-          raise ArgumentError, "#{attributes_or_id.class} is not acceptable"
+          unless attributes_or_id.respond_to?(:stringify_keys)
+            raise ArgumentError, "#{attributes_or_id.class} is not acceptable"
+          end
+          attributes_or_id.stringify_keys
         end
-        attributes
       end
   end
 end
