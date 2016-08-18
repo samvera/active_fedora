@@ -83,7 +83,7 @@ module ActiveFedora
       protected
 
         def find_polymorphic_inverse(record)
-          record.reflections.values.find { |r| !r.has_many? && r.options[:property] == reflection.options[:property] }
+          record.reflections.values.find { |r| !r.has_many? && r.predicate == reflection.predicate }
         end
 
         # Deletes the records according to the <tt>:dependent</tt> option.
