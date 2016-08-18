@@ -17,8 +17,7 @@ RSpec/ExampleLength:
 RSpec/VerifiedDoubles:
   Enabled: false
 
-# Offense count: 2
+# Offense count: 1
 Style/MethodMissing:
   Exclude:
-    - 'lib/active_fedora/nom_datastream.rb'
     - 'lib/active_fedora/relation/delegation.rb'

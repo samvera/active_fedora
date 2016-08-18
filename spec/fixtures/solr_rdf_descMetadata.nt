@@ -1,7 +1,0 @@
-<http://localhost:8983/fedora/rest/test/test:1> <http://purl.org/dc/terms/created> "2009-10-10"^^<http://www.w3.org/2001/XMLSchema#date> .
-<http://localhost:8983/fedora/rest/test/test:1> <http://purl.org/dc/terms/title> "fake-title" .
-<http://localhost:8983/fedora/rest/test/test:1> <http://purl.org/dc/terms/publisher> "publisher1" .
-<http://localhost:8983/fedora/rest/test/test:1> <http://xmlns.com/foaf/0.1/based_near> "coverage1" .
-<http://localhost:8983/fedora/rest/test/test:1> <http://xmlns.com/foaf/0.1/based_near> "coverage2" .
-<http://localhost:8983/fedora/rest/test/test:1> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <http://example.org/> .
-
