@@ -32,19 +32,34 @@ describe ActiveFedora::Associations::HasManyAssociation do
     end
   end
 
-  describe "Finding a polymorphic inverse relation" do
-    before do
-      # :books must come first, so that we can test that is being passed over in favor of :contents
-      Page.has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
-      Page.has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
-    end
+  describe "#find_polymorphic_inverse" do
     let(:book_reflection) { ActiveFedora::Reflection.create(:has_many, 'pages', nil, { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf }, Book) }
     let(:association) { described_class.new(book, book_reflection) }
 
     subject(:af_page) { association.send(:find_polymorphic_inverse, page) }
 
-    it "finds the HABTM reflection" do
-      expect(af_page.name).to eq :contents
+    context "when a has_many is present" do
+      before do
+        # :books must come first, so that we can test that is being passed over in favor of :contents
+        Page.has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+        Page.has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+      end
+
+      it "finds the HABTM reflection" do
+        expect(af_page.name).to eq :contents
+      end
+    end
+
+    context "when multiple belongs_to are present" do
+      before do
+        # :foo must come first, so that we can test that is being passed over in favor of :bar
+        Page.belongs_to :foo, predicate: ::RDF::Vocab::DC.isPartOf, class_name: 'ActiveFedora::Base'
+        Page.belongs_to :bar, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
+      end
+
+      it "finds the belongs_to reflection" do
+        expect(af_page.name).to eq :bar
+      end
     end
   end
 
