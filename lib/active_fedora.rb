@@ -59,7 +59,6 @@ module ActiveFedora #:nodoc:
       autoload :DirectContainer
       autoload :IndirectContainer
     end
-    autoload :Datastreams
     autoload :DelegatedAttribute
     autoload_under 'attributes' do
       autoload :ActiveTripleAttribute
@@ -89,23 +88,14 @@ module ActiveFedora #:nodoc:
     autoload :LoadableFromJson
     autoload :ModelClassifier
     autoload :NestedAttributes
-    autoload :NomDatastream
     autoload :NullRelation
-    autoload :OmDatastream
     autoload :Orders
     autoload :Pathing
     autoload :Persistence
     autoload :Property
-    autoload :QualifiedDublinCoreDatastream
     autoload :Querying
     autoload :QueryResultBuilder
     autoload :RDF
-    autoload_under 'rdf' do
-      autoload :RDFDatastream
-      autoload :RDFXMLDatastream
-      autoload :NtriplesRDFDatastream
-      autoload :FedoraRdfResource
-    end
     autoload :Reflection
     autoload :Relation
 

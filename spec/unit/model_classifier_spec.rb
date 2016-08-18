@@ -15,7 +15,7 @@ describe ActiveFedora::ModelClassifier do
 
   describe ".class_from_string" do
     it "returns class constants based on strings" do
-      expect(described_class.class_from_string("Om")).to eq Om
+      expect(described_class.class_from_string("String")).to eq String
       expect(described_class.class_from_string("ActiveFedora::RDF::IndexingService")).to eq ActiveFedora::RDF::IndexingService
       expect(described_class.class_from_string("IndexingService", ActiveFedora::RDF)).to eq ActiveFedora::RDF::IndexingService
     end

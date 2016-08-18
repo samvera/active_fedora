@@ -54,53 +54,52 @@ describe ActiveFedora::File do
   context "with a sub-resource that autocreates" do
     before do
       class MockAFBase < ActiveFedora::Base
-        has_subresource "descMetadata", class_name: 'ActiveFedora::QualifiedDublinCoreDatastream', autocreate: true
+        has_subresource "descMetadata", class_name: 'SampleResource', autocreate: true
+      end
+
+      class SampleResource < ActiveFedora::File
+        def content
+          'something to save'
+        end
       end
     end
 
     after do
+      Object.send(:remove_const, :SampleResource)
       Object.send(:remove_const, :MockAFBase)
     end
 
     let(:test_object) { MockAFBase.create }
     let(:descMetadata) { test_object.descMetadata }
 
-    describe "#content" do
-      subject { descMetadata.content }
-      it { should_not be_nil }
+    describe "changed attributes are set" do
+      it "marks profile as changed" do
+        expect_any_instance_of(SampleResource).to receive(:attribute_will_change!).with(:profile)
+        test_object
+      end
     end
 
-    describe "#described_by" do
+    describe "content_changed? is called" do
+      before do
+        allow_any_instance_of(SampleResource).to receive(:content_changed?).and_return(true)
+      end
       subject { descMetadata.described_by }
       it { should eq descMetadata.uri + '/fcr:metadata' }
-    end
-
-    context "an XML file" do
-      let(:xml_content) { Nokogiri::XML::Document.parse(descMetadata.content) }
-      let(:title) { Nokogiri::XML::Element.new "title", xml_content }
-      before do
-        title.content = "Test Title"
-        xml_content.root.add_child title
-        allow(descMetadata).to receive(:before_save)
-        descMetadata.content = xml_content.to_s
-        descMetadata.save
-      end
-
-      let(:found) { Nokogiri::XML::Document.parse(test_object.reload.descMetadata.content) }
-
-      subject { found.xpath('//dc/title/text()').first.inner_text }
-      it { should eq title.content }
     end
   end
 
   context "with a sub-resource" do
     before do
       class MockAFBase < ActiveFedora::Base
-        has_subresource "descMetadata", class_name: 'ActiveFedora::QualifiedDublinCoreDatastream'
+        has_subresource "descMetadata", class_name: 'SampleResource'
+      end
+
+      class SampleResource < ActiveFedora::File
       end
     end
 
     after do
+      Object.send(:remove_const, :SampleResource)
       Object.send(:remove_const, :MockAFBase)
     end
 

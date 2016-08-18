@@ -24,7 +24,6 @@ ActiveFedora::Base.logger.level = Logger::WARN
 # HttpLogger.log_headers = true
 
 Dir[File.expand_path("../support/**/*.rb", __FILE__)].each { |f| require f }
-require 'samples/samples'
 
 $VERBOSE = nil
 
@@ -37,12 +36,6 @@ restore_spec_configuration
 
 require 'active_fedora/cleaner'
 RSpec.configure do |config|
-  config.before(:suite) do
-    ActiveFedora::RDFDatastream.deprecation_behavior = :silence
-    ActiveFedora::NtriplesRDFDatastream.deprecation_behavior = :silence
-    ActiveFedora::OmDatastream.deprecation_behavior = :silence
-    ActiveFedora::NomDatastream.deprecation_behavior = :silence
-  end
   # Stub out test stuff.
   config.before(:each) do
     begin

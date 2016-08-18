@@ -10,16 +10,12 @@ module ActiveFedora
   #
   # =The Basics
   #   class Oralhistory < ActiveFedora::Base
-  #     has_metadata "properties", type: ActiveFedora::SimpleDatastream do |m|
-  #       m.field "narrator",  :string
-  #       m.field "narrator",  :text
-  #     end
+  #     property :creator, predicate: RDF::Vocab::DC.creator
   #   end
   #
-  # The above example creates a Fedora object with a metadata datastream named "properties", which is composed of a
-  # narrator and bio field.
+  # The above example creates a Fedora object with a property named "creator"
   #
-  # Attached files defined with +contains+ are accessed via the +attached_files+ member hash.
+  # Attached files defined with +has_subresource+ and iis accessed via the +attached_files+ member hash.
   #
   class Base
     extend ActiveModel::Naming

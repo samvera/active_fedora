@@ -8,9 +8,7 @@ describe ActiveFedora do
     end
   end
 
-  before(:each) do
-    @test_object = ActiveFedora::Base.new
-  end
+  subject(:test_object) { ActiveFedora::Base.new }
 
   describe ".id_field" do
     let(:field) { "MY_SAMPLE_ID".freeze }
@@ -19,9 +17,9 @@ describe ActiveFedora do
     end
 
     it "is used by ActiveFedora::Base.to_solr" do
-      allow(@test_object).to receive(:id).and_return('changeme:123')
-      expect(@test_object.to_solr[field.to_sym]).to eq 'changeme:123'
-      expect(@test_object.to_solr[:id]).to be_nil
+      allow(test_object).to receive(:id).and_return('changeme:123')
+      expect(test_object.to_solr[field.to_sym]).to eq 'changeme:123'
+      expect(test_object.to_solr[:id]).to be_nil
     end
 
     it "is used by ActiveFedora::Base#search_with_conditions" do
@@ -43,17 +41,16 @@ describe ActiveFedora do
       end
 
       it "prevents Base.save from calling update_index if false" do
-        dirty_ds = ActiveFedora::QualifiedDublinCoreDatastream.new
-        @test_object.attached_files['ds1'] = dirty_ds
-        allow(@test_object).to receive(:datastreams).and_return(ds1: dirty_ds)
-        expect(@test_object).to receive(:update_index).never
-        expect(@test_object).to receive(:refresh)
-        @test_object.save
+        allow(test_object).to receive(:new_record?).and_return(false)
+        expect(test_object).to receive(:update_index).never
+        expect(test_object).to receive(:refresh)
+        test_object.save
       end
+
       it "prevents Base.delete from deleting the corresponding Solr document if false" do
-        expect(ActiveFedora::SolrService.instance.conn).to receive(:delete).with(@test_object.id).never
-        expect(@test_object).to receive(:delete)
-        @test_object.delete
+        expect(ActiveFedora::SolrService.instance.conn).to receive(:delete).with(test_object.id).never
+        expect(test_object).to receive(:delete)
+        test_object.delete
       end
     end
   end

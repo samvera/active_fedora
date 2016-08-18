@@ -4,17 +4,20 @@ describe ActiveFedora::AttachedFiles do
   subject(:af_base) { ActiveFedora::Base.new }
   describe "has_subresource" do
     before do
-      class Z < ActiveFedora::File
+      class Sample1 < ActiveFedora::File
+      end
+      class Sample2 < ActiveFedora::File
       end
       class FooHistory < ActiveFedora::Base
-        has_subresource 'dsid', class_name: 'ActiveFedora::QualifiedDublinCoreDatastream'
-        has_subresource 'complex_ds', autocreate: true, class_name: 'Z'
+        has_subresource 'dsid', class_name: 'Sample2'
+        has_subresource 'complex_ds', autocreate: true, class_name: 'Sample1'
         has_subresource 'thumbnail'
         has_subresource 'child_resource', class_name: 'ActiveFedora::Base'
       end
     end
     after do
-      Object.send(:remove_const, :Z)
+      Object.send(:remove_const, :Sample1)
+      Object.send(:remove_const, :Sample2)
       Object.send(:remove_const, :FooHistory)
     end
 
@@ -26,12 +29,12 @@ describe ActiveFedora::AttachedFiles do
 
     it "lets you override defaults" do
       expect(FooHistory.child_resource_reflections[:complex_ds].options).to include(autocreate: true)
-      expect(FooHistory.child_resource_reflections[:complex_ds].class_name).to eq 'Z'
+      expect(FooHistory.child_resource_reflections[:complex_ds].class_name).to eq 'Sample1'
     end
 
     it "raises an error if you don't give a dsid" do
-      expect { FooHistory.has_subresource nil, type: ActiveFedora::QualifiedDublinCoreDatastream }.to raise_error ArgumentError,
-                                                                                                                  "You must provide a path name (f.k.a. dsid) for the resource"
+      expect { FooHistory.has_subresource nil, type: Sample2 }.to raise_error ArgumentError,
+                                                                              "You must provide a path name (f.k.a. dsid) for the resource"
     end
   end
 
