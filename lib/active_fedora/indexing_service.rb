@@ -15,10 +15,6 @@ module ActiveFedora
       @object = obj
     end
 
-    def self.profile_solr_name
-      @profile_solr_name ||= ActiveFedora.index_field_mapper.solr_name("object_profile", :displayable)
-    end
-
     def self.create_time_solr_name
       @create_time_solr_name ||= ActiveFedora.index_field_mapper.solr_name('system_create', :stored_sortable, type: :date)
     end
