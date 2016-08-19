@@ -55,9 +55,5 @@ module ActiveFedora
       def classifier
         ActiveFedora.model_mapper.classifier(document)
       end
-
-      def profile_json
-        Array(document[ActiveFedora::IndexingService.profile_solr_name]).first
-      end
   end
 end
