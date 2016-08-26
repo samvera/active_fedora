@@ -110,7 +110,7 @@ describe ActiveFedora::File do
       context 'when content has changed from what is currently persisted' do
         context 'and has been set to something that has a #size method (i.e. string or File)' do
           it 'returns the size of the dirty content' do
-            dirty_content = double
+            dirty_content = instance_double(::File)
             allow(dirty_content).to receive(:size) { 8_675_309 }
             af_file.content = dirty_content
             expect(af_file.size).to eq dirty_content.size

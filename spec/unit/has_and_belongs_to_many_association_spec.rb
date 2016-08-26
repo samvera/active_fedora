@@ -7,8 +7,6 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
       end
       class Page < ActiveFedora::Base
       end
-      allow_any_instance_of(Book).to receive(:load_datastreams).and_return(false)
-      allow_any_instance_of(Page).to receive(:load_datastreams).and_return(false)
 
       allow(book).to receive(:new_record?).and_return(false)
       allow(book).to receive(:save).and_return(true)

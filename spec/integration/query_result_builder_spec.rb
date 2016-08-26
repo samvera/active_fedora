@@ -13,7 +13,7 @@ describe ActiveFedora::QueryResultBuilder do
     let(:test_object) { ActiveFedora::Base.create }
     let(:foo_object) { FooObject.create }
 
-    after(:each) do
+    after do
       Object.send(:remove_const, :FooObject)
     end
 

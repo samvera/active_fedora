@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 describe ActiveFedora::Property do
-  before(:each) do
-    @test_property = described_class.new(double("model_stub"), "file_name", :string)
+  before do
+    @test_property = described_class.new(instance_double(ActiveFedora::Base), "file_name", :string)
   end
 
   it 'provides .new' do

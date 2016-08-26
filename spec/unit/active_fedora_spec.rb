@@ -85,7 +85,7 @@ describe ActiveFedora do
     end
 
     describe "within rails" do
-      after(:each) do
+      after do
         unstub_rails
       end
 

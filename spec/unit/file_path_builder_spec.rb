@@ -9,7 +9,7 @@ describe ActiveFedora::FilePathBuilder do
 
     context "when some datastreams exist" do
       before do
-        allow(parent).to receive(:attached_files).and_return('FOO56' => double)
+        allow(parent).to receive(:attached_files).and_return('FOO56' => instance_double(ActiveFedora::File))
       end
 
       it { should eq 'FOO57' }

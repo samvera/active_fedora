@@ -10,8 +10,8 @@ describe ActiveFedora::FilesHash do
 
   after { Object.send(:remove_const, :FilesContainer) }
 
-  let(:reflection) { double('reflection') }
-  let(:association) { double('association', reader: object) }
+  let(:reflection) { instance_double(ActiveFedora::Reflection::MacroReflection) }
+  let(:association) { instance_double(ActiveFedora::Associations::SingularAssociation, reader: object) }
   let(:object) { double('object') }
   let(:container) { FilesContainer.new }
 

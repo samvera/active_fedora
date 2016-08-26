@@ -3,60 +3,46 @@ require 'spec_helper'
 describe ActiveFedora::AssociationHash do
   subject(:association_hash) { described_class.new(model, reflections) }
 
-  let(:model) { double(association: nil) }
-  let(:reflections) { double(keys: [:foo]) }
+  let(:model) { instance_double(ActiveFedora::Base, association: nil) }
+  let(:reflections) { { foo: association } }
   let(:reader) { double("reader") }
   let(:writer) { double("writer") }
   let(:association) { double(reader: reader, writer: writer) }
 
+  before do
+    allow(model).to receive(:association).with(:foo).and_return(association)
+  end
+
   describe "key reader" do
     describe "when the association exists" do
-      before do
-        allow(association_hash).to receive(:association).with("foo") { association }
-      end
       it "calls the association reader" do
         expect(association_hash["foo"]).to eq(reader)
       end
     end
     describe "when the association does not exist" do
-      before do
-        allow(association_hash).to receive(:association).with("foo") { nil }
-      end
       it "returns nil" do
-        expect(association_hash["foo"]).to be_nil
+        expect(association_hash["bar"]).to be_nil
       end
     end
   end
 
   describe "key setter" do
     let(:obj) { double }
-    before do
-      allow(association).to receive(:writer).with(obj) { writer }
-    end
     describe "when the association exists" do
-      before do
-        allow(association_hash).to receive(:association).with("foo") { association }
-      end
       it "calls the association writer" do
         expect(association).to receive(:writer).with(obj)
         association_hash["foo"] = obj
       end
     end
     describe "when the association does not exist" do
-      before do
-        allow(association_hash).to receive(:association).with("foo") { nil }
-      end
       it "doesn't call the association writer" do
         expect(association).not_to receive(:writer).with(obj)
-        association_hash["foo"] = obj
+        association_hash["bar"] = obj
       end
     end
   end
 
   describe "#association" do
-    before do
-      allow(model).to receive(:association).with(:foo) { association }
-    end
     it "works with a string key" do
       expect(association_hash.association("foo")).to eq(association)
     end

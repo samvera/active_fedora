@@ -9,6 +9,8 @@ describe ActiveFedora::SolrService do
     described_class.reset!
   end
 
+  let(:mock_conn) { instance_double(RSolr::Client) }
+
   describe '#conn' do
     it "takes a n-arg constructor and configure for localhost" do
       expect(RSolr).to receive(:connect).with(read_timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr')
@@ -21,10 +23,9 @@ describe ActiveFedora::SolrService do
   end
 
   describe '#conn=' do
-    let(:new_connection) { double }
     it 'is settable' do
-      described_class.instance.conn = new_connection
-      expect(described_class.instance.conn).to eq new_connection
+      described_class.instance.conn = mock_conn
+      expect(described_class.instance.conn).to eq mock_conn
     end
   end
 
@@ -44,14 +45,12 @@ describe ActiveFedora::SolrService do
 
   describe "#get" do
     it "calls solr" do
-      mock_conn = double("Connection")
       stub_result = double("Result")
       expect(mock_conn).to receive(:get).with('select', params: { q: 'querytext', qt: 'standard' }).and_return(stub_result)
       allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
       expect(described_class.get('querytext')).to eq stub_result
     end
     it "uses select_path" do
-      mock_conn = double("Connection")
       stub_result = double("Result")
       expect(mock_conn).to receive(:get).with('select_test', params: { q: 'querytext', qt: 'standard' }).and_return(stub_result)
       expect(described_class).to receive(:select_path).and_return('select_test')
@@ -65,7 +64,6 @@ describe ActiveFedora::SolrService do
     let(:docs) { [doc] }
 
     it "wraps the solr response documents in Solr hits" do
-      mock_conn = double("Connection")
       stub_result = { 'response' => { 'docs' => docs } }
       expect(mock_conn).to receive(:get).with('select', params: { q: 'querytext', qt: 'standard' }).and_return(stub_result)
       allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
@@ -77,14 +75,12 @@ describe ActiveFedora::SolrService do
 
   describe ".count" do
     it "returns a count of matching records" do
-      mock_conn = double("Connection")
       stub_result = { 'response' => { 'numFound' => '7' } }
       expect(mock_conn).to receive(:get).with('select', params: { rows: 0, q: 'querytext', qt: 'standard' }).and_return(stub_result)
       allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
       expect(described_class.count('querytext')).to eq 7
     end
     it "accepts query args" do
-      mock_conn = double("Connection")
       stub_result = { 'response' => { 'numFound' => '7' } }
       expect(mock_conn).to receive(:get).with('select', params: { rows: 0, q: 'querytext', qt: 'standard', fq: 'filter' }).and_return(stub_result)
       allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
@@ -104,7 +100,6 @@ describe ActiveFedora::SolrService do
 
   describe ".add" do
     it "calls solr" do
-      mock_conn = double("Connection")
       doc = { 'id' => '1234' }
       expect(mock_conn).to receive(:add).with(doc, params: {})
       allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
@@ -114,7 +109,6 @@ describe ActiveFedora::SolrService do
 
   describe ".commit" do
     it "calls solr" do
-      mock_conn = double("Connection")
       expect(mock_conn).to receive(:commit)
       allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
       described_class.commit

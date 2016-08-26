@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-  before :each do
+  before do
     class CallbackStub < ActiveFedora::Base
       after_initialize :a_init
       before_save :b_save
@@ -19,7 +19,7 @@ describe ActiveFedora::Base do
       end
     end
   end
-  after :each do
+  after do
     @cb.destroy if @cb && @cb.persisted? # this only is called if the test failed to run all the way through.
     Object.send(:remove_const, :CallbackStub)
   end

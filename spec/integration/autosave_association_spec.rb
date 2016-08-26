@@ -12,7 +12,7 @@ describe ActiveFedora::Base do
   subject(:relationship) { MockAFBaseRelationship.new }
 
   context '#changed_for_autosave?' do
-    before(:each) do
+    before do
       expect(relationship).to receive(:new_record?).and_return(false)
       expect(relationship).to receive(:changed?).and_return(false)
       expect(relationship).to receive(:marked_for_destruction?).and_return(false)

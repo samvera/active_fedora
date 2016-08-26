@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-  let(:logger1) { double(debug?: false) }
+  let(:logger1) { instance_double(::Logger, debug?: false) }
 
   before do
     @initial_logger = described_class.logger

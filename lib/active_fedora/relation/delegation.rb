@@ -29,5 +29,9 @@ module ActiveFedora
           super
         end
       end
+
+      def respond_to_missing?(method, *args)
+        array_delegable?(method) || super
+      end
   end
 end

@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
-  before(:each) do
+  before do
     @test_object = described_class.new
   end
 

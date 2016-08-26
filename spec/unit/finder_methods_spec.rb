@@ -57,9 +57,9 @@ describe ActiveFedora::FinderMethods do
   end
 
   describe "#search_in_batches" do
-    let(:docs) { double('docs', has_next?: false) }
+    let(:docs) { instance_double(RSolr::Response::PaginatedDocSet, has_next?: false) }
     let(:select_handler) { 'select' }
-    let(:connection) { double('conn') }
+    let(:connection) { instance_double(RSolr::Client) }
     before do
       expect(finder).to receive(:create_query).with('age_t' => '21').and_return('dummy query')
       allow(ActiveFedora::SolrService.instance).to receive(:conn).and_return(connection)
@@ -84,7 +84,7 @@ describe ActiveFedora::FinderMethods do
 
   describe '#search_by_id' do
     context 'with a document in solr' do
-      let(:doc) { double('Document') }
+      let(:doc) { instance_double(Hash) }
 
       before do
         expect(finder).to receive(:search_with_conditions).with({ id: 'x' }, hash_including(rows: 1)).and_return([doc])

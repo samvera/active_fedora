@@ -1,5 +1,5 @@
 def mock_yaml(hash, path)
-  mock_file = double(path.split("/")[-1])
+  mock_file = instance_double(File, path.split("/")[-1])
   allow(File).to receive(:exist?).with(path).and_return(true)
   allow(File).to receive(:open).with(path).and_return(mock_file)
   allow(Psych).to receive(:load).and_return(hash)

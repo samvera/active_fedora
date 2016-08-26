@@ -105,12 +105,12 @@ describe ActiveFedora::FileConfigurator do
       end
 
       context "no solr.yml in same directory as fedora.yml and fedora.yml does not contain solr url" do
-        before :each do
+        before do
           allow(configurator).to receive(:config_options).and_return({})
           expect(configurator).to receive(:path).and_return("/path/to/fedora/config/fedora.yml")
           expect(File).to receive(:file?).with("/path/to/fedora/config/solr.yml").and_return(false)
         end
-        after :each do
+        after do
           unstub_rails
         end
 
@@ -137,7 +137,7 @@ describe ActiveFedora::FileConfigurator do
     end
 
     describe "load_fedora_config" do
-      before(:each) do
+      before do
         configurator.reset!
       end
       it "loads the file specified in fedora_config_path" do
@@ -169,7 +169,7 @@ describe ActiveFedora::FileConfigurator do
     end
 
     describe "load_solr_config" do
-      before(:each) do
+      before do
         configurator.reset!
       end
       it "loads the file specified in solr_config_path" do

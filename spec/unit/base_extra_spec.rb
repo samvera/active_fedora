@@ -4,11 +4,11 @@ describe ActiveFedora::Base do
   subject(:object) { described_class.new }
   describe ".update_index" do
     before do
-      mock_conn = double("SolrConnection")
+      mock_conn = instance_double(RSolr::Client)
       expect(mock_conn).to receive(:add) do |_, opts|
         expect(opts).to eq(params: { softCommit: true })
       end
-      mock_ss = double("SolrService")
+      mock_ss = instance_double(ActiveFedora::SolrService)
       allow(mock_ss).to receive(:conn).and_return(mock_conn)
       allow(ActiveFedora::SolrService).to receive(:instance).and_return(mock_ss)
     end
