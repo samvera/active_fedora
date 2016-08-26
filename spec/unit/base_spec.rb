@@ -274,7 +274,7 @@ describe ActiveFedora::Base do
 
     describe "#create" do
       it "builds a new record and save it" do
-        obj = double
+        obj = instance_double(FooHistory)
         expect(obj).to receive(:save)
         expect(FooHistory).to receive(:new).and_return(obj)
         FooHistory.create(fubar: 'ta')

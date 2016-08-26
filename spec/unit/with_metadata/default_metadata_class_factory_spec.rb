@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::WithMetadata::DefaultMetadataClassFactory do
-  let(:parent) { double("Parent") }
+  let(:parent) { class_double(ActiveFedora::File) }
   let(:object) { described_class.new }
 
   describe "default class attributes" do

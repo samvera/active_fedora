@@ -145,7 +145,7 @@ describe ActiveFedora::Base do
       let(:conditions) { { foo: "bar" } }
       context "and at least one object matches the conditions" do
         it "returns true" do
-          allow(ActiveFedora::SolrService).to receive(:query) { [double("solr document")] }
+          allow(ActiveFedora::SolrService).to receive(:query) { [instance_double(RSolr::HashWithResponse)] }
           expect(described_class.exists?(conditions)).to be true
         end
       end

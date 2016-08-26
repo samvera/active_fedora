@@ -36,9 +36,7 @@ describe ActiveFedora::Base do
     end
 
     it "has each" do
-      t = double
-      expect(t).to receive(:foo).twice
-      peanuts.each { t.foo }
+      expect(peanuts.each.to_a.length).to eq 2
     end
 
     it "has all?" do

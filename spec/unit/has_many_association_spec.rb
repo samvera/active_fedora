@@ -110,8 +110,8 @@ describe ActiveFedora::Associations::HasManyAssociation do
   end
 
   describe "#ids_reader" do
-    let(:owner) { double('owner') }
-    let(:reflection) { double('reflection', check_validity!: true) }
+    let(:owner) { instance_double(ActiveFedora::Base) }
+    let(:reflection) { instance_double(ActiveFedora::Reflection::AssociationReflection, check_validity!: true) }
     let(:association) { described_class.new(owner, reflection) }
 
     let(:r1) { ActiveFedora::Base.new(id: 'r1-id', &:mark_for_destruction) }

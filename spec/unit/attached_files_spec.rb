@@ -99,8 +99,8 @@ describe ActiveFedora::AttachedFiles do
 
   describe "#serialize_attached_files" do
     it "touches each file" do
-      m1 = double
-      m2 = double
+      m1 = instance_double(ActiveFedora::File)
+      m2 = instance_double(ActiveFedora::File)
 
       expect(m1).to receive(:serialize!)
       expect(m2).to receive(:serialize!)
@@ -178,10 +178,10 @@ describe ActiveFedora::AttachedFiles do
 
   describe "#metadata_streams" do
     it "only is metadata datastreams" do
-      ds1 = double(metadata?: true)
-      ds2 = double(metadata?: true)
-      ds3 = double(metadata?: true)
-      file_ds = double(metadata?: false)
+      ds1 = instance_double(ActiveFedora::File, metadata?: true)
+      ds2 = instance_double(ActiveFedora::File, metadata?: true)
+      ds3 = instance_double(ActiveFedora::File, metadata?: true)
+      file_ds = instance_double(ActiveFedora::File, metadata?: false)
       allow(af_base).to receive(:attached_files).and_return(a: ds1, b: ds2, c: ds3, e: file_ds)
       expect(af_base.metadata_streams).to include(ds1, ds2, ds3)
       expect(af_base.metadata_streams).to_not include(file_ds)

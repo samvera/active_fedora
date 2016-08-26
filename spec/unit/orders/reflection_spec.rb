@@ -6,7 +6,7 @@ RSpec.describe ActiveFedora::Reflection::OrdersReflection do
   let(:name) { "ordered_member_proxies" }
   let(:options) { {} }
   let(:scope) { nil }
-  let(:active_fedora) { double("active_fedora") }
+  let(:active_fedora) { instance_double(ActiveFedora::Base) }
 
   describe "#klass" do
     it "is a proxy" do

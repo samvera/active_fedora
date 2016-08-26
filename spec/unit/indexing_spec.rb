@@ -72,8 +72,8 @@ describe ActiveFedora::Indexing do
     end
 
     context "with attached files" do
-      let(:mock1) { double("ds1") }
-      let(:mock2) { double("ds2") }
+      let(:mock1) { instance_double(ActiveFedora::File) }
+      let(:mock2) { instance_double(ActiveFedora::File) }
 
       it "calls .to_solr on all datastreams, passing the resulting document to solr" do
         expect(mock1).to receive(:to_solr).and_return("one" => "title one")

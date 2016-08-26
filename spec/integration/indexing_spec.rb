@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
   describe "descendant_uris" do
-    before :each do
+    before do
       ids.each do |id|
         described_class.create id: id
       end

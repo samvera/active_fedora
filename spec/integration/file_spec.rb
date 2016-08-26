@@ -131,7 +131,7 @@ describe ActiveFedora::File do
       end
 
       describe "streaming the response" do
-        let(:stream_reader) { double }
+        let(:stream_reader) { instance_double(IO) }
         it "streams the response" do
           expect(stream_reader).to receive(:read).at_least(:once)
           test_object.attached_files[path].stream.each { |buff| stream_reader.read(buff) }

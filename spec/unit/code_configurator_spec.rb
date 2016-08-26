@@ -18,7 +18,7 @@ describe ActiveFedora::FileConfigurator do
     }
   end
 
-  before :each do
+  before do
     ActiveFedora.configurator = TestConfigurator.new
   end
 
