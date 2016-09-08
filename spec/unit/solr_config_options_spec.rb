@@ -25,7 +25,7 @@ describe ActiveFedora do
     it "is used by ActiveFedora::Base#search_with_conditions" do
       mock_response = double("SolrResponse")
       expect(ActiveFedora::SolrService).to receive(:query)
-        .with("_query_:\"{!field f=has_model_ssim}SolrSpecModel::Basic\" AND " \
+        .with("_query_:\"{!raw f=has_model_ssim}SolrSpecModel::Basic\" AND " \
               "_query_:\"{!field f=#{field}}changeme:30\"",
               sort: ["#{described_class.index_field_mapper.solr_name('system_create', :stored_sortable, type: :date)} asc"])
         .and_return(mock_response)

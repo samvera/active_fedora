@@ -11,28 +11,29 @@ module ActiveFedora
         "{!terms f=#{ActiveFedora.id_field}}#{ids.join(',')}"
       end
 
-      # Create a query with a clause for each key, value
+      # Create a raw query with a clause for each key, value
       # @param [Hash, Array<Array<String>>] field_pairs key is the predicate, value is the target_uri
       # @param [String] join_with ('AND') the value we're joining the clauses with
       # @example
-      #   construct_query_for_rel [[:has_model, "info:fedora/afmodel:ComplexCollection"], [:has_model, "info:fedora/afmodel:ActiveFedora_Base"]], 'OR'
-      #   # => _query_:"{!field f=has_model_ssim}info:fedora/afmodel:ComplexCollection" OR _query_:"{!field f=has_model_ssim}info:fedora/afmodel:ActiveFedora_Base"
+      #   construct_query_for_rel [[:has_model, "ComplexCollection"], [:has_model, "ActiveFedora_Base"]], 'OR'
+      #   # => _query_:"{!raw f=has_model_ssim}ComplexCollection" OR _query_:"{!raw f=has_model_ssim}ActiveFedora_Base"
       #
       #   construct_query_for_rel [[Book._reflect_on_association(:library), "foo/bar/baz"]]
       def construct_query_for_rel(field_pairs, join_with = default_join_with)
         field_pairs = field_pairs.to_a if field_pairs.is_a? Hash
-        construct_query(property_values_to_solr(field_pairs), join_with)
+        construct_query(property_values_to_solr(field_pairs), join_with, 'raw'.freeze)
       end
 
       # Construct a solr query from a list of pairs (e.g. [field name, values])
       # @param [Array<Array>] field_pairs a list of pairs of property name and values
       # @param [String] join_with ('AND') the value we're joining the clauses with
+      # @param [String] type ('field') The type of query to run. Either 'raw' or 'field'
       # @return [String] a solr query
       # @example
       #   construct_query([['library_id_ssim', '123'], ['owner_ssim', 'Fred']])
       #   # => "_query_:\"{!field f=library_id_ssim}123\" AND _query_:\"{!field f=owner_ssim}Fred\""
-      def construct_query(field_pairs, join_with = default_join_with)
-        clauses = pairs_to_clauses(field_pairs)
+      def construct_query(field_pairs, join_with = default_join_with, type = 'field'.freeze)
+        clauses = pairs_to_clauses(field_pairs, type)
         return "" if clauses.count.zero?
         return clauses.first if clauses.count == 1
         "(#{clauses.join(join_with)})"
@@ -45,22 +46,24 @@ module ActiveFedora
       private
 
         # @param [Array<Array>] pairs a list of (key, value) pairs. The value itself may
+        # @param [String] type  The type of query to run. Either 'raw' or 'field'
         # @return [Array] a list of solr clauses
-        def pairs_to_clauses(pairs)
+        def pairs_to_clauses(pairs, type)
           pairs.flat_map do |field, value|
-            condition_to_clauses(field, value)
+            condition_to_clauses(field, value, type)
           end
         end
 
         # @param [String] field
         # @param [String, Array<String>] values
+        # @param [String] type The type of query to run. Either 'raw' or 'field'
         # @return [Array<String>]
-        def condition_to_clauses(field, values)
+        def condition_to_clauses(field, values, type)
           values = Array(values)
           values << nil if values.empty?
           values.map do |value|
             if value.present?
-              field_query(field, value)
+              query_clause(type, field, value)
             else
               # Check that the field is not present. In SQL: "WHERE field IS NULL"
               "-#{field}:[* TO *]"
@@ -93,10 +96,11 @@ module ActiveFedora
         end
 
         # Create a raw query clause suitable for sending to solr as an fq element
+        # @param [String] type The type of query to run. Either 'raw' or 'field'
         # @param [String] key
         # @param [String] value
-        def field_query(key, value)
-          "_query_:\"{!field f=#{key}}#{value.gsub('"', '\"')}\""
+        def query_clause(type, key, value)
+          "_query_:\"{!#{type} f=#{key}}#{value.gsub('"', '\"')}\""
         end
     end
   end
