@@ -30,20 +30,4 @@ describe ActiveFedora::Base do
       object.delete
     end
   end
-
-  describe "to_class_uri" do
-    before :all do
-      module SpecModel
-        class CamelCased < ActiveFedora::Base
-        end
-      end
-    end
-
-    after :all do
-      Object.send(:remove_const, :SpecModel)
-    end
-    subject { SpecModel::CamelCased.to_class_uri }
-
-    it { should == 'SpecModel::CamelCased' }
-  end
 end

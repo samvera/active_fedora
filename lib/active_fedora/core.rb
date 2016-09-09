@@ -96,13 +96,14 @@ module ActiveFedora
 
     protected
 
-      # This can be overriden to assert a different model
-      # It's normally called once in the lifecycle, by #create#
+      # This method is normally called once in the lifecycle, by #create#
       def assert_content_model
-        self.has_model = self.class.to_s
+        self.has_model = self.class.to_rdf_representation
       end
 
       module ClassMethods
+        extend Deprecation
+
         def generated_association_methods
           @generated_association_methods ||= begin
             mod = const_set(:GeneratedAssociationMethods, Module.new)
@@ -111,12 +112,22 @@ module ActiveFedora
           end
         end
 
-        # Returns a suitable uri object for :has_model
-        # Should reverse Model#from_class_uri
-        # TODO this is a poorly named method
-        def to_class_uri(_attrs = {})
+        # Returns a suitable string representation for :has_model
+        # Override this method if you want to change how this class
+        # is represented in RDF.
+        def to_rdf_representation
           name
         end
+
+        # Returns a suitable string representation for :has_model
+        # @deprecated use to_rdf_representation instead
+        def to_class_uri(attrs = nil)
+          if attrs
+            Deprecation.warn ActiveFedora::Core, "to_class_uri no longer acceps an argument"
+          end
+          to_rdf_representation
+        end
+        deprecation_deprecate to_class_uri: "use 'to_rdf_representation()' instead"
 
         private
 
