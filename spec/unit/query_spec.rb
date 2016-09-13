@@ -8,7 +8,7 @@ describe ActiveFedora::Base do
     end
   end
   let(:sort_query) { ActiveFedora.index_field_mapper.solr_name("system_create", :stored_sortable, type: :date) + ' asc' }
-  let(:model_query) { "_query_:\"{!field f=has_model_ssim}SpecModel::Basic\"" }
+  let(:model_query) { "_query_:\"{!raw f=has_model_ssim}SpecModel::Basic\"" }
 
   after(:all) do
     Object.send(:remove_const, :SpecModel)
