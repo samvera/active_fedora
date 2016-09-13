@@ -291,7 +291,7 @@ module ActiveFedora
         def construct_query
           @solr_query ||= begin
             clauses = { find_reflection => @owner.id }
-            clauses[:has_model] = @reflection.class_name.constantize.to_class_uri if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base'
+            clauses[:has_model] = @reflection.klass.to_rdf_representation if @reflection.klass != ActiveFedora::Base
             ActiveFedora::SolrQueryBuilder.construct_query_for_rel(clauses)
           end
         end

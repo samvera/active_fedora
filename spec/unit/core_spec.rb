@@ -169,4 +169,40 @@ describe ActiveFedora::Base do
       it { should eq '123456w' }
     end
   end
+
+  describe "to_class_uri" do
+    before do
+      module SpecModel
+        class CamelCased < ActiveFedora::Base
+        end
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :SpecModel)
+    end
+    subject do
+      Deprecation.silence(ActiveFedora::Core::ClassMethods) do
+        SpecModel::CamelCased.to_class_uri
+      end
+    end
+
+    it { is_expected.to eq 'SpecModel::CamelCased' }
+  end
+
+  describe "to_rdf_representation" do
+    before do
+      module SpecModel
+        class CamelCased < ActiveFedora::Base
+        end
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :SpecModel)
+    end
+    subject { SpecModel::CamelCased.to_rdf_representation }
+
+    it { is_expected.to eq 'SpecModel::CamelCased' }
+  end
 end

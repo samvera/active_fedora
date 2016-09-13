@@ -40,7 +40,7 @@ module ActiveFedora::Associations
       # a slow fedora call
       def relation_subjects(record)
         query = ActiveFedora::SolrQueryBuilder.construct_query_for_rel(
-          [[:has_model, proxy_class.to_class_uri], [:proxyFor, record.id]]
+          [[:has_model, proxy_class.to_rdf_representation], [:proxyFor, record.id]]
         )
         ActiveFedora::SolrService.query(query, fl: 'id').map(&:rdf_uri)
       end
