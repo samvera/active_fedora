@@ -23,8 +23,12 @@ module ActiveFedora
           result[predicate] = graph.query(subject: object.rdf_subject, predicate: predicate)
         elsif object.class.properties.keys.include?(key)
           predicate = graph.reflections.reflect_on_property(key).predicate
-          result[predicate] = graph.query(subject: object.rdf_subject, predicate: predicate)
-          result[predicate] = child_graphs(result[predicate].objects) << result[predicate]
+          results = graph.query(subject: object.rdf_subject, predicate: predicate)
+          new_graph = child_graphs(results.map(&:object))
+          results.each do |res|
+            new_graph << res
+          end
+          result[predicate] = new_graph
         elsif key == 'type'.freeze
           # working around https://github.com/ActiveTriples/ActiveTriples/issues/122
           predicate = ::RDF.type
