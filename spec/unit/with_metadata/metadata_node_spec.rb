@@ -37,7 +37,7 @@ describe ActiveFedora::WithMetadata::MetadataNode do
       end
 
       it "is expected to have the rdf type statement" do
-        expect(changes_for_update[::RDF.type]).to be_kind_of RDF::Queryable::Enumerator
+        expect(changes_for_update[::RDF.type]).to be_present
       end
     end
   end

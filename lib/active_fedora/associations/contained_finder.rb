@@ -29,7 +29,7 @@ module ActiveFedora::Associations
     private
 
       def matching_ids(record)
-        IDComposite.new(proxy_ids(record) & contained_ids, repository.translate_uri_to_id)
+        IDComposite.new(proxy_ids(record) & contained_ids.to_a, repository.translate_uri_to_id)
       end
 
       def proxy_ids(record)

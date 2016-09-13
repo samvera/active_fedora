@@ -13,8 +13,8 @@ module ActiveFedora
       # @param [::RDF::URI] head_subject URI of head node in list.
       # @param [::RDF::URI] tail_subject URI of tail node in list.
       def initialize(graph, head_subject, tail_subject)
-        @graph = if graph.respond_to?(:graph, true)
-                   graph.send(:graph).data
+        @graph = if graph.respond_to?(:graph)
+                   graph.graph.data
                  else
                    graph
                  end
