@@ -7,5 +7,6 @@ module ActiveFedora
     autoload :ProjectHydra
     autoload :FieldMap
     autoload :FieldMapEntry
+    autoload :ValueCaster
   end
 end

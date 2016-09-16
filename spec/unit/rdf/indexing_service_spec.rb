@@ -20,7 +20,7 @@ describe ActiveFedora::RDF::IndexingService do
     MyObj.new.tap do |obj|
       obj.created = [Date.parse("2012-03-04")]
       obj.title = ["Of Mice and Men, The Sequel"]
-      obj.publisher = ["Bob's Blogtastic Publishing"]
+      obj.publisher = [RDF::Literal.new("Bob's Blogtastic Publishing", language: :fr)]
       obj.based_near = ["Tacoma, WA", "Renton, WA"]
       obj.related_url = ["http://example.org/blogtastic/"]
       obj.rights = ["Totally open, y'all"]

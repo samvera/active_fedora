@@ -22,5 +22,11 @@ module ActiveFedora::RDF
       self.behaviors.uniq!
       self.values += values
     end
+
+    def values
+      @values.map do |value|
+        ValueCaster.new(value).value
+      end
+    end
   end
 end
