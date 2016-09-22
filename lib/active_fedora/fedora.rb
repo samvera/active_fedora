@@ -86,7 +86,7 @@ module ActiveFedora
 
     def validate_options
       unless host.downcase.end_with?("/rest")
-        ActiveFedora::Base.logger.warn "Fedora URL (#{host}) does not end with /rest. This could be a problem. Check your fedora.yml config"
+        ActiveFedora::Base.logger.warn "Fedora URL (#{host}) does not end with /rest. This could be a problem. Check your fedora.yml config" if ActiveFedora::Base.logger
       end
     end
   end
