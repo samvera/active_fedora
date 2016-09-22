@@ -174,7 +174,7 @@ module ActiveFedora
       def proxy_in
         proxies = to_a.map(&:proxy_in_id).compact.uniq
         if proxies.length > 1
-          ActiveFedora::Base.logger.warn "WARNING: List contains nodes aggregated under different URIs. Returning only the first." if ActiveFedora::Base.logger
+          ActiveFedora::Base.logger.warn "WARNING: List contains nodes aggregated under different URIs. Returning only the first."
         end
         proxies.first
       end

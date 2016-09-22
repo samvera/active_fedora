@@ -60,7 +60,7 @@ module ActiveFedora
 
       def classify(model_value)
         unless class_exists?(model_value)
-          ActiveFedora::Base.logger.warn "'#{model_value}' is not a real class" if ActiveFedora::Base.logger
+          ActiveFedora::Base.logger.warn "'#{model_value}' is not a real class"
           return nil
         end
         ActiveFedora::ModelClassifier.class_from_string(model_value)

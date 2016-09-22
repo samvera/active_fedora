@@ -21,7 +21,7 @@ module ActiveFedora
         if reflection.options[:inverse_of]
           inverse = reflection.inverse_of
           if owner.new_record?
-            ActiveFedora::Base.logger.warn("has_and_belongs_to_many #{reflection.inspect} is cowardly refusing to insert the inverse relationship into #{record}, because #{owner} is not persisted yet.") if ActiveFedora::Base.logger
+            ActiveFedora::Base.logger.warn("has_and_belongs_to_many #{reflection.inspect} is cowardly refusing to insert the inverse relationship into #{record}, because #{owner} is not persisted yet.")
           elsif inverse.has_and_belongs_to_many?
             record[inverse.foreign_key] ||= []
             record[inverse.foreign_key] += [owner.id]

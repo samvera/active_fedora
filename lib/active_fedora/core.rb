@@ -8,13 +8,21 @@ module ActiveFedora
     autoload :FedoraUriTranslator
 
     included do
-      ##
-      # :singleton-method:
-      #
+      mattr_accessor :belongs_to_required_by_default, instance_accessor: false
+
       # Accepts a logger conforming to the interface of Log4r which can be
       # retrieved on both a class and instance level by calling +logger+.
-      mattr_accessor :logger, instance_writer: false
-      mattr_accessor :belongs_to_required_by_default, instance_accessor: false
+      class_attribute :logger
+
+      # Use NullLogger if none is set and all messages sent to it are retuned as nil
+      def self.logger
+        self.logger ||= ActiveFedora::NullLogger.new
+      end
+
+      # All instances default to the class-level logger
+      def logger
+        self.class.logger
+      end
     end
 
     # Constructor.  You may supply a custom +:id+, or we call the Fedora Rest API for the

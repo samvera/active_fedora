@@ -36,7 +36,7 @@ module ActiveFedora
 
     def model(opts = {})
       best_model_match = classifier.best_model(opts)
-      ActiveFedora::Base.logger.warn "Could not find a model for #{id}, defaulting to ActiveFedora::Base" if ActiveFedora::Base.logger && best_model_match == ActiveFedora::Base
+      ActiveFedora::Base.logger.warn "Could not find a model for #{id}, defaulting to ActiveFedora::Base" if best_model_match == ActiveFedora::Base
       best_model_match
     end
 
