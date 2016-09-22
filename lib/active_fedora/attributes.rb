@@ -138,7 +138,7 @@ module ActiveFedora
           def warn_duplicate_predicates(new_name, new_properties)
             new_predicate = new_properties[:predicate]
             properties.select { |_k, existing| existing.predicate == new_predicate }.each do |key, _value|
-              ActiveFedora::Base.logger.warn "Same predicate (#{new_predicate}) used for properties #{key} and #{new_name}" if ActiveFedora::Base.logger
+              ActiveFedora::Base.logger.warn "Same predicate (#{new_predicate}) used for properties #{key} and #{new_name}"
             end
           end
 

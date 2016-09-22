@@ -99,7 +99,7 @@ module ActiveFedora
     def load_fedora_config
       return @fedora_config unless @fedora_config.empty?
       @fedora_config_path = config_path(:fedora)
-      ActiveFedora::Base.logger.info("ActiveFedora: loading fedora config from #{::File.expand_path(@fedora_config_path)}") if ActiveFedora::Base.logger
+      ActiveFedora::Base.logger.info("ActiveFedora: loading fedora config from #{::File.expand_path(@fedora_config_path)}")
 
       begin
         config_erb = ERB.new(IO.read(@fedora_config_path)).result(binding)
@@ -124,7 +124,7 @@ module ActiveFedora
       return @solr_config unless @solr_config.empty?
       @solr_config_path = config_path(:solr)
 
-      ActiveFedora::Base.logger.info "ActiveFedora: loading solr config from #{::File.expand_path(@solr_config_path)}" if ActiveFedora::Base.logger
+      ActiveFedora::Base.logger.info "ActiveFedora: loading solr config from #{::File.expand_path(@solr_config_path)}"
       begin
         config_erb = ERB.new(IO.read(@solr_config_path)).result(binding)
       rescue StandardError
@@ -188,7 +188,7 @@ module ActiveFedora
       # Last choice, check for the default config file
       config_path = ::File.join(ActiveFedora.root, "config", "#{config_type}.yml")
       if ::File.file? config_path
-        ActiveFedora::Base.logger.warn "Using the default #{config_type}.yml that comes with active-fedora.  If you want to override this, pass the path to #{config_type}.yml to ActiveFedora - ie. ActiveFedora.init(:#{config_type}_config_path => '/path/to/#{config_type}.yml') - or set Rails.root and put #{config_type}.yml into \#{Rails.root}/config." if ActiveFedora::Base.logger
+        ActiveFedora::Base.logger.warn "Using the default #{config_type}.yml that comes with active-fedora.  If you want to override this, pass the path to #{config_type}.yml to ActiveFedora - ie. ActiveFedora.init(:#{config_type}_config_path => '/path/to/#{config_type}.yml') - or set Rails.root and put #{config_type}.yml into \#{Rails.root}/config."
         return config_path
       else
         raise ConfigurationError, "Couldn't load #{config_type} config file!"

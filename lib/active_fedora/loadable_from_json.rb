@@ -176,7 +176,7 @@ module ActiveFedora
       def property_reflection(attribute_name)
         self.class.reflect_on_property(attribute_name)
       rescue ActiveTriples::UndefinedPropertyError
-        ActiveFedora::Base.logger.info "Undefined property #{attribute_name} reflected." if ActiveFedora::Base.logger
+        ActiveFedora::Base.logger.info "Undefined property #{attribute_name} reflected."
         nil
       end
 

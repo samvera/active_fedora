@@ -48,7 +48,7 @@ module ActiveFedora
     end
 
     def self.log(message)
-      ActiveFedora::Base.logger.debug message if ActiveFedora::Base.logger
+      ActiveFedora::Base.logger.debug message
     end
   end
 end

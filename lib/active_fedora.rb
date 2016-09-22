@@ -89,6 +89,7 @@ module ActiveFedora #:nodoc:
     autoload :ModelClassifier
     autoload :NestedAttributes
     autoload :NullRelation
+    autoload :NullLogger
     autoload :Orders
     autoload :Pathing
     autoload :Persistence

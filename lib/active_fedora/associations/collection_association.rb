@@ -305,7 +305,7 @@ module ActiveFedora
           records.each { |record| set_inverse_instance(record) }
           records
         rescue ObjectNotFoundError, Ldp::Gone => e
-          ActiveFedora::Base.logger.error "Solr and Fedora may be out of sync:\n" + e.message if ActiveFedora::Base.logger
+          ActiveFedora::Base.logger.error "Solr and Fedora may be out of sync:\n" + e.message
           reset
           []
         end
