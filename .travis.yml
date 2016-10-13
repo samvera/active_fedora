@@ -1,17 +1,13 @@
 sudo: false
 language: ruby
 rvm:
-  - 1.9.3
-  - 2.0.0
-  - 2.1.2
-  - 2.2.0
-
-gemfile:
-  - gemfiles/gemfile.rails3
-  - gemfiles/gemfile.rails4
+  - 2.2.5
+  - 2.3.1
 
 notifications:
   irc: "irc.freenode.org#projecthydra"
 
 before_install:
   - gem install bundler
+
+jdk: oraclejdk8
