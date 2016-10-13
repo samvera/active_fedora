@@ -170,7 +170,7 @@ END
         comp = SpecDatastream::MediatorUser.new ds.graph
         comp.title = ['Doctor']
         ds.mediator = comp
-        expect(ds.mediator.first.type.first).to be_instance_of RDF::URI
+        expect(ds.mediator.first.type.first).to be_instance_of RDF::Vocabulary::Term
         expect(ds.mediator.first.type.first.to_s).to eq('http://purl.org/dc/terms/AgentClass')
         expect(ds.mediator.first.title.first).to eq('Doctor')
       end

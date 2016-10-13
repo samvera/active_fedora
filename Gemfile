@@ -1,4 +1,4 @@
-source "http://rubygems.org"
+source "https://rubygems.org"
 
 # Bundler will rely on active-fedora.gemspec for dependency information.
 
@@ -10,3 +10,5 @@ group :development, :test do
 end
 
 gem 'jruby-openssl', :platform=> :jruby
+
+gem 'activemodel', '~> 4.2'

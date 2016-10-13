@@ -126,6 +126,7 @@ module ActiveFedora
 
     def content_changed?
       return false if !xml_loaded
+      return true if changed_attributes.any?
       super
     end
 
