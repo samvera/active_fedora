@@ -1,22 +1,14 @@
 language: ruby
 rvm:
-  - 2.1.1
+  - 2.3.1
 
-gemfile:
-  - gemfiles/rails3.gemfile
-  - gemfiles/rails4.gemfile
-  - gemfiles/rails4.1.gemfile
 
-    
 matrix:
   include:
-    - rvm: 2.1.0
-      gemfile: gemfiles/rails4.gemfile
-    - rvm: 2.0.0
-      gemfile: gemfiles/rails4.gemfile
-    - rvm: 1.9.3
-      gemfile: gemfiles/rails4.gemfile
-      
+    - rvm: 2.2.5
+      env: RAILS_VERSION=4.2.7.1
+    - rvm: 2.1.10
+      env: RAILS_VERSION=4.2.7.1
 
 notifications:
   irc: "irc.freenode.org#projecthydra"
@@ -24,3 +16,5 @@ notifications:
 env:
   global:
     - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+
+jdk: oraclejdk8
