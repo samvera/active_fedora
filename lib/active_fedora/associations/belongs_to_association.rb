@@ -10,22 +10,25 @@ module ActiveFedora
       end
 
       def id_reader
-        @full_result ||= begin
+        begin
           # need to find the id with the correct class
           ids = @owner.ids_for_outbound(@reflection.options[:property])
 
-          return if ids.empty? 
+          return if ids.empty?
+
           # This incurs a lot of overhead, but it's necessary if the users use one property for more than one association.
           # e.g.
           #   belongs_to :author, property: :has_member, class_name: 'Person'
           #   belongs_to :publisher, property: :has_member
-
-          results = SolrService.query(construct_query(ids))
-          if results.present?
-            results.first
+          
+          if @owner.reflections.one? { |k, v| v.options[:property] == @reflection.options[:property] }
+            @full_results = nil
+            ids.first
+          else
+            @full_results = SolrService.query(construct_query(ids))
+            @full_results.first['id'] if @full_results.present?
           end
         end
-        @full_result['id'] if @full_result
       end
 
       def replace(record)
@@ -55,7 +58,13 @@ module ActiveFedora
 
       private
         def find_target
-          ActiveFedora::SolrService.reify_solr_results([@full_result]).first if id_reader
+          return unless id_reader
+
+          if @full_result # side-effect from #id_reader
+            ActiveFedora::SolrService.reify_solr_results([@full_result]).first
+          else
+            ActiveFedora::Base.find(id_reader, cast: true)
+          end
         end
 
         # Constructs a query that checks solr for the correct id & class_name combination
