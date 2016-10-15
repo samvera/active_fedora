@@ -14,13 +14,13 @@ Gem::Specification.new do |s|
   s.license = "APACHE2"
   s.required_ruby_version     = '>= 1.9.3'
 
-  s.add_dependency 'rsolr', "~> 1.0.11"
+  s.add_dependency 'rsolr', ">= 1.0.11", '< 3'
   s.add_dependency 'om', '~> 3.1'
   s.add_dependency 'nom-xml', '>= 0.5.1'
   s.add_dependency "activesupport", '>= 3.0.0'
   s.add_dependency "rubydora", '~> 1.8'
   s.add_dependency "active-triples", '~> 0.4.0'
-  s.add_dependency "rdf-rdfxml", '~> 1.1.0'
+  s.add_dependency "rdf-rdfxml", '~> 1.1'
   s.add_dependency "deprecation"
   s.add_development_dependency "rdoc"
   s.add_development_dependency "yard"
