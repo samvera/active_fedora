@@ -30,11 +30,11 @@ describe ActiveFedora::OmDatastream do
     end
 
     it "should not be changed when no fields have been set" do
-      @obj.descMetadata.should_not be_content_changed
+      @obj.descMetadata.should_not be_changed
     end
     it "should be changed when a field has been set" do
       @obj.descMetadata.title = 'Foobar'
-      @obj.descMetadata.should be_content_changed
+      @obj.descMetadata.should be_changed
     end
     describe "#changed?" do
       it "should not be changed if the new xml matches the old xml" do
