@@ -3,6 +3,10 @@ shared_examples_for "An ActiveModel" do
     expect(test).to eq(true)
   end
 
+  def assert_equal(test, obj)
+    expect(test).to eq(obj)
+  end
+
   def assert_kind_of(klass, inspected_object)
     expect(inspected_object).to be_kind_of(klass)
   end
