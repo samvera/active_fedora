@@ -3,6 +3,7 @@ cache: bundler
 sudo: false
 rvm:
   - 2.3.0
+  - jruby-9.0.5.0
 
 notifications:
   irc: "irc.freenode.org#projecthydra"
@@ -15,3 +16,7 @@ global_env:
   - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
 before_script:
   - jdk_switcher use oraclejdk8
+before_install:
+  - gem install bundler
+  - gem install bundler
+# jruby env doesn't have bundler by default
