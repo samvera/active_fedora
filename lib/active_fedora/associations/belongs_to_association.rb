@@ -63,7 +63,11 @@ module ActiveFedora
           if @full_result # side-effect from #id_reader
             ActiveFedora::SolrService.reify_solr_results([@full_result]).first
           else
-            ActiveFedora::Base.find(id_reader, cast: true)
+            begin
+              ActiveFedora::Base.find(id_reader, cast: true)
+            rescue ActiveFedora::ObjectNotFoundError
+              nil
+            end
           end
         end
 
