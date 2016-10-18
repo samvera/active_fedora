@@ -45,6 +45,11 @@ describe ActiveFedora::Base do
       book[:library_id] = library.id
       book.library_id.should == library.id
     end
+
+    it "safely handles invalid data" do
+      book[:library_id] = 'bad:identifier'
+      book.library.should be_nil
+    end
   end
 
   describe "getting the id property" do
