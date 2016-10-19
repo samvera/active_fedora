@@ -425,4 +425,36 @@ describe ActiveFedora::File do
       }
     end
   end
+
+  describe "#new" do
+    let(:file2) do
+      described_class.new do |file|
+        file.content = "My Content"
+        file.save!
+      end
+    end
+
+    context "when uri is passed to new" do
+      subject { described_class.new(file2.uri).content }
+
+      it { is_expected.to eq "My Content" }
+    end
+
+    context "when id is passed to new" do
+      subject { described_class.new(file2.id).content }
+
+      it { is_expected.to eq "My Content" }
+    end
+
+    context "when object responding to .uri is passed to new" do
+      subject { described_class.new(file2).content }
+      it { is_expected.to eq "My Content" }
+    end
+
+    context "when Array passed to new" do
+      it "raises an expection" do
+        expect { described_class.new([]) }.to raise_error
+      end
+    end
+  end
 end

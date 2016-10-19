@@ -31,6 +31,7 @@ module ActiveFedora
     # @yieldparam [File] self the newly created file
     def initialize(identifier = nil, &_block)
       identifier = identifier.delete(:id) if identifier.is_a? Hash
+      identifier = identifier.uri if identifier.respond_to? :uri
       run_callbacks(:initialize) do
         case identifier
         when nil, ::RDF::URI
