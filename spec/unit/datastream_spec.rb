@@ -8,37 +8,37 @@ describe ActiveFedora::Datastream do
     @test_datastream.content = "hi there"
   end
 
-  its(:metadata?) { should be_false}
+  its(:metadata?) { should be_falsey}
 
   it "should escape dots in  to_param" do
-    @test_datastream.stub(:dsid).and_return('foo.bar')
-    @test_datastream.to_param.should == 'foo%2ebar'
+    allow(@test_datastream).to receive(:dsid).and_return('foo.bar')
+    expect(@test_datastream.to_param).to eq('foo%2ebar')
   end
   
   it "should be inspectable" do
-    @test_datastream.inspect.should match /#<ActiveFedora::Datastream @pid=\"\" @dsid=\"abcd\" @controlGroup=\"M\" changed=\"true\" @mimeType=\"\" >/
+    expect(@test_datastream.inspect).to match /#<ActiveFedora::Datastream @pid=\"\" @dsid=\"abcd\" @controlGroup=\"M\" changed=\"true\" @mimeType=\"\" >/
   end
 
   it "should have mimeType accessors" do
     ds1 = ActiveFedora::Datastream.new
     ds1.mimeType = "text/foo"
-    ds1.mimeType.should == "text/foo"
+    expect(ds1.mimeType).to eq("text/foo")
     ds2 = ActiveFedora::Datastream.new
     ds2.mimeType = "text/bar"
-    ds2.mimeType.should == "text/bar"
+    expect(ds2.mimeType).to eq("text/bar")
   end
 
   describe "#generate_dsid" do
     subject {ActiveFedora::Datastream.new(@test_object.inner_object) }
     let(:digital_object) { double(datastreams: {})}
     it "should create an autoincrementing dsid" do
-      subject.send(:generate_dsid, digital_object, 'FOO').should == 'FOO1'
+      expect(subject.send(:generate_dsid, digital_object, 'FOO')).to eq('FOO1')
     end
 
     describe "when some datastreams exist" do
       let(:digital_object) { double(datastreams: {'FOO56' => double})}
       it "should start from the highest existing dsid" do
-        subject.send(:generate_dsid, digital_object, 'FOO').should == 'FOO57'
+        expect(subject.send(:generate_dsid, digital_object, 'FOO')).to eq('FOO57')
       end
     end
   end
@@ -71,13 +71,13 @@ describe ActiveFedora::Datastream do
       EOS
 
       mock_repo = Rubydora::Repository.new
-      @test_object.inner_object.stub(:repository).and_return(mock_repo)
-      mock_repo.api.should_receive(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).and_return(ds_profile)
-      @test_datastream.size.should == 9999
+      allow(@test_object.inner_object).to receive(:repository).and_return(mock_repo)
+      expect(mock_repo.api).to receive(:datastream).with(:dsid => 'abcd', :pid => @test_object.pid).and_return(ds_profile)
+      expect(@test_datastream.size).to eq(9999)
     end
 
     it "should default to an empty string if ds has not been saved" do
-      @test_datastream.size.should be_nil
+      expect(@test_datastream.size).to be_nil
     end
   end
 end

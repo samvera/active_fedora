@@ -37,18 +37,18 @@ describe ActiveFedora::Base do
     describe "attributes=" do
       it "should set attributes" do
         @n.attributes = {:fubar=>"baz", :duck=>"Quack"}
-        @n.fubar.should == "baz"
-        @n.withText.get_values(:fubar).first.should == 'baz'
-        @n.duck.should == "Quack"
-        @n.xmlish.term_values(:duck).first.should == 'Quack'
+        expect(@n.fubar).to eq("baz")
+        expect(@n.withText.get_values(:fubar).first).to eq('baz')
+        expect(@n.duck).to eq("Quack")
+        expect(@n.xmlish.term_values(:duck).first).to eq('Quack')
       end
     end
     describe "update_attributes" do
       it "should set attributes and save " do
         @n.update_attributes(:fubar=>"baz", :duck=>"Quack")
         @q = BarHistory.find(@n.pid)
-        @q.fubar.should == "baz"
-        @q.duck.should == "Quack"
+        expect(@q.fubar).to eq("baz")
+        expect(@q.duck).to eq("Quack")
       end
       after do
         @n.delete

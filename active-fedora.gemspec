@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "yard"
   s.add_development_dependency "rake"
   s.add_development_dependency "jettywrapper", ">=1.4.0"
-  s.add_development_dependency "rspec", "~> 2.99"
+  s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "rspec-its"
   s.add_development_dependency "equivalent-xml"
   s.add_development_dependency "rest-client"
@@ -43,4 +43,3 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
 
 end
-

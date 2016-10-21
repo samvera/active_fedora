@@ -18,8 +18,8 @@ describe "A base object with metadata" do
     end
     it "should save the datastream." do
       obj = ActiveFedora::Base.find(@obj.pid)
-      obj.foo.should_not be_new
-      obj.foo.person.should == ['bob']
+      expect(obj.foo).not_to be_new
+      expect(obj.foo.person).to eq(['bob'])
       person_field = ActiveFedora::SolrService.solr_name('foo__person', type: :string)
       solr_result = ActiveFedora::SolrService.query("{!raw f=id}#{@obj.pid}", :fl=>"id #{person_field}").first
       expect(solr_result).to eq("id"=>@obj.pid, person_field =>['bob'])
@@ -32,7 +32,7 @@ describe "A base object with metadata" do
       obj.state='D'
       obj.save!
       obj.reload
-      obj.state.should == 'D'
+      expect(obj.state).to eq('D')
     end
   end
 
@@ -50,9 +50,9 @@ describe "A base object with metadata" do
         @release.save!
       end
       it "should save the datastream." do
-        MockAFBaseRelationship.find(@release.pid).foo.person.should == ['frank']
+        expect(MockAFBaseRelationship.find(@release.pid).foo.person).to eq(['frank'])
         person_field = ActiveFedora::SolrService.solr_name('foo__person', type: :string)
-        ActiveFedora::SolrService.query("id:#{@release.pid.gsub(":", "\\:")}", :fl=>"id #{person_field}").first.should == {"id"=>@release.pid, person_field =>['frank']}
+        expect(ActiveFedora::SolrService.query("id:#{@release.pid.gsub(":", "\\:")}", :fl=>"id #{person_field}").first).to eq({"id"=>@release.pid, person_field =>['frank']})
       end
     end
     describe "clone_into a new object" do
@@ -68,7 +68,7 @@ describe "A base object with metadata" do
         @new_object = MockAFBaseRelationship.find('test:999')
       end
       it "should have all the assertions" do
-        @new_object.rels_ext.content.should be_equivalent_to '<rdf:RDF xmlns:ns1="info:fedora/fedora-system:def/model#" xmlns:ns2="info:fedora/fedora-system:def/relations-external#" xmlns:ns0="http://projecthydra.org/ns/relations#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        expect(@new_object.rels_ext.content).to be_equivalent_to '<rdf:RDF xmlns:ns1="info:fedora/fedora-system:def/model#" xmlns:ns2="info:fedora/fedora-system:def/relations-external#" xmlns:ns0="http://projecthydra.org/ns/relations#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
          <rdf:Description rdf:about="info:fedora/test:999">
            <ns0:isGovernedBy rdf:resource="info:fedora/test:catalog-fixture"/>
            <ns1:hasModel rdf:resource="info:fedora/afmodel:MockAFBaseRelationship"/>
@@ -78,8 +78,8 @@ describe "A base object with metadata" do
        </rdf:RDF>'
       end
       it "should have the other datastreams too" do
-        @new_object.datastreams.keys.should include "foo"
-        @new_object.foo.content.should be_equivalent_to @release.foo.content
+        expect(@new_object.datastreams.keys).to include "foo"
+        expect(@new_object.foo.content).to be_equivalent_to @release.foo.content
       end
     end
     describe "clone" do
@@ -87,7 +87,7 @@ describe "A base object with metadata" do
         @new_object = @release.clone
       end
       it "should have all the assertions" do
-        @new_object.rels_ext.content.should be_equivalent_to '<rdf:RDF xmlns:ns1="info:fedora/fedora-system:def/model#" xmlns:ns2="info:fedora/fedora-system:def/relations-external#" xmlns:ns0="http://projecthydra.org/ns/relations#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+        expect(@new_object.rels_ext.content).to be_equivalent_to '<rdf:RDF xmlns:ns1="info:fedora/fedora-system:def/model#" xmlns:ns2="info:fedora/fedora-system:def/relations-external#" xmlns:ns0="http://projecthydra.org/ns/relations#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
          <rdf:Description rdf:about="info:fedora/'+ @new_object.pid+'">
            <ns0:isGovernedBy rdf:resource="info:fedora/test:catalog-fixture"/>
            <ns1:hasModel rdf:resource="info:fedora/afmodel:MockAFBaseRelationship"/>
@@ -97,8 +97,8 @@ describe "A base object with metadata" do
        </rdf:RDF>'
       end
       it "should have the other datastreams too" do
-        @new_object.datastreams.keys.should include "foo"
-        @new_object.foo.content.should be_equivalent_to @release.foo.content
+        expect(@new_object.datastreams.keys).to include "foo"
+        expect(@new_object.foo.content).to be_equivalent_to @release.foo.content
       end
     end
   end
@@ -117,7 +117,7 @@ describe "A base object with metadata" do
 
     it 'should requery Fedora' do
       @object.reload
-      @object.foo.person.should == ['dave']
+      expect(@object.foo.person).to eq(['dave'])
     end
 
     it 'should raise an error if not persisted' do
@@ -141,12 +141,12 @@ describe "Datastreams synched together" do
   it "Should update datastream" do
     @nc = DSTest.new
     @nc.save
-    @nc.test_ds.content.should == 'XXX'
+    expect(@nc.test_ds.content).to eq('XXX')
     ds  = @nc.datastreams['test_ds']
     ds.content = "Foobar"
     @nc.save
-    DSTest.find(@nc.pid).datastreams['test_ds'].content.should == 'Foobar'
-    DSTest.find(@nc.pid).test_ds.content.should == 'Foobar'
+    expect(DSTest.find(@nc.pid).datastreams['test_ds'].content).to eq('Foobar')
+    expect(DSTest.find(@nc.pid).test_ds.content).to eq('Foobar')
   end
 
 end
@@ -213,8 +213,8 @@ describe ActiveFedora::Base do
   
   describe ".initialize" do
     it "calling constructor should create a new Fedora Object" do    
-      @test_object.should have(0).errors
-      @test_object.pid.should_not be_nil
+      expect(@test_object.size).to eq(0)
+      expect(@test_object.pid).not_to be_nil
     end
   end
   
@@ -231,20 +231,20 @@ describe ActiveFedora::Base do
       @test_object2 = ActiveFedora::Base.new({:namespace=>"randomNamespace"})
       # will be nil if match failed, otherwise will equal pid
       @test_object2.save
-      @test_object2.pid.match('randomNamespace:\d+').to_a.first.should == @test_object2.pid
+      expect(@test_object2.pid.match('randomNamespace:\d+').to_a.first).to eq(@test_object2.pid)
     end
 
     it "should set the CMA hasModel relationship in the Rels-EXT" do 
       @test_object2.save
       rexml = REXML::Document.new(@test_object2.datastreams["RELS-EXT"].content)
       # Purpose: confirm that the isMemberOf entries exist and have real RDF in them
-      rexml.root.elements["rdf:Description/ns0:hasModel"].attributes["rdf:resource"].should == 'info:fedora/afmodel:ActiveFedora_Base'
+      expect(rexml.root.elements["rdf:Description/ns0:hasModel"].attributes["rdf:resource"]).to eq('info:fedora/afmodel:ActiveFedora_Base')
     end
     it "should merge attributes from fedora into attributes hash" do
       @test_object2.save
       inner_object = @test_object2.inner_object
-      inner_object.pid.should == @test_object2.pid
-      inner_object.should respond_to(:lastModifiedDate)
+      expect(inner_object.pid).to eq(@test_object2.pid)
+      expect(inner_object).to respond_to(:lastModifiedDate)
     end
 
     it 'when the object is updated, it also updates modification time field in solr' do
@@ -262,25 +262,25 @@ describe ActiveFedora::Base do
 
       new_time_fedora = Time.parse(@test_object2.modified_date).to_i
       new_time_solr = Time.parse(solr_doc.first['system_modified_dtsi']).to_i
-      new_time_solr.should == new_time_fedora
+      expect(new_time_solr).to eq(new_time_fedora)
     end
   end
   
   describe ".datastreams" do
     it "should return a Hash of datastreams from fedora" do
       datastreams = @test_object.datastreams
-      datastreams.should be_a_kind_of(ActiveFedora::DatastreamHash) 
+      expect(datastreams).to be_a_kind_of(ActiveFedora::DatastreamHash) 
       datastreams.each_value do |ds| 
-        ds.should be_a_kind_of(ActiveFedora::Datastream)
+        expect(ds).to be_a_kind_of(ActiveFedora::Datastream)
       end
-      @test_object.datastreams["DC"].should be_an_instance_of(ActiveFedora::Datastream)
-      datastreams["DC"].should_not be_nil
-      datastreams["DC"].should be_an_instance_of(ActiveFedora::Datastream)       
+      expect(@test_object.datastreams["DC"]).to be_an_instance_of(ActiveFedora::Datastream)
+      expect(datastreams["DC"]).not_to be_nil
+      expect(datastreams["DC"]).to be_an_instance_of(ActiveFedora::Datastream)       
     end
     it "should initialize the datastream pointers with @new_object=false" do
       datastreams = @test_object.datastreams
       datastreams.each_value do |ds| 
-        ds.should_not be_new
+        expect(ds).not_to be_new
       end
     end
   end
@@ -295,23 +295,23 @@ describe ActiveFedora::Base do
       @test_object.add_datastream(fds)      
       
       result = @test_object.metadata_streams
-      result.length.should == 2
-      result.should include(mds1)
-      result.should include(mds2)
+      expect(result.length).to eq(2)
+      expect(result).to include(mds1)
+      expect(result).to include(mds2)
     end
   end
   
   describe '.rels_ext' do
     it "should retrieve RelsExtDatastream object via rels_ext method" do
-      @test_object.rels_ext.should be_instance_of(ActiveFedora::RelsExtDatastream)
+      expect(@test_object.rels_ext).to be_instance_of(ActiveFedora::RelsExtDatastream)
     end
     
     it 'should create the RELS-EXT datastream if it doesnt exist' do
       test_object = ActiveFedora::Base.new
       #test_object.datastreams["RELS-EXT"].should == nil
       test_object.rels_ext
-      test_object.datastreams["RELS-EXT"].should_not == nil
-      test_object.datastreams["RELS-EXT"].class.should == ActiveFedora::RelsExtDatastream
+      expect(test_object.datastreams["RELS-EXT"]).not_to eq(nil)
+      expect(test_object.datastreams["RELS-EXT"].class).to eq(ActiveFedora::RelsExtDatastream)
     end
   end
 
@@ -323,9 +323,9 @@ describe ActiveFedora::Base do
       @test_object.save
       rexml = REXML::Document.new(@test_object.datastreams["RELS-EXT"].content)
       # Purpose: confirm that the isMemberOf entries exist and have real RDF in them
-      rexml.root.attributes["xmlns:ns1"].should == 'info:fedora/fedora-system:def/relations-external#'
-      rexml.root.elements["rdf:Description/ns1:isMemberOf[@rdf:resource='info:fedora/demo:5']"].should_not be_nil
-      rexml.root.elements["rdf:Description/ns1:isMemberOf[@rdf:resource='info:fedora/demo:10']"].should_not be_nil
+      expect(rexml.root.attributes["xmlns:ns1"]).to eq('info:fedora/fedora-system:def/relations-external#')
+      expect(rexml.root.elements["rdf:Description/ns1:isMemberOf[@rdf:resource='info:fedora/demo:5']"]).not_to be_nil
+      expect(rexml.root.elements["rdf:Description/ns1:isMemberOf[@rdf:resource='info:fedora/demo:10']"]).not_to be_nil
     end
   end
 
@@ -337,25 +337,25 @@ describe ActiveFedora::Base do
      @test_object.save
      test_obj = ActiveFedora::Base.find(@test_object.pid)
      #check case where nothing passed in does not have correct mime type
-     test_obj.datastreams["DS1"].mimeType.should == "application/octet-stream"
+     expect(test_obj.datastreams["DS1"].mimeType).to eq("application/octet-stream")
      @test_object2 = ActiveFedora::Base.new
      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
      @test_object2.add_file_datastream(f,{:mimeType=>"image/jpeg"})
      @test_object2.save
      test_obj = ActiveFedora::Base.find(@test_object2.pid)
-     test_obj.datastreams["DS1"].mimeType.should == "image/jpeg"
+     expect(test_obj.datastreams["DS1"].mimeType).to eq("image/jpeg")
      @test_object3 = ActiveFedora::Base.new
      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
      @test_object3.add_file_datastream(f,{:mime_type=>"image/jpeg"})
      @test_object3.save
      test_obj = ActiveFedora::Base.find(@test_object3.pid)
-     test_obj.datastreams["DS1"].mimeType.should == "image/jpeg"
+     expect(test_obj.datastreams["DS1"].mimeType).to eq("image/jpeg")
      @test_object4 = ActiveFedora::Base.new
      f = File.new(File.join( File.dirname(__FILE__), "../fixtures/dino_jpg_no_file_ext" ))
      @test_object4.add_file_datastream(f,{:content_type=>"image/jpeg"})
      @test_object4.save
      test_obj = ActiveFedora::Base.find(@test_object4.pid)
-     test_obj.datastreams["DS1"].mimeType.should == "image/jpeg"
+     expect(test_obj.datastreams["DS1"].mimeType).to eq("image/jpeg")
    end
   end
   
@@ -363,16 +363,16 @@ describe ActiveFedora::Base do
   
     it "should be able to add datastreams" do
       ds = ActiveFedora::Datastream.new(@test_object.inner_object, 'DS1')
-      @test_object.add_datastream(ds).should be_true
+      expect(@test_object.add_datastream(ds)).to be_truthy
     end
       
     it "adding and saving should add the datastream to the datastreams array" do
       ds = ActiveFedora::Datastream.new(@test_object.inner_object, 'DS1') 
       ds.content = fixture('dino.jpg').read
-      @test_object.datastreams.should_not have_key("DS1")
+      expect(@test_object.datastreams).not_to have_key("DS1")
       @test_object.add_datastream(ds)
       ds.save
-      @test_object.datastreams.should have_key("DS1")
+      expect(@test_object.datastreams).to have_key("DS1")
     end
     
   end
@@ -382,18 +382,18 @@ describe ActiveFedora::Base do
     ds.content = "foo"
     new_ds = ds.save
     @test_object.add_datastream(new_ds)
-    @test_object.class.find(@test_object.pid).datastreams["DS1"].content.should == new_ds.content
+    expect(@test_object.class.find(@test_object.pid).datastreams["DS1"].content).to eq(new_ds.content)
   end
   
   describe ".create_date" do 
     it "should return W3C date" do 
-      @test_object.create_date.should_not be_nil
+      expect(@test_object.create_date).not_to be_nil
     end
   end
   
   describe ".modified_date" do 
     it "should return nil before saving and a W3C date after saving" do       
-      @test_object.modified_date.should_not be_nil
+      expect(@test_object.modified_date).not_to be_nil
     end  
   end
   
@@ -401,10 +401,10 @@ describe ActiveFedora::Base do
     
     it "should delete the object from Fedora and Solr" do
       @test_object.save
-      ActiveFedora::Base.find_with_conditions(:id=>@test_object.pid).first["id"].should == @test_object.pid
+      expect(ActiveFedora::Base.find_with_conditions(:id=>@test_object.pid).first["id"]).to eq(@test_object.pid)
       pid = @test_object.pid # store so we can access it after deletion
       @test_object.delete
-      ActiveFedora::Base.find_with_conditions(:id=>pid).should be_empty
+      expect(ActiveFedora::Base.find_with_conditions(:id=>pid)).to be_empty
     end
   end
 
@@ -421,11 +421,11 @@ describe ActiveFedora::Base do
         puts "#{e.message}\n#{e.backtrace}"
         raise e
       end
-      @test_object.object_relations[:has_part].should include @test_object2.internal_uri
+      expect(@test_object.object_relations[:has_part]).to include @test_object2.internal_uri
       @test_object.remove_relationship(:has_part,@test_object2)
       @test_object.save
       @test_object = ActiveFedora::Base.find(@pid)
-      @test_object.object_relations[:has_part].should be_empty
+      expect(@test_object.object_relations[:has_part]).to be_empty
     end
   end
 

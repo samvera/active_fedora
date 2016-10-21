@@ -10,17 +10,17 @@ describe RSpec::Matchers, "belong_to_associated_active_fedora_object_matcher" do
   let(:association) { :association }
 
   it 'should match when association is properly stored in fedora' do
-    subject.class.should_receive(:find).with(pid).and_return(subject)
-    subject.should_receive(association).and_return(object1)
-    subject.should belong_to_associated_active_fedora_object(association).with_object(object1)
+    expect(subject.class).to receive(:find).with(pid).and_return(subject)
+    expect(subject).to receive(association).and_return(object1)
+    expect(subject).to belong_to_associated_active_fedora_object(association).with_object(object1)
   end
 
   it 'should not match when association is different' do
-    subject.class.should_receive(:find).with(pid).and_return(subject)
-    subject.should_receive(association).and_return(object1)
-    lambda {
-      subject.should belong_to_associated_active_fedora_object(association).with_object(object2)
-    }.should (
+    expect(subject.class).to receive(:find).with(pid).and_return(subject)
+    expect(subject).to receive(association).and_return(object1)
+    expect {
+      expect(subject).to belong_to_associated_active_fedora_object(association).with_object(object2)
+    }.to (
       raise_error(
         RSpec::Expectations::ExpectationNotMetError,
         /expected #{subject.class} PID=#{pid} association: #{association.inspect}/
@@ -29,9 +29,9 @@ describe RSpec::Matchers, "belong_to_associated_active_fedora_object_matcher" do
   end
 
   it 'should require :with_object option' do
-    lambda {
-      subject.should belong_to_associated_active_fedora_object(association)
-    }.should(
+    expect {
+      expect(subject).to belong_to_associated_active_fedora_object(association)
+    }.to(
       raise_error(
         ArgumentError,
         "subject.should belong_to_associated_active_fedora_object(<association_name>).with_object(<object>)"

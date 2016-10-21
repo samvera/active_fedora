@@ -13,17 +13,17 @@ describe ActiveFedora::Auditable do
     @test_object.delete
   end
   it "should have the correct number of audit records" do
-    @test_object.audit_trail.records.length.should == 1
+    expect(@test_object.audit_trail.records.length).to eq(1)
   end
   it "should return all the data from each audit record" do
     record = @test_object.audit_trail.records.last
-    record.id.should == "AUDREC1"
-    record.process_type.should == "Fedora API-M"
-    record.action.should == "addDatastream"
-    record.component_id.should == "RELS-EXT"
-    record.responsibility.should == "fedoraAdmin"
+    expect(record.id).to eq("AUDREC1")
+    expect(record.process_type).to eq("Fedora API-M")
+    expect(record.action).to eq("addDatastream")
+    expect(record.component_id).to eq("RELS-EXT")
+    expect(record.responsibility).to eq("fedoraAdmin")
     expect(DateTime.parse(record.date)).to eq DateTime.parse(@test_object.modified_date)
-    record.justification.should == ""
+    expect(record.justification).to eq("")
   end
   
 end

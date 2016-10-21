@@ -23,6 +23,6 @@ describe "fedora_solr_sync_issues" do
   it "should not go into an infinite loop" do
     subject.inner_object.delete
     parent.reload
-    parent.things.should == []
+    expect(parent.things).to eq([])
   end
 end

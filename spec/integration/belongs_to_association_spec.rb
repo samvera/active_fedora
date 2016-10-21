@@ -25,7 +25,7 @@ describe ActiveFedora::Base do
   describe "setting the id property" do
     it "should store it" do
       book.library_id = library.id
-      book.library_id.should == library.id
+      expect(book.library_id).to eq(library.id)
     end
 
     describe "reassigning the parent_id" do
@@ -43,19 +43,19 @@ describe ActiveFedora::Base do
 
     it "should be settable via []=" do
       book[:library_id] = library.id
-      book.library_id.should == library.id
+      expect(book.library_id).to eq(library.id)
     end
 
     it "safely handles invalid data" do
       book[:library_id] = 'bad:identifier'
-      book.library.should be_nil
+      expect(book.library).to be_nil
     end
   end
 
   describe "getting the id property" do
     it "should be accessable via []" do
       book[:library_id] = library.id
-      book[:library_id].should == library.id
+      expect(book[:library_id]).to eq(library.id)
     end
   end
 
@@ -135,40 +135,40 @@ describe ActiveFedora::Base do
 
       it "casted association methods should work and return the most complex class" do
 
-        @complex_object.simple_collection.should be_instance_of SimpleCollection
-        @complex_object.complex_collection.should be_nil
+        expect(@complex_object.simple_collection).to be_instance_of SimpleCollection
+        expect(@complex_object.complex_collection).to be_nil
 
-        @complex_object_second.simple_collection.should be_instance_of ComplexCollection
-        @complex_object_second.complex_collection.should be_instance_of ComplexCollection
+        expect(@complex_object_second.simple_collection).to be_instance_of ComplexCollection
+        expect(@complex_object_second.complex_collection).to be_instance_of ComplexCollection
 
-        @simple_object.simple_collection.should be_instance_of SimpleCollection
-        @simple_object.complex_collection.should be_nil
+        expect(@simple_object.simple_collection).to be_instance_of SimpleCollection
+        expect(@simple_object.complex_collection).to be_nil
 
-        @simple_object_second.simple_collection.should be_instance_of SimpleCollection
-        @simple_object_second.complex_collection.should be_nil
+        expect(@simple_object_second.simple_collection).to be_instance_of SimpleCollection
+        expect(@simple_object_second.complex_collection).to be_nil
 
-        @simple_object_third.simple_collection.should be_instance_of ComplexCollection
-        @simple_object_third.complex_collection.should be_instance_of ComplexCollection
+        expect(@simple_object_third.simple_collection).to be_instance_of ComplexCollection
+        expect(@simple_object_third.complex_collection).to be_instance_of ComplexCollection
 
-        @simple_collection.objects.size.should == 3
-        @simple_collection.objects[0].should be_instance_of SimpleObject
-        @simple_collection.objects[1].should be_instance_of SimpleObject
-        @simple_collection.objects[2].should be_instance_of ComplexObject
+        expect(@simple_collection.objects.size).to eq(3)
+        expect(@simple_collection.objects[0]).to be_instance_of SimpleObject
+        expect(@simple_collection.objects[1]).to be_instance_of SimpleObject
+        expect(@simple_collection.objects[2]).to be_instance_of ComplexObject
 
-        @complex_collection.objects.size.should == 2
-        @complex_collection.objects[0].should be_instance_of SimpleObject
-        @complex_collection.objects[1].should be_instance_of ComplexObject
+        expect(@complex_collection.objects.size).to eq(2)
+        expect(@complex_collection.objects[0]).to be_instance_of SimpleObject
+        expect(@complex_collection.objects[1]).to be_instance_of ComplexObject
 
       end
 
       it "specified ending relationships should ignore classes not specified" do
-        @simple_collection.complex_objects.size.should == 1
-        @simple_collection.complex_objects[0].should be_instance_of ComplexObject
-        @simple_collection.complex_objects[1].should be_nil
+        expect(@simple_collection.complex_objects.size).to eq(1)
+        expect(@simple_collection.complex_objects[0]).to be_instance_of ComplexObject
+        expect(@simple_collection.complex_objects[1]).to be_nil
 
-        @complex_collection.complex_objects.size.should == 1
-        @complex_collection.complex_objects[0].should be_instance_of ComplexObject
-        @complex_collection.complex_objects[1].should be_nil
+        expect(@complex_collection.complex_objects.size).to eq(1)
+        expect(@complex_collection.complex_objects[0]).to be_instance_of ComplexObject
+        expect(@complex_collection.complex_objects[1]).to be_nil
       end
 
       after do

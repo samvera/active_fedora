@@ -24,17 +24,17 @@ describe ActiveFedora do
       SOLR_DOCUMENT_ID = "id"
     end
     it "should be used by ActiveFedora::Base.to_solr" do
-      @test_object.stub(pid: 'changeme:123')
+      allow(@test_object).to receive_messages(pid: 'changeme:123')
       SOLR_DOCUMENT_ID = "MY_SAMPLE_ID"
-      @test_object.to_solr[SOLR_DOCUMENT_ID.to_sym].should == 'changeme:123'
-      @test_object.to_solr[:id].should be_nil
+      expect(@test_object.to_solr[SOLR_DOCUMENT_ID.to_sym]).to eq('changeme:123')
+      expect(@test_object.to_solr[:id]).to be_nil
     end
 
     it "should be used by ActiveFedora::Base#find_with_conditions" do
       mock_response = double("SolrResponse")
-      ActiveFedora::SolrService.should_receive(:query).with("_query_:\"{!raw f=#{ActiveFedora::SolrService.solr_name("has_model", :symbol)}}info:fedora/afmodel:SolrSpecModel_Basic\" AND " + SOLR_DOCUMENT_ID + ':changeme\\:30', {:sort => ["#{ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)} asc"]}).and_return(mock_response)
+      expect(ActiveFedora::SolrService).to receive(:query).with("_query_:\"{!raw f=#{ActiveFedora::SolrService.solr_name("has_model", :symbol)}}info:fedora/afmodel:SolrSpecModel_Basic\" AND " + SOLR_DOCUMENT_ID + ':changeme\\:30', {:sort => ["#{ActiveFedora::SolrService.solr_name("system_create", :stored_sortable, type: :date)} asc"]}).and_return(mock_response)
   
-      SolrSpecModel::Basic.find_with_conditions(:id=>"changeme:30").should equal(mock_response)
+      expect(SolrSpecModel::Basic.find_with_conditions(:id=>"changeme:30")).to equal(mock_response)
     end
   end
   
@@ -50,14 +50,14 @@ describe ActiveFedora do
     it "should prevent Base.save from calling update_index if false" do
       dirty_ds = ActiveFedora::SimpleDatastream.new(@test_object.inner_object, 'ds1')
       @test_object.datastreams['ds1'] = dirty_ds
-      @test_object.stub(:datastreams).and_return({:ds1 => dirty_ds})
-      @test_object.should_receive(:update_index).never
-      @test_object.should_receive(:refresh)
+      allow(@test_object).to receive(:datastreams).and_return({:ds1 => dirty_ds})
+      expect(@test_object).to receive(:update_index).never
+      expect(@test_object).to receive(:refresh)
       @test_object.save
     end
     it "should prevent Base.delete from deleting the corresponding Solr document if false" do
-      ActiveFedora::SolrService.instance.conn.should_receive(:delete).with(@test_object.pid).never 
-      @test_object.inner_object.should_receive(:delete)
+      expect(ActiveFedora::SolrService.instance.conn).to receive(:delete).with(@test_object.pid).never 
+      expect(@test_object.inner_object).to receive(:delete)
       @test_object.delete
     end
   end

@@ -26,28 +26,28 @@ describe ActiveFedora::OmDatastream do
     end
 
     it "should report being inline" do
-      @obj.descMetadata.should be_inline
+      expect(@obj.descMetadata).to be_inline
     end
 
     it "should not be changed when no fields have been set" do
-      @obj.descMetadata.should_not be_changed
+      expect(@obj.descMetadata).not_to be_changed
     end
     it "should be changed when a field has been set" do
       @obj.descMetadata.title = 'Foobar'
-      @obj.descMetadata.should be_changed
+      expect(@obj.descMetadata).to be_changed
     end
     describe "#changed?" do
       it "should not be changed if the new xml matches the old xml" do
         @obj.descMetadata.content = @obj.descMetadata.content
-        @obj.descMetadata.should_not be_changed
+        expect(@obj.descMetadata).not_to be_changed
       end
 
       it "should not be changed if there are minor differences in whitespace" do
         @obj.descMetadata.content = "<a><b>1</b></a>"
         @obj.save
-        @obj.descMetadata.should_not be_changed
+        expect(@obj.descMetadata).not_to be_changed
         @obj.descMetadata.content = "<a>\n<b>1</b>\n</a>"
-        @obj.descMetadata.should_not be_changed
+        expect(@obj.descMetadata).not_to be_changed
       end
     end
   end
@@ -75,21 +75,21 @@ describe ActiveFedora::OmDatastream do
     end
 
     it "should not report being inline" do
-      @obj.descMetadata.should be_managed
+      expect(@obj.descMetadata).to be_managed
     end
 
     describe "#changed?" do
       it "should not be changed if the new xml matches the old xml" do
         @obj.descMetadata.content = @obj.descMetadata.content
-        @obj.descMetadata.should_not be_changed
+        expect(@obj.descMetadata).not_to be_changed
       end
 
       it "should be changed if there are minor differences in whitespace" do
         @obj.descMetadata.content = "<a><b>1</b></a>"
         @obj.save
-        @obj.descMetadata.should_not be_changed
+        expect(@obj.descMetadata).not_to be_changed
         @obj.descMetadata.content = "<a>\n<b>1</b>\n</a>"
-        @obj.descMetadata.should be_changed
+        expect(@obj.descMetadata).to be_changed
       end
     end
 
@@ -109,31 +109,31 @@ describe ActiveFedora::OmDatastream do
       end
 
       it "should return the same values whether getting from solr or Fedora" do
-        @solr_obj.datastreams["descMetadata"].term_values(:name,:role,:text).should == ["Creator","Contributor","Funder","Host"]
-        @solr_obj.datastreams["descMetadata"].term_values({:name=>0},:role,:text).should == ["Creator"]
-        @solr_obj.datastreams["descMetadata"].term_values({:name=>1},:role,:text).should == ["Contributor"]
-        @solr_obj.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text).should == ["Creator"]
-        @solr_obj.datastreams["descMetadata"].term_values({:name=>1},{:role=>0},:text).should == ["Contributor"]
-        @solr_obj.datastreams["descMetadata"].term_values({:name=>1},{:role=>1},:text).should == []
+        expect(@solr_obj.datastreams["descMetadata"].term_values(:name,:role,:text)).to eq(["Creator","Contributor","Funder","Host"])
+        expect(@solr_obj.datastreams["descMetadata"].term_values({:name=>0},:role,:text)).to eq(["Creator"])
+        expect(@solr_obj.datastreams["descMetadata"].term_values({:name=>1},:role,:text)).to eq(["Contributor"])
+        expect(@solr_obj.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text)).to eq(["Creator"])
+        expect(@solr_obj.datastreams["descMetadata"].term_values({:name=>1},{:role=>0},:text)).to eq(["Contributor"])
+        expect(@solr_obj.datastreams["descMetadata"].term_values({:name=>1},{:role=>1},:text)).to eq([])
         ar = @solr_obj.datastreams["descMetadata"].term_values(:name,{:role=>0},:text)
-        ar.length.should == 4
-        ar.include?("Creator").should == true
-        ar.include?("Contributor").should == true
-        ar.include?("Funder").should == true
-        ar.include?("Host").should == true
+        expect(ar.length).to eq(4)
+        expect(ar.include?("Creator")).to eq(true)
+        expect(ar.include?("Contributor")).to eq(true)
+        expect(ar.include?("Funder")).to eq(true)
+        expect(ar.include?("Host")).to eq(true)
 
-        @obj.datastreams["descMetadata"].term_values(:name,:role,:text).should == ["Creator","Contributor","Funder","Host"]
-        @obj.datastreams["descMetadata"].term_values({:name=>0},:role,:text).should == ["Creator"]
-        @obj.datastreams["descMetadata"].term_values({:name=>1},:role,:text).should == ["Contributor"]
-        @obj.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text).should == ["Creator"]
-        @obj.datastreams["descMetadata"].term_values({:name=>1},{:role=>0},:text).should == ["Contributor"]
-        @obj.datastreams["descMetadata"].term_values({:name=>1},{:role=>1},:text).should == []
+        expect(@obj.datastreams["descMetadata"].term_values(:name,:role,:text)).to eq(["Creator","Contributor","Funder","Host"])
+        expect(@obj.datastreams["descMetadata"].term_values({:name=>0},:role,:text)).to eq(["Creator"])
+        expect(@obj.datastreams["descMetadata"].term_values({:name=>1},:role,:text)).to eq(["Contributor"])
+        expect(@obj.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text)).to eq(["Creator"])
+        expect(@obj.datastreams["descMetadata"].term_values({:name=>1},{:role=>0},:text)).to eq(["Contributor"])
+        expect(@obj.datastreams["descMetadata"].term_values({:name=>1},{:role=>1},:text)).to eq([])
         ar = @obj.datastreams["descMetadata"].term_values(:name,{:role=>0},:text)
-        ar.length.should == 4
-        ar.include?("Creator").should == true
-        ar.include?("Contributor").should == true
-        ar.include?("Funder").should == true
-        ar.include?("Host").should == true
+        expect(ar.length).to eq(4)
+        expect(ar.include?("Creator")).to eq(true)
+        expect(ar.include?("Contributor")).to eq(true)
+        expect(ar.include?("Funder")).to eq(true)
+        expect(ar.include?("Host")).to eq(true)
       end
     end
     
@@ -146,10 +146,10 @@ describe ActiveFedora::OmDatastream do
 
       it "should not be dirty after .update_values is saved" do
         @obj.datastreams["descMetadata"].update_values([{:name=>0},{:role=>0},:text] =>"Funder")
-        @obj.datastreams["descMetadata"].should be_changed
+        expect(@obj.datastreams["descMetadata"]).to be_changed
         @obj.save
-        @obj.datastreams["descMetadata"].should_not be_changed
-        @obj.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text).should == ["Funder"]
+        expect(@obj.datastreams["descMetadata"]).not_to be_changed
+        expect(@obj.datastreams["descMetadata"].term_values({:name=>0},{:role=>0},:text)).to eq(["Funder"])
       end    
     end
 
@@ -161,7 +161,7 @@ describe ActiveFedora::OmDatastream do
         @obj.reload
       end
       it "should solrize terms with :type=>'date' to *_dt solr terms" do
-        @obj.to_solr[ActiveFedora::SolrService.solr_name('desc_metadata__journal_issue_publication_date', type: :date)].should == ['2012-11-02T00:00:00Z']
+        expect(@obj.to_solr[ActiveFedora::SolrService.solr_name('desc_metadata__journal_issue_publication_date', type: :date)]).to eq(['2012-11-02T00:00:00Z'])
       end
     end
   end

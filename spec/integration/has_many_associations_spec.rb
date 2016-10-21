@@ -21,7 +21,7 @@ describe "Collection members" do
         expect(library.books).not_to be_loaded
         expect(library.books.size).to eq(0)
         expect(library.books).to be_loaded
-        expect(library.books.any?).to be_false
+        expect(library.books.any?).to be_falsey
       end
     end
   end
@@ -41,9 +41,9 @@ describe "Collection members" do
     end
 
     it "should cache the results" do
-      expect(library.books.loaded?).to be_false
+      expect(library.books.loaded?).to be_falsey
       expect(library.books).to eq [book]
-      expect(library.books.loaded?).to be_true
+      expect(library.books.loaded?).to be_truthy
     end
     it "should load from solr" do
       expect(library.books.load_from_solr.map {|r| r["id"]}).to eq([book.pid])
@@ -52,9 +52,9 @@ describe "Collection members" do
       expect(library.books.load_from_solr(rows: 0).size).to eq(0)
     end
     it "should respond to #any?" do
-      expect(library.books.any?).to be_true
-      expect(library.books.any? {|book| book.library == nil}).to be_false
-      expect(library.books.any? {|book| book.library == library}).to be_true
+      expect(library.books.any?).to be_truthy
+      expect(library.books.any? {|book| book.library == nil}).to be_falsey
+      expect(library.books.any? {|book| book.library == library}).to be_truthy
     end
   end
 end
@@ -84,7 +84,7 @@ describe "After save callbacks" do
   let(:book) { Book.new(library: library) }
   it "should have the relationship available in after_save" do
     book.save!
-    book.library_books.should include book
+    expect(book.library_books).to include book
   end
 end
 
@@ -115,8 +115,8 @@ describe "When two or more relationships share the same property" do
 
   it "Should only return relationships of the correct class" do
     @book.reload
-    @book.people.should == [@person1, @person2]
-    @book.collections.should == []
+    expect(@book.people).to eq([@person1, @person2])
+    expect(@book.collections).to eq([])
   end
 end
 
@@ -150,7 +150,7 @@ describe "When relationship is restricted to AF::Base" do
     end
     it "Should not restrict relationships " do
       @book.reload
-      @book.attachments.should == [@image, @pdf]
+      expect(@book.attachments).to eq([@image, @pdf])
     end
   end
 
@@ -168,7 +168,7 @@ describe "When relationship is restricted to AF::Base" do
     it "Should not restrict relationships " do
       email.attachment_ids = [image.id, pdf.id]
       email.reload
-      email.attachments.should == [image, pdf]
+      expect(email.attachments).to eq([image, pdf])
     end
   end
 end
@@ -194,12 +194,12 @@ describe "Deleting a dependent relationship" do
   it "should remove relationships" do
     component.item = item
     component.save!
-    item.components.should == [component]
+    expect(item.components).to eq([component])
     item.components.delete(component)
     item.reload
     component.reload
-    component.relationships(:is_part_of).should == []
-    item.components.should == []
+    expect(component.relationships(:is_part_of)).to eq([])
+    expect(item.components).to eq([])
   end
 
   it "should remove the relationships that point at that object" do
@@ -207,7 +207,7 @@ describe "Deleting a dependent relationship" do
     component.save!
     item.delete
     component.reload
-    component.relationships(:is_part_of).should == []
+    expect(component.relationships(:is_part_of)).to eq([])
   end
 
   it "should only try to delete objects that exist in the datastore (not cached objects)" do
@@ -254,7 +254,7 @@ describe "Autosave" do
 
     it "should save dependent records" do
       component.reload
-      component.item.title.should == 'my title'
+      expect(component.item.title).to eq('my title')
     end
   end
   describe "From the has_many side" do
@@ -262,7 +262,7 @@ describe "Autosave" do
 
     it "should save dependent records" do
       item.reload
-      item.components.first.description.should == 'my description'
+      expect(item.components.first.description).to eq('my description')
     end
   end
 

@@ -12,15 +12,15 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should have a ds_specs entry" do
-      FooHistory.ds_specs.should have_key('dsid')
+      expect(FooHistory.ds_specs).to have_key('dsid')
     end
 
     it "should have reasonable defaults" do
-      FooHistory.ds_specs['dsid'].should include(:autocreate => false)
+      expect(FooHistory.ds_specs['dsid']).to include(:autocreate => false)
     end
 
     it "should let you override defaults" do
-      FooHistory.ds_specs['complex_ds'].should include(:versionable => true, :autocreate => true, :type => 'Z', :label => 'My Label', :control_group => 'Z')
+      expect(FooHistory.ds_specs['complex_ds']).to include(:versionable => true, :autocreate => true, :type => 'Z', :label => 'My Label', :control_group => 'Z')
     end
 
     it "should raise an error if you don't give a type" do
@@ -43,8 +43,8 @@ describe ActiveFedora::Datastreams do
     end
 
     it "should have reasonable defaults" do
-      FooHistory.ds_specs['dsid'].should include(:type => ActiveFedora::Datastream, :label => 'File Datastream', :control_group => 'M')
-      FooHistory.ds_specs['another'].should include(:type => ActiveFedora::Datastream, :label => 'File Datastream', :control_group => 'M')
+      expect(FooHistory.ds_specs['dsid']).to include(:type => ActiveFedora::Datastream, :label => 'File Datastream', :control_group => 'M')
+      expect(FooHistory.ds_specs['another']).to include(:type => ActiveFedora::Datastream, :label => 'File Datastream', :control_group => 'M')
     end
   end
 
@@ -53,9 +53,9 @@ describe ActiveFedora::Datastreams do
       m1 = double()
       m2 = double()
 
-      m1.should_receive(:serialize!)
-      m2.should_receive(:serialize!)
-       subject.stub(:datastreams => { :m1 => m1, :m2 => m2})
+      expect(m1).to receive(:serialize!)
+      expect(m2).to receive(:serialize!)
+       allow(subject).to receive_messages(:datastreams => { :m1 => m1, :m2 => m2})
        subject.serialize_datastreams
     end
   end
@@ -65,62 +65,62 @@ describe ActiveFedora::Datastreams do
       
       mock_specs = {'e' => { :disseminator => 'xyz' }}
       mock_ds = double(:controlGroup => 'E')
-      ActiveFedora::Base.stub(:ds_specs => mock_specs)
-      ActiveFedora.stub(:config_for_environment => { :url => 'http://localhost'})
-      subject.stub(:pid => 'test:1', :datastreams => {'e' => mock_ds})
-      mock_ds.should_receive(:dsLocation=).with("http://localhost/objects/test:1/methods/xyz")
+      allow(ActiveFedora::Base).to receive_messages(:ds_specs => mock_specs)
+      allow(ActiveFedora).to receive_messages(:config_for_environment => { :url => 'http://localhost'})
+      allow(subject).to receive_messages(:pid => 'test:1', :datastreams => {'e' => mock_ds})
+      expect(mock_ds).to receive(:dsLocation=).with("http://localhost/objects/test:1/methods/xyz")
       subject.add_disseminator_location_to_datastreams
     end
   end
 
   describe ".name_for_dsid" do
     it "should use the name" do
-      ActiveFedora::Base.send(:name_for_dsid, 'abc').should == 'abc'
+      expect(ActiveFedora::Base.send(:name_for_dsid, 'abc')).to eq('abc')
     end
 
     it "should use the name" do
-      ActiveFedora::Base.send(:name_for_dsid, 'ARCHIVAL_XML').should == 'ARCHIVAL_XML'
+      expect(ActiveFedora::Base.send(:name_for_dsid, 'ARCHIVAL_XML')).to eq('ARCHIVAL_XML')
     end
 
     it "should use the name" do
-      ActiveFedora::Base.send(:name_for_dsid, 'descMetadata').should == 'descMetadata'
+      expect(ActiveFedora::Base.send(:name_for_dsid, 'descMetadata')).to eq('descMetadata')
     end
 
     it "should hash-erize underscores" do
-      ActiveFedora::Base.send(:name_for_dsid, 'a-b').should == 'a_b'
+      expect(ActiveFedora::Base.send(:name_for_dsid, 'a-b')).to eq('a_b')
     end
   end
  
   describe "#datastreams" do
     it "should return the datastream hash proxy" do
-      subject.stub(:load_datastreams)
-      subject.datastreams.should be_a_kind_of(ActiveFedora::DatastreamHash)
+      allow(subject).to receive(:load_datastreams)
+      expect(subject.datastreams).to be_a_kind_of(ActiveFedora::DatastreamHash)
     end
     
     it "should round-trip to/from YAML" do
-      YAML.load(subject.datastreams.to_yaml).inspect.should == subject.datastreams.inspect
+      expect(YAML.load(subject.datastreams.to_yaml).inspect).to eq(subject.datastreams.inspect)
     end
   end
 
   describe "#configure_datastream" do
     it "should look up the ds_spec" do
       mock_dsspec = { :type => nil }
-      subject.stub(:ds_specs => {'abc' => mock_dsspec})
+      allow(subject).to receive_messages(:ds_specs => {'abc' => mock_dsspec})
       subject.configure_datastream(double(:dsid => 'abc'))
     end
 
     it "should be ok if there is no ds spec" do
       mock_dsspec = double()
-      subject.stub(:ds_specs => {})
+      allow(subject).to receive_messages(:ds_specs => {})
       subject.configure_datastream(double(:dsid => 'abc'))
     end
 
     it "should configure RelsExtDatastream" do
       mock_dsspec = { :type => ActiveFedora::RelsExtDatastream }
-      subject.stub(:ds_specs => {'abc' => mock_dsspec})
+      allow(subject).to receive_messages(:ds_specs => {'abc' => mock_dsspec})
 
       ds = double(:dsid => 'abc')
-      ds.should_receive(:model=).with(subject)
+      expect(ds).to receive(:model=).with(subject)
 
       subject.configure_datastream(ds)
     end
@@ -129,7 +129,7 @@ describe ActiveFedora::Datastreams do
       ds = double(:dsid => 'abc')
       @count = 0
       mock_dsspec = { :block => lambda { |x| @count += 1 } }
-      subject.stub(:ds_specs => {'abc' => mock_dsspec})
+      allow(subject).to receive_messages(:ds_specs => {'abc' => mock_dsspec})
 
 
       expect {
@@ -140,7 +140,7 @@ describe ActiveFedora::Datastreams do
 
   describe "#datastream_from_spec" do
     it "should fetch the rubydora datastream" do
-      subject.inner_object.should_receive(:datastream_object_for).with('dsid', {}, {})
+      expect(subject.inner_object).to receive(:datastream_object_for).with('dsid', {}, {})
       subject.datastream_from_spec({}, 'dsid')
     end
   end
@@ -149,12 +149,12 @@ describe ActiveFedora::Datastreams do
     it "should add the datastream to the object" do
       ds = double(:dsid => 'Abc')
       subject.add_datastream(ds)
-      subject.datastreams['Abc'].should == ds
+      expect(subject.datastreams['Abc']).to eq(ds)
     end
 
     it "should mint a dsid" do
       ds = ActiveFedora::Datastream.new(subject.inner_object)
-      subject.add_datastream(ds).should == 'DS1'
+      expect(subject.add_datastream(ds)).to eq('DS1')
     end
   end
 
@@ -165,24 +165,24 @@ describe ActiveFedora::Datastreams do
       ds3 = double(:metadata? => true)
       relsextds = ActiveFedora::RelsExtDatastream.new
       file_ds = double(:metadata? => false)
-      subject.stub(:datastreams => {:a => ds1, :b => ds2, :c => ds3, :d => relsextds, :e => file_ds})
-      subject.metadata_streams.should include(ds1, ds2, ds3)
-      subject.metadata_streams.should_not include(relsextds)
-      subject.metadata_streams.should_not include(file_ds)
+      allow(subject).to receive_messages(:datastreams => {:a => ds1, :b => ds2, :c => ds3, :d => relsextds, :e => file_ds})
+      expect(subject.metadata_streams).to include(ds1, ds2, ds3)
+      expect(subject.metadata_streams).not_to include(relsextds)
+      expect(subject.metadata_streams).not_to include(file_ds)
     end
   end
 
   describe "#relsext" do
     it "should be the RELS-EXT datastream" do
       m = double
-      subject.stub(:datastreams => { 'RELS-EXT' => m})
-      subject.rels_ext.should == m
+      allow(subject).to receive_messages(:datastreams => { 'RELS-EXT' => m})
+      expect(subject.rels_ext).to eq(m)
     end
 
     it "should make one up otherwise" do
-      subject.stub(:datastreams => {})
+      allow(subject).to receive_messages(:datastreams => {})
 
-      subject.rels_ext.should be_a_kind_of(ActiveFedora::RelsExtDatastream)
+      expect(subject.rels_ext).to be_a_kind_of(ActiveFedora::RelsExtDatastream)
     end
   end
 
@@ -193,7 +193,7 @@ describe ActiveFedora::Datastreams do
   describe "#create_datastream" do
     it "should mint a DSID" do
       ds = subject.create_datastream(ActiveFedora::Datastream, nil, {})
-      ds.dsid.should == 'DS1'
+      expect(ds.dsid).to eq('DS1')
     end
 
     it "should raise an argument error if the supplied dsid is nonsense" do
@@ -203,19 +203,19 @@ describe ActiveFedora::Datastreams do
     it "should try to get a mime type from the blob" do
       mock_file = double(:content_type => 'x-application/asdf')
       ds = subject.create_datastream(ActiveFedora::Datastream, nil, {:blob => mock_file})
-      ds.mimeType.should == 'x-application/asdf'
+      expect(ds.mimeType).to eq('x-application/asdf')
     end
 
     it "should provide a default mime type" do
       mock_file = double()
       ds = subject.create_datastream(ActiveFedora::Datastream, nil, {:blob => mock_file})
-      ds.mimeType.should == 'application/octet-stream'
+      expect(ds.mimeType).to eq('application/octet-stream')
     end
 
     it "should use the filename as a default label" do
       mock_file = double(:path => '/asdf/fdsa')
       ds = subject.create_datastream(ActiveFedora::Datastream, nil, {:blob => mock_file})
-      ds.dsLabel.should == 'fdsa'
+      expect(ds.dsLabel).to eq('fdsa')
     end
 
     it "should not set content for controlGroup 'E'" do

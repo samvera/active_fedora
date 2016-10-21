@@ -52,7 +52,7 @@ describe "Loading from solr" do
   end
 
   it "should be able to get indexed properties without loading from fedora" do
-    RdfTest.connection_for_pid('1').should_not_receive(:datastream_dissemination)
+    expect(RdfTest.connection_for_pid('1')).not_to receive(:datastream_dissemination)
     obj = RdfTest.load_instance_from_solr original.pid
     expect(obj.title).to eq "PLAN 9 FROM OUTER SPACE"
     expect(obj.date_uploaded).to eq [Date.parse('1959-01-01')]

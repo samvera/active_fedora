@@ -14,7 +14,7 @@ describe ActiveFedora::Base do
   end
 
   subject { Library.all } 
-  its(:class) {should eq ActiveFedora::Relation }
+  its(:class) {is_expected.to eq ActiveFedora::Relation }
 
   before :all do
     Library.create
@@ -32,7 +32,7 @@ describe ActiveFedora::Base do
       expect(subject).to be_loaded
     end
     it "shouldn't reload" do
-      ActiveFedora::Relation.any_instance.should_not_receive :find_each
+      expect_any_instance_of(ActiveFedora::Relation).not_to receive :find_each
       subject[0]
     end
   end

@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "Objects should be serialized to JSON" do
   it "should have json results" do
-    ActiveFedora::Base.new.to_json.should == "{\"id\":null}"
+    expect(ActiveFedora::Base.new.to_json).to eq("{\"id\":null}")
   end
 
   describe "with a more interesting model" do
@@ -20,7 +20,7 @@ describe "Objects should be serialized to JSON" do
       Object.send(:remove_const, :Foo)
     end
     subject { Foo.new(foo: ["baz"], bar: 'quix') }
-    before { subject.stub(pid: 'test:123') }
+    before { allow(subject).to receive_messages(pid: 'test:123') }
     it "should have to_json" do
       json = JSON.parse(subject.to_json)
       expect(json['id']).to eq "test:123"

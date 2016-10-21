@@ -100,14 +100,14 @@ describe "Nesting attribute behavior of RDFDatastream" do
         subject { ComplexRDFDatastream::PersonalName.new(RDF::Graph.new) }
         it "should accept a hash" do
           subject.elementList_attributes =  [{ topicElement_attributes: {'0' => { elementValue:"Quantum Behavior" }, '1' => { elementValue:"Wave Function" }}}]
-          subject.elementList.first[0].elementValue.should == ["Quantum Behavior"]
-          subject.elementList.first[1].elementValue.should == ["Wave Function"]
+          expect(subject.elementList.first[0].elementValue).to eq(["Quantum Behavior"])
+          expect(subject.elementList.first[1].elementValue).to eq(["Wave Function"])
 
         end
         it "should accept an array" do
           subject.elementList_attributes =  [{ topicElement_attributes: [{ elementValue:"Quantum Behavior" }, { elementValue:"Wave Function" }]}]
-          subject.elementList.first[0].elementValue.should == ["Quantum Behavior"]
-          subject.elementList.first[1].elementValue.should == ["Wave Function"]
+          expect(subject.elementList.first[0].elementValue).to eq(["Quantum Behavior"])
+          expect(subject.elementList.first[1].elementValue).to eq(["Wave Function"])
         end
       end
 
@@ -118,10 +118,10 @@ describe "Nesting attribute behavior of RDFDatastream" do
         end
 
         it 'should have attributes' do
-          subject.topic[0].elementList.first[0].elementValue.should == ["Cosmology"]
-          subject.topic[1].elementList.first[0].elementValue.should == ["Quantum Behavior"]
-          subject.personalName.first.elementList.first.fullNameElement.should == ["Jefferson, Thomas"]
-          subject.personalName.first.elementList.first.dateNameElement.should == ["1743-1826"]
+          expect(subject.topic[0].elementList.first[0].elementValue).to eq(["Cosmology"])
+          expect(subject.topic[1].elementList.first[0].elementValue).to eq(["Quantum Behavior"])
+          expect(subject.personalName.first.elementList.first.fullNameElement).to eq(["Jefferson, Thomas"])
+          expect(subject.personalName.first.elementList.first.dateNameElement).to eq(["1743-1826"])
         end
         
         it 'should build nodes with ids' do
@@ -171,7 +171,7 @@ describe "Nesting attribute behavior of RDFDatastream" do
       it "should update nested objects" do
         subject.parts_attributes= [{id: replace_object_id, label: "Universal Joint"}, {label:"Oil Pump"}, {id: remove_object_id, _destroy: '1', label: "bar1 uno"}]
 
-        subject.parts.map{|p| p.label.first}.should == ['Alternator', 'Universal Joint', 'Transmission', 'Oil Pump']
+        expect(subject.parts.map{|p| p.label.first}).to eq(['Alternator', 'Universal Joint', 'Transmission', 'Oil Pump'])
 
       end
       it "create a new object when the id is provided" do

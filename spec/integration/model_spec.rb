@@ -29,11 +29,11 @@ describe ActiveFedora::Model do
   describe "#all" do
     it "should return an array of instances of the calling Class" do
       result = ModelIntegrationSpec::Basic.all.to_a
-      result.should be_instance_of(Array)
+      expect(result).to be_instance_of(Array)
       # this test is meaningless if the array length is zero
-      result.length.should > 0
+      expect(result.length).to be > 0
       result.each do |obj|
-        obj.class.should == ModelIntegrationSpec::Basic
+        expect(obj.class).to eq(ModelIntegrationSpec::Basic)
       end
     end
   end
@@ -41,31 +41,31 @@ describe ActiveFedora::Model do
   describe '#find' do
     describe "#find with a valid pid without cast" do
       subject { ActiveFedora::Base.find(@test_instance.pid) }
-      it { should be_instance_of ModelIntegrationSpec::Basic}
+      it { is_expected.to be_instance_of ModelIntegrationSpec::Basic}
     end
     describe "#find with a valid pid with cast of false" do
       subject { ActiveFedora::Base.find(@test_instance.pid, cast: false) }
-      it { should be_instance_of ActiveFedora::Base}
+      it { is_expected.to be_instance_of ActiveFedora::Base}
     end
     describe "#find with a valid pid without cast on a model extending Base" do
       subject { ModelIntegrationSpec::Basic.find(@test_instance.pid) }
-      it { should be_instance_of ModelIntegrationSpec::Basic}
+      it { is_expected.to be_instance_of ModelIntegrationSpec::Basic}
     end
   end
 
   describe "#load_instance_from_solr" do
     describe "with a valid pid" do
       subject { ActiveFedora::Base.load_instance_from_solr(@test_instance.pid) }
-      it { should be_instance_of ModelIntegrationSpec::Basic}
+      it { is_expected.to be_instance_of ModelIntegrationSpec::Basic}
     end
     describe "with metadata datastream spec" do
       subject { ActiveFedora::Base.load_instance_from_solr(@test_instance.pid) }
       it "should create an xml datastream" do
-        subject.datastreams['properties'].should be_kind_of ActiveFedora::SimpleDatastream
+        expect(subject.datastreams['properties']).to be_kind_of ActiveFedora::SimpleDatastream
       end
 
       it "should know the datastreams properties" do
-        subject.properties.dsSize.should == 9
+        expect(subject.properties.dsSize).to eq(9)
       end
     end
   end
