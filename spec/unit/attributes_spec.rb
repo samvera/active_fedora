@@ -69,7 +69,7 @@ describe ActiveFedora::Base do
         expect(subject.inspect).to eq "#<BarHistory2 pid: nil, cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil>"
       end
       describe "with a pid" do
-        before { subject.stub(pid: 'test:123') }
+        before { allow(subject).to receive_messages(pid: 'test:123') }
         it "should show a pid" do
           expect(subject.inspect).to eq "#<BarHistory2 pid: \"test:123\", cow: \"\", fubar: [], pig: nil, horse: [], duck: [\"\"], animal_id: nil>"
         end
@@ -108,58 +108,58 @@ describe ActiveFedora::Base do
     end
 
     it "should reveal the unique properties" do
-      BarHistory2.unique?(:horse).should be false
-      BarHistory2.unique?(:pig).should be true
-      BarHistory2.unique?(:cow).should be true
+      expect(BarHistory2.unique?(:horse)).to be false
+      expect(BarHistory2.unique?(:pig)).to be true
+      expect(BarHistory2.unique?(:cow)).to be true
     end
 
     it "should save a delegated property uniquely" do
       subject.fubar = ["Quack"]
-      subject.fubar.should == ["Quack"]
-      subject.withText.get_values(:fubar).first.should == 'Quack'
+      expect(subject.fubar).to eq(["Quack"])
+      expect(subject.withText.get_values(:fubar).first).to eq('Quack')
       subject.cow = "Low"
-      subject.cow.should == "Low"
-      subject.xmlish.term_values(:cow).first.should == 'Low'
+      expect(subject.cow).to eq("Low")
+      expect(subject.xmlish.term_values(:cow).first).to eq('Low')
 
       subject.pig = "Oink"
-      subject.pig.should == "Oink"
+      expect(subject.pig).to eq("Oink")
     end
 
     it "should allow passing parameters to the delegate accessor" do
       subject.fubar = ["one", "two"]
-      subject.fubar(1).should == ['two']
+      expect(subject.fubar(1)).to eq(['two'])
     end
 
     it "should return an array if marked as multiple" do
       subject.horse=["neigh", "whinny"]
-      subject.horse.should == ["neigh", "whinny"]
+      expect(subject.horse).to eq(["neigh", "whinny"])
     end
 
     it "should be able to delegate deeply into the terminology" do
       subject.duck = ["Quack", "Peep"]
-      subject.duck.should == ["Quack", "Peep"]
+      expect(subject.duck).to eq(["Quack", "Peep"])
     end
 
     it "should be able to track change status" do
-      subject.fubar_changed?.should be false
+      expect(subject.fubar_changed?).to be false
       subject.fubar = ["Meow"]
-      subject.fubar_changed?.should be true
+      expect(subject.fubar_changed?).to be true
     end
 
     describe "array getters and setters" do
       it "should accept symbol keys" do
         subject[:duck] = ["Cluck", "Gobble"]
-        subject[:duck].should == ["Cluck", "Gobble"]
+        expect(subject[:duck]).to eq(["Cluck", "Gobble"])
       end
 
       it "should accept string keys" do
         subject['duck'] = ["Cluck", "Gobble"]
-        subject['duck'].should == ["Cluck", "Gobble"]
+        expect(subject['duck']).to eq(["Cluck", "Gobble"])
       end
 
       it "should accept field names with _id that are not associations" do
         subject['animal_id'] = "lemur"
-        subject['animal_id'].should == "lemur"
+        expect(subject['animal_id']).to eq("lemur")
       end
 
       it "should raise an error on the reader when the field isn't delegated" do
@@ -206,13 +206,13 @@ describe ActiveFedora::Base do
 
     it "should be able to delegate deeply into the terminology" do
       subject.donkey = ["Bray", "Hee-haw"]
-      subject.donkey.should == ["Bray", "Hee-haw"]
+      expect(subject.donkey).to eq(["Bray", "Hee-haw"])
     end
 
     it "should be able to track change status" do
-      subject.cow_changed?.should be false
+      expect(subject.cow_changed?).to be false
       subject.cow = ["Moo"]
-      subject.cow_changed?.should be true
+      expect(subject.cow_changed?).to be true
     end 
   end
 
@@ -247,9 +247,9 @@ describe ActiveFedora::Base do
 
     describe "with a multivalued field" do
       it "should be able to track change status" do
-        subject.title_changed?.should be false
+        expect(subject.title_changed?).to be false
         subject.title = ["Title1", "Title2"]
-        subject.title_changed?.should be true
+        expect(subject.title_changed?).to be true
       end
       it "should not accept a single literal value" do
         expect { subject.title = "Title1" }.to raise_error
@@ -261,9 +261,9 @@ describe ActiveFedora::Base do
     end
     describe "with a single-valued field" do
       it "should be able to track change status" do
-        subject.description_changed?.should be false
+        expect(subject.description_changed?).to be false
         subject.description = "A brief description"
-        subject.description_changed?.should be true
+        expect(subject.description_changed?).to be true
       end
       it "should not accept an array of literal values" do
         expect { subject.description = ["A brief description", "A longer description"] }.to raise_error

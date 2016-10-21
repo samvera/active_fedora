@@ -27,23 +27,23 @@ describe ActiveFedora::Base do
       subject.attributes = { fubar: ['here'], swank: 'long enough' }
     end
     
-    it { should be_valid}
+    it { is_expected.to be_valid}
   end
   describe "an invalid object" do
     before do
       subject.attributes = { swank: 'smal' }
     end
     it "should have errors" do
-      subject.should_not be_valid
-      subject.errors[:fubar].should == ["can't be blank"]
-      subject.errors[:swank].should == ["is too short (minimum is 5 characters)"]
+      expect(subject).not_to be_valid
+      expect(subject.errors[:fubar]).to eq(["can't be blank"])
+      expect(subject.errors[:swank]).to eq(["is too short (minimum is 5 characters)"])
     end
   end
 
   describe "required terms" do
     it "should be required" do
-       subject.required?(:fubar).should be true
-       subject.required?(:swank).should be false
+       expect(subject.required?(:fubar)).to be true
+       expect(subject.required?(:swank)).to be false
     end
   end
 

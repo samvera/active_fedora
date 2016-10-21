@@ -20,11 +20,11 @@ describe ActiveFedora::Model do
       SpecModel::Basic.solr_query_handler = 'standard'
     end
     it "should have a default" do
-      SpecModel::Basic.solr_query_handler.should == 'standard'
+      expect(SpecModel::Basic.solr_query_handler).to eq('standard')
     end
     it "should be settable" do
       SpecModel::Basic.solr_query_handler = 'search'
-      SpecModel::Basic.solr_query_handler.should == 'search'
+      expect(SpecModel::Basic.solr_query_handler).to eq('search')
     end
   end
   
@@ -44,13 +44,13 @@ describe ActiveFedora::Model do
   
     describe ".classname_from_uri" do 
       it "should turn an afmodel URI into a Model class name" do
-        ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:SpecModel_CamelCased').should == ['SpecModel::CamelCased', 'afmodel']
+        expect(ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:SpecModel_CamelCased')).to eq(['SpecModel::CamelCased', 'afmodel'])
       end
       it "should not change plurality" do
-        ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:MyMetadata').should == ['MyMetadata', 'afmodel']
+        expect(ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:MyMetadata')).to eq(['MyMetadata', 'afmodel'])
       end
       it "should capitalize the first letter" do
-        ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:image').should == ['Image', 'afmodel']
+        expect(ActiveFedora::Model.classname_from_uri('info:fedora/afmodel:image')).to eq(['Image', 'afmodel'])
       end
     end
   end

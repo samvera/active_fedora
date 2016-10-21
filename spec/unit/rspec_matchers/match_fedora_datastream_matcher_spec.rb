@@ -15,14 +15,14 @@ describe RSpec::Matchers, "match_fedora_datastream" do
 
   it 'should match based on request' do
     stub_request(:get, datastream_url).to_return(:body => expected_xml, :status => 200)
-    subject.should match_fedora_datastream(datastream_name).with(expected_xml)
+    expect(subject).to match_fedora_datastream(datastream_name).with(expected_xml)
   end
 
   it 'should handle non-matching requests' do
     stub_request(:get, datastream_url).to_return(:body => "<parent>#{expected_xml}</parent>", :status => 200)
-    lambda {
-      subject.should match_fedora_datastream(datastream_name).with(expected_xml)
-    }.should(
+    expect {
+      expect(subject).to match_fedora_datastream(datastream_name).with(expected_xml)
+    }.to(
       raise_error(
         RSpec::Expectations::ExpectationNotMetError,
         /expected #{subject.class} PID=#{pid} datastream: #{datastream_name.inspect} to match Fedora/
@@ -32,9 +32,9 @@ describe RSpec::Matchers, "match_fedora_datastream" do
 
   it 'should require :with option' do
     stub_request(:get, datastream_url).to_return(:body => "<parent>#{expected_xml}</parent>", :status => 200)
-    lambda {
-      subject.should match_fedora_datastream(datastream_name)
-    }.should(
+    expect {
+      expect(subject).to match_fedora_datastream(datastream_name)
+    }.to(
       raise_error(
         ArgumentError,
         "match_fedora_datastream(<datastream_name>).with(<expected_xml>)"

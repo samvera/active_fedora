@@ -5,7 +5,7 @@ describe ActiveFedora::SolrDigitalObject do
     subject { ActiveFedora::SolrDigitalObject.new({},{'datastreams'=>{}}) }
     describe "when not finished" do
       it "should not respond_to? :repository" do
-        subject.should_not respond_to :repository
+        expect(subject).not_to respond_to :repository
       end
     end
     describe "when finished" do
@@ -13,7 +13,7 @@ describe ActiveFedora::SolrDigitalObject do
         subject.freeze
       end
       it "should respond_to? :repository" do
-        subject.should respond_to :repository
+        expect(subject).to respond_to :repository
       end
     end
   end
@@ -71,10 +71,10 @@ describe ActiveFedora::SolrDigitalObject do
       end
       subject { ActiveFedora::SolrDigitalObject.new({}, {'datastreams'=>{'properties'=>{'dsMIME'=>'text/xml'}}},WithoutMetadataDs) }
       it "should create an xml datastream" do
-        subject.datastreams['properties'].should be_kind_of ActiveFedora::OmDatastream
+        expect(subject.datastreams['properties']).to be_kind_of ActiveFedora::OmDatastream
       end
 
-      its(:new_record?) { should be_false }
+      its(:new_record?) { should be_falsey }
     end
     
     describe "with a ds spec that's not part of the solrized object" do

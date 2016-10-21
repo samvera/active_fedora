@@ -15,16 +15,16 @@ describe ActiveFedora::NomDatastream do
     }
 
     it "should work" do
-      subject.a.should include("123")
+      expect(subject.a).to include("123")
     end
 
     it "should to_solr" do
-      subject.to_solr['a_s'].should include('123')
-      subject.to_solr['b_s'].should include('asdf')
+      expect(subject.to_solr['a_s']).to include('123')
+      expect(subject.to_solr['b_s']).to include('asdf')
     end
 
     it "should be a managed datastream" do
-      subject.controlGroup.should == 'M'
+      expect(subject.controlGroup).to eq('M')
     end
   end
 
@@ -54,7 +54,7 @@ describe ActiveFedora::NomDatastream do
     }
 
     it "should scope #a attribute to only the dc namespace" do
-      subject.a.should == ["123"]
+      expect(subject.a).to eq(["123"])
     end
 
   end

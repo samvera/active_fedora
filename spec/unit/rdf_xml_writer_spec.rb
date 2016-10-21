@@ -35,7 +35,7 @@ describe ActiveFedora::RDFXMLWriter do
         writer << statement
       end
     end
-    content.should be_equivalent_to @rdf_xml_with_type
+    expect(content).to be_equivalent_to @rdf_xml_with_type
   end
   
   it 'should serialize graphs without rdf:type equivalently to RDF::RDFXML::Writer' do
@@ -57,7 +57,7 @@ describe ActiveFedora::RDFXMLWriter do
         writer << statement
       end
     end
-    EquivalentXml.equivalent?(local_content, @rdf_xml).should be_true
-    EquivalentXml.equivalent?(local_content, generic_content).should be_true
+    expect(EquivalentXml.equivalent?(local_content, @rdf_xml)).to be_truthy
+    expect(EquivalentXml.equivalent?(local_content, generic_content)).to be_truthy
   end
 end

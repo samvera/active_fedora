@@ -43,31 +43,31 @@ describe "NestedAttribute behavior" do
   end
 
   it "should have _destroy" do
-    Bar.new._destroy.should be_false
+    expect(Bar.new._destroy).to be_falsey
   end
 
   it "should update the child objects" do
     @car, @bar1, @bar2 = create_car_with_bars
 
     @car.attributes = {:bars_attributes=>[{:id=>@bar1.pid, :uno=>"bar1 uno"}, {:uno=>"newbar uno"}, {:id=>@bar2.pid, :_destroy=>'1', :uno=>'bar2 uno'}]}
-    Bar.find(@bar1.pid).uno.should == 'bar1 uno'
-    Bar.where(:id => @bar2.pid).first.should be_nil
-    Bar.where(:uno => "newbar uno").first.should_not be_nil
+    expect(Bar.find(@bar1.pid).uno).to eq('bar1 uno')
+    expect(Bar.where(:id => @bar2.pid).first).to be_nil
+    expect(Bar.where(:uno => "newbar uno").first).not_to be_nil
 
     bars = @car.bars(true)
-    bars.should include(@bar1)
-    bars.should_not include(@bar2)
+    expect(bars).to include(@bar1)
+    expect(bars).not_to include(@bar2)
   end
 
   it "should reject attributes when all blank" do
     @car, @bar1, @bar2 = create_car_with_bars(CarAllBlank)
 
-    @car.bars.count.should == 2
+    expect(@car.bars.count).to eq(2)
     @car.attributes = {:bars_attributes=>[{}, {:id=>@bar1.pid, :uno=>"bar1 uno"}]}
-    @car.bars(true).count.should == 2
+    expect(@car.bars(true).count).to eq(2)
 
     @bar1.reload
-    @bar1.uno.should == "bar1 uno"
+    expect(@bar1.uno).to eq("bar1 uno")
   end
 
   it "should reject attributes based on proc" do
@@ -76,8 +76,8 @@ describe "NestedAttribute behavior" do
     @car.attributes = {:bars_attributes=>[{}, {:id=>@bar1.pid, :uno=>"bar1 uno"}, {:id=>@bar2.pid, :dos=>"bar2 dos"}]}
     @bar1.reload
     @bar2.reload
-    @bar1.uno.should == "bar1 uno"
-    @bar2.dos.should be_nil
+    expect(@bar1.uno).to eq("bar1 uno")
+    expect(@bar2.dos).to be_nil
   end
 
   it "should reject attributes base on method name" do
@@ -86,20 +86,20 @@ describe "NestedAttribute behavior" do
     @car.attributes = {:bars_attributes=>[{}, {:id=>@bar1.pid, :uno=>"bar1 uno"}, {:id=>@bar2.pid, :dos=>"bar2 dos"}]}
     @bar1.reload
     @bar2.reload
-    @bar1.uno.should == "bar1 uno"
-    @bar2.dos.should be_nil
+    expect(@bar1.uno).to eq("bar1 uno")
+    expect(@bar2.dos).to be_nil
   end
 
   it "should throw TooManyRecords" do
     @car, @bar1, @bar2 = create_car_with_bars(CarWithLimit)
 
-    lambda {
+    expect {
       @car.attributes = {:bars_attributes=>[{}]}
-    }.should_not raise_exception
+    }.not_to raise_exception
 
-    lambda {
+    expect {
       @car.attributes = {:bars_attributes=>[{}, {}]}
-    }.should raise_exception(ActiveFedora::NestedAttributes::TooManyRecords)
+    }.to raise_exception(ActiveFedora::NestedAttributes::TooManyRecords)
   end
 
   private

@@ -68,7 +68,7 @@ describe ActiveFedora::Base do
     it "should access associations" do
       f = Book.find(subject.id)
       f.freeze
-      f.library_id.should_not be_nil
+      expect(f.library_id).not_to be_nil
 
     end
   end

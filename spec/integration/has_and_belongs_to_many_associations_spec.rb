@@ -36,14 +36,14 @@ describe ActiveFedora::Base do
       end
       it "habtm should set and remove relationships bidirectionally" do
         @book.topics << @topic1
-        @book.topics.should == [@topic1]
-        @topic1.books.should == [@book]
-        @topic1.reload.books.should == [@book]
+        expect(@book.topics).to eq([@topic1])
+        expect(@topic1.books).to eq([@book])
+        expect(@topic1.reload.books).to eq([@book])
 
         @book.topics.delete(@topic1)
         #@topic1.books.delete(@book)
-        @book.topics.should == []
-        @topic1.books.should == []
+        expect(@book.topics).to eq([])
+        expect(@topic1.books).to eq([])
       end
       it "Should allow for more than 10 items" do
 
@@ -51,16 +51,16 @@ describe ActiveFedora::Base do
           @book.topics << Topic.create
         end
         @book.save
-        @book.topics.count.should == 12
+        expect(@book.topics.count).to eq(12)
         book2 = Book.find(@book.pid)
-        book2.topics.count.should == 12
+        expect(book2.topics.count).to eq(12)
       end
 
       it "Should find inherited objects along with base objects" do
         @book.topics << @topic1
         @special_book.topics << @topic1
-        @topic1.books.should == [@book, @special_book]
-        @topic1.reload.books.should == [@book, @special_book]
+        expect(@topic1.books).to eq([@book, @special_book])
+        expect(@topic1.reload.books).to eq([@book, @special_book])
       end
 
       it "Should cast found books to the correct cmodel" do
@@ -83,20 +83,20 @@ describe ActiveFedora::Base do
       end
       it "should set relationships bidirectionally" do
         @book.topics << @topic1
-        @book.topics.should == [@topic1]
-        @book.relationships(:has_topic).should == [@topic1.internal_uri]
-        @topic1.relationships(:has_topic).should == []
-        @topic1.relationships(:is_topic_of).should == [@book.internal_uri]
-        Topic.find(@topic1.pid).books.should == [@book] #Can't have saved it because @book isn't saved yet.
+        expect(@book.topics).to eq([@topic1])
+        expect(@book.relationships(:has_topic)).to eq([@topic1.internal_uri])
+        expect(@topic1.relationships(:has_topic)).to eq([])
+        expect(@topic1.relationships(:is_topic_of)).to eq([@book.internal_uri])
+        expect(Topic.find(@topic1.pid).books).to eq([@book]) #Can't have saved it because @book isn't saved yet.
       end
       it "should save new child objects" do
         @book.topics << Topic.new
-        @book.topics.first.pid.should_not be_nil
+        expect(@book.topics.first.pid).not_to be_nil
       end
       it "should clear out the old associtions" do
         @book.topics = [@topic1]
         @book.topics = [@topic2]
-        @book.topic_ids.should == [@topic2.pid]
+        expect(@book.topic_ids).to eq([@topic2.pid])
       end
       after do
         @book.delete
@@ -135,27 +135,27 @@ describe ActiveFedora::Base do
       end
 
       it "should have a collection" do
-        book.relationships(:is_member_of_collection).should == [collection.internal_uri]
-        book.collections.should == [collection]
+        expect(book.relationships(:is_member_of_collection)).to eq([collection.internal_uri])
+        expect(book.collections).to eq([collection])
       end
       it "habtm should not set foreign relationships if :inverse_of is not specified" do
-         collection.relationships(:is_member_of_collection).should == []
+         expect(collection.relationships(:is_member_of_collection)).to eq([])
       end
       it "should load the collections" do
         reloaded = Book.find(book.pid)
-        reloaded.collections.should == [collection]
+        expect(reloaded.collections).to eq([collection])
       end
 
       describe "#empty?" do
         subject { book.collections }
-        its(:empty?) { should be_false }
+        its(:empty?) { is_expected.to be_falsey }
       end
     end
 
     context "when a book isn't in a collection" do 
       describe "#empty?" do
         subject { book.collections }
-        its(:empty?) { should be_true }
+        its(:empty?) { should be_truthy }
       end
     end
   end
@@ -191,22 +191,22 @@ describe ActiveFedora::Base do
       end
 
       it "delete should cause the entries to be removed from RELS-EXT, but not destroy the original record" do
-        book.collections.should == [collection1, collection2]
+        expect(book.collections).to eq([collection1, collection2])
         book.collections.delete(collection1)
-        book.collections.should == [collection2]
+        expect(book.collections).to eq([collection2])
         book.save!
         book.reload
-        book.collections.should == [collection2]
+        expect(book.collections).to eq([collection2])
         expect {Collection.find(collection1.pid)}.to_not be_nil
       end
 
       it "destroy should cause the entries to be removed from RELS-EXT, but not destroy the original record" do
-        book.collections.should == [collection1, collection2]
+        expect(book.collections).to eq([collection1, collection2])
         book.collections.destroy(collection1)
-        book.collections.should == [collection2]
+        expect(book.collections).to eq([collection2])
         book.save!
         book.reload
-        book.collections.should == [collection2]
+        expect(book.collections).to eq([collection2])
         expect {Collection.find(collection1.pid)}.to_not be_nil
       end
     end
@@ -240,25 +240,25 @@ describe ActiveFedora::Base do
       end
 
       it "destroy should cause the before_remove and after_remove callback to be triggered" do
-        book.should_receive(:foo).with(collection)
-        book.should_receive(:bar).with(collection)
+        expect(book).to receive(:foo).with(collection)
+        expect(book).to receive(:bar).with(collection)
         book.collections.destroy(collection)
       end
 
       it "delete should cause the before_remove and after_remove callback to be triggered" do
-        book.should_receive(:foo).with(collection)
-        book.should_receive(:bar).with(collection)
+        expect(book).to receive(:foo).with(collection)
+        expect(book).to receive(:bar).with(collection)
         book.collections.delete(collection)
       end
 
       it "should not remove if an exception is thrown in before_remove" do
-        book.should_receive(:foo).with(collection).and_raise
-        book.should_not_receive(:bar)
+        expect(book).to receive(:foo).with(collection).and_raise
+        expect(book).not_to receive(:bar)
         begin
           book.collections.delete(collection)
         rescue RuntimeError
         end
-        book.collections.should == [collection]
+        expect(book.collections).to eq([collection])
       end
     end
 
@@ -287,25 +287,25 @@ describe ActiveFedora::Base do
       end
 
       it "shift should cause the before_add and after_add callback to be triggered" do
-        book.should_receive(:foo).with(collection)
-        book.should_receive(:bar).with(collection)
+        expect(book).to receive(:foo).with(collection)
+        expect(book).to receive(:bar).with(collection)
         book.collections << collection
       end
 
       it "assignment should cause the before_add and after_add callback to be triggered" do
-        book.should_receive(:foo).with(collection)
-        book.should_receive(:bar).with(collection)
+        expect(book).to receive(:foo).with(collection)
+        expect(book).to receive(:bar).with(collection)
         book.collections = [collection]
       end
 
       it "should not add if an exception is thrown in before_add" do
-        book.should_receive(:foo).with(collection).and_raise
-        book.should_not_receive(:bar)
+        expect(book).to receive(:foo).with(collection).and_raise
+        expect(book).not_to receive(:bar)
         begin
           book.collections << collection
         rescue RuntimeError
         end
-        book.collections.should == []
+        expect(book.collections).to eq([])
       end
     end
 
@@ -341,7 +341,7 @@ describe "Autosave" do
 
     it "should save dependent records" do
       component.reload
-      component.items.first.title.should == 'my title'
+      expect(component.items.first.title).to eq('my title')
     end
   end
   describe "From the has_many side" do
@@ -349,7 +349,7 @@ describe "Autosave" do
 
     it "should save dependent records" do
       item.reload
-      item.components.first.description.should == 'my description'
+      expect(item.components.first.description).to eq('my description')
     end
   end
 

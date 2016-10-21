@@ -22,7 +22,7 @@ describe ActiveFedora::SemanticNode do
       end
 
       @node = SpecNode.new
-      @node.stub(:rels_ext).and_return(double("rels_ext", :content_will_change! => true, :content=>''))
+      allow(@node).to receive(:rels_ext).and_return(double("rels_ext", :content_will_change! => true, :content=>''))
       @node.pid = increment_pid
     end
     
@@ -32,37 +32,37 @@ describe ActiveFedora::SemanticNode do
 
     describe "pid_from_uri" do
       it "should strip the info:fedora/ out of a given string" do 
-        SpecNode.pid_from_uri("info:fedora/FOO:BAR").should == "FOO:BAR"
+        expect(SpecNode.pid_from_uri("info:fedora/FOO:BAR")).to eq("FOO:BAR")
       end
     end
     
     describe ".add_relationship" do
       it "should add relationship to the relationships graph" do
         @node.add_relationship("isMemberOf", 'demo:9')
-        @node.ids_for_outbound("isMemberOf").should == ['demo:9']
+        expect(@node.ids_for_outbound("isMemberOf")).to eq(['demo:9'])
       end
       it "should not be written into the graph until it is saved" do
         @n1 = ActiveFedora::Base.new
         @node.add_relationship(:has_part, @n1)
-        @node.relationships.statements.to_a.first.object.to_s.should == 'info:fedora/' 
+        expect(@node.relationships.statements.to_a.first.object.to_s).to eq('info:fedora/') 
         @n1.save
-        @node.relationships.statements.to_a.first.object.to_s.should == @n1.internal_uri
+        expect(@node.relationships.statements.to_a.first.object.to_s).to eq(@n1.internal_uri)
       end
 
       it "should add a literal relationship to the relationships graph" do
         @node.add_relationship("isMemberOf", 'demo:9', true)
-        @node.relationships("isMemberOf").should == ['demo:9']
+        expect(@node.relationships("isMemberOf")).to eq(['demo:9'])
       end
       
       it "adding relationship to an instance should not affect class-level relationships hash" do 
         local_test_node1 = SpecNode.new
         local_test_node2 = SpecNode.new
-        local_test_node1.stub(:rels_ext).and_return(double("rels_ext", :content_will_change! => true, :content=>''))
+        allow(local_test_node1).to receive(:rels_ext).and_return(double("rels_ext", :content_will_change! => true, :content=>''))
         local_test_node1.add_relationship(:is_member_of, 'demo:10')
-        local_test_node2.stub(:rels_ext).and_return(double('rels-ext', :content=>''))
+        allow(local_test_node2).to receive(:rels_ext).and_return(double('rels-ext', :content=>''))
         
-        local_test_node1.relationships(:is_member_of).should == ["demo:10"]
-        local_test_node2.relationships(:is_member_of).should == []
+        expect(local_test_node1.relationships(:is_member_of)).to eq(["demo:10"])
+        expect(local_test_node2.relationships(:is_member_of)).to eq([])
       end
       
     end
@@ -75,28 +75,28 @@ describe ActiveFedora::SemanticNode do
       end
       it "should clear the specified relationship" do
         @node.clear_relationship(:is_member_of)
-        @node.relationships(:is_member_of).should == []
-        @node.relationships(:has_description).should == ['demo:9']
+        expect(@node.relationships(:is_member_of)).to eq([])
+        expect(@node.relationships(:has_description)).to eq(['demo:9'])
       end
     end
     
     describe '#remove_relationship' do
       it 'should remove a relationship from the relationships hash' do
-        @node.stub(:rels_ext).and_return(double("rels_ext", :content_will_change! => true, :content=>''))
+        allow(@node).to receive(:rels_ext).and_return(double("rels_ext", :content_will_change! => true, :content=>''))
         @node.add_relationship(:has_part, "info:fedora/3")
         @node.add_relationship(:has_part, "info:fedora/4")
         #check both are there
-        @node.ids_for_outbound(:has_part).should include "3", "4"
+        expect(@node.ids_for_outbound(:has_part)).to include "3", "4"
         @node.remove_relationship(:has_part, "info:fedora/3")
         #check returns false if relationship does not exist and does nothing with different predicate
         @node.remove_relationship(:has_member,"info:fedora/4")
         #check only one item removed
-        @node.ids_for_outbound(:has_part).should == ['4']
+        expect(@node.ids_for_outbound(:has_part)).to eq(['4'])
         @node.remove_relationship(:has_part,"info:fedora/4")
         #check last item removed and predicate removed since now emtpy
-        @node.ids_for_outbound(:has_part).should == []
+        expect(@node.ids_for_outbound(:has_part)).to eq([])
 
-        @node.relationships_are_dirty.should == true
+        expect(@node.relationships_are_dirty).to eq(true)
         
       end
     end

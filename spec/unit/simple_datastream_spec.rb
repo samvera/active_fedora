@@ -12,7 +12,7 @@ describe ActiveFedora::SimpleDatastream do
 
   end
   it "from_xml should parse everything correctly" do
-    @test_ds.ng_xml.should be_equivalent_to @sample_xml
+    expect(@test_ds.ng_xml).to be_equivalent_to @sample_xml
   end
 
   
@@ -23,14 +23,14 @@ describe ActiveFedora::SimpleDatastream do
         it "should respond to getters and setters for the string typed #{el} element" do
           value = "Hey #{el}"
           @test_ds.send("#{el.to_s}=", value) 
-          @test_ds.send(el).first.should == value  #Looking at first because creator has 2 nodes
+          expect(@test_ds.send(el).first).to eq(value)  #Looking at first because creator has 2 nodes
         end
       end
 
       it "should set date elements" do
         d = Date.parse('1939-05-23')
         @test_ds.creation_date = d
-        @test_ds.creation_date.first.should == d
+        expect(@test_ds.creation_date.first).to eq(d)
       end
     end
   end
@@ -40,7 +40,7 @@ describe ActiveFedora::SimpleDatastream do
       @test_ds.publisher= "charlie"
       @test_ds.coverage= ["80%", "20%"]
 
-      @test_ds.to_xml.should be_equivalent_to('
+      expect(@test_ds.to_xml).to be_equivalent_to('
         <fields>
           <coverage>80%</coverage>
           <coverage>20%</coverage>
@@ -54,8 +54,8 @@ describe ActiveFedora::SimpleDatastream do
   describe "#to_solr" do
     it "should have title" do
       solr = @test_ds.to_solr
-      solr[ActiveFedora::SolrService.solr_name('publisher', type: :string)].should == "publisher1"
-      solr[ActiveFedora::SolrService.solr_name('creation_date', type: :date)].should == "2012-01-15"
+      expect(solr[ActiveFedora::SolrService.solr_name('publisher', type: :string)]).to eq("publisher1")
+      expect(solr[ActiveFedora::SolrService.solr_name('creation_date', type: :date)]).to eq("2012-01-15")
     end
   end
 

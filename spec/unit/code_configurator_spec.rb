@@ -38,14 +38,14 @@ describe ActiveFedora::FileConfigurator do
   end
 
   it "should initialize from code" do
-    Psych.should_receive(:load).never
-    File.should_receive(:exists?).never
-    File.should_receive(:read).never
-    File.should_receive(:open).never
+    expect(Psych).to receive(:load).never
+    expect(File).to receive(:exists?).never
+    expect(File).to receive(:read).never
+    expect(File).to receive(:open).never
     ActiveFedora.init(@config_params)
-    ActiveFedora.fedora_config.credentials.should == @config_params[:fedora_config]
-    ActiveFedora.solr_config.should == @config_params[:solr_config]
-    ActiveFedora::Predicates.predicate_mappings['info:fedora/fedora-system:def/relations-external#'].length.should == 1
+    expect(ActiveFedora.fedora_config.credentials).to eq(@config_params[:fedora_config])
+    expect(ActiveFedora.solr_config).to eq(@config_params[:solr_config])
+    expect(ActiveFedora::Predicates.predicate_mappings['info:fedora/fedora-system:def/relations-external#'].length).to eq(1)
   end
   
 end

@@ -108,16 +108,16 @@ describe ActiveFedora::Base do
   end
   
   it "should be an instance of ActiveFedora::Base" do
-    @test_history.should be_kind_of(ActiveFedora::Base)
+    expect(@test_history).to be_kind_of(ActiveFedora::Base)
   end
   
 
   it "should create proxies to all the datastreams" do
     properties_ds = @test_history.datastreams["properties"]
     dublin_core_ds = @test_history.datastreams["dublin_core"]
-    @test_history.properties.should be properties_ds    
-    @test_history.should respond_to(:properties)
-    OralHistory.new.should respond_to(:properties)
+    expect(@test_history.properties).to be properties_ds    
+    expect(@test_history).to respond_to(:properties)
+    expect(OralHistory.new).to respond_to(:properties)
   end 
 
     
@@ -142,12 +142,12 @@ describe ActiveFedora::Base do
     @properties_sample_values.each_pair do |field, value|
       next if field == :hard_copy_availability #FIXME HYDRA-824
       next if field == :location #FIXME HYDRA-825 
-      (@solr_result[ActiveFedora::SolrService.solr_name(field, type: :string)] || @solr_result[ActiveFedora::SolrService.solr_name(field, type: :date)]).should == [::Solrizer::Extractor.format_node_value(value)] 
+      expect(@solr_result[ActiveFedora::SolrService.solr_name(field, type: :string)] || @solr_result[ActiveFedora::SolrService.solr_name(field, type: :date)]).to eq([::Solrizer::Extractor.format_node_value(value)]) 
     end
     
     @dublin_core_sample_values.each_pair do |field, value|
       next if [:format, :type].include?(field)  #format and type are methods declared on Object
-      dublin_core_ds.send("#{field.to_s}").should == [value]
+      expect(dublin_core_ds.send("#{field.to_s}")).to eq([value])
     end    
   end
   
@@ -158,19 +158,19 @@ describe ActiveFedora::Base do
     dublin_core_ds.subject = "My Subject Heading"
     dc_xml = REXML::Document.new(dublin_core_ds.to_xml)
     
-    dc_xml.root.elements["dcterms:subject"].text.should == "My Subject Heading"
+    expect(dc_xml.root.elements["dcterms:subject"].text).to eq("My Subject Heading")
     
   end
   
   it "should support #find_with_conditions" do
     solr_result = OralHistory.find_with_conditions({})
-    solr_result.should_not be_nil
+    expect(solr_result).not_to be_nil
   end
   
   describe '#new' do
     it "should support custom pids" do
       oh = OralHistory.new(:pid=>"uuid:blah-blah-blah")
-      oh.pid.should == "uuid:blah-blah-blah"
+      expect(oh.pid).to eq("uuid:blah-blah-blah")
     end
   end
   

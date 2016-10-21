@@ -31,8 +31,8 @@ describe ActiveFedora::Base do
   describe ".destroy_all" do
     it "should remove both and run callbacks" do 
       SpecModel::Basic.destroy_all
-      SpecModel::Basic.count.should == 0 
-      SpecModel::Basic.callback_counter.should == 2
+      expect(SpecModel::Basic.count).to eq(0) 
+      expect(SpecModel::Basic.callback_counter).to eq(2)
     end
 
     describe "when a model is missing" do
@@ -48,7 +48,7 @@ describe ActiveFedora::Base do
       it "should be able to skip a missing model" do 
         expect(ActiveFedora::Base.logger).to receive(:error).with("Although #{pid} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch.")
         SpecModel::Basic.destroy_all
-        SpecModel::Basic.count.should == 1 
+        expect(SpecModel::Basic.count).to eq(1) 
       end
     end
   end
@@ -56,8 +56,8 @@ describe ActiveFedora::Base do
   describe ".delete_all" do
     it "should remove both and not run callbacks" do 
       SpecModel::Basic.delete_all
-      SpecModel::Basic.count.should == 0
-      SpecModel::Basic.callback_counter.should == 0
+      expect(SpecModel::Basic.count).to eq(0)
+      expect(SpecModel::Basic.callback_counter).to eq(0)
     end
   end
 end
