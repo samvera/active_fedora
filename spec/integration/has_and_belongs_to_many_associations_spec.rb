@@ -197,7 +197,7 @@ describe ActiveFedora::Base do
         book.save!
         book.reload
         expect(book.collections).to eq([collection2])
-        expect {Collection.find(collection1.pid)}.to_not be_nil
+        expect(Collection.find(collection1.pid)).to_not be_nil
       end
 
       it "destroy should cause the entries to be removed from RELS-EXT, but not destroy the original record" do
@@ -207,7 +207,7 @@ describe ActiveFedora::Base do
         book.save!
         book.reload
         expect(book.collections).to eq([collection2])
-        expect {Collection.find(collection1.pid)}.to_not be_nil
+        expect(Collection.find(collection1.pid)).to_not be_nil
       end
     end
 
@@ -354,4 +354,3 @@ describe "Autosave" do
   end
 
 end
-

@@ -311,7 +311,7 @@ describe ActiveFedora::RDFDatastream do
     end
 
     it 'lets me specify a resource class' do
-      expect(DummyResource.resource_class < DummyATResource).to be_true
+      expect(DummyResource.resource_class < DummyATResource).to eq true
     end
 
     it 'creates underlying resource of type resource_class' do

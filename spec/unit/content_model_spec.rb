@@ -58,7 +58,6 @@ describe ActiveFedora::ContentModel do
       expect(ActiveFedora::ContentModel.known_models_for(mock_object)).to eq([SampleModel])
     end
     it "should support namespaced models" do
-      pending "This is harder than it looks."
       mock_object = double("ActiveFedora Object")
       expect(mock_object).to receive(:relationships).with(:has_model).and_return(["info:fedora/afmodel:Sample_NamespacedModel"])
       expect(ActiveFedora::ContentModel.known_models_for(mock_object)).to eq([Sample::NamespacedModel])
