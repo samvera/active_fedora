@@ -88,7 +88,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     let(:collection) {Collection.create().tap {|c| c.members << thing}}
 
     it "should call destroy" do
-      expect(collection.destroy).to_not raise_error
+      expect { collection.destroy }.to_not raise_error
     end
 
   end

@@ -213,7 +213,7 @@ describe ActiveFedora::Base do
   
   describe ".initialize" do
     it "calling constructor should create a new Fedora Object" do    
-      expect(@test_object.size).to eq(0)
+      expect(@test_object.errors).to be_blank
       expect(@test_object.pid).not_to be_nil
     end
   end
