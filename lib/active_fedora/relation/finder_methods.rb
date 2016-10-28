@@ -240,11 +240,13 @@ module ActiveFedora
 
       # Returns a solr query for the supplied conditions
       # @param[Hash,String,Array] conditions solr conditions to match
+      # @return [String]
       def create_query(conditions)
         build_query(build_where(conditions))
       end
 
       # @param [Array<String>] conditions
+      # @return [String]
       def build_query(conditions)
         clauses = search_model_clause ? [search_model_clause] : []
         clauses += conditions.reject(&:blank?)
