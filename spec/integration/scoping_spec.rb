@@ -27,16 +27,16 @@ describe ActiveFedora::Scoping::Named do
   describe '#find' do
     describe "#find with a valid id without cast" do
       subject { ActiveFedora::Base.find(test_instance.id) }
-      it { should be_instance_of TestClass }
+      it { is_expected.to be_instance_of TestClass }
     end
     describe "#find with a valid id with cast of false" do
       subject { ActiveFedora::Base.find(test_instance.id, cast: false) }
-      it { should be_instance_of ActiveFedora::Base }
+      it { is_expected.to be_instance_of ActiveFedora::Base }
     end
 
     describe "#find with a valid id without cast on a model extending Base" do
       subject { TestClass.find(test_instance.id) }
-      it { should be_instance_of TestClass }
+      it { is_expected.to be_instance_of TestClass }
     end
   end
 end

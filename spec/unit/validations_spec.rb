@@ -22,7 +22,7 @@ describe ActiveFedora::Base do
       validation_stub.attributes = { fubar: ['here'], swank: 'long enough' }
     end
 
-    it { should be_valid }
+    it { is_expected.to be_valid }
   end
   describe "an invalid object" do
     before do
@@ -36,8 +36,8 @@ describe ActiveFedora::Base do
   end
 
   describe "required terms" do
-    it { should be_required(:fubar) }
-    it { should_not be_required(:swank) }
+    it { is_expected.to be_required(:fubar) }
+    it { is_expected.to_not be_required(:swank) }
   end
 
   describe "#save!" do

@@ -109,7 +109,7 @@ describe ActiveFedora::Base do
     subject(:uri) { described_class.id_to_uri(id) }
 
     context "with no custom proc is set" do
-      it { should eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/123456w" }
+      it { is_expected.to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/123456w" }
       it "justs call #translate_id_to_uri" do
         allow(described_class).to receive(:translate_id_to_uri).and_call_original
         allow(ActiveFedora::Core::FedoraIdTranslator).to receive(:call).and_call_original
@@ -126,7 +126,7 @@ describe ActiveFedora::Base do
       end
       after { described_class.translate_id_to_uri = nil }
 
-      it { should eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/foo/123456w" }
+      it { is_expected.to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/foo/123456w" }
     end
 
     context "with an empty base path" do
@@ -149,7 +149,7 @@ describe ActiveFedora::Base do
     subject(:uri_id) { described_class.uri_to_id(uri) }
 
     context "with no custom proc is set" do
-      it { should eq 'foo/123456w' }
+      it { is_expected.to eq 'foo/123456w' }
       it "justs call #translate_uri_to_id" do
         allow(described_class).to receive(:translate_uri_to_id).and_call_original
         allow(ActiveFedora::Core::FedoraUriTranslator).to receive(:call).and_call_original
@@ -166,7 +166,7 @@ describe ActiveFedora::Base do
       end
       after { described_class.translate_uri_to_id = nil }
 
-      it { should eq '123456w' }
+      it { is_expected.to eq '123456w' }
     end
   end
 

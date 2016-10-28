@@ -84,7 +84,7 @@ describe ActiveFedora::File do
         allow_any_instance_of(SampleResource).to receive(:content_changed?).and_return(true)
       end
       subject { descMetadata.described_by }
-      it { should eq descMetadata.uri + '/fcr:metadata' }
+      it { is_expected.to eq descMetadata.uri + '/fcr:metadata' }
     end
   end
 
@@ -108,7 +108,7 @@ describe ActiveFedora::File do
 
     describe "the metadata file" do
       subject { descMetadata }
-      it { should be_a_kind_of(described_class) }
+      it { is_expected.to be_a_kind_of(described_class) }
     end
 
     context "a binary file" do
@@ -145,19 +145,19 @@ describe ActiveFedora::File do
           subject { str = ''; test_object.webm.stream(range).each { |chunk| str << chunk }; str }
           context "whole thing" do
             let(:range) { 'bytes=0-15' }
-            it { should eq 'one1two2threfour' }
+            it { is_expected.to eq 'one1two2threfour' }
           end
           context "open ended" do
             let(:range) { 'bytes=0-' }
-            it { should eq 'one1two2threfour' }
+            it { is_expected.to eq 'one1two2threfour' }
           end
           context "not starting at the beginning" do
             let(:range) { 'bytes=3-15' }
-            it { should eq '1two2threfour' }
+            it { is_expected.to eq '1two2threfour' }
           end
           context "not ending at the end" do
             let(:range) { 'bytes=4-11' }
-            it { should eq 'two2thre' }
+            it { is_expected.to eq 'two2thre' }
           end
         end
 
@@ -168,7 +168,7 @@ describe ActiveFedora::File do
             test_object.save!
           end
           subject { str = ''; test_object.redirector.stream.each { |chunk| str << chunk }; str }
-          it { should eq 'one1two2threfour' }
+          it { is_expected.to eq 'one1two2threfour' }
         end
 
         context "when there are more than 3 requests because of redirects" do
