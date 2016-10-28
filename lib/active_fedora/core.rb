@@ -14,10 +14,8 @@ module ActiveFedora
       # retrieved on both a class and instance level by calling +logger+.
       class_attribute :logger
 
-      # Use NullLogger if none is set and all messages sent to it are retuned as nil
-      def self.logger
-        self.logger ||= ActiveFedora::NullLogger.new
-      end
+      # Use NullLogger as the default and all messages sent to it are retuned as nil
+      self.logger = ActiveFedora::NullLogger.new
 
       # All instances default to the class-level logger
       def logger
