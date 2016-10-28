@@ -29,12 +29,12 @@ describe ActiveFedora::Indexing do
 
     describe "#create_needs_index?" do
       subject { SpecNode.new.send(:create_needs_index?) }
-      it { should be true }
+      it { is_expected.to be true }
     end
 
     describe "#update_needs_index?" do
       subject { SpecNode.new.send(:update_needs_index?) }
-      it { should be true }
+      it { is_expected.to be true }
     end
   end
 

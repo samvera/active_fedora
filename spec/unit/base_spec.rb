@@ -165,11 +165,11 @@ describe ActiveFedora::Base do
     context "before saving" do
       context "#to_param" do
         subject { @test_object.to_param }
-        it { should be_nil }
+        it { is_expected.to be_nil }
       end
       context "#to_key" do
         subject { @test_object.to_key }
-        it { should be_nil }
+        it { is_expected.to be_nil }
       end
     end
 
@@ -181,12 +181,12 @@ describe ActiveFedora::Base do
 
       context "#to_param" do
         subject { @test_object.to_param }
-        it { should eq 'one/two/three' }
+        it { is_expected.to eq 'one/two/three' }
       end
 
       context "#to_key" do
         subject { @test_object.to_key }
-        it { should eq ['one/two/three'] }
+        it { is_expected.to eq ['one/two/three'] }
       end
     end
     ### end ActiveModel::Conversions

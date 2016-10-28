@@ -48,12 +48,12 @@ describe ActiveFedora::Base do
 
     describe "#errors" do
       subject { obj.errors }
-      it { should be_empty }
+      it { is_expected.to be_empty }
     end
 
     describe "#id" do
       subject { obj.id }
-      it { should_not be_nil }
+      it { is_expected.to_not be_nil }
     end
 
     context "when updated with changes after one second" do
@@ -71,12 +71,12 @@ describe ActiveFedora::Base do
 
     describe "#create_date" do
       subject { obj.create_date }
-      it { should_not be_nil }
+      it { is_expected.to_not be_nil }
     end
 
     describe "#modified_date" do
       subject { obj.modified_date }
-      it { should_not be_nil }
+      it { is_expected.to_not be_nil }
     end
 
     describe "delete" do

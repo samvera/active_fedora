@@ -171,14 +171,14 @@ describe ActiveFedora::Base do
 
       describe "#empty?" do
         subject { book.collections }
-        it { should_not be_empty }
+        it { is_expected.to_not be_empty }
       end
     end
 
     context "when a book isn't in a collection" do
       describe "#empty?" do
         subject { book.collections }
-        it { should be_empty }
+        it { is_expected.to be_empty }
       end
     end
   end

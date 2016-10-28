@@ -46,7 +46,7 @@ describe ActiveFedora::AttachedFiles do
       Object.send(:remove_const, :DSTest)
     end
 
-    it { should == 'XXX' }
+    it { is_expected.to eq('XXX') }
 
     context "After updating" do
       before do
