@@ -252,17 +252,7 @@ module ActiveFedora
         return @content if new_record?
 
         @content ||= ensure_fetch ? remote_content : @ds_content
-
-        if behaves_like_io?(@content)
-          begin
-            @content.rewind
-            @content.read
-          ensure
-            @content.rewind
-          end
-        else
-          @content
-        end
+        @content.rewind if behaves_like_io?(@content)
         @content
       end
   end
