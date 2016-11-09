@@ -25,8 +25,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rails"
   s.add_development_dependency "rdoc"
   s.add_development_dependency "yard"
-  # Pin rake to 10.0 due to https://github.com/lsegal/yard/issues/947
-  s.add_development_dependency "rake", '~> 10.0'
+  s.add_development_dependency "rake"
   s.add_development_dependency "solr_wrapper", "~> 0.15"
   s.add_development_dependency 'fcrepo_wrapper', '~> 0.2'
   s.add_development_dependency "rspec", "~> 3.0"
