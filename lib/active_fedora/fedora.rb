@@ -23,11 +23,15 @@ module ActiveFedora
     end
 
     def host
-      @config[:url]
+      @config[:url].sub(/\/$/, BLANK)
     end
 
     def base_path
-      @config[:base_path] || '/'
+      @config[:base_path] || SLASH
+    end
+
+    def base_uri
+      host + base_path.sub(/\/$/, BLANK)
     end
 
     def user

@@ -253,7 +253,7 @@ describe ActiveFedora::Base do
             end
 
             it "updates the resource" do
-              expect(test_object.resource.rdf_subject).to eq ::RDF::URI.new("#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/#{@this_id}")
+              expect(test_object.resource.rdf_subject).to eq ::RDF::URI.new("#{ActiveFedora.fedora.base_uri}/#{@this_id}")
               expect(test_object.title).to eq ['foo']
             end
           end

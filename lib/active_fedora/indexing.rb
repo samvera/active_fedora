@@ -83,7 +83,7 @@ module ActiveFedora
         end
 
         def reindex_everything
-          descendants = descendant_uris(ActiveFedora::Base.id_to_uri(''))
+          descendants = descendant_uris(ActiveFedora.fedora.base_uri)
           descendants.shift # Discard the root uri
           descendants.each do |uri|
             logger.debug "Re-index everything ... #{uri}"
