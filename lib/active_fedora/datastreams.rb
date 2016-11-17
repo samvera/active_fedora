@@ -7,18 +7,16 @@ module ActiveFedora
     included do
       class_attribute :ds_specs
       self.ds_specs = {'RELS-EXT'=> {:type=> ActiveFedora::RelsExtDatastream, :label=>"Fedora Object-to-Object Relationship Metadata", :block=>nil}}
-      class << self
-        def inherited_with_datastreams(kls) #:nodoc:
-          ## Do some inheritance logic that doesn't override Base.inherited
-          inherited_without_datastreams kls
-          # each subclass should get a copy of the parent's datastream definitions, it should not add to the parent's definition table.
-          kls.ds_specs = kls.ds_specs.dup
-        end
-        alias_method_chain :inherited, :datastreams
-      end
 
       before_save :add_disseminator_location_to_datastreams
       #before_save :serialize_datastreams
+    end
+
+    module ClassMethods
+      def inherited(kls) #:nodoc:
+        super
+        kls.ds_specs = kls.ds_specs.dup
+      end
     end
 
     def ds_specs
