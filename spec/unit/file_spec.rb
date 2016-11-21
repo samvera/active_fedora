@@ -51,14 +51,14 @@ describe ActiveFedora::File do
       context "and it's initialized with the URI" do
         let(:file) { described_class.new(parent.uri + "/FOO1") }
         it "works" do
-          expect(subject.to_s).to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234/FOO1"
+          expect(subject.to_s).to eq "#{ActiveFedora.fedora.base_uri}/1234/FOO1"
         end
       end
 
       context "and it's initialized with an ID" do
         let(:file) { described_class.new(parent.id + "/FOO1") }
         it "works" do
-          expect(subject.to_s).to eq "#{ActiveFedora.fedora.host}#{ActiveFedora.fedora.base_path}/1234/FOO1"
+          expect(subject.to_s).to eq "#{ActiveFedora.fedora.base_uri}/1234/FOO1"
         end
       end
     end
