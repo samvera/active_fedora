@@ -13,9 +13,7 @@ module ActiveFedora
 
     def connect(force=false)
       return unless @connection.nil? or force
-      allowable_options = [:url, :user, :password, :timeout, :open_timeout, :ssl_client_cert, :ssl_client_key, :validateChecksum]
-      client_options = options.reject { |k,v| not allowable_options.include?(k) }
-      @connection = Rubydora.connect client_options
+      @connection = Rubydora.connect options
 
       Rubydora::Transaction.after_rollback do |options|
         begin
