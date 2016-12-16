@@ -115,7 +115,7 @@ module ActiveFedora
       end
 
       # Finds an object in the collection responding to the +id+. Uses the same
-      # rules as <tt>ActiveFedora::Base.find</tt>. Returns <tt>ActiveFedora::RecordNotFound</tt>
+      # rules as <tt>ActiveFedora::Base.find</tt>. Returns <tt>ActiveFedora::ObjectNotFoundError</tt>
       # error if the object can not be found.
       #
       #   class Person < ActiveFedora::Base
@@ -130,7 +130,7 @@ module ActiveFedora
       #   #    ]
       #
       #   person.pets.find(1) # => #<Pet id: 1, name: "Fancy-Fancy", person_id: 1>
-      #   person.pets.find(4) # => ActiveFedora::RecordNotFound: Couldn't find Pet with id=4
+      #   person.pets.find(4) # => ActiveFedora::ObjectNotFoundError: Couldn't find Pet with id=4
       #
       #   person.pets.find(2) { |pet| pet.name.downcase! }
       #   # => #<Pet id: 2, name: "fancy-fancy", person_id: 1>
@@ -394,7 +394,7 @@ module ActiveFedora
       #   #    ]
       #
       #   Pet.find(1, 2, 3)
-      #   # => ActiveFedora::RecordNotFound
+      #   # => ActiveFedora::ObjectNotFoundError
       #
       # If it is set to <tt>:delete_all</tt>, all the objects are deleted
       # *without* calling their +destroy+ method.
@@ -419,7 +419,7 @@ module ActiveFedora
       #   #    ]
       #
       #   Pet.find(1, 2, 3)
-      #   # => ActiveFedora::RecordNotFound
+      #   # => ActiveFedora::ObjectNotFoundError
       def delete_all
         @association.delete_all
       end
@@ -511,7 +511,7 @@ module ActiveFedora
       #   # => [#<Pet id: 2, name: "Spook", person_id: 1>]
       #
       #   Pet.find(1, 3)
-      #   # => ActiveFedora::RecordNotFound: Couldn't find all Pets with IDs (1, 3)
+      #   # => ActiveFedora::ObjectNotFoundError: Couldn't find all Pets with IDs (1, 3)
       #
       # If it is set to <tt>:delete_all</tt>, all the +records+ are deleted
       # *without* calling their +destroy+ method.
@@ -539,7 +539,7 @@ module ActiveFedora
       #   #    ]
       #
       #   Pet.find(1)
-      #   # => ActiveFedora::RecordNotFound: Couldn't find Pet with id=1
+      #   # => ActiveFedora::ObjectNotFoundError: Couldn't find Pet with id=1
       #
       # You can pass +Fixnum+ or +String+ values, it finds the records
       # responding to the +id+ and executes delete on them.
@@ -603,7 +603,7 @@ module ActiveFedora
       #   person.pets.size  # => 0
       #   person.pets       # => []
       #
-      #   Pet.find(1, 2, 3) # => ActiveFedora::RecordNotFound: Couldn't find all Pets with IDs (1, 2, 3)
+      #   Pet.find(1, 2, 3) # => ActiveFedora::ObjectNotFoundError: Couldn't find all Pets with IDs (1, 2, 3)
       #
       # You can pass +Fixnum+ or +String+ values, it finds the records
       # responding to the +id+ and then deletes them from the database.
@@ -635,7 +635,7 @@ module ActiveFedora
       #   person.pets.size  # => 0
       #   person.pets       # => []
       #
-      #   Pet.find(4, 5, 6) # => ActiveFedora::RecordNotFound: Couldn't find all Pets with IDs (4, 5, 6)
+      #   Pet.find(4, 5, 6) # => ActiveFedora::ObjectNotFoundError: Couldn't find all Pets with IDs (4, 5, 6)
       def destroy(*records)
         @association.destroy(*records)
       end
