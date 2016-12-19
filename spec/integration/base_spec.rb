@@ -130,7 +130,7 @@ describe ActiveFedora::Base do
       expect(described_class.exists?(obj.id)).to be true
     end
     it "returns false for ids that don't exist" do
-      expect(described_class.exists?('test:missing_object')).to be false
+      expect(described_class.exists?('test_missing_object')).to be false
     end
     it "returns false for nil" do
       expect(described_class.exists?(nil)).to be false

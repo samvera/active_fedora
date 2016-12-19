@@ -298,10 +298,10 @@ describe ActiveFedora::Base do
 
   describe "#load_from_fedora" do
     let(:relation) { ActiveFedora::Relation.new(described_class) }
-    before { @obj = SpecModel::Basic.create(id: "test:123") }
+    before { @obj = SpecModel::Basic.create(id: "test_123") }
     after { @obj.destroy }
     it "casts when klass == ActiveFedora::Base and cast argument is nil" do
-      expect(relation.send(:load_from_fedora, "test:123", nil)).to be_a SpecModel::Basic
+      expect(relation.send(:load_from_fedora, "test_123", nil)).to be_a SpecModel::Basic
     end
   end
 end
