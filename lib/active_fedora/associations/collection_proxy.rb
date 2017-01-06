@@ -541,7 +541,7 @@ module ActiveFedora
       #   Pet.find(1)
       #   # => ActiveFedora::ObjectNotFoundError: Couldn't find Pet with id=1
       #
-      # You can pass +Fixnum+ or +String+ values, it finds the records
+      # You can pass +Integer+ or +String+ values, it finds the records
       # responding to the +id+ and executes delete on them.
       #
       #   class Person < ActiveFedora::Base
@@ -605,7 +605,7 @@ module ActiveFedora
       #
       #   Pet.find(1, 2, 3) # => ActiveFedora::ObjectNotFoundError: Couldn't find all Pets with IDs (1, 2, 3)
       #
-      # You can pass +Fixnum+ or +String+ values, it finds the records
+      # You can pass +Integer+ or +String+ values, it finds the records
       # responding to the +id+ and then deletes them from the database.
       #
       #   person.pets.size # => 3
