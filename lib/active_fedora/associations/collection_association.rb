@@ -204,7 +204,7 @@ module ActiveFedora
       # Note that this method will _always_ remove records from the database
       # ignoring the +:dependent+ option.
       def destroy(*records)
-        records = find(records) if records.any? { |record| record.is_a?(Fixnum) || record.is_a?(String) }
+        records = find(records) if records.any? { |record| record.is_a?(Integer) || record.is_a?(String) }
         delete_or_destroy(records, :destroy)
       end
 

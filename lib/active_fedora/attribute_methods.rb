@@ -235,7 +235,7 @@ module ActiveFedora
     #   person = Person.new
     #   person[:age] = '22'
     #   person[:age] # => 22
-    #   person[:age] # => Fixnum
+    #   person[:age] # => Integer
     def []=(attr_name, value)
       write_attribute(attr_name, value)
     end
