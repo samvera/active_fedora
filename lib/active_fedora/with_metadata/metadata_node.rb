@@ -10,6 +10,7 @@ module ActiveFedora
       # this class rather than being in the DefaultSchema.
       property :mime_type, predicate: ::RDF::Vocab::EBUCore.hasMimeType
 
+      # @param file [ActiveFedora::File]
       def initialize(file)
         @file = file
         super(file.uri, ldp_source.graph)
@@ -44,7 +45,7 @@ module ActiveFedora
 
       def save
         raise "Save the file first" if file.new_record?
-        SparqlInsert.new(changes_for_update, ::RDF::URI.new(file.uri)).execute(metadata_uri)
+        SparqlInsert.new(changes_for_update, file.uri).execute(metadata_uri)
         @ldp_source = nil
         true
       end
