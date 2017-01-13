@@ -1,3 +1,37 @@
+v11.1.0
+2017-01-12: Casting an RDF::URI to a RDF::URI is unnecessary [Justin Coyne]
+
+2017-01-06: Replace deprecated Fixnum with Integer [Justin Coyne]
+
+2017-01-06: Pin rubocop-rspec to 1.8.0 [Justin Coyne]
+
+2017-01-06: Add Ruby 2.4.0 to the test matrix [Justin Coyne]
+
+2016-12-19: Removing invalid namespaces from tests [Esmé Cowles]
+
+2016-12-16: Correct the documentation [Justin Coyne]
+
+2016-11-14: Use base_uri instead of relying on id_to_uri [Chris Colvard]
+
+2016-11-14: Add base_uri convenience method [Chris Colvard]
+
+2016-11-09: There is no need to pin rake anylonger [Justin Coyne]
+
+2016-10-28: Allow logger to be set by default. Fixes #1170 [Justin Coyne]
+
+2016-10-28: Add return value YARD doc [Justin Coyne]
+
+2016-10-28: Update to latest Rubocop [Adam Wead]
+
+2016-10-27: Stop spamming IRC with Travis builds [Michael J. Giarlo]
+
+2016-10-19: Changing file to accept any object that responds to URI including
+another File object or a Version [Carolyn Cole]
+
+2016-09-30: Test with rsolr 2.x [Chris Beer]
+
+2016-09-22: Use ActiveFedora::NullLogger [Adam Wead]
+
 v9.10.1
 2016-03-26: Fix #reflect_on_association. [Trey Pendragon]
 
