@@ -23,11 +23,23 @@ describe ActiveFedora::Base do
     expect(book.has_model).to eq ['Book']
   end
 
-  describe "initialize with a block" do
-    subject(:book) { Book.new { |b| b.title = "The Sun also Rises" } }
+  describe "initialize" do
+    context "with a block" do
+      subject(:book) { Book.new { |b| b.title = "The Sun also Rises" } }
 
-    it "has set the title" do
-      expect(book.title).to eq "The Sun also Rises"
+      it "has set the title" do
+        expect(book.title).to eq "The Sun also Rises"
+      end
+    end
+
+    context "with an identifier" do
+      subject(:book) { Book.new(attributes) }
+      let(:attributes) { { id: '1234' } }
+
+      it "sets the id and doesn't modify the passed hash" do
+        expect(book.id).to eq '1234'
+        expect(attributes[:id]).to eq '1234'
+      end
     end
   end
 

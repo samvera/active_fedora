@@ -36,6 +36,7 @@ Metrics/BlockNesting:
 Metrics/CyclomaticComplexity:
   Exclude:
     - 'lib/active_fedora.rb'
+    - 'lib/active_fedora/core.rb'
     - 'lib/active_fedora/reflection.rb'
     - 'lib/active_fedora/relation/finder_methods.rb'
     - 'lib/active_fedora/query_result_builder.rb'
