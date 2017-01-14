@@ -1,3 +1,9 @@
+v11.1.1
+2017-01-13: Don't modify passed in attributes [Justin Coyne]
+
+2017-01-13: When rails initializes, set the log if it previously was a
+NullLogger [Justin Coyne]
+
 v11.1.0
 2017-01-12: Casting an RDF::URI to a RDF::URI is unnecessary [Justin Coyne]
 
