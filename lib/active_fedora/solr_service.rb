@@ -4,6 +4,8 @@ module ActiveFedora
   class SolrService
     attr_writer :conn
 
+    MAX_ROWS = 10_000
+
     def initialize(options = {})
       @options = { read_timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr' }.merge(options)
     end
@@ -42,6 +44,7 @@ module ActiveFedora
       end
 
       def query(query, args = {})
+        Base.logger.warn "Calling ActiveFedora::SolrService.get without passing an explicit value for ':rows' is not recommended. You will end up with Solr's default (usually set to 10)\nCalled by #{caller[0]}" unless args.key?(:rows)
         result = get(query, args)
         result['response']['docs'].map do |doc|
           ActiveFedora::SolrHit.new(doc)

@@ -8,7 +8,9 @@ module ActiveFedora::Aggregation
 
       def ordered_by_ids
         if id.present?
-          ActiveFedora::SolrService.query("{!join from=proxy_in_ssi to=id}ordered_targets_ssim:#{id}").map { |x| x["id"] }
+          query = "{!join from=proxy_in_ssi to=id}ordered_targets_ssim:#{id}"
+          rows = ActiveFedora::SolrService::MAX_ROWS
+          ActiveFedora::SolrService.query(query, rows: rows).map { |x| x["id"] }
         else
           []
         end
