@@ -62,14 +62,22 @@ describe ActiveFedora::SolrService do
   describe "#query" do
     let(:doc) { { 'id' => 'x' } }
     let(:docs) { [doc] }
+    let(:stub_result) { { 'response' => { 'docs' => docs } } }
+    before do
+      allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
+    end
 
     it "wraps the solr response documents in Solr hits" do
-      stub_result = { 'response' => { 'docs' => docs } }
-      expect(mock_conn).to receive(:get).with('select', params: { q: 'querytext', qt: 'standard' }).and_return(stub_result)
-      allow(described_class).to receive(:instance).and_return(double("instance", conn: mock_conn))
-      result = described_class.query('querytext')
+      expect(mock_conn).to receive(:get).with('select', params: { rows: 2, q: 'querytext', qt: 'standard' }).and_return(stub_result)
+      result = described_class.query('querytext', rows: 2)
       expect(result.size).to eq 1
       expect(result.first.id).to eq 'x'
+    end
+
+    it "warns about not passing rows" do
+      allow(mock_conn).to receive(:get).and_return(stub_result)
+      expect(ActiveFedora::Base.logger).to receive(:warn).with(/^Calling ActiveFedora::SolrService\.get without passing an explicit value for ':rows' is not recommended/)
+      described_class.query('querytext')
     end
   end
 

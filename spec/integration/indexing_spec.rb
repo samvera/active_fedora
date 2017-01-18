@@ -83,7 +83,7 @@ describe ActiveFedora::Base do
     before { gf.update(permissions_attributes: [{ id: p1.id, _destroy: 'true' }]) }
 
     it "saves to solr correctly" do
-      result = ActiveFedora::SolrService.query("id:#{gf.id}").first['permissions_ssim']
+      result = ActiveFedora::SolrService.query("id:#{gf.id}", rows: 10).first['permissions_ssim']
       expect(result).to eq [p2.id]
     end
   end

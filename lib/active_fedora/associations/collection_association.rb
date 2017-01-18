@@ -301,7 +301,7 @@ module ActiveFedora
         def find_target
           # TODO: don't reify, just store the solr results and lazily reify.
           # For now, we set a hard limit of 1000 results.
-          records = ActiveFedora::QueryResultBuilder.reify_solr_results(load_from_solr(rows: 1000))
+          records = ActiveFedora::QueryResultBuilder.reify_solr_results(load_from_solr(rows: SolrService::MAX_ROWS))
           records.each { |record| set_inverse_instance(record) }
           records
         rescue ObjectNotFoundError, Ldp::Gone => e

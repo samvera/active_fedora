@@ -61,7 +61,7 @@ module ActiveFedora
         def filter_by_class(candidate_uris)
           return [] if candidate_uris.empty?
           ids = candidate_uris.map { |uri| ActiveFedora::Base.uri_to_id(uri) }
-          results = ActiveFedora::SolrService.query(ActiveFedora::SolrQueryBuilder.construct_query_for_ids(ids), rows: 10_000)
+          results = ActiveFedora::SolrService.query(ActiveFedora::SolrQueryBuilder.construct_query_for_ids(ids), rows: SolrService::MAX_ROWS)
 
           results.select { |result| result.model? reflection.klass }.map(&:rdf_uri)
         end
