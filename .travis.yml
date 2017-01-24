@@ -9,5 +9,7 @@ matrix:
     - env: "RSOLR_VERSION=2.0.0.pre1"
 global_env:
   - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
+before_install:
+  - gem update --system
 before_script:
   - jdk_switcher use oraclejdk8
