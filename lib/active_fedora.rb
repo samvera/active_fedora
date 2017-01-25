@@ -72,7 +72,6 @@ module ActiveFedora #:nodoc:
     autoload :FilePersistence
     autoload :FileRelation
     autoload :FilesHash
-    autoload :Filter
     autoload :FixityService
     autoload :Identifiable
     autoload :Indexers
