@@ -262,6 +262,22 @@ module ActiveFedora #:nodoc:
         true
       end
     end
+
+    # ActiveSupport::Autoload automatically defines
+    # an eager_load! method. In this case, we are
+    # extending the method to also eager load the
+    # components inside ActiveFedora.
+    def eager_load!
+      super
+      ActiveFedora::Scoping.eager_load!
+      ActiveFedora::Aggregation.eager_load!
+      ActiveFedora::Associations.eager_load!
+      ActiveFedora::Attributes.eager_load!
+      ActiveFedora::AttributeMethods.eager_load!
+      ActiveFedora::Indexers.eager_load!
+      ActiveFedora::Indexing.eager_load!
+      ActiveFedora::Orders.eager_load!
+    end
   end
 
   self.configurator ||= ActiveFedora::FileConfigurator.new
