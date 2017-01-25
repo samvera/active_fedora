@@ -1,3 +1,14 @@
+v11.1.2
+2017-01-25: Eager load all the code in eager_load blocks [Justin Coyne]
+
+2017-01-25: Eager load ActiveFedora [Justin Coyne]
+
+2017-01-24: Ensuring up to date system gems [Jeremy Friesen]
+
+2017-01-18: Warn if you don't pass :rows to SolrService.query [Justin Coyne]
+
+2017-01-13: Ensuring NullLogger responds to logging questions [Jeremy Friesen]
+
 v11.1.1
 2017-01-13: Don't modify passed in attributes [Justin Coyne]
 
