@@ -221,6 +221,10 @@ Style/ZeroLengthPredicate:
   Exclude:
     - 'lib/active_fedora/file/attributes.rb'
 
+Performance/RedundantMerge:
+  Exclude:
+    - 'lib/active_fedora/railtie.rb'
+
 Rails:
   Enabled: true
 

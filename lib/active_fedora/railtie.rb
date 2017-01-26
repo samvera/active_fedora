@@ -2,6 +2,10 @@ module ActiveFedora
   class Railtie < Rails::Railtie
     config.app_middleware.insert_after ::ActionDispatch::Callbacks,
                                        ActiveFedora::LdpCache
+    config.action_dispatch.rescue_responses.merge!(
+      "ActiveFedora::ObjectNotFoundError" => :not_found
+    )
+
     config.eager_load_namespaces << ActiveFedora
 
     initializer 'active_fedora.autoload', before: :set_autoload_paths do |app|
