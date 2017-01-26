@@ -112,7 +112,7 @@ module ActiveFedora
       result = search_with_conditions({ id: id }, opts)
 
       if result.empty?
-        raise ActiveFedora::ObjectNotFoundError, "Object #{id} not found in solr"
+        raise ActiveFedora::ObjectNotFoundError, "Object '#{id}' not found in solr"
       end
 
       result.first
@@ -191,8 +191,13 @@ module ActiveFedora
       def load_from_fedora(id, cast)
         raise ActiveFedora::ObjectNotFoundError if id.empty?
         resource = ActiveFedora.fedora.ldp_resource_service.build(klass, id)
-        raise ActiveFedora::ObjectNotFoundError if resource.new?
+        raise_record_not_found_exception!(id) if resource.new?
         class_to_load(resource, cast).allocate.init_with_resource(resource) # Triggers the find callback
+      end
+
+      def raise_record_not_found_exception!(id)
+        name = @klass.name
+        raise ActiveFedora::ObjectNotFoundError, "Couldn't find #{name} with 'id'=#{id}"
       end
 
       def class_to_load(resource, cast)
