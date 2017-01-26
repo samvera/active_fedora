@@ -101,7 +101,7 @@ describe ActiveFedora::FinderMethods do
       end
 
       it "returns the document" do
-        expect { finder.search_by_id('x') }.to raise_error ActiveFedora::ObjectNotFoundError
+        expect { finder.search_by_id('x') }.to raise_error ActiveFedora::ObjectNotFoundError, "Object 'x' not found in solr"
       end
     end
   end

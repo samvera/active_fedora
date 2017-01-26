@@ -56,7 +56,7 @@ describe ActiveFedora::Base do
     describe "with :cast false" do
       describe "and an id is specified" do
         it "raises an exception if it is not found" do
-          expect { SpecModel::Basic.find("_ID_") }.to raise_error ActiveFedora::ObjectNotFoundError
+          expect { SpecModel::Basic.find("_ID_") }.to raise_error ActiveFedora::ObjectNotFoundError, "Couldn't find SpecModel::Basic with 'id'=_ID_"
         end
       end
     end
