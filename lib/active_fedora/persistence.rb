@@ -41,6 +41,15 @@ module ActiveFedora
 
     alias update_attributes update
 
+    # Updates its receiver just like #update but calls #save! instead
+    # of +save+, so an exception is raised if the record is invalid and saving will fail.
+    def update!(attributes)
+      assign_attributes(attributes)
+      save!
+    end
+
+    alias update_attributes! update!
+
     # Deletes an object from Fedora and deletes the indexed record from Solr.
     # Delete does not run any callbacks, so consider using _destroy_ instead.
     # @param [Hash] opts

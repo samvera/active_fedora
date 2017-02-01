@@ -41,11 +41,34 @@ describe ActiveFedora::Base do
   end
 
   describe "#save!" do
-    before { allow(validation_stub).to receive(:_create_record) } # prevent saving to Fedora/Solr
+    before { expect(validation_stub).to receive(:_create_record) } # prevent saving to Fedora/Solr
 
     it "validates only once" do
       expect(validation_stub).to receive(:perform_validations).once.and_return(true)
       validation_stub.save!
+    end
+  end
+
+  describe "#update!" do
+    before do
+      allow(validation_stub).to receive(:new_record?).and_return(false)
+    end
+    context "when validations work" do
+      it "saves the record" do
+        expect(validation_stub).to receive(:_update_record) # prevent saving to Fedora/Solr
+        expect(validation_stub).to receive(:perform_validations).once.and_return(true)
+        validation_stub.update!(fubar: ['here'], swank: 'long enough')
+        expect(validation_stub.fubar).to eq ['here']
+      end
+    end
+
+    context "when validations fail" do
+      it "raises an error" do
+        expect(validation_stub).not_to receive(:_update_record)
+        expect(validation_stub).to receive(:perform_validations).once.and_return(false)
+        expect { validation_stub.update!(fubar: ['here'], swank: 'long enough') }.to raise_error ActiveFedora::RecordInvalid
+        expect(validation_stub.fubar).to eq ['here']
+      end
     end
   end
 end
