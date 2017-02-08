@@ -1,14 +1,14 @@
 require 'spec_helper'
 
-describe ActiveFedora::Base do
-  let(:model) { Source.new }
-
+describe ActiveFedora::Associations::BasicContainsAssociation do
   context "with a file" do
     before do
       class Source < ActiveFedora::Base
         is_a_container
       end
     end
+
+    let(:model) { Source.new }
 
     after do
       Object.send(:remove_const, :Source)
@@ -102,6 +102,19 @@ describe ActiveFedora::Base do
         expect { model.contains.destroy_all }
           .to change { model.contains.size }.by(-2)
           .and change { Thing.count }.by(-2)
+      end
+    end
+
+    describe "#reload" do
+      before do
+        model.save!
+        child = model.contains.create(title: ['title 1'])
+        model.reload # Cause the model to load its graph that contains the child ids.
+        ActiveFedora::Base.find(child.id).destroy
+      end
+
+      it "can reload without attempting to load any deleted objects" do
+        expect { model.contains.reload }.not_to raise_error
       end
     end
   end
