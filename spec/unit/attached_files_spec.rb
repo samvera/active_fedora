@@ -187,4 +187,27 @@ describe ActiveFedora::AttachedFiles do
       expect(af_base.metadata_streams).to_not include(file_ds)
     end
   end
+
+  context "When the resource is using idiomatic basic containment" do
+    before do
+      class Sample1 < ActiveFedora::Base
+        is_a_container
+      end
+    end
+    after do
+      Object.send(:remove_const, :Sample1)
+    end
+
+    before do
+      child = obj.contains.build
+      child.content = "Stuff"
+      child.save!
+    end
+    let(:obj) { Sample1.create! }
+    let(:obj2) { Sample1.find(obj.id) }
+
+    it "doesn't conflate attached_file and contains" do
+      expect(obj2.attached_files.keys).to be_empty
+    end
+  end
 end
