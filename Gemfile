@@ -11,3 +11,4 @@ end
 gem 'jruby-openssl', :platform=> :jruby
 gem 'activemodel', ENV['RAILS_VERSION'] if ENV['RAILS_VERSION']
 gem 'linkeddata', '~> 1.99'
+gem 'rake', '< 12'

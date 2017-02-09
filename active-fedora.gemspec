@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'om', '~> 3.1'
   s.add_dependency 'nom-xml', '>= 0.5.1'
   s.add_dependency "activesupport", '>= 3.0.0'
-  s.add_dependency "rubydora", '~> 1.8'
+  s.add_dependency "rubydora", '~> 1.8', '< 3'
   s.add_dependency "active-triples", '~> 0.2.2'
   s.add_dependency "rdf-rdfxml", '~> 1.1'
   s.add_dependency "deprecation"
@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rake"
   s.add_development_dependency "jettywrapper", ">=1.4.0"
   s.add_development_dependency "rspec", "~> 2.99"
-  s.add_development_dependency "rspec-its"
+  s.add_development_dependency "rspec-its", "~> 1.0.1"
   s.add_development_dependency "equivalent-xml"
   s.add_development_dependency "rest-client"
   s.add_development_dependency "webmock"
