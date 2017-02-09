@@ -17,6 +17,16 @@ module ActiveFedora
         record.base_path_for_resource = owner.uri.to_s
         super
       end
+
+      def reset
+        # Update the membership triples (and no other triples) on the the owner's resource
+        if owner.persisted?
+          pattern = ::RDF::Query::Pattern.new(predicate: options[:predicate])
+          new_resource = owner.dup.reload.resource
+          owner.resource.delete_insert([pattern], new_resource.query(pattern))
+        end
+        super
+      end
     end
   end
 end
