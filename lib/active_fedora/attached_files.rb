@@ -33,7 +33,11 @@ module ActiveFedora
       resource.query(subject: resource, predicate: ::RDF::Vocab::LDP.contains).objects.map(&:to_s)
     end
 
+    # Load any undeclared relationships or has_subresource relationships.  These are non-idiomatic LDP
+    # because we are going to find the subresource by knowing it's subpath ahead of time.
+    # Does nothing if this object is using idiomatic basic containment, by declaring `is_a_container`
     def load_attached_files
+      return if reflections[:contains] && reflections[:contains].macro == :is_a_container
       contains_assertions.each do |file_uri|
         path = file_uri.to_s.sub(uri + '/', '')
         next if association(path.to_sym)
