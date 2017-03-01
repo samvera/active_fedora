@@ -2,8 +2,6 @@ require 'spec_helper'
 
 describe ActiveFedora::Base do
   describe ".uri_prefix" do
-    let(:path) { "foo" }
-
     before do
       class FooHistory < ActiveFedora::Base
         def uri_prefix
@@ -18,6 +16,7 @@ describe ActiveFedora::Base do
     end
 
     subject(:history) { FooHistory.new(title: ["Root foo"]) }
+    let(:path) { "foo" }
 
     it { is_expected.to have_uri_prefix }
 

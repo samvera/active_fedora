@@ -28,17 +28,17 @@ describe ActiveFedora::Associations::HasManyAssociation do
       end
 
       context "when the owner is not saved, and potential targets (Books) exist" do
+        subject { library.books.count }
         let!(:book) { Book.create }
         let(:library) { Library.new }
-        subject { library.books.count }
         # it excludes the books that aren't associated
         it { is_expected.to eq 0 }
       end
 
       context "when the owner is saved with associations" do
+        subject { library.reload; library.books.count }
         let(:book) { Book.create }
         let!(:library) { Library.create(books: [book]) }
-        subject { library.reload; library.books.count }
         # it excludes the books that are associated
         it { is_expected.to eq 1 }
       end
@@ -55,13 +55,13 @@ describe ActiveFedora::Associations::HasManyAssociation do
       end
 
       context "loading the association prior to a save that affects the association" do
-        let(:library) { Library.new }
         before do
           Book.create
           library.books
           library.save
         end
         subject { library.books.size }
+        let(:library) { Library.new }
         it { is_expected.to eq 0 }
       end
     end
@@ -396,8 +396,6 @@ describe ActiveFedora::Associations::HasManyAssociation do
         Object.send(:remove_const, :Library)
       end
 
-      let(:library) { Library.create }
-
       before do
         library.books.create(title: ["Great Book"])
         library.books.first.title = ["Better book"]
@@ -405,6 +403,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       end
 
       subject(:books) { library.books(true) }
+      let(:library) { Library.create }
 
       it "saves the new title" do
         expect(books.first.title).to eq ["Better book"]

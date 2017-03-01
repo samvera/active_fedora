@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe ActiveFedora::FilePathBuilder do
   describe ".build" do
-    let(:parent) { ActiveFedora::Base.new(id: '1234') }
     subject { described_class.build(parent, nil, 'FOO') }
+    let(:parent) { ActiveFedora::Base.new(id: '1234') }
 
     it { is_expected.to eq 'FOO1' }
 

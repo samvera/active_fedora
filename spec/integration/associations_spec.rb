@@ -16,8 +16,8 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :Person)
     end
 
-    let(:person) { Person.create }
     subject(:book) { Book.new(author: person) }
+    let(:person) { Person.create }
 
     it "goes" do
       book.save
@@ -523,14 +523,15 @@ describe ActiveFedora::Base do
       end
 
       describe "removing association" do
-        let(:p1) { Page.create }
-        let(:p2) { Page.create }
         subject(:book) do
           book = LibraryBook.create
           book.pages << p1 << p2
           book.save!
           book
         end
+        let(:p1) { Page.create }
+        let(:p2) { Page.create }
+
         it "saves between the before and after hooks" do
           expect(book).to receive(:before_count).with(1)
           expect(book).to receive(:after_count).with(0)

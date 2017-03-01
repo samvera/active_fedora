@@ -114,8 +114,8 @@ describe "Indirect containers" do
       let(:reloaded) { FooHistory.find(o.id) }
 
       context "with no related_objects" do
-        let(:o) { FooHistory.new }
         subject { o.related_objects }
+        let(:o) { FooHistory.new }
 
         it { is_expected.to be_empty }
         it { is_expected.to eq [] }
@@ -263,8 +263,8 @@ describe "Indirect containers" do
       let(:reloaded) { FooHistory.find(o.id) }
 
       context "with no related_objects" do
-        let(:o) { FooHistory.new }
         subject { o.related_objects }
+        let(:o) { FooHistory.new }
 
         it { is_expected.to be_empty }
         it { is_expected.to eq [] }

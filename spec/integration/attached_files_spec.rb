@@ -37,10 +37,9 @@ describe ActiveFedora::AttachedFiles do
       end
     end
 
+    subject { ds.content }
     let(:file) { DSTest.create }
     let(:ds) { file.test_ds }
-
-    subject { ds.content }
 
     after do
       Object.send(:remove_const, :DSTest)

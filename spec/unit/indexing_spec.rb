@@ -53,9 +53,8 @@ describe ActiveFedora::Indexing do
       Object.send(:remove_const, :SpecNode)
     end
 
-    let(:test_object) { SpecNode.new(title: ['first title'], abstract: 'The abstract') }
-
     subject(:solr_doc) { test_object.to_solr }
+    let(:test_object) { SpecNode.new(title: ['first title'], abstract: 'The abstract') }
 
     it "indexs the rdf properties" do
       expect(solr_doc).to include('title_tesim' => ['first title'], 'abstract_ssi' => 'The abstract')

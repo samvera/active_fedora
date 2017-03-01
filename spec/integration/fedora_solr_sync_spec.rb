@@ -17,8 +17,8 @@ describe "fedora_solr_sync_issues" do
     Object.send(:remove_const, :ParentThing)
   end
 
-  let(:parent) { ParentThing.create }
   subject(:child) { ChildThing.create parent: parent }
+  let(:parent) { ParentThing.create }
 
   before { Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, child.uri).delete }
 

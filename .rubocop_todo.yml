@@ -20,10 +20,6 @@ RSpec/BeforeAfterAll:
 RSpec/ExampleLength:
   Enabled: false
 
-# Offense count: 40
-RSpec/LeadingSubject:
-  Enabled: false
-
 # Offense count: 15
 RSpec/LetSetup:
   Exclude:

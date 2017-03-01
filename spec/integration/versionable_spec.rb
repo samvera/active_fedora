@@ -32,6 +32,8 @@ describe ActiveFedora::Versionable do
     end
 
     describe 'sorting versions' do
+      subject(:graph) { ActiveFedora::VersionsGraph.new }
+
       before do
         allow(graph).to receive(:fedora_versions) { versions }
       end
@@ -39,8 +41,6 @@ describe ActiveFedora::Versionable do
       let(:version1) { instance_double(ActiveFedora::VersionsGraph::ResourceVersion, uri: 'http://localhost:8983/fedora/rest/test/84/61/63/98/84616398-f63a-4572-ba01-0689339e4fcb/fcr:versions/87a0a8c317f1e711aa993d-e1d2-4a65-93ee-3a12fc9541ab', label: 'version1', created: '2015-04-02T19:54:45.962Z') }
       let(:version2) { instance_double(ActiveFedora::VersionsGraph::ResourceVersion, uri: 'http://localhost:8983/fedora/rest/test/84/61/63/98/84616398-f63a-4572-ba01-0689339e4fcb/fcr:versions/87a0a8c317f1e790373a67-c9ee-447d-b740-4faa882b1a1f', label: 'version2', created: '2015-04-02T19:54:45.96Z') }
       let(:versions) { [version1, version2] }
-
-      subject(:graph) { ActiveFedora::VersionsGraph.new }
 
       it 'sorts by DateTime' do
         expect(graph.first).to eq version2

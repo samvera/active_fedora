@@ -24,8 +24,8 @@ describe ActiveFedora::WithMetadata::MetadataNode do
   end
 
   describe "changes_for_update" do
-    let(:changes_for_update) { node.send(:changes_for_update) }
     subject { changes_for_update }
+    let(:changes_for_update) { node.send(:changes_for_update) }
 
     context "when type is not set" do
       it { is_expected.to eq({}) }

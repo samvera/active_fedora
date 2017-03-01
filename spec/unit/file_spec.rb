@@ -1,29 +1,27 @@
 require 'spec_helper'
 
 describe ActiveFedora::File do
-  let(:file) { described_class.new }
-
-  subject(:af_file) { file }
+  subject(:af_file) { described_class.new }
 
   it { is_expected.not_to be_metadata }
 
   describe "#save!" do
     context "when updating metadata" do
       before do
-        file.content = 'foo'
-        file.save!
-        file.mime_type = 'application/pdf'
+        af_file.content = 'foo'
+        af_file.save!
+        af_file.mime_type = 'application/pdf'
       end
 
       it "Updates metadata" do
-        expect(file.metadata).to receive(:save)
-        file.save!
+        expect(af_file.metadata).to receive(:save)
+        af_file.save!
       end
     end
   end
 
   describe "#behaves_like_io?" do
-    subject { file.send(:behaves_like_io?, object) }
+    subject { af_file.send(:behaves_like_io?, object) }
 
     context "with a File" do
       let(:object) { File.new __FILE__ }
@@ -43,20 +41,20 @@ describe ActiveFedora::File do
   end
 
   describe "#uri" do
-    subject(:uri) { file.uri }
+    subject(:uri) { af_file.uri }
 
     context "when the file is in an ldp:BasicContainer" do
       let(:parent) { ActiveFedora::Base.new(id: '1234') }
 
       context "and it's initialized with the URI" do
-        let(:file) { described_class.new(parent.uri + "/FOO1") }
+        let(:af_file) { described_class.new(parent.uri + "/FOO1") }
         it "works" do
           expect(uri.to_s).to eq "#{ActiveFedora.fedora.base_uri}/1234/FOO1"
         end
       end
 
       context "and it's initialized with an ID" do
-        let(:file) { described_class.new(parent.id + "/FOO1") }
+        let(:af_file) { described_class.new(parent.id + "/FOO1") }
         it "works" do
           expect(uri.to_s).to eq "#{ActiveFedora.fedora.base_uri}/1234/FOO1"
         end
@@ -184,12 +182,12 @@ describe ActiveFedora::File do
 
   context "when the file has local content" do
     before do
-      file.uri = "http://localhost:8983/fedora/rest/test/1234/abcd"
-      file.content = "hi there"
+      af_file.uri = "http://localhost:8983/fedora/rest/test/1234/abcd"
+      af_file.content = "hi there"
     end
 
     describe "#inspect" do
-      subject { file.inspect }
+      subject { af_file.inspect }
       it { is_expected.to eq "#<ActiveFedora::File uri=\"http://localhost:8983/fedora/rest/test/1234/abcd\" >" }
     end
   end
@@ -214,11 +212,11 @@ describe ActiveFedora::File do
   end
 
   context "original_name" do
-    subject { file.original_name }
+    subject { af_file.original_name }
 
     context "on a new file" do
       context "that has a name set locally" do
-        before { file.original_name = "my_image.png" }
+        before { af_file.original_name = "my_image.png" }
         it { is_expected.to eq "my_image.png" }
       end
 
@@ -252,7 +250,7 @@ describe ActiveFedora::File do
   end
 
   context "digest" do
-    subject { file.digest }
+    subject(:digest) { af_file.digest }
 
     context "on a new file" do
       it { is_expected.to be_empty }
@@ -274,11 +272,11 @@ describe ActiveFedora::File do
         predicate = ::RDF::URI("http://fedora.info/definitions/v4/repository#digest")
         object = RDF::URI.new("urn:sha1:f1d2d2f924e986ac86fdf7b36c94bcdf32beec15")
         graph = ActiveTriples::Resource.new
-        graph << RDF::Statement.new(file.uri, predicate, object)
-        allow(file).to receive_message_chain(:metadata, :ldp_source, :graph).and_return(graph)
+        graph << RDF::Statement.new(af_file.uri, predicate, object)
+        allow(af_file).to receive_message_chain(:metadata, :ldp_source, :graph).and_return(graph)
       end
       it "falls back on fedora:digest if premis:hasMessageDigest is not present" do
-        expect(file.digest.first).to be_kind_of RDF::URI
+        expect(digest.first).to be_kind_of RDF::URI
       end
     end
   end
@@ -308,14 +306,14 @@ describe ActiveFedora::File do
   end
 
   describe "#create_date" do
-    subject { file.create_date }
+    subject { af_file.create_date }
     describe "when new record" do
       it { is_expected.to be_nil }
     end
     describe "when persisted" do
       before do
-        file.content = "foo"
-        file.save!
+        af_file.content = "foo"
+        af_file.save!
       end
       it { is_expected.to be_a(DateTime) }
     end

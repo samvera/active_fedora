@@ -63,8 +63,8 @@ describe ActiveFedora::Base do
         Object.send(:remove_const, :FooHistory)
       end
 
-      let(:instance) { FooHistory.new(title: ['A label']) }
       subject { instance.rdf_label }
+      let(:instance) { FooHistory.new(title: ['A label']) }
 
       it { is_expected.to eq ['A label'] }
     end
@@ -88,8 +88,8 @@ describe ActiveFedora::Base do
         Object.send(:remove_const, :Creator)
       end
 
-      let(:instance) { Creator.new(foaf_name: ['Carolyn'], job: ['Developer']) }
       subject { instance.rdf_label }
+      let(:instance) { Creator.new(foaf_name: ['Carolyn'], job: ['Developer']) }
 
       it { is_expected.to eq ['Developer'] }
     end

@@ -14,11 +14,12 @@ describe ActiveFedora::Associations::CollectionProxy do
   end
 
   describe "#spawn" do
+    subject { proxy.spawn }
+
     let(:reflection)  { ActiveFedora::Reflection.create(:has_many, :pages, nil, { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isMemberOfCollection }, Book) }
     let(:association) { ActiveFedora::Associations::HasManyAssociation.new(Book.new, reflection) }
     let(:proxy)       { described_class.new(association) }
 
-    subject { proxy.spawn }
     it { is_expected.to be_instance_of ActiveFedora::Relation }
   end
 end
