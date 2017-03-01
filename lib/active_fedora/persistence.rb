@@ -205,8 +205,7 @@ module ActiveFedora
       end
 
       # Override to tie in an ID minting service
-      def assign_id
-      end
+      def assign_id; end
 
       # This is only used when creating a new record. If the object doesn't have an id
       # and assign_id can mint an id for the object, then assign it to the resource.

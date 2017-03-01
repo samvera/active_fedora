@@ -28,7 +28,6 @@ module ActiveFedora
     private
 
       # Don't allow directly setting contained
-      def contained=(*_args)
-      end
+      def contained=(*_args); end
   end
 end

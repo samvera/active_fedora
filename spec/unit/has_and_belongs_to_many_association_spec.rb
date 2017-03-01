@@ -77,8 +77,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     before do
       class Collection < ActiveFedora::Base
         has_and_belongs_to_many :members, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasCollectionMember, class_name: "ActiveFedora::Base", after_remove: :remove_member
-        def remove_member(_m)
-        end
+        def remove_member(_m); end
       end
 
       class Thing < ActiveFedora::Base

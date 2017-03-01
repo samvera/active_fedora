@@ -7,7 +7,6 @@ module ActiveFedora::Indexers
       self
     end
 
-    def index(_)
-    end
+    def index(_); end
   end
 end

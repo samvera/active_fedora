@@ -511,8 +511,7 @@ describe ActiveFedora::Base do
             after_count(m.reload.library_books.count)
           end
 
-          def say_hi(_var)
-          end
+          def say_hi(_var); end
         end
         class Page < ActiveFedora::Base
           has_many :library_books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf

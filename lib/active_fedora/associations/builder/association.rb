@@ -63,8 +63,7 @@ module ActiveFedora::Associations::Builder
       name
     end
 
-    def self.define_extensions(_model, _name)
-    end
+    def self.define_extensions(_model, _name); end
 
     def self.define_callbacks(model, reflection)
       if dependent = reflection.options[:dependent]

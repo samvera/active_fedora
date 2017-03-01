@@ -140,8 +140,7 @@ module ActiveFedora
     end
 
     # serializes any changed data into the content field
-    def serialize!
-    end
+    def serialize!; end
 
     def to_solr(solr_doc = {}, _opts = {})
       solr_doc

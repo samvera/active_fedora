@@ -4,7 +4,7 @@ require 'generators/active_fedora/config/fedora/fedora_generator'
 describe ActiveFedora::Config::FedoraGenerator do
   describe "#fcrepo_wrapper_config" do
     let(:generator) { described_class.new }
-    let(:files_to_test) {[
+    let(:files_to_test) { [
       'config/fcrepo_wrapper_test.yml',
       '.fcrepo_wrapper'
     ]}

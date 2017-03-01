@@ -202,8 +202,7 @@ module ActiveFedora
         # the target is stale.
         #
         # This is only relevant to certain associations, which is why it returns nil by default.
-        def stale_state
-        end
+        def stale_state; end
 
         def build_record(attributes)
           reflection.build_association(attributes) do |record|

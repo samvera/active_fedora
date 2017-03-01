@@ -5,8 +5,7 @@ describe ActiveFedora::QueryResultBuilder do
     before(:all) do
       class AudioRecord < ActiveFedora::Base
         attr_accessor :id
-        def self.connection_for_id(_id)
-        end
+        def self.connection_for_id(_id); end
       end
       @sample_solr_hits = [{ "id" => "my:_ID1_", ActiveFedora.index_field_mapper.solr_name("has_model", :symbol) => ["AudioRecord"] },
                            { "id" => "my:_ID2_", ActiveFedora.index_field_mapper.solr_name("has_model", :symbol) => ["AudioRecord"] },

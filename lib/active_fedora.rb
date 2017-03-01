@@ -196,11 +196,11 @@ module ActiveFedora #:nodoc:
     #  ActiveFedora.environment => "test"
     def environment
       if config_options.fetch(:environment, nil)
-        return config_options[:environment]
+        config_options[:environment]
       elsif defined?(Rails.env) && !Rails.env.nil?
-        return Rails.env.to_s
+        Rails.env.to_s
       elsif defined?(ENV['environment']) && !ENV['environment'].nil?
-        return ENV['environment']
+        ENV['environment']
       elsif defined?(ENV['RAILS_ENV']) && !ENV['RAILS_ENV'].nil?
         raise "You're depending on RAILS_ENV for setting your environment. Please use ENV['environment'] for non-rails environment setting: 'rake foo:bar environment=test'"
       else
