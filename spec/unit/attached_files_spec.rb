@@ -110,20 +110,25 @@ describe ActiveFedora::AttachedFiles do
   end
 
   describe "#accessor_name" do
-    it "uses the name" do
-      expect(af_base.send(:accessor_name, 'abc')).to eq 'abc'
+    subject { af_base.send(:accessor_name, value) }
+    context "with lowercase" do
+      let(:value) { 'abc' }
+      it { is_expected.to eq 'abc' }
     end
 
-    it "uses the name" do
-      expect(af_base.send(:accessor_name, 'ARCHIVAL_XML')).to eq 'ARCHIVAL_XML'
+    context "with uppercase" do
+      let(:value) { 'ARCHIVAL_XML' }
+      it { is_expected.to eq 'ARCHIVAL_XML' }
     end
 
-    it "uses the name" do
-      expect(af_base.send(:accessor_name, 'descMetadata')).to eq 'descMetadata'
+    context "with camelcase" do
+      let(:value) { 'descMetadata' }
+      it { is_expected.to eq 'descMetadata' }
     end
 
-    it "hash-erizes underscores" do
-      expect(af_base.send(:accessor_name, 'a-b')).to eq 'a_b'
+    context "with dashes" do
+      let(:value) { 'a-b' }
+      it { is_expected.to eq 'a_b' }
     end
   end
 

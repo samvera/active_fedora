@@ -44,12 +44,6 @@ RSpec/MultipleExpectations:
 RSpec/NestedGroups:
   Enabled: false
 
-# Offense count: 5
-RSpec/RepeatedDescription:
-  Exclude:
-    - 'spec/unit/attached_files_spec.rb'
-    - 'spec/unit/callback_spec.rb'
-
 # Offense count: 24
 RSpec/ScatteredSetup:
   Exclude:
