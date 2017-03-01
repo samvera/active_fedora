@@ -227,6 +227,7 @@ module ActiveFedora
         root_resource_path
       end
 
+      # Check to see if the :base_path (from fedora.yml) exists in Fedora. If it doesn't exist, then create it.
       def init_root_path
         path = root_resource_path.gsub(/^\//, "")
         ActiveFedora.fedora.connection.head(path)
