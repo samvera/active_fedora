@@ -11,8 +11,8 @@ describe ActiveFedora::Base do
     end
   end
 
-  let(:library) { Library.create }
   subject(:book) { Book.new(library: library, title: "War and Peace", publisher: "Random House") }
+  let(:library) { Library.create }
 
   after do
     Object.send(:remove_const, :Book)
@@ -117,8 +117,8 @@ describe ActiveFedora::Base do
   end
 
   describe "id_to_uri" do
-    let(:id) { '123456w' }
     subject(:uri) { described_class.id_to_uri(id) }
+    let(:id) { '123456w' }
 
     context "with no custom proc is set" do
       it { is_expected.to eq "#{ActiveFedora.fedora.base_uri}/123456w" }
@@ -157,8 +157,8 @@ describe ActiveFedora::Base do
   end
 
   describe "uri_to_id" do
-    let(:uri) { "#{ActiveFedora.fedora.base_uri}/foo/123456w" }
     subject(:uri_id) { described_class.uri_to_id(uri) }
+    let(:uri) { "#{ActiveFedora.fedora.base_uri}/foo/123456w" }
 
     context "with no custom proc is set" do
       it { is_expected.to eq 'foo/123456w' }

@@ -108,7 +108,7 @@ module ActiveFedora
       end
 
       begin
-        fedora_yml = YAML.load(config_erb)
+        fedora_yml = YAML.safe_load(config_erb)
       rescue Psych::SyntaxError => e
         raise "fedora.yml was found, but could not be parsed. " \
               "Error #{e.message}"
@@ -132,7 +132,7 @@ module ActiveFedora
       end
 
       begin
-        solr_yml = YAML.load(config_erb)
+        solr_yml = YAML.safe_load(config_erb)
       rescue StandardError
         raise("solr.yml was found, but could not be parsed.\n")
       end

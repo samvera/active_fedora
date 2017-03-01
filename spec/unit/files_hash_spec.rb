@@ -10,12 +10,11 @@ describe ActiveFedora::FilesHash do
 
   after { Object.send(:remove_const, :FilesContainer) }
 
+  subject(:file_hash) { described_class.new(container) }
   let(:reflection) { instance_double(ActiveFedora::Reflection::MacroReflection) }
   let(:association) { instance_double(ActiveFedora::Associations::SingularAssociation, reader: object) }
   let(:object) { double('object') }
   let(:container) { FilesContainer.new }
-
-  subject(:file_hash) { described_class.new(container) }
 
   describe "#key?" do
     context 'when the key is present' do

@@ -2,10 +2,10 @@ require 'spec_helper'
 
 describe ActiveFedora::Reflection::AssociationReflection do
   describe "#derive_foreign_key" do
+    subject { instance.send :derive_foreign_key }
     let(:name) { 'dummy' }
     let(:options) { { inverse_of: :default_permissions } }
     let(:active_fedora) { instance_double(ActiveFedora::Base) }
-    subject { instance.send :derive_foreign_key }
 
     context "when a has_many" do
       let(:instance) { ActiveFedora::Reflection::HasManyReflection.new(name, nil, options, active_fedora) }
@@ -26,10 +26,10 @@ describe ActiveFedora::Reflection::AssociationReflection do
     end
 
     after { Object.send(:remove_const, :Dummy) }
+    subject { instance.send :automatic_inverse_of }
     let(:name) { 'dummy' }
     let(:options) { { as: 'foothing' } }
     let(:active_fedora) { instance_double(ActiveFedora::Base) }
-    subject { instance.send :automatic_inverse_of }
 
     context "when a has_many" do
       let(:instance) { ActiveFedora::Reflection::HasManyReflection.new(name, nil, options, active_fedora) }

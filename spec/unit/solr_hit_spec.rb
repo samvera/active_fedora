@@ -4,8 +4,7 @@ describe ActiveFedora::SolrHit do
   before(:all) do
     class AudioRecord < ActiveFedora::Base
       attr_accessor :id
-      def self.connection_for_id(_id)
-      end
+      def self.connection_for_id(_id); end
     end
   end
 

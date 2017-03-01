@@ -1,8 +1,8 @@
 require 'spec_helper'
 
 describe ActiveFedora::SparqlInsert do
-  let(:change_set) { ActiveFedora::ChangeSet.new(base, base.resource, base.changed_attributes.keys) }
   subject(:sparql_insert) { described_class.new(change_set.changes) }
+  let(:change_set) { ActiveFedora::ChangeSet.new(base, base.resource, base.changed_attributes.keys) }
 
   context "with a changed object" do
     before do

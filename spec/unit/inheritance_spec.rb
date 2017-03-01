@@ -17,8 +17,9 @@ describe ActiveFedora::Base do
       has_subresource 'barstream', class_name: 'MyDS'
     end
   end
-  let(:f) { Foo.new }
+
   subject(:attached_files) { f.attached_files }
+  let(:f) { Foo.new }
 
   it "doesn't overwrite stream specs" do
     expect(attached_files.values).to match_array [MyDS, MySample]

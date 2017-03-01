@@ -7,7 +7,6 @@ module ActiveFedora
       @instance_variable_name = "@#{@name}"
     end
 
-    def field
-    end
+    def field; end
   end
 end

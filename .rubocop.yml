@@ -266,3 +266,6 @@ RSpec/DescribedClass:
 
 RSpec/NotToNot:
   Enabled: false
+
+RSpec/MessageSpies:
+  Enabled: false

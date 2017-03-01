@@ -242,9 +242,9 @@ describe ActiveFedora::Base do
   end
 
   describe '#search_with_conditions' do
+    subject(:search_with_conditions) { klass.search_with_conditions(conditions) }
     let(:mock_result) { double('Result') }
     let(:klass) { SpecModel::Basic }
-    subject(:search_with_conditions) { klass.search_with_conditions(conditions) }
 
     before do
       expect(ActiveFedora::SolrService).to receive(:query)

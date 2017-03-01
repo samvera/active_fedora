@@ -120,13 +120,13 @@ describe ActiveFedora::Associations::FilterAssociation do
   end
 
   describe "#delete" do
+    subject { image.members }
+
     let(:another_object) { TestObject.new }
     before do
       image.members = [test_object, test_collection, another_object]
       image.child_objects.delete(test_object)
     end
-
-    subject { image.members }
 
     it { is_expected.to contain_exactly test_collection, another_object }
   end

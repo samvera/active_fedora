@@ -15,8 +15,8 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :BarHistory4)
     end
 
-    let(:obj) { BarHistory4.new(title: ['test1']) }
     subject(:history) { obj }
+    let(:obj) { BarHistory4.new(title: ['test1']) }
 
     describe "#attribute_names" do
       context "on an instance" do
@@ -60,8 +60,8 @@ describe ActiveFedora::Base do
           history.library = library
         end
 
-        let(:library) { BarHistory4.create }
         subject(:history) { BarHistory2.new }
+        let(:library) { BarHistory4.create }
 
         after do
           Object.send(:remove_const, :BarHistory2)

@@ -11,6 +11,7 @@ describe ActiveFedora::SolrHit do
     Object.send(:remove_const, :Foo)
   end
 
+  subject(:solr_hit) { described_class.new(doc) }
   let(:another) { Foo.create }
 
   let!(:obj) { Foo.create!(
@@ -19,7 +20,6 @@ describe ActiveFedora::SolrHit do
   ) }
 
   let(:doc) { obj.to_solr }
-  subject(:solr_hit) { described_class.new(doc) }
 
   describe "#reify" do
     let(:solr_reified) { solr_hit.reify }

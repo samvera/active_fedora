@@ -4,7 +4,7 @@ require 'generators/active_fedora/config/solr/solr_generator'
 describe ActiveFedora::Config::SolrGenerator do
   describe "#solr_wrapper_config" do
     let(:generator) { described_class.new }
-    let(:files_to_test) {[
+    let(:files_to_test) { [
       'config/solr_wrapper_test.yml',
       '.solr_wrapper'
     ]}

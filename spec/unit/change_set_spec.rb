@@ -1,8 +1,7 @@
 require 'spec_helper'
 
 describe ActiveFedora::ChangeSet do
-  let(:change_set) { described_class.new(base, base.resource, base.changed_attributes.keys) }
-  subject { change_set }
+  subject(:change_set) { described_class.new(base, base.resource, base.changed_attributes.keys) }
 
   context "with an unchanged object" do
     let(:base) { ActiveFedora::Base.new }

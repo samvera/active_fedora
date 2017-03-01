@@ -1,11 +1,11 @@
 require 'spec_helper'
 
 describe ActiveFedora::DefaultModelMapper do
+  subject(:mapper) { described_class.new classifier_class: classifier, solr_field: solr_field, predicate: predicate }
   let(:classifier) { class_double(ActiveFedora::ModelClassifier) }
   let(:classifier_instance) { instance_double(ActiveFedora::ModelClassifier) }
   let(:solr_field) { 'solr_field' }
   let(:predicate) { 'info:predicate' }
-  subject(:mapper) { described_class.new classifier_class: classifier, solr_field: solr_field, predicate: predicate }
 
   describe '#classifier' do
     context 'with a solr document' do

@@ -10,8 +10,8 @@ describe ActiveFedora::ModelClassifier do
     end
   end
 
-  let(:class_names) { ["ParentClass::SiblingClass", "ParentClass::OtherSiblingClass", "ParentClass::SubclassClass", "ParentClass::NoSuchClass"] }
   subject(:classifier) { described_class.new class_names }
+  let(:class_names) { ["ParentClass::SiblingClass", "ParentClass::OtherSiblingClass", "ParentClass::SubclassClass", "ParentClass::NoSuchClass"] }
 
   describe ".class_from_string" do
     it "returns class constants based on strings" do

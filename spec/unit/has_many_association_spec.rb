@@ -33,10 +33,10 @@ describe ActiveFedora::Associations::HasManyAssociation do
   end
 
   describe "#find_polymorphic_inverse" do
+    subject(:af_page) { association.send(:find_polymorphic_inverse, page) }
+
     let(:book_reflection) { ActiveFedora::Reflection.create(:has_many, 'pages', nil, { predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf }, Book) }
     let(:association) { described_class.new(book, book_reflection) }
-
-    subject(:af_page) { association.send(:find_polymorphic_inverse, page) }
 
     context "when a has_many is present" do
       before do

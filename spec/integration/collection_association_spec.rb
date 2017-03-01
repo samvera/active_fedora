@@ -157,8 +157,8 @@ describe ActiveFedora::Base do
         Object.send(:remove_const, :Foo)
       end
 
-      let(:instance) { Foo::Container.new }
       subject { instance.items }
+      let(:instance) { Foo::Container.new }
 
       it { is_expected.to eq [] }
     end

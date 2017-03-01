@@ -11,8 +11,8 @@ describe ActiveFedora::FixityService do
 
   describe "initialize" do
     context "with a string" do
-      let(:uri) { 'http://path/to/resource' }
       subject { service.target }
+      let(:uri) { 'http://path/to/resource' }
       it { is_expected.to eq 'http://path/to/resource' }
     end
 

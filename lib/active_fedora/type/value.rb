@@ -11,8 +11,7 @@ module ActiveFedora
         @limit = limit
       end
 
-      def type # :nodoc:
-      end
+      def type; end
 
       # Converts a value from database input to the appropriate ruby type. The
       # return value of this method will be returned from
@@ -102,8 +101,7 @@ module ActiveFedora
         [self.class, precision, scale, limit].hash
       end
 
-      def assert_valid_value(*)
-      end
+      def assert_valid_value(*); end
 
       private
 

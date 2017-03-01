@@ -24,7 +24,7 @@ describe ActiveFedora::Base do
     Object.send(:remove_const, :CallbackStub)
   end
 
-  it "has after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
+  it "has after_initialize, before_save, after_save, before_create, after_create" do
     allow_any_instance_of(CallbackStub).to receive(:a_init)
     allow_any_instance_of(CallbackStub).to receive :b_create
     allow_any_instance_of(CallbackStub).to receive :a_create
@@ -34,7 +34,7 @@ describe ActiveFedora::Base do
     @cb.save
   end
 
-  it "has after_initialize, before_save,after_save, before_create, after_create, after_update, before_update, before_destroy" do
+  it "has after_initialize, before_save, after_save, before_create, after_create, after_update, before_update, before_destroy" do
     allow_any_instance_of(CallbackStub).to receive(:a_init)
     allow_any_instance_of(CallbackStub).to receive(:b_create)
     allow_any_instance_of(CallbackStub).to receive(:a_create)
