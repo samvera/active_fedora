@@ -69,5 +69,10 @@ describe "delegating attributes" do
       expect(titled_object).to_not be_title_changed
       expect(titled_object.changes).to be_empty
     end
+
+    it "changes when the shift operator is used" do
+      titled_object.title << "Another Title"
+      expect(titled_object.changes).to have_key :title
+    end
   end
 end

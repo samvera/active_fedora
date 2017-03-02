@@ -3,12 +3,10 @@ module ActiveFedora
     module Dirty
       extend ActiveSupport::Concern
 
-      def set_value(*val)
-        attribute = val.first
+      def dirty_attribute(attribute, values)
         unless [:has_model, :modified_date].include? attribute
-          attribute_will_change!(attribute) unless Array(self[val.first]).to_set == Array(val.last).to_set
+          attribute_will_change!(attribute) unless Array(self[attribute]).to_set == Array(values).to_set
         end
-        super
       end
     end
   end
