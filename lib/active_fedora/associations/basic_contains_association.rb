@@ -22,7 +22,9 @@ module ActiveFedora
         # Update the membership triples (and no other triples) on the the owner's resource
         if owner.persisted?
           pattern = ::RDF::Query::Pattern.new(predicate: options[:predicate])
-          new_resource = owner.dup.reload.resource
+          new_resource = ActiveFedora::Base.uncached do
+            owner.dup.reload.resource
+          end
           owner.resource.delete_insert([pattern], new_resource.query(pattern))
         end
         super
