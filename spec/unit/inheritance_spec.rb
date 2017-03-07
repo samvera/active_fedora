@@ -8,6 +8,9 @@ describe ActiveFedora::Base do
     class MySample < ActiveFedora::File
     end
 
+    class MyDeepSample < MySample
+    end
+
     class Foo < ActiveFedora::Base
       has_subresource 'foostream', class_name: 'MyDS'
       has_subresource 'dcstream', class_name: 'MySample'
@@ -15,6 +18,9 @@ describe ActiveFedora::Base do
 
     class Bar < ActiveFedora::Base
       has_subresource 'barstream', class_name: 'MyDS'
+    end
+
+    class Baz < Bar
     end
   end
 
@@ -25,10 +31,30 @@ describe ActiveFedora::Base do
     expect(attached_files.values).to match_array [MyDS, MySample]
   end
 
+  context 'base_class' do
+    it 'shallow < Base' do
+      expect(Bar.base_class).to eq(Bar)
+    end
+
+    it 'deep < Base' do
+      expect(Baz.base_class).to eq(Bar)
+    end
+
+    it 'shallow < File' do
+      expect(MySample.base_class).to eq(ActiveFedora::File)
+    end
+
+    it 'deep < File' do
+      expect(MyDeepSample.base_class).to eq(ActiveFedora::File)
+    end
+  end
+
   after do
+    Object.send(:remove_const, :Baz)
     Object.send(:remove_const, :Bar)
     Object.send(:remove_const, :Foo)
     Object.send(:remove_const, :MyDS)
+    Object.send(:remove_const, :MyDeepSample)
     Object.send(:remove_const, :MySample)
   end
 end
