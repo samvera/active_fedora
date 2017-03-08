@@ -45,7 +45,7 @@ module ActiveFedora
       # subject.
       @resource ||= self.class.resource_class.new(@ldp_source.graph.rdf_subject,
                                                   data: @ldp_source.graph.graph.data,
-                                                  callback: ->(attrib, values) { dirty_attribute(attrib, values) })
+                                                  on_property_change: ->(attrib, values) { dirty_attribute(attrib, values) })
     end
 
     # You can set the URI to use for the rdf_label on ClassMethods.rdf_label, then on
