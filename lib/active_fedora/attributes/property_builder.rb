@@ -16,7 +16,7 @@ module ActiveFedora::Attributes
       mixin.class_eval <<-CODE, __FILE__, __LINE__ + 1
         def #{name}=(value)
           if value.present? && !value.respond_to?(:each)
-            raise ArgumentError, "You attempted to set the property `#{name}' to a scalar value. However, this property is declared as being multivalued."
+            raise ArgumentError, "You attempted to set the property `#{name}' of \#{id} to a scalar value. However, this property is declared as being multivalued."
           end
           set_value(:#{name}, value)
         end
@@ -28,7 +28,7 @@ module ActiveFedora::Attributes
         def #{name}(*args)
           vals = get_values(:#{name})
           return nil unless vals
-          raise ActiveFedora::ConstraintError, "Expected \\"#{name}\\" to have 0-1 statements, but there are \#{vals.size}" if vals.size > 1
+          raise ActiveFedora::ConstraintError, "Expected \\"#{name}\\" of \#{id} to have 0-1 statements, but there are \#{vals.size}" if vals.size > 1
           vals.first
         end
       CODE
@@ -46,7 +46,7 @@ module ActiveFedora::Attributes
       mixin.class_eval <<-CODE, __FILE__, __LINE__ + 1
         def #{name}=(value)
           if value.respond_to?(:each) # singular
-            raise ArgumentError, "You attempted to set the property `#{name}' to an enumerable value. However, this property is declared as singular."
+            raise ArgumentError, "You attempted to set the property `#{name}' of \#{id} to an enumerable value. However, this property is declared as singular."
           end
           set_value(:#{name}, value)
         end
