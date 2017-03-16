@@ -106,7 +106,6 @@ Style/AndOr:
 Style/AccessorMethodName:
   Exclude:
     - 'lib/active_fedora/with_metadata/metadata_node.rb'
-    - 'lib/active_fedora/predicates.rb'
     - 'lib/active_fedora/fedora_attributes.rb'
     - 'lib/active_fedora/attribute_methods/dirty.rb'
     - 'lib/active_fedora/associations/has_many_association.rb'
@@ -207,7 +206,6 @@ Style/ClassVars:
     - 'spec/unit/finder_methods_spec.rb'
     - 'spec/unit/base_spec.rb'
     - 'spec/integration/indexing_spec.rb'
-    - 'lib/active_fedora/predicates.rb'
     - 'lib/active_fedora/identifiable.rb'
 
 Style/SignalException:
