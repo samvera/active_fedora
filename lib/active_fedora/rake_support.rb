@@ -12,7 +12,7 @@ def with_server(environment)
   # setting port: nil assigns a random port.
   solr_defaults = { port: nil, verbose: true, managed: true }
   fcrepo_defaults = { port: nil, verbose: true, managed: true,
-                      enable_jms: false, fcrepo_home_dir: "fcrepo4-#{environment}-data" }
+                      enable_jms: false, fcrepo_home_dir: "tmp/fcrepo4-#{environment}-data" }
 
   SolrWrapper.wrap(load_config(:solr, environment, solr_defaults)) do |solr|
     ENV["SOLR_#{environment.upcase}_PORT"] = solr.port.to_s
