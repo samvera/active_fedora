@@ -80,7 +80,7 @@ module ActiveFedora
           # Set node subjects to a term in AF JUST so that AF will persist the
           # sub-graphs.
           # TODO: Find a way to fix this.
-          self.nodes = nil
+          resource.set_value(:nodes, [])
           self.nodes += graph.subjects.to_a
           ordered_self.changes_committed!
         end
