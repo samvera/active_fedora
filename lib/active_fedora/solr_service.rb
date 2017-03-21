@@ -64,7 +64,7 @@ module ActiveFedora
         SolrService.get(query, args)['response']['numFound'].to_i
       end
 
-      # @param [Hash] doc the document to index
+      # @param [Hash] doc the document to index, or an array of docs
       # @param [Hash] params
       #   :commit => commits immediately
       #   :softCommit => commit to memory, but don't flush to disk
