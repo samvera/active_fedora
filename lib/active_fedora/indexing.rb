@@ -89,16 +89,14 @@ module ActiveFedora
 
           batch = []
 
-          progress_bar_controller = if progress_bar
-            ProgressBar.create(:total => descendants.count, format: "%t: |%B| %p%% %e")
-          end
+          progress_bar_controller = ProgressBar.create(total: descendants.count, format: "%t: |%B| %p%% %e") if progress_bar
 
           descendants.each do |uri|
             logger.debug "Re-index everything ... #{uri}"
 
             batch << ActiveFedora::Base.find(ActiveFedora::Base.uri_to_id(uri)).to_solr
 
-            if batch.count % batch_size == 0
+            if (batch.count % batch_size).zero?
               SolrService.add(batch, softCommit: softCommit)
               batch.clear
             end
