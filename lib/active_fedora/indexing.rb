@@ -83,12 +83,26 @@ module ActiveFedora
                             end
         end
 
-        def reindex_everything
+        def reindex_everything(batch_size: 50)
           descendants = descendant_uris(ActiveFedora.fedora.base_uri)
           descendants.shift # Discard the root uri
+
+          batch = []
+
           descendants.each do |uri|
             logger.debug "Re-index everything ... #{uri}"
-            ActiveFedora::Base.find(ActiveFedora::Base.uri_to_id(uri)).update_index
+
+            batch << ActiveFedora::Base.find(ActiveFedora::Base.uri_to_id(uri)).to_solr
+
+            if batch.count % batch_size == 0
+              SolrService.add(batch, softCommit: true)
+              batch.clear
+            end
+          end
+
+          if batch.present?
+            SolrService.add(batch, softCommit: true)
+            batch.clear
           end
         end
 
