@@ -83,11 +83,15 @@ module ActiveFedora
                             end
         end
 
-        def reindex_everything(batch_size: 50, softCommit: true)
+        def reindex_everything(batch_size: 50, softCommit: true, progress_bar: false)
           descendants = descendant_uris(ActiveFedora.fedora.base_uri)
           descendants.shift # Discard the root uri
 
           batch = []
+
+          progress_bar_controller = if progress_bar
+            ProgressBar.create(:total => descendants.count, format: "%t: |%B| %p%% %e")
+          end
 
           descendants.each do |uri|
             logger.debug "Re-index everything ... #{uri}"
@@ -98,6 +102,8 @@ module ActiveFedora
               SolrService.add(batch, softCommit: softCommit)
               batch.clear
             end
+
+            progress_bar_controller.increment if progress_bar_controller
           end
 
           if batch.present?
