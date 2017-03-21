@@ -83,7 +83,11 @@ module ActiveFedora
                             end
         end
 
-        def reindex_everything(batch_size: 50, softCommit: true, progress_bar: false)
+        # @param [Integer] batch_size - The number of Fedora objects to process for each SolrService.add call. Default 50.
+        # @param [Boolean] softCommit - Do we perform a softCommit when we add the to_solr objects to SolrService. Default true.
+        # @param [Boolean] progress_bar - If true output progress bar information. Default false.
+        # @param [Boolean] final_commit - If true perform a hard commit to the Solr service at the completion of the batch of updates. Default false.
+        def reindex_everything(batch_size: 50, softCommit: true, progress_bar: false, final_commit: false)
           descendants = descendant_uris(ActiveFedora.fedora.base_uri)
           descendants.shift # Discard the root uri
 
@@ -107,6 +111,11 @@ module ActiveFedora
           if batch.present?
             SolrService.add(batch, softCommit: softCommit)
             batch.clear
+          end
+
+          if final_commit
+            logger.debug "Solr hard commit..."
+            SolrService.commit
           end
         end
 
