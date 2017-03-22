@@ -81,7 +81,7 @@ solr_wrapper
 To start FCRepo, open another shell and run:
 
 ```bash
-fcrepo_wrapper -p 8984
+fcrepo_wrapper -p 8986
 ```
 
 Now you’re ready to run the tests. In the directory where active\_fedora
