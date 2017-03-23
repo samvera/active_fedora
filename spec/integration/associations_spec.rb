@@ -582,7 +582,7 @@ describe ActiveFedora::Base do
         Object.send(:remove_const, :MediaObject)
       end
 
-      it "it should find the reflection that bears the predicate" do
+      it "finds the reflection that bears the predicate" do
         expect(MediaObject.new.association(:baubles).send(:find_reflection)).to eq Bauble._reflect_on_association(:media_object)
       end
     end
@@ -602,7 +602,7 @@ describe ActiveFedora::Base do
         Object.send(:remove_const, :MediaObject)
       end
 
-      it "it should find the reflection that bears the predicate" do
+      it "finds the reflection that bears the predicate" do
         expect(MediaObject.new.association(:parts).send(:find_reflection)).to eq MasterFile._reflect_on_association(:media_object)
       end
     end
@@ -622,7 +622,7 @@ describe ActiveFedora::Base do
         Object.send(:remove_const, :MediaObject)
       end
 
-      it "it should find the reflection that bears the predicate" do
+      it "finds the reflection that bears the predicate" do
         expect(MediaObject.new.association(:baubles).send(:find_reflection)).to eq MediaObject._reflect_on_association(:baubles)
       end
     end
