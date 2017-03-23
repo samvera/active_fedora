@@ -43,13 +43,33 @@ describe ActiveFedora::Base do
       end
     end
 
+    describe "when some of the descendants are prioritized models" do
+      around do |example|
+        class PriorityModel < ActiveFedora::Base
+        end
+        original_defaults = ActiveFedora::Indexing::DescendantFetcher.default_priority_models
+        ActiveFedora::Indexing::DescendantFetcher.default_priority_models = ["PriorityModel"]
+
+        example.run
+
+        ActiveFedora::Indexing::DescendantFetcher.default_priority_models = original_defaults
+        Object.send(:remove_const, :PriorityModel)
+      end
+      let(:ids) { ['foo', 'bar'] }
+      let!(:priority_models) { [PriorityModel.create, PriorityModel.create] }
+
+      it "puts prioritized model ids first" do
+        expect(described_class.descendant_uris(ActiveFedora.fedora.base_uri).slice(0..(priority_models.count - 1))).to contain_exactly(*priority_models.collect(&:uri).collect(&:to_s))
+      end
+    end
+
     describe "reindex_everything" do
       let(:ids) { ['foo', 'bar'] }
       let(:solr) { ActiveFedora::SolrService.instance.conn }
       before do
         solr.delete_by_query('*:*', params: { 'softCommit' => true })
       end
-      it "calls update_index on every object represented in the sitemap" do
+      it "adds object to solr" do
         expect {
           described_class.reindex_everything
         }.to change { ActiveFedora::SolrService.query('id:foo').size }.from(0).to(1)
