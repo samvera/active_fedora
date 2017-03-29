@@ -12,8 +12,13 @@ module ActiveFedora
     extend ActiveSupport::Autoload
 
     eager_autoload do
-      autoload :Map
+      autoload :DefaultDescriptors
+      autoload :Descriptor
       autoload :DescendantFetcher
+      autoload :FieldMapper
+      autoload :Inserter
+      autoload :Map
+      autoload :Suffix
     end
 
     included do

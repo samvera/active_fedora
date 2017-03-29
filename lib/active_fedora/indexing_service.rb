@@ -32,8 +32,8 @@ module ActiveFedora
     # @return [Hash] the solr document
     def generate_solr_document
       solr_doc = {}
-      Solrizer.set_field(solr_doc, 'system_create', c_time, :stored_sortable)
-      Solrizer.set_field(solr_doc, 'system_modified', m_time, :stored_sortable)
+      ActiveFedora.index_field_mapper.set_field(solr_doc, 'system_create', c_time, :stored_sortable)
+      ActiveFedora.index_field_mapper.set_field(solr_doc, 'system_modified', m_time, :stored_sortable)
       solr_doc[QueryResultBuilder::HAS_MODEL_SOLR_FIELD] = object.has_model
       solr_doc[ActiveFedora.id_field.to_sym] = object.id
       object.declared_attached_files.each do |name, file|
