@@ -32,7 +32,7 @@ module ActiveFedora
                              [:stored_searchable, { type: :text }]
                            else
                              [opts[0], opts[1] || { type: :string }]
-        end
+                           end
 
         indexer(index_type).name_and_converter(field_name, args).first
       end
@@ -80,7 +80,7 @@ module ActiveFedora
                       single_value
                     else
                       single_value.to_s
-            end
+                    end
 
             # Add mapped name & value, unless it's a duplicate
             if descriptor.evaluate_suffix(data_type).multivalued?
@@ -110,8 +110,7 @@ module ActiveFedora
                          index_type
                        else
                          raise Solrizer::InvalidIndexDescriptor, "#{index_type.class} is not a valid indexer_type. Use a String, Symbol or Descriptor."
-            # IndexDescriptors::Descriptor.new(*index_type)
-          end
+                       end
 
           raise InvalidIndexDescriptor, "index type should be an Descriptor, you passed: #{index_type.class}" unless index_type.is_a? Descriptor
           index_type
@@ -120,7 +119,7 @@ module ActiveFedora
         # @param index_type [Symbol]
         # search through the descriptors (class attribute) until a module is found that responds to index_type, then call it.
         def index_type_macro(index_type)
-          klass = self.class.descriptors.find { |klass| klass.respond_to? index_type }
+          klass = self.class.descriptors.find { |descriptor_klass| descriptor_klass.respond_to? index_type }
           if klass
             klass.send(index_type)
           else
@@ -131,6 +130,7 @@ module ActiveFedora
         def extract_type(value)
           case value
           when NilClass
+            nil
           when Integer # In ruby < 2.4, Fixnum extends Integer
             :integer
           when DateTime

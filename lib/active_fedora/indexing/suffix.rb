@@ -38,7 +38,7 @@ module ActiveFedora
                             config.send(key).call(@fields)
                           else
                             config.send(key)
-          end
+                          end
         end
 
         field_suffix.join

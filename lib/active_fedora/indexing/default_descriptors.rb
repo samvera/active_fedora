@@ -65,9 +65,8 @@ module ActiveFedora
         @simple ||= Descriptor.new(->(field_type) { [field_type, :indexed] })
       end
 
-      protected
-
-        def self.searchable_field_definition
+      class << self
+        def searchable_field_definition
           lambda do |type|
             type = :text_en if [:string, :text].include?(type) # for backwards compatibility with old solr schema
             vals = [type, :indexed, :multivalued]
@@ -75,7 +74,7 @@ module ActiveFedora
           end
         end
 
-        def self.stored_searchable_field_definition
+        def stored_searchable_field_definition
           lambda do |type|
             type = :text_en if [:string, :text].include?(type) # for backwards compatibility with old solr schema
             if type == :boolean
@@ -86,14 +85,14 @@ module ActiveFedora
           end
         end
 
-        def self.sortable_field_definition
+        def sortable_field_definition
           lambda do |type|
             vals = [type, :indexed]
             vals
           end
         end
 
-        def self.searchable_converter
+        def searchable_converter
           lambda do |type|
             case type
             when :date, :time
@@ -102,7 +101,7 @@ module ActiveFedora
           end
         end
 
-        def self.dateable_converter
+        def dateable_converter
           lambda do |_type|
             lambda do |val|
               begin
@@ -114,15 +113,16 @@ module ActiveFedora
           end
         end
 
-        def self.iso8601_date(value)
+        def iso8601_date(value)
           if value.is_a?(Date) || value.is_a?(Time)
             DateTime.parse(value.to_s).to_time.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
           elsif !value.empty?
             DateTime.parse(value).to_time.utc.strftime('%Y-%m-%dT%H:%M:%SZ')
           end
-        rescue ArgumentError => e
+        rescue ArgumentError
           raise ArgumentError, "Unable to parse `#{value}' as a date-time object"
         end
+      end
     end
   end
 end
