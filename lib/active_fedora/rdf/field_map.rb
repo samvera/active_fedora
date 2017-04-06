@@ -15,8 +15,8 @@ module ActiveFedora::RDF
 
     # Inserts each solr field map configuration into the FieldMap class
     # @param [Symbol] name the name of the property on the object that we're indexing
-    # @param [Object] index_field_config an instance of ActiveFedora::Indexing::Map::IndexObject
-    # @param [Object] object the instance of ActiveFedora::Base which is being indexed into Solr
+    # @param [ActiveFedora::Indexing::Map::IndexObject] index_field_config describes how the object should be indexed
+    # @param [ActiveFedora::Base] object the object to be indexed into Solr
     def insert(name, index_field_config, object)
       self[index_field_config.key.to_s] ||= FieldMapEntry.new
       PolymorphicBuilder.new(self[index_field_config.key.to_s], index_field_config, object, name).build
