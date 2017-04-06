@@ -6,11 +6,17 @@ module ActiveFedora::RDF
   # @see ActiveFedora::IndexingService
   class IndexingService
     include Solrizer::Common
-    attr_reader :object
+    attr_reader :object, :index_config
 
-    # @param [#resource, #rdf_subject] obj the object to build an solr document for. Its class must respond to 'properties' and 'index_config'
-    def initialize(obj)
+    # @param [#resource, #rdf_subject] obj the object to build an solr document for. Its class must respond to 'properties'
+    # @param [ActiveFedora::Indexing::Map] index_config the configuration to use to map object values to index document values
+    def initialize(obj, index_config = nil)
+      unless index_config
+        Deprecation.warn(self, "initializing ActiveFedora::RDF::IndexingService without an index_config is deprecated and will be removed in ActiveFedora 13.0")
+        index_config = obj.class.index_config
+      end
       @object = obj
+      @index_config = index_config
     end
 
     # Creates a solr document hash for the rdf assertions of the {#object}
@@ -67,10 +73,6 @@ module ActiveFedora::RDF
 
       def resource
         object.resource
-      end
-
-      def index_config
-        object.class.index_config
       end
 
       # returns the field map instance

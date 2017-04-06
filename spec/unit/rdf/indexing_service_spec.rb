@@ -50,11 +50,25 @@ describe ActiveFedora::RDF::IndexingService do
     end
   end
 
-  before do
-    allow(MyObj).to receive(:index_config).and_return(index_config)
+  describe "#index_config" do
+    subject { indexer.index_config }
+    context "without passing one in" do
+      before do
+        expect(Deprecation).to receive(:warn)
+        allow(MyObj).to receive(:index_config).and_return(index_config)
+      end
+
+      let(:indexer) { described_class.new(f2) }
+      it { is_expected.to eq(index_config) }
+    end
+
+    context "when passing one in" do
+      let(:indexer) { described_class.new(f2, index_config) }
+      it { is_expected.to eq(index_config) }
+    end
   end
 
-  let(:indexer) { described_class.new(f2) }
+  let(:indexer) { described_class.new(f2, index_config) }
 
   describe "#generate_solr_document" do
     let(:solr_obj) { indexer.generate_solr_document(lambda { |key| "solr_rdf__#{key}" }) }
