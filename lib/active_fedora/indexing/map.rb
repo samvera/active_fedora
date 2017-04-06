@@ -11,7 +11,15 @@ module ActiveFedora::Indexing
     end
 
     def dup
-      self.class.new(@hash.deep_dup)
+      self.class.new(to_hash)
+    end
+
+    def merge(new_hash)
+      self.class.new(to_hash.merge(new_hash))
+    end
+
+    def to_hash
+      @hash.deep_dup
     end
 
     # this enables a cleaner API for solr integration
@@ -19,8 +27,8 @@ module ActiveFedora::Indexing
       attr_accessor :data_type, :behaviors, :term
       attr_reader :key
 
-      def initialize(name, &_block)
-        @behaviors = []
+      def initialize(name, behaviors: [], &_block)
+        @behaviors = behaviors
         @data_type = :string
         @key = name
         yield self if block_given?
