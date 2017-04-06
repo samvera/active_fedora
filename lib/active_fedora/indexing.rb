@@ -87,6 +87,7 @@ module ActiveFedora
         # @param [Boolean] softCommit - Do we perform a softCommit when we add the to_solr objects to SolrService. Default true.
         # @param [Boolean] progress_bar - If true output progress bar information. Default false.
         # @param [Boolean] final_commit - If true perform a hard commit to the Solr service at the completion of the batch of updates. Default false.
+        # rubocop:disable Metrics/CyclomaticComplexity
         def reindex_everything(batch_size: 50, softCommit: true, progress_bar: false, final_commit: false)
           descendants = descendant_uris(ActiveFedora.fedora.base_uri)
 
@@ -120,6 +121,7 @@ module ActiveFedora
             SolrService.commit
           end
         end
+        # rubocop:enable Metrics/CyclomaticComplexity
 
         def descendant_uris(uri)
           DescendantFetcher.new(uri).descendant_and_self_uris
