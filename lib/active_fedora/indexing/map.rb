@@ -11,7 +11,15 @@ module ActiveFedora::Indexing
     end
 
     def dup
-      self.class.new(@hash.deep_dup)
+      self.class.new(to_hash)
+    end
+
+    def merge(new_hash)
+      self.class.new(to_hash.merge(new_hash))
+    end
+
+    def to_hash
+      @hash.deep_dup
     end
 
     # this enables a cleaner API for solr integration
