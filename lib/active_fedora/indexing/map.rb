@@ -19,8 +19,8 @@ module ActiveFedora::Indexing
       attr_accessor :data_type, :behaviors, :term
       attr_reader :key
 
-      def initialize(name, &_block)
-        @behaviors = []
+      def initialize(name, behaviors: [], &_block)
+        @behaviors = behaviors
         @data_type = :string
         @key = name
         yield self if block_given?
