@@ -451,7 +451,7 @@ describe ActiveFedora::File do
 
     context "when Array passed to new" do
       it "raises an expection" do
-        expect { described_class.new([]) }.to raise_error
+        expect { described_class.new([]) }.to raise_error(RuntimeError)
       end
     end
   end
