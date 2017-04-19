@@ -40,7 +40,7 @@ module ActiveFedora
           id = ActiveFedora::Associations::IDComposite.new([identifier], translate_uri_to_id).first
           @ldp_source = build_ldp_resource id
         else
-          raise "The first argument to #{self} must be a Hash, String or RDF::URI. You provided a #{uri.class}"
+          raise "The first argument to #{self} must be a Hash, String or RDF::URI. You provided a #{identifier.class}"
         end
 
         @attributes = {}.with_indifferent_access
