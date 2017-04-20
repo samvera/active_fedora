@@ -87,15 +87,18 @@ module ActiveFedora
         # @param [Boolean] softCommit - Do we perform a softCommit when we add the to_solr objects to SolrService. Default true.
         # @param [Boolean] progress_bar - If true output progress bar information. Default false.
         # @param [Boolean] final_commit - If true perform a hard commit to the Solr service at the completion of the batch of updates. Default false.
+        # rubocop:disable Metrics/CyclomaticComplexity
         def reindex_everything(batch_size: 50, softCommit: true, progress_bar: false, final_commit: false)
           descendants = descendant_uris(ActiveFedora.fedora.base_uri)
-          descendants.shift # Discard the root uri
 
           batch = []
 
           progress_bar_controller = ProgressBar.create(total: descendants.count, format: "%t: |%B| %p%% %e") if progress_bar
 
           descendants.each do |uri|
+            # skip root url
+            next if uri == ActiveFedora.fedora.base_uri
+
             logger.debug "Re-index everything ... #{uri}"
 
             batch << ActiveFedora::Base.find(ActiveFedora::Base.uri_to_id(uri)).to_solr
@@ -118,6 +121,7 @@ module ActiveFedora
             SolrService.commit
           end
         end
+        # rubocop:enable Metrics/CyclomaticComplexity
 
         def descendant_uris(uri)
           DescendantFetcher.new(uri).descendant_and_self_uris
