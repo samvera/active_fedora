@@ -80,7 +80,7 @@ describe ActiveFedora::File do
 
     let(:conn_stubs) do
       Faraday::Adapter::Test::Stubs.new do |stub|
-        stub.head(path) { [200, { 'Content-Length' => '9999' }] }
+        stub.head(path) { [200, { 'Content-Length' => '9999', "Link" => "<#{path}/fcr:metadata>; rel=\"describedby\"" }] }
       end
     end
 
@@ -90,6 +90,7 @@ describe ActiveFedora::File do
 
     before do
       allow(af_file).to receive(:ldp_source).and_return(ldp_source)
+      allow(af_file.metadata).to receive(:mime_type).and_return(["text/plain"])
     end
 
     describe '#persisted_size' do
@@ -176,6 +177,59 @@ describe ActiveFedora::File do
         it "returns false" do
           expect(af_file.has_content?).to be false
         end
+      end
+    end
+  end
+
+  context "external content" do
+    let(:external_url) { "http://www.example.com/external/content" }
+    before do
+      af_file.mime_type = "message/external-body; access-type=URL; URL=\"#{external_url}\""
+      allow_any_instance_of(Faraday::Connection).to receive(:get).and_return(
+        instance_double("Faraday::Response", status: 200, body: "This is external content!")
+      )
+    end
+
+    describe ".content" do
+      it "returns external content" do
+        expect(af_file.content).to eq af_file.external_content
+      end
+    end
+
+    describe ".content=" do
+      it "raises an error" do
+        expect { af_file.content = "Test" }.to raise_error(RuntimeError)
+      end
+    end
+
+    describe ".content_changed?" do
+      it "always returns false" do
+        expect(af_file.content_changed?).to be_falsey
+      end
+    end
+
+    describe ".external_content?" do
+      it "returns true" do
+        expect(af_file.external_content?).to be_truthy
+      end
+    end
+
+    describe ".external_content" do
+      it "returns the content of the external url" do
+        expect(af_file.external_content).to eq 'This is external content!'
+      end
+    end
+
+    describe ".external_url" do
+      it "returns the external_url" do
+        expect(af_file.external_url).to eq external_url
+      end
+    end
+
+    describe ".external_url=" do
+      it "persists the external_url in mime_type" do
+        af_file.external_url = "http://www.example.com"
+        expect(af_file.mime_type).to eq "message/external-body; access-type=URL; URL=\"http://www.example.com\""
       end
     end
   end

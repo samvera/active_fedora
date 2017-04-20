@@ -1,31 +1,6 @@
 require 'spec_helper'
 
 describe ActiveFedora::AttachedFiles do
-  describe "#has_subresource" do
-    before do
-      class FooHistory < ActiveFedora::Base
-        has_subresource 'child'
-      end
-    end
-    after do
-      Object.send(:remove_const, :FooHistory)
-    end
-
-    context "when the object exists" do
-      let!(:o) { FooHistory.create }
-      before do
-        o.child.content = "HMMM"
-        o.save
-      end
-
-      it "does not need to do a head on the children" do
-        f = FooHistory.find(o.id)
-        expect(f.ldp_source.client).not_to receive(:head)
-        f.child.content
-      end
-    end
-  end
-
   describe "Datastreams synched together" do
     before do
       class DSTest < ActiveFedora::Base
