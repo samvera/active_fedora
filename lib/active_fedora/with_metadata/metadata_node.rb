@@ -36,6 +36,7 @@ module ActiveFedora
       end
 
       def ldp_source
+        @ldp_source ||= LdpResource.new(ldp_connection, nil) if file.new_record?
         @ldp_source ||= LdpResource.new(ldp_connection, metadata_uri)
       end
 
