@@ -103,13 +103,8 @@ module ActiveFedora
     end
 
     def remote_content
-      return if new_record?
+      return if new_record? && !external_content?
       @ds_content ||= retrieve_content
-    end
-
-    def external_content
-      return nil unless external_url.start_with?("http")
-      Faraday.get(external_url).body
     end
 
     def metadata
@@ -173,7 +168,7 @@ module ActiveFedora
     end
 
     def content
-      external_content? ? external_content : local_or_remote_content(true)
+      local_or_remote_content(true)
     end
 
     def self.relation
@@ -195,7 +190,12 @@ module ActiveFedora
       end
 
       def retrieve_content
-        ldp_source.get.body
+        ldp_response = ldp_source.get
+        if ldp_response.response.status == 307
+          Faraday.get(ldp_response.response["location"])
+        else
+          ldp_response.body
+        end
       end
 
       def ldp_headers
@@ -217,7 +217,7 @@ module ActiveFedora
       end
 
       def local_or_remote_content(ensure_fetch = true)
-        return @content if new_record?
+        return @content if new_record? && !external_content?
 
         @content ||= ensure_fetch ? remote_content : @ds_content
         @content.rewind if behaves_like_io?(@content)

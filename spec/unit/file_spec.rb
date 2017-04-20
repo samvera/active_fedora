@@ -192,7 +192,7 @@ describe ActiveFedora::File do
 
     describe ".content" do
       it "returns external content" do
-        expect(af_file.content).to eq af_file.external_content
+        expect(af_file.content).to eq "This is external content!"
       end
     end
 
@@ -211,12 +211,6 @@ describe ActiveFedora::File do
     describe ".external_content?" do
       it "returns true" do
         expect(af_file.external_content?).to be_truthy
-      end
-    end
-
-    describe ".external_content" do
-      it "returns the content of the external url" do
-        expect(af_file.external_content).to eq 'This is external content!'
       end
     end
 
