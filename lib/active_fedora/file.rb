@@ -146,8 +146,7 @@ module ActiveFedora
 
     def external_url
       return nil unless mime_type.start_with? "message/external-body"
-      url = mime_type.split(';').at(2)
-      url.nil? ? nil : url[/\"(.*?)\"/, 1]
+      mime_type[/url=['"](.+?)['"]/i, 1]
     end
 
     def external_url=(external_file_url)
