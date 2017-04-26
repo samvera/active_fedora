@@ -41,4 +41,11 @@ describe ActiveFedora::WithMetadata::MetadataNode do
       end
     end
   end
+
+  describe ".new" do
+    it "does not make a request when parent file is new" do
+      expect(file.ldp_source.client).not_to receive(:head)
+      described_class.new(file)
+    end
+  end
 end
