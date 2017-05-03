@@ -48,4 +48,22 @@ describe ActiveFedora::WithMetadata::MetadataNode do
       described_class.new(file)
     end
   end
+
+  describe ".save" do
+    it "resets metadata_uri" do
+      expect(node.metadata_uri).to eq ::RDF::URI.new(nil)
+      file.content = "test"
+      file.save!
+      node.save
+      expect(node.metadata_uri).not_to eq ::RDF::URI.new(nil)
+    end
+
+    it "resets ldp_source" do
+      expect(node.ldp_source.new?).to be_truthy
+      file.content = "test"
+      file.save!
+      node.save
+      expect(node.ldp_source.new?).to be_falsey
+    end
+  end
 end
