@@ -23,14 +23,15 @@ module ActiveFedora
       HAS_MODEL_PREDICATE = ActiveFedora::RDF::Fcrepo::Model.hasModel
 
       class_attribute :default_priority_models, instance_accessor: false
-      self.default_priority_models = %w(Hydra::AccessControls Hydra::AccessControls::Permissions).freeze
+      self.default_priority_models = %w(Hydra::AccessControl Hydra::AccessControl::Permissions).freeze
 
       attr_reader :uri, :priority_models
 
       def initialize(uri,
-                     priority_models: self.class.default_priority_models)
+                     priority_models: self.class.default_priority_models, exclude_self: false)
         @uri = uri
         @priority_models = priority_models
+        @exclude_self = exclude_self
       end
 
       def descendant_and_self_uris
@@ -46,7 +47,7 @@ module ActiveFedora
         # but this causes more requests to Fedora.
         return partitioned_uris unless resource.head.rdf_source?
 
-        add_self_to_partitioned_uris
+        add_self_to_partitioned_uris unless @exclude_self
 
         immediate_descendant_uris = rdf_graph.query(predicate: ::RDF::Vocab::LDP.contains).map { |descendant| descendant.object.to_s }
         immediate_descendant_uris.each do |descendant_uri|

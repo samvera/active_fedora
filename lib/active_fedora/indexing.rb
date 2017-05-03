@@ -88,8 +88,8 @@ module ActiveFedora
         # @param [Boolean] progress_bar - If true output progress bar information. Default false.
         # @param [Boolean] final_commit - If true perform a hard commit to the Solr service at the completion of the batch of updates. Default false.
         def reindex_everything(batch_size: 50, softCommit: true, progress_bar: false, final_commit: false)
-          descendants = descendant_uris(ActiveFedora.fedora.base_uri)
-          descendants.shift # Discard the root uri
+          # skip root url
+          descendants = descendant_uris(ActiveFedora.fedora.base_uri, exclude_uri: true)
 
           batch = []
 
@@ -119,8 +119,8 @@ module ActiveFedora
           end
         end
 
-        def descendant_uris(uri)
-          DescendantFetcher.new(uri).descendant_and_self_uris
+        def descendant_uris(uri, exclude_uri: false)
+          DescendantFetcher.new(uri, exclude_self: exclude_uri).descendant_and_self_uris
         end
       end
   end
