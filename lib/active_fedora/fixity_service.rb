@@ -2,24 +2,55 @@ module ActiveFedora
   class FixityService
     extend ActiveSupport::Concern
 
-    attr_accessor :target, :response
+    attr_accessor :target
 
-    # @param [String, RDF::URI] target url for a Fedora resource
+    # @param [String, RDF::URI] target url for a Fedora resource.
     def initialize(target)
       raise ArgumentError, 'You must provide a uri' unless target
       @target = target.to_s
     end
 
-    # Executes a fixity check on Fedora and saves the Faraday::Response.
+    def response
+      @response ||= fixity_response_from_fedora
+    end
+
+    # For backwards compat, check always insists on doing a new request.
+    # you might want verified? instead which uses a cached request.
     # @return true or false
     def check
-      @response = fixity_response_from_fedora
+      @response = nil
+      verified?
+    end
+
+    # Executes a fixity check on Fedora
+    # @return true or false
+    def verified?
       status.include?(success)
     end
 
+    # An array of 1 or more literals reported by Fedora.
+    # See 'success' for which one indicates fixity check is good.
     def status
       fixity_graph.query(predicate: premis_status_predicate).map(&:object) +
         fixity_graph.query(predicate: fedora_status_predicate).map(&:object)
+    end
+
+    # the currently calculated checksum, as a string URI, like
+    # "urn:sha1:09a848b79f86f3a4f3f301b8baafde455d6f8e0e"
+    def expected_message_digest
+      fixity_graph.query(predicate: ::RDF::Vocab::PREMIS.hasMessageDigest).first.try(:object).try(:to_s)
+    end
+
+    # integer, as reported by fedora. bytes maybe?
+    def expected_size
+      fixity_graph.query(predicate: ::RDF::Vocab::PREMIS.hasSize).first.try(:object).try(:to_s).try(:to_i)
+    end
+
+    # Fedora response as an ::RDF::Graph object. Public API, so consumers
+    # can do with it what they will, especially if future fedora versions
+    # add more things to it.
+    def response_graph
+      fixity_graph
     end
 
     private
@@ -46,7 +77,7 @@ module ActiveFedora
       end
 
       def fixity_graph
-        ::RDF::Graph.new << ::RDF::Reader.for(:ttl).new(response.body)
+        @fixity_graph ||= ::RDF::Graph.new << ::RDF::Reader.for(:ttl).new(response.body)
       end
 
       # See https://jira.duraspace.org/browse/FCREPO-1247
