@@ -11,6 +11,12 @@ describe ActiveFedora::SolrService do
 
   let(:mock_conn) { instance_double(RSolr::Client) }
 
+  describe '#options' do
+    it 'is readable' do
+      expect(described_class.instance.options).to include :read_timeout, :open_timeout, :url
+    end
+  end
+
   describe '#conn' do
     it "takes a n-arg constructor and configure for localhost" do
       expect(RSolr).to receive(:connect).with(read_timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr')

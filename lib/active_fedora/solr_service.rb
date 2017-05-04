@@ -2,6 +2,7 @@ require 'rsolr'
 
 module ActiveFedora
   class SolrService
+    attr_reader :options
     attr_writer :conn
 
     MAX_ROWS = 10_000
