@@ -61,7 +61,12 @@ module ActiveFedora
       # Serialize the resource's RDF relationships to solr
       # @param [Hash] solr_doc @deafult an empty Hash
       def solrize_rdf_assertions(solr_doc = {})
-        solr_doc.merge rdf_service.new(object).generate_solr_document
+        solr_doc.merge rdf_indexer.generate_solr_document
+      end
+
+      # @return IndexingService
+      def rdf_indexer
+        rdf_service.new(object, object.class.index_config)
       end
   end
 end
