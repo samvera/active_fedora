@@ -10,7 +10,7 @@ module ActiveFedora
       if @cache_enabled
         cache_resource(url) { super }
       else
-        super
+        log(url) { super }
       end
     end
 
