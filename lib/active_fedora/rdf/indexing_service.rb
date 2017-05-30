@@ -5,7 +5,6 @@ module ActiveFedora::RDF
   # @see ActiveFedora::Indexing
   # @see ActiveFedora::IndexingService
   class IndexingService
-    include Solrizer::Common
     attr_reader :object, :index_config
 
     # @param [#resource, #rdf_subject] obj the object to build an solr document for. Its class must respond to 'properties'
@@ -43,13 +42,14 @@ module ActiveFedora::RDF
       # Override this in order to allow one field to be expanded into more than one:
       #   example:
       #     def append_to_solr_doc(solr_doc, field_key, field_info, val)
-      #       Solrizer.set_field(solr_doc, 'lcsh_subject_uri', val.to_uri, :symbol)
-      #       Solrizer.set_field(solr_doc, 'lcsh_subject_label', val.to_label, :searchable)
+      #       ActiveFedora.index_field_mapper.set_field(solr_doc, 'lcsh_subject_uri', val.to_uri, :symbol)
+      #       ActiveFedora.index_field_mapper.set_field(solr_doc, 'lcsh_subject_label', val.to_label, :searchable)
       #     end
       def append_to_solr_doc(solr_doc, solr_field_key, field_info, val)
-        self.class.create_and_insert_terms(solr_field_key,
-                                           solr_document_field_value(val),
-                                           field_info.behaviors, solr_doc)
+        ActiveFedora::Indexing::Inserter.create_and_insert_terms(solr_field_key,
+                                                                 solr_document_field_value(val),
+                                                                 field_info.behaviors,
+                                                                 solr_doc)
       end
 
       def solr_document_field_name(field_key, prefix_method)

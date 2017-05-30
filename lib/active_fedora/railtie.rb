@@ -15,7 +15,6 @@ module ActiveFedora
     initializer "active_fedora.logger" do
       ActiveSupport.on_load(:active_fedora) do
         self.logger = ::Rails.logger if logger.is_a? NullLogger
-        Solrizer.logger ||= logger
       end
     end
 

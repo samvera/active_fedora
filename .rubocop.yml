@@ -50,6 +50,8 @@ Metrics/CyclomaticComplexity:
     - 'lib/active_fedora/file.rb'
     - 'lib/active_fedora/attribute_methods.rb'
     - 'lib/active_fedora/scoping/named.rb'
+    - 'lib/active_fedora/indexing/field_mapper.rb'
+    - 'lib/active_fedora/indexing/suffix.rb'
     - 'lib/active_fedora/inheritance.rb'
 
 Metrics/PerceivedComplexity:
@@ -66,6 +68,7 @@ Metrics/PerceivedComplexity:
     - 'lib/active_fedora/associations/collection_association.rb'
     - 'lib/active_fedora/attribute_methods.rb'
     - 'lib/active_fedora/scoping/named.rb'
+    - 'lib/active_fedora/indexing/field_mapper.rb'
     - 'lib/active_fedora/inheritance.rb'
 
 Metrics/ModuleLength:
@@ -127,6 +130,7 @@ Style/PredicateName:
     - 'lib/active_fedora/association_hash.rb'
     - 'lib/active_fedora/aggregation/list_source.rb'
     - 'lib/active_fedora/associations/builder/aggregation.rb'
+    - 'lib/active_fedora/indexing/suffix.rb'
 
 Style/GuardClause:
   Exclude:

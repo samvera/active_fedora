@@ -1,7 +1,6 @@
 require 'active_support'
 require 'active_model'
 require 'ldp'
-require 'solrizer'
 require 'active_fedora/file_configurator'
 require 'active_support/core_ext/class/attribute'
 require 'active_support/core_ext/object'
@@ -242,16 +241,14 @@ module ActiveFedora #:nodoc:
     end
 
     def index_field_mapper
-      Solrizer.default_field_mapper
+      @index_field_mapper ||= Indexing::FieldMapper.new
     end
 
     def id_field
       if defined?(SOLR_DOCUMENT_ID) && !SOLR_DOCUMENT_ID.nil?
         SOLR_DOCUMENT_ID
-      elsif defined?(Solrizer)
-        Solrizer.default_field_mapper.id_field
       else
-        'id'.freeze
+        ActiveFedora.index_field_mapper.id_field
       end
     end
 
