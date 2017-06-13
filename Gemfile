@@ -8,7 +8,6 @@ gem 'byebug' unless ENV['TRAVIS']
 gem 'pry-byebug' unless ENV['CI']
 
 gem 'activemodel', ENV['RAILS_VERSION'] if ENV['RAILS_VERSION']
-gem 'rsolr', ENV['RSOLR_VERSION'] if ENV['RSOLR_VERSION']
 
 group :test do
   gem 'simplecov', require: false

@@ -6,7 +6,7 @@ matrix:
   include:
     - rvm: 2.3.4
       env: "RAILS_VERSION=4.2.8"
-    - env: "RSOLR_VERSION=2.0.1"
+    - env: "RAILS_VERSION=5.1.1"
 global_env:
   - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
 before_install:
