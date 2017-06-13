@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.add_dependency "activemodel", '>= 4.2', '< 6'
   s.add_dependency "active-triples", '~> 0.11.0'
   s.add_dependency "deprecation"
-  s.add_dependency "ldp", '~> 0.6.0'
+  s.add_dependency "ldp", '~> 0.7.0'
   s.add_dependency "ruby-progressbar", '~> 1.0'
 
   s.add_development_dependency "rails"
