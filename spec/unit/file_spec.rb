@@ -319,6 +319,20 @@ describe ActiveFedora::File do
     end
   end
 
+  describe "#modified_date" do
+    subject { af_file.modified_date }
+    describe "when new record" do
+      it { is_expected.to be_nil }
+    end
+    describe "when persisted" do
+      before do
+        af_file.content = "foo"
+        af_file.save!
+      end
+      it { is_expected.to be_a(DateTime) }
+    end
+  end
+
   describe "callbacks" do
     before do
       class MyFile < ActiveFedora::File
