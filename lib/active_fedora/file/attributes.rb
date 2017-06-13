@@ -49,6 +49,11 @@ module ActiveFedora::File::Attributes
     created && created.first
   end
 
+  def modified_date
+    modified = metadata.attributes["http://fedora.info/definitions/v4/repository#lastModified"]
+    modified && modified.first
+  end
+
   private
 
     # Fcrepo4.digest was used by Fedora < 4.3, but it was removed
