@@ -88,6 +88,44 @@ describe ActiveFedora::File do
     end
   end
 
+  describe "#content" do
+    let(:file) { described_class.new { |ds| ds.content = content } }
+
+    before do
+      file.save
+    end
+
+    describe "#content" do
+      subject(:resource) { described_class.new(file.uri).content }
+
+      before { content.rewind }
+
+      context "when encoding is not set" do
+        let(:content) { fixture('dino.jpg') }
+
+        it "is read from fedora" do
+          expect(resource).to eq content.read
+          expect(resource.encoding).to eq Encoding::ASCII_8BIT
+        end
+      end
+
+      context "when encoding is set" do
+        let(:file) do
+          described_class.new do |f|
+            f.content = content
+            f.mime_type = 'text/plain;charset=UTF-8'
+          end
+        end
+        let(:content) { StringIO.new "I'm a little teåpot" }
+
+        it "is read from fedora" do
+          expect(resource).to eq content.read
+          expect(resource.encoding).to eq Encoding::UTF_8
+        end
+      end
+    end
+  end
+
   context "with a sub-resource" do
     before do
       class MockAFBase < ActiveFedora::Base
@@ -114,7 +152,7 @@ describe ActiveFedora::File do
     context "a binary file" do
       let(:path) { "ds#{Time.now.to_i}" }
       let(:content) { fixture('dino.jpg') }
-      let(:file) { described_class.new.tap { |ds| ds.content = content } }
+      let(:file) { described_class.new { |ds| ds.content = content } }
 
       before do
         test_object.attach_file(file, path)
@@ -123,11 +161,6 @@ describe ActiveFedora::File do
 
       it "is not changed" do
         expect(test_object.attached_files[path]).to_not be_content_changed
-      end
-
-      it "is able to read the content from fedora" do
-        content.rewind
-        expect(test_object.attached_files[path].content).to eq content.read
       end
 
       describe "streaming the response" do
