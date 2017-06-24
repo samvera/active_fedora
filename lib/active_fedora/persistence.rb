@@ -4,9 +4,13 @@ module ActiveFedora
     extend ActiveSupport::Concern
 
     def new_record?
-      @ldp_source.new?
+      return true if @ldp_source.subject.nil?
+      @ldp_source.get
+      false
     rescue Ldp::Gone
       false
+    rescue Ldp::NotFound
+      true
     end
 
     def persisted?
