@@ -43,6 +43,28 @@ describe ActiveFedora::Base do
     end
   end
 
+  describe '#etag' do
+    let(:attributes) { { id: '1234' } }
+
+    it 'before save raises an error' do
+      expect { book.etag }
+        .to raise_error 'Unable to produce an etag for a unsaved object'
+    end
+
+    context 'after save' do
+      before { book.save! }
+
+      it 'has the etag from the ldp_source' do
+        expect(book.etag).to eq book.ldp_source.head.etag
+      end
+
+      it 'after delete raises Ldp::Gone' do
+        book.destroy!
+        expect { book.etag }.to raise_error Ldp::Gone
+      end
+    end
+  end
+
   describe "#freeze" do
     before { book.freeze }
 
