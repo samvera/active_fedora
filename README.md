@@ -1,10 +1,10 @@
 Description
 -----------
 
-[![Build Status](https://travis-ci.org/projecthydra/active_fedora.png?branch=master)](https://travis-ci.org/projecthydra/active\_fedora)
+[![Build Status](https://travis-ci.org/samvera/active_fedora.png?branch=master)](https://travis-ci.org/samvera/active\_fedora)
 [![Version](https://badge.fury.io/rb/active-fedora.png)](http://badge.fury.io/rb/active-fedora)
-[![Dependencies](https://gemnasium.com/projecthydra/active_fedora.png)](https://gemnasium.com/projecthydra/active\_fedora)
-[![Coverage Status](https://img.shields.io/coveralls/projecthydra/active_fedora.svg)](https://coveralls.io/r/projecthydra/active_fedora)
+[![Dependencies](https://gemnasium.com/samvera/active_fedora.png)](https://gemnasium.com/samvera/active\_fedora)
+[![Coverage Status](https://img.shields.io/coveralls/samvera/active_fedora.svg)](https://coveralls.io/r/samvera/active_fedora)
 
 ActiveFedora is a Ruby gem for creating and
 managing objects in the Fedora Repository Architecture
@@ -15,8 +15,8 @@ Getting Help
 ------------
 
 -   Community Discussions & Mailing List are located at
-    [http://groups.google.com/group/hydra-tech](http://groups.google.com/group/hydra-tech)
--   Developers hang out on IRC in \#projecthydra on freenet.
+    [http://groups.google.com/group/samvera-tech](http://groups.google.com/group/samvera-tech)
+-   Developers hang out on [slack.samvera.org](http://slack.samvera.org/)
 
 Installation
 ------------
@@ -30,7 +30,7 @@ gem install active-fedora
 Getting Started
 ---------------
 
-The [Dive into Hydra](https://github.com/projecthydra/hydra/wiki/Dive-into-Hydra)
+The [Dive into Hydra](https://github.com/samvera/hydra/wiki/Dive-into-Hydra)
 gives you a brief tour through ActiveFedora’s features on the command line.
 
 Generators
@@ -47,21 +47,18 @@ Testing (this Gem)
 
 In order to run the RSpec tests, you need to have a copy of the
 ActiveFedora source code, and then run bundle install in the source
-directory. Testing requires hydra-jetty, which contains version for
-Fedora and Solr. Setting up and maintaining hydra-jetty for the purposes
-of testing this gem is all accomplished via:
+directory. You can download the source code by doing the following:
 
 ```bash
-git clone https://github.com/projecthydra/active_fedora.git
-cd active_fedora   # or whatever directory your clone is in
+git clone https://github.com/samvera/active_fedora.git
+cd active_fedora
 bundle install
 ```
 
 ### Using the continuous integration server
 
 You can test ActiveFedora using the same process as our continuous
-integration server. To do that, unzip a copy of hydra-jetty first. This includes copies of Fedora and Solr which are
-used during the testing process.
+integration server. This will automatically pull down a copy of Solr and Fedora Content Repository.
 
 The `ci` rake task will download solr and fedora, start them,
 and run the tests for you.
