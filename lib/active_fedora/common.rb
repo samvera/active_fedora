@@ -17,6 +17,16 @@ module ActiveFedora
       end
     end
 
+    ##
+    # @return [String] the etag from the response headers
+    #
+    # @raise [RuntimeError] when the resource is new and has no etag
+    # @raise [Ldp::Gone]    when the resource is deleted
+    def etag
+      raise 'Unable to produce an etag for a unsaved object' if ldp_source.new?
+      ldp_source.head.etag
+    end
+
     def ldp_source
       @ldp_source
     end
