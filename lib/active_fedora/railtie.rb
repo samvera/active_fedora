@@ -5,7 +5,7 @@ module ActiveFedora
     end
 
    initializer 'active_fedora.autoload', :before => :set_autoload_paths do |app|
-     app.config.autoload_paths << 'app/models/datastreams'
+     app.config.autoload_paths += ['app/models/datastreams']
     end
 
    initializer "active_fedora.logger" do
