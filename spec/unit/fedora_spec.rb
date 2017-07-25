@@ -15,5 +15,17 @@ describe ActiveFedora::Fedora do
         fedora.authorized_connection
       }
     end
+    describe "with request options" do
+      let(:config) {
+        { url: "https://example.com",
+          user: "fedoraAdmin",
+          password: "fedoraAdmin",
+          request: { timeout: 600, open_timeout: 60 } }
+      }
+      specify {
+        expect(Faraday).to receive(:new).with("https://example.com", request: { timeout: 600, open_timeout: 60 }).and_call_original
+        fedora.authorized_connection
+      }
+    end
   end
 end
