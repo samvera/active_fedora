@@ -49,6 +49,10 @@ module ActiveFedora
       @config[:ssl]
     end
 
+    def request_options
+      @config[:request]
+    end
+
     def connection
       @connection ||= begin
         build_connection
@@ -86,6 +90,7 @@ module ActiveFedora
     def authorized_connection
       options = {}
       options[:ssl] = ssl_options if ssl_options
+      options[:request] = request_options if request_options
       Faraday.new(host, options) do |conn|
         conn.response :encoding # use Faraday::Encoding middleware
         conn.adapter Faraday.default_adapter # net/http
