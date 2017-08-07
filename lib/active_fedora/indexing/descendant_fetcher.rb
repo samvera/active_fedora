@@ -49,10 +49,9 @@ module ActiveFedora
 
       # returns a hash where keys are model names
       def descendant_and_self_uris_partitioned_by_model
-        resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
         # GET could be slow if it's a big resource, we're using HEAD to avoid this problem,
         # but this causes more requests to Fedora.
-        return partitioned_uris unless resource.head.rdf_source?
+        return partitioned_uris unless rdf_resource.head.rdf_source?
 
         add_self_to_partitioned_uris unless @exclude_self
 
