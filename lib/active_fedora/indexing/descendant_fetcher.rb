@@ -91,10 +91,6 @@ module ActiveFedora
           end.compact
         end
 
-        def prioritized_object?
-          priority_models.present? && (rdf_graph_models & priority_models).count > 0
-        end
-
         def add_self_to_partitioned_uris
           rdf_graph_models.each do |model|
             partitioned_uris[model] ||= []
