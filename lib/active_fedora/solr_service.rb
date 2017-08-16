@@ -58,7 +58,9 @@ module ActiveFedora
       #Set the default starting point to the class specified, if available.
       best_model_match = Model.from_class_uri(opts[:class]) unless opts[:class].nil?
 
-      hit[solr_name("has_model", :symbol)].each do |value|
+      models = hit[solr_name("has_model", :symbol)]
+      raise "couldn't find a model in:\n#{hit}" unless models
+      models.each do |value|
 
         model_value = Model.from_class_uri(value)
 

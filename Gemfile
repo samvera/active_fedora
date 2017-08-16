@@ -12,3 +12,4 @@ end
 gem 'jruby-openssl', :platform=> :jruby
 
 gem 'activemodel', '~> 4.2'
+gem 'rake', '~> 11.0' # Rspec version 2.99 requires rake < 12
