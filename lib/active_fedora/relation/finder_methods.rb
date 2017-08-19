@@ -1,7 +1,6 @@
 module ActiveFedora
   module FinderMethods
-    # Returns the first records that was found.
-    #
+    # Returns the first record that was found.
     # @example
     #  Person.where(name_t: 'Jones').first
     #    => #<Person @id="foo:123" @name='Jones' ... >
@@ -15,7 +14,6 @@ module ActiveFedora
 
     # Returns the last record sorted by id.  ID was chosen because this mimics
     # how ActiveRecord would achieve the same behavior.
-    #
     # @example
     #  Person.where(name_t: 'Jones').last
     #    => #<Person @id="foo:123" @name='Jones' ... >
@@ -27,12 +25,10 @@ module ActiveFedora
       end
     end
 
-    # Returns an Array of objects of the Class that +find+ is being
-    # called on
-    #
-    # @param[String,Hash] args either an id or a hash of conditions
+    # @param [String, Hash] args either an id or a hash of conditions
     # @option args [Integer] :rows when :all is passed, the maximum number of rows to load from solr
     # @option args [Boolean] :cast when true, examine the model and cast it to the first known cModel
+    # @return [Array] objects of the Class that +find+ is being called on
     def find(*args)
       return to_a.find { |*block_args| yield(*block_args) } if block_given?
       options = args.extract_options!
@@ -71,10 +67,9 @@ module ActiveFedora
       end
     end
 
-    # Returns true if object having the id or matching the conditions exists in the repository
     # Returns false if param is false (or nil)
-    # @param[ActiveFedora::Base, String, Hash] object, id or hash of conditions
-    # @return[boolean]
+    # @param [ActiveFedora::Base, String, Hash] object, id or hash of conditions
+    # @return [Boolean] true if object having the id or matching the conditions exists in the repository
     def exists?(conditions)
       conditions = conditions.id if Base === conditions
       return false unless conditions
@@ -91,10 +86,8 @@ module ActiveFedora
     end
 
     # Returns a solr result matching the supplied conditions
-    # @param[Hash,String] conditions can either be specified as a string, or
-    # hash representing the query part of an solr statement. If a hash is
-    # provided, this method will generate conditions based simple equality
-    # combined using the boolean AND operator.
+    # @param [Hash, String] conditions represention of the query part of an solr statement.
+    # If a hash is provided, query will combine based on simple equality using the boolean AND operator.
     # @param [Hash] options
     # @option opts [Array] :sort a list of fields to sort by
     # @option opts [Array] :rows number of rows to return
@@ -110,11 +103,9 @@ module ActiveFedora
     def search_by_id(id, opts = {})
       opts[:rows] = 1
       result = search_with_conditions({ id: id }, opts)
-
       if result.empty?
         raise ActiveFedora::ObjectNotFoundError, "Object '#{id}' not found in solr"
       end
-
       result.first
     end
 
@@ -141,14 +132,14 @@ module ActiveFedora
     # option; the default is 1000.
     #
     # Returns a solr result matching the supplied conditions
-    # @param[Hash] conditions solr conditions to match
-    # @param[Hash] options
+    # @param [Hash] conditions solr conditions to match
+    # @param [Hash] options
     # @option opts [Array] :sort a list of fields to sort by
     # @option opts [Array] :rows number of rows to return
     #
     # @example
     #  Person.search_in_batches('age_t'=>'21', {:batch_size=>50}) do |group|
-    #  group.each { |person| puts person['name_t'] }
+    #    group.each { |person| puts person['name_t'] }
     #  end
     def search_in_batches(conditions, opts = {})
       opts[:q] = create_query(conditions)
@@ -169,11 +160,10 @@ module ActiveFedora
       end
     end
 
-    # Retrieve the Fedora object with the given id, explore the returned object
-    # Raises a ObjectNotFoundError if the object is not found.
+    # Retrieve the Fedora object with the given id
     # @param [String] id of the object to load
     # @param [Boolean] cast when true, cast the found object to the class of the first known model defined in it's RELS-EXT
-    #
+    # @raise [ObjectNotFoundError] if the object is not found
     # @example because the object hydra:dataset1 asserts it is a Dataset (hasModel http://fedora.info/definitions/v4/model#Dataset), return a Dataset object (not a Book).
     #   Book.find_one("hydra:dataset1")
     def find_one(id, cast = nil)
@@ -190,7 +180,6 @@ module ActiveFedora
 
       def load_from_fedora(id, cast)
         raise ActiveFedora::ObjectNotFoundError, "No ID provided for #{klass.name}." if id.empty?
-
         resource = ActiveFedora.fedora.ldp_resource_service.build(klass, id)
         raise_record_not_found_exception!(id) if resource.new?
         class_to_load(resource, cast).allocate.init_with_resource(resource) # Triggers the find callback
@@ -245,7 +234,7 @@ module ActiveFedora
     private
 
       # Returns a solr query for the supplied conditions
-      # @param[Hash,String,Array] conditions solr conditions to match
+      # @param [Hash, String, Array] conditions solr conditions to match
       # @return [String]
       def create_query(conditions)
         build_query(build_where(conditions))
