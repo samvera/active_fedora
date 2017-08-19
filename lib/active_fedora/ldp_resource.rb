@@ -18,8 +18,7 @@ module ActiveFedora
     end
 
     def marshal_load(data)
-      ivars = data
-      ivars.each { |name, val| instance_variable_set(name, val) }
+      data.each { |name, val| instance_variable_set(name, val) }
     end
   end
 end
