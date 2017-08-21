@@ -121,40 +121,54 @@ describe ActiveFedora::Base do
     end
   end
 
-  describe "#exists?" do
-    let(:obj) { described_class.create }
+  shared_examples 'ActiveFedora::Base#exists?' do
+    let(:obj) { test_class.create }
     it "returns true for objects that exist" do
-      expect(described_class.exists?(obj)).to be true
+      expect(test_class.exists?(obj)).to be true
     end
     it "returns true for ids that exist" do
-      expect(described_class.exists?(obj.id)).to be true
+      expect(test_class.exists?(obj.id)).to be true
     end
     it "returns false for ids that don't exist" do
-      expect(described_class.exists?('test_missing_object')).to be false
+      expect(test_class.exists?('test_missing_object')).to be false
     end
-    it "returns false for nil" do
-      expect(described_class.exists?(nil)).to be false
-    end
-    it "returns false for false" do
-      expect(described_class.exists?(false)).to be false
-    end
-    it "returns false for empty" do
-      expect(described_class.exists?('')).to be false
+    it "returns false for nil, false and empty" do
+      expect(test_class.exists?(nil)).to be false
+      expect(test_class.exists?(false)).to be false
+      expect(test_class.exists?('')).to be false
     end
     context "when passed a hash of conditions" do
       let(:conditions) { { foo: "bar" } }
       context "and at least one object matches the conditions" do
         it "returns true" do
           allow(ActiveFedora::SolrService).to receive(:query) { [instance_double(RSolr::HashWithResponse)] }
-          expect(described_class.exists?(conditions)).to be true
+          expect(test_class.exists?(conditions)).to be true
         end
       end
       context "and no object matches the conditions" do
         it "returns false" do
           allow(ActiveFedora::SolrService).to receive(:query) { [] }
-          expect(described_class.exists?(conditions)).to be false
+          expect(test_class.exists?(conditions)).to be false
         end
       end
+    end
+  end
+
+  context 'base class' do
+    let(:test_class) { described_class }
+    it_behaves_like 'ActiveFedora::Base#exists?'
+  end
+
+  context 'subclass' do
+    before(:all) { class Whatev < ActiveFedora::Base; end }
+    after(:all) { Object.send(:remove_const, :Whatev) }
+    let(:test_class) { Whatev }
+    it_behaves_like 'ActiveFedora::Base#exists?'
+
+    it 'does not mistake other fedora objects for subclass' do
+      obj = described_class.create
+      expect { test_class.exists?(obj.id) }.not_to raise_error
+      expect(test_class.exists?(obj.id)).to be false
     end
   end
 
