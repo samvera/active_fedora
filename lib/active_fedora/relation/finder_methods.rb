@@ -81,7 +81,7 @@ module ActiveFedora
       else
         raise ArgumentError, "`conditions' argument must be ActiveFedora::Base, String, or Hash: #{conditions.inspect}"
       end
-    rescue ActiveFedora::ObjectNotFoundError, Ldp::Gone
+    rescue ActiveFedora::ObjectNotFoundError, ActiveFedora::ModelMismatch, Ldp::Gone
       false
     end
 
@@ -186,28 +186,19 @@ module ActiveFedora
       end
 
       def raise_record_not_found_exception!(id)
-        name = @klass.name
-        raise ActiveFedora::ObjectNotFoundError, "Couldn't find #{name} with 'id'=#{id}"
+        raise ActiveFedora::ObjectNotFoundError, "Couldn't find #{@klass.name} with 'id'=#{id}"
       end
 
       def class_to_load(resource, cast)
         if @klass == ActiveFedora::Base && cast == false
           ActiveFedora::Base
         else
-          resource_class = has_model_value(resource)
-          unless equivalent_class?(resource_class)
-            raise ActiveFedora::ActiveFedoraError, "Model mismatch. Expected #{@klass}. Got: #{resource_class}"
+          resource_class = ActiveFedora.model_mapper.classifier(resource).best_model
+          unless resource_class <= @klass
+            raise ActiveFedora::ModelMismatch, "Expected #{@klass}. Got: #{resource_class}"
           end
           resource_class
         end
-      end
-
-      def has_model_value(resource)
-        ActiveFedora.model_mapper.classifier(resource).best_model
-      end
-
-      def equivalent_class?(other_class)
-        other_class <= @klass
       end
 
       def find_with_ids(ids, cast)
