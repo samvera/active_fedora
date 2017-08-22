@@ -40,6 +40,10 @@ module ActiveFedora #:nodoc:
   class AssociationNotFoundError < ConfigurationError #:nodoc:
   end
 
+  # Raised when an object is loaded from Fedora by an incompatible class
+  class ModelMismatch < ActiveFedoraError
+  end
+
   # This error is raised when trying to destroy a parent instance in N:1 or 1:1 associations
   # (has_many, has_one) when there is at least 1 child associated instance.
   # ex: if @project.tasks.size > 0, DeleteRestrictionError will be raised when trying to destroy @project

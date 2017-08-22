@@ -1,21 +1,18 @@
 require 'spec_helper'
 
 describe ActiveFedora::Base do
+  before(:all) do
+    class Foo < ActiveFedora::Base
+      property :person, predicate: ::RDF::Vocab::DC.creator
+    end
+  end
+  after(:all) { Object.send(:remove_const, :Foo) }
+
   describe '#reload' do
-    before do
-      class Foo < ActiveFedora::Base
-        property :person, predicate: ::RDF::Vocab::DC.creator
-      end
-    end
-    after do
-      Object.send(:remove_const, :Foo)
-    end
     context "when persisted" do
       let(:object) { Foo.create(person: ['bob']) }
       let(:object2) { Foo.find(object.id) }
-      before do
-        object2.update(person: ['dave'])
-      end
+      before { object2.update(person: ['dave']) }
 
       it 're-queries Fedora' do
         object.reload
@@ -24,27 +21,22 @@ describe ActiveFedora::Base do
     end
 
     context "when not persisted" do
-      let(:object) { Foo.new }
       it 'raises an error' do
-        expect { object.reload }.to raise_error(ActiveFedora::ObjectNotFoundError)
+        expect { Foo.new.reload }.to raise_error(ActiveFedora::ObjectNotFoundError)
       end
     end
   end
 
   describe "a saved object" do
-    before do
+    before(:all) do
       class Book < ActiveFedora::Base
         type [::RDF::URI("http://www.example.com/Book")]
         property :title, predicate: ::RDF::Vocab::DC.title
       end
     end
-
-    after do
-      Object.send(:remove_const, :Book)
-    end
-    let!(:obj) { Book.create }
-
+    after(:all) { Object.send(:remove_const, :Book) }
     after { obj.destroy unless obj.destroyed? }
+    let!(:obj) { Book.create }
 
     describe "#errors" do
       subject { obj.errors }
@@ -121,40 +113,52 @@ describe ActiveFedora::Base do
     end
   end
 
-  describe "#exists?" do
-    let(:obj) { described_class.create }
+  shared_examples 'ActiveFedora::Base#exists?' do
+    let(:obj) { test_class.create }
     it "returns true for objects that exist" do
-      expect(described_class.exists?(obj)).to be true
+      expect(test_class.exists?(obj)).to be true
     end
     it "returns true for ids that exist" do
-      expect(described_class.exists?(obj.id)).to be true
+      expect(test_class.exists?(obj.id)).to be true
     end
     it "returns false for ids that don't exist" do
-      expect(described_class.exists?('test_missing_object')).to be false
+      expect(test_class.exists?('test_missing_object')).to be false
     end
-    it "returns false for nil" do
-      expect(described_class.exists?(nil)).to be false
-    end
-    it "returns false for false" do
-      expect(described_class.exists?(false)).to be false
-    end
-    it "returns false for empty" do
-      expect(described_class.exists?('')).to be false
+    it "returns false for nil, false and empty" do
+      expect(test_class.exists?(nil)).to be false
+      expect(test_class.exists?(false)).to be false
+      expect(test_class.exists?('')).to be false
     end
     context "when passed a hash of conditions" do
       let(:conditions) { { foo: "bar" } }
       context "and at least one object matches the conditions" do
         it "returns true" do
           allow(ActiveFedora::SolrService).to receive(:query) { [instance_double(RSolr::HashWithResponse)] }
-          expect(described_class.exists?(conditions)).to be true
+          expect(test_class.exists?(conditions)).to be true
         end
       end
       context "and no object matches the conditions" do
         it "returns false" do
           allow(ActiveFedora::SolrService).to receive(:query) { [] }
-          expect(described_class.exists?(conditions)).to be false
+          expect(test_class.exists?(conditions)).to be false
         end
       end
+    end
+  end
+
+  context 'base class' do
+    let(:test_class) { described_class }
+    it_behaves_like 'ActiveFedora::Base#exists?'
+  end
+
+  context 'subclass' do
+    let(:test_class) { Foo }
+    it_behaves_like 'ActiveFedora::Base#exists?'
+
+    it 'does not mistake other fedora objects for subclass' do
+      obj = described_class.create
+      expect { test_class.exists?(obj.id) }.not_to raise_error
+      expect(test_class.exists?(obj.id)).to be false
     end
   end
 
