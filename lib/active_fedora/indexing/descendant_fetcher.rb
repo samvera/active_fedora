@@ -7,7 +7,7 @@ module ActiveFedora
     #
     # The DescendantFetcher is also capable of partitioning the URIs into "priority" URIs
     # that will be first in the returned list. These prioritized URIs belong to objects
-    # with certain hasModel models. This feature is used in some hydra apps that need to
+    # with certain hasModel models. This feature is used in some samvera apps that need to
     # index 'permissions' objects before other objects to have the solr indexing work right.
     # And so by default, the prioritized class names are the ones form Hydra::AccessControls,
     # but you can alter the prioritized model name list, or set it to the empty array.
@@ -34,6 +34,7 @@ module ActiveFedora
         @exclude_self = exclude_self
       end
 
+      # @return [Array<String>] uris starting with priority models
       def descendant_and_self_uris
         partitioned = descendant_and_self_uris_partitioned
         partitioned[:priority] + partitioned[:other]
@@ -41,11 +42,20 @@ module ActiveFedora
 
       # returns a hash where key :priority is an array of all prioritized
       # type objects, key :other is an array of the rest.
+      # @return [Hash<String, Array<String>>] uris sorted into :priority and :other
       def descendant_and_self_uris_partitioned
-        resource = Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
+        model_partitioned = descendant_and_self_uris_partitioned_by_model
+        { priority: model_partitioned.slice(*priority_models).values.flatten,
+          other: model_partitioned.slice(*(model_partitioned.keys - priority_models)).values.flatten }
+      end
+
+      # Returns a hash where keys are model names
+      # This is useful if you need to action on certain models and want finer grainularity than priority/other
+      # @return [Hash<String, Array<String>>] uris sorted by model names
+      def descendant_and_self_uris_partitioned_by_model
         # GET could be slow if it's a big resource, we're using HEAD to avoid this problem,
         # but this causes more requests to Fedora.
-        return partitioned_uris unless resource.head.rdf_source?
+        return partitioned_uris unless rdf_resource.head.rdf_source?
 
         add_self_to_partitioned_uris unless @exclude_self
 
@@ -54,9 +64,11 @@ module ActiveFedora
           self.class.new(
             descendant_uri,
             priority_models: priority_models
-          ).descendant_and_self_uris_partitioned.tap do |descendant_partitioned|
-            partitioned_uris[:priority].concat descendant_partitioned[:priority]
-            partitioned_uris[:other].concat descendant_partitioned[:other]
+          ).descendant_and_self_uris_partitioned_by_model.tap do |descendant_partitioned|
+            descendant_partitioned.keys.each do |k|
+              partitioned_uris[k] ||= []
+              partitioned_uris[k].concat descendant_partitioned[k]
+            end
           end
         end
         partitioned_uris
@@ -73,10 +85,7 @@ module ActiveFedora
         end
 
         def partitioned_uris
-          @partitioned_uris ||= {
-            priority: [],
-            other: []
-          }
+          @partitioned_uris ||= {}
         end
 
         def rdf_graph_models
@@ -85,15 +94,10 @@ module ActiveFedora
           end.compact
         end
 
-        def prioritized_object?
-          priority_models.present? && (rdf_graph_models & priority_models).count > 0
-        end
-
         def add_self_to_partitioned_uris
-          if prioritized_object?
-            partitioned_uris[:priority] << rdf_resource.subject
-          else
-            partitioned_uris[:other] << rdf_resource.subject
+          rdf_graph_models.each do |model|
+            partitioned_uris[model] ||= []
+            partitioned_uris[model] << rdf_resource.subject
           end
         end
     end
