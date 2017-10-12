@@ -44,9 +44,23 @@ module ActiveFedora
         SolrService.instance.conn.get(select_path, params: args)
       end
 
+      def post(query, args = {})
+        args = args.merge(q: query, qt: 'standard')
+        SolrService.instance.conn.post(select_path, data: args)
+      end
+
       def query(query, args = {})
         Base.logger.warn "Calling ActiveFedora::SolrService.get without passing an explicit value for ':rows' is not recommended. You will end up with Solr's default (usually set to 10)\nCalled by #{caller[0]}" unless args.key?(:rows)
-        result = get(query, args)
+        method = args.delete(:method) || :get
+
+        result = case method
+                 when :get
+                   get(query, args)
+                 when :post
+                   post(query, args)
+                 else
+                   raise "Unsupported HTTP method for querying SolrService (#{method.inspect})"
+                 end
         result['response']['docs'].map do |doc|
           ActiveFedora::SolrHit.new(doc)
         end
