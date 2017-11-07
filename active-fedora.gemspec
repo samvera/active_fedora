@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'solrizer', '>= 3.4', '< 5'
   s.add_dependency "activesupport", '>= 4.2.4', '< 6'
   s.add_dependency "activemodel", '>= 4.2', '< 6'
-  s.add_dependency "active-triples", '~> 0.11.0'
+  s.add_dependency "active-triples", '>= 0.11.0', '< 2.0.0'
   s.add_dependency "deprecation"
   s.add_dependency "ldp", '~> 0.7.0'
   s.add_dependency "ruby-progressbar", '~> 1.0'
