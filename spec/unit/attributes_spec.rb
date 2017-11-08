@@ -133,6 +133,11 @@ describe ActiveFedora::Base do
         expect { history.title = nil }.not_to raise_error
       end
 
+      it "allow setting to multiple properties with unintended legacy behavior" do
+        expect { history.title = '' }.not_to raise_error
+        expect { history.title = ActiveTriples::Resource.new }.not_to raise_error
+      end
+
       it "does not allow an enumerable to a unique attribute writer" do
         expect { history.abstract = "Low" }.not_to raise_error
         expect { history.abstract = ["Low"]
