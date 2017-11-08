@@ -138,6 +138,7 @@ describe ActiveFedora::Base do
         expect { history.abstract = ["Low"]
         }.to raise_error ArgumentError, "You attempted to set the property `abstract' of test:123 to an enumerable value. However, this property is declared as singular."
         expect { history.abstract = nil }.not_to raise_error
+        expect { history.abstract = ActiveTriples::Resource.new }.not_to raise_error
       end
     end
   end

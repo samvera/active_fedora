@@ -45,7 +45,7 @@ module ActiveFedora::Attributes
     def self.define_singular_writers(mixin, name)
       mixin.class_eval <<-CODE, __FILE__, __LINE__ + 1
         def #{name}=(value)
-          if value.respond_to?(:each) # singular
+          if value.respond_to?(:each) && !(value.respond_to?(:term?) && value.term?)
             raise ArgumentError, "You attempted to set the property `#{name}' of \#{id} to an enumerable value. However, this property is declared as singular."
           end
           set_value(:#{name}, value)
