@@ -7,18 +7,18 @@ Gem::Specification.new do |s|
   s.version     = ActiveFedora::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Matt Zumwalt", "McClain Looney", "Justin Coyne"]
-  s.email       = ["matt.zumwalt@yourmediashelf.com"]
+  s.email       = ["samvera-tech@googlegroups.com"]
   s.homepage    = %q{https://github.com/projecthydra/active_fedora}
   s.summary     = %q{A convenience libary for manipulating documents in the Fedora Repository.}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
-  s.license = "APACHE2"
+  s.license = "Apache-2.0"
   s.required_ruby_version = '~> 2.0'
 
   s.add_dependency 'rsolr', '>= 1.1.2', '< 3'
   s.add_dependency 'solrizer', '>= 3.4', '< 5'
   s.add_dependency "activesupport", '>= 4.2.4', '< 6'
   s.add_dependency "activemodel", '>= 4.2', '< 6'
-  s.add_dependency "active-triples", '~> 0.11.0'
+  s.add_dependency "active-triples", '>= 0.11.0', '< 2.0.0'
   s.add_dependency "deprecation"
   s.add_dependency "ldp", '~> 0.7.0'
   s.add_dependency "ruby-progressbar", '~> 1.0'
@@ -46,5 +46,4 @@ Gem::Specification.new do |s|
     "README.md"
   ]
   s.require_paths = ["lib"]
-
 end
