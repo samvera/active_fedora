@@ -1,12 +1,19 @@
 language: ruby
 cache: bundler
+dist: trusty
 sudo: false
-rvm: 2.4.1
+
+rvm:
+  - 2.3
+  - 2.3.4
+  - 2.4
+  - ruby-head
+
 matrix:
+  allow_failures: ruby-head
   include:
-    - rvm: 2.3.4
-      env: "RAILS_VERSION=4.2.8"
     - env: "RAILS_VERSION=5.1.1"
+
 global_env:
   - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
 before_install:
