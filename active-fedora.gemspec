@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency "deprecation"
   s.add_dependency "ldp", '~> 0.7.0'
   s.add_dependency "ruby-progressbar", '~> 1.0'
-  s.add_dependency 'faraday', '~> 0.12.1'
+  s.add_dependency 'faraday', '~> 0.9.2'
   s.add_dependency 'faraday-encoding', '0.0.4'
 
   s.add_development_dependency "rails"
