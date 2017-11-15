@@ -11,7 +11,8 @@ module ActiveFedora
     end
 
     def solr_wrapper_config
-      copy_file '.solr_wrapper', '.solr_wrapper'
+      # Overwrite the configuration files that Blacklight has installed
+      copy_file '.solr_wrapper.yml', force: true
       copy_file 'solr_wrapper_test.yml', 'config/solr_wrapper_test.yml'
     end
   end

@@ -6,7 +6,7 @@ describe ActiveFedora::Config::SolrGenerator do
     let(:generator) { described_class.new }
     let(:files_to_test) { [
       'config/solr_wrapper_test.yml',
-      '.solr_wrapper'
+      '.solr_wrapper.yml'
     ]}
 
     it "creates config files" do
