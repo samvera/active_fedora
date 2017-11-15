@@ -6,7 +6,7 @@ describe ActiveFedora::Config::FedoraGenerator do
     let(:generator) { described_class.new }
     let(:files_to_test) { [
       'config/fcrepo_wrapper_test.yml',
-      '.fcrepo_wrapper'
+      '.fcrepo_wrapper.yml'
     ]}
 
     before do
