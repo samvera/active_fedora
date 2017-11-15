@@ -4,5 +4,5 @@ port: 8985
 instance_dir: tmp/solr-test
 collection:
     persist: false
-    dir: solr/config
+    dir: solr/conf
     name: hydra-test
