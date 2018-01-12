@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ActiveFedora::FinderMethods do
+RSpec.describe ActiveFedora::FinderMethods do
   let(:object_class) do
     Class.new do
       def self.delegated_attributes
@@ -29,6 +29,52 @@ describe ActiveFedora::FinderMethods do
   end
 
   let(:finder) { finder_class.new }
+
+  describe '#equivalent_class?' do
+    let(:child_class) { Class.new(object_class) }
+    let(:object_class) { Class.new }
+    it 'is true for the exact class' do
+      expect(finder.send(:equivalent_class?, object_class)).to be true
+    end
+
+    it 'is true for child classes' do
+      expect(finder.send(:equivalent_class?, child_class)).to be true
+    end
+
+    it 'is falsey for non-decendants' do
+      expect(finder.send(:equivalent_class?, Class.new)).to be_nil
+    end
+  end
+
+  describe '#class_to_load' do
+    subject(:class_to_load) { finder.send(:class_to_load, resource, true) }
+
+    let(:best_model) { Class.new }
+    let(:mapper) { instance_double(ActiveFedora::DefaultModelMapper, classifier: classifier) }
+    let(:classifier) { instance_double(ActiveFedora::ModelClassifier, best_model: best_model) }
+    let(:resource) { instance_double(Hash) }
+
+    before do
+      allow(ActiveFedora).to receive(:model_mapper).and_return(mapper)
+    end
+
+    context 'when using the default implementation' do
+      it 'raises an error' do
+        expect { class_to_load }.to raise_error ActiveFedora::ModelMismatch
+      end
+    end
+
+    context 'when a custom finder overrides equivalent_class?' do
+      before do
+        allow(finder).to receive(:equivalent_class?).and_return(true)
+      end
+
+      it 'calls the overridden implementation' do
+        expect(class_to_load).to eq best_model
+        expect(finder).to have_received(:equivalent_class?).with(best_model)
+      end
+    end
+  end
 
   describe "#condition_to_clauses" do
     subject { finder.send(:condition_to_clauses, key, value) }
