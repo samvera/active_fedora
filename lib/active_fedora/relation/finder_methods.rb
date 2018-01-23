@@ -194,11 +194,15 @@ module ActiveFedora
           ActiveFedora::Base
         else
           resource_class = ActiveFedora.model_mapper.classifier(resource).best_model
-          unless resource_class <= @klass
+          unless equivalent_class?(resource_class)
             raise ActiveFedora::ModelMismatch, "Expected #{@klass}. Got: #{resource_class}"
           end
           resource_class
         end
+      end
+
+      def equivalent_class?(other_class)
+        other_class <= @klass
       end
 
       def find_with_ids(ids, cast)
