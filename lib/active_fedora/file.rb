@@ -103,7 +103,7 @@ module ActiveFedora
     end
 
     def remote_content
-      return if new_record?
+      return if new_record? && !external_content?
       @ds_content ||= retrieve_content
     end
 
@@ -116,6 +116,7 @@ module ActiveFedora
     end
 
     def content_changed?
+      return false if external_content?
       return true if new_record? && !local_or_remote_content(false).blank?
       local_or_remote_content(false) != @ds_content
     end
@@ -139,6 +140,19 @@ module ActiveFedora
       false
     end
 
+    def external_content?
+      external_url.present?
+    end
+
+    def external_url
+      return nil unless mime_type.start_with? "message/external-body"
+      mime_type[/url=['"](.+?)['"]/i, 1]
+    end
+
+    def external_url=(external_file_url)
+      self.mime_type = "message/external-body; access-type=URL; URL=\"#{external_file_url}\""
+    end
+
     # serializes any changed data into the content field
     def serialize!; end
 
@@ -147,6 +161,7 @@ module ActiveFedora
     end
 
     def content=(string_or_io)
+      raise "This file has external content.  First call external_url=nil if you want to use content=." if external_content?
       content_will_change! unless @content == string_or_io
       @content = string_or_io
     end
@@ -174,7 +189,12 @@ module ActiveFedora
       end
 
       def retrieve_content
-        ldp_source.get.body
+        ldp_response = ldp_source.get
+        if ldp_response.response.status == 307
+          Faraday.get(ldp_response.response["location"])
+        else
+          ldp_response.body
+        end
       end
 
       def ldp_headers
@@ -196,7 +216,7 @@ module ActiveFedora
       end
 
       def local_or_remote_content(ensure_fetch = true)
-        return @content if new_record?
+        return @content if new_record? && !external_content?
 
         @content ||= ensure_fetch ? remote_content : @ds_content
         @content.rewind if behaves_like_io?(@content)
