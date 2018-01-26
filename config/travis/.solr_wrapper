@@ -1,0 +1,7 @@
+# Place any default configuration for solr_wrapper here
+# version: 6.1.0
+port: 8985
+download_dir: dep_cache
+collection:
+  dir: lib/generators/active_fedora/config/solr/templates/solr/config/
+  name: hydra-test
