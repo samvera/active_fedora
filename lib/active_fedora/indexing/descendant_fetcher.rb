@@ -77,7 +77,7 @@ module ActiveFedora
       protected
 
         def rdf_resource
-          @rdf_resource ||= Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, uri)
+          @rdf_resource ||= Ldp::Resource::RdfSource.new(ActiveFedora.fedora.build_ntriples_connection, uri)
         end
 
         def rdf_graph
