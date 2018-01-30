@@ -12,6 +12,9 @@ describe ActiveFedora::Base do
       after_update :a_update
       after_find :a_find
 
+      after_update_index :a_update_index
+      before_update_index :b_update_index
+
       before_destroy :do_stuff
 
       def do_stuff
@@ -24,12 +27,14 @@ describe ActiveFedora::Base do
     Object.send(:remove_const, :CallbackStub)
   end
 
-  it "has after_initialize, before_save, after_save, before_create, after_create" do
+  it "has after_initialize, before_save, after_save, before_create, after_create, after_update_index, before_update_index" do
     allow_any_instance_of(CallbackStub).to receive(:a_init)
     allow_any_instance_of(CallbackStub).to receive :b_create
     allow_any_instance_of(CallbackStub).to receive :a_create
     allow_any_instance_of(CallbackStub).to receive(:b_save)
     allow_any_instance_of(CallbackStub).to receive(:a_save)
+    allow_any_instance_of(CallbackStub).to receive(:a_update_index)
+    allow_any_instance_of(CallbackStub).to receive(:b_update_index)
     @cb = CallbackStub.new
     @cb.save
   end
@@ -40,6 +45,8 @@ describe ActiveFedora::Base do
     allow_any_instance_of(CallbackStub).to receive(:a_create)
     allow_any_instance_of(CallbackStub).to receive(:b_save)
     allow_any_instance_of(CallbackStub).to receive(:a_save)
+    allow_any_instance_of(CallbackStub).to receive(:a_update_index)
+    allow_any_instance_of(CallbackStub).to receive(:b_update_index)
     @cb = CallbackStub.new
     @cb.save
     allow_any_instance_of(CallbackStub).to receive(:a_init)

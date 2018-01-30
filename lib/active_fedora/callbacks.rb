@@ -215,7 +215,8 @@ module ActiveFedora
       :after_initialize, :after_find, :before_validation, :after_validation,
       :before_save, :around_save, :after_save, :before_create, :around_create,
       :after_create, :before_update, :around_update, :after_update,
-      :before_destroy, :around_destroy, :after_destroy
+      :before_destroy, :around_destroy, :after_destroy,
+      :before_update_index, :around_update_index, :after_update_index
     ].freeze
 
     included do
@@ -223,11 +224,15 @@ module ActiveFedora
       include ActiveModel::Validations::Callbacks
 
       define_model_callbacks :initialize, :find, only: :after
-      define_model_callbacks :save, :create, :update, :destroy
+      define_model_callbacks :save, :create, :update, :destroy, :update_index
     end
 
     def destroy(*) #:nodoc:
       _run_destroy_callbacks { super }
+    end
+
+    def update_index(*args)
+      _run_update_index_callbacks { super(*args) }
     end
 
     private

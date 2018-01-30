@@ -103,5 +103,13 @@ module ActiveFedora
         ActiveFedora::Base.logger.warn "Fedora URL (#{host}) does not end with /rest. This could be a problem. Check your fedora.yml config"
       end
     end
+
+    def ntriples_connection
+      authorized_connection.tap { |conn| conn.headers['Accept'] = 'application/n-triples' }
+    end
+
+    def build_ntriples_connection
+      ActiveFedora::InitializingConnection.new(ActiveFedora::CachingConnection.new(ntriples_connection, omit_ldpr_interaction_model: true), root_resource_path)
+    end
   end
 end
