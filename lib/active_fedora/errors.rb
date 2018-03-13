@@ -119,4 +119,8 @@ module ActiveFedora #:nodoc:
 
   class DangerousAttributeError < ActiveFedoraError
   end
+
+  # Raised when you try to index in an invalid way
+  class InvalidIndexDescriptor < ActiveFedoraError
+  end
 end
