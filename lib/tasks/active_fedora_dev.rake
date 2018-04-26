@@ -2,7 +2,7 @@ APP_ROOT = File.expand_path("#{File.dirname(__FILE__)}/../../")
 
 require 'jettywrapper'
 JETTY_ZIP_BASENAME = '7.x-stable'
-Jettywrapper.url = "https://github.com/projecthydra/hydra-jetty/archive/#{JETTY_ZIP_BASENAME}.zip"
+Jettywrapper.url = "https://github.com/samvera/hydra-jetty/archive/#{JETTY_ZIP_BASENAME}.zip"
 
 namespace :active_fedora do
   # Use yard to build docs
@@ -13,7 +13,7 @@ namespace :active_fedora do
     doc_destination = File.join(project_root, 'doc')
 
     YARD::Rake::YardocTask.new(:doc) do |yt|
-      yt.files   = Dir.glob(File.join(project_root, 'lib', '**', '*.rb')) + 
+      yt.files   = Dir.glob(File.join(project_root, 'lib', '**', '*.rb')) +
                    [ '-', File.join(project_root, 'README.md')]
       yt.options = ['--output-dir', doc_destination, '--readme', 'README.md']
     end
@@ -39,7 +39,7 @@ namespace :active_fedora do
 
   desc "Copies the default SOLR config for the bundled Testing Server"
   task :configure_jetty do
-    FileList['lib/generators/active_fedora/config/solr/templates/solr_conf/conf/*'].each do |f|  
+    FileList['lib/generators/active_fedora/config/solr/templates/solr_conf/conf/*'].each do |f|
       cp("#{f}", 'jetty/solr/development-core/conf/', :verbose => true)
       cp("#{f}", 'jetty/solr/test-core/conf/', :verbose => true)
     end
@@ -60,7 +60,7 @@ task :ci do
 end
 
 desc "Execute specs with coverage"
-task :coverage do 
+task :coverage do
   # Put spec opts in a file named .rspec in root
   ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
   ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
