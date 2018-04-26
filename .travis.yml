@@ -1,14 +1,17 @@
 language: ruby
 rvm:
-  - 2.3.1
-
+  - 2.5.1
 
 matrix:
   include:
-    - rvm: 2.2.5
-      env: RAILS_VERSION=4.2.7.1
+    - rvm: 2.5.1
+      env: ACTIVEMODEL_VERSION=5.1.6
+    - rvm: 2.3.7
+      env: RAILS_VERSION=5.0.7
+    - rvm: 2.2.10
+      env: RAILS_VERSION=4.2.10
     - rvm: 2.1.10
-      env: RAILS_VERSION=4.2.7.1
+      env: RAILS_VERSION=4.2.10
 
 env:
   global:
