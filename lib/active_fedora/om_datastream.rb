@@ -6,7 +6,7 @@ module ActiveFedora
     before_save do
       if content.blank?
         ActiveFedora::Base.logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}" if ActiveFedora::Base.logger
-        false
+        throw(:abort)
       end
     end
 
