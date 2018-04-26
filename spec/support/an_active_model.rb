@@ -10,6 +10,11 @@ shared_examples_for "An ActiveModel" do
   def assert_kind_of(klass, inspected_object)
     expect(inspected_object).to be_kind_of(klass)
   end
+
+  def assert_respond_to(obj, meth, msg = nil)
+    expect(obj).to respond_to meth
+  end
+
   include ActiveModel::Lint::Tests
 
   ActiveModel::Lint::Tests.public_instance_methods.map{|m| m.to_s}.grep(/^test/).each do |m|

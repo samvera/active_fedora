@@ -5,7 +5,9 @@ rvm:
 matrix:
   include:
     - rvm: 2.5.1
-      env: ACTIVEMODEL_VERSION=5.1.6
+      env: RAILS_VERSION=5.2.0
+    - rvm: 2.4.4
+      env: RAILS_VERSION=5.1.6
     - rvm: 2.3.7
       env: RAILS_VERSION=5.0.7
     - rvm: 2.2.10
