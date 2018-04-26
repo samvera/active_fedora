@@ -12,7 +12,7 @@ module ActiveFedora
       after_save :clear_changed_attributes
       def clear_changed_attributes
         @previously_changed = changes
-        @changed_attributes.clear
+        clear_attribute_changes(changes.keys)
       end
     end
 

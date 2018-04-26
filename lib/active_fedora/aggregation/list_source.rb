@@ -15,7 +15,7 @@ module ActiveFedora
       # Overriding so that we don't track previously_changed, which was
       # rather expensive.
       def clear_changed_attributes
-        @changed_attributes.clear
+        clear_changes_information
       end
 
       def changed?
