@@ -6,7 +6,11 @@ module ActiveFedora
     before_save do
       if content.blank?
         ActiveFedora::Base.logger.warn "Cowardly refusing to save a datastream with empty content: #{self.inspect}" if ActiveFedora::Base.logger
-        false
+        if ActiveSupport.version >= Gem::Version.new('5.0')
+          throw(:abort)
+        else
+          false
+        end
       end
     end
 
@@ -293,6 +297,11 @@ module ActiveFedora
       else
         om_term_values(*term_pointer)
       end
+    end
+
+    def reset_profile_attributes
+      super
+      clear_attribute_changes([:ng_xml])
     end
 
   end
