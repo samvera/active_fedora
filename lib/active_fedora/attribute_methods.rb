@@ -136,7 +136,7 @@ module ActiveFedora
     #   person.attribute_names
     #   # => ["id", "created_at", "updated_at", "name", "age"]
     def attribute_names
-      @attributes.keys
+      @local_attributes.keys
     end
 
     # Returns a hash of all the attributes with their names as keys and the values of the attributes as values.
