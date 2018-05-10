@@ -62,4 +62,28 @@ describe ActiveFedora::Base do
 
     @cb.destroy
   end
+
+  describe 'before_validation callback' do
+    module SpecModel
+      class Book < ActiveFedora::Base
+        property :title, predicate: ::RDF::DC.title, multiple: false
+
+        before_validation do
+          self.title = "Some title" if title.blank?
+        end
+
+      end
+    end
+    let(:book) { SpecModel::Book.new}
+
+    it 'should be called by the valid? check' do
+      book.valid?
+      expect(book.title).to eql 'Some title'
+    end
+
+    it 'should be called before save' do
+      book.save
+      expect(book.title).to eql 'Some title'
+    end
+  end
 end
