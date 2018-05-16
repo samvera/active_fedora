@@ -98,7 +98,7 @@ Metrics/ClassLength:
 Metrics/MethodLength:
   Enabled: false
 
-Style/MethodName:
+Naming/MethodName:
   Exclude:
     - 'lib/active_fedora/with_metadata.rb'
 
@@ -106,7 +106,7 @@ Style/AndOr:
   Exclude:
     - 'lib/active_fedora/associations/has_many_association.rb'
 
-Style/AccessorMethodName:
+Naming/AccessorMethodName:
   Exclude:
     - 'lib/active_fedora/with_metadata/metadata_node.rb'
     - 'lib/active_fedora/fedora_attributes.rb'
@@ -114,7 +114,7 @@ Style/AccessorMethodName:
     - 'lib/active_fedora/associations/has_many_association.rb'
     - 'lib/active_fedora/associations/association.rb'
 
-Style/PredicateName:
+Naming/PredicateName:
   Exclude:
     - 'lib/active_fedora/attribute_methods.rb'
     - 'lib/active_fedora/relation/finder_methods.rb'
@@ -156,11 +156,11 @@ Style/BlockDelimiters:
   Exclude:
     - 'spec/**/*'
 
-Style/BlockEndNewline:
+Layout/BlockEndNewline:
   Exclude:
     - 'spec/**/*'
 
-Style/MultilineBlockLayout:
+Layout/MultilineBlockLayout:
   Exclude:
     - 'spec/**/*'
 
@@ -172,7 +172,7 @@ Style/Lambda:
   Exclude:
     - 'spec/**/*'
 
-Style/IndentationConsistency:
+Layout/IndentationConsistency:
   EnforcedStyle: rails
 
 Style/CollectionMethods:
@@ -215,7 +215,7 @@ Style/ClassVars:
 Style/SignalException:
   Enabled: false
 
-Style/FileName:
+Naming/FileName:
   Exclude:
     - 'lib/active-fedora.rb'
 
