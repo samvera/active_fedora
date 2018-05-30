@@ -76,7 +76,9 @@ module ActiveFedora
           attr_reader :parent_class
 
           def property(name, options)
-            parent_class.delegate name, :"#{name}=", :"#{name}_changed?", to: :metadata_node
+            parent_class.delegate(name, :"#{name}=", :"#{name}_changed?", to: :metadata_node) if
+              parent_class
+
             super
           end
 

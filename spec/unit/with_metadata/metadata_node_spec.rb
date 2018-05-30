@@ -7,6 +7,14 @@ describe ActiveFedora::WithMetadata::MetadataNode do
   let(:node) { generated_schema.new(file) }
   let(:book) { RDF::URI.new('http://example.com/ns/Book') }
 
+  describe '.property' do
+    it 'can set a property' do
+      expect { described_class.property :moomin, predicate: RDF::Vocab::DC.type }
+        .to change { described_class.properties }
+        .to include 'moomin'
+    end
+  end
+
   describe "#changed_attributes" do
     subject { node.changed_attributes }
 
