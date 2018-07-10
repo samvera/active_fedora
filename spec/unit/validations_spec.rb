@@ -8,6 +8,16 @@ describe ActiveFedora::Base do
 
       validates_presence_of :fubar
       validates_length_of :swank, minimum: 5
+
+      before_validation :before_validation_callback
+      after_validation :after_validation_callback
+
+      def before_validation_callback
+        # no-op
+      end
+      def after_validation_callback
+        # no-op
+      end
     end
   end
 
@@ -69,6 +79,14 @@ describe ActiveFedora::Base do
         expect { validation_stub.update!(fubar: ['here'], swank: 'long enough') }.to raise_error ActiveFedora::RecordInvalid
         expect(validation_stub.fubar).to eq ['here']
       end
+    end
+  end
+
+  describe 'validation callbacks' do
+    it 'calls callbacks' do
+      expect(validation_stub).to receive(:before_validation_callback)
+      expect(validation_stub).to receive(:after_validation_callback)
+      validation_stub.validate
     end
   end
 end
