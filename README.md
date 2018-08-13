@@ -3,7 +3,6 @@ Description
 
 [![Build Status](https://travis-ci.org/samvera/active_fedora.png?branch=master)](https://travis-ci.org/samvera/active\_fedora)
 [![Version](https://badge.fury.io/rb/active-fedora.png)](http://badge.fury.io/rb/active-fedora)
-[![Dependencies](https://gemnasium.com/samvera/active_fedora.png)](https://gemnasium.com/samvera/active\_fedora)
 [![Coverage Status](https://img.shields.io/coveralls/samvera/active_fedora.svg)](https://coveralls.io/r/samvera/active_fedora)
 
 ActiveFedora is a Ruby gem for creating and
