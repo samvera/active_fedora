@@ -1,10 +1,17 @@
-ENV["environment"] ||= 'test'
-require "bundler/setup"
+ENV["environment"] ||= "test"
 
+require "bundler/setup"
 require 'simplecov'
 require 'coveralls'
 
-SimpleCov.start do
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
+  [
+    SimpleCov::Formatter::HTMLFormatter,
+    Coveralls::SimpleCov::Formatter
+  ]
+)
+
+SimpleCov.start "rails" do
   add_filter "/spec/"
 end
 
@@ -17,11 +24,6 @@ require 'pry' unless ENV['TRAVIS']
 
 ActiveFedora::Base.logger = Logger.new(STDERR)
 ActiveFedora::Base.logger.level = Logger::WARN
-# require 'http_logger'
-# HttpLogger.logger = Logger.new(STDOUT)
-# HttpLogger.ignore = [/localhost:8983\/solr/]
-# HttpLogger.colorize = false
-# HttpLogger.log_headers = true
 
 Dir[File.expand_path("../support/**/*.rb", __FILE__)].each { |f| require f }
 
