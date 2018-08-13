@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Matt Zumwalt", "McClain Looney", "Justin Coyne"]
   s.email       = ["samvera-tech@googlegroups.com"]
-  s.homepage    = %q{https://github.com/projecthydra/active_fedora}
+  s.homepage    = %q{https://github.com/samvera/active_fedora}
   s.summary     = %q{A convenience libary for manipulating documents in the Fedora Repository.}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.license = "Apache-2.0"

@@ -36,7 +36,7 @@ module ActiveFedora
       # Serializing head/tail/nodes slows things down CONSIDERABLY, and is not
       # useful.
       # @note This method is used by ActiveFedora::Base upstream for indexing,
-      #   at https://github.com/projecthydra/active_fedora/blob/master/lib/active_fedora/profile_indexing_service.rb.
+      #   at https://github.com/samvera/active_fedora/blob/master/lib/active_fedora/indexing_service.rb.
       def serializable_hash(_options = nil)
         {}
       end
