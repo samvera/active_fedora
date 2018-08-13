@@ -1,21 +1,24 @@
 # How to Contribute
 
-We want your help to make Project Hydra great.
-There are a few guidelines that we need contributors to follow so that we can have a chance of keeping on top of things.
+We want your help to make Samvera great. There are a few guidelines
+that we need contributors to follow so that we can have a chance of
+keeping on top of things.
 
 ## Code of Conduct
 
-The Hydra community is dedicated to providing a welcoming and positive experience for all its
-members, whether they are at a formal gathering, in a social setting, or taking part in activities
-online.  Please see our [Code of Conduct](https://wiki.duraspace.org/display/hydra/Code+of+Conduct)
-for more information.
+The Samvera Community is dedicated to providing a welcoming and positive
+experience for all its members, whether they are at a formal gathering, in
+a social setting, or taking part in activities online. Please see our
+[Code of Conduct](CODE_OF_CONDUCT.md) for more information.
 
-## Hydra Project Intellectual Property Licensing and Ownership
+## Samvera Community Intellectual Property Licensing and Ownership
 
-All code contributors must have an Individual Contributor License Agreement (iCLA) on file with the Hydra Project Steering Group.
-If the contributor works for an institution, the institution must have a Corporate Contributor License Agreement (cCLA) on file.
+All code contributors must have an Individual Contributor License Agreement
+(iCLA) on file with the Samvera Steering Group. If the contributor works for
+an institution, the institution must have a Corporate Contributor License
+Agreement (cCLA) on file.
 
-https://wiki.duraspace.org/display/hydra/Hydra+Project+Intellectual+Property+Licensing+and+Ownership
+https://wiki.duraspace.org/display/samvera/Samvera+Community+Intellectual+Property+Licensing+and+Ownership
 
 You should also add yourself to the `CONTRIBUTORS.md` file in the root of the project.
 
@@ -48,7 +51,7 @@ You should also add yourself to the `CONTRIBUTORS.md` file in the root of the pr
   * Please avoid working directly on the `master` branch.
   * You may find the [hub suite of commands](https://github.com/defunkt/hub) helpful
 * Make sure you have added sufficient tests and documentation for your changes.
-  * Test functionality with RSpec; est features / UI with Capybara.
+  * Test functionality with RSpec; Test features / UI with Capybara.
 * Run _all_ the tests to assure nothing else was accidentally broken.
 
 ### Documenting Code
@@ -61,7 +64,7 @@ You should also add yourself to the `CONTRIBUTORS.md` file in the root of the pr
   * This work greatly increases the usability of the code base and supports the on-ramping of new committers.
   * We will all be understanding of one another's time constraints in this area.
 * YARD examples:
-  * [Hydra::Works::RemoveGenericFile](https://github.com/projecthydra-labs/hydra-works/blob/master/lib/hydra/works/services/generic_work/remove_generic_file.rb)
+  * [Hyrax::AdminSet](https://github.com/samvera/hyrax/blob/master/app/models/admin_set.rb)
   * [ActiveTriples::LocalName::Minter](https://github.com/ActiveTriples/active_triples-local_name/blob/master/lib/active_triples/local_name/minter.rb)
 * [Getting started with YARD](http://www.rubydoc.info/gems/yard/file/docs/GettingStarted.md)
 
@@ -103,7 +106,13 @@ You should also add yourself to the `CONTRIBUTORS.md` file in the root of the pr
       long to fit in 72 characters
 ```
 
+* Make sure you have added the necessary tests for your changes.
+* Run _all_ the tests to assure nothing else was accidentally broken.
+* When you are ready to submit a pull request
+
 ### Submitting Changes
+
+[Detailed Walkthrough of One Pull Request per Commit](http://ndlib.github.io/practices/one-commit-per-pull-request/)
 
 * Read the article ["Using Pull Requests"](https://help.github.com/articles/using-pull-requests) on GitHub.
 * Make sure your branch is up to date with its parent branch (i.e. master)
@@ -144,16 +153,18 @@ First, the person contributing the code is putting themselves out there. Be mind
 This is your chance for a mentoring moment of another developer. Take time to give an honest and thorough review of what has changed. Things to consider:
 
   * Does the commit message explain what is going on?
-  * Does the code changes have tests? _Not all changes need new tests, some changes are refactors_
+  * Does the code changes have tests? _Not all changes need new tests, some changes are refactorings_
   * Do new or changed methods, modules, and classes have documentation?
   * Does the commit contain more than it should? Are two separate concerns being addressed in one commit?
   * Does the description of the new/changed specs match your understanding of what the spec is doing?
+  * Did the Travis tests complete successfully?
 
 If you are uncertain, bring other contributors into the conversation by assigning them as a reviewer.
 
 # Additional Resources
 
 * [General GitHub documentation](http://help.github.com/)
-* [GitHub pull request documentation](http://help.github.com/send-pull-requests/)
+* [GitHub pull request documentation](https://help.github.com/articles/about-pull-requests/)
 * [Pro Git](http://git-scm.com/book) is both a free and excellent book about Git.
 * [A Git Config for Contributing](http://ndlib.github.io/practices/my-typical-per-project-git-config/)
+
