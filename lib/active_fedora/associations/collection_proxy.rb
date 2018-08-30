@@ -41,6 +41,8 @@ module ActiveFedora
         merge! association.scope(nullify: false)
       end
 
+      delegate :each, to: :to_a
+
       def target
         @association.target
       end
