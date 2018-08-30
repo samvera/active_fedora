@@ -39,7 +39,36 @@ describe ActiveFedora::Base do
 
       it "does not reload" do
         expect_any_instance_of(ActiveFedora::Relation).to_not receive :find_each
-        libraries[0]
+        libraries.each(&:id)
+      end
+    end
+
+    describe '#each' do
+      before { Book.create }
+
+      it 'returns an enumerator' do
+        expect(libraries.each).to be_a Enumerator
+      end
+
+      it 'yields the items' do
+        expect { |b| libraries.each(&b) }
+          .to yield_successive_args(*Library.all.to_a)
+      end
+
+      it 'when called from Base yields all items' do
+        expect { |b| described_class.all.each(&b) }
+          .to yield_successive_args(*(Library.all.to_a + Book.all.to_a))
+      end
+
+      context 'when cached' do
+        it 'returns an enumerator' do
+          expect(libraries.each).to be_a Enumerator
+        end
+
+        it 'yields the items' do
+          expect { |b| libraries.each(&b) }
+            .to yield_successive_args(*Library.all.to_a)
+        end
       end
     end
 
