@@ -13,7 +13,8 @@ module ActiveFedora
       :keep_if, :pop, :shift, :delete_at, :select!
     ].to_set
 
-    delegate :length, :collect, :map, :each, :all?, :include?, :to_ary, to: :to_a
+    delegate :length, :map, :to_ary, to: :to_a
+    delegate :all?, :blank?, :collect, :include?, :present?, to: :each
 
     protected
 
