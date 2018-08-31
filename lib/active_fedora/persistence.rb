@@ -2,6 +2,13 @@ module ActiveFedora
   # = Active Fedora Persistence
   module Persistence
     extend ActiveSupport::Concern
+    extend ActiveSupport::Autoload
+    autoload :NullIdentifierService
+
+    included do
+      class_attribute :identifier_service_class
+      self.identifier_service_class = NullIdentifierService
+    end
 
     def new_record?
       return true if @ldp_source.subject.nil?
@@ -209,7 +216,13 @@ module ActiveFedora
       end
 
       # Override to tie in an ID minting service
-      def assign_id; end
+      def assign_id
+        identifier_service.mint
+      end
+
+      def identifier_service
+        @identifier_service ||= identifier_service_class.new
+      end
 
       # This is only used when creating a new record. If the object doesn't have an id
       # and assign_id can mint an id for the object, then assign it to the resource.
