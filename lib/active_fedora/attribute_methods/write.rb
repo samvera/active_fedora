@@ -28,7 +28,7 @@ module ActiveFedora
 
       def write_attribute(attribute_name, value)
         if self.class.properties.key?(attribute_name)
-          @attributes[attribute_name] = value
+          attributes[attribute_name] = value
         else
           raise ActiveModel::MissingAttributeError, "can't write unknown attribute `#{attribute_name}'"
         end

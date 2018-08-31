@@ -74,7 +74,7 @@ describe ActiveFedora::File do
 
     describe "changed attributes are set" do
       it "marks profile as changed" do
-        expect_any_instance_of(SampleResource).to receive(:attribute_will_change!).with(:profile)
+        expect_any_instance_of(SampleResource).to receive(:attribute_will_change!).with(:ldp_source)
         test_object
       end
     end

@@ -284,6 +284,8 @@
       -->
   </searchComponent>
 
+<!-- suggest searchComponent and requestHandler disabled by default due to performance penalties -->
+<!--
   <searchComponent name="suggest" class="solr.SuggestComponent">
     <lst name="suggester">
       <str name="name">mySuggester</str>
@@ -304,7 +306,8 @@
       <str>suggest</str>
     </arr>
   </requestHandler>
-
+-->
+ 
   <requestHandler name="/update/extract" class="org.apache.solr.handler.extraction.ExtractingRequestHandler">
     <lst name="defaults">
       <str name="fmap.Last-Modified">last_modified</str>

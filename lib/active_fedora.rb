@@ -9,7 +9,7 @@ require 'active_support/core_ext/hash/except'
 require 'active_triples'
 
 # Monkey patching RDF::Literal::DateTime to support fractional seconds.
-# See https://github.com/projecthydra/active_fedora/issues/497
+# See https://github.com/samvera/active_fedora/issues/497
 # Also monkey patches in a fix for timezones to be stored properly.
 module RDF
   class Literal

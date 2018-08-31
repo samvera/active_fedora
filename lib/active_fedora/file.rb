@@ -43,7 +43,7 @@ module ActiveFedora
           raise "The first argument to #{self} must be a Hash, String or RDF::URI. You provided a #{identifier.class}"
         end
 
-        @attributes = {}.with_indifferent_access
+        @local_attributes = {}.with_indifferent_access
         @readonly = false
         yield self if block_given?
       end
@@ -86,7 +86,7 @@ module ActiveFedora
       @content = nil
       @metadata = nil
       @ds_content = nil
-      changed_attributes.clear
+      clear_attribute_changes(changes.keys)
     end
 
     def check_fixity
@@ -94,12 +94,12 @@ module ActiveFedora
     end
 
     def datastream_will_change!
-      attribute_will_change! :profile
+      attribute_will_change! :ldp_source
     end
 
     def attribute_will_change!(attr)
       return super unless attr == 'content'
-      changed_attributes['content'] = true
+      attributes_changed_by_setter[:content] = true
     end
 
     def remote_content
