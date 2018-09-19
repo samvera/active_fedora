@@ -33,6 +33,7 @@ module ActiveFedora
 
         def find_target
           # TODO: this forces a solr query, but I think it's likely we can just lookup from Fedora.
+          # See https://github.com/samvera/active_fedora/issues/1330
           rec = scope.take
           rec.tap { |record| set_inverse_instance(record) }
         end

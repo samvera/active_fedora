@@ -57,6 +57,7 @@
        1.4: default auto-phrase (QueryParser feature) to off
        1.5: omitNorms defaults to true for primitive field types (int, float, boolean, string...)
 # TODO 1.6: useDocValuesAsStored defaults to true.
+# See https://github.com/samvera/active_fedora/issues/1346
      -->
 
   <types>

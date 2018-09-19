@@ -26,6 +26,7 @@ module ActiveFedora::Associations::Builder
       full_callback_name = "#{callback_name}_for_#{name}"
 
       # TODO : why do i need method_defined? I think its because of the inheritance chain
+      # See https://github.com/samvera/active_fedora/issues/1333
       model.class_attribute full_callback_name.to_sym unless model.method_defined?(full_callback_name)
 
       callbacks = Array(options[callback_name.to_sym]).map do |callback|

@@ -14,6 +14,7 @@ module ActiveFedora
 
       def merge
         # TODO: merge order
+        # See https://github.com/samvera/active_fedora/issues/1329
         relation.where_values += other.where_values
         relation
       end

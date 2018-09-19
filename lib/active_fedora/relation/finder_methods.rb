@@ -262,6 +262,7 @@ module ActiveFedora
       def field_name_for(key)
         if @klass.delegated_attributes.key?(key)
           # TODO: Check to see if `key' is a possible solr field for this class, if it isn't try :searchable instead
+          # See https://github.com/samvera/active_fedora/issues/1344
           ActiveFedora.index_field_mapper.solr_name(key, :stored_searchable, type: :string)
         elsif key == :id
           ActiveFedora.id_field
