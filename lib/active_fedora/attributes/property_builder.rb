@@ -57,6 +57,7 @@ module ActiveFedora::Attributes
 
     def build(&block)
       # TODO: remove this block stuff
+      # See https://github.com/samvera/active_fedora/issues/1336
       NodeConfig.new(name, options[:predicate], options.except(:predicate)) do |config|
         config.with_index(&block) if block_given?
       end

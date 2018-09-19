@@ -314,7 +314,7 @@ module ActiveFedora
       def collect_join_chain
         [self]
       end
-      alias chain collect_join_chain # todo
+      alias chain collect_join_chain # TODO Remove alias, See https://github.com/samvera/active_fedora/issues/1347
 
       def has_inverse?
         inverse_name
