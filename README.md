@@ -1,24 +1,46 @@
-Description
------------
+# ActiveFedora
 
-[![Build Status](https://travis-ci.org/samvera/active_fedora.png?branch=master)](https://travis-ci.org/samvera/active\_fedora)
-[![Version](https://badge.fury.io/rb/active-fedora.png)](http://badge.fury.io/rb/active-fedora)
+Code: [![Version](https://badge.fury.io/rb/active-fedora.png)](http://badge.fury.io/rb/active-fedora)
+[![Build Status](https://travis-ci.org/samvera/active_fedora.png?branch=master)](https://travis-ci.org/samvera/active_fedora)
 [![Coverage Status](https://coveralls.io/repos/github/samvera/active_fedora/badge.svg?branch=master)](https://coveralls.io/github/samvera/active_fedora?branch=master)
+
+Docs: [![Contribution Guidelines](http://img.shields.io/badge/CONTRIBUTING-Guidelines-blue.svg)](./CONTRIBUTING.md)
+[![Apache 2.0 License](http://img.shields.io/badge/APACHE2-license-blue.svg)](./LICENSE)
+
+Jump in: [![Slack Status](http://slack.samvera.org/badge.svg)](http://slack.samvera.org/)
+
+# What is ActiveFedora?
 
 ActiveFedora is a Ruby gem for creating and
 managing objects in the Fedora Repository Architecture
 ([http://fedora-commons.org](http://fedora-commons.org)). ActiveFedora
 is loosely based on “ActiveRecord” in Rails. Version 9.0+ works with Fedora 4 and prior versions work on Fedora 3. Version 9.2+ works with Solr 4.10. Version 10.0+ works with Fedora >= 4.5.1.
 
-Getting Help
-------------
+## Product Owner & Maintenance
+ActiveFedora is a Core Component of the Samvera community. The documentation for
+what this means can be found
+[here](http://samvera.github.io/core_components.html#requirements-for-a-core-component).
 
--   Community Discussions & Mailing List are located at
-    [http://groups.google.com/group/samvera-tech](http://groups.google.com/group/samvera-tech)
--   Developers hang out on [slack.samvera.org](http://slack.samvera.org/)
+### Product Owner
 
-Installation
-------------
+[no-reply](https://github.com/no-reply)
+
+# Help
+
+The Samvera community is here to help. Please see our [support guide](./SUPPORT.md).
+
+# Getting Started
+
+The [Dive into Hydra](https://github.com/samvera/hydra/wiki/Dive-into-Hydra)
+gives you a brief tour through ActiveFedora’s features on the command line.
+
+## Prerequisites
+
+- A Fedora Commons Repository installation (configured by URL in fedora.yml)
+- A Solr index (configured by URL in solr.yml)
+- A JDK8+ installation (if running the test suite)
+
+## Installation
 
 The gem is hosted on rubygems.
 
@@ -26,14 +48,7 @@ The gem is hosted on rubygems.
 gem install active-fedora
 ```
 
-Getting Started
----------------
-
-The [Dive into Hydra](https://github.com/samvera/hydra/wiki/Dive-into-Hydra)
-gives you a brief tour through ActiveFedora’s features on the command line.
-
-Generators
-----------
+## Generators
 
 You can generate a model inheriting from ActiveFedora::Base.
 
@@ -41,8 +56,7 @@ You can generate a model inheriting from ActiveFedora::Base.
 rails generate active_fedora:model Book
 ```
 
-Testing (this Gem)
-------------------
+## Testing (this Gem)
 
 In order to run the RSpec tests, you need to have a copy of the
 ActiveFedora source code, and then run bundle install in the source
@@ -87,11 +101,9 @@ is installed, run:
 rake spec
 ```
 
-Acknowledgements
-----------------
+# Acknowledgments
 
-Creator: Matt Zumwalt ([MediaShelf](http://yourmediashelf.com))
+This software has been developed by and is brought to you by the Samvera community.  Learn more at the
+[Samvera website](http://samvera.org/).
 
-Developers:
-Justin Coyne, McClain Looney & Eddie Shin
-([MediaShelf](http://yourmediashelf.com)), Rick Johnson (Notre Dame)
+![Samvera Logo](https://wiki.duraspace.org/download/thumbnails/87459292/samvera-fall-font2-200w.png?version=1&modificationDate=1498550535816&api=v2)
