@@ -210,9 +210,17 @@ module ActiveFedora
       end
 
       def execute_sparql_update
-        change_set = ChangeSet.new(self, resource, changed_attributes.keys)
+        changed_attributes_keys = changed_attributes.keys
+        changed_attributes_keys << "type" if type_changed?
+        change_set = ChangeSet.new(self, resource, changed_attributes_keys)
         return true if change_set.empty?
         ActiveFedora.fedora.ldp_resource_service.update(change_set, self.class, id)
+      end
+
+      def type_changed?
+        current = build_ldp_resource(id)
+        current_types = self.class.resource_class.new(current.graph.rdf_subject, data: current.graph.graph.data).type
+        (type.map(&:to_s) - current_types.map(&:to_s)).any?
       end
 
       # Override to tie in an ID minting service
