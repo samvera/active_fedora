@@ -16,8 +16,8 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'rsolr', '>= 1.1.2', '< 3'
   s.add_dependency 'solrizer', '>= 3.4', '< 5'
-  s.add_dependency "activesupport", '>= 4.2.4', '< 6'
-  s.add_dependency "activemodel", '>= 4.2', '< 6'
+  s.add_dependency "activesupport", '>= 4.2.4', '< 5.2'
+  s.add_dependency "activemodel", '>= 4.2', '< 5.2'
   s.add_dependency "active-triples", '>= 0.11.0', '< 2.0.0'
   s.add_dependency "deprecation"
   s.add_dependency "ldp", '~> 0.7.0'
@@ -29,7 +29,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rdoc"
   s.add_development_dependency "yard"
   s.add_development_dependency "rake"
-  s.add_development_dependency "solr_wrapper", "~> 1.0"
+  s.add_development_dependency "solr_wrapper", "~> 2.0"
   s.add_development_dependency 'fcrepo_wrapper', '~> 0.2'
   s.add_development_dependency "rspec", "~> 3.0"
   s.add_development_dependency "rspec-its"
