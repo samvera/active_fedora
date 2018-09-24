@@ -22,6 +22,10 @@ describe ActiveFedora::Base do
   end
 
   it { is_expected.to respond_to(:each_with_index) }
+  it { expect(libraries.any?).to eq false }
+  it { is_expected.to be_blank }
+  it { is_expected.to be_empty }
+  it { is_expected.not_to be_present }
 
   context "when some records exist" do
     before do
@@ -47,6 +51,11 @@ describe ActiveFedora::Base do
         libraries.each { |l| l.id }
       end
     end
+
+    it { expect(libraries.any?).to eq true }
+    it { is_expected.not_to be_blank }
+    it { is_expected.not_to be_empty }
+    it { is_expected.to be_present }
 
     describe '#each' do
       before { Book.create }
