@@ -154,6 +154,10 @@ module ActiveFedora
       end
     end
 
+    def empty?
+      !any?
+    end
+
     private
 
       VALID_FIND_OPTIONS = [:order, :limit, :start, :conditions, :cast].freeze

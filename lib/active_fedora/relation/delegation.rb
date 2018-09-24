@@ -14,7 +14,7 @@ module ActiveFedora
     ].to_set
 
     delegate :length, :map, :to_ary, to: :to_a
-    delegate :all?, :blank?, :collect, :include?, :present?, to: :each
+    delegate :any?, :all?, :collect, :include?, to: :each
 
     protected
 
