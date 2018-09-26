@@ -64,6 +64,7 @@ module ActiveFedora
             reflection.autosave = true
             define_autosave_association_callbacks(reflection)
             ## TODO this ought to work, but doesn't seem to do the class inheritance right
+            # See https://github.com/samvera/active_fedora/issues/1343
 
             nested_attributes_options = self.nested_attributes_options.dup
             nested_attributes_options[association_name.to_sym] = options

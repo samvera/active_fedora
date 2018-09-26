@@ -22,6 +22,7 @@ module ActiveFedora
       # @api
       # Given a field name, index_type, etc., returns the corresponding Solr name.
       # TODO field type is the input format, maybe we could just detect that?
+      # See https://github.com/samvera/active_fedora/issues/1338
       # @param [String] field_name the ruby (term) name which will get a suffix appended to become a Solr field name
       # @param opts - index_type is only needed if the FieldDescriptor requires it (e.g. :searcahble)
       # @return [String] name of the solr field, based on the params
@@ -69,6 +70,7 @@ module ActiveFedora
 
             # Is there a custom converter?
             # TODO instead of a custom converter, look for input data type and output data type. Create a few methods that can do that cast.
+            # See https://github.com/samvera/active_fedora/issues/1339
 
             value = if converter
                       if converter.arity == 1

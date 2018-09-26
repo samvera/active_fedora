@@ -2,6 +2,7 @@ module ActiveFedora
   module Associations
     # TODO: we may want to split this into two subclasses, one for has_member_relation
     # and the other for is_member_of_relation
+    # See https://github.com/samvera/active_fedora/issues/1332
     class IndirectlyContainsAssociation < ContainsAssociation #:nodoc:
       # Add +records+ to this association.  Returns +self+ so method calls may be chained.
       # Since << flattens its argument list and inserts each record, +push+ and +concat+ behave identically.
@@ -40,6 +41,7 @@ module ActiveFedora
           uris.map { |object_uri| klass.find(klass.uri_to_id(object_uri)) }
         else # is_member_of_relation
           # TODO this is a lot of reads. Avoid this path
+          # See https://github.com/samvera/active_fedora/issues/1345
           container_predicate = ::RDF::Vocab::LDP.contains
           proxy_uris = container.resource.query(predicate: container_predicate).map { |r| r.object.to_s }
           proxy_uris.map { |uri| proxy_class.find(proxy_class.uri_to_id(uri))[options[:foreign_key]] }

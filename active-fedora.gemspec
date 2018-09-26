@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Matt Zumwalt", "McClain Looney", "Justin Coyne"]
   s.email       = ["samvera-tech@googlegroups.com"]
-  s.homepage    = %q{https://github.com/projecthydra/active_fedora}
+  s.homepage    = %q{https://github.com/samvera/active_fedora}
   s.summary     = %q{A convenience libary for manipulating documents in the Fedora Repository.}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.license = "Apache-2.0"
@@ -22,20 +22,20 @@ Gem::Specification.new do |s|
   s.add_dependency "deprecation"
   s.add_dependency "ldp", '~> 0.7.0'
   s.add_dependency "ruby-progressbar", '~> 1.0'
-  s.add_dependency 'faraday', '~> 0.12.1'
+  s.add_dependency 'faraday', '~> 0.12'
   s.add_dependency 'faraday-encoding', '0.0.4'
 
   s.add_development_dependency "rails"
   s.add_development_dependency "rdoc"
   s.add_development_dependency "yard"
   s.add_development_dependency "rake"
-  s.add_development_dependency "solr_wrapper", "~> 1.0"
+  s.add_development_dependency "solr_wrapper", "~> 2.0"
   s.add_development_dependency 'fcrepo_wrapper', '~> 0.2'
   s.add_development_dependency "rspec", "~> 3.5"
   s.add_development_dependency "rspec-its"
   s.add_development_dependency "equivalent-xml"
   s.add_development_dependency "simplecov", '~> 0.8'
-  s.add_development_dependency "rubocop", '~> 0.47.1'
+  s.add_development_dependency "rubocop", '~> 0.56.0'
   s.add_development_dependency "rubocop-rspec", '~> 1.12.0'
 
   s.files         = `git ls-files`.split("\n")

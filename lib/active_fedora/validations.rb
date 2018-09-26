@@ -92,5 +92,12 @@ module ActiveFedora
       def perform_validations(options = {}) # :nodoc:
         options[:validate] == false || valid?(options[:context])
       end
+
+    private
+
+      # Overwrite run validations to include callbacks.
+      def run_validations!
+        _run_validation_callbacks { super }
+      end
   end
 end

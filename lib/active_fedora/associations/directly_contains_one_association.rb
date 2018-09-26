@@ -4,6 +4,7 @@ module ActiveFedora
     class DirectlyContainsOneAssociation < SingularAssociation #:nodoc:
       # Finds objects contained by the container predicate (either the configured has_member_relation or ldp:contains)
       # TODO: Refactor this to use solr (for efficiency) instead of parsing the RDF graph.  Requires indexing ActiveFedora::File objects into solr, including their RDF.type and, if possible, the id of their container
+      # See https://github.com/samvera/active_fedora/issues/1335
       def find_target
         # filtered_objects = container_association_proxy.to_a.select { |o| o.metadata_node.type.include?(options[:type]) }
         query_node = if container_predicate = options[:has_member_relation]

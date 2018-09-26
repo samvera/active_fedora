@@ -131,6 +131,7 @@ module ActiveFedora
       @resource = SolrBackedResource.new(self.class)
       self.attributes = adapt_attributes(attrs)
       # TODO: Should we clear the change tracking, or make this object Read-only?
+      # See https://github.com/samvera/active_fedora/issues/1342
 
       yield self if block_given?
 

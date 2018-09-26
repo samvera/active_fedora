@@ -22,6 +22,10 @@ describe ActiveFedora::Base do
   end
 
   it { is_expected.to respond_to(:each_with_index) }
+  it { expect(libraries.any?).to eq false }
+  it { is_expected.to be_blank }
+  it { is_expected.to be_empty }
+  it { is_expected.not_to be_present }
 
   context "when some records exist" do
     before do
@@ -40,6 +44,45 @@ describe ActiveFedora::Base do
       it "does not reload" do
         expect_any_instance_of(ActiveFedora::Relation).to_not receive :find_each
         libraries[0]
+      end
+
+      it "does not reload" do
+        expect_any_instance_of(ActiveFedora::Relation).to_not receive :find_each
+        libraries.each { |l| l.id }
+      end
+    end
+
+    it { expect(libraries.any?).to eq true }
+    it { is_expected.not_to be_blank }
+    it { is_expected.not_to be_empty }
+    it { is_expected.to be_present }
+
+    describe '#each' do
+      before { Book.create }
+
+      it 'returns an enumerator' do
+        expect(libraries.each).to be_a Enumerator
+      end
+
+      it 'yields the items' do
+        expect { |b| libraries.each(&b) }
+          .to yield_successive_args(*Library.all.to_a)
+      end
+
+      it 'when called from Base yields all items' do
+        expect { |b| ActiveFedora::Base.all.each(&b) }
+          .to yield_successive_args(*(Library.all.to_a + Book.all.to_a))
+      end
+
+      context 'when cached' do
+        it 'returns an enumerator' do
+          expect(libraries.each).to be_a Enumerator
+        end
+
+        it 'yields the items' do
+          expect { |b| libraries.each(&b) }
+            .to yield_successive_args(*Library.all.to_a)
+        end
       end
     end
 

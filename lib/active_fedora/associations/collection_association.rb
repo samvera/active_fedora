@@ -43,6 +43,7 @@ module ActiveFedora
         ids = Array(ids).reject(&:blank?)
         replace(klass.find(ids)) # .index_by { |r| r.id }.values_at(*ids))
         # TODO, like this when find() can return multiple records
+        # See https://github.com/samvera/active_fedora/issues/1340
         # send("#{reflection.name}=", reflection.klass.find(ids))
         # send("#{reflection.name}=", ids.collect { |id| reflection.klass.find(id)})
       end
@@ -171,6 +172,7 @@ module ActiveFedora
       # See delete for more info.
       def delete_all
         # TODO: load_target causes extra loads. Can't we just send delete requests?
+        # See https://github.com/samvera/active_fedora/issues/1341
         delete(load_target).tap do
           reset
           loaded!
@@ -301,6 +303,7 @@ module ActiveFedora
         def find_target
           # TODO: don't reify, just store the solr results and lazily reify.
           # For now, we set a hard limit of 1000 results.
+          # See https://github.com/samvera/active_fedora/issues/1358
           records = ActiveFedora::QueryResultBuilder.reify_solr_results(load_from_solr(rows: SolrService::MAX_ROWS))
           records.each { |record| set_inverse_instance(record) }
           records

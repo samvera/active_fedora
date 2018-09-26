@@ -144,6 +144,20 @@ module ActiveFedora
       @scope_for_create ||= where_values_hash.merge(create_with_value)
     end
 
+    def each
+      if loaded?
+        @records.each { |item| yield item } if block_given?
+        @records.to_enum
+      else
+        find_each(where_values) { |item| yield item } if block_given?
+        enum_for(:find_each, where_values)
+      end
+    end
+
+    def empty?
+      !any?
+    end
+
     private
 
       VALID_FIND_OPTIONS = [:order, :limit, :start, :conditions, :cast].freeze

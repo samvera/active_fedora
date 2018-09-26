@@ -45,12 +45,14 @@ module ActiveFedora
       end
 
       def self.config
+        # TODO: `:symbol' usage ought to be deprecated
+        # See https://github.com/samvera/active_fedora/issues/1334
         @config ||= OpenStruct.new fields: [:type, :stored, :indexed, :multivalued],
                                    suffix_delimiter: '_',
                                    type_suffix: (lambda do |fields|
                                                    type = fields.first
                                                    case type
-                                                   when :string, :symbol # TODO: `:symbol' usage ought to be deprecated
+                                                   when :string, :symbol
                                                      's'
                                                    when :text
                                                      't'

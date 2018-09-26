@@ -20,6 +20,7 @@ module ActiveFedora
 
     def create_or_update(*)
       return unless super && !new_record?
+      # TODOs captured as https://github.com/samvera/active_fedora/issues/1331
       metadata_node.metadata_uri = described_by # TODO: only necessary if the URI was < > before
       metadata_node.save # TODO if changed?
     end
