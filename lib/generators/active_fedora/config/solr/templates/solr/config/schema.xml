@@ -66,23 +66,23 @@
     <fieldType name="rand" class="solr.RandomSortField" omitNorms="true"/>
 
     <!-- Default numeric field types.  -->
-    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" positionIncrementGap="0"/>
-    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" positionIncrementGap="0"/>
-    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0"/>
-    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="int" class="solr.IntPointField" docValues="true"/>
+    <fieldType name="float" class="solr.FloatPointField" docValues="true"/>
+    <fieldType name="long" class="solr.LongPointField" docValues="true"/>
+    <fieldType name="double" class="solr.DoublePointField" docValues="true"/>
 
-    <!-- trie numeric field types for faster range queries -->
-    <fieldType name="tint" class="solr.TrieIntField" precisionStep="8" positionIncrementGap="0"/>
-    <fieldType name="tfloat" class="solr.TrieFloatField" precisionStep="8" positionIncrementGap="0"/>
-    <fieldType name="tlong" class="solr.TrieLongField" precisionStep="8" positionIncrementGap="0"/>
-    <fieldType name="tdouble" class="solr.TrieDoubleField" precisionStep="8" positionIncrementGap="0"/>
+    <!-- PointField numeric field types for faster range queries -->
+    <fieldType name="tint" class="solr.IntPointField" docValues="true"/>
+    <fieldType name="tfloat" class="solr.FloatPointField" docValues="true"/>
+    <fieldType name="tlong" class="solr.LongPointField" docValues="true"/>
+    <fieldType name="tdouble" class="solr.DoublePointField" docValues="true"/>
 
     <!-- The format for this date field is of the form 1995-12-31T23:59:59Z
          Optional fractional seconds are allowed: 1995-12-31T23:59:59.999Z
       -->
-    <fieldType name="date" class="solr.TrieDateField" precisionStep="0" positionIncrementGap="0"/>
-    <!-- A Trie based date field for faster date range queries and date faceting. -->
-    <fieldType name="tdate" class="solr.TrieDateField" precisionStep="6" positionIncrementGap="0"/>
+    <fieldType name="date" class="solr.DatePointField" docValues="true"/>
+    <!-- A PointField based date field for faster date range queries and date faceting. -->
+    <fieldType name="tdate" class="solr.DatePointField" docValues="true"/>
     <!-- A DateRange based date field for truly faster date range queries. -->
     <fieldType name="dateRange" class="solr.DateRangeField"/>
 
@@ -235,7 +235,7 @@
     <dynamicField name="*_isi" type="int" stored="true" indexed="true" multiValued="false"/>
     <dynamicField name="*_isim" type="int" stored="true" indexed="true" multiValued="true"/>
 
-    <!-- trie integer (_it...) (for faster range queries) -->
+    <!-- IntegerPointField (_it...) (for faster range queries) -->
     <dynamicField name="*_iti" type="tint" stored="false" indexed="true" multiValued="false"/>
     <dynamicField name="*_itim" type="tint" stored="false" indexed="true" multiValued="true"/>
     <dynamicField name="*_its" type="tint" stored="true" indexed="false" multiValued="false"/>
@@ -253,7 +253,7 @@
     <dynamicField name="*_dtsi" type="date" stored="true" indexed="true" multiValued="false"/>
     <dynamicField name="*_dtsim" type="date" stored="true" indexed="true" multiValued="true"/>
 
-    <!-- trie date (_dtt...) (for faster range queries) -->
+    <!-- DatePointField (_dtt...) (for faster range queries) -->
     <dynamicField name="*_dtti" type="tdate" stored="false" indexed="true" multiValued="false"/>
     <dynamicField name="*_dttim" type="tdate" stored="false" indexed="true" multiValued="true"/>
     <dynamicField name="*_dtts" type="tdate" stored="true" indexed="false" multiValued="false"/>
@@ -278,7 +278,7 @@
     <dynamicField name="*_lsi" type="long" stored="true" indexed="true" multiValued="false"/>
     <dynamicField name="*_lsim" type="long" stored="true" indexed="true" multiValued="true"/>
 
-    <!-- trie long (_lt...) (for faster range queries) -->
+    <!-- LongPointField (_lt...) (for faster range queries) -->
     <dynamicField name="*_lti" type="tlong" stored="false" indexed="true" multiValued="false"/>
     <dynamicField name="*_ltim" type="tlong" stored="false" indexed="true" multiValued="true"/>
     <dynamicField name="*_lts" type="tlong" stored="true" indexed="false" multiValued="false"/>
@@ -294,7 +294,7 @@
     <dynamicField name="*_dbsi" type="double" stored="true" indexed="true" multiValued="false"/>
     <dynamicField name="*_dbsim" type="double" stored="true" indexed="true" multiValued="true"/>
 
-    <!-- trie double (_dbt...) (for faster range queries) -->
+    <!-- DoublePointField (_dbt...) (for faster range queries) -->
     <dynamicField name="*_dbti" type="tdouble" stored="false" indexed="true" multiValued="false"/>
     <dynamicField name="*_dbtim" type="tdouble" stored="false" indexed="true" multiValued="true"/>
     <dynamicField name="*_dbts" type="tdouble" stored="true" indexed="false" multiValued="false"/>
@@ -310,7 +310,7 @@
     <dynamicField name="*_fsi" type="float" stored="true" indexed="true" multiValued="false"/>
     <dynamicField name="*_fsim" type="float" stored="true" indexed="true" multiValued="true"/>
 
-    <!-- trie float (_ft...) (for faster range queries) -->
+    <!-- FloatPointField (_ft...) (for faster range queries) -->
     <dynamicField name="*_fti" type="tfloat" stored="false" indexed="true" multiValued="false"/>
     <dynamicField name="*_ftim" type="tfloat" stored="false" indexed="true" multiValued="true"/>
     <dynamicField name="*_fts" type="tfloat" stored="true" indexed="false" multiValued="false"/>
