@@ -1,5 +1,5 @@
 require 'spec_helper'
-@@last_pid = 0  
+@@last_pid = 0
 
 describe ActiveFedora::Base do
   it_behaves_like "An ActiveModel"
@@ -128,7 +128,7 @@ describe ActiveFedora::Base do
         end
         has_metadata :type=>ActiveFedora::SimpleDatastream, :name=>"withText2", :label=>"withLabel", :autocreate => true do |m|
           m.field "fubar", :text
-        end 
+        end
         has_attributes :fubar, datastream: 'withText', multiple: true
         has_attributes :swank, datastream: 'someData', multiple: true
       end
@@ -451,8 +451,12 @@ describe ActiveFedora::Base do
       end
     end
 
+    describe '#has_model' do
+      subject { FooHistory.new.send(:has_model) }
+      it { is_expected.to eq 'FooHistory' }
+    end
 
-    describe ".to_solr" do
+    describe '#to_solr' do
       it "should provide .to_solr" do
         expect(@test_object).to respond_to(:to_solr)
       end
@@ -478,11 +482,10 @@ describe ActiveFedora::Base do
         expect(solr_doc[ActiveFedora::SolrService.solr_name("has_part", :symbol)]).to be_nil
       end
 
-      it "should add self.class as the :active_fedora_model" do
+      it "adds has_model as the :active_fedora_model" do
         stub_get(@this_pid)
         stub_get_content(@this_pid, ['RELS-EXT', 'someData', 'withText2', 'withText'])
-        @test_history = FooHistory.new()
-        solr_doc = @test_history.to_solr
+        solr_doc = FooHistory.new.to_solr
         expect(solr_doc[ActiveFedora::SolrService.solr_name("active_fedora_model", :stored_sortable)]).to eql("FooHistory")
       end
 

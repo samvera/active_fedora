@@ -20,7 +20,7 @@ module ActiveFedora
         Solrizer.set_field(solr_doc, 'system_create', c_time, :stored_sortable)
         Solrizer.set_field(solr_doc, 'system_modified', m_time, :stored_sortable)
         Solrizer.set_field(solr_doc, 'object_state', state, :stored_sortable)
-        Solrizer.set_field(solr_doc, 'active_fedora_model', self.class.inspect, :stored_sortable)
+        Solrizer.set_field(solr_doc, 'active_fedora_model', has_model, :stored_sortable)
         solr_doc.merge!(SOLR_DOCUMENT_ID.to_sym => pid)
         solrize_profile(solr_doc)
       end
@@ -71,6 +71,13 @@ module ActiveFedora
       else
         SolrService.add(self.to_solr, softCommit: true)
       end
+    end
+
+    private
+
+    # Override this method if you want to represent the class in a different way
+    def has_model
+      self.class.inspect
     end
 
 
