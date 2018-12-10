@@ -73,13 +73,10 @@ module ActiveFedora
       end
     end
 
-    private
-
     # Override this method if you want to represent the class in a different way
     def has_model
       self.class.inspect
     end
-
 
     module ClassMethods
       # This method can be used instead of ActiveFedora::Model::ClassMethods.find.
