@@ -4,11 +4,11 @@ describe ActiveFedora::SolrService do
   before do
     Thread.current[:solr_service]=nil
   end
-  
+
   after(:all) do
     ActiveFedora::SolrService.register(ActiveFedora.solr_config[:url])
   end
-  
+
   it "should take a narg constructor and configure for localhost" do
     expect(RSolr).to receive(:connect).with(:read_timeout => 120, :open_timeout => 120, :url => 'http://localhost:8080/solr')
     ActiveFedora::SolrService.register
@@ -97,7 +97,7 @@ describe ActiveFedora::SolrService do
       expect(ActiveFedora::SolrService.raw_query('id', "my:_PID1_")).to eq '_query_:"{!raw f=id}my:_PID1_"'
     end
   end
-  
+
   describe '#construct_query_for_pids' do
     it "should generate a useable solr query from an array of Fedora pids" do
       expect(ActiveFedora::SolrService.construct_query_for_pids(["my:_PID1_", "my:_PID2_", "my:_PID3_"])).to eq('_query_:"{!raw f=id}my:_PID1_" OR _query_:"{!raw f=id}my:_PID2_" OR _query_:"{!raw f=id}my:_PID3_"')
@@ -105,12 +105,12 @@ describe ActiveFedora::SolrService do
     end
     it "should return a valid solr query even if given an empty array as input" do
       expect(ActiveFedora::SolrService.construct_query_for_pids([""])).to eq("id:NEVER_USE_THIS_ID")
-      
+
     end
   end
-  
+
   describe ".query" do
-    it "should call solr" do 
+    it "should call solr" do
       mock_conn = double("Connection")
       stub_result = double("Result")
       expect(mock_conn).to receive(:get).with('select', :params=>{:q=>'querytext', :qt=>'standard'}).and_return(stub_result)
@@ -119,23 +119,23 @@ describe ActiveFedora::SolrService do
     end
   end
   describe ".count" do
-    it "should return a count of matching records" do 
+    it "should return a count of matching records" do
       mock_conn = double("Connection")
       stub_result = {'response' => {'numFound'=>'7'}}
       expect(mock_conn).to receive(:get).with('select', :params=>{:rows=>0, :q=>'querytext', :qt=>'standard'}).and_return(stub_result)
       allow(ActiveFedora::SolrService).to receive_messages(:instance =>double("instance", :conn=>mock_conn))
-      expect(ActiveFedora::SolrService.count('querytext')).to eq(7) 
+      expect(ActiveFedora::SolrService.count('querytext')).to eq(7)
     end
     it "should accept query args" do
       mock_conn = double("Connection")
       stub_result = {'response' => {'numFound'=>'7'}}
       expect(mock_conn).to receive(:get).with('select', :params=>{:rows=>0, :q=>'querytext', :qt=>'standard', :fq=>'filter'}).and_return(stub_result)
       allow(ActiveFedora::SolrService).to receive_messages(:instance =>double("instance", :conn=>mock_conn))
-      expect(ActiveFedora::SolrService.count('querytext', :fq=>'filter', :rows=>10)).to eq(7) 
+      expect(ActiveFedora::SolrService.count('querytext', :fq=>'filter', :rows=>10)).to eq(7)
     end
   end
   describe ".add" do
-    it "should call solr" do 
+    it "should call solr" do
       mock_conn = double("Connection")
       doc = {'id' => '1234'}
       expect(mock_conn).to receive(:add).with(doc, {:params=>{}})
@@ -144,7 +144,7 @@ describe ActiveFedora::SolrService do
     end
   end
   describe ".commit" do
-    it "should call solr" do 
+    it "should call solr" do
       mock_conn = double("Connection")
       doc = {'id' => '1234'}
       expect(mock_conn).to receive(:commit)
@@ -152,5 +152,27 @@ describe ActiveFedora::SolrService do
       ActiveFedora::SolrService.commit()
     end
   end
-  
+
+  describe '.class_from_solr_document' do
+    subject { described_class.class_from_solr_document(document) }
+
+    context 'when the document does not have has_model_ssim' do
+      let (:document) do
+        { "id" => "my:_PID1_" }
+      end
+
+      it 'raises a helpful error' do
+        expect { subject }.to raise_error "Solr document (id: my:_PID1_) is missing required has_model_ssim field."
+      end
+    end
+
+    context 'when the document has has_model_ssim' do
+      let (:document) do
+        { "id" => "my:_PID1_", ActiveFedora::SolrService.solr_name("has_model", :symbol) => ["info:fedora/afmodel:AudioRecord"] }
+      end
+
+      it { is_expected.to eq AudioRecord }
+
+    end
+  end
 end
