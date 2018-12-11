@@ -452,7 +452,7 @@ describe ActiveFedora::Base do
     end
 
     describe '#has_model' do
-      subject { FooHistory.new.send(:has_model) }
+      subject { FooHistory.new.has_model }
       it { is_expected.to eq 'FooHistory' }
     end
 
