@@ -7,7 +7,7 @@ gemspec path: File.expand_path('..', __FILE__)
 gem 'byebug' unless ENV['TRAVIS']
 gem 'pry-byebug' unless ENV['CI']
 
-gem 'activemodel', ENV['RAILS_VERSION'] if ENV['RAILS_VERSION']
+gem 'rails', ENV['RAILS_VERSION'] if ENV['RAILS_VERSION']
 
 group :test do
   gem 'simplecov', require: false
