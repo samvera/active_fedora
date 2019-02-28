@@ -11,6 +11,7 @@ matrix:
     - env: RAILS_VERSION=5.1.6
     - rvm: 2.5
     - env: RAILS_VERSION=5.2.1
+    - rvm: 2.6
 global_env:
   - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
 before_install:
