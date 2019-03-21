@@ -12,6 +12,7 @@ gem 'activemodel', ENV['RAILS_VERSION'] if ENV['RAILS_VERSION']
 group :test do
   gem 'simplecov', require: false
   gem 'coveralls', require: false
+  gem 'rspec_junit_formatter'
 end
 
 gem 'jruby-openssl', platform: :jruby
