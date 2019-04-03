@@ -1,7 +1,7 @@
 # ActiveFedora
 
 Code: [![Version](https://badge.fury.io/rb/active-fedora.png)](http://badge.fury.io/rb/active-fedora)
-[![Build Status](https://travis-ci.org/samvera/active_fedora.png?branch=master)](https://travis-ci.org/samvera/active_fedora)
+[![Build Status](https://circleci.com/gh/samvera/active_fedora.svg?style=svg)](https://circleci.com/gh/samvera/active_fedora)
 [![Coverage Status](https://coveralls.io/repos/github/samvera/active_fedora/badge.svg?branch=master)](https://coveralls.io/github/samvera/active_fedora?branch=master)
 
 Docs: [![Contribution Guidelines](http://img.shields.io/badge/CONTRIBUTING-Guidelines-blue.svg)](./CONTRIBUTING.md)
