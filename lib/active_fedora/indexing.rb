@@ -21,6 +21,9 @@ module ActiveFedora
       autoload :Suffix
     end
 
+    # Error to be raised for encountering unsupported field types
+    class InvalidIndexDescriptor < RuntimeError; end
+
     included do
       # Because the previous method of setting indexer was to override
       # the class method, we must ensure that we aren't using the instance

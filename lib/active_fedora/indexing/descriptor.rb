@@ -9,7 +9,7 @@ module ActiveFedora
           @type_required = opts[:requires_type]
         end
         @index_type = args
-        raise Solrizer::InvalidIndexDescriptor, "Invalid index type passed to Sorizer.solr_name.  It should be an array like [:string, :indexed, :stored, :multivalued]. You provided: `#{@index_type}'" unless index_type.is_a? Array
+        raise InvalidIndexDescriptor, "Invalid index type passed.  It should be an array like [:string, :indexed, :stored, :multivalued]. You provided: `#{@index_type}'" unless index_type.is_a? Array
       end
 
       def name_and_converter(field_name, args = nil)

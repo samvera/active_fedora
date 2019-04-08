@@ -7,7 +7,6 @@ require 'active_support/core_ext/object'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/core_ext/hash/except'
 require 'active_triples'
-require 'solrizer'
 
 # Monkey patching RDF::Literal::DateTime to support fractional seconds.
 # See https://github.com/samvera/active_fedora/issues/497
@@ -31,10 +30,6 @@ module RDF
     end
   end
 end
-
-# This is in place until Solrizer is updated
-class Solrizer::SolrizerError < RuntimeError; end
-class Solrizer::InvalidIndexDescriptor < Solrizer::SolrizerError; end
 
 module ActiveFedora #:nodoc:
   extend ActiveSupport::Autoload

@@ -89,7 +89,7 @@ module ActiveFedora
               values = (results[name] ||= [])
               values << value unless value.nil? || values.include?(value)
             else
-              Solrizer.logger.warn "Setting #{name} to `#{value}', but it already had `#{results[name]}'" if results[name] && Solrizer.logger
+              Rails.logger.warn "Setting #{name} to `#{value}', but it already had `#{results[name]}'" if results[name]
               results[name] = value
             end
           end
@@ -111,7 +111,7 @@ module ActiveFedora
                        when Descriptor
                          index_type
                        else
-                         raise Solrizer::InvalidIndexDescriptor, "#{index_type.class} is not a valid indexer_type. Use a String, Symbol or Descriptor."
+                         raise InvalidIndexDescriptor, "#{index_type.class} is not a valid indexer_type. Use a String, Symbol or Descriptor."
                        end
 
           raise InvalidIndexDescriptor, "index type should be an Descriptor, you passed: #{index_type.class}" unless index_type.is_a? Descriptor

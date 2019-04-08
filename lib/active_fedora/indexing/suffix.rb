@@ -28,7 +28,7 @@ module ActiveFedora
       end
 
       def to_s
-        raise Solrizer::InvalidIndexDescriptor, "Missing datatype for #{@fields}" unless data_type
+        raise InvalidIndexDescriptor, "Missing datatype for #{@fields}" unless data_type
 
         field_suffix = [config.suffix_delimiter]
 
@@ -69,7 +69,7 @@ module ActiveFedora
                                                    when :float, :big_decimal
                                                      'f'
                                                    else
-                                                     raise Solrizer::InvalidIndexDescriptor, "Invalid datatype `#{type.inspect}'. Must be one of: :date, :time, :text, :text_en, :string, :symbol, :integer, :boolean"
+                                                     raise InvalidIndexDescriptor, "Invalid datatype `#{type.inspect}'. Must be one of: :date, :time, :text, :text_en, :string, :symbol, :integer, :boolean"
                                                    end
                                                  end),
                                    stored_suffix: 's',
