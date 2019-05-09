@@ -39,31 +39,46 @@ workflows:
   ci:
     jobs:
       - bundle_lint_test:
-          ruby_version: "2.3.8"
-          name: "ruby2-3-8"
-          bundler_version: '1.17.3'
-          rails_version: '4.2.11.1'
+          ruby_version: "2.6.3"
+          name: "ruby2-6-3"
           solr_config_path: 'lib/generators/active_fedora/config/solr/templates/solr/config'
       - bundle_lint_test:
           ruby_version: "2.5.5"
           name: "ruby2-5-5"
           solr_config_path: 'lib/generators/active_fedora/config/solr/templates/solr/config'
       - bundle_lint_test:
-          ruby_version: "2.6.2"
-          name: "ruby2-6-2"
+          ruby_version: "2.4.6"
+          name: "ruby2-4-6"
+          bundler_version: '1.17.3'
+          rails_version: '4.2.11.1'
           solr_config_path: 'lib/generators/active_fedora/config/solr/templates/solr/config'
       - bundle_lint_test:
-          ruby_version: "2.4.5"
-          name: "ruby2-4-5_rails5.0"
+          ruby_version: "2.6.3"
+          name: "ruby2-6-3_rails5.1"
+          rails_version: '5.1.7'
+          solr_config_path: 'lib/generators/active_fedora/config/solr/templates/solr/config'
+      - bundle_lint_test:
+          ruby_version: "2.5.5"
+          name: "ruby2-5-5_rails5.1"
+          rails_version: '5.1.7'
+          solr_config_path: 'lib/generators/active_fedora/config/solr/templates/solr/config'
+      - bundle_lint_test:
+          ruby_version: "2.4.6"
+          name: "ruby2-4-6_rails5.1"
+          rails_version: '5.1.7'
+          solr_config_path: 'lib/generators/active_fedora/config/solr/templates/solr/config'
+      - bundle_lint_test:
+          ruby_version: "2.6.3"
+          name: "ruby2-6-3_rails5.0"
           rails_version: '5.0.7.2'
           solr_config_path: 'lib/generators/active_fedora/config/solr/templates/solr/config'
       - bundle_lint_test:
-          ruby_version: "2.4.5"
-          name: "ruby2-4-5_rails5.1"
-          rails_version: '5.1.6.2'
+          ruby_version: "2.5.5"
+          name: "ruby2-5-5_rails5.0"
+          rails_version: '5.0.7.2'
           solr_config_path: 'lib/generators/active_fedora/config/solr/templates/solr/config'
       - bundle_lint_test:
-          ruby_version: "2.4.5"
-          name: "ruby2-4-5_rails5.2"
-          rails_version: '5.2.2.1'
+          ruby_version: "2.4.6"
+          name: "ruby2-4-6_rails5.0"
+          rails_version: '5.0.7.2'
           solr_config_path: 'lib/generators/active_fedora/config/solr/templates/solr/config'
