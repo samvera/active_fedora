@@ -16,12 +16,12 @@ def with_server(environment)
 
   SolrWrapper.wrap(load_config(:solr, environment, solr_defaults)) do |solr|
     ENV["SOLR_#{environment.upcase}_PORT"] = solr.port.to_s
-    solr_config_path = File.join('solr', 'config')
+    solr_config_path = File.join('solr', 'conf')
     # Check to see if configs exist in a path relative to the working directory
     unless Dir.exist?(solr_config_path)
       $stderr.puts "Solr configuration not found at #{solr_config_path}. Using ActiveFedora defaults"
       # Otherwise use the configs delivered with ActiveFedora.
-      solr_config_path = File.join(File.expand_path("../..", File.dirname(__FILE__)), 'lib', 'generators', 'active_fedora', 'config', 'solr', 'templates', 'solr', 'config')
+      solr_config_path = File.join(File.expand_path("../..", File.dirname(__FILE__)), 'lib', 'generators', 'active_fedora', 'config', 'solr', 'templates', 'solr', 'conf')
     end
     solr.with_collection(name: "hydra-#{environment}", dir: solr_config_path) do
       FcrepoWrapper.wrap(load_config(:fcrepo, environment, fcrepo_defaults)) do |fcrepo|
