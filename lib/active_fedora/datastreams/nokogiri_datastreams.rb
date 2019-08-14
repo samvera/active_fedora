@@ -24,7 +24,7 @@ module ActiveFedora
 
           return tmpl
         end
-        
+
         def xml_template
           Nokogiri::XML::Document.parse("<xml/>")
         end
@@ -35,7 +35,7 @@ module ActiveFedora
       end
 
 
-      def ng_xml 
+      def ng_xml
         @ng_xml ||= begin
           if new?
             ## Load up the template
@@ -46,34 +46,34 @@ module ActiveFedora
           self.class.decorate_ng_xml xml
         end
       end
-      
+
       def ng_xml=(new_xml)
         # before we set ng_xml, we load the datastream so we know if the new value differs.
         local_or_remote_content(true)
 
-        case new_xml 
+        case new_xml
         when Nokogiri::XML::Document
           self.content=new_xml.to_xml
-        when  Nokogiri::XML::Node 
+        when  Nokogiri::XML::Node
           ## Cast a fragment to a document
           self.content=new_xml.to_s
-        when String 
+        when String
           self.content=new_xml
         else
           raise TypeError, "You passed a #{new_xml.class} into the ng_xml of the #{self.dsid} datastream. OmDatastream.ng_xml= only accepts Nokogiri::XML::Document, Nokogiri::XML::Element, Nokogiri::XML::Node, or raw XML (String) as inputs."
         end
       end
-      
-      # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods 
+
+      # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods
       def ng_xml_will_change!
-        attributes_changed_by_setter[:ng_xml] = nil
+        attribute_will_change!(:ng_xml)
       end
 
       def ng_xml_doesnt_change!
         clear_attribute_changes([:ng_xml])
       end
-      
-      # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods 
+
+      # don't want content eagerly loaded by proxy, so implementing methods that would be implemented by define_attribute_methods
       def ng_xml_changed?
         changed_attributes.has_key? :ng_xml
       end
@@ -81,18 +81,18 @@ module ActiveFedora
       def datastream_content
         @datastream_content ||= Nokogiri::XML(super).to_xml  {|config| config.no_declaration}.strip
       end
-      
+
       def content=(new_content)
         if inline?
           # inline datastreams may be transformed by fedora 3, so we test for equivalence instead of equality
           if !EquivalentXml.equivalent?(datastream_content, new_content)
-            ng_xml_will_change! 
+            ng_xml_will_change!
             @ng_xml = Nokogiri::XML::Document.parse(new_content)
             super(@ng_xml.to_s)
           end
         else
           if datastream_content != new_content
-            ng_xml_will_change! 
+            ng_xml_will_change!
             @ng_xml = Nokogiri::XML::Document.parse(new_content)
             super(@ng_xml.to_s)
           end
@@ -124,7 +124,7 @@ module ActiveFedora
               raise "You can only pass instances of Nokogiri::XML::Node into this method.  You passed in #{xml}"
           end
         end
-        
+
         return xml.to_xml {|config| config.no_declaration}.strip
       end
 
@@ -140,7 +140,7 @@ module ActiveFedora
       def xml_loaded
         instance_variable_defined? :@ng_xml
       end
-    
+
     end
   end
 end
