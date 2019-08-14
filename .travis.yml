@@ -21,4 +21,4 @@ env:
   global:
     - NOKOGIRI_USE_SYSTEM_LIBRARIES=true
 
-jdk: oraclejdk8
+jdk: openjdk8
