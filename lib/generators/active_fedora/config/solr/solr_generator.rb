@@ -7,7 +7,7 @@ module ActiveFedora
     def generate
       # Overwrite the configuration files that Blacklight has installed
       copy_file 'solr.yml', 'config/solr.yml', force: true
-      directory 'solr', 'solr'
+      directory 'solr', 'solr', force: true
     end
 
     def solr_wrapper_config
