@@ -11,11 +11,8 @@ jobs:
         default: 2.0.1
       rails_version:
         type: string
-      solr_config_path:
-        type: string
-        default: lib/generators/active_fedora/config/solr/templates/solr/config
     executor:
-      name: 'samvera/ruby_fcrepo_solr'
+      name: 'samvera/ruby'
       ruby_version: << parameters.ruby_version >>
     environment:
       RAILS_VERSION: << parameters.rails_version >>
@@ -27,12 +24,9 @@ jobs:
           bundler_version: << parameters.bundler_version >>
           project: 'active-fedora'
 
-      - samvera/install_solr_core:
-          solr_config_path: << parameters.solr_config_path >>
-
       - samvera/rubocop
 
-      - samvera/parallel_rspec
+      - run: bundle exec rake
 
 workflows:
   ci:
