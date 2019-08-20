@@ -24,7 +24,6 @@ ActiveFedora::Base.logger.level = Logger::WARN
 # HttpLogger.log_headers = true
 
 Dir[File.expand_path("../support/**/*.rb", __FILE__)].each { |f| require f }
-require 'samples/samples'
 
 $VERBOSE = nil
 
