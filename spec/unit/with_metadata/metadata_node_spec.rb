@@ -19,7 +19,7 @@ describe ActiveFedora::WithMetadata::MetadataNode do
         generated_schema.configure type: book
       end
 
-      it { is_expected.to eq('type' => true) }
+      it { is_expected.to match('type' => be_truthy) }
     end
   end
 
