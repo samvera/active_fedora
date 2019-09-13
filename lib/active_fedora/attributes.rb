@@ -9,11 +9,7 @@ module ActiveFedora
       include Serializers
       include PrimaryKey
 
-      after_save :clear_changed_attributes
-      def clear_changed_attributes
-        @previously_changed = changes
-        clear_attribute_changes(changes.keys)
-      end
+      after_save :changes_applied
     end
 
     def attribute_names

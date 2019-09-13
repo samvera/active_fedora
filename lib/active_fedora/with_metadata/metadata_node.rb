@@ -15,7 +15,7 @@ module ActiveFedora
         @file = file
         super(file.uri, ldp_source.graph)
         return unless self.class.type && !type.include?(self.class.type)
-        attributes_changed_by_setter[:type] = true if type.present?
+        attribute_will_change!(:type) if type.present?
         # Workaround for https://github.com/ActiveTriples/ActiveTriples/issues/123
         get_values(:type) << self.class.type
       end

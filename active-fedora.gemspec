@@ -12,11 +12,11 @@ Gem::Specification.new do |s|
   s.summary     = %q{A convenience libary for manipulating documents in the Fedora Repository.}
   s.description = %q{ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.}
   s.license = "Apache-2.0"
-  s.required_ruby_version = '~> 2.0'
+  s.required_ruby_version = '~> 2.5'
 
   s.add_dependency 'rsolr', '>= 1.1.2', '< 3'
-  s.add_dependency "activesupport", '>= 4.2.4', '< 5.3'
-  s.add_dependency "activemodel", '>= 4.2.10', '< 5.3'
+  s.add_dependency "activesupport", '>= 5.2'
+  s.add_dependency "activemodel", '>= 5.2'
   s.add_dependency "active-triples", '>= 0.11.0', '< 2.0.0'
   s.add_dependency "deprecation"
   s.add_dependency "ldp", '>= 0.7.0', '< 2'

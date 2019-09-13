@@ -97,11 +97,6 @@ module ActiveFedora
       attribute_will_change! :ldp_source
     end
 
-    def attribute_will_change!(attr)
-      return super unless attr == 'content'
-      attributes_changed_by_setter[:content] = true
-    end
-
     def remote_content
       return if new_record?
       @ds_content ||= retrieve_content
