@@ -53,3 +53,7 @@ workflows:
           name: ruby2-5_rails6.0
           ruby_version: 2.5.5
           rails_version: 6.0.0
+      - bundle_lint_test:
+          name: ruby2-4_rails5-2
+          ruby_version: 2.4.7
+          rails_version: 5.2.3
