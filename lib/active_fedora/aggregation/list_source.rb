@@ -15,6 +15,8 @@ module ActiveFedora
       # Overriding so that we don't track previously_changed, which was
       # rather expensive.
       def clear_changed_attributes
+        Deprecation.warn self.class, "#clear_changed_attributes is deprecated, use ActiveModel::Dirty#changes_applied instead."
+
         clear_changes_information
       end
 

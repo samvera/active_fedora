@@ -9,10 +9,23 @@ module ActiveFedora
       include Serializers
       include PrimaryKey
 
-      after_save :clear_changed_attributes
+      after_save :clear_changed_attributes_or_changes_applied
       def clear_changed_attributes
+        Deprecation.warn ActiveFedora::Attributes, "#clear_changed_attributes is deprecated, use ActiveModel::Dirty#changes_applied instead."
         @previously_changed = changes
         clear_attribute_changes(changes.keys)
+      end
+
+      ##
+      # Call the deprecated method
+      def clear_changed_attributes_or_changes_applied
+        return changes_applied if
+          method(:clear_changed_attributes).super_method.nil? ||
+          method(:clear_changed_attributes).owner == ActiveFedora::Aggregation::ListSource
+
+        Deprecation.warn self.class, "after_save callbacks to #clear_changed_attributes are deprecated." /
+                                     "These calls will be removed in 14.0.0."
+        clear_changed_attributes
       end
     end
 
