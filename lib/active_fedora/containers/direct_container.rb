@@ -1,5 +1,7 @@
 module ActiveFedora
   class DirectContainer < Container
-    type ::RDF::Vocab::LDP.DirectContainer
+    def build_ldp_resource(id)
+      DirectContainerResource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(id))
+    end
   end
 end
