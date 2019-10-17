@@ -1,11 +1,14 @@
 module ActiveFedora
-  class LdpResource < Ldp::Resource::RdfSource
-    def build_empty_graph
-      graph_class.new(subject_uri)
+  module LdpResourceAddons
+    extend ActiveSupport::Concern
+    module ClassMethods
+      def graph_class
+        ActiveTriples::Resource
+      end
     end
 
-    def self.graph_class
-      ActiveTriples::Resource
+    def build_empty_graph
+      graph_class.new(subject_uri)
     end
 
     def graph_class
@@ -20,5 +23,11 @@ module ActiveFedora
     def marshal_load(data)
       data.each { |name, val| instance_variable_set(name, val) }
     end
+  end
+  class LdpResource < Ldp::Resource::RdfSource
+    include LdpResourceAddons
+  end
+  class IndirectContainerResource < Ldp::Container::Indirect
+    include LdpResourceAddons
   end
 end
