@@ -36,4 +36,7 @@ module ActiveFedora
   class IndirectContainerResource < Ldp::Container::Indirect
     include LdpResourceAddons
   end
+  class DirectContainerResource < Ldp::Container::Direct
+    include LdpResourceAddons
+  end
 end
