@@ -7,11 +7,22 @@ module ActiveFedora
     end
 
     def build(klass, id)
+      resource_klass = resource_klass(klass)
       if id
-        LdpResource.new(connection, to_uri(klass, id))
+        resource_klass.new(connection, to_uri(klass, id))
       else
         parent_uri = ActiveFedora.fedora.host + ActiveFedora.fedora.base_path
-        LdpResource.new(connection, nil, nil, parent_uri)
+        resource_klass.new(connection, nil, nil, parent_uri)
+      end
+    end
+
+    def resource_klass(klass)
+      if klass <= ActiveFedora::IndirectContainer
+        IndirectContainerResource
+      elsif klass <= ActiveFedora::DirectContainer
+        DirectContainerResource
+      else
+        LdpResource
       end
     end
 
