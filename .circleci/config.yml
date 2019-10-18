@@ -17,6 +17,7 @@ jobs:
     executor:
       name: 'samvera/ruby_fcrepo_solr'
       ruby_version: << parameters.ruby_version >>
+      fcrepo_version: '5.1'
     environment:
       RAILS_VERSION: << parameters.rails_version >>
     steps:
