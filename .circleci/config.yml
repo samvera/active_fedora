@@ -22,7 +22,7 @@ jobs:
         default: '8985'
       fcrepo_version:
         type: string
-        default: "5.1"
+        default: "5.1.0"
       solr_version:
         type: string
         default: "9"
