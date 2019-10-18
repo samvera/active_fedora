@@ -15,9 +15,9 @@ module ActiveFedora
         @file = file
         super(file.uri, ldp_source.graph)
         return unless self.class.type && !type.include?(self.class.type)
-        # attribute_will_change!(:type) if type.present?
+        attribute_will_change!(:type) if type.present?
         # Workaround for https://github.com/ActiveTriples/ActiveTriples/issues/123
-        # get_values(:type) << self.class.type
+        get_values(:type) << self.class.type
       end
 
       attr_writer :metadata_uri
@@ -55,7 +55,7 @@ module ActiveFedora
 
       def changed_attributes
         super.tap do |changed|
-          # changed.merge('type' => true) if type.present? && new_record?
+          changed.merge('type' => true) if type.present? && new_record?
         end
       end
 
