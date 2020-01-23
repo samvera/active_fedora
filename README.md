@@ -101,6 +101,10 @@ is installed, run:
 rake spec
 ```
 
+# Release Process
+
+The [release process](https://github.com/samvera/active_fedora/wiki/Release-management-process) is documented on the wiki.
+
 # Acknowledgments
 
 This software has been developed by and is brought to you by the Samvera community.  Learn more at the
