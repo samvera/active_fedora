@@ -191,9 +191,7 @@ module ActiveFedora
       end
 
       def local_or_remote_content(ensure_fetch = true)
-        return @content if new_record?
-
-        @content ||= ensure_fetch ? remote_content : @ds_content
+        @content ||= ensure_fetch ? remote_content : @ds_content unless new_record?
         @content.rewind if behaves_like_io?(@content)
         @content
       end
