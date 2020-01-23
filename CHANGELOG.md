@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/samvera/active_fedora/tree/HEAD)
+## [v13.1.2](https://github.com/samvera/active_fedora/tree/HEAD) (2020-01-23)
 
-[Full Changelog](https://github.com/samvera/active_fedora/compare/v13.1.1...HEAD)
+[Full Changelog](https://github.com/samvera/active_fedora/compare/v13.1.1...v13.1.2)
 
 **Closed issues:**
 
