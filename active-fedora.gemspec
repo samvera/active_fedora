@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'faraday', '~> 0.12.1'
   s.add_dependency 'faraday-encoding', '0.0.4'
 
-  s.add_development_dependency "rails"
+  s.add_development_dependency "rails", ">= 4.2"
   s.add_development_dependency "rdoc"
   s.add_development_dependency "yard"
   s.add_development_dependency "rake"
