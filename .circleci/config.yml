@@ -1,0 +1,43 @@
+version: 2.1
+orbs:
+  samvera: samvera/circleci-orb@0
+jobs:
+  bundle_lint_test:
+    parameters:
+      ruby_version:
+        type: string
+      bundler_version:
+        type: string
+        default: 1.17.3
+      rails_version:
+        type: string
+      solr_config_path:
+        type: string
+        default: lib/generators/active_fedora/config/solr/templates/solr/config
+    executor:
+      name: 'samvera/ruby_fcrepo_solr'
+      ruby_version: << parameters.ruby_version >>
+    environment:
+      RAILS_VERSION: << parameters.rails_version >>
+    steps:
+      - samvera/cached_checkout
+
+      - samvera/bundle_for_gem:
+          ruby_version: << parameters.ruby_version >>
+          bundler_version: << parameters.bundler_version >>
+          project: 'active-fedora'
+
+      - samvera/install_solr_core:
+          solr_config_path: << parameters.solr_config_path >>
+
+      - samvera/rubocop
+
+      - samvera/parallel_rspec
+
+workflows:
+  ci:
+    jobs:
+      - bundle_lint_test:
+          name: ruby2-3_rails4-2
+          ruby_version: 2.4.9
+          rails_version: 4.2.8
