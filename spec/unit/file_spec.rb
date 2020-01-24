@@ -192,6 +192,23 @@ describe ActiveFedora::File do
     end
   end
 
+  context 'when file is new and content behaves like io' do
+    let(:file_content) { "hello world" }
+
+    before do
+      af_file.uri = "http://localhost:8983/fedora/rest/test/1234/abcd"
+      af_file.content = StringIO.new(file_content)
+      allow(af_file).to receive(:new_record?).and_return(true)
+    end
+
+    describe "#content" do
+      it 'can be re-read' do
+        expect(af_file.content.read).to eq file_content
+        expect(af_file.content.read).to eq file_content
+      end
+    end
+  end
+
   describe "#mime_type" do
     let(:parent) { ActiveFedora::Base.create }
     before do
