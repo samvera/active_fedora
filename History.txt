@@ -1,3 +1,30 @@
+v9.0.8
+
+  2015-04-15: Revert "Move the indexing logic to the model. Fixes #736"
+  [Justin Coyne] (cabb9057)
+
+  2015-04-15: Fix deleting from a HABTM when the inverse_of is a
+  has_many. Fixes #763 [Justin Coyne] (b1e67fb1)
+
+  2015-04-15: Remove a spec that is a duplicate of
+  integration/collection_association_spec.rb:92 [Justin Coyne]
+  (bdafd50d)
+
+  2015-04-15: Leverage the code in AssociationRelation to find the
+  inverse. Fixes #760 [Justin Coyne] (c764ea70)
+
+  2015-04-15: Make #translate_id_to_uri/uri_to_id reliable. [Trey
+  Terrell] (80a4e3fd)
+
+  2015-04-15: Find best model match in case of inheritance [Stuart
+  Kenny] (481a9cd4)
+
+  2015-04-15: Requires 'deprecation' for ActiveFedora::File [Andrew
+  Myers] (14be5cf6)
+
+  2015-04-07: The indexing hints should be inheritable [Justin Coyne]
+  (c8d41b91)
+
 v9.0.7
   2015-04-06: Only set/save the inverse on a HABTM if the inverse is also HABTM
   previously we were getting: [Justin Coyne]
