@@ -14,8 +14,8 @@ Gem::Specification.new do |s|
   s.license = "Apache-2.0"
   s.required_ruby_version = '~> 2.4'
 
-  s.add_dependency "activemodel", '>= 5.2'
-  s.add_dependency "activesupport", '>= 5.2'
+  s.add_dependency "activemodel", '>= 5.1'
+  s.add_dependency "activesupport", '>= 5.1'
   s.add_dependency "active-triples", '>= 0.11.0', '< 2.0.0'
   s.add_dependency "deprecation"
   s.add_dependency 'faraday', '~> 0.12'
