@@ -39,26 +39,48 @@ workflows:
   ci:
     jobs:
       - bundle_lint_test:
-          name: ruby2-6_rails5-2
-          ruby_version: 2.6.3
-          rails_version: 5.2.3
+          name: "ruby2-7_rails6-0"
+          ruby_version: 2.7.1
+          rails_version: 6.0.3.1
       - bundle_lint_test:
-          name: ruby2-5_rails5-2
-          ruby_version: 2.5.5
-          rails_version: 5.2.3
+          name: "ruby2-6_rails6-0"
+          ruby_version: 2.6.6
+          rails_version: 6.0.3.1
       - bundle_lint_test:
-          name: ruby2-4_rails5-2
-          ruby_version: 2.4.6
-          rails_version: 5.2.3
+          name: "ruby2-5_rails6-0"
+          ruby_version: 2.5.8
+          rails_version: 6.0.3.1
+
       - bundle_lint_test:
-          name: ruby2-6_rails5-1
-          ruby_version: 2.6.3
+          name: "ruby2-7_rails5-2"
+          ruby_version: 2.7.1
+          rails_version: 5.2.4.3
+      - bundle_lint_test:
+          name: "ruby2-6_rails5-2"
+          ruby_version: 2.6.6
+          rails_version: 5.2.4.3
+      - bundle_lint_test:
+          name: "ruby2-5_rails5-2"
+          ruby_version: 2.5.8
+          rails_version: 5.2.4.3
+      - bundle_lint_test:
+          name: "ruby2-4_rails5-2"
+          ruby_version: 2.4.10
+          rails_version: 5.2.4.3
+
+      - bundle_lint_test:
+          name: "ruby2-7_rails5-1"
+          ruby_version: 2.7.1
           rails_version: 5.1.7
       - bundle_lint_test:
-          name: ruby2-5_rails5.1
-          ruby_version: 2.5.5
+          name: "ruby2-6_rails5-1"
+          ruby_version: 2.6.6
           rails_version: 5.1.7
       - bundle_lint_test:
-          name: ruby2-4_rails5-1
-          ruby_version: 2.4.6
+          name: "ruby2-5_rails5-1"
+          ruby_version: 2.5.8
+          rails_version: 5.1.7
+      - bundle_lint_test:
+          name: "ruby2-4_rails5-1"
+          ruby_version: 2.4.10
           rails_version: 5.1.7
