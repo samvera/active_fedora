@@ -4,7 +4,7 @@
 module ActiveFedora::WithMetadata
   class DefaultSchema < ActiveTriples::Schema
     property :label, predicate: ::RDF::RDFS.label
-    property :file_name, predicate: ::RDF::Vocab::EBUCore.resourceFilename
+    property :file_name, predicate: ::RDF::Vocab::EBUCore.filename
     property :file_size, predicate: ::RDF::Vocab::EBUCore.fileSize
     property :date_created, predicate: ::RDF::Vocab::EBUCore.dateCreated
     property :date_modified, predicate: ::RDF::Vocab::EBUCore.dateModified
