@@ -8,10 +8,12 @@ module ActiveFedora
 
     autoload :Streaming
     autoload :Attributes
+    autoload :External
 
     include Common
     include ActiveFedora::File::Attributes
     include ActiveFedora::File::Streaming
+    include ActiveFedora::File::External
     include ActiveFedora::FilePersistence
     include ActiveFedora::Versionable
     include ActiveModel::Dirty
@@ -175,6 +177,7 @@ module ActiveFedora
       def ldp_headers
         headers = { 'Content-Type'.freeze => mime_type, 'Content-Length'.freeze => content.size.to_s }
         headers['Content-Disposition'.freeze] = "attachment; filename=\"#{URI.encode(@original_name)}\"" if @original_name
+        headers["Link"] = "<#{@external_uri}>; rel=\"http://fedora.info/definitions/fcrepo#ExternalContent\"; handling=\"#{@external_handling}\"; type=\"#{mime_type}\"" if @external_uri
         headers
       end
 

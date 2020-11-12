@@ -197,8 +197,9 @@ describe ActiveFedora::File do
         context "when the request results in a redirect" do
           before do
             test_object.add_file('one1two2threfour', path: 'webm', mime_type: 'video/webm')
-            test_object.add_file('', path: 'redirector', mime_type: "message/external-body; access-type=URL; url=\"#{test_object.webm.uri}\"")
+            test_object.add_file('', path: 'redirector', mime_type: 'video/webm', external_uri: test_object.webm.uri, external_handling: 'redirect')
             test_object.save!
+            test_object.reload
           end
           subject { str = ''; test_object.redirector.stream.each { |chunk| str << chunk }; str }
           it { is_expected.to eq 'one1two2threfour' }
@@ -206,9 +207,9 @@ describe ActiveFedora::File do
 
         context "when there are more than 3 requests because of redirects" do
           before do
-            test_object.add_file('', path: 'one', mime_type: "message/external-body; access-type=URL; url=\"#{test_object.attached_files[path].uri}\"")
-            test_object.add_file('', path: 'two', mime_type: "message/external-body; access-type=URL; url=\"#{test_object.one.uri}\"")
-            test_object.add_file('', path: 'three', mime_type: "message/external-body; access-type=URL; url=\"#{test_object.two.uri}\"")
+            test_object.add_file('', path: 'one', external_uri: test_object.attached_files[path].uri, external_handling: 'redirect')
+            test_object.add_file('', path: 'two', external_uri: test_object.one.uri, external_handling: 'redirect')
+            test_object.add_file('', path: 'three', external_uri: test_object.two.uri, external_handling: 'redirect')
             test_object.save!
           end
           it "raises a HTTP redirect too deep Error" do

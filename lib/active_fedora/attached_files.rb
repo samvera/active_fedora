@@ -78,6 +78,8 @@ module ActiveFedora
         node.content = file
         node.mime_type = opts[:mime_type]
         node.original_name = opts[:original_name]
+        node.external_uri = opts[:external_uri]
+        node.external_handling = opts[:external_handling]
       end
     end
 
