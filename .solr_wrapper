@@ -1,5 +1,5 @@
 # Place any default configuration for solr_wrapper here
-# version: 6.1.0
+version: 7.7.3
 port: 8985
 collection:
   dir: lib/generators/active_fedora/config/solr/templates/solr/conf/
