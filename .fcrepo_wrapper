@@ -1,0 +1,8 @@
+# Place any default configuration for solr_wrapper here
+port: 8986
+version: 5.1.1
+enable_jms: false
+java_options: ['-Dfcrepo.log.http.api=WARN','-Dfcrepo.log.kernel=ERROR','-Xmx512m',
+  '-Dfcrepo.external.content.allowed=config/fcrepo_allow.txt']
+#managed: true
+#fcrepo_home_dir: tmp/fcrepo4-development-data
