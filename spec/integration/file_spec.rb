@@ -199,7 +199,6 @@ describe ActiveFedora::File do
             test_object.add_file('one1two2threfour', path: 'webm', mime_type: 'video/webm')
             test_object.add_file('', path: 'redirector', mime_type: 'video/webm', external_uri: test_object.webm.uri, external_handling: 'redirect')
             test_object.save!
-            test_object.reload
           end
           subject { str = ''; test_object.redirector.stream.each { |chunk| str << chunk }; str }
           it { is_expected.to eq 'one1two2threfour' }
