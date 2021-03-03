@@ -63,6 +63,16 @@ module ActiveFedora
         ["ActiveFedora::Aggregation::ListSource"]
       end
 
+      # Short circuit ActiveModel::Dirty which attempts to load the whole ordered list when calling nodes_will_change!
+      # which leads to a stack level too deep exception in some cases
+      # See https://github.com/samvera/hyrax/issues/4581
+      # This approach was also taken in ActiveFedora::File:
+      # See https://github.com/samvera/active_fedora/pull/1312/commits/7c8bbbefdacefd655a2ca653f5950c991e1dc999#diff-28356c4daa0d55cbaf97e4269869f510R100-R103
+      def attribute_will_change!(attr)
+        return super unless attr == 'nodes'
+        attributes_changed_by_setter[:nodes] = true
+      end
+
       private
 
         def persist_ordered_self
