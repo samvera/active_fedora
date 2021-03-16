@@ -4,7 +4,7 @@ module ActiveFedora
       result = __getobj__.get(*args) do |req|
         prefer_headers = Ldp::PreferHeaders.new(req.headers["Prefer"])
         prefer_headers.omit = prefer_headers.omit | omit_uris
-        req.headers["Prefer"] = prefer_headers.to_s
+	req.headers["Prefer"] = prefer_headers.to_s
       end
       CleanResult.new(result)
     end
@@ -13,6 +13,7 @@ module ActiveFedora
 
       def omit_uris
         [
+	  "http://fedora.info/definitions/fcrepo#ServerManaged",
           ::RDF::Vocab::Fcrepo4.ServerManaged,
           ::RDF::Vocab::LDP.PreferContainment,
           ::RDF::Vocab::LDP.PreferEmptyContainer,
