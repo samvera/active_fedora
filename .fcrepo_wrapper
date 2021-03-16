@@ -1,8 +1,10 @@
 # Place any default configuration for solr_wrapper here
 port: 8986
-version: 5.1.1
+version: 6.0.0-beta-1 
 enable_jms: false
-java_options: ['-Dfcrepo.log.http.api=WARN','-Dfcrepo.log.kernel=ERROR','-Xmx512m',
-  '-Dfcrepo.external.content.allowed=config/fcrepo_allow.txt']
+java_options: ['-Dfcrepo.log.http.api=DEBUG','-Dfcrepo.log.kernel=ERROR','-Xmx512m',
+  '-Dfcrepo.external.content.allowed=config/fcrepo_allow.txt', '-Dfcrepo.autoversioning.enabled=false']
 #managed: true
-#fcrepo_home_dir: tmp/fcrepo4-development-data
+#fcrepo_home_dir: tmp/fcrepo-development-data
+url: https://github.com/fcrepo/fcrepo/releases/download/fcrepo-6.0.0-beta-1/fcrepo-webapp-6.0.0-beta-1-jetty-console.jar
+ignore_md5sum: true
