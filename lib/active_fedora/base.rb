@@ -3,6 +3,7 @@ require 'active_fedora/errors'
 require 'active_fedora/log_subscriber'
 
 module ActiveFedora
+  ##
   # This class ties together many of the lower-level modules, and
   # implements something akin to an ActiveRecord-alike interface to
   # fedora. If you want to represent a fedora object in the ruby
