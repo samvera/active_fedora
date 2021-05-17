@@ -18,6 +18,15 @@ describe ActiveFedora::Base do
         object.reload
         expect(object.person).to eq ['dave']
       end
+
+      context "when object is destroyed but flag is not set on copy" do
+        before { object2.destroy! }
+
+        it 'causes the correct error' do
+          expect(object.destroyed?).to be(nil)
+          expect { object.reload }.to raise_error(ActiveFedora::ObjectNotFoundError)
+        end
+      end
     end
 
     context "when not persisted" do
