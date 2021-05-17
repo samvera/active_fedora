@@ -3,8 +3,19 @@
 # to add rdf triples to a non-rdf resource and have them persisted.
 module ActiveFedora::WithMetadata
   class DefaultSchema < ActiveTriples::Schema
+    def self.legacy_ebucore_vocabulary
+      @legacy_ebucore_vocabulary ||= Class.new(RDF::StrictVocabulary("http://www.ebu.ch/metadata/ontologies/ebucore/ebucore#")) do
+        property :filename,
+          comment: %(The name of the file containing the Resource.).freeze,
+          domain: "ebucore:Resource".freeze,
+          label: "File name".freeze,
+          range: "xsd:string".freeze,
+          type: "rdf:Property".freeze
+      end
+    end
+
     property :label, predicate: ::RDF::RDFS.label
-    property :file_name, predicate: ::RDF::Vocab::EBUCore.filename
+    property :file_name, predicate: legacy_ebucore_vocabulary.filename
     property :file_size, predicate: ::RDF::Vocab::EBUCore.fileSize
     property :date_created, predicate: ::RDF::Vocab::EBUCore.dateCreated
     property :date_modified, predicate: ::RDF::Vocab::EBUCore.dateModified
