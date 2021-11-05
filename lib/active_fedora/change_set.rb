@@ -32,7 +32,9 @@ module ActiveFedora
         elsif key == 'type'.freeze
           # working around https://github.com/ActiveTriples/ActiveTriples/issues/122
           predicate = ::RDF.type
-          result[predicate] = graph.query(subject: object.rdf_subject, predicate: predicate)
+          result[predicate] = graph.query(subject: object.rdf_subject, predicate: predicate).select do |statement|
+            !statement.object.to_s.start_with?("http://fedora.info/definitions/v4/repository#", "http://www.w3.org/ns/ldp#")
+          end
         elsif object.local_attributes.include?(key)
           raise "Unable to find a graph predicate corresponding to the attribute: \"#{key}\""
         end

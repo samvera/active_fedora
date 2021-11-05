@@ -14,8 +14,13 @@ module ActiveFedora
       def initialize(file)
         @file = file
         super(file.uri, ldp_source.graph)
+
         return unless self.class.type && !type.include?(self.class.type)
-        attribute_will_change!(:type) if type.present?
+        types = type.reject do |statement|
+                  ::RDF::URI.new(statement.object).to_s.start_with?("http://fedora.info/definitions/v4/repository#", "http://www.w3.org/ns/ldp#")
+                end
+
+        attribute_will_change!(:type) if types.present?
         # Workaround for https://github.com/ActiveTriples/ActiveTriples/issues/123
         get_values(:type) << self.class.type
       end

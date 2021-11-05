@@ -228,10 +228,11 @@ module ActiveFedora
       # and assign_id can mint an id for the object, then assign it to the resource.
       # Otherwise the resource will have the id assigned by the LDP server
       def assign_rdf_subject
+        ldp_resource_klass = ActiveFedora.fedora.ldp_resource_service.resource_klass(self.class)
         @ldp_source = if !id && new_id = assign_id
-                        LdpResource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_id), @resource)
+                        ldp_resource_klass.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_id), @resource)
                       else
-                        LdpResource.new(ActiveFedora.fedora.connection, @ldp_source.subject, @resource, base_path_for_resource)
+                        ldp_resource_klass.new(ActiveFedora.fedora.connection, @ldp_source.subject, @resource, base_path_for_resource)
                       end
       end
 
