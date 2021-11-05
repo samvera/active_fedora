@@ -4,6 +4,9 @@ orbs:
 jobs:
   bundle_lint_test:
     parameters:
+      ruby_type:
+        type: string
+        default: 'ruby'
       ruby_version:
         type: string
       bundler_version:
@@ -14,12 +17,29 @@ jobs:
       solr_config_path:
         type: string
         default: lib/generators/active_fedora/config/solr/templates/solr/conf
-    executor:
-      name: 'samvera/ruby_fcrepo_solr'
-      ruby_version: << parameters.ruby_version >>
-      fcrepo_version: '5.1.0'
-    environment:
-      RAILS_VERSION: << parameters.rails_version >>
+      solr_port:
+        type: string
+        default: '8983'
+    docker:
+      - image: circleci/<< parameters.ruby_type >>:<< parameters.ruby_version >>-node-browsers-legacy
+        environment:
+          BUNDLE_PATH: vendor/bundle
+          BUNDLE_JOBS: 4
+          BUNDLE_RETRY: 3
+          RAILS_ENV: test
+          RACK_ENV: test
+          SPEC_OPTS: --profile 10 --format RspecJunitFormatter --out /tmp/test-results/rspec.xml --format progress
+          RAILS_VERSION: << parameters.rails_version >>
+          FCREPO_PORT: 8080
+          FCREPO_REST_PATH: fcrepo/rest
+          SOLR_TEST_PORT: << parameters.solr_port >>
+      - image: fcrepo/fcrepo:6.1.0
+        environment:
+          JAVA_OPTS: -Dfcrepo.autoversioning.enabled=false -Dfcrepo.external.content.allowed=/fcrepo_allow.txt
+        command: |
+          /bin/bash -c "echo 'http://fedoraAdmin:fedoraAdmin@localhost:8080/' > /fcrepo_allow.txt && catalina.sh run"
+      - image: solr:7.7-alpine
+        command: bin/solr -cloud -noprompt -f -p <<parameters.solr_port>>
     steps:
       - samvera/cached_checkout
       - checkout
@@ -40,6 +60,7 @@ jobs:
 
       - samvera/install_solr_core:
           solr_config_path: << parameters.solr_config_path >>
+          solr_port: <<parameters.solr_port >>
 
       - samvera/rubocop
 
