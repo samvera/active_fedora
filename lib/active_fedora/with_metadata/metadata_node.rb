@@ -33,7 +33,7 @@ module ActiveFedora
 
       def set_value(*args)
         super
-        attribute_will_change! args.first
+        attribute_will_change! args.first unless server_managed_properties.include?(args.first)
       end
 
       def ldp_source
@@ -68,6 +68,10 @@ module ActiveFedora
 
         def changes_for_update
           ChangeSet.new(self, self, changed_attributes.keys).changes
+        end
+
+        def server_managed_properties
+          @server_managed_properties ||= properties.select { |k,v| v[:server_managed] }.symbolize_keys.keys
         end
 
         class << self

@@ -48,6 +48,16 @@ describe ActiveFedora::WithMetadata do
       it { is_expected.to respond_to(:byte_order) }
       it { is_expected.to respond_to(:file_hash) }
     end
+
+    context "server-managed properties" do
+      before do
+        file.file_hash = "abcd1234"
+      end
+
+      it "allows setting but does not track changes" do
+        expect(file.file_hash_changed?).to be false
+      end
+    end
   end
 
   describe "#save" do
@@ -72,6 +82,30 @@ describe ActiveFedora::WithMetadata do
       it "doesn't save the metadata" do
         expect(file.metadata_node).not_to receive(:save)
         file.save
+      end
+    end
+
+    context "with modified server-managed properties" do
+      let(:file) do
+        file = SampleFile.new
+        file.title = ["foo"]
+        file.content = "Hey"
+        file.save
+        file
+      end
+      let(:reloaded) { SampleFile.new(file.uri) }
+
+      before do
+        saved_file = SampleFile.new(file.uri)
+        @server_assigned_value = saved_file.metadata_node.file_hash.first.id
+        saved_file.metadata_node.title = ["bar"]
+        saved_file.metadata_node.file_hash = ["abcd1234"]
+        saved_file.metadata_node.save
+      end
+
+      it "persists changes except server-managed properties" do
+        expect(reloaded.metadata_node.title).to eq ["bar"]
+        expect(reloaded.metadata_node.file_hash.first.id).to eq @server_assigned_value
       end
     end
   end
