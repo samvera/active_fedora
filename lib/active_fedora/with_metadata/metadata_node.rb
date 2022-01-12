@@ -71,7 +71,7 @@ module ActiveFedora
         end
 
         def server_managed_properties
-          @server_managed_properties ||= properties.select { |k,v| v[:server_managed] }.symbolize_keys.keys
+          @server_managed_properties ||= properties.select { |k,v| v[:server_managed] }.keys.map(&:to_sym)
         end
 
         class << self
