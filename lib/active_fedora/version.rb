@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
 module ActiveFedora
-  VERSION = '13.2.4'
+  VERSION = '13.2.5'
 end
