@@ -21,6 +21,6 @@ module ActiveFedora::WithMetadata
     property :date_modified, predicate: ::RDF::Vocab::EBUCore.dateModified
     property :byte_order, predicate: SweetJPLTerms.byteOrder
     # This is a server-managed predicate which means Fedora does not let us change it.
-    property :file_hash, predicate: ::RDF::Vocab::PREMIS.hasMessageDigest
+    property :file_hash, predicate: ::RDF::Vocab::PREMIS.hasMessageDigest, server_managed: true
   end
 end
