@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'fcrepo_wrapper', '~> 0.2'
   s.add_development_dependency "github_changelog_generator"
   s.add_development_dependency "rdoc"
+  s.add_development_dependency "psych", "< 4" # Restricted because 4.0+ do not work with rubocop 0.56.x
   s.add_development_dependency "rails"
   s.add_development_dependency "rake"
   s.add_development_dependency "rspec", "~> 3.5"
