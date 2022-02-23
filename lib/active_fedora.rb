@@ -11,21 +11,26 @@ require 'active_triples'
 # Monkey patching RDF::Literal::DateTime to support fractional seconds.
 # See https://github.com/samvera/active_fedora/issues/497
 # Also monkey patches in a fix for timezones to be stored properly.
-module RDF
-  class Literal
-    class DateTime < Literal
-      ALTERNATIVE_FORMAT   = '%Y-%m-%dT%H:%M:%S'.freeze
-      DOT                  = '.'.freeze
-      EMPTY                = ''.freeze
-      TIMEZONE_FORMAT      = '%:z'.freeze
+#
+# RDF 3.2.5 changes the superclass of DateTime to RDF::Temporal
+# TODO: Determine if this monkey-patch is needed even with RDF pre-3.2.5 (All the tests pass without it)
+if RDF::Literal::DateTime.superclass == RDF::Literal
+  module RDF
+    class Literal
+      class DateTime < Literal
+	ALTERNATIVE_FORMAT   = '%Y-%m-%dT%H:%M:%S'.freeze
+	DOT                  = '.'.freeze
+	EMPTY                = ''.freeze
+	TIMEZONE_FORMAT      = '%:z'.freeze
 
-      def to_s
-        @string ||= begin
-          # Show nanoseconds but remove trailing zeros
-          nano = @object.strftime('%N').sub(/0+\Z/, EMPTY)
-          nano = DOT + nano unless nano.blank?
-          @object.strftime(ALTERNATIVE_FORMAT) + nano + @object.strftime(TIMEZONE_FORMAT)
-        end
+	def to_s
+	  @string ||= begin
+	    # Show nanoseconds but remove trailing zeros
+	    nano = @object.strftime('%N').sub(/0+\Z/, EMPTY)
+	    nano = DOT + nano unless nano.blank?
+	    @object.strftime(ALTERNATIVE_FORMAT) + nano + @object.strftime(TIMEZONE_FORMAT)
+	  end
+	end
       end
     end
   end
