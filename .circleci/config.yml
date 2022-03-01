@@ -31,7 +31,7 @@ jobs:
                   echo "$(git branch --all --list master */master)"
               fi
               [[ -z "$(git branch --all --list master */master)" ]]
-              
+
       - samvera/bundle_for_gem:
           ruby_version: << parameters.ruby_version >>
           bundler_version: << parameters.bundler_version >>
