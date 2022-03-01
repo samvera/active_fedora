@@ -20,7 +20,7 @@ if ENV['RAILS_VERSION']
     gem 'rails', github: 'rails/rails'
     ENV['ENGINE_CART_RAILS_OPTIONS'] = '--edge --skip-turbolinks'
   else
-    gem 'activemodel', ENV['RAILS_VERSION']
+    #gem 'activemodel', ENV['RAILS_VERSION']
     gem 'rails', ENV['RAILS_VERSION']
   end
 end
