@@ -1,8 +1,10 @@
 require 'spec_helper'
-@@last_id = 0
+#@@last_id = 0
 
 describe ActiveFedora::Base do
   it_behaves_like "An ActiveModel"
+
+  let(:last_id) { 0 }
 
   describe "id=" do
     before do
@@ -118,15 +120,13 @@ describe ActiveFedora::Base do
     end
 
     after do
+      last_id += 1
       Object.send(:remove_const, :FooHistory)
     end
 
-    def increment_id
-      @@last_id += 1
-    end
-
     before do
-      @this_id = increment_id.to_s
+      incremented = last_id + 1
+      @this_id = incremented.to_s
       @test_object = described_class.new
       allow(@test_object).to receive(:assign_id).and_return(@this_id)
     end
