@@ -4,7 +4,7 @@ inherit_from:
 - .rubocop_todo.yml
 
 AllCops:
-  TargetRubyVersion: 2.2
+  TargetRubyVersion: 2.6
   DisplayCopNames: true
   Include:
     - '**/Rakefile'
@@ -12,7 +12,7 @@ AllCops:
     - 'script/**/*'
     - 'vendor/**/*'
 
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Exclude:
     - 'spec/unit/**/*'
     - 'spec/integration/**/*'
@@ -173,7 +173,7 @@ Style/Lambda:
     - 'spec/**/*'
 
 Layout/IndentationConsistency:
-  EnforcedStyle: rails
+  EnforcedStyle: indented_internal_methods
 
 Style/CollectionMethods:
   PreferredMethods:
@@ -223,22 +223,22 @@ Style/ZeroLengthPredicate:
   Exclude:
     - 'lib/active_fedora/file/attributes.rb'
 
-Performance/RedundantMerge:
-  Exclude:
-    - 'lib/active_fedora/railtie.rb'
+      #Performance/RedundantMerge:
+      #Exclude:
+      #- 'lib/active_fedora/railtie.rb'
 
 Rails:
   Enabled: true
 
-Rails/Output:
-  Exclude:
-    - 'lib/generators/**/*'
+  #Rails/Output:
+  #Exclude:
+  #  - 'lib/generators/**/*'
 
-Rails/Date:
-  Enabled: false
+  #Rails/Date:
+  #Enabled: false
 
-Rails/TimeZone:
-  Enabled: false
+  #Rails/TimeZone:
+  #Enabled: false
 
 RSpec/AnyInstance:
   Enabled: false
