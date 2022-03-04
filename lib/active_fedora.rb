@@ -11,9 +11,11 @@ require 'active_triples'
 # Monkey patching RDF::Literal::DateTime to support fractional seconds.
 # See https://github.com/samvera/active_fedora/issues/497
 # Also monkey patches in a fix for timezones to be stored properly.
+# This is needed in both RDF <= 3.2.4 and RDF >= 3.2.5
+# TODO: Figure out how to contribute something upstream to avoid monkey-patching
 module RDF
   class Literal
-    class DateTime < Literal
+    class DateTime
       ALTERNATIVE_FORMAT   = '%Y-%m-%dT%H:%M:%S'.freeze
       DOT                  = '.'.freeze
       EMPTY                = ''.freeze
