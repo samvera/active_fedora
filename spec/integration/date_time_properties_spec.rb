@@ -33,9 +33,33 @@ describe ActiveFedora::Base do
 
   describe 'serializing' do
     let(:object) { Foo.new(date: [date]) }
-    let(:triple) { object.resource.query(predicate: ::RDF::Vocab::DC.date).to_a.first }
+    let(:triple) { object.resource.query(predicate: ::RDF::Vocab::DC.date).to_a.first.object }
     it 'time zone must have semicolin to be a cannonical XMLSchema#dateTime' do
       expect(triple.to_s).to match(/\+01:00/)
+    end
+
+    context 'nanoseconds' do
+      let(:date) { DateTime.parse("2015-10-22T10:20:03.653991025+01:00") }
+
+      it 'includes nanosecond precision' do
+        expect(triple.to_s).to eq "2015-10-22T10:20:03.653991025+01:00"
+      end
+
+      context 'with trailing zeros' do
+        let(:date) { DateTime.parse("2015-10-22T15:34:20.97800000-11:00") }
+
+        it 'trims trailing zeros' do
+          expect(triple.to_s).to eq "2015-10-22T15:34:20.978-11:00"
+        end
+
+        context 'and only zero nanoseconds' do
+          let(:date) { DateTime.parse("2015-10-22T15:34:20.000000000-11:00") }
+
+          it 'trims trailing zeros and dot if nanoseconds are all 0' do
+            expect(triple.to_s).to eq "2015-10-22T15:34:20-11:00"
+          end
+        end
+      end
     end
   end
 end
