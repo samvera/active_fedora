@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'faraday', '~> 0.12'
   s.add_dependency 'faraday-encoding', '>= 0.0.5'
   #s.add_dependency "ldp", '>= 0.7.0', '< 2'
-  s.add_dependency "ldp"
+  #s.add_dependency "ldp", '~> 1.0'
   #s.add_dependency 'rsolr', '>= 1.1.2', '< 3'
   s.add_dependency 'rsolr'
   s.add_dependency "ruby-progressbar", '~> 1.0'
@@ -35,8 +35,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rspec-its"
   #s.add_development_dependency "rubocop"
   s.add_development_dependency "rubocop", '~> 0.93'
-  #s.add_development_dependency "rubocop-rspec", '~> 1.12'
   s.add_development_dependency "rubocop-rspec"
+  #s.add_development_dependency "rubocop-rspec", '~> 1.44'
   s.add_development_dependency "simplecov", '~> 0.8'
   #s.add_development_dependency "solr_wrapper", "~> 2.0"
   s.add_development_dependency "solr_wrapper"

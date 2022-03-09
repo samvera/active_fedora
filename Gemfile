@@ -4,6 +4,8 @@ source "https://rubygems.org"
 
 gemspec path: File.expand_path('..', __FILE__)
 
+gem 'ldp', git: 'https://github.com/samvera/ldp.git', branch: 'issues-131-jrgriffiniii-ruby3.0'
+
 gem 'jruby-openssl', platform: :jruby
 
 group :development, :test do
@@ -22,5 +24,7 @@ if ENV['RAILS_VERSION']
   else
     gem 'rails', ENV['RAILS_VERSION']
   end
+else
+  gem 'rails', '~> 6.0'
 end
 
