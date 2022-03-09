@@ -8,7 +8,7 @@ module ActiveFedora
     MAX_ROWS = 10_000
 
     def initialize(options = {})
-      @options = { read_timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr' }.merge(options)
+      @options = { timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr' }.merge(options)
     end
 
     def conn
