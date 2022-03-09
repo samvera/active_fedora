@@ -8,7 +8,6 @@ doc
 tmp
 Gemfile.lock
 jetty
-bin
 .idea
 .ruby-version
 .ruby-gemset
@@ -16,3 +15,4 @@ gemfiles/*.gemfile.lock
 /fcrepo4-data
 /fcrepo4-test-data
 /spec/examples.txt
+lib/generators/active_fedora/config/solr/templates/solr/conf/solr_conf.zip

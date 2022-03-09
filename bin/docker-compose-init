@@ -1,0 +1,7 @@
+#!/bin/bash
+
+cd lib/generators/active_fedora/config/solr/templates/solr/conf
+/usr/bin/env zip -1 -r solr_conf.zip ./*
+/usr/bin/env curl -H "Content-Type: application/octet-stream" --user solr:SolrRocks --data-binary @solr_conf.zip "http://0.0.0.0:8985/solr/admin/configs?action=UPLOAD&name=solrconfig"
+/usr/bin/env curl -H 'Content-Type: application/json' --user solr:SolrRocks http://0.0.0.0:8985/api/collections/ -d '{create: {name: hydra-test, config: solrconfig, numShards: 1}}'
+cd -

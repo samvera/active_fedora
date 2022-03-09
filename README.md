@@ -82,23 +82,41 @@ rake active_fedora:ci
 
 ### Testing Manually
 
-If you want to run the tests manually, follow these instructions:
+If you want to deploy the tests manually, follow these instructions:
+
+#### Starting the Docker Containers
+To start the Apache Solr and Fedora Commons test deployments, please open another terminal and invoke:
 
 ```bash
-solr_wrapper
+$ bin/docker-compose-start
 ```
 
-To start FCRepo, open another shell and run:
+Once the server has started, one should see a log entry similar to the following:
 
 ```bash
-fcrepo_wrapper -p 8986
+solrnode1_1  | 2022-03-09 20:57:52.316 INFO  (main) [   ] o.e.j.s.Server Started @4721ms
 ```
 
-Now you’re ready to run the tests. In the directory where active\_fedora
-is installed, run:
+Then, please create the Solr Collection with the following:
 
 ```bash
-rake spec
+$ bin/docker-compose-init
+```
+
+#### Executing the Test Suite
+Now you’re ready to run the tests. In the directory where `active_fedora` is installed, run:
+
+```bash
+$ bundle exec rspec spec/
+```
+
+#### Stopping the Docker Containers
+
+Once one no longer needs to use the `docker` containers for testing, please
+invoke the following:
+
+```bash
+$ bin/docker-compose-stop
 ```
 
 # Release Process

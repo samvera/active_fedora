@@ -4,6 +4,7 @@ source "https://rubygems.org"
 
 gemspec path: File.expand_path('..', __FILE__)
 
+# This is for the initial, draft PR
 gem 'ldp', git: 'https://github.com/samvera/ldp.git', branch: 'issues-131-jrgriffiniii-ruby3.0'
 
 gem 'jruby-openssl', platform: :jruby

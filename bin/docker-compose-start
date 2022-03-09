@@ -1,0 +1,4 @@
+#!/bin/bash
+
+/usr/bin/env docker-compose up --detach
+/usr/bin/env docker-compose logs --follow solrnode1
