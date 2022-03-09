@@ -4,7 +4,9 @@ module ActiveFedora
       module ClassMethods
         protected
 
-          def define_method_attribute(name)
+          # Please be aware that this can vary based upon the Rails release used
+          # @see https://github.com/rails/rails/blob/6-1-stable/activemodel/lib/active_model/attribute_methods.rb#L297
+          def define_method_attribute(name, **options)
             name = name.to_s
             safe_name = name.unpack('h*'.freeze).first
             temp_method = "__temp__#{safe_name}"
