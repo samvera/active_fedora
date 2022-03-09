@@ -179,7 +179,7 @@ module ActiveFedora
 
       def ldp_headers
         headers = { 'Content-Type'.freeze => mime_type, 'Content-Length'.freeze => content.size.to_s }
-        headers['Content-Disposition'.freeze] = "attachment; filename=\"#{URI::DEFAULT_PARSER.escape(@original_name)}\"" if @original_name
+        headers['Content-Disposition'.freeze] = "attachment; filename=\"#{Addressable::URI.escape(@original_name)}\"" if @original_name
         headers
       end
 

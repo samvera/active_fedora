@@ -7,6 +7,7 @@ require 'active_support/core_ext/object'
 require 'active_support/core_ext/hash/indifferent_access'
 require 'active_support/core_ext/hash/except'
 require 'active_triples'
+require 'addressable/uri'
 
 # Monkey patching RDF::Literal::DateTime to support fractional seconds.
 # See https://github.com/samvera/active_fedora/issues/497
