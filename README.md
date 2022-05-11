@@ -1,8 +1,7 @@
 # ActiveFedora
-[![Samvera Core Component](https://img.shields.io/badge/samvera-core--component-brightgreen)](https://github.com/samvera/maintenance#samvera-core-components)
 
 Code: [![Samvera Core Component](https://img.shields.io/badge/samvera-core--component-brightgreen)](https://github.com/samvera/maintenance#samvera-core-components)
-[![Version](https://badge.fury.io/rb/active-fedora.png)](http://badge.fury.io/rb/active-fedora)
+[![Version](https://img.shields.io/gem/v/active-fedora)](https://rubygems.org/gems/active-fedora)
 [![Build Status](https://circleci.com/gh/samvera/active_fedora.svg?style=svg)](https://circleci.com/gh/samvera/active_fedora)
 [![Coverage Status](https://coveralls.io/repos/github/samvera/active_fedora/badge.svg?branch=main)](https://coveralls.io/github/samvera/active_fedora?branch=main)
 
