@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  samvera: samvera/circleci-orb@0
+  samvera: samvera/circleci-orb@1.0
 jobs:
   bundle_lint_test:
     parameters:
@@ -8,14 +8,14 @@ jobs:
         type: string
       bundler_version:
         type: string
-        default: 2.0.1
+        default: 2.3.11
       rails_version:
         type: string
       solr_config_path:
         type: string
         default: lib/generators/active_fedora/config/solr/templates/solr/conf
     executor:
-      name: 'samvera/ruby_fcrepo_solr'
+      name: 'samvera/ruby_fcrepo_solr_redis_postgres'
       ruby_version: << parameters.ruby_version >>
     environment:
       RAILS_VERSION: << parameters.rails_version >>
@@ -31,7 +31,7 @@ jobs:
                   echo "$(git branch --all --list master */master)"
               fi
               [[ -z "$(git branch --all --list master */master)" ]]
-              
+
       - samvera/bundle_for_gem:
           ruby_version: << parameters.ruby_version >>
           bundler_version: << parameters.bundler_version >>
@@ -47,31 +47,79 @@ jobs:
 workflows:
   ci:
     jobs:
-      - bundle_lint_test:
-          name: ruby2-7_rails5-2
-          ruby_version: 2.7.0
-          rails_version: 5.2.4
-      - bundle_lint_test:
-          name: ruby2-6_rails5-2
-          ruby_version: 2.6.5
-          rails_version: 5.2.4
-      - bundle_lint_test:
-          name: ruby2-5_rails5-2
-          ruby_version: 2.5.7
-          rails_version: 5.2.4
-      - bundle_lint_test:
-          name: ruby2-4_rails5-2
-          ruby_version: 2.4.9
-          rails_version: 5.2.4
+      # Ruby 2.7 releases
       - bundle_lint_test:
           name: ruby2-7_rails6-0
-          ruby_version: 2.7.0
-          rails_version: 6.0.2
+          ruby_version: 2.7.5
+          rails_version: 6.0.4.7
+      - bundle_lint_test:
+          name: ruby2-7_rails5-2
+          ruby_version: 2.7.5
+          rails_version: 5.2.4
+      # Ruby 2.6 releases
       - bundle_lint_test:
           name: ruby2-6_rails6-0
-          ruby_version: 2.6.5
-          rails_version: 6.0.2
+          ruby_version: 2.6.9
+          rails_version: 6.0.4.7
+      - bundle_lint_test:
+          name: ruby2-6_rails5-2
+          ruby_version: 2.6.9
+          rails_version: 5.2.4
+      # Ruby 2.5 releases
       - bundle_lint_test:
           name: ruby2-5_rails6.0
-          ruby_version: 2.5.7
-          rails_version: 6.0.2
+          ruby_version: 2.5.9
+          rails_version: 6.0.4.7
+      - bundle_lint_test:
+          name: ruby2-5_rails5-2
+          ruby_version: 2.5.9
+          rails_version: 5.2.4
+
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - main
+    jobs:
+      # Ruby 2.7 releases
+      - bundle_lint_test:
+          name: ruby2-7_rails6-1
+          ruby_version: 2.7.5
+          rails_version: 6.1.5
+      - bundle_lint_test:
+          name: ruby2-7_rails6-0
+          ruby_version: 2.7.5
+          rails_version: 6.0.4.7
+      - bundle_lint_test:
+          name: ruby2-7_rails5-2
+          ruby_version: 2.7.5
+          rails_version: 5.2.4
+      # Ruby 2.6 releases
+      - bundle_lint_test:
+          name: ruby2-6_rails6-1
+          ruby_version: 2.6.9
+          rails_version: 6.1.5
+      - bundle_lint_test:
+          name: ruby2-6_rails6-0
+          ruby_version: 2.6.9
+          rails_version: 6.0.4.7
+      - bundle_lint_test:
+          name: ruby2-6_rails5-2
+          ruby_version: 2.6.9
+          rails_version: 5.2.4
+      # Ruby 2.5 releases
+      - bundle_lint_test:
+          name: ruby2-5_rails6-1
+          ruby_version: 2.5.9
+          rails_version: 6.1.5
+      - bundle_lint_test:
+          name: ruby2-5_rails6.0
+          ruby_version: 2.5.9
+          rails_version: 6.0.4.7
+      - bundle_lint_test:
+          name: ruby2-5_rails5-2
+          ruby_version: 2.5.9
+          rails_version: 5.2.4
