@@ -4,6 +4,7 @@ Code: [![Version](https://badge.fury.io/rb/active-fedora.png)](http://badge.fury
 [![Build Status](https://circleci.com/gh/samvera/active_fedora.svg?style=svg)](https://circleci.com/gh/samvera/active_fedora)
 [![Coverage Status](https://coveralls.io/repos/github/samvera/active_fedora/badge.svg?branch=master)](https://coveralls.io/github/samvera/active_fedora?branch=master)
 
+[![Samvera Core Component](https://img.shields.io/badge/samvera-core--component-red)](https://github.com/samvera/maintenance#samvera-core-components)
 Docs: [![Contribution Guidelines](http://img.shields.io/badge/CONTRIBUTING-Guidelines-blue.svg)](./CONTRIBUTING.md)
 [![Apache 2.0 License](http://img.shields.io/badge/APACHE2-license-blue.svg)](./LICENSE)
 
