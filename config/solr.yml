@@ -1,13 +1,13 @@
 development:
   default:
-    url: http://127.0.0.1:<%= ENV['SOLR_TEST_PORT'] || 8983 %>/solr/hydra-development
+    url: http://<%= ENV['lando_active_fedora_dev_solr_conn_host'] || ENV['SOLR_DEVELOPMENT_HOST'] || 'localhost' %>:<%= ENV['lando_active_fedora_dev_solr_conn_port'] || ENV['SOLR_DEVELOPMENT_PORT'] || 8983 %>/solr/hydra-development
   full_text:
-    url: http://localhost:8983/solr/development
+    url: http://<%= ENV['lando_active_fedora_dev_solr_conn_host'] || ENV['SOLR_DEVELOPMENT_HOST'] || 'localhost' %>:<%= ENV['lando_active_fedora_dev_solr_conn_port'] || ENV['SOLR_DEVELOPMENT_PORT'] || 8983 %>/solr/hydra-development
 test:
   default:
-    url: http://localhost:<%= ENV['SOLR_TEST_PORT'] || 8985 %>/solr/hydra-test
+    url: http://<%= ENV['lando_active_fedora_dev_solr_conn_host'] || ENV['SOLR_TEST_HOST'] || 'localhost' %>:<%= ENV['lando_active_fedora_dev_solr_conn_port'] || ENV['SOLR_TEST_PORT'] || 8983 %>/solr/hydra-development
   full_text:
-    url: http://localhost:<%= ENV['SOLR_TEST_PORT'] || 8985 %>/solr/test
+    url: http://<%= ENV['lando_active_fedora_dev_solr_conn_host'] || ENV['SOLR_TEST_HOST'] || 'localhost' %>:<%= ENV['lando_active_fedora_dev_solr_conn_port'] || ENV['SOLR_TEST_PORT'] || 8983 %>/solr/hydra-development
 production:
   default:
     url: http://localhost:8080/solr/production

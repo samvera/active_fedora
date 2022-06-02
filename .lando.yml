@@ -1,0 +1,64 @@
+name: samvera
+services:
+  active_fedora_dev_fcrepo:
+    type: compose
+    ##app_mount: false
+    portforward: 8080
+    moreHttpPorts:
+      - 8080
+      - 61613
+      - 61616
+    overrides:
+      ports:
+        - 8080
+        - 61613
+        - 61616
+    services:
+      image: samvera/fcrepo4:4.7.5
+      command: "/fedora-entrypoint.sh"
+      ports:
+        - 8080
+        - 61613
+        - 61616
+  active_fedora_test_fcrepo:
+    type: compose
+    #app_mount: false
+    # portforward: 8080
+    moreHttpPorts:
+      - 8080
+      - 61613
+      - 61616
+    overrides:
+      ports:
+        - 8080
+        - 61613
+        - 61616
+    services:
+      image: samvera/fcrepo4:4.7.5
+      command: "/fedora-entrypoint.sh"
+      ports:
+        - 8080
+        - 61613
+        - 61616
+  active_fedora_dev_solr:
+    type: solr:7
+    portforward: true
+    core: hydra-development
+    config:
+      dir: solr/config
+  active_fedora_test_solr:
+    type: solr:7
+    portforward: true
+    core: hydra-test
+    config:
+      dir: solr/config
+proxy:
+  active_fedora_dev_fcrepo:
+    - active-fedora.dev.fcrepo.lndo.site
+  active_fedora_dev_solr:
+    - active-fedora.dev.solr.lndo.site:8983
+  active_fedora_test_fcrepo:
+    - active-fedora.test.fcrepo.lndo.site
+  active_fedora_test_solr:
+    - active-fedora.test.solr.lndo.site:8985
+
