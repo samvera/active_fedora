@@ -45,13 +45,13 @@ services:
     portforward: true
     core: hydra-development
     config:
-      dir: solr/config
+      dir: lib/generators/active_fedora/config/solr/templates/solr/conf
   active_fedora_test_solr:
     type: solr:7
     portforward: true
     core: hydra-test
     config:
-      dir: solr/config
+      dir: lib/generators/active_fedora/config/solr/templates/solr/conf
 proxy:
   active_fedora_dev_fcrepo:
     - active-fedora.dev.fcrepo.lndo.site

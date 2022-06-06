@@ -17,6 +17,3 @@ begin
 rescue StandardError
   nil
 end
-
-binding.pry
-
