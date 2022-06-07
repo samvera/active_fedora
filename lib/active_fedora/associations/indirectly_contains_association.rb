@@ -16,7 +16,7 @@ module ActiveFedora
         if force
           record.save!
         else
-          return false unless record.save(validate:)
+          return false unless record.save(validate: validate)
         end
 
         save_through_record(record)
@@ -31,8 +31,7 @@ module ActiveFedora
         if loaded?
           target.map(&:id)
         else
-          owner.resource.query(predicate:)
-               .map { |s| ActiveFedora::Base.uri_to_id(s.object) } | target.map(&:id)
+          owner.resource.query(predicate: predicate).map { |s| ActiveFedora::Base.uri_to_id(s.object) } | target.map(&:id)
         end
       end
 
@@ -79,7 +78,7 @@ module ActiveFedora
         end
 
         def record_proxy_finder
-          ContainedFinder.new(container:, repository: composite_proxy_repository, proxy_class:)
+          ContainedFinder.new(container: container, repository: composite_proxy_repository, proxy_class: proxy_class)
         end
 
         def composite_proxy_repository

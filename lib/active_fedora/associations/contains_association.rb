@@ -7,7 +7,7 @@ module ActiveFedora
         if force
           record.save!
         else
-          record.save(validate:)
+          record.save(validate: validate)
         end
       end
 

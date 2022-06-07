@@ -23,7 +23,7 @@ module ActiveFedora
     def self.find_or_initialize(id)
       find(id)
     rescue ActiveFedora::ObjectNotFoundError
-      new(id:)
+      new(id: id)
     end
 
     private
