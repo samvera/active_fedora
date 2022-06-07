@@ -26,9 +26,7 @@ describe ActiveFedora::Base do
   end
 
   it { is_expected.to respond_to(:each_with_index) }
-
   it { expect(libraries.any?).to eq false }
-
   it { is_expected.to be_blank }
   it { is_expected.to be_empty }
   it { is_expected.not_to be_present }
@@ -75,9 +73,21 @@ describe ActiveFedora::Base do
           .to yield_successive_args(*Library.all.to_a)
       end
 
-      it 'when called from Base yields all items' do
-        expect { |b| ActiveFedora::Base.all.each(&b) }
-          .to yield_successive_args(*(Library.all.to_a + Book.all.to_a))
+      context 'when called from ActiveFedora::Base' do
+        let(:items) { ActiveFedora::Base.all }
+        let(:books) { Book.all }
+        let(:yielded) { items.each.to_a }
+        let(:yielded_books) do
+          yielded.select { |e| e.is_a?(Book) }
+        end
+        let(:yielded_libraries) do
+          yielded.select { |e| e.is_a?(Library) }
+        end
+
+        it 'yields all items' do
+          expect(yielded_books.length).to eq(books.length)
+          expect(yielded_libraries.length).to eq(libraries.length)
+        end
       end
 
       context 'when cached' do
@@ -114,9 +124,24 @@ describe ActiveFedora::Base do
     end
 
     context "when limit is applied" do
-      subject(:libraries) { Library.create books: [Book.create, Book.create] }
+      let(:book2) { Book.create }
+      let(:book1) { Book.create }
+      let(:library) { Library.create books: [book1, book2] }
+
+      before do
+        book1
+        book2
+        library
+      end
+
+      after do
+        library.destroy
+        book2
+        book1
+      end
+
       it "limits the number of books" do
-        expect(libraries.books.limit(1).size).to eq 1
+        expect(library.books.limit(1).size).to eq 1
       end
     end
   end
