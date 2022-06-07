@@ -41,7 +41,7 @@ RSpec.configure do |config|
   # Stub out test stuff.
   config.before(:each) do
     begin
-      ActiveFedora::Cleaner.clean!
+      #ActiveFedora::Cleaner.clean!
     rescue Faraday::ConnectionFailed, RSolr::Error::ConnectionRefused => e
       $stderr.puts e.message
     end

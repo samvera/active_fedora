@@ -2,44 +2,44 @@ name: samvera
 services:
   active_fedora_dev_fcrepo:
     type: compose
-    ##app_mount: false
+    #app_mount: false
     portforward: 8080
     moreHttpPorts:
       - 8080
-      - 61613
-      - 61616
+        #- 61613
+        #- 61616
     overrides:
       ports:
         - 8080
-        - 61613
-        - 61616
+          #- 61613
+          #- 61616
     services:
       image: samvera/fcrepo4:4.7.5
       command: "/fedora-entrypoint.sh"
       ports:
         - 8080
-        - 61613
-        - 61616
+          #- 61613
+          #- 61616
   active_fedora_test_fcrepo:
     type: compose
     #app_mount: false
-    # portforward: 8080
+    portforward: 8080
     moreHttpPorts:
       - 8080
-      - 61613
-      - 61616
+        #- 61613
+        #- 61616
     overrides:
       ports:
         - 8080
-        - 61613
-        - 61616
+          #- 61613
+          #- 61616
     services:
       image: samvera/fcrepo4:4.7.5
       command: "/fedora-entrypoint.sh"
       ports:
         - 8080
-        - 61613
-        - 61616
+          #- 61613
+          #- 61616
   active_fedora_dev_solr:
     type: solr:7
     portforward: true
