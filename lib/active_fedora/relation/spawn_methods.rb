@@ -1,9 +1,10 @@
+# frozen_string_literal: true
 require 'active_fedora/relation/merger'
 
 module ActiveFedora
   module SpawnMethods
     # This is overridden by Associations::CollectionProxy
-    def spawn #:nodoc:
+    def spawn # :nodoc:
       clone
     end
 

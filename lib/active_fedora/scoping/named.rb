@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # = Active Fedora \Named \Scopes
   module Scoping
@@ -138,9 +139,7 @@ module ActiveFedora
         #   Article.published.featured.latest_article
         #   Article.featured.titles
         def scope(name, body, &block)
-          unless body.respond_to?(:call)
-            raise ArgumentError, 'The scope body needs to be callable.'
-          end
+          raise ArgumentError, 'The scope body needs to be callable.' unless body.respond_to?(:call)
 
           if dangerous_class_method?(name)
             raise ArgumentError, "You tried to define a scope named \"#{name}\" " \

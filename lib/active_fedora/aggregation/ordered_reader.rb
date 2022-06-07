@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Aggregation
   ##
   # Lazily iterates over a doubly linked list, fixing up nodes if necessary.

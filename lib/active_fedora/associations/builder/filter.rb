@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
   class Filter < ActiveFedora::Associations::Builder::CollectionAssociation
     def self.valid_options(options)

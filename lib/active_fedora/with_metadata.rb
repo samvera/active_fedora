@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module WithMetadata
     extend ActiveSupport::Concern
@@ -22,7 +23,7 @@ module ActiveFedora
       return unless super && !new_record?
       # TODOs captured as https://github.com/samvera/active_fedora/issues/1331
       metadata_node.metadata_uri = described_by # TODO: only necessary if the URI was < > before
-      metadata_node.save # TODO if changed?
+      metadata_node.save # TODO: if changed?
     end
 
     module ClassMethods

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::WithMetadata
   class DefaultStrategy < ActiveTriples::ExtensionStrategy
     # override apply method to check if property already exists or receiver already has predicate defined.

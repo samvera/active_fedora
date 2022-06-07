@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'active_support/descendants_tracker'
 require 'active_fedora/errors'
 require 'active_fedora/log_subscriber'

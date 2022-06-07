@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Indexers
   ##
   # An indexer which does nothing with the given index object.

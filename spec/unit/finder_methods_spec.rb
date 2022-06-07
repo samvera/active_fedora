@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 RSpec.describe ActiveFedora::FinderMethods do
@@ -50,8 +51,8 @@ RSpec.describe ActiveFedora::FinderMethods do
     subject(:class_to_load) { finder.send(:class_to_load, resource, true) }
 
     let(:best_model) { Class.new }
-    let(:mapper) { instance_double(ActiveFedora::DefaultModelMapper, classifier: classifier) }
-    let(:classifier) { instance_double(ActiveFedora::ModelClassifier, best_model: best_model) }
+    let(:mapper) { instance_double(ActiveFedora::DefaultModelMapper, classifier:) }
+    let(:classifier) { instance_double(ActiveFedora::ModelClassifier, best_model:) }
     let(:resource) { instance_double(Hash) }
 
     before do

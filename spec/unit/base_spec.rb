@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 @@last_id = 0
 
@@ -75,10 +76,12 @@ describe ActiveFedora::Base do
           rdf_label ::RDF::Vocab::FOAF.name
           property :foaf_name, predicate: ::RDF::Vocab::FOAF.name
         end
+
         class Person < Agent
           rdf_label ::RDF::URI('http://example.com/foo')
           property :job, predicate: ::RDF::URI('http://example.com/foo')
         end
+
         class Creator < Person
         end
       end
@@ -289,7 +292,7 @@ describe ActiveFedora::Base do
         expect(m).to receive(:fubar=).with('1234')
         expect(m).to receive(:baz=).with('stuff')
         expect(m).to receive(:save)
-        m.update_attributes(att)
+        m.update(att)
       end
     end
 

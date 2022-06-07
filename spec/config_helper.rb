@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 def mock_yaml(hash, path)
   mock_file = instance_double(File, path.split("/")[-1])
   allow(File).to receive(:exist?).with(path).and_return(true)

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Aggregation
   class Proxy < ActiveFedora::Base
     belongs_to :container, predicate: ::RDF::Vocab::ORE.proxyIn, class_name: 'ActiveFedora::Base'

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # in ./spec/spec_helper.rb
   # ``` require 'active_fedora/rspec_matchers' ```

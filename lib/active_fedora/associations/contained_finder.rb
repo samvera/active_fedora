@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations
   ##
   # Finds the objects which associate with a given record and are contained
@@ -43,7 +44,7 @@ module ActiveFedora::Associations
           [[:has_model, proxy_class.to_rdf_representation], [:proxyFor, record.id]]
         )
         rows = ActiveFedora::SolrService::MAX_ROWS
-        ActiveFedora::SolrService.query(query, fl: 'id', rows: rows).map(&:rdf_uri)
+        ActiveFedora::SolrService.query(query, fl: 'id', rows:).map(&:rdf_uri)
       end
   end
 end

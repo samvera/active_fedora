@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Inheritance
     extend ActiveSupport::Concern
@@ -14,9 +15,7 @@ module ActiveFedora
       def base_class
         return File if self <= File
 
-        unless self <= Base
-          raise ActiveFedoraError, "#{name} doesn't belong in a hierarchy descending from ActiveFedora"
-        end
+        raise ActiveFedoraError, "#{name} doesn't belong in a hierarchy descending from ActiveFedora" unless self <= Base
 
         if self == Base || superclass == Base || superclass.abstract_class?
           self

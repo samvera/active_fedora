@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe "rdf associations" do
@@ -5,6 +6,7 @@ describe "rdf associations" do
     before do
       class Foo < ActiveFedora::Base
       end
+
       class Library < ActiveFedora::Base
         has_and_belongs_to_many :foos, predicate: ::RDF::URI('http://example.com')
       end
@@ -38,8 +40,10 @@ describe "rdf associations" do
     before do
       class Foo < ActiveFedora::Base
       end
+
       class Bar < ActiveFedora::Base
       end
+
       class Library < ActiveFedora::Base
         has_and_belongs_to_many :foos, predicate: ::RDF::URI('http://example.com')
         has_and_belongs_to_many :bars, predicate: ::RDF::URI('http://example.com')

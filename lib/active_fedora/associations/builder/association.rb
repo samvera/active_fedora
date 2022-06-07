@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
-  class Association #:nodoc:
+  class Association # :nodoc:
     class << self
       attr_accessor :extensions
     end
@@ -36,7 +37,7 @@ module ActiveFedora::Associations::Builder
     def self.build_scope(scope, extension)
       new_scope = scope
 
-      new_scope = proc { instance_exec(&scope) } if scope && scope.arity.zero?
+      new_scope = proc { instance_exec(&scope) } if scope&.arity&.zero?
 
       new_scope = wrap_scope new_scope, extension if extension
 
@@ -114,9 +115,7 @@ module ActiveFedora::Associations::Builder
     end
 
     def self.check_dependent_options(dependent)
-      unless valid_dependent_options.include? dependent
-        raise ArgumentError, "The :dependent option must be one of #{valid_dependent_options}, but is :#{dependent}"
-      end
+      raise ArgumentError, "The :dependent option must be one of #{valid_dependent_options}, but is :#{dependent}" unless valid_dependent_options.include? dependent
     end
 
     def self.add_destroy_callbacks(model, reflection)

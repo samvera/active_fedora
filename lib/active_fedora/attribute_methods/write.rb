@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module AttributeMethods
     module Write
@@ -6,7 +7,7 @@ module ActiveFedora
 
           def define_method_attribute=(name)
             name = name.to_s
-            safe_name = name.unpack('h*'.freeze).first
+            safe_name = name.unpack('h*').first
             ActiveFedora::AttributeMethods::AttrNames.set_name_cache safe_name, name
 
             generated_attribute_methods.module_eval <<-STR, __FILE__, __LINE__ + 1

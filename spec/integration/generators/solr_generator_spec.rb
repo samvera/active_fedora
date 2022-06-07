@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 require 'generators/active_fedora/config/solr/solr_generator'
 

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
   class Orders < ActiveFedora::Associations::Builder::CollectionAssociation
     include ActiveFedora::AutosaveAssociation::AssociationBuilderExtension

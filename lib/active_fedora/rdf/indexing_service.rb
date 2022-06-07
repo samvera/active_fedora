@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::RDF
   # Responsible for generating the solr document (via #generate_solr_document) of the
   # given object.

@@ -1,7 +1,8 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Associations
     # Filters a DirectContainer relationship, returning the first item that matches the given :type
-    class DirectlyContainsOneAssociation < SingularAssociation #:nodoc:
+    class DirectlyContainsOneAssociation < SingularAssociation # :nodoc:
       # Finds objects contained by the container predicate (either the configured has_member_relation or ldp:contains)
       # TODO: Refactor this to use solr (for efficiency) instead of parsing the RDF graph.  Requires indexing ActiveFedora::File objects into solr, including their RDF.type and, if possible, the id of their container
       # See https://github.com/samvera/active_fedora/issues/1335

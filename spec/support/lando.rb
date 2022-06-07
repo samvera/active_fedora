@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 unless ENV["lando_env"]
   begin

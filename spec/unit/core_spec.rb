@@ -1,9 +1,11 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::Base do
   before do
     class Library < ActiveFedora::Base
     end
+
     class Book < ActiveFedora::Base
       belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
       property :title, predicate: ::RDF::Vocab::DC.title, multiple: false
@@ -11,7 +13,7 @@ describe ActiveFedora::Base do
     end
   end
 
-  subject(:book) { Book.new(library: library, title: "War and Peace", publisher: "Random House") }
+  subject(:book) { Book.new(library:, title: "War and Peace", publisher: "Random House") }
   let(:library) { Library.create }
 
   after do

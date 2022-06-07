@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Orders
     class CollectionProxy < ActiveFedora::Associations::CollectionProxy

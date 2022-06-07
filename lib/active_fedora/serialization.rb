@@ -1,4 +1,5 @@
-module ActiveFedora #:nodoc:
+# frozen_string_literal: true
+module ActiveFedora # :nodoc:
   # = Active Fedora Serialization
   module Serialization
     extend ActiveSupport::Concern

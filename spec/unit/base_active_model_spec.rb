@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::Base do
@@ -18,7 +19,7 @@ describe ActiveFedora::Base do
 
     describe "update_attributes" do
       it "sets attributes and save" do
-        history.update_attributes(fubar: "baz", duck: "Quack")
+        history.update(fubar: "baz", duck: "Quack")
         history.reload
         expect(history.fubar).to eq "baz"
         expect(history.duck).to eq "Quack"

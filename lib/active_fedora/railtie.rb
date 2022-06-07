@@ -1,10 +1,9 @@
+# frozen_string_literal: true
 module ActiveFedora
   class Railtie < Rails::Railtie
     config.app_middleware.insert_after ::ActionDispatch::Callbacks,
                                        ActiveFedora::LdpCache
-    config.action_dispatch.rescue_responses.merge!(
-      "ActiveFedora::ObjectNotFoundError" => :not_found
-    )
+    config.action_dispatch.rescue_responses["ActiveFedora::ObjectNotFoundError"] = :not_found
 
     config.eager_load_namespaces << ActiveFedora
 

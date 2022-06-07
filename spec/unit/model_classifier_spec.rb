@@ -1,11 +1,14 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::ModelClassifier do
   module ParentClass
     class SiblingClass
     end
+
     class OtherSiblingClass
     end
+
     class SubclassClass < SiblingClass
     end
   end

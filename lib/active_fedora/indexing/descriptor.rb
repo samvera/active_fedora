@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Indexing
     class Descriptor
@@ -37,7 +38,7 @@ module ActiveFedora
         end
 
         def converter(field_type)
-          @converter.call(field_type) if @converter
+          @converter&.call(field_type)
         end
     end
   end

@@ -1,7 +1,8 @@
+# frozen_string_literal: true
 module ActiveFedora
   # = Active Fedora Has And Belongs To Many Association
   module Associations
-    class HasAndBelongsToManyAssociation < CollectionAssociation #:nodoc:
+    class HasAndBelongsToManyAssociation < CollectionAssociation # :nodoc:
       def initialize(owner, reflection)
         super
       end
@@ -11,7 +12,7 @@ module ActiveFedora
           if force
             record.save!
           else
-            return false unless record.save(validate: validate)
+            return false unless record.save(validate:)
           end
         end
         owner[reflection.foreign_key] ||= []

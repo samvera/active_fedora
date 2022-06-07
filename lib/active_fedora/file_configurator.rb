@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'deprecation'
 require 'erb'
 require 'yaml'
@@ -54,9 +55,7 @@ module ActiveFedora
     end
 
     def init(options = {})
-      if options.is_a?(String)
-        raise ArgumentError, "Calling ActiveFedora.init with a path as an argument has been removed.  Use ActiveFedora.init(:fedora_config_path=>#{options})"
-      end
+      raise ArgumentError, "Calling ActiveFedora.init with a path as an argument has been removed.  Use ActiveFedora.init(:fedora_config_path=>#{options})" if options.is_a?(String)
       reset!
       @config_options = options
       load_configs
@@ -181,15 +180,13 @@ module ActiveFedora
         return config_path if ::File.file? config_path
       end
 
-      if ::File.file? "#{Dir.getwd}/config/#{config_type}.yml"
-        return "#{Dir.getwd}/config/#{config_type}.yml"
-      end
+      return "#{Dir.getwd}/config/#{config_type}.yml" if ::File.file? "#{Dir.getwd}/config/#{config_type}.yml"
 
       # Last choice, check for the default config file
       config_path = ::File.join(ActiveFedora.root, "config", "#{config_type}.yml")
       if ::File.file? config_path
         ActiveFedora::Base.logger.warn "Using the default #{config_type}.yml that comes with active-fedora.  If you want to override this, pass the path to #{config_type}.yml to ActiveFedora - ie. ActiveFedora.init(:#{config_type}_config_path => '/path/to/#{config_type}.yml') - or set Rails.root and put #{config_type}.yml into \#{Rails.root}/config."
-        return config_path
+        config_path
       else
         raise ConfigurationError, "Couldn't load #{config_type} config file!"
       end

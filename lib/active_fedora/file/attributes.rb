@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::File::Attributes
   delegate :mime_type=, to: :metadata
 
@@ -46,12 +47,12 @@ module ActiveFedora::File::Attributes
 
   def create_date
     created = metadata.attributes["http://fedora.info/definitions/v4/repository#created"]
-    created && created.first
+    created&.first
   end
 
   def modified_date
     modified = metadata.attributes["http://fedora.info/definitions/v4/repository#lastModified"]
-    modified && modified.first
+    modified&.first
   end
 
   private

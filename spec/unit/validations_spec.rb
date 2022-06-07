@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::Base do
@@ -15,6 +16,7 @@ describe ActiveFedora::Base do
       def before_validation_callback
         # no-op
       end
+
       def after_validation_callback
         # no-op
       end

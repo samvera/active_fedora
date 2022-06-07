@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::Base do
@@ -107,6 +108,7 @@ describe ActiveFedora::Base do
       class ExampleSchema < ActiveTriples::Schema
         property :title, predicate: RDF::Vocab::DC.title
       end
+
       class ExampleBase < ActiveFedora::Base
         apply_schema ExampleSchema, ActiveFedora::SchemaIndexingStrategy.new(ActiveFedora::Indexers::GlobalIndexer.new(:symbol))
       end
@@ -176,6 +178,7 @@ describe ActiveFedora::Base do
     before do
       class TestResource < ActiveTriples::Resource
       end
+
       class TestBase < ActiveFedora::Base
         def self.resource_class_factory
           TestResource

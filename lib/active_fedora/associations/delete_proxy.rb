@@ -1,7 +1,8 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations
   class DeleteProxy
     def self.call(proxy_ids:, proxy_class:)
-      new(proxy_ids: proxy_ids, proxy_class: proxy_class).run
+      new(proxy_ids:, proxy_class:).run
     end
     attr_reader :proxy_ids, :proxy_class
 

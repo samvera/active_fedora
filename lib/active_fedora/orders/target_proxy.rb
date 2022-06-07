@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Orders
     class TargetProxy
@@ -32,7 +33,7 @@ module ActiveFedora
       # the index is out of range.
       def delete_at(loc)
         result = association.delete_at(loc)
-        result.target if result
+        result&.target
       end
 
       # Deletes all items from self that are equal to obj.

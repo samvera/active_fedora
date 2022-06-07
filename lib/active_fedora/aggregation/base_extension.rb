@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Aggregation
   module BaseExtension
     def ordered_by
@@ -10,7 +11,7 @@ module ActiveFedora::Aggregation
         if id.present?
           query = "{!join from=proxy_in_ssi to=id}ordered_targets_ssim:#{id}"
           rows = ActiveFedora::SolrService::MAX_ROWS
-          ActiveFedora::SolrService.query(query, rows: rows).map { |x| x["id"] }
+          ActiveFedora::SolrService.query(query, rows:).map { |x| x["id"] }
         else
           []
         end

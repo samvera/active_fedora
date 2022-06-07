@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 @@last_id = 0
 
@@ -5,7 +6,7 @@ describe ActiveFedora::Base do
   describe "descendant_uris" do
     before do
       ids.each do |id|
-        described_class.create id: id
+        described_class.create id:
       end
     end
 

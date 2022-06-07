@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module RDF
     #
@@ -10,7 +11,7 @@ module ActiveFedora
     module Persistence
       extend ActiveSupport::Concern
 
-      BASE_URI = 'info:fedora/'.freeze
+      BASE_URI = 'info:fedora/'
 
       included do
         configure base_uri: BASE_URI unless base_uri
@@ -19,7 +20,7 @@ module ActiveFedora
 
       # Overrides ActiveTriples::Resource
       def persist!
-        return false unless datastream && datastream.respond_to?(:save)
+        return false unless datastream&.respond_to?(:save)
         @persisted ||= datastream.save
       end
 

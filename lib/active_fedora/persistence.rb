@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # = Active Fedora Persistence
   module Persistence

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'rdf/vocab'
 
 module ActiveFedora
@@ -77,7 +78,7 @@ module ActiveFedora
 
         # @return a Hash of options suitable for passing to ActiveTriples::Base.configure
         def active_triple_options
-          { type: type, rdf_label: rdf_label }
+          { type:, rdf_label: }
         end
     end
   end

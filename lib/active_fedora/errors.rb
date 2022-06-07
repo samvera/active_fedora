@@ -1,4 +1,5 @@
-module ActiveFedora #:nodoc:
+# frozen_string_literal: true
+module ActiveFedora # :nodoc:
   # Generic ActiveFedora exception class
   class ActiveFedoraError < StandardError
   end
@@ -37,7 +38,7 @@ module ActiveFedora #:nodoc:
   class AssociationTypeMismatch < ActiveFedoraError
   end
 
-  class AssociationNotFoundError < ConfigurationError #:nodoc:
+  class AssociationNotFoundError < ConfigurationError # :nodoc:
   end
 
   # Raised when an object is loaded from Fedora by an incompatible class
@@ -47,7 +48,7 @@ module ActiveFedora #:nodoc:
   # This error is raised when trying to destroy a parent instance in N:1 or 1:1 associations
   # (has_many, has_one) when there is at least 1 child associated instance.
   # ex: if @project.tasks.size > 0, DeleteRestrictionError will be raised when trying to destroy @project
-  class DeleteRestrictionError < ActiveFedoraError #:nodoc:
+  class DeleteRestrictionError < ActiveFedoraError # :nodoc:
     def initialize(name = nil)
       if name
         super("Cannot delete record because of dependent #{name}")

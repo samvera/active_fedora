@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::RDF
   class ValueCaster
     def initialize(value)

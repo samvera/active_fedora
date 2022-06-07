@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora do
@@ -11,7 +12,7 @@ describe ActiveFedora do
   subject(:test_object) { ActiveFedora::Base.new }
 
   describe ".id_field" do
-    let(:field) { "MY_SAMPLE_ID".freeze }
+    let(:field) { "MY_SAMPLE_ID" }
     before do
       allow(described_class).to receive(:id_field).and_return(field)
     end

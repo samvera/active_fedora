@@ -1,9 +1,10 @@
+# frozen_string_literal: true
 require "spec_helper"
 require 'ostruct'
 require "active_fedora/rspec_matchers/have_many_associated_active_fedora_objects_matcher"
 
 describe RSpec::Matchers, ".have_many_associated_active_fedora_objects" do
-  let(:open_struct) { OpenStruct.new(id: id) }
+  let(:open_struct) { OpenStruct.new(id:) }
   let(:id) { 123 }
   let(:object1) { Object.new }
   let(:object2) { Object.new }

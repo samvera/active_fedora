@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::File::Streaming
   # @param range [String] the Range HTTP header
   # @return [Stream] an object that responds to each

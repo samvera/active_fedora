@@ -1,6 +1,7 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Associations
-    class AssociationScope #:nodoc:
+    class AssociationScope # :nodoc:
       def self.scope(association)
         new(association).scope
       end

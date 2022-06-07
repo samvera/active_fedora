@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 require 'timeout'
 
@@ -17,7 +18,7 @@ describe "fedora_solr_sync_issues" do
     Object.send(:remove_const, :ParentThing)
   end
 
-  subject(:child) { ChildThing.create parent: parent }
+  subject(:child) { ChildThing.create parent: }
   let(:parent) { ParentThing.create }
 
   before { Ldp::Resource::RdfSource.new(ActiveFedora.fedora.connection, child.uri).delete }

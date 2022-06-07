@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module LoadableFromJson
     extend ActiveSupport::Concern
@@ -147,8 +148,8 @@ module ActiveFedora
       # @param attrs [Hash] attributes read from Solr
       # @return [Hash] the adapted attributes
       def adapt_attributes(attrs)
-        self.class.attribute_names.each_with_object({}) do |attribute_name, new_attributes|
-          new_attributes[attribute_name] = adapt_attribute_value(attrs, attribute_name)
+        self.class.attribute_names.index_with do |attribute_name|
+          adapt_attribute_value(attrs, attribute_name)
         end
       end
 
@@ -194,7 +195,7 @@ module ActiveFedora
       # @return [Object] the adapted value
       def adapt_single_attribute_value(value, attribute_name)
         if value && date_attribute?(attribute_name)
-          return nil unless value.present?
+          return nil if value.blank?
           DateTime.parse(value)
         else
           value

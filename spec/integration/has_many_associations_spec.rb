@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::Associations::HasManyAssociation do
@@ -124,7 +125,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
     end
 
     let(:library) { Library.create }
-    let(:book) { Book.new(library: library) }
+    let(:book) { Book.new(library:) }
 
     it "has the relationship available in after_save" do
       book.save!
@@ -169,6 +170,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       class Permissionable1 < ActiveFedora::Base
         has_many :permissions, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, inverse_of: :access_to
       end
+
       class Permissionable2 < ActiveFedora::Base
         has_many :permissions, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, inverse_of: :access_to
       end
@@ -248,6 +250,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       class Item < ActiveFedora::Base
         has_many :components
       end
+
       class Component < ActiveFedora::Base
         belongs_to :item, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
       end
@@ -263,8 +266,8 @@ describe ActiveFedora::Associations::HasManyAssociation do
 
     context "when the relationship is set by an id" do
       let(:item_id) { item.id }
-      let!(:component1) { Component.create(item_id: item_id) }
-      let!(:component2) { Component.create(item_id: item_id) }
+      let!(:component1) { Component.create(item_id:) }
+      let!(:component2) { Component.create(item_id:) }
 
       it "sets the inverse relationship" do
         expect(component1.item.components).to match_array [component1, component2]
@@ -314,6 +317,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
             has_many :components
             property :title, predicate: ::RDF::Vocab::DC.title
           end
+
           class Component < ActiveFedora::Base
             belongs_to :item, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
             property :description, predicate: ::RDF::Vocab::DC.description
@@ -351,6 +355,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
               has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
               has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
             end
+
             class Text < ActiveFedora::Base
               has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
             end
@@ -422,7 +427,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       end
     end
     let(:book) { Book.create! }
-    let!(:permissions) { Permission.create!(book: book) }
+    let!(:permissions) { Permission.create!(book:) }
 
     after do
       Object.send(:remove_const, :Book)

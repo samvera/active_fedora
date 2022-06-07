@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   class FileRelation < Relation
     def load_from_fedora(id, _)

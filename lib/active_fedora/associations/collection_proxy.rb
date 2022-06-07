@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# frozen_string_literal: true
 module ActiveFedora
   module Associations
     # Association proxies in Active Fedora are middlemen between the object that

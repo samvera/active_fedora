@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 RSpec.describe ActiveFedora::Orders::OrderedList do
@@ -188,7 +189,7 @@ RSpec.describe ActiveFedora::Orders::OrderedList do
       member = instance_double(ActiveFedora::Base)
       proxy_in = instance_double(ActiveFedora::Base, uri: RDF::URI("obj1"))
       600.times do
-        ordered_list.append_target member, proxy_in: proxy_in
+        ordered_list.append_target member, proxy_in:
       end
       expect(ordered_list.length).to eq 600
       expect(ordered_list.to_a.last.next).not_to eq nil

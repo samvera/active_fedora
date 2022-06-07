@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::AttachedFiles do
@@ -6,8 +7,10 @@ describe ActiveFedora::AttachedFiles do
     before do
       class Sample1 < ActiveFedora::File
       end
+
       class Sample2 < ActiveFedora::File
       end
+
       class FooHistory < ActiveFedora::Base
         has_subresource 'dsid', class_name: 'Sample2'
         has_subresource 'complex_ds', autocreate: true, class_name: 'Sample1'
@@ -104,7 +107,7 @@ describe ActiveFedora::AttachedFiles do
 
       expect(m1).to receive(:serialize!)
       expect(m2).to receive(:serialize!)
-      allow(af_base).to receive(:declared_attached_files).and_return(m1: m1, m2: m2)
+      allow(af_base).to receive(:declared_attached_files).and_return(m1:, m2:)
       af_base.serialize_attached_files
     end
   end

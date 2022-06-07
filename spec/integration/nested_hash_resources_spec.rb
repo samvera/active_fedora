@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe "nested hash resources" do
@@ -18,6 +19,7 @@ describe "nested hash resources" do
         parent
       end
     end
+
     class ExampleOwner < ActiveFedora::Base
       property :relation, predicate: ::RDF::Vocab::DC.relation, class_name: NestedResource
       accepts_nested_attributes_for :relation

@@ -1,6 +1,7 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Associations
-    class HasManyAssociation < CollectionAssociation #:nodoc:
+    class HasManyAssociation < CollectionAssociation # :nodoc:
       def initialize(owner, reflection)
         super
       end
@@ -35,7 +36,7 @@ module ActiveFedora
           end
         elsif owner.persisted?
           inverse = reflection.inverse_of
-          if inverse && inverse.collection?
+          if inverse&.collection?
             record[inverse.foreign_key] ||= []
             record[inverse.foreign_key] += [owner.id]
           elsif inverse && inverse.klass == ActiveFedora::Base
@@ -51,9 +52,9 @@ module ActiveFedora
         set_inverse_instance(record)
 
         if raise
-          record.save!(validate: validate)
+          record.save!(validate:)
         else
-          record.save(validate: validate)
+          record.save(validate:)
         end
       end
 
@@ -65,7 +66,7 @@ module ActiveFedora
         when :restrict_with_error
           unless empty?
             record = owner.class.human_attribute_name(reflection.name).downcase
-            owner.errors.add(:base, message || :'restrict_dependent_destroy.has_many', record: record)
+            owner.errors.add(:base, message || :'restrict_dependent_destroy.has_many', record:)
             throw(:abort)
           end
 

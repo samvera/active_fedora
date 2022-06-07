@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   ##
   # Used as an access method for associations on a model, given some
@@ -11,11 +12,11 @@ module ActiveFedora
     end
 
     def [](name)
-      association(name).reader if association(name)
+      association(name)&.reader
     end
 
     def []=(name, object)
-      association(name).writer(object) if association(name)
+      association(name)&.writer(object)
     end
 
     def association(name)
@@ -84,6 +85,7 @@ module ActiveFedora
       super
     end
   end
+
   ##
   # Represents the result of merging two association hashes.
   # @note As the keys can come from multiple models, the attributes become

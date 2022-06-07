@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   class Property
     attr_accessor :name, :instance_variable_name

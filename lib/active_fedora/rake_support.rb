@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # Starts a fedora server and a solr server on a random port and then
 # yields the passed block
 def with_test_server(&block)

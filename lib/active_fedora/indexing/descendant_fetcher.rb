@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Indexing
     # Finds all descendent URIs of a given repo URI (usually the base URI).
@@ -23,7 +24,7 @@ module ActiveFedora
       HAS_MODEL_PREDICATE = ActiveFedora::RDF::Fcrepo::Model.hasModel
 
       class_attribute :default_priority_models, instance_accessor: false
-      self.default_priority_models = %w(Hydra::AccessControl Hydra::AccessControl::Permissions).freeze
+      self.default_priority_models = %w[Hydra::AccessControl Hydra::AccessControl::Permissions].freeze
 
       attr_reader :uri, :priority_models
 
@@ -63,7 +64,7 @@ module ActiveFedora
           descendant_uri = uri.to_s
           self.class.new(
             descendant_uri,
-            priority_models: priority_models
+            priority_models:
           ).descendant_and_self_uris_partitioned_by_model.tap do |descendant_partitioned|
             descendant_partitioned.keys.each do |k|
               partitioned_uris[k] ||= []

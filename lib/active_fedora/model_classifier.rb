@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # Translate model names to classes
   class ModelClassifier
@@ -69,9 +70,9 @@ module ActiveFedora
       def class_exists?(class_name)
         return false if class_name.empty?
         klass = class_name.constantize
-        return klass.is_a?(Class)
+        klass.is_a?(Class)
       rescue NameError
-        return false
+        false
       end
   end
 end

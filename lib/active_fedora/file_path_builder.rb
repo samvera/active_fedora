@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   class FilePathBuilder
     # Builds a relative path for a file

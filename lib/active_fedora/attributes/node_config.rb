@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Attributes
   class NodeConfig < ActiveTriples::NodeConfig
     def multiple?

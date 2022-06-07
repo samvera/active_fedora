@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # This is the base class for ldp containers, it is not an ldp:BasicContainer
   class Container < ActiveFedora::Base
@@ -22,7 +23,7 @@ module ActiveFedora
     def self.find_or_initialize(id)
       find(id)
     rescue ActiveFedora::ObjectNotFoundError
-      new(id: id)
+      new(id:)
     end
 
     private

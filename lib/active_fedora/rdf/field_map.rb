@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::RDF
   # Transient class that maps solr field names, without their suffixes, to the values and behaviors that
   # are used to transforming them for insertion into the solr document.

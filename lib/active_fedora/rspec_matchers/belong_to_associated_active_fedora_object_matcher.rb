@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # RSpec matcher to spec delegations.
 RSpec::Matchers.define :belong_to_associated_active_fedora_object do |association_name|
   match do |subject|

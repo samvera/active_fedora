@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # = Active Fedora RecordInvalid, adapted from Active Record
   #
@@ -14,7 +15,7 @@ module ActiveFedora
     def initialize(record)
       @record = record
       errors = @record.errors.full_messages.join(", ")
-      super(I18n.t("activefedora.errors.messages.record_invalid", errors: errors))
+      super(I18n.t("activefedora.errors.messages.record_invalid", errors:))
     end
   end
 

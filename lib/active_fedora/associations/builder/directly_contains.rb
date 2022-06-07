@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
-  class DirectlyContains < CollectionAssociation #:nodoc:
+  class DirectlyContains < CollectionAssociation # :nodoc:
     def self.macro
       :directly_contains
     end

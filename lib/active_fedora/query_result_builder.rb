@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module QueryResultBuilder
     def self.lazy_reify_solr_results(solr_results, opts = {})

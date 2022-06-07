@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'forwardable'
 module ActiveFedora::Indexing
   # This is a description of how properties should map to indexing strategies

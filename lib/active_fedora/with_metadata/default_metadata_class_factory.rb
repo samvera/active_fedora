@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # This builds classes for metadata nodes (nodes that describe a binary)
 module ActiveFedora::WithMetadata
   class DefaultMetadataClassFactory

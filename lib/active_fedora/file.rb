@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # An LDP NonRDFSource. The base class for a bytestream stored in the repository.
   class File
@@ -111,7 +112,7 @@ module ActiveFedora
     end
 
     def content_changed?
-      return true if new_record? && !local_or_remote_content(false).blank?
+      return true if new_record? && local_or_remote_content(false).present?
       local_or_remote_content(false) != @ds_content
     end
 
@@ -173,8 +174,8 @@ module ActiveFedora
       end
 
       def ldp_headers
-        headers = { 'Content-Type'.freeze => mime_type, 'Content-Length'.freeze => content.size.to_s }
-        headers['Content-Disposition'.freeze] = "attachment; filename=\"#{URI::DEFAULT_PARSER.escape(@original_name)}\"" if @original_name
+        headers = { 'Content-Type' => mime_type, 'Content-Length' => content.size.to_s }
+        headers['Content-Disposition'] = "attachment; filename=\"#{URI::DEFAULT_PARSER.escape(@original_name)}\"" if @original_name
         headers
       end
 

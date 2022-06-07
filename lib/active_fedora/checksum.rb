@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   class Checksum
     attr_reader :uri, :value, :algorithm

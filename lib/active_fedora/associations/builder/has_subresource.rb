@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
-  class HasSubresource < SingularAssociation #:nodoc:
+  class HasSubresource < SingularAssociation # :nodoc:
     def self.macro
       :has_subresource
     end
