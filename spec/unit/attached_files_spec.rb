@@ -107,7 +107,7 @@ describe ActiveFedora::AttachedFiles do
 
       expect(m1).to receive(:serialize!)
       expect(m2).to receive(:serialize!)
-      allow(af_base).to receive(:declared_attached_files).and_return(m1:, m2:)
+      allow(af_base).to receive(:declared_attached_files).and_return(m1: m1, m2: m2)
       af_base.serialize_attached_files
     end
   end

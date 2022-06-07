@@ -15,7 +15,7 @@ module ActiveFedora
     def initialize(record)
       @record = record
       errors = @record.errors.full_messages.join(", ")
-      super(I18n.t("activefedora.errors.messages.record_invalid", errors:))
+      super(I18n.t("activefedora.errors.messages.record_invalid", errors: errors))
     end
   end
 

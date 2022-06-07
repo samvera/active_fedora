@@ -83,7 +83,7 @@ module ActiveFedora
       #   :commit => commits immediately
       #   :softCommit => commit to memory, but don't flush to disk
       def add(doc, params = {})
-        SolrService.instance.conn.add(doc, params:)
+        SolrService.instance.conn.add(doc, params: params)
       end
 
       def commit

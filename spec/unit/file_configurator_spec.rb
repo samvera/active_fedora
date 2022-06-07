@@ -241,7 +241,7 @@ describe ActiveFedora::FileConfigurator do
     after(:all) do
       config_file = File.join(File.dirname(__FILE__), "..", "..", "config", "fedora.yml")
       environment = "test"
-      ActiveFedora.init(environment:, fedora_config_path: config_file)
+      ActiveFedora.init(environment: environment, fedora_config_path: config_file)
     end
 
     it "can tell its config paths" do

@@ -8,7 +8,7 @@ describe ActiveFedora::AssociationHash do
   let(:reflections) { { foo: association } }
   let(:reader) { double("reader") }
   let(:writer) { double("writer") }
-  let(:association) { double(reader:, writer:) }
+  let(:association) { double(reader: reader, writer: writer) }
 
   before do
     allow(model).to receive(:association).with(:foo).and_return(association)

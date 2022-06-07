@@ -4,8 +4,8 @@ require 'ostruct'
 require "active_fedora/rspec_matchers/have_predicate_matcher"
 
 describe RSpec::Matchers, ".have_predicate" do
-  let(:open_struct) { OpenStruct.new(id:) }
   let(:id) { 123 }
+  let(:open_struct) { OpenStruct.new(id: id) }
   let(:object1) { Object.new }
   let(:object2) { Object.new }
   let(:object3) { Object.new }

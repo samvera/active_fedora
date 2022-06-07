@@ -25,7 +25,7 @@ describe ActiveFedora::QueryResultBuilder do
         expect(AudioRecord).to receive(:find).with("my:_ID1_", cast: true)
         expect(AudioRecord).to receive(:find).with("my:_ID2_", cast: true)
         expect(AudioRecord).to receive(:find).with("my:_ID3_", cast: true)
-        described_class.lazy_reify_solr_results(@sample_solr_hits).each { |r| r }
+        described_class.lazy_reify_solr_results(@sample_solr_hits).each
       end
     end
   end

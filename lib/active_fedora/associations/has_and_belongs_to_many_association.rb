@@ -12,7 +12,7 @@ module ActiveFedora
           if force
             record.save!
           else
-            return false unless record.save(validate:)
+            return false unless record.save(validate: validate)
           end
         end
         owner[reflection.foreign_key] ||= []

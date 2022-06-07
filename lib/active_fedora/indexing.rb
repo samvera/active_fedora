@@ -110,7 +110,7 @@ module ActiveFedora
             batch << ActiveFedora::Base.find(ActiveFedora::Base.uri_to_id(uri)).to_solr
 
             if (batch.count % batch_size).zero?
-              SolrService.add(batch, softCommit:)
+              SolrService.add(batch, softCommit: softCommit)
               batch.clear
             end
 
@@ -118,7 +118,7 @@ module ActiveFedora
           end
 
           if batch.present?
-            SolrService.add(batch, softCommit:)
+            SolrService.add(batch, softCommit: softCommit)
             batch.clear
           end
 

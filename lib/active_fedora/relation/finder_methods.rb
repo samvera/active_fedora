@@ -103,7 +103,7 @@ module ActiveFedora
     # @param [Hash] opts
     def search_by_id(id, opts = {})
       opts[:rows] = 1
-      result = search_with_conditions({ id: }, opts)
+      result = search_with_conditions({ id: id }, opts)
       raise ActiveFedora::ObjectNotFoundError, "Object '#{id}' not found in solr" if result.empty?
       result.first
     end

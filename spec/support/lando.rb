@@ -6,8 +6,8 @@ unless ENV["lando_env"]
     lando_services.each do |service|
       urls = service[:urls]
       unless urls.empty?
-        value = urls.first
-        parsed = URI.parse(value)
+        url = urls.first
+        parsed = URI.parse(url)
         ENV["lando_#{service[:service]}_conn_host"] = parsed.host
         ENV["lando_#{service[:service]}_conn_port"] = parsed.port.to_s
       end

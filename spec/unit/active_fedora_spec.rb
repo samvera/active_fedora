@@ -23,13 +23,13 @@ describe ActiveFedora do
 
     it "connects OK" do
       expect(ActiveFedora::Base.logger).to_not receive(:warn)
-      ActiveFedora::Fedora.new(url: good_url, base_path: '/test', user:, password:)
+      ActiveFedora::Fedora.new(url: good_url, base_path: '/test', user: user, password: password)
     end
 
     it "does not connect and warn" do
       expect(ActiveFedora::Base.logger).to receive(:warn)
       expect {
-        ActiveFedora::Fedora.new(url: bad_url, base_path: '/test', user:, password:).connection.head
+        ActiveFedora::Fedora.new(url: bad_url, base_path: '/test', user: user, password: password).connection.head
       }.to raise_error Ldp::HttpError
     end
   end
@@ -101,7 +101,7 @@ describe ActiveFedora do
             allow(File).to receive(:open).with(fedora_config_path).and_return(fedora_config)
             allow(File).to receive(:open).with(solr_config_path).and_return(solr_config)
 
-            described_class.init(fedora_config_path:, solr_config_path:)
+            described_class.init(fedora_config_path: fedora_config_path, solr_config_path: solr_config_path)
             expect(described_class.solr.class).to eq ActiveFedora::SolrService
           end
         end

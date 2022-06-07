@@ -338,7 +338,7 @@ module ActiveFedora
         #   end
         def filters_association(extending_from, options = {})
           name = options.delete(:as)
-          Builder::Filter.build(self, name, options.merge(extending_from:))
+          Builder::Filter.build(self, name, options.merge(extending_from: extending_from))
         end
       end
   end

@@ -13,7 +13,7 @@ describe ActiveFedora::Base do
     end
   end
 
-  subject(:book) { Book.new(library:, title: "War and Peace", publisher: "Random House") }
+  subject(:book) { Book.new(library: library, title: "War and Peace", publisher: "Random House") }
   let(:library) { Library.create }
 
   after do

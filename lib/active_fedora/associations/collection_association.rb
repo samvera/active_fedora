@@ -254,7 +254,7 @@ module ActiveFedora
         return [] if finder_query.empty?
         rows = opts.delete(:rows) { count }
         return [] if rows.zero?
-        SolrService.query(finder_query, { rows: }.merge(opts))
+        SolrService.query(finder_query, { rows: rows }.merge(opts))
       end
 
       def add_to_target(record, skip_callbacks = false)

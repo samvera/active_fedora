@@ -47,14 +47,14 @@ module ActiveFedora
         end
       end
 
-      def insert_record(record, validate = true, raise = false)
+      def insert_record(record, validate = true, raise_error = false)
         set_owner_attributes(record)
         set_inverse_instance(record)
 
-        if raise
-          record.save!(validate:)
+        if raise_error
+          record.save!(validate: validate)
         else
-          record.save(validate:)
+          record.save(validate: validate)
         end
       end
 
@@ -66,7 +66,7 @@ module ActiveFedora
         when :restrict_with_error
           unless empty?
             record = owner.class.human_attribute_name(reflection.name).downcase
-            owner.errors.add(:base, message || :'restrict_dependent_destroy.has_many', record:)
+            owner.errors.add(:base, message || :'restrict_dependent_destroy.has_many', record: record)
             throw(:abort)
           end
 

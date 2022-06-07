@@ -3,7 +3,11 @@ require 'spec_helper'
 
 describe ActiveFedora::FileIO do
   # 300,000 byte test string
-  test_file = (0..300_000).reduce('') do |s, c| s << (c % 256).chr end
+  test_file = (0..300_000).reduce('') do |s, c|
+    output = s.dup
+    output << (c % 256).chr
+    output
+  end
 
   let(:file_contents) { test_file }
   let(:fedora_file) {
