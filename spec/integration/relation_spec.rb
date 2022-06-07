@@ -17,12 +17,18 @@ describe ActiveFedora::Base do
 
   subject(:libraries) { Library.all }
 
+  before do
+    libraries.destroy_all
+  end
+
   it "is a relation" do
     expect(libraries.class).to be ActiveFedora::Relation
   end
 
   it { is_expected.to respond_to(:each_with_index) }
+
   it { expect(libraries.any?).to eq false }
+
   it { is_expected.to be_blank }
   it { is_expected.to be_empty }
   it { is_expected.not_to be_present }
