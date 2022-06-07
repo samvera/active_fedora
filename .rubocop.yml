@@ -1,18 +1,29 @@
-require: rubocop-rspec
+require:
+  - rubocop-performance
+  - rubocop-rails
+  - rubocop-rake
+  - rubocop-rspec
+
+inherit_gem:
+  bixby: bixby_default.yml
 
 inherit_from:
-- .rubocop_todo.yml
+  - .rubocop_todo.yml
 
 AllCops:
-  TargetRubyVersion: 2.2
+  TargetRubyVersion: 3.2
   DisplayCopNames: true
   Include:
     - '**/Rakefile'
+    - 'lib/**/*.rb'
+    - 'spec/**/*.rb'
   Exclude:
     - 'script/**/*'
     - 'vendor/**/*'
+    - 'lib/generators/active_fedora/config/fedora/templates/**/*'
+    - 'lib/generators/active_fedora/config/solr/templates/**/*'
 
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Exclude:
     - 'spec/unit/**/*'
     - 'spec/integration/**/*'
@@ -33,26 +44,7 @@ Metrics/BlockNesting:
     - 'lib/active_fedora/autosave_association.rb'
     - 'lib/active_fedora/associations/has_many_association.rb'
 
-Metrics/CyclomaticComplexity:
-  Exclude:
-    - 'lib/active_fedora.rb'
-    - 'lib/active_fedora/core.rb'
-    - 'lib/active_fedora/reflection.rb'
-    - 'lib/active_fedora/relation/finder_methods.rb'
-    - 'lib/active_fedora/query_result_builder.rb'
-    - 'lib/active_fedora/nested_attributes.rb'
-    - 'lib/active_fedora/autosave_association.rb'
-    - 'lib/active_fedora/associations/has_many_association.rb'
-    - 'lib/active_fedora/associations/has_and_belongs_to_many_association.rb'
-    - 'lib/active_fedora/associations/builder/indirectly_contains.rb'
-    - 'lib/active_fedora/associations/builder/directly_contains_one.rb'
-    - 'lib/active_fedora/file_configurator.rb'
-    - 'lib/active_fedora/file.rb'
-    - 'lib/active_fedora/attribute_methods.rb'
-    - 'lib/active_fedora/scoping/named.rb'
-    - 'lib/active_fedora/indexing/field_mapper.rb'
-    - 'lib/active_fedora/indexing/suffix.rb'
-    - 'lib/active_fedora/inheritance.rb'
+
 
 Metrics/PerceivedComplexity:
   Exclude:
@@ -173,7 +165,7 @@ Style/Lambda:
     - 'spec/**/*'
 
 Layout/IndentationConsistency:
-  EnforcedStyle: rails
+  EnforcedStyle: indented_internal_methods
 
 Style/CollectionMethods:
   PreferredMethods:
@@ -223,22 +215,22 @@ Style/ZeroLengthPredicate:
   Exclude:
     - 'lib/active_fedora/file/attributes.rb'
 
-Performance/RedundantMerge:
-  Exclude:
-    - 'lib/active_fedora/railtie.rb'
+      #Performance/RedundantMerge:
+      #Exclude:
+      #- 'lib/active_fedora/railtie.rb'
 
-Rails:
-  Enabled: true
+      #Rails:
+      #Enabled: true
 
-Rails/Output:
-  Exclude:
-    - 'lib/generators/**/*'
+      #Rails/Output:
+      #Exclude:
+      #- 'lib/generators/**/*'
 
-Rails/Date:
-  Enabled: false
+      #Rails/Date:
+      #Enabled: false
 
-Rails/TimeZone:
-  Enabled: false
+      #Rails/TimeZone:
+      #Enabled: false
 
 RSpec/AnyInstance:
   Enabled: false

@@ -32,6 +32,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency "psych", "< 4" # Restricted because 4.0+ do not work with rubocop 0.56.x
   s.add_development_dependency "rails"
   s.add_development_dependency "rake"
+  s.add_development_dependency "rubocop-performance"
+  s.add_development_dependency "rubocop-rails"
+  s.add_development_dependency "rubocop-rake"
   s.add_development_dependency "rspec", "~> 3.5"
   s.add_development_dependency "rspec-its"
   s.add_development_dependency "simplecov", '~> 0.8'
