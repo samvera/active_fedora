@@ -45,7 +45,8 @@ module ActiveFedora
     def read(amount = nil, buf = nil)
       raise(IOError, "closed stream") if @closed
 
-      buf ||= ''.force_encoding("ASCII-8BIT")
+      new_buffer = ''.dup
+      buf ||= new_buffer.force_encoding("ASCII-8BIT")
       buf.clear
 
       if amount.nil?

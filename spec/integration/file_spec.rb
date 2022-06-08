@@ -176,7 +176,10 @@ describe ActiveFedora::File do
             test_object.add_file('one1two2threfour', path: 'webm', mime_type: 'video/webm')
             test_object.save!
           end
-          subject { str = ''; test_object.webm.stream(range).each { |chunk| str << chunk }; str }
+          subject do
+            str = ''.dup
+            test_object.webm.stream(range).each { |chunk| str << chunk }; str
+          end
           context "whole thing" do
             let(:range) { 'bytes=0-15' }
             it { is_expected.to eq 'one1two2threfour' }
