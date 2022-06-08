@@ -96,23 +96,23 @@ module ActiveFedora
 
           raise "Not Implemented" if method == :delete_all # update_counter(-scope.delete_all)
 
-          if reflection.inverse_of # Can't get an inverse when class_name: 'ActiveFedora::Base' is supplied
-            inverse = reflection.inverse_of
-            records.each do |record|
-              next unless record.persisted?
-              if inverse.collection?
-                # Remove from a has_and_belongs_to_many
-                record.association(inverse.name).delete(@owner)
-              elsif inverse.klass == ActiveFedora::Base
-                record[inverse.foreign_key] = nil
-              else
-                # Remove from a belongs_to
-                record[reflection.foreign_key] = nil
-              end
-              # Check to see if the object still exists (may be already deleted).
-              # In Rails, they do this with an update_all to avoid callbacks and validations, we may need the same.
-              record.save! if record.class.exists?(record.id)
+          return unless reflection.inverse_of # Can't get an inverse when class_name: 'ActiveFedora::Base' is supplied
+
+          inverse = reflection.inverse_of
+          records.each do |record|
+            next unless record.persisted?
+            if inverse.collection?
+              # Remove from a has_and_belongs_to_many
+              record.association(inverse.name).delete(@owner)
+            elsif inverse.klass == ActiveFedora::Base
+              record[inverse.foreign_key] = nil
+            else
+              # Remove from a belongs_to
+              record[reflection.foreign_key] = nil
             end
+            # Check to see if the object still exists (may be already deleted).
+            # In Rails, they do this with an update_all to avoid callbacks and validations, we may need the same.
+            record.save! if record.class.exists?(record.id)
           end
 
           # update_counter(-scope.update_all(reflection.foreign_key => nil))

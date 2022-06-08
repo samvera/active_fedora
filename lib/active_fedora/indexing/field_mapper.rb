@@ -123,11 +123,9 @@ module ActiveFedora
         # search through the descriptors (class attribute) until a module is found that responds to index_type, then call it.
         def index_type_macro(index_type)
           klass = self.class.descriptors.find { |descriptor_klass| descriptor_klass.respond_to? index_type }
-          if klass
-            klass.send(index_type)
-          else
-            raise UnknownIndexMacro, "Unable to find `#{index_type}' in #{self.class.descriptors}"
-          end
+          raise(UnknownIndexMacro, "Unable to find `#{index_type}' in #{self.class.descriptors}") unless klass
+
+          klass.send(index_type)
         end
 
         def extract_type(value)

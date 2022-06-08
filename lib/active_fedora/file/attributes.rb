@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 module ActiveFedora::File::Attributes
   delegate :mime_type=, to: :metadata
+  attr_writer :original_name
 
   def assign_attributes(_)
     # nop
@@ -12,10 +13,6 @@ module ActiveFedora::File::Attributes
 
   def original_name
     @original_name ||= fetch_original_name
-  end
-
-  def original_name=(name)
-    @original_name = name
   end
 
   def digest
@@ -38,7 +35,7 @@ module ActiveFedora::File::Attributes
   end
 
   def has_content?
-    size && size > 0
+    size&.positive?
   end
 
   def empty?

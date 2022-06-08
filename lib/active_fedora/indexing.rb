@@ -122,10 +122,10 @@ module ActiveFedora
             batch.clear
           end
 
-          if final_commit
-            logger.debug "Solr hard commit..."
-            SolrService.commit
-          end
+          return unless final_commit
+
+          logger.debug "Solr hard commit..."
+          SolrService.commit
         end
 
         def descendant_uris(uri, exclude_uri: false)

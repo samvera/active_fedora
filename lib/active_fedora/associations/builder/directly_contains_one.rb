@@ -10,26 +10,27 @@ module ActiveFedora::Associations::Builder
     end
 
     def self.create_reflection(model, name, scope, options, extension = nil)
-      if options[:through]
-        inherit_options_from_association(model, options, options[:through])
-      else
-        raise ArgumentError, "you must specify a :through option on #{name}.  #{name} will use the container from that directly_contains association."
-      end
+      through = options[:through]
+      raise(ArgumentError, "you must specify a :through option on #{name}.  #{name} will use the container from that directly_contains association.") unless through
+
+      inherit_options_from_association(model, options, through)
 
       super
     end
 
     def self.validate_options(options)
       super
-      if options[:class_name] == "ActiveFedora::File"
-        raise ArgumentError, "You cannot set :class_name of #{name} to ActiveFedora::File because directly_contains_one needs to assert and read RDF.type assertions, which is not supported by ActiveFedora::File.  To make Files support RDF.type assertions, define a subclass of ActiveFedora::File and make it `include ActiveFedora::WithMetadata`. Otherwise, all subclasses of ActiveFedora::Base support RDF.type assertions."
-      elsif !options[:has_member_relation] && !options[:is_member_of_relation]
-        raise ArgumentError, "You must specify a :has_member_relation or :is_member_of_relation predicate for #{name}"
-      elsif !options[:has_member_relation].is_a?(RDF::URI) && !options[:is_member_of_relation].is_a?(RDF::URI)
-        raise ArgumentError, "Predicate must be a kind of RDF::URI"
-      end
+
+      raise(ArgumentError, "You cannot set :class_name of #{name} to ActiveFedora::File because directly_contains_one needs to assert and read RDF.type assertions, which is not supported by ActiveFedora::File.  To make Files support RDF.type assertions, define a subclass of ActiveFedora::File and make it `include ActiveFedora::WithMetadata`. Otherwise, all subclasses of ActiveFedora::Base support RDF.type assertions.") if options[:class_name] == "ActiveFedora::File"
+
+      has_member_relation = options[:has_member_relation]
+      is_member_of_relation = options[:is_member_of_relation]
+      raise ArgumentError, "You must specify a :has_member_relation or :is_member_of_relation predicate for #{name}" if !has_member_relation && !is_member_of_relation
+
+      raise ArgumentError, "Predicate must be a kind of RDF::URI" if !has_member_relation.is_a?(RDF::URI) && !is_member_of_relation.is_a?(RDF::URI)
 
       return if options[:type].is_a?(RDF::URI)
+
       raise ArgumentError, "You must specify a Type and it must be a kind of RDF::URI"
     end
 

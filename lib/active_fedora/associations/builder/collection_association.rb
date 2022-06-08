@@ -16,11 +16,11 @@ module ActiveFedora::Associations::Builder
     end
 
     def self.define_extensions(model, name)
-      if block_given?
-        extension_module_name = "#{model.name.demodulize}#{name.to_s.camelize}AssociationExtension"
-        extension = Module.new(&Proc.new)
-        model.parent.const_set(extension_module_name, extension)
-      end
+      return unless block_given?
+
+      extension_module_name = "#{model.name.demodulize}#{name.to_s.camelize}AssociationExtension"
+      extension = Module.new(&Proc.new)
+      model.parent.const_set(extension_module_name, extension)
     end
 
     def self.define_callback(model, callback_name, name, options)
@@ -45,7 +45,7 @@ module ActiveFedora::Associations::Builder
 
     def self.wrap_scope(scope, mod)
       if scope
-        if scope.arity > 0
+        if scope.arity.positive?
           proc { |owner| instance_exec(owner, &scope).extending(mod) }
         else
           proc { instance_exec(&scope).extending(mod) }

@@ -68,6 +68,13 @@ Metrics/PerceivedComplexity:
     - 'lib/active_fedora/indexing/field_mapper.rb'
     - 'lib/active_fedora/inheritance.rb'
 
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'lib/active_fedora/reflection.rb'
+    - 'lib/active_fedora/nested_attributes.rb'
+    - 'lib/active_fedora/indexing/field_mapper.rb'
+    - 'lib/active_fedora/autosave_association.rb'
+
 Metrics/ModuleLength:
   Exclude:
     - 'lib/active_fedora.rb'

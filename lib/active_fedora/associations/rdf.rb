@@ -10,7 +10,9 @@ module ActiveFedora
         deletions = current_objects - incoming_objects
         additions = incoming_objects - current_objects
         deletions.each { |object| owner.resource.delete([owner.rdf_subject, reflection.predicate, object]) }
+        # rubocop:disable Rails/SkipsModelValidations
         additions.each { |object| owner.resource.insert([owner.rdf_subject, reflection.predicate, object]) }
+        # rubocop:enable Rails/SkipsModelValidations
         owner.resource.persist!
         owner.send(:attribute_will_change!, reflection.name)
       end

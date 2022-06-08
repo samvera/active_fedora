@@ -4,12 +4,9 @@ module ActiveFedora
     class SingularAssociation < Association # :nodoc:
       # Implements the reader method, e.g. foo.bar for Foo.has_one :bar
       def reader(force_reload = false)
-        if force_reload
-          raise NotImplementedError, "Need to define the uncached method" # TODO
-          # klass.uncached { reload }
-        elsif !loaded? || stale_target?
-          reload
-        end
+        raise NotImplementedError, "Need to define the uncached method" if force_reload # TODO
+
+        reload if !loaded? || stale_target?
         target
       end
 

@@ -176,7 +176,7 @@ module ActiveFedora
       end
 
       if defined?(Rails.root)
-        config_path = "#{Rails.root}/config/#{config_type}.yml"
+        config_path = Rails.root.join('config', "#{config_type}.yml")
         return config_path if ::File.file? config_path
       end
 
@@ -184,12 +184,10 @@ module ActiveFedora
 
       # Last choice, check for the default config file
       config_path = ::File.join(ActiveFedora.root, "config", "#{config_type}.yml")
-      if ::File.file? config_path
-        ActiveFedora::Base.logger.warn "Using the default #{config_type}.yml that comes with active-fedora.  If you want to override this, pass the path to #{config_type}.yml to ActiveFedora - ie. ActiveFedora.init(:#{config_type}_config_path => '/path/to/#{config_type}.yml') - or set Rails.root and put #{config_type}.yml into \#{Rails.root}/config."
-        config_path
-      else
-        raise ConfigurationError, "Couldn't load #{config_type} config file!"
-      end
+      raise(ConfigurationError, "Couldn't load #{config_type} config file!") unless ::File.file?(config_path)
+
+      ActiveFedora::Base.logger.warn("Using the default #{config_type}.yml that comes with active-fedora.  If you want to override this, pass the path to #{config_type}.yml to ActiveFedora - ie. ActiveFedora.init(:#{config_type}_config_path => '/path/to/#{config_type}.yml') - or set Rails.root and put #{config_type}.yml into \#{Rails.root}/config.")
+      config_path
     end
 
     # Checks the existing fedora_config.path to see if there is a solr.yml there

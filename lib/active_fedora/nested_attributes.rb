@@ -198,11 +198,9 @@ module ActiveFedora
             association(association_name).initialize_attributes(existing_record)
           else
             method = "build_#{association_name}"
-            if respond_to?(method)
-              send(method, assignable_attributes)
-            else
-              raise ArgumentError, "Cannot build association `#{association_name}'. Are you trying to build a polymorphic one-to-one association?"
-            end
+            raise ArgumentError, "Cannot build association `#{association_name}'. Are you trying to build a polymorphic one-to-one association?" unless respond_to?(method)
+
+            send(method, assignable_attributes)
           end
         end
       end

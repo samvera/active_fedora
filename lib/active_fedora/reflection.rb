@@ -184,9 +184,9 @@ module ActiveFedora
       end
 
       def check_validity_of_inverse!
-        unless polymorphic?
-          raise InverseOfAssociationNotFoundError, self if has_inverse? && inverse_of.nil?
-        end
+        return if polymorphic?
+
+        raise InverseOfAssociationNotFoundError, self if has_inverse? && inverse_of.nil?
       end
 
       def alias_candidate(name)
@@ -220,6 +220,7 @@ module ActiveFedora
         @active_fedora = active_fedora
         @klass         = options[:anonymous_class]
         @automatic_inverse_of = nil
+        super
       end
 
       def autosave=(autosave)
