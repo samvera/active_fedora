@@ -125,7 +125,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
     end
 
     let(:library) { Library.create }
-    let(:book) { Book.new(library:) }
+    let(:book) { Book.new(library: library) }
 
     it "has the relationship available in after_save" do
       book.save!
@@ -266,8 +266,8 @@ describe ActiveFedora::Associations::HasManyAssociation do
 
     context "when the relationship is set by an id" do
       let(:item_id) { item.id }
-      let!(:component1) { Component.create(item_id:) }
-      let!(:component2) { Component.create(item_id:) }
+      let!(:component1) { Component.create(item_id: item_id) }
+      let!(:component2) { Component.create(item_id: item_id) }
 
       it "sets the inverse relationship" do
         expect(component1.item.components).to match_array [component1, component2]
@@ -427,7 +427,7 @@ describe ActiveFedora::Associations::HasManyAssociation do
       end
     end
     let(:book) { Book.create! }
-    let!(:permissions) { Permission.create!(book:) }
+    let!(:permissions) { Permission.create!(book: book) }
 
     after do
       Object.send(:remove_const, :Book)

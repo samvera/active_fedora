@@ -6,7 +6,7 @@ describe ActiveFedora::Base do
   describe "descendant_uris" do
     before do
       ids.each do |id|
-        described_class.create id:
+        described_class.create(id: id)
       end
     end
 

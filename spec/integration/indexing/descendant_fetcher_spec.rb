@@ -32,7 +32,7 @@ RSpec.describe ActiveFedora::Indexing::DescendantFetcher do
     end
     context 'when supplying priority models' do
       let(:priority_models) { ['Thing'] }
-      let(:fetcher) { described_class.new(uri, priority_models:) }
+      let(:fetcher) { described_class.new(uri, priority_models: priority_models) }
       it 'returns priority model uris first' do
         expect(fetcher.descendant_and_self_uris.slice(0..(thing_uris.count - 1))).to match_array(thing_uris)
       end
@@ -46,7 +46,7 @@ RSpec.describe ActiveFedora::Indexing::DescendantFetcher do
     end
     context 'when supplying priority models' do
       let(:priority_models) { ['Thing'] }
-      let(:fetcher) { described_class.new(uri, priority_models:) }
+      let(:fetcher) { described_class.new(uri, priority_models: priority_models) }
       it 'returns' do
         expect(fetcher.descendant_and_self_uris_partitioned.to_a).to match_array([[:priority, match_array(thing_uris)], [:other, match_array(source_uris)]])
       end

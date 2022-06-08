@@ -22,8 +22,8 @@ describe "NestedAttribute behavior" do
 
   let(:car_class) { Car }
   let(:car) { car_class.create }
-  let(:bar1) { Bar.create(car:) }
-  let(:bar2) { Bar.create(car:) }
+  let(:bar1) { Bar.create(car: car) }
+  let(:bar2) { Bar.create(car: car) }
 
   it "has _destroy" do
     expect(Bar.new._destroy).to be_nil
@@ -48,8 +48,8 @@ describe "NestedAttribute behavior" do
     let(:car_class) { CarAllBlank }
     after { Object.send(:remove_const, :CarAllBlank) }
     let(:car) { car_class.create }
-    let!(:bar1) { Bar.create(car:) }
-    let!(:bar2) { Bar.create(car:) }
+    let!(:bar1) { Bar.create(car: car) }
+    let!(:bar2) { Bar.create(car: car) }
 
     it "rejects attributes when all blank" do
       expect(car.bars.count).to eq 2

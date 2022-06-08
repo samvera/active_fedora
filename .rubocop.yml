@@ -263,3 +263,6 @@ RSpec/NotToNot:
 
 RSpec/MessageSpies:
   Enabled: false
+
+Style/HashSyntax:
+  Enabled: false

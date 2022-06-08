@@ -64,7 +64,7 @@ module ActiveFedora
           descendant_uri = uri.to_s
           self.class.new(
             descendant_uri,
-            priority_models:
+            priority_models: priority_models
           ).descendant_and_self_uris_partitioned_by_model.tap do |descendant_partitioned|
             descendant_partitioned.keys.each do |k|
               partitioned_uris[k] ||= []

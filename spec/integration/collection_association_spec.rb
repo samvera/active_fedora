@@ -20,8 +20,8 @@ describe ActiveFedora::Base do
   end
 
   describe "load_from_solr" do
-    let!(:book1) { Book.create!(library:) }
-    let!(:book2) { Book.create!(library:) }
+    let!(:book1) { Book.create!(library: library) }
+    let!(:book2) { Book.create!(library: library) }
 
     it "sets rows to count, if not specified" do
       expect(library.books(response_format: :solr).size).to eq 2
@@ -38,8 +38,8 @@ describe ActiveFedora::Base do
   end
 
   describe "#delete_all" do
-    let!(:book1) { Book.create!(library:) }
-    let!(:book2) { Book.create!(library:) }
+    let!(:book1) { Book.create!(library: library) }
+    let!(:book2) { Book.create!(library: library) }
     it "deletes em" do
       expect {
         library.books.delete_all
@@ -64,8 +64,8 @@ describe ActiveFedora::Base do
   end
 
   describe "#destroy_all" do
-    let!(:book1) { Book.create!(library:) }
-    let!(:book2) { Book.create!(library:) }
+    let!(:book1) { Book.create!(library: library) }
+    let!(:book2) { Book.create!(library: library) }
     it "deletes em" do
       expect {
         library.books.destroy_all
@@ -74,8 +74,8 @@ describe ActiveFedora::Base do
   end
 
   describe "#find" do
-    let!(:book1) { Book.create!(library:) }
-    let!(:book2) { Book.create!(library:) }
+    let!(:book1) { Book.create!(library: library) }
+    let!(:book2) { Book.create!(library: library) }
     it "finds the record that matches" do
       expected = library.books.find(book1.id)
       expect(expected).to eq book1
@@ -89,8 +89,8 @@ describe ActiveFedora::Base do
   end
 
   describe "#select" do
-    let!(:book1) { Book.create!(library:) }
-    let!(:book2) { Book.create!(library:) }
+    let!(:book1) { Book.create!(library: library) }
+    let!(:book2) { Book.create!(library: library) }
 
     # TODO: Bug described in issue #609
     xit "chooses a subset of objects in the relationship" do
