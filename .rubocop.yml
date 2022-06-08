@@ -39,12 +39,17 @@ Metrics/LineLength:
 Metrics/AbcSize:
   Enabled: false
 
+Metrics/BlockLength:
+  Exclude:
+    - 'lib/active_fedora/nested_attributes.rb'
+    - 'lib/active_fedora/rspec_matchers/have_predicate_matcher.rb'
+    - 'lib/active_fedora/rspec_matchers/have_many_associated_active_fedora_objects_matcher.rb'
+    - 'lib/active_fedora.rb'
+
 Metrics/BlockNesting:
   Exclude:
     - 'lib/active_fedora/autosave_association.rb'
     - 'lib/active_fedora/associations/has_many_association.rb'
-
-
 
 Metrics/PerceivedComplexity:
   Exclude:
@@ -210,6 +215,9 @@ Style/SignalException:
 Naming/FileName:
   Exclude:
     - 'lib/active-fedora.rb'
+
+Naming/VariableName:
+  Enabled: false
 
 Style/ZeroLengthPredicate:
   Exclude:
