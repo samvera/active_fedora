@@ -119,7 +119,8 @@ module ActiveFedora
         slices = if count > total_slices.length - 1
                     total_slices
                   else
-                    @buffer.slice(@pos..count - 1)
+                    #@buffer.slice(@pos..count - 1)
+                    @buffer.slice(@pos, count)
                   end
 
         @pos += count
