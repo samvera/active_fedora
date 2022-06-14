@@ -220,7 +220,6 @@ module ActiveFedora
         @active_fedora = active_fedora
         @klass         = options[:anonymous_class]
         @automatic_inverse_of = nil
-        super
       end
 
       def autosave=(autosave)

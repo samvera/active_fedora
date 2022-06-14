@@ -176,8 +176,9 @@ module ActiveFedora
       end
 
       if defined?(Rails.root)
-        config_path = Rails.root.join('config', "#{config_type}.yml")
-        return config_path if ::File.file? config_path
+        root_path = Pathname.new(Rails.root)
+        config_path = root_path.join('config', "#{config_type}.yml")
+        return config_path.to_s if ::File.file?(config_path.to_s)
       end
 
       return "#{Dir.getwd}/config/#{config_type}.yml" if ::File.file? "#{Dir.getwd}/config/#{config_type}.yml"

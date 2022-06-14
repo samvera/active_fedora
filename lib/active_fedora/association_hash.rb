@@ -97,7 +97,6 @@ module ActiveFedora
       @first = first
       @base = first.base
       @second = second
-      super
     end
 
     def [](name)

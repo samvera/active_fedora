@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+
 module ActiveFedora
   ##
   # IO like object for reading Fedora files.
@@ -45,21 +45,25 @@ module ActiveFedora
     def read(amount = nil, buf = nil)
       raise(IOError, "closed stream") if @closed
 
-      new_buffer = ''.dup
-      buf ||= new_buffer.force_encoding("ASCII-8BIT")
-      buf.clear
+      new_out_buffer = String.new
+      out_buffer = if buf.nil?
+                     new_out_buffer
+                   else
+                     buf.force_encoding("ASCII-8BIT")
+                     buf.clear
+                   end
+      fill_buffer unless @buffer
+      amount = @buffer.length - @pos if amount.nil?
 
-      if amount.nil?
-        read_to_buf(nil, buf) # read the entire file, returns buf
-      elsif amount.negative?
-        raise(ArgumentError, "negative length #{amount} given")
-      elsif amount.zero?
-        ''
+      raise(ArgumentError, "negative length #{amount} given") if amount.negative?
+
+      if amount.zero?
+        new_out_buffer
       else
-        read_to_buf(amount, buf)
+        read_to_buffer(amount, out_buffer)
         # if amount was specified but we reached eof before reading anything
         # then we must return nil
-        buf.empty? ? nil : buf
+        out_buffer.empty? ? nil : out_buffer
       end
     end
 
@@ -74,9 +78,10 @@ module ActiveFedora
         @fedora_file.stream.each do |chunk|
           Fiber.yield chunk
         end
-        @stream_fiber = nil
         # last value from Fiber is the return value of the block which should be nil
+        @stream_fiber = nil
       end
+
       0
     end
 
@@ -90,30 +95,58 @@ module ActiveFedora
 
     private
 
-      def read_to_buf(amount, buf)
-        buf << consume_buffer(amount.nil? ? nil : (amount - buf.length)) while (amount.nil? || buf.length < amount) && fill_buffer
-        buf
+      def buffer_read?(length:, out_buffer:)
+        return true if length.nil?
+
+        out_buffer.length < length
       end
 
-      def consume_buffer(count = nil)
-        if count.nil? || count >= @buffer.length
-          @pos += @buffer.length
-          @buffer .tap do
-            @buffer = nil
-          end
-        else
-          @buffer.slice!(0, count) .tap do |slice|
-            @pos += slice.length
-          end
+      def read_finished?
+        @pos >= @buffer.length
+      end
+
+      def read_to_buffer(amount, stream)
+        if !read_finished?
+          bytes = read_bytes(amount)
+          stream << bytes
         end
+
+        stream
+      end
+
+      def read_bytes(count)
+        total_slices = @buffer.slice(@pos..)
+        slices = if count > total_slices.length - 1
+                    total_slices
+                  else
+                    @buffer.slice(@pos..count - 1)
+                  end
+
+        @pos += count
+        slices
       end
 
       def fill_buffer
         return true if @buffer.present?
-        # Ruby Net library doesn't seem to like it if we modify the returned
-        # chunk in any way, hence dup.
-        @buffer = @stream_fiber.try(:resume).try(:dup)
-        @buffer.try(:force_encoding, 'ASCII-8BIT')
+
+        return false if @stream_fiber.nil?
+        bytes = true
+        while !@stream_fiber.nil? && @stream_fiber.alive? && !bytes.nil?
+          # Ruby Net library doesn't seem to like it if we modify the returned
+          # chunk in any way, hence dup.
+          bytes = @stream_fiber.try(:resume).try(:dup)
+          if !bytes.nil?
+            @buffer = if @buffer.nil?
+                        bytes
+                      else
+                        @buffer + bytes
+                      end
+          end
+          break if @stream_fiber.nil? || bytes.nil?
+
+        end
+
+        @buffer = @buffer.try(:force_encoding, 'ASCII-8BIT')
         !@buffer.nil?
       end
   end

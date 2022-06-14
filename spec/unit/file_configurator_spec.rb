@@ -280,13 +280,14 @@ describe ActiveFedora::FileConfigurator do
         unstub_rails
       end
 
-      let(:fedora_config_path) { Rails.root.join('config', 'fedora.yml') }
-      let(:solr_config_path) { Rails.root.join('config', 'solr.yml') }
+      let(:rails_root_path) { Pathname.new(Rails.root) }
+      let(:fedora_config_path) { rails_root_path.join('config', 'fedora.yml') }
+      let(:solr_config_path) { rails_root_path.join('config', 'solr.yml') }
 
       it "loads a config from Rails.root as a first choice" do
         configurator.init
-        expect(configurator.config_path(:fedora)).to eql(fedora_config_path)
-        expect(configurator.solr_config_path).to eql(solr_config_path)
+        expect(configurator.config_path(:fedora)).to eql(fedora_config_path.to_s)
+        expect(configurator.solr_config_path).to eql(solr_config_path.to_s)
       end
 
       it "can tell what environment it is set to run in" do
