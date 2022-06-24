@@ -1,6 +1,7 @@
 source "https://rubygems.org"
 
 gem 'active-triples', git: 'https://github.com/samvera-labs/ActiveTriples.git', branch: 'merge-gitlab-upstream'
+gem 'ldp', git: 'https://github.com/samvera/ldp.git', branch: 'allow-ruby-3.0'
 
 # Bundler will rely on active-fedora.gemspec for dependency information.
 gemspec path: File.expand_path('..', __FILE__)

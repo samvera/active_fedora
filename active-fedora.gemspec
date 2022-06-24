@@ -19,14 +19,14 @@ Gem::Specification.new do |s|
   s.add_dependency "deprecation"
   s.add_dependency 'faraday', '~> 0.12'
   s.add_dependency 'faraday-encoding', '>= 0.0.5'
-  s.add_dependency "ldp", '>= 0.7.0', '< 2'
+  s.add_dependency "ldp", '>= 1.0'
   s.add_dependency 'rsolr', '>= 1.1.2', '< 3'
   s.add_dependency "ruby-progressbar", '~> 1.0'
 
   s.add_development_dependency "equivalent-xml"
   s.add_development_dependency 'fcrepo_wrapper', '~> 0.2'
   s.add_development_dependency "github_changelog_generator"
-  s.add_development_dependency "rdoc"
+  # s.add_development_dependency "rdoc"
   s.add_development_dependency "psych", "< 4" # Restricted because 4.0+ do not work with rubocop 0.56.x
   s.add_development_dependency "rails"
   s.add_development_dependency "rake"
