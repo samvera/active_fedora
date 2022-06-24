@@ -19,7 +19,6 @@ Gem::Specification.new do |s|
   s.add_dependency "deprecation"
   s.add_dependency 'faraday', '~> 0.12'
   s.add_dependency 'faraday-encoding', '>= 0.0.5'
-  s.add_dependency "ldp", '>= 1.0'
   s.add_dependency 'rsolr', '>= 1.1.2', '< 3'
   s.add_dependency "ruby-progressbar", '~> 1.0'
 
