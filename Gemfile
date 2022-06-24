@@ -1,7 +1,8 @@
 source "https://rubygems.org"
 
-# Bundler will rely on active-fedora.gemspec for dependency information.
+gem 'active-triples', git: 'https://github.com/samvera-labs/ActiveTriples.git', branch: 'merge-gitlab-upstream'
 
+# Bundler will rely on active-fedora.gemspec for dependency information.
 gemspec path: File.expand_path('..', __FILE__)
 
 gem 'byebug' unless ENV['TRAVIS']
