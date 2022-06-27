@@ -1,7 +1,8 @@
+# frozen_string_literal: true
 module ActiveFedora
   # = Active Fedora Has And Belongs To Many Association
   module Associations
-    class HasAndBelongsToManyAssociation < CollectionAssociation #:nodoc:
+    class HasAndBelongsToManyAssociation < CollectionAssociation # :nodoc:
       def initialize(owner, reflection)
         super
       end
@@ -63,6 +64,7 @@ module ActiveFedora
             owner[reflection.foreign_key] -= [r.id]
             inverse = @reflection.inverse_of
             next unless inverse
+
             r[inverse.foreign_key] -= [owner.id] if inverse.has_and_belongs_to_many?
             r.association(inverse.name).reset
             r.save
@@ -79,6 +81,7 @@ module ActiveFedora
         def find_target
           ids = owner[reflection.foreign_key]
           return [] if ids.blank?
+
           ActiveFedora::Base.find(ids)
         end
     end

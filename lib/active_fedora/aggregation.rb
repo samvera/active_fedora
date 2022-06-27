@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ActiveFedora
   module Aggregation
     extend ActiveSupport::Autoload

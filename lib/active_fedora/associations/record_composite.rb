@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations
   ##
   # A Composite for records - currently only supports delete interface.
@@ -18,6 +19,7 @@ module ActiveFedora::Associations
     def delete
       each(&:delete)
     end
+
     ##
     # A Repository which returns a composite from #find instead of a single
     # record. Delegates find to a base repository.

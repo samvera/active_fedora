@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 ENV["environment"] ||= "test"
 
 require "bundler/setup"
@@ -40,11 +41,9 @@ require 'active_fedora/cleaner'
 RSpec.configure do |config|
   # Stub out test stuff.
   config.before(:each) do
-    begin
-      ActiveFedora::Cleaner.clean!
-    rescue Faraday::ConnectionFailed, RSolr::Error::ConnectionRefused => e
-      $stderr.puts e.message
-    end
+    ActiveFedora::Cleaner.clean!
+  rescue Faraday::ConnectionFailed, RSolr::Error::ConnectionRefused => e
+    $stderr.puts e.message
   end
 
   # rspec-expectations config goes here. You can use an alternate

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   class SparqlInsert
     attr_reader :changes, :subject

@@ -1,7 +1,8 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
-  class SingularAssociation < Association #:nodoc:
+  class SingularAssociation < Association # :nodoc:
     def self.valid_options(options)
-      super + [:dependent, :inverse_of, :required]
+      super + %i[dependent inverse_of required]
     end
 
     def self.define_accessors(model, reflection)

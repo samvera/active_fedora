@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # Attributes delegated to ActiveTriples. Allows ActiveFedora to track all attributes consistently.
   #

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::RDF
   # Transient class that represents a field that we send to solr.
   # It might be possible for two properties to share a single field map entry if they use the same solr key.

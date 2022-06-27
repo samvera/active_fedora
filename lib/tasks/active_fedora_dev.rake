@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'active_fedora/rake_support'
 require 'yard'
 require 'yard/rake/yardoc_task'
@@ -11,12 +12,12 @@ namespace :active_fedora do
   begin
     YARD::Rake::YardocTask.new(:doc) do |yt|
       yt.files   = Dir.glob(File.join(project_root, 'lib', '**', '*.rb')) +
-                   [ '-', File.join(project_root, 'README.md')]
+                   ['-', File.join(project_root, 'README.md')]
       yt.options = ['--output-dir', doc_destination, '--readme', 'README.md']
     end
   rescue LoadError
     desc "Generate YARD Documentation"
-    task :doc do
+    task doc: :environment do
       abort "Please install the YARD gem to generate rdoc."
     end
   end
@@ -38,7 +39,7 @@ namespace :active_fedora do
   end
 
   desc "Execute specs with coverage"
-  task :coverage do
+  task coverage: :environment do
     # Put spec opts in a file named .rspec in root
     ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
     ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'

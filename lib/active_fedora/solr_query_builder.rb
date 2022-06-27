@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module SolrQueryBuilder
     class << self
@@ -21,7 +22,7 @@ module ActiveFedora
       #   construct_query_for_rel [[Book._reflect_on_association(:library), "foo/bar/baz"]]
       def construct_query_for_rel(field_pairs, join_with = default_join_with)
         field_pairs = field_pairs.to_a if field_pairs.is_a? Hash
-        construct_query(property_values_to_solr(field_pairs), join_with, 'raw'.freeze)
+        construct_query(property_values_to_solr(field_pairs), join_with, 'raw')
       end
 
       # Construct a solr query from a list of pairs (e.g. [field name, values])
@@ -32,7 +33,7 @@ module ActiveFedora
       # @example
       #   construct_query([['library_id_ssim', '123'], ['owner_ssim', 'Fred']])
       #   # => "_query_:\"{!field f=library_id_ssim}123\" AND _query_:\"{!field f=owner_ssim}Fred\""
-      def construct_query(field_pairs, join_with = default_join_with, type = 'field'.freeze)
+      def construct_query(field_pairs, join_with = default_join_with, type = 'field')
         clauses = pairs_to_clauses(field_pairs, type)
         return "" if clauses.count.zero?
         return clauses.first if clauses.count == 1

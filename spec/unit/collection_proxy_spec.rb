@@ -1,9 +1,11 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::Associations::CollectionProxy do
   before do
     class Book < ActiveFedora::Base
     end
+
     class Page < ActiveFedora::Base
     end
   end

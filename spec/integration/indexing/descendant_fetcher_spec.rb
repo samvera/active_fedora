@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 RSpec.describe ActiveFedora::Indexing::DescendantFetcher do
@@ -5,6 +6,7 @@ RSpec.describe ActiveFedora::Indexing::DescendantFetcher do
     class Thing < ActiveFedora::Base
       property :title, predicate: ::RDF::Vocab::DC.title
     end
+
     class Source < ActiveFedora::Base
       is_a_container class_name: 'Thing'
     end

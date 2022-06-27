@@ -1,6 +1,7 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Associations
-    class BasicContainsAssociation < ContainsAssociation #:nodoc:
+    class BasicContainsAssociation < ContainsAssociation # :nodoc:
       def find_target
         uris = owner.resource.query(predicate: options[:predicate])
                     .map { |r| r.object.to_s }

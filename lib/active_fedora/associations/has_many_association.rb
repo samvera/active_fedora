@@ -1,6 +1,7 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Associations
-    class HasManyAssociation < CollectionAssociation #:nodoc:
+    class HasManyAssociation < CollectionAssociation # :nodoc:
       def initialize(owner, reflection)
         super
       end
@@ -35,7 +36,7 @@ module ActiveFedora
           end
         elsif owner.persisted?
           inverse = reflection.inverse_of
-          if inverse && inverse.collection?
+          if inverse&.collection?
             record[inverse.foreign_key] ||= []
             record[inverse.foreign_key] += [owner.id]
           elsif inverse && inverse.klass == ActiveFedora::Base

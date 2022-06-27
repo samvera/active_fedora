@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # RSpec matcher to spec delegations.
 
 RSpec::Matchers.define :have_predicate do |predicate|

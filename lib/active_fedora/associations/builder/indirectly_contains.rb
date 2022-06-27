@@ -1,11 +1,12 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
-  class IndirectlyContains < CollectionAssociation #:nodoc:
+  class IndirectlyContains < CollectionAssociation # :nodoc:
     def self.macro
       :indirectly_contains
     end
 
     def self.valid_options(options)
-      super + [:has_member_relation, :is_member_of_relation, :inserted_content_relation, :foreign_key, :through] - [:predicate]
+      super + %i[has_member_relation is_member_of_relation inserted_content_relation foreign_key through] - [:predicate]
     end
 
     def self.define_readers(mixin, name)

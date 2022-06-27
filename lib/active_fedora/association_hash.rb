@@ -1,9 +1,10 @@
+# frozen_string_literal: true
 module ActiveFedora
   ##
   # Used as an access method for associations on a model, given some
   # reflections.
   class AssociationHash
-    attr_reader :base
+    attr_reader :base, :reflections
 
     def initialize(model, reflections)
       @base = model
@@ -11,11 +12,11 @@ module ActiveFedora
     end
 
     def [](name)
-      association(name).reader if association(name)
+      association(name)&.reader
     end
 
     def []=(name, object)
-      association(name).writer(object) if association(name)
+      association(name)&.writer(object)
     end
 
     def association(name)
@@ -23,8 +24,6 @@ module ActiveFedora
       # are not garbage collected in earlier versions of Ruby
       base.association(name.to_sym) if key?(name)
     end
-
-    attr_reader :reflections
 
     def merge(other_hash)
       Merged.new(self, other_hash)
@@ -84,6 +83,7 @@ module ActiveFedora
       super
     end
   end
+
   ##
   # Represents the result of merging two association hashes.
   # @note As the keys can come from multiple models, the attributes become

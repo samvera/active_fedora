@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # Create model classifiers for resources or solr documents
   class DefaultModelMapper

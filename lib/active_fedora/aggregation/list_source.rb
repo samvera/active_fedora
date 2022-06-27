@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ActiveFedora
   module Aggregation
     class ListSource < ActiveFedora::Base
@@ -8,6 +10,7 @@ module ActiveFedora
 
       def save(*args)
         return true if has_unpersisted_proxy_for? || !changed?
+
         persist_ordered_self if ordered_self.changed?
         super
       end

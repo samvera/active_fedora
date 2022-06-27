@@ -1,9 +1,10 @@
+# frozen_string_literal: true
 require 'active_support/core_ext/hash/except'
 require 'active_support/core_ext/object/try'
 require 'active_support/core_ext/object/blank'
 
 module ActiveFedora
-  module NestedAttributes #:nodoc:
+  module NestedAttributes # :nodoc:
     class TooManyRecords < RuntimeError
     end
 
@@ -160,7 +161,7 @@ module ActiveFedora
 
       # Attribute hash keys that should not be assigned as normal attributes.
       # These hash keys are nested attributes implementation details.
-      UNASSIGNABLE_KEYS = %w(id _destroy).freeze
+      UNASSIGNABLE_KEYS = %w[id _destroy].freeze
 
       # Assigns the given attributes to the association.
       #
@@ -182,7 +183,7 @@ module ActiveFedora
         attributes = attributes.with_indifferent_access
         existing_record = send(association_name)
 
-        if (options[:update_only] || !attributes['id'].blank?) && existing_record &&
+        if (options[:update_only] || attributes['id'].present?) && existing_record &&
            (options[:update_only] || existing_record.id.to_s == attributes['id'].to_s)
           assign_to_or_mark_for_destruction(existing_record, attributes, options[:allow_destroy]) unless call_reject_if(association_name, attributes)
 
@@ -192,7 +193,7 @@ module ActiveFedora
         elsif !reject_new_record?(association_name, attributes)
           assignable_attributes = attributes.except(*UNASSIGNABLE_KEYS)
 
-          if existing_record && existing_record.new_record?
+          if existing_record&.new_record?
             existing_record.assign_attributes(assignable_attributes)
             association(association_name).initialize_attributes(existing_record)
           else
@@ -209,13 +210,9 @@ module ActiveFedora
       def assign_nested_attributes_for_collection_association(association_name, attributes_collection)
         options = nested_attributes_options[association_name]
 
-        if attributes_collection.respond_to?(:permitted?)
-          attributes_collection = attributes_collection.to_h
-        end
+        attributes_collection = attributes_collection.to_h if attributes_collection.respond_to?(:permitted?)
 
-        unless attributes_collection.is_a?(Hash) || attributes_collection.is_a?(Array)
-          raise ArgumentError, "Hash or Array expected, got #{attributes_collection.class.name} (#{attributes_collection.inspect})"
-        end
+        raise ArgumentError, "Hash or Array expected, got #{attributes_collection.class.name} (#{attributes_collection.inspect})" unless attributes_collection.is_a?(Hash) || attributes_collection.is_a?(Array)
 
         check_record_limit!(options[:limit], attributes_collection)
 
@@ -242,16 +239,12 @@ module ActiveFedora
           attributes = attributes.with_indifferent_access
 
           if attributes['id'].blank?
-            unless reject_new_record?(association_name, attributes)
-              association.build(attributes.except(*UNASSIGNABLE_KEYS))
-            end
+            association.build(attributes.except(*UNASSIGNABLE_KEYS)) unless reject_new_record?(association_name, attributes)
 
           elsif existing_record = existing_records.detect { |record| record.id.to_s == attributes['id'].to_s }
             association.send(:add_record_to_target_with_callbacks, existing_record) if !association.loaded? && !call_reject_if(association_name, attributes)
 
-            unless call_reject_if(association_name, attributes)
-              assign_to_or_mark_for_destruction(existing_record, attributes, options[:allow_destroy])
-            end
+            assign_to_or_mark_for_destruction(existing_record, attributes, options[:allow_destroy]) unless call_reject_if(association_name, attributes)
 
           else
             raise_nested_attributes_record_not_found!(association_name, attributes['id'])

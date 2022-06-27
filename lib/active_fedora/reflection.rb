@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Reflection # :nodoc:
     extend ActiveSupport::Concern
@@ -184,9 +185,7 @@ module ActiveFedora
 
       def check_validity_of_inverse!
         unless polymorphic?
-          if has_inverse? && inverse_of.nil?
-            raise InverseOfAssociationNotFoundError, self
-          end
+          raise InverseOfAssociationNotFoundError, self if has_inverse? && inverse_of.nil?
         end
       end
 
@@ -262,7 +261,7 @@ module ActiveFedora
 
     # Holds all the meta-data about an association as it was specified in the
     # Active Record class.
-    class AssociationReflection < MacroReflection #:nodoc:
+    class AssociationReflection < MacroReflection # :nodoc:
       attr_accessor :parent_reflection # Reflection
 
       def initialize(name, scope, options, active_fedora)
@@ -295,9 +294,7 @@ module ActiveFedora
       end
 
       def solr_key
-        @solr_key ||= begin
-          ActiveFedora.index_field_mapper.solr_name(predicate_for_solr, :symbol)
-        end
+        @solr_key ||= ActiveFedora.index_field_mapper.solr_name(predicate_for_solr, :symbol)
       end
 
       def check_validity!
@@ -314,7 +311,7 @@ module ActiveFedora
       def collect_join_chain
         [self]
       end
-      alias chain collect_join_chain # TODO Remove alias, See https://github.com/samvera/active_fedora/issues/1347
+      alias chain collect_join_chain # TODO: Remove alias, See https://github.com/samvera/active_fedora/issues/1347
 
       def has_inverse?
         inverse_name
@@ -445,7 +442,7 @@ module ActiveFedora
             "#{name.to_s.singularize}_ids"
           elsif options[:as]
             "#{options[:as]}_id"
-          elsif inverse_of && inverse_of.collection?
+          elsif inverse_of&.collection?
             # for a has_many that is the inverse of a has_and_belongs_to_many
             "#{options[:inverse_of].to_s.singularize}_ids"
           else

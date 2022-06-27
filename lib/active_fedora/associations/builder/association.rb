@@ -1,11 +1,12 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
-  class Association #:nodoc:
+  class Association # :nodoc:
     class << self
       attr_accessor :extensions
     end
     self.extensions = []
 
-    VALID_OPTIONS = [:class_name, :predicate, :type_validator].freeze
+    VALID_OPTIONS = %i[class_name predicate type_validator].freeze
 
     # configure_dependency
     def self.build(model, name, options, &block)
@@ -25,6 +26,7 @@ module ActiveFedora::Associations::Builder
 
     def self.create_reflection(model, name, scope, options, extension = nil)
       raise ArgumentError, "association names must be a Symbol. You provided #{name.inspect}" unless name.is_a?(Symbol)
+
       validate_options(options)
 
       scope = build_scope(scope, extension)
@@ -36,7 +38,7 @@ module ActiveFedora::Associations::Builder
     def self.build_scope(scope, extension)
       new_scope = scope
 
-      new_scope = proc { instance_exec(&scope) } if scope && scope.arity.zero?
+      new_scope = proc { instance_exec(&scope) } if scope&.arity&.zero?
 
       new_scope = wrap_scope new_scope, extension if extension
 
@@ -114,9 +116,7 @@ module ActiveFedora::Associations::Builder
     end
 
     def self.check_dependent_options(dependent)
-      unless valid_dependent_options.include? dependent
-        raise ArgumentError, "The :dependent option must be one of #{valid_dependent_options}, but is :#{dependent}"
-      end
+      raise ArgumentError, "The :dependent option must be one of #{valid_dependent_options}, but is :#{dependent}" unless valid_dependent_options.include? dependent
     end
 
     def self.add_destroy_callbacks(model, reflection)

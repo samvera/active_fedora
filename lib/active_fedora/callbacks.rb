@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # = Active Fedora Callbacks, adapted from ActiveRecord
   #
@@ -227,7 +228,7 @@ module ActiveFedora
       define_model_callbacks :save, :create, :update, :destroy, :update_index
     end
 
-    def destroy(*) #:nodoc:
+    def destroy(*) # :nodoc:
       _run_destroy_callbacks { super }
     end
 
@@ -241,11 +242,11 @@ module ActiveFedora
         _run_save_callbacks { super }
       end
 
-      def _create_record(*) #:nodoc:
+      def _create_record(*) # :nodoc:
         _run_create_callbacks { super }
       end
 
-      def _update_record(*) #:nodoc:
+      def _update_record(*) # :nodoc:
         _run_update_callbacks { super }
       end
   end

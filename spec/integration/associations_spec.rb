@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::Base do
@@ -59,11 +60,10 @@ describe ActiveFedora::Base do
     before do
       class EnsureBanana
         def self.validate!(_reflection, object)
-          unless object.try(:banana?)
-            raise ActiveFedora::AssociationTypeMismatch, "#{object} must be a banana"
-          end
+          raise ActiveFedora::AssociationTypeMismatch, "#{object} must be a banana" unless object.try(:banana?)
         end
       end
+
       class FooThing < ActiveFedora::Base
         attr_accessor :banana
         has_many :bars, class_name: 'BarThing', predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, as: :foothing, type_validator: EnsureBanana
@@ -442,6 +442,7 @@ describe ActiveFedora::Base do
       class Course < ActiveFedora::Base
         has_and_belongs_to_many :textbooks, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
       end
+
       class Textbook < ActiveFedora::Base
         has_many :courses, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
       end
@@ -513,6 +514,7 @@ describe ActiveFedora::Base do
 
           def say_hi(_var); end
         end
+
         class Page < ActiveFedora::Base
           has_many :library_books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         end
@@ -545,6 +547,7 @@ describe ActiveFedora::Base do
         class LibraryBook < ActiveFedora::Base
           has_many :pages, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, after_remove: :say_hi
         end
+
         class Page < ActiveFedora::Base
           belongs_to :library_book, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         end
@@ -573,6 +576,7 @@ describe ActiveFedora::Base do
         class Bauble < ActiveFedora::Base
           belongs_to :media_object, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         end
+
         class MediaObject < ActiveFedora::Base
           has_many :baubles
         end
@@ -592,6 +596,7 @@ describe ActiveFedora::Base do
         class MasterFile < ActiveFedora::Base
           belongs_to :media_object, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         end
+
         class MediaObject < ActiveFedora::Base
           has_many :parts, class_name: 'MasterFile'
         end
@@ -612,6 +617,7 @@ describe ActiveFedora::Base do
         class Bauble < ActiveFedora::Base
           belongs_to :media_object, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
         end
+
         class MediaObject < ActiveFedora::Base
           has_many :baubles, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasEquivalent
         end
@@ -634,12 +640,15 @@ describe ActiveFedora::Base do
         class Novel < ActiveFedora::Base
           has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
         end
+
         class TextBook < ActiveFedora::Base
           has_and_belongs_to_many :contents, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
         end
+
         class Text < ActiveFedora::Base
           has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
         end
+
         class Image < ActiveFedora::Base
           has_many :books, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf, class_name: 'ActiveFedora::Base'
         end

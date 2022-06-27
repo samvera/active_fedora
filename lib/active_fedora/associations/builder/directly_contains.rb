@@ -1,11 +1,12 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
-  class DirectlyContains < CollectionAssociation #:nodoc:
+  class DirectlyContains < CollectionAssociation # :nodoc:
     def self.macro
       :directly_contains
     end
 
     def self.valid_options(options)
-      super + [:has_member_relation, :is_member_of_relation] - [:predicate]
+      super + %i[has_member_relation is_member_of_relation] - [:predicate]
     end
 
     def self.validate_options(options)

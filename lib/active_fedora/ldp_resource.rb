@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   class LdpResource < Ldp::Resource::RdfSource
     def build_empty_graph
@@ -23,8 +24,8 @@ module ActiveFedora
 
     private
 
-    def response_as_graph(resp)
-      graph_class.new(subject_uri, data: resp.graph.data)
-    end
+      def response_as_graph(resp)
+        graph_class.new(subject_uri, data: resp.graph.data)
+      end
   end
 end

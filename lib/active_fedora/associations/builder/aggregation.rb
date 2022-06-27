@@ -1,7 +1,8 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
   class Aggregation < ActiveFedora::Associations::Builder::Association
     def self.valid_options(_options)
-      [:through, :class_name, :has_member_relation, :type_validator]
+      %i[through class_name has_member_relation type_validator]
     end
 
     def self.build(model, name, options)

@@ -1,6 +1,7 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Associations
-    class RDF < SingularAssociation #:nodoc:
+    class RDF < SingularAssociation # :nodoc:
       def replace(values)
         ids = Array(values).reject(&:blank?)
         raise "can't modify frozen #{owner.class}" if owner.frozen?

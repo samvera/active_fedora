@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::Orders do
@@ -5,8 +6,10 @@ describe ActiveFedora::Orders do
   before do
     class Member < ActiveFedora::Base
     end
+
     class BadClass < ActiveFedora::Base
     end
+
     class Image < ActiveFedora::Base
       ordered_aggregation :members, through: :list_source
     end

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::Base do
@@ -11,6 +12,7 @@ describe ActiveFedora::Base do
     class FileWithMetadata < ActiveFedora::File
       include ActiveFedora::WithMetadata
     end
+
     class AlternativeFileWithMetadata < ActiveFedora::File
       include ActiveFedora::WithMetadata
     end

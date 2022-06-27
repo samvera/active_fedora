@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations
   class FilterAssociation < ::ActiveFedora::Associations::CollectionAssociation
     # @param [Array] records a list of records to replace the current association with

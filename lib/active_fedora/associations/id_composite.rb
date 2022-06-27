@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations
   ##
   # A composite object for an array of IDs. This abstracts away the fact that an

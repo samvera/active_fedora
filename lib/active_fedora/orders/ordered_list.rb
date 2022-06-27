@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Orders
     ##
@@ -35,12 +36,10 @@ module ActiveFedora
       #   empty, tail.prev is the first element.
       def tail
         @tail ||=
-          begin
-            if tail_subject
-              TailSentinel.new(self, prev_node: build_node(tail_subject))
-            else
-              head.next
-            end
+          if tail_subject
+            TailSentinel.new(self, prev_node: build_node(tail_subject))
+          else
+            head.next
           end
       end
 
@@ -173,9 +172,7 @@ module ActiveFedora
       #   the first.
       def proxy_in
         proxies = to_a.map(&:proxy_in_id).compact.uniq
-        if proxies.length > 1
-          ActiveFedora::Base.logger.warn "WARNING: List contains nodes aggregated under different URIs. Returning only the first."
-        end
+        ActiveFedora::Base.logger.warn "WARNING: List contains nodes aggregated under different URIs. Returning only the first." if proxies.length > 1
         proxies.first
       end
 
@@ -208,9 +205,7 @@ module ActiveFedora
 
         def new_node_subject
           node = ::RDF::URI("##{::RDF::Node.new.id}")
-          while node_cache.key?(node)
-            node = ::RDF::URI("##{::RDF::Node.new.id}")
-          end
+          node = ::RDF::URI("##{::RDF::Node.new.id}") while node_cache.key?(node)
           node
         end
 

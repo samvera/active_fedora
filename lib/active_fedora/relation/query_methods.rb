@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module QueryMethods # :nodoc:
     def extending_values

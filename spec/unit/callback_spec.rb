@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::Base do
@@ -23,7 +24,7 @@ describe ActiveFedora::Base do
     end
   end
   after do
-    @cb.destroy if @cb && @cb.persisted? # this only is called if the test failed to run all the way through.
+    @cb.destroy if @cb&.persisted? # this only is called if the test failed to run all the way through.
     Object.send(:remove_const, :CallbackStub)
   end
 

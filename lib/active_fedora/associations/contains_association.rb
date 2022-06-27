@@ -1,7 +1,8 @@
+# frozen_string_literal: true
 # This is the parent class of BasicContainsAssociation, DirectlyContainsAssociation and IndirectlyContainsAssociation
 module ActiveFedora
   module Associations
-    class ContainsAssociation < CollectionAssociation #:nodoc:
+    class ContainsAssociation < CollectionAssociation # :nodoc:
       def insert_record(record, force = true, validate = true)
         if force
           record.save!
@@ -33,6 +34,7 @@ module ActiveFedora
 
         def uri
           raise "Can't get uri. Owner isn't saved" if @owner.new_record?
+
           "#{@owner.uri}/#{@reflection.name}"
         end
 

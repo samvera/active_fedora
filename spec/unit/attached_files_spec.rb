@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::AttachedFiles do
@@ -6,8 +7,10 @@ describe ActiveFedora::AttachedFiles do
     before do
       class Sample1 < ActiveFedora::File
       end
+
       class Sample2 < ActiveFedora::File
       end
+
       class FooHistory < ActiveFedora::Base
         has_subresource 'dsid', class_name: 'Sample2'
         has_subresource 'complex_ds', autocreate: true, class_name: 'Sample1'

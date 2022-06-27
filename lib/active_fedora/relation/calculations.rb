@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Calculations
     # Get a count of the number of objects from solr

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::Base do
@@ -9,6 +10,7 @@ describe ActiveFedora::Base do
     class Book < ActiveFedora::Base
       belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasConstituent
     end
+
     class SpecialInheritedBook < Book
       def assert_content_model
         self.has_model = [self.class.to_s, self.class.superclass.to_s]

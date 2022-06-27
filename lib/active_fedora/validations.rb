@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # = Active Fedora RecordInvalid, adapted from Active Record
   #

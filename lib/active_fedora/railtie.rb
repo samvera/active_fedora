@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   class Railtie < Rails::Railtie
     config.app_middleware.insert_after ::ActionDispatch::Callbacks,

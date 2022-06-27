@@ -1,9 +1,10 @@
+# frozen_string_literal: true
 require 'active_support/core_ext/enumerable'
 require 'active_support/core_ext/module/delegation'
 require 'active_support/core_ext/object/blank'
 
 module ActiveFedora
-  class InverseOfAssociationNotFoundError < RuntimeError #:nodoc:
+  class InverseOfAssociationNotFoundError < RuntimeError # :nodoc:
     def initialize(reflection, associated_class = nil)
       super("Could not find the inverse association for #{reflection.name} (#{reflection.options[:inverse_of].inspect} in #{associated_class.nil? ? reflection.class_name : associated_class.name})")
     end
@@ -65,7 +66,7 @@ module ActiveFedora
     end
 
     # Clears out the association cache.
-    def clear_association_cache #:nodoc:
+    def clear_association_cache # :nodoc:
       @association_cache.clear if persisted?
     end
 
@@ -73,7 +74,7 @@ module ActiveFedora
     attr_reader :association_cache
 
     # Returns the association instance for the given name, instantiating it if it doesn't already exist
-    def association(name) #:nodoc:
+    def association(name) # :nodoc:
       association = association_instance_get(name)
 
       if association.nil?
@@ -97,6 +98,7 @@ module ActiveFedora
       # Returns the specified association instance if it responds to :loaded?, nil otherwise.
       def association_instance_get(name)
         raise "use a symbol" if name.is_a? String
+
         @association_cache[name]
       end
 
@@ -197,6 +199,7 @@ module ActiveFedora
         def has_subresource(name, options = {}, &block)
           options[:block] = block if block
           raise ArgumentError, "You must provide a path name (f.k.a. dsid) for the resource" unless name
+
           Associations::Builder::HasSubresource.build(self, name.to_sym, options)
         end
 

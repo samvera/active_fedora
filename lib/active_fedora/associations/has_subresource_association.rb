@@ -1,6 +1,7 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Associations
-    class HasSubresourceAssociation < SingularAssociation #:nodoc:
+    class HasSubresourceAssociation < SingularAssociation # :nodoc:
       # Implements the reader method, e.g. foo.bar for Foo.has_one :bar
       def reader(force_reload = false)
         super || build
@@ -50,9 +51,7 @@ module ActiveFedora
 
         def configure_datastream(record)
           # If you called has_metadata with a block, pass the block into the File class
-          if reflection.options[:block].class == Proc
-            reflection.options[:block].call(record)
-          end
+          reflection.options[:block].call(record) if reflection.options[:block].class == Proc
           return unless record.new_record? && reflection.options[:autocreate]
           record.datastream_will_change!
         end

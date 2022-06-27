@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # This is the base class for ldp containers, it is not an ldp:BasicContainer
   class Container < ActiveFedora::Base

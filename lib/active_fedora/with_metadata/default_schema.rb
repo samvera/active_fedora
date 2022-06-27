@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # These are the default properties defined on a resource that has WithMetadata
 # added to it. This is most commonly used with ActiveFedora::File, when we want
 # to add rdf triples to a non-rdf resource and have them persisted.
@@ -6,11 +7,11 @@ module ActiveFedora::WithMetadata
     def self.legacy_ebucore_vocabulary
       @legacy_ebucore_vocabulary ||= Class.new(RDF::StrictVocabulary("http://www.ebu.ch/metadata/ontologies/ebucore/ebucore#")) do
         property :filename,
-          comment: %(The name of the file containing the Resource.).freeze,
-          domain: "ebucore:Resource".freeze,
-          label: "File name".freeze,
-          range: "xsd:string".freeze,
-          type: "rdf:Property".freeze
+          comment: %(The name of the file containing the Resource.),
+          domain: "ebucore:Resource",
+          label: "File name",
+          range: "xsd:string",
+          type: "rdf:Property"
       end
     end
 

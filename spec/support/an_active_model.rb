@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 shared_examples_for "An ActiveModel" do
   def assert(test, *_args)
     expect(test).to be true

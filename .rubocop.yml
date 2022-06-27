@@ -1,23 +1,31 @@
-require: rubocop-rspec
+inherit_gem:
+  bixby: bixby_default.yml
+
+require:
+  - rubocop-performance
+  - rubocop-rails
+  - rubocop-rake
+  - rubocop-rspec
 
 inherit_from:
-- .rubocop_todo.yml
+  - .rubocop_todo.yml
 
 AllCops:
-  TargetRubyVersion: 2.2
+  TargetRubyVersion: 2.5
   DisplayCopNames: true
-  Include:
-    - '**/Rakefile'
+    - 'lib/**/*rb'
+    - 'spec/**/*rb'
+    - 'Rakefile'
   Exclude:
     - 'script/**/*'
     - 'vendor/**/*'
 
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Exclude:
-    - 'spec/unit/**/*'
-    - 'spec/integration/**/*'
     - 'lib/active_fedora/cleaner.rb'
     - 'lib/active_fedora/associations/builder/has_subresource.rb'
+    - 'spec/integration/**/*'
+    - 'spec/unit/**/*'
 
 Lint/AssignmentInCondition:
   Enabled: false
@@ -173,7 +181,7 @@ Style/Lambda:
     - 'spec/**/*'
 
 Layout/IndentationConsistency:
-  EnforcedStyle: rails
+  EnforcedStyle: indented_internal_methods
 
 Style/CollectionMethods:
   PreferredMethods:

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Orders
   class ListNode
     attr_reader :rdf_subject
@@ -120,7 +121,7 @@ module ActiveFedora::Orders
     end
 
     def new_record?
-      @target && @target.new_record?
+      @target&.new_record?
     end
 
     private

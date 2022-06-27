@@ -1,8 +1,10 @@
+# frozen_string_literal: true
 require 'spec_helper'
-@@last_id = 0
 
 describe ActiveFedora::Base do
   it_behaves_like "An ActiveModel"
+
+  let!(:last_id) { 0 }
 
   describe "id=" do
     before do
@@ -75,10 +77,12 @@ describe ActiveFedora::Base do
           rdf_label ::RDF::Vocab::FOAF.name
           property :foaf_name, predicate: ::RDF::Vocab::FOAF.name
         end
+
         class Person < Agent
           rdf_label ::RDF::URI('http://example.com/foo')
           property :job, predicate: ::RDF::URI('http://example.com/foo')
         end
+
         class Creator < Person
         end
       end
@@ -121,19 +125,23 @@ describe ActiveFedora::Base do
       Object.send(:remove_const, :FooHistory)
     end
 
-    def increment_id
-      @@last_id += 1
-    end
+    # def increment_id
+    #  @@last_id += 1
+    # end
+
+    let(:increment_id) { last_id + 1 }
+    let(:this_id) { increment_id.to_s }
 
     before do
-      @this_id = increment_id.to_s
+      # @this_id = increment_id.to_s
       @test_object = described_class.new
-      allow(@test_object).to receive(:assign_id).and_return(@this_id)
+      # allow(@test_object).to receive(:assign_id).and_return(@this_id)
+      allow(@test_object).to receive(:assign_id).and_return(this_id)
     end
 
     describe '#new' do
       before do
-        allow_any_instance_of(FooHistory).to receive(:assign_id).and_return(@this_id)
+        allow_any_instance_of(FooHistory).to receive(:assign_id).and_return(this_id)
       end
 
       context "with no arguments" do
@@ -236,7 +244,7 @@ describe ActiveFedora::Base do
         context "an no id has been set" do
           it "sets the id" do
             @test_object.save
-            expect(@test_object.id).to eq @this_id
+            expect(@test_object.id).to eq this_id
           end
 
           context "and the object has properties" do
@@ -245,7 +253,7 @@ describe ActiveFedora::Base do
               class WithProperty < ActiveFedora::Base
                 property :title, predicate: ::RDF::Vocab::DC.title
               end
-              allow(test_object).to receive(:assign_id).and_return(@this_id)
+              allow(test_object).to receive(:assign_id).and_return(this_id)
               test_object.save
             end
             after do
@@ -253,7 +261,7 @@ describe ActiveFedora::Base do
             end
 
             it "updates the resource" do
-              expect(test_object.resource.rdf_subject).to eq ::RDF::URI.new("#{ActiveFedora.fedora.base_uri}/#{@this_id}")
+              expect(test_object.resource.rdf_subject).to eq ::RDF::URI.new("#{ActiveFedora.fedora.base_uri}/#{this_id}")
               expect(test_object.title).to eq ['foo']
             end
           end
@@ -262,7 +270,7 @@ describe ActiveFedora::Base do
         context "when an id is set" do
           before do
             @test_object = described_class.new(id: '999')
-            allow(@test_object).to receive(:assign_id).and_return(@this_id)
+            allow(@test_object).to receive(:assign_id).and_return(this_id)
           end
           it "does not set the id" do
             @test_object.save
@@ -289,7 +297,7 @@ describe ActiveFedora::Base do
         expect(m).to receive(:fubar=).with('1234')
         expect(m).to receive(:baz=).with('stuff')
         expect(m).to receive(:save)
-        m.update_attributes(att)
+        m.update(att)
       end
     end
 

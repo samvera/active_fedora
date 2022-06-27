@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'active_model/forbidden_attributes_protection'
 module ActiveFedora
   module Attributes
@@ -77,7 +78,7 @@ module ActiveFedora
       # override activemodel so it doesn't trigger a load of all the attributes.
       # the callback methods seem to trigger this, which means just initing an object (after_init)
       # causes a load of all the datastreams.
-      def attribute_method?(attr_name) #:nodoc:
+      def attribute_method?(attr_name) # :nodoc:
         respond_to_without_attributes?(:attributes) && self.class.delegated_attributes.include?(attr_name)
       end
 

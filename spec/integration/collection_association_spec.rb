@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe ActiveFedora::Base do
@@ -5,6 +6,7 @@ describe ActiveFedora::Base do
     class Library < ActiveFedora::Base
       has_many :books
     end
+
     class Book < ActiveFedora::Base
       belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.hasMember
     end
@@ -125,6 +127,7 @@ describe ActiveFedora::Base do
       before do
         class Item < ActiveFedora::Base
         end
+
         class SpecContainer < ActiveFedora::Base
           has_many :items
         end
@@ -146,6 +149,7 @@ describe ActiveFedora::Base do
         class Item < ActiveFedora::Base
           has_and_belongs_to_many :container, predicate: ::RDF::Vocab::DC.extent, class_name: 'Foo::Container'
         end
+
         module Foo
           class Container < ActiveFedora::Base
             has_many :items

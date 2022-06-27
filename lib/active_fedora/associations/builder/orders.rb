@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
   class Orders < ActiveFedora::Associations::Builder::CollectionAssociation
     include ActiveFedora::AutosaveAssociation::AssociationBuilderExtension
@@ -6,7 +7,7 @@ module ActiveFedora::Associations::Builder
     end
 
     def self.valid_options(options)
-      super + [:through, :unordered_reflection]
+      super + %i[through unordered_reflection]
     end
 
     def self.define_readers(mixin, name)
@@ -31,6 +32,7 @@ module ActiveFedora::Associations::Builder
         source = send(options[:through])
         source.save
         return if head_ids == source.head_id && tail_ids == source.tail_id
+
         self.head = source.head_id
         self.tail = source.tail_id
         save! if changed?

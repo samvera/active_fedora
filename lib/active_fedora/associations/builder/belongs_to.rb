@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
-  class BelongsTo < SingularAssociation #:nodoc:
+  class BelongsTo < SingularAssociation # :nodoc:
     def self.macro
       :belongs_to
     end
@@ -9,7 +10,7 @@ module ActiveFedora::Associations::Builder
     end
 
     def self.valid_dependent_options
-      [:destroy, :delete]
+      %i[destroy delete]
     end
 
     def self.validate_options(options)
@@ -19,9 +20,7 @@ module ActiveFedora::Associations::Builder
     end
 
     def self.define_validations(model, reflection)
-      if reflection.options.key?(:required)
-        reflection.options[:optional] = !reflection.options.delete(:required)
-      end
+      reflection.options[:optional] = !reflection.options.delete(:required) if reflection.options.key?(:required)
 
       required = if reflection.options[:optional].nil?
                    model.belongs_to_required_by_default
@@ -31,9 +30,7 @@ module ActiveFedora::Associations::Builder
 
       super
 
-      if required
-        model.validates_presence_of reflection.name, message: :required
-      end
+      model.validates_presence_of reflection.name, message: :required if required
     end
   end
 end

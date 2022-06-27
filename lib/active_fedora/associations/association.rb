@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Associations
     # This is the root class of all associations:
@@ -11,6 +12,7 @@ module ActiveFedora
     class Association
       attr_reader :owner, :target, :reflection
       attr_accessor :inversed
+
       delegate :options, :klass, to: :reflection
 
       def initialize(owner, reflection)
@@ -86,6 +88,7 @@ module ActiveFedora
       # Set the inverse association, if possible
       def set_inverse_instance(record)
         return unless record && invertible_for?(record)
+
         inverse = record.association(inverse_reflection_for(record).name.to_sym)
         if inverse.is_a? ActiveFedora::Associations::HasAndBelongsToManyAssociation
           inverse.target << owner
@@ -119,7 +122,7 @@ module ActiveFedora
         reset
       end
 
-      def initialize_attributes(record, except_from_scope_attributes = nil) #:nodoc:
+      def initialize_attributes(record, except_from_scope_attributes = nil) # :nodoc:
         except_from_scope_attributes ||= {}
         skip_assign = [reflection.foreign_key].compact
         assigned_keys = record.changed
@@ -141,9 +144,7 @@ module ActiveFedora
           if (reflection.has_one? || reflection.collection?) && !options[:through]
             attributes[reflection.foreign_key] = owner[reflection.active_record_primary_key]
 
-            if reflection.options[:as]
-              attributes[reflection.type] = owner.class.base_class.name
-            end
+            attributes[reflection.type] = owner.class.base_class.name if reflection.options[:as]
           end
 
           attributes

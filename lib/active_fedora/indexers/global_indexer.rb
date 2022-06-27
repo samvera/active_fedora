@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Indexers
   ##
   # Applies indexing hints to any given property, independent of what that

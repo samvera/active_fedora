@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 RSpec.describe ActiveFedora::Indexing::Inserter do
@@ -29,7 +30,7 @@ RSpec.describe ActiveFedora::Indexing::Inserter do
   end
 
   it "handles floating point integers" do
-    described_class.create_and_insert_terms('my_number', (6.022140857*10**23).to_f, [:displayable, :searchable], solr_doc)
+    described_class.create_and_insert_terms('my_number', (6.022140857 * 10**23).to_f, [:displayable, :searchable], solr_doc)
     expect(solr_doc).to eq('my_number_ssm' => ['6.0221408569999995e+23'], 'my_number_fim' => ['6.0221408569999995e+23'])
   end
 end

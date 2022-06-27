@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Identifiable
     extend ActiveSupport::Concern

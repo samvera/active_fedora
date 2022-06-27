@@ -1,11 +1,12 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
-  class HasAndBelongsToMany < CollectionAssociation #:nodoc:
+  class HasAndBelongsToMany < CollectionAssociation # :nodoc:
     def self.macro
       :has_and_belongs_to_many
     end
 
     def self.valid_options(options)
-      super + [:inverse_of, :solr_page_size]
+      super + %i[inverse_of solr_page_size]
     end
 
     def self.validate_options(options)

@@ -1,9 +1,11 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations
   ##
   # Finds the objects which associate with a given record and are contained
   # within the given container. Uses #repository to find the objects.
   class ContainedFinder
     attr_reader :container, :repository, :proxy_class
+
     delegate :contained_ids, to: :container
     # @param [#contained_ids] container a container that records are stored
     #   under.

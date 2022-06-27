@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
-  class BasicContains < CollectionAssociation #:nodoc:
+  class BasicContains < CollectionAssociation # :nodoc:
     def self.macro
       :is_a_container
     end

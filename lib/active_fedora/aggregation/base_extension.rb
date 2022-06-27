@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ActiveFedora::Aggregation
   module BaseExtension
     def ordered_by

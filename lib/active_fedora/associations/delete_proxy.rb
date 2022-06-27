@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations
   class DeleteProxy
     def self.call(proxy_ids:, proxy_class:)

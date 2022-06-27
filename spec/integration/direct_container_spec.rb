@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe "Direct containers" do
@@ -77,6 +78,7 @@ describe "Direct containers" do
     context "when the class is a subclass of ActiveFedora::File" do
       before do
         class SubFile < ActiveFedora::File; end
+
         class FooHistory < ActiveFedora::Base
           directly_contains :files, has_member_relation: ::RDF::URI.new("http://example.com/hasFiles"), class_name: 'SubFile'
         end

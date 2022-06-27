@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'active_support'
 require 'active_model'
 require 'ldp'
@@ -16,16 +17,16 @@ require 'active_triples'
 module RDF
   class Literal
     class DateTime
-      ALTERNATIVE_FORMAT   = '%Y-%m-%dT%H:%M:%S'.freeze
-      DOT                  = '.'.freeze
-      EMPTY                = ''.freeze
-      TIMEZONE_FORMAT      = '%:z'.freeze
+      ALTERNATIVE_FORMAT   = '%Y-%m-%dT%H:%M:%S'
+      DOT                  = '.'
+      EMPTY                = ''
+      TIMEZONE_FORMAT      = '%:z'
 
       def to_s
         @string ||= begin
           # Show nanoseconds but remove trailing zeros
           nano = @object.strftime('%N').sub(/0+\Z/, EMPTY)
-          nano = DOT + nano unless nano.blank?
+          nano = DOT + nano if nano.present?
           @object.strftime(ALTERNATIVE_FORMAT) + nano + @object.strftime(TIMEZONE_FORMAT)
         end
       end
@@ -33,7 +34,7 @@ module RDF
   end
 end
 
-module ActiveFedora #:nodoc:
+module ActiveFedora # :nodoc:
   extend ActiveSupport::Autoload
 
   eager_autoload do
@@ -174,9 +175,8 @@ module ActiveFedora #:nodoc:
       options = {} if options.nil?
       # For backwards compatibility, handle cases where config_path (a String) is passed in as the argument rather than a config_options hash
       # In all other cases, set config_path to config_options[:config_path], which is ok if it's nil
-      if options.is_a? String
-        raise ArgumentError, "Calling ActiveFedora.init with a path as an argument has been removed.  Use ActiveFedora.init(:fedora_config_path=>#{options})"
-      end
+      raise ArgumentError, "Calling ActiveFedora.init with a path as an argument has been removed.  Use ActiveFedora.init(:fedora_config_path=>#{options})" if options.is_a? String
+
       @fedora_config = nil
       SolrService.reset!
       configurator.init(options)
@@ -219,7 +219,7 @@ module ActiveFedora #:nodoc:
     end
 
     def root
-      ::File.expand_path('../..', __FILE__)
+      ::File.expand_path('..', __dir__)
     end
 
     def version

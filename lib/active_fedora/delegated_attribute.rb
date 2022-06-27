@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # Represents the mapping between a model attribute and a property
   class DelegatedAttribute

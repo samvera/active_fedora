@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require "spec_helper"
 require 'ostruct'
 require "active_fedora/rspec_matchers/have_many_associated_active_fedora_objects_matcher"

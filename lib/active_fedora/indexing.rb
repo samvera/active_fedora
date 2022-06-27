@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module ActiveFedora
   # Mix in this module to update Solr on save.
   # Assign a new indexer at the class level where this is mixed in
@@ -113,7 +114,7 @@ module ActiveFedora
               batch.clear
             end
 
-            progress_bar_controller.increment if progress_bar_controller
+            progress_bar_controller&.increment
           end
 
           if batch.present?

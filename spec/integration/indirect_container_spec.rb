@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper'
 
 describe "Indirect containers" do
@@ -5,6 +6,7 @@ describe "Indirect containers" do
     class RelatedObject < ActiveFedora::Base
       property :title, predicate: ::RDF::Vocab::DC.title, multiple: false
     end
+
     class Proxy < ActiveFedora::Base
       belongs_to :proxy_for, predicate: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'), class_name: 'ActiveFedora::Base'
     end
@@ -216,6 +218,7 @@ describe "Indirect containers" do
         class Different < ActiveFedora::Base
           property :title, predicate: ::RDF::Vocab::DC.title, multiple: false
         end
+
         class FooHistory < ActiveFedora::Base
           indirectly_contains :related_objects, has_member_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/aggregates'), inserted_content_relation: ::RDF::URI.new('http://www.openarchives.org/ore/terms/proxyFor'), class_name: 'Different', through: 'Proxy', foreign_key: :proxy_for
         end

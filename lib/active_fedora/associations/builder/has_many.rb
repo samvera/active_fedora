@@ -1,15 +1,16 @@
+# frozen_string_literal: true
 module ActiveFedora::Associations::Builder
-  class HasMany < CollectionAssociation #:nodoc:
+  class HasMany < CollectionAssociation # :nodoc:
     def self.macro
       :has_many
     end
 
     def self.valid_options(options)
-      super + [:as, :dependent, :inverse_of]
+      super + %i[as dependent inverse_of]
     end
 
     def self.valid_dependent_options
-      [:destroy, :delete_all, :nullify, :restrict_with_error, :restrict_with_exception]
+      %i[destroy delete_all nullify restrict_with_error restrict_with_exception]
     end
 
     def self.define_readers(mixin, name)

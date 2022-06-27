@@ -1,6 +1,7 @@
+# frozen_string_literal: true
 module ActiveFedora
   module Associations
-    class CollectionAssociation < Association #:nodoc:
+    class CollectionAssociation < Association # :nodoc:
       attr_reader :proxy
 
       # Implements the reader method, e.g. foo.items for Foo.has_many :items
@@ -9,6 +10,7 @@ module ActiveFedora
       def reader(opts = false)
         if opts.is_a?(Hash)
           return load_from_solr(opts) if opts.delete(:response_format) == :solr
+
           raise ArgumentError, "Hash parameter must include :response_format=>:solr (#{opts.inspect})"
         else
           force_reload = opts
@@ -251,8 +253,10 @@ module ActiveFedora
       def load_from_solr(opts = {})
         finder_query = construct_query
         return [] if finder_query.empty?
+
         rows = opts.delete(:rows) { count }
         return [] if rows.zero?
+
         SolrService.query(finder_query, { rows: rows }.merge(opts))
       end
 
@@ -388,6 +392,7 @@ module ActiveFedora
 
         def ensure_owner_is_not_new
           return if @owner.persisted?
+
           raise ActiveFedora::RecordNotSaved, "You cannot call create unless the parent is saved"
         end
 
