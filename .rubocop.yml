@@ -20,6 +20,9 @@ AllCops:
     - 'script/**/*'
     - 'vendor/**/*'
 
+Lint/AssignmentInCondition:
+  Enabled: false
+
 Lint/SuppressedException:
   Exclude:
     - 'lib/active_fedora/cleaner.rb'
@@ -27,19 +30,35 @@ Lint/SuppressedException:
     - 'spec/integration/**/*'
     - 'spec/unit/**/*'
 
-Lint/AssignmentInCondition:
-  Enabled: false
-
-Metrics/LineLength:
-  Enabled: false
-
 Metrics/AbcSize:
   Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'lib/active_fedora.rb'
+    - 'lib/active_fedora/rspec_matchers/have_predicate_matcher.rb'
+    - 'lib/active_fedora/rspec_matchers/have_many_associated_active_fedora_objects_matcher.rb'
+    - 'lib/tasks/active_fedora_dev.rake'
+    - 'lib/active_fedora/nested_attributes.rb'
 
 Metrics/BlockNesting:
   Exclude:
     - 'lib/active_fedora/autosave_association.rb'
     - 'lib/active_fedora/associations/has_many_association.rb'
+
+Metrics/ClassLength:
+  Exclude:
+    - 'lib/active_fedora/rdf/fcrepo.rb'
+    - 'lib/active_fedora/file_configurator.rb'
+    - 'lib/active_fedora/file.rb'
+    - 'lib/active_fedora/associations/association.rb'
+    - 'lib/active_fedora/associations/builder/association.rb'
+    - 'lib/active_fedora/associations/collection_proxy.rb'
+    - 'lib/active_fedora/associations/collection_association.rb'
+    - 'lib/active_fedora/reflection.rb'
+    - 'lib/active_fedora/orders/ordered_list.rb'
+    - 'lib/active_fedora/solr_service.rb'
+    - 'lib/active_fedora/associations/orders_association.rb'
 
 Metrics/CyclomaticComplexity:
   Exclude:
@@ -62,6 +81,22 @@ Metrics/CyclomaticComplexity:
     - 'lib/active_fedora/indexing/suffix.rb'
     - 'lib/active_fedora/inheritance.rb'
 
+Metrics/LineLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/ModuleLength:
+  Exclude:
+    - 'lib/active_fedora.rb'
+    - 'lib/active_fedora/relation/finder_methods.rb'
+    - 'lib/active_fedora/persistence.rb'
+    - 'lib/active_fedora/attributes.rb'
+    - 'lib/active_fedora/autosave_association.rb'
+    - 'lib/active_fedora/attached_files.rb'
+    - 'lib/active_fedora/nested_attributes.rb'
+
 Metrics/PerceivedComplexity:
   Exclude:
     - 'lib/active_fedora.rb'
@@ -79,41 +114,6 @@ Metrics/PerceivedComplexity:
     - 'lib/active_fedora/indexing/field_mapper.rb'
     - 'lib/active_fedora/inheritance.rb'
 
-Metrics/ModuleLength:
-  Exclude:
-    - 'lib/active_fedora.rb'
-    - 'lib/active_fedora/relation/finder_methods.rb'
-    - 'lib/active_fedora/persistence.rb'
-    - 'lib/active_fedora/attributes.rb'
-    - 'lib/active_fedora/autosave_association.rb'
-    - 'lib/active_fedora/attached_files.rb'
-    - 'lib/active_fedora/nested_attributes.rb'
-
-Metrics/ClassLength:
-  Exclude:
-    - 'lib/active_fedora/rdf/fcrepo.rb'
-    - 'lib/active_fedora/file_configurator.rb'
-    - 'lib/active_fedora/file.rb'
-    - 'lib/active_fedora/associations/association.rb'
-    - 'lib/active_fedora/associations/builder/association.rb'
-    - 'lib/active_fedora/associations/collection_proxy.rb'
-    - 'lib/active_fedora/associations/collection_association.rb'
-    - 'lib/active_fedora/reflection.rb'
-    - 'lib/active_fedora/orders/ordered_list.rb'
-    - 'lib/active_fedora/solr_service.rb'
-    - 'lib/active_fedora/associations/orders_association.rb'
-
-Metrics/MethodLength:
-  Enabled: false
-
-Naming/MethodName:
-  Exclude:
-    - 'lib/active_fedora/with_metadata.rb'
-
-Style/AndOr:
-  Exclude:
-    - 'lib/active_fedora/associations/has_many_association.rb'
-
 Naming/AccessorMethodName:
   Exclude:
     - 'lib/active_fedora/with_metadata/metadata_node.rb'
@@ -121,6 +121,10 @@ Naming/AccessorMethodName:
     - 'lib/active_fedora/attribute_methods/dirty.rb'
     - 'lib/active_fedora/associations/has_many_association.rb'
     - 'lib/active_fedora/associations/association.rb'
+
+Naming/MethodName:
+  Exclude:
+    - 'lib/active_fedora/with_metadata.rb'
 
 Naming/PredicateName:
   Exclude:
@@ -140,9 +144,39 @@ Naming/PredicateName:
     - 'lib/active_fedora/associations/builder/aggregation.rb'
     - 'lib/active_fedora/indexing/suffix.rb'
 
+Style/AndOr:
+  Exclude:
+    - 'lib/active_fedora/associations/has_many_association.rb'
+
+Style/BlockDelimiters:
+  Exclude:
+    - 'spec/**/*'
+
+Style/CaseEquality:
+  Exclude:
+    - 'lib/active_fedora/relation/finder_methods.rb'
+
+Style/EachWithObject:
+  Exclude:
+    - 'lib/active_fedora/relation/finder_methods.rb'
+
 Style/GuardClause:
   Exclude:
     - 'lib/active_fedora/autosave_association.rb'
+    - 'lib/active_fedora/associations/builder/collection_association.rb'
+    - 'lib/active_fedora/associations/builder/directly_contains.rb'
+    - 'lib/active_fedora/associations/builder/directly_contains_one.rb'
+    - 'lib/active_fedora/associations/builder/indirectly_contains.rb'
+    - 'lib/active_fedora/associations/collection_association.rb'
+    - 'lib/active_fedora/associations/singular_association.rb'
+    - 'lib/active_fedora/attribute_methods/write.rb'
+    - 'lib/active_fedora/core.rb'
+    - 'lib/active_fedora/reflection.rb'
+    - 'lib/active_fedora/orders/ordered_list.rb'
+    - 'lib/active_fedora/nested_attributes.rb'
+    - 'lib/active_fedora/indexing/field_mapper.rb'
+    - 'lib/active_fedora/indexing.rb'
+    - 'lib/active_fedora/file_configurator.rb'
 
 Style/TrivialAccessors:
   Exclude:
@@ -152,36 +186,16 @@ Style/TrivialAccessors:
     - 'lib/active_fedora/associations/belongs_to_association.rb'
     - 'lib/active_fedora/associations/association.rb'
 
-Style/EachWithObject:
-  Exclude:
-    - 'lib/active_fedora/relation/finder_methods.rb'
-
-Style/CaseEquality:
-  Exclude:
-    - 'lib/active_fedora/relation/finder_methods.rb'
-
-Style/BlockDelimiters:
-  Exclude:
-    - 'spec/**/*'
-
 Layout/BlockEndNewline:
-  Exclude:
-    - 'spec/**/*'
-
-Layout/MultilineBlockLayout:
-  Exclude:
-    - 'spec/**/*'
-
-Style/Semicolon:
-  Exclude:
-    - 'spec/**/*'
-
-Style/Lambda:
   Exclude:
     - 'spec/**/*'
 
 Layout/IndentationConsistency:
   EnforcedStyle: indented_internal_methods
+
+Layout/MultilineBlockLayout:
+  Exclude:
+    - 'spec/**/*'
 
 Style/CollectionMethods:
   PreferredMethods:
@@ -191,13 +205,27 @@ Style/CollectionMethods:
     detect: 'find'
     find_all: 'select'
 
-Style/WordArray:
+Style/Lambda:
+  Exclude:
+    - 'spec/**/*'
+
+Style/RegexpLiteral:
+  Enabled: false
+
+Style/Semicolon:
+  Exclude:
+    - 'spec/**/*'
+
+Style/StringLiterals:
   Enabled: false
 
 Style/RegexpLiteral:
   Enabled: false
 
 Style/StringLiterals:
+  Enabled: false
+
+Style/WordArray:
   Enabled: false
 
 Style/ClassAndModuleChildren:
@@ -234,6 +262,12 @@ Style/ZeroLengthPredicate:
 Performance/RedundantMerge:
   Exclude:
     - 'lib/active_fedora/railtie.rb'
+
+Naming/VariableNumber:
+  Exclude:
+    - 'spec/unit/orders/ordered_list_spec.rb'
+    - 'spec/unit/ordered_spec.rb'
+    - 'spec/integration/associations_spec.rb'
 
 Rails:
   Enabled: true

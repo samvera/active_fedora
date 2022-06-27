@@ -9,6 +9,7 @@ module ActiveFedora
     def initialize(model, reflections)
       @base = model
       @reflections = reflections
+      super
     end
 
     def [](name)
@@ -95,6 +96,8 @@ module ActiveFedora
       @first = first
       @base = first.base
       @second = second
+
+      super
     end
 
     def [](name)

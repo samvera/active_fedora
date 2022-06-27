@@ -20,10 +20,10 @@ describe "Marshalling and loading" do
 
   context "persisted records" do
     let(:post) { Post.create(text: ['serialize me']) }
-    it "marshals them" do
-      marshalled = Marshal.dump(post)
-      loaded     = Marshal.load(marshalled)
+    let(:marshalled) { Marshal.dump(post) }
+    let(:loaded) { Marshal.load(marshalled) }
 
+    it "marshals them" do
       expect(loaded.attributes).to eq post.attributes
     end
   end

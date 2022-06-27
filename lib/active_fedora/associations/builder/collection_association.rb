@@ -45,7 +45,7 @@ module ActiveFedora::Associations::Builder
 
     def self.wrap_scope(scope, mod)
       if scope
-        if scope.arity > 0
+        if scope.arity.positive?
           proc { |owner| instance_exec(owner, &scope).extending(mod) }
         else
           proc { instance_exec(&scope).extending(mod) }

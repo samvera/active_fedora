@@ -213,7 +213,7 @@ describe ActiveFedora::File do
             test_object.save!
           end
           it "raises a HTTP redirect too deep Error" do
-            expect { test_object.three.stream.each { |chunk| chunk } }.to raise_error('HTTP redirect too deep')
+            expect { test_object.three.stream }.to raise_error('HTTP redirect too deep')
           end
         end
       end

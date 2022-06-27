@@ -36,6 +36,7 @@ module ActiveFedora::RDF
         @index_field_config = index_field_config
         @object             = object
         @name               = name
+
         self
       end
 

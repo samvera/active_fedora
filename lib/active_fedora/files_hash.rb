@@ -3,6 +3,7 @@ module ActiveFedora
   class FilesHash < AssociationHash
     def initialize(model)
       @base = model
+      super
     end
 
     def reflections

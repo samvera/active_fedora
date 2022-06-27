@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 module ActiveFedora
   class NullLogger < Logger
-    def initialize(*); end
+    def initialize(*)
+      super
+    end
 
     # allows all the usual logger method calls (warn, info, error, etc.)
     def add(*); end

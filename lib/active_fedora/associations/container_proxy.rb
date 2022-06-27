@@ -4,6 +4,7 @@ module ActiveFedora
     class ContainerProxy < CollectionProxy
       def initialize(association)
         @association = association
+        super
       end
     end
   end

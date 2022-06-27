@@ -38,7 +38,7 @@ module ActiveFedora::File::Attributes
   end
 
   def has_content?
-    size && size > 0
+    size&.positive?
   end
 
   def empty?

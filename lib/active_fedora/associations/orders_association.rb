@@ -99,13 +99,12 @@ module ActiveFedora::Associations
     def insert_record(record, _force = true, _validate = true)
       record.save_target
       list_container.save
-      # NOTE: This turns out to be pretty cheap, but should we be doing it
-      # elsewhere?
-      unless list_container.changed?
-        owner.head = [list_container.head_id.first]
-        owner.tail = [list_container.tail_id.first]
-        owner.save
-      end
+      # NOTE: This turns out to be pretty cheap, but should we be doing it elsewhere?
+      return if list_container.changed?
+
+      owner.head = [list_container.head_id.first]
+      owner.tail = [list_container.tail_id.first]
+      owner.save
     end
 
     def scope(*_args)
