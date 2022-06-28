@@ -212,7 +212,7 @@ module ActiveFedora
       attr_reader :options
 
       attr_reader :active_fedora
-
+      # rubocop:disable Lint/MissingSuper
       def initialize(name, scope, options, active_fedora)
         @name = name
         @scope = scope
@@ -220,9 +220,8 @@ module ActiveFedora
         @active_fedora = active_fedora
         @klass         = options[:anonymous_class]
         @automatic_inverse_of = nil
-
-        super
       end
+      # rubocop:enable Lint/MissingSuper
 
       def autosave=(autosave)
         @options[:autosave] = autosave
