@@ -176,7 +176,9 @@ module ActiveFedora
       end
 
       if defined?(Rails.root)
-        config_path = Rails.root.join('config', "#{config_type}.yml")
+        # rubocop:disable Rails/FilePath
+        config_path = "#{Rails.root}/config/#{config_type}.yml"
+        # rubocop:enable Rails/FilePath
         return config_path if ::File.file? config_path
       end
 
