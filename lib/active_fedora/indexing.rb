@@ -97,9 +97,8 @@ module ActiveFedora
         # @param [Boolean] progress_bar - If true output progress bar information. Default false.
         # @param [Boolean] final_commit - If true perform a hard commit to the Solr service at the completion of the batch of updates. Default false.
 
-        # rubocop:enable Naming/VariableName
+        # rubocop:disable Naming/VariableName
         def reindex_everything(batch_size: 50, softCommit: true, progress_bar: false, final_commit: false)
-          # rubocop:disable Naming/VariableName
           # skip root url
           descendants = descendant_uris(ActiveFedora.fedora.base_uri, exclude_uri: true)
 
@@ -130,6 +129,7 @@ module ActiveFedora
             SolrService.commit
           end
         end
+        # rubocop:enable Naming/VariableName
 
         def descendant_uris(uri, exclude_uri: false)
           DescendantFetcher.new(uri, exclude_self: exclude_uri).descendant_and_self_uris

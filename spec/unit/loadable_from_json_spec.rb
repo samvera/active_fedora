@@ -19,7 +19,9 @@ describe ActiveFedora::LoadableFromJson::SolrBackedResource do
   let(:resource) { described_class.new(Foo) }
 
   before do
+    # rubocop:disable Rails/SkipsModelValidations
     resource.insert [nil, ::RDF::Vocab::DC.extent, RDF::URI('http://example.org/123')]
+    # rubocop:enable Rails/SkipsModelValidations
   end
 
   describe "#query" do

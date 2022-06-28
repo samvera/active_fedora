@@ -21,7 +21,9 @@ describe "Marshalling and loading" do
   context "persisted records" do
     let(:post) { Post.create(text: ['serialize me']) }
     let(:marshalled) { Marshal.dump(post) }
+    # rubocop:disable Security/MarshalLoad
     let(:loaded) { Marshal.load(marshalled) }
+    # rubocop:enable Security/MarshalLoad
 
     it "marshals them" do
       expect(loaded.attributes).to eq post.attributes
@@ -32,7 +34,9 @@ describe "Marshalling and loading" do
     let(:post) { Post.create(comments: [Comment.new]) }
     it "marshals associations" do
       marshalled = Marshal.dump(post)
+      # rubocop:disable Security/MarshalLoad
       loaded     = Marshal.load(marshalled)
+      # rubocop:enable Security/MarshalLoad
 
       expect(loaded.comments.size).to eq 1
     end

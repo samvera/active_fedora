@@ -157,7 +157,7 @@ module ActiveFedora # :nodoc:
   end
 
   class << self
-    attr_reader :fedora_config, :solr_config, :config_options
+    attr_reader :solr_config, :config_options
     attr_accessor :configurator
 
     def fedora_config
@@ -199,7 +199,7 @@ module ActiveFedora # :nodoc:
     def environment
       if config_options.fetch(:environment, nil)
         config_options[:environment]
-      elsif defined?(Rails.env) && !Rails.env.nil?
+      elsif defined?(Rails.env) && Rails.env
         Rails.env.to_s
       elsif defined?(ENV['environment']) && !ENV['environment'].nil?
         ENV['environment']
