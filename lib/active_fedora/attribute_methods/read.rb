@@ -5,7 +5,7 @@ module ActiveFedora
       module ClassMethods
         protected
 
-          def define_method_attribute(name)
+          def define_method_attribute(name, _opts = nil)
             name = name.to_s
             safe_name = name.unpack('h*').first
             temp_method = "__temp__#{safe_name}"

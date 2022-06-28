@@ -2,9 +2,18 @@
 
 source "https://rubygems.org"
 
-gem 'active-triples', git: 'https://github.com/samvera-labs/ActiveTriples.git', branch: 'merge-gitlab-upstream'
+# Bundler will rely on active-fedora.gemspec for dependency information.
+gemspec
+
+#git_source(:github) { |repo| "https://github.com/#{repo}.git" }
+
+#gem 'active-triples', git: 'https://github.com/samvera-labs/ActiveTriples.git', branch: 'merge-gitlab-upstream'
+#gem 'ldp', git: 'https://github.com/samvera/ldp.git', branch: 'allow-ruby-3.0'
+
+#gem 'active-triples', git: 'https://github.com/samvera-labs/ActiveTriples.git', branch: 'merge-gitlab-upstream'
+#gem 'ldp', git: 'https://github.com/samvera/ldp.git', branch: 'allow-ruby-3.0'
+
 gem 'jruby-openssl', platform: :jruby
-gem 'ldp', git: 'https://github.com/samvera/ldp.git', branch: 'allow-ruby-3.0'
 gem 'pry-byebug' unless ENV['CI']
 
 if ENV['RAILS_VERSION']
@@ -22,6 +31,3 @@ group :test do
   gem 'rspec_junit_formatter'
   gem 'simplecov', require: false
 end
-
-# Bundler will rely on active-fedora.gemspec for dependency information.
-gemspec path: File.expand_path(__dir__)

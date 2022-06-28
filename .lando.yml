@@ -1,0 +1,36 @@
+name: active_fedora
+services:
+  active_fedora_fcrepo4:
+    type: compose
+    app_mount: false
+    volumes:
+      fcrepo4:
+    services:
+      image: samvera/fcrepo4:4.7.5
+      environment:
+        CATALINA_OPTS: "-Djava.awt.headless=true -Dfile.encoding=UTF-8 -server -Xms512m -Xmx1024m -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:+DisableExplicitGC"
+      command: /fedora-entrypoint.sh
+      ports:
+        - '8080:8080'
+      volumes:
+        - fcrepo4:/data
+    portforward: true
+  active_fedora_development_solr:
+    type: solr:7
+    portforward: true
+    core: hydra-development
+    config:
+      dir: lib/generators/active_fedora/config/solr/templates/solr/conf
+  active_fedora_test_solr:
+    type: solr:7
+    portforward: true
+    core: hydra-test
+    config:
+      dir: lib/generators/active_fedora/config/solr/templates/solr/conf
+proxy:
+  active_fedora_development_solr:
+    - active_fedora.development.solr.lndo.site:8983
+  active_fedora_test_solr:
+    - active_fedora.test.solr.lndo.site:8983
+  active_fedora_fcrepo4:
+    - active_fedora.fcrepo4.lndo.site:8080

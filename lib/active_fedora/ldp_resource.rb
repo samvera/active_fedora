@@ -2,7 +2,9 @@
 module ActiveFedora
   class LdpResource < Ldp::Resource::RdfSource
     def build_empty_graph
-      graph_class.new(subject_uri)
+      graph_class.new(subject_uri, nil)
+    rescue StandardError => error
+      binding.pry
     end
 
     def self.graph_class

@@ -2,8 +2,16 @@
 ENV["environment"] ||= "test"
 
 require "bundler/setup"
-require 'simplecov'
+
 require 'coveralls'
+require 'equivalent-xml/rspec_matchers'
+require 'logger'
+require 'pry-byebug' unless ENV['CI']
+require 'rspec'
+require 'rspec/its'
+require 'simplecov'
+
+require 'active-fedora'
 
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
   [
@@ -15,13 +23,6 @@ SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
 SimpleCov.start "rails" do
   add_filter "/spec/"
 end
-
-require 'active-fedora'
-require 'rspec'
-require 'rspec/its'
-require 'equivalent-xml/rspec_matchers'
-require 'logger'
-require 'pry' unless ENV['CI']
 
 ActiveFedora::Base.logger = Logger.new(STDERR)
 ActiveFedora::Base.logger.level = Logger::WARN
