@@ -189,6 +189,7 @@ module ActiveFedora
         assign_uri_to_contained_resources
         save_contained_resources
         refresh
+      rescue StandardError => error
       end
 
       def _update_record(_options = {})

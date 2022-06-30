@@ -32,19 +32,19 @@ module ActiveFedora
     # An array of 1 or more literals reported by Fedora.
     # See 'success' for which one indicates fixity check is good.
     def status
-      fixity_graph.query(predicate: premis_status_predicate).map(&:object) +
-        fixity_graph.query(predicate: fedora_status_predicate).map(&:object)
+      fixity_graph.query([nil, premis_status_predicate, nil]).map(&:object) +
+        fixity_graph.query([nil, fedora_status_predicate, nil]).map(&:object)
     end
 
     # the currently calculated checksum, as a string URI, like
     # "urn:sha1:09a848b79f86f3a4f3f301b8baafde455d6f8e0e"
     def expected_message_digest
-      fixity_graph.query(predicate: ::RDF::Vocab::PREMIS.hasMessageDigest).first.try(:object).try(:to_s)
+      fixity_graph.query([nil, ::RDF::Vocab::PREMIS.hasMessageDigest, nil]).first.try(:object).try(:to_s)
     end
 
     # integer, as reported by fedora. bytes maybe?
     def expected_size
-      fixity_graph.query(predicate: ::RDF::Vocab::PREMIS.hasSize).first.try(:object).try(:to_s).try(:to_i)
+      fixity_graph.query([nil, ::RDF::Vocab::PREMIS.hasSize, nil]).first.try(:object).try(:to_s).try(:to_i)
     end
 
     # Fedora response as an ::RDF::Graph object. Public API, so consumers

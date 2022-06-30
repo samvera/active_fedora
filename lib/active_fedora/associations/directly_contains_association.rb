@@ -15,7 +15,7 @@ module ActiveFedora
                        container
                      end
 
-        uris = query_node.resource.query(predicate: container_predicate).map { |r| r.object.to_s }
+        uris = query_node.resource.query([nil, container_predicate, nil]).map { |r| r.object.to_s }
 
         uris.map { |object_uri| klass.find(klass.uri_to_id(object_uri)) }
       end

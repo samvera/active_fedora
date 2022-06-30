@@ -31,20 +31,20 @@ module ActiveFedora
         if loaded?
           target.map(&:id)
         else
-          owner.resource.query(predicate: predicate)
+          owner.resource.query([nil, predicate, nil])
                .map { |s| ActiveFedora::Base.uri_to_id(s.object) } | target.map(&:id)
         end
       end
 
       def find_target
         if container_predicate = options[:has_member_relation]
-          uris = owner.resource.query(predicate: container_predicate).map { |r| r.object.to_s }
+          uris = owner.resource.query([nil, container_predicate, nil]).map { |r| r.object.to_s }
           uris.map { |object_uri| klass.find(klass.uri_to_id(object_uri)) }
         else # is_member_of_relation
           # TODO this is a lot of reads. Avoid this path
           # See https://github.com/samvera/active_fedora/issues/1345
           container_predicate = ::RDF::Vocab::LDP.contains
-          proxy_uris = container.resource.query(predicate: container_predicate).map { |r| r.object.to_s }
+          proxy_uris = container.resource.query([nil, container_predicate, nil]).map { |r| r.object.to_s }
           proxy_uris.map { |uri| proxy_class.find(proxy_class.uri_to_id(uri))[options[:foreign_key]] }
         end
       end

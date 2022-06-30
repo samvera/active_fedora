@@ -3,7 +3,7 @@ module ActiveFedora
   module Associations
     class BasicContainsAssociation < ContainsAssociation # :nodoc:
       def find_target
-        uris = owner.resource.query(predicate: options[:predicate])
+        uris = owner.resource.query([nil, options[:predicate], nil])
                     .map { |r| r.object.to_s }
 
         uris.map { |object_uri| klass.find(klass.uri_to_id(object_uri)) }
@@ -26,7 +26,7 @@ module ActiveFedora
           new_resource = ActiveFedora::Base.uncached do
             owner.dup.reload.resource
           end
-          owner.resource.delete_insert([pattern], new_resource.query(pattern))
+          owner.resource.delete_insert(pattern, new_resource.query(pattern))
         end
         super
       end

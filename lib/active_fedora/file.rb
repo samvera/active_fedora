@@ -52,6 +52,8 @@ module ActiveFedora
 
     def described_by
       raise "#{self} isn't persisted yet" if new_record?
+      return unless links['describedby'] && !links['describedby'].empty?
+
       links['describedby'].first
     end
 

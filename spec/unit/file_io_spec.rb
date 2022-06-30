@@ -9,7 +9,7 @@ describe ActiveFedora::FileIO do
 
   let(:file_contents) { test_file }
   let(:fedora_file) {
-    ActiveFedora::File.new .tap do |file|
+    ActiveFedora::File.new.tap do |file|
       file.content = file_contents
       file.save
     end

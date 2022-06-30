@@ -19,9 +19,9 @@ module ActiveFedora::File::Attributes
   end
 
   def digest
-    response = metadata.ldp_source.graph.query(predicate: RDF::Vocab::PREMIS.hasMessageDigest)
+    response = metadata.ldp_source.graph.query([nil, RDF::Vocab::PREMIS.hasMessageDigest, nil])
     # fallback on old predicate for checksum
-    response = metadata.ldp_source.graph.query(predicate: fallback_digest_predicate) if response.empty?
+    response = metadata.ldp_source.graph.query([nil, fallback_digest_predicate, nil]) if response.empty?
     response.map(&:object)
   end
 

@@ -15,7 +15,7 @@ module ActiveFedora
                        container_association.container # Use the :through association's container
                      end
 
-        contained_uris = query_node.resource.query(predicate: container_predicate).map { |r| r.object.to_s }
+        contained_uris = query_node.resource.query([nil, container_predicate, nil]).map { |r| r.object.to_s }
         contained_uris.each do |object_uri|
           contained_object = klass.find(klass.uri_to_id(object_uri))
           return contained_object if get_type_from_record(contained_object).include?(options[:type])

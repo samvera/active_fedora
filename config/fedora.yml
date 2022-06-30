@@ -1,13 +1,11 @@
 development:
   user: <%= ENV['FCREPO_USER'] || 'fedoraAdmin' %>
   password: <%= ENV['FCREPO_PASSWORD'] || 'fedoraAdmin' %>
-  # url: http://<%= ENV['FCREPO_HOST'] || 'localhost' %>:<%= ENV['FCREPO_DEVELOPMENT_PORT'] || ENV['FCREPO_PORT'] || 8984 %>/<%= ENV['FCREPO_REST_PATH'] || 'rest' %>
   url: http://<%= ENV['FCREPO_HOST'] || 'localhost' %>:<%= ENV['FCREPO_DEVELOPMENT_PORT'] || ENV['FCREPO_PORT'] || 8984 %>/<%= ENV['FCREPO_REST_PATH'] || 'rest' %>
   base_path: <%= ENV['FCREPO_BASE_PATH'] || '/dev' %>
 test:
   user: fedoraAdmin
   password: fedoraAdmin
-  # url: http://<%= ENV['FCREPO_HOST'] || 'localhost' %>:<%= ENV['FCREPO_TEST_PORT'] || ENV['FCREPO_PORT'] || 8986 %>/<%= ENV['FCREPO_REST_PATH'] || 'rest' %>
   url: http://<%= ENV['FCREPO_HOST'] || 'localhost' %>:<%= ENV['FCREPO_TEST_PORT'] || ENV['FCREPO_PORT'] || 8986 %>/<%= ENV['FCREPO_REST_PATH'] || 'rest' %>
   base_path: <%= ENV['FCREPO_BASE_PATH'] || '/test' %>
 production:

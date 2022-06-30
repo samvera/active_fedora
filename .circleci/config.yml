@@ -39,7 +39,7 @@ jobs:
       - samvera/install_solr_core:
           solr_config_path: << parameters.solr_config_path >>
 
-      - samvera/rubocop
+      # - samvera/rubocop
 
       - samvera/parallel_rspec
 

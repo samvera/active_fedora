@@ -9,9 +9,19 @@ module ActiveFedora
 
     def build(klass, id)
       if id
-        LdpResource.new(connection, to_uri(klass, id))
+        parsed_fedora_host = URI.parse(ActiveFedora.fedora.host).to_s
+        segments = id.gsub(parsed_fedora_host, '')
+        relative_id = segments.gsub(ActiveFedora.fedora.base_path, '')
+
+        LdpResource.new(connection, to_uri(klass, relative_id))
       else
+        # Update ActiveFedora::Persistence
+        # self.identifier_service_class = NullIdentifierService
         parent_uri = ActiveFedora.fedora.host + ActiveFedora.fedora.base_path
+        node_id = SecureRandom.uuid
+        node_uri = "#{parent_uri}/#{node_id}"
+
+        #LdpResource.new(connection, node_uri, nil, parent_uri)
         LdpResource.new(connection, nil, nil, parent_uri)
       end
     end

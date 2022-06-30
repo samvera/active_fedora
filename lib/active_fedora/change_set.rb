@@ -21,10 +21,10 @@ module ActiveFedora
         if object.association(key.to_sym).present?
           # This is always an ActiveFedora::Reflection::RDFPropertyReflection
           predicate = object.association(key.to_sym).reflection.predicate
-          result[predicate] = graph.query(subject: object.rdf_subject, predicate: predicate)
+          result[predicate] = graph.query([object.rdf_subject, predicate, nil])
         elsif object.class.properties.keys.include?(key)
           predicate = graph.reflections.reflect_on_property(key).predicate
-          results = graph.query(subject: object.rdf_subject, predicate: predicate)
+          results = graph.query([object.rdf_subject, predicate, nil])
           new_graph = child_graphs(results.map(&:object))
           results.each do |res|
             new_graph << res
@@ -33,7 +33,7 @@ module ActiveFedora
         elsif key == 'type'
           # working around https://github.com/ActiveTriples/ActiveTriples/issues/122
           predicate = ::RDF.type
-          result[predicate] = graph.query(subject: object.rdf_subject, predicate: predicate)
+          result[predicate] = graph.query([object.rdf_subject, predicate, nil])
         elsif object.local_attributes.include?(key)
           raise "Unable to find a graph predicate corresponding to the attribute: \"#{key}\""
         end
@@ -47,7 +47,7 @@ module ActiveFedora
       def child_graphs(objects)
         child_graphs = ::RDF::Graph.new
         objects.each do |object|
-          graph.query(subject: object).each do |statement|
+          graph.query([object, nil, nil]).each do |statement|
             # Have to filter out Fedora triples.
             child_graphs << statement unless FedoraStatement.new(statement).internal?
           end
