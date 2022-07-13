@@ -50,6 +50,11 @@ module ActiveFedora
 
     private
 
+      def create_base_path
+        response = connection.put(root_resource_path, '')
+        @initialized = response.success?
+      end
+
       # Call this to create a Container Resource to act as the base path for this connection
       def init_base_path
         return if @initialized
@@ -59,7 +64,7 @@ module ActiveFedora
         @initialized = true
         false
       rescue Ldp::NotFound
-        @initialized = connection.put(root_resource_path, '').success?
+        create_base_path
       end
   end
 end

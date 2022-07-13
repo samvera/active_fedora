@@ -189,7 +189,7 @@ module ActiveFedora
         assign_uri_to_contained_resources
         save_contained_resources
         refresh
-      rescue StandardError => error
+        execute_sparql_update
       end
 
       def _update_record(_options = {})
@@ -212,6 +212,7 @@ module ActiveFedora
       end
 
       def execute_sparql_update
+        assert_content_model
         change_set = ChangeSet.new(self, resource, changed_attributes.keys)
         return true if change_set.empty?
         ActiveFedora.fedora.ldp_resource_service.update(change_set, self.class, id)
@@ -230,8 +231,14 @@ module ActiveFedora
       # and assign_id can mint an id for the object, then assign it to the resource.
       # Otherwise the resource will have the id assigned by the LDP server
       def assign_rdf_subject
-        @ldp_source = if !id && new_id = assign_id
-                        LdpResource.new(ActiveFedora.fedora.connection, self.class.id_to_uri(new_id), @resource)
+        @ldp_source = if !id
+                        new_id = assign_id
+                        new_subject_uri = if new_id.nil?
+                                            new_id
+                                          else
+                                            self.class.id_to_uri(new_id)
+                                          end
+                        LdpResource.new(ActiveFedora.fedora.connection, new_subject_uri, @resource)
                       else
                         LdpResource.new(ActiveFedora.fedora.connection, @ldp_source.subject, @resource, base_path_for_resource)
                       end

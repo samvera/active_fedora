@@ -40,6 +40,7 @@ Metrics/BlockLength:
     - 'lib/active_fedora/rspec_matchers/have_many_associated_active_fedora_objects_matcher.rb'
     - 'lib/tasks/active_fedora_dev.rake'
     - 'lib/active_fedora/nested_attributes.rb'
+    - 'lib/active_fedora/attributes.rb'
 
 Metrics/BlockNesting:
   Exclude:

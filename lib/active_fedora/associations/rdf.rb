@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 module ActiveFedora
   module Associations
+    class WrappedAttributes < Hash
+      def fetch_value(key)
+        fetch(key)
+      end
+    end
+
     class RDF < SingularAssociation # :nodoc:
       def replace(values)
         ids = Array(values).reject(&:blank?)

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 require 'active_model/forbidden_attributes_protection'
+require 'active_model/attribute_set'
+
 module ActiveFedora
   module Attributes
     extend ActiveSupport::Concern
@@ -10,12 +12,26 @@ module ActiveFedora
       include Serializers
       include PrimaryKey
 
+      # @see ActiveModel::Dirty#mutations_from_database
+      # @see activemodel/lib/active_model/dirty.rb
+      def mutations_from_database
+        @attributes = ActiveModel::AttributeSet.new(attributes)
+        super
+      end
+
       after_save :clear_changed_attributes_or_changes_applied
       # @deprecated use #changes_applied instead
       def clear_changed_attributes
         Deprecation.warn ActiveFedora::Attributes, "#clear_changed_attributes is deprecated, use ActiveModel::Dirty#changes_applied instead."
         @previously_changed = changes
         clear_attribute_changes(changes.keys)
+      end
+
+      # @see ActiveModel::Dirty#changes_applied
+      # @see activemodel/lib/active_model/dirty.rb
+      def changes_applied
+        @mutations_before_last_save = mutations_from_database
+        @mutations_from_database = nil
       end
 
       ##
@@ -40,8 +56,21 @@ module ActiveFedora
       self.class.attribute_names
     end
 
-    def attributes
-      attribute_names.each_with_object("id" => id) { |key, hash| hash[key] = self[key] }
+    def model_attributes
+      @model_attributes ||= begin
+                          mapped = attribute_names.map do |key, value|
+                            [
+                              key,
+                              ActiveModel::Attribute.new(
+                                # key, self[key], Type::Value.new.cast(value)
+                                key, self[key], Type::Value.new, nil, value
+                              )
+                            ]
+                          end
+
+                          values = Hash[mapped]
+                          ActiveModel::AttributeSet.new(values)
+                        end
     end
 
     def [](key)
@@ -84,12 +113,16 @@ module ActiveFedora
 
       module ClassMethods
         def attribute_names
-          @attribute_names ||= delegated_attributes.keys + association_attributes - system_attributes
+          # @attribute_names ||= delegated_attributes.keys + association_attributes - system_attributes
+          # We need to store system attributes for fcrepo5
+          @attribute_names ||= delegated_attributes.keys + association_attributes + system_attributes
         end
 
         # Attributes that are asserted about this RdfSource (not on a datastream)
         def local_attributes
-          association_attributes + properties.keys - system_attributes
+          # association_attributes + properties.keys - system_attributes
+          # We need to store system attributes for fcrepo5
+          association_attributes + properties.keys + system_attributes
         end
 
         # Attributes that are required by ActiveFedora and Fedora

@@ -247,14 +247,14 @@ module ActiveFedora
 
         class HeadSentinel < Sentinel
           def initialize(*args)
-            super(args.first, **(args.last))
+            super(args.first, **args.last)
             @next ||= TailSentinel.new(parent, prev_node: self)
           end
         end
 
         class TailSentinel < Sentinel
           def initialize(*args)
-            super(args.first, **(args.last))
+            super(args.first, **args.last)
             prev.next = self if prev && prev.next != self
           end
         end

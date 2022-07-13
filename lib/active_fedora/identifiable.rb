@@ -41,7 +41,8 @@ module ActiveFedora
       if uri.is_a?(::RDF::URI) && uri.value.blank?
         nil
       elsif uri.present?
-        self.class.uri_to_id(URI.parse(uri))
+        parsed_uri = URI.parse(uri)
+        self.class.uri_to_id(parsed_uri)
       end
     end
 

@@ -32,8 +32,9 @@ module ActiveFedora
     # @return [Array] objects of the Class that +find+ is being called on
     def find(*args)
       return to_a.find { |*block_args| yield(*block_args) } if block_given?
-      options = args.extract_options!
-      options = options.dup
+      extracted = args.extract_options!
+      default_options = { cast: true }
+      options = default_options.merge(extracted).dup
       cast = if @klass == ActiveFedora::Base && !options.key?(:cast)
                true
              else

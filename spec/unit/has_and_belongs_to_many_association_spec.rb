@@ -104,14 +104,17 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     end
 
     context "with a persisted collection" do
-      let(:collection) { Collection.create.tap { |c| c.members << thing } }
       let(:thing) { Thing.create }
+      let(:collection) { Collection.create.tap { |c| c.members << thing } }
 
       context "when the ids are set" do
         let(:thing2) { Thing.create }
         let(:thing3) { Thing.create }
 
         it "clears the object set" do
+          collection
+          thing2
+          thing3
           expect(collection.members).to eq [thing]
           collection.member_ids = [thing2.id, thing3.id]
           expect(collection.members).to contain_exactly thing2, thing3
@@ -119,6 +122,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
       end
 
       it "calls destroy" do
+        collection
         # this is a pretty weak test
         expect { collection.destroy }.to_not raise_error
       end

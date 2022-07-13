@@ -5,8 +5,8 @@ source "https://rubygems.org"
 # Bundler will rely on active-fedora.gemspec for dependency information.
 gemspec
 
-gem 'active-triples', git: 'https://github.com/samvera-labs/ActiveTriples.git', branch: 'merge-gitlab-upstream'
-gem 'ldp', git: 'https://github.com/samvera/ldp.git', branch: 'allow-ruby-3.0'
+gem 'active-triples', path: '/Users/jrg5/src/github.com/samvera-labs/ActiveTriples'
+gem 'ldp', path: '/Users/jrg5/src/github.com/samvera/workspace6/ldp'
 
 gem 'jruby-openssl', platform: :jruby
 gem 'pry-byebug' unless ENV['CI']

@@ -37,7 +37,7 @@ module ActiveFedora
       end
 
       def _read_attribute(attr_name) # :nodoc:
-        attributes.fetch(attr_name.to_s) { |n| yield n if block_given? }
+        model_attributes.fetch(attr_name.to_s) { |n| yield n if block_given? }
       end
 
       alias attribute _read_attribute

@@ -22,6 +22,10 @@ module ActiveFedora
       def logger
         self.class.logger
       end
+
+      def self.relation
+        Relation.new(self)
+      end
     end
 
     # Constructor.  You may supply a custom +:id+, or we call the Fedora Rest API for the
@@ -138,11 +142,9 @@ module ActiveFedora
         end
         deprecation_deprecate to_class_uri: "use 'to_rdf_representation()' instead"
 
-        private
-
-          def relation
-            Relation.new(self)
-          end
+        # def relation
+        #  Relation.new(self)
+        # end
       end
 
     private
