@@ -61,10 +61,11 @@ module ActiveFedora
                           mapped = attribute_names.map do |key, value|
                             [
                               key,
-                              ActiveModel::Attribute.new(
-                                # key, self[key], Type::Value.new.cast(value)
-                                key, self[key], Type::Value.new, nil, value
-                              )
+                              #ActiveModel::FromUser.new(
+                                # key, self[key], Type::Value.new.cast(value), nil, value
+                              #  key, self[key], Type::Value.new, nil, value
+                              #)
+                              ActiveModel::Attribute.from_user(key, self[key], Type::Value.new)
                             ]
                           end
 
