@@ -138,6 +138,33 @@ module ActiveFedora
       @local_attributes.keys
     end
 
+    def filtered_attribute_names
+      [:has_model, :create_date, :modified_date]
+    end
+
+    def inspection_attribute_names
+      attribute_names - filtered_attribute_names.map(&:to_s)
+    end
+
+    def inspect
+      # We check defined?(@attributes) not to issue warnings if the object is
+      # allocated but not initialized.
+      inspection = if defined?(@attributes) && @attributes
+                     output = []
+                     # This was not generating the ID
+                     output << "id: #{id.inspect}"
+                     values = inspection_attribute_names.collect do |name|
+                       "#{name}: #{attribute_for_inspect(name)}" if has_attribute?(name)
+                     end
+                     output += values
+                     output.compact.join(", ")
+                   else
+                     "not initialized"
+                   end
+
+      "#<#{self.class} #{inspection}>"
+    end
+
     # Returns a hash of all the attributes with their names as keys and the values of the attributes as values.
     #
     #   class Person < ActiveFedora::Base

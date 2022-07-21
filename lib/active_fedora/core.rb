@@ -36,9 +36,12 @@ module ActiveFedora
     def initialize(attributes = nil, &_block)
       init_internals
       attributes = attributes.dup if attributes # can't dup nil in Ruby 2.3
+
       id = attributes && (attributes.delete(:id) || attributes.delete('id'))
+
       @ldp_source = build_ldp_resource(id)
       raise IllegalOperation, "Attempting to recreate existing ldp_source: `#{ldp_source.subject}'" unless ldp_source.new?
+
       assign_attributes(attributes) if attributes
       assert_content_model
       load_attached_files
