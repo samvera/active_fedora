@@ -7,7 +7,7 @@ shared_examples_for "An ActiveModel" do
     expect(inspected_object).to be_kind_of(klass)
   end
 
-  def assert_equal(the_other, one)
+  def assert_equal(the_other, one, description = nil)
     expect(one).to eq the_other
   end
 

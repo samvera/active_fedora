@@ -15,7 +15,7 @@ jobs:
         type: string
         default: lib/generators/active_fedora/config/solr/templates/solr/conf
     executor:
-      name: 'samvera/ruby_fcrepo_solr_redis_postgres'
+      name: 'samvera/ruby_fcrepo_solr'
       ruby_version: << parameters.ruby_version >>
     environment:
       RAILS_VERSION: << parameters.rails_version >>
@@ -49,6 +49,10 @@ workflows:
     jobs:
       # Ruby 2.7 releases
       - bundle_lint_test:
+          name: ruby2-7_rails6-1
+          ruby_version: 2.7.5
+          rails_version: 6.1.6.1
+      - bundle_lint_test:
           name: ruby2-7_rails6-0
           ruby_version: 2.7.5
           rails_version: 6.0.4.7
@@ -57,6 +61,10 @@ workflows:
           ruby_version: 2.7.5
           rails_version: 5.2.4
       # Ruby 2.6 releases
+      - bundle_lint_test:
+          name: ruby2-6_rails6-1
+          ruby_version: 2.6.9
+          rails_version: 6.1.6.1
       - bundle_lint_test:
           name: ruby2-6_rails6-0
           ruby_version: 2.6.9
@@ -88,7 +96,7 @@ workflows:
       - bundle_lint_test:
           name: ruby2-7_rails6-1
           ruby_version: 2.7.5
-          rails_version: 6.1.5
+          rails_version: 6.1.6.1
       - bundle_lint_test:
           name: ruby2-7_rails6-0
           ruby_version: 2.7.5
@@ -101,7 +109,7 @@ workflows:
       - bundle_lint_test:
           name: ruby2-6_rails6-1
           ruby_version: 2.6.9
-          rails_version: 6.1.5
+          rails_version: 6.1.6.1
       - bundle_lint_test:
           name: ruby2-6_rails6-0
           ruby_version: 2.6.9
@@ -111,10 +119,6 @@ workflows:
           ruby_version: 2.6.9
           rails_version: 5.2.4
       # Ruby 2.5 releases
-      - bundle_lint_test:
-          name: ruby2-5_rails6-1
-          ruby_version: 2.5.9
-          rails_version: 6.1.5
       - bundle_lint_test:
           name: ruby2-5_rails6.0
           ruby_version: 2.5.9
