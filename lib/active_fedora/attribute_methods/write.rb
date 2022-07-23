@@ -4,7 +4,9 @@ module ActiveFedora
       module ClassMethods
         protected
 
-          def define_method_attribute=(name)
+          # rubocop:disable Lint/UnusedMethodArgument
+          def define_method_attribute=(name, owner: nil)
+            # rubocop:enable Lint/UnusedMethodArgument
             name = name.to_s
             safe_name = name.unpack('h*'.freeze).first
             ActiveFedora::AttributeMethods::AttrNames.set_name_cache safe_name, name
