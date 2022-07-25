@@ -4,7 +4,7 @@ module ActiveFedora
       module ClassMethods
         protected
 
-          def define_method_attribute=(name)
+          def define_method_attribute=(name, owner: nil)
             name = name.to_s
             safe_name = name.unpack('h*'.freeze).first
             ActiveFedora::AttributeMethods::AttrNames.set_name_cache safe_name, name
