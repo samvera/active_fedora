@@ -111,28 +111,12 @@ describe ActiveFedora::Base do
         expect(uri).to eq ActiveFedora::Core::FedoraIdTranslator
       end
     end
-    context "when it's set to nil" do
-      before do
-        described_class.translate_id_to_uri = nil
-      end
-      it "is a FedoraIdTranslator" do
-        expect(uri).to eq ActiveFedora::Core::FedoraIdTranslator
-      end
-    end
   end
 
   describe "#translate_uri_to_id" do
     subject(:uri) { described_class.translate_uri_to_id }
     context "when it's not set" do
       it "is a FedoraUriTranslator" do
-        expect(uri).to eq ActiveFedora::Core::FedoraUriTranslator
-      end
-    end
-    context "when it's set to nil" do
-      before do
-        described_class.translate_uri_to_id = nil
-      end
-      it "is a FedoraIdTranslator" do
         expect(uri).to eq ActiveFedora::Core::FedoraUriTranslator
       end
     end
@@ -158,7 +142,7 @@ describe ActiveFedora::Base do
       before do
         described_class.translate_id_to_uri = lambda { |id| "#{ActiveFedora.fedora.base_uri}/foo/#{id}" }
       end
-      after { described_class.translate_id_to_uri = nil }
+      after { described_class.translate_id_to_uri = ActiveFedora::Core::FedoraIdTranslator }
 
       it { is_expected.to eq "#{ActiveFedora.fedora.base_uri}/foo/123456w" }
     end
@@ -198,7 +182,7 @@ describe ActiveFedora::Base do
       before do
         described_class.translate_uri_to_id = lambda { |uri| uri.to_s.split('/')[-1] }
       end
-      after { described_class.translate_uri_to_id = nil }
+      after { described_class.translate_uri_to_id = ActiveFedora::Core::FedoraUriTranslator }
 
       it { is_expected.to eq '123456w' }
     end
