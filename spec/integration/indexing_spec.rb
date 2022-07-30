@@ -1,5 +1,4 @@
 require 'spec_helper'
-@@last_id = 0
 
 describe ActiveFedora::Base do
   describe "descendant_uris" do

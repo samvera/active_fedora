@@ -21,14 +21,13 @@ RSpec.describe ActiveFedora::FinderMethods do
     this = self
     Class.new do
       include ActiveFedora::FinderMethods
-      @@klass = this.object_class
-      def initialize
-        @klass = @@klass
+      def initialize(object_class:)
+        @klass = object_class
       end
     end
   end
 
-  let(:finder) { finder_class.new }
+  let(:finder) { finder_class.new(object_class: object_class) }
 
   describe '#equivalent_class?' do
     let(:child_class) { Class.new(object_class) }
