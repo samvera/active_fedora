@@ -49,6 +49,10 @@ workflows:
     jobs:
       # Ruby 2.7 releases
       - bundle_lint_test:
+          name: ruby2-7_rails7-0
+          ruby_version: 2.7.5
+          rails_version: 7.0.3.1
+      - bundle_lint_test:
           name: ruby2-7_rails6-1
           ruby_version: 2.7.5
           rails_version: 6.1.6.1
@@ -93,6 +97,10 @@ workflows:
                 - main
     jobs:
       # Ruby 2.7 releases
+      - bundle_lint_test:
+          name: ruby2-7_rails7-0
+          ruby_version: 2.7.5
+          rails_version: 7.0.3.1
       - bundle_lint_test:
           name: ruby2-7_rails6-1
           ruby_version: 2.7.5
