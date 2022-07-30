@@ -165,7 +165,7 @@ describe ActiveFedora::Versionable do
         end
 
         it "links to versions endpoint" do
-          expect(content.metadata.ldp_source.graph.query(predicate: ::RDF::Vocab::Fcrepo4.hasVersions).objects).to_not be_empty
+          expect(content.metadata.ldp_source.graph.query({ predicate: ::RDF::Vocab::Fcrepo4.hasVersions }).objects).to_not be_empty
         end
 
         it "has one version" do

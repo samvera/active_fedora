@@ -59,7 +59,7 @@ module ActiveFedora
 
         add_self_to_partitioned_uris unless @exclude_self
 
-        rdf_graph.query(predicate: ::RDF::Vocab::LDP.contains).each_object do |uri|
+        rdf_graph.query({ predicate: ::RDF::Vocab::LDP.contains }).each_object do |uri|
           descendant_uri = uri.to_s
           self.class.new(
             descendant_uri,
@@ -89,7 +89,7 @@ module ActiveFedora
         end
 
         def add_self_to_partitioned_uris
-          rdf_graph.query(predicate: HAS_MODEL_PREDICATE).each_object do |model|
+          rdf_graph.query({ predicate: HAS_MODEL_PREDICATE }).each_object do |model|
             next unless model.literal?
 
             partitioned_uris[model.to_s] ||= []

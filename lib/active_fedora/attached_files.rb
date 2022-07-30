@@ -30,7 +30,7 @@ module ActiveFedora
     end
 
     def contains_assertions
-      resource.query(subject: resource, predicate: ::RDF::Vocab::LDP.contains).objects.map(&:to_s)
+      resource.query({ subject: resource, predicate: ::RDF::Vocab::LDP.contains }).objects.map(&:to_s)
     end
 
     # Load any undeclared relationships or has_subresource relationships.  These are non-idiomatic LDP

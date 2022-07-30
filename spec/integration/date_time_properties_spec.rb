@@ -33,7 +33,7 @@ describe ActiveFedora::Base do
 
   describe 'serializing' do
     let(:object) { Foo.new(date: [date]) }
-    let(:triple) { object.resource.query(predicate: ::RDF::Vocab::DC.date).to_a.first.object }
+    let(:triple) { object.resource.query({ predicate: ::RDF::Vocab::DC.date }).to_a.first.object }
     it 'time zone must have semicolin to be a cannonical XMLSchema#dateTime' do
       expect(triple.to_s).to match(/\+01:00/)
     end
