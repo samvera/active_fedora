@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 require 'active_fedora'
-require "rexml/document"
 
 describe ActiveFedora::File do
   let(:file) { described_class.new }
