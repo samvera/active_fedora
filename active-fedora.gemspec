@@ -36,7 +36,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "rubocop", '~> 0.56.0'
   s.add_development_dependency "rubocop-rspec", '~> 1.12.0'
   s.add_development_dependency "simplecov", '~> 0.8'
-  s.add_development_dependency "solr_wrapper", "~> 2.0"
+  s.add_development_dependency "solr_wrapper", "~> 4.0"
   s.add_development_dependency "yard"
 
   s.files         = `git ls-files`.split($OUTPUT_RECORD_SEPARATOR).select { |f| File.dirname(f) !~ %r{\A"?spec\/?} }
