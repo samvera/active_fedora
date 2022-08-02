@@ -204,7 +204,11 @@ describe ActiveFedora::File do
             test_object.add_file('', path: 'redirector', mime_type: "message/external-body; access-type=URL; url=\"#{test_object.webm.uri}\"")
             test_object.save!
           end
-          subject { str = ''; test_object.redirector.stream.each { |chunk| str << chunk }; str }
+          subject do
+            str = ''.dup
+            test_object.redirector.stream.each { |chunk| str << chunk }
+            str
+          end
           it { is_expected.to eq 'one1two2threfour' }
         end
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 module ActiveFedora
   class CachingConnection < Ldp::Client
-    def initialize(host, options = {})
+    def initialize(*args)
       super
       @cache = {}
       @cache_enabled = false

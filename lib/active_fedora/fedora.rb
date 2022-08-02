@@ -93,7 +93,8 @@ module ActiveFedora
       Faraday.new(host, options) do |conn|
         conn.response :encoding # use Faraday::Encoding middleware
         conn.adapter Faraday.default_adapter # net/http
-        conn.basic_auth(user, password)
+        # conn.basic_auth(user, password)
+        conn.request(:authorization, :basic, user, password)
       end
     end
 

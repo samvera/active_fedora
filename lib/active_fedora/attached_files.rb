@@ -9,9 +9,12 @@ module ActiveFedora
 
     # Returns only the attached_files that are declared with 'contains'
     def declared_attached_files
-      attached_files.reflections.keys.index_with do |k|
-        attached_files[k]
+      values = attached_files.reflections.map do |k, _v|
+        [k, attached_files[k]]
       end
+
+      valid = values.select { |_k, value| value.respond_to?(:serialize!) }
+      valid.to_h
     end
 
     #

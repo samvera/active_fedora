@@ -45,7 +45,7 @@ module ActiveFedora
     def read(amount = nil, buf = nil)
       raise(IOError, "closed stream") if @closed
 
-      new_out_buffer = String.new
+      new_out_buffer = ''
       out_buffer = if buf.nil?
                      new_out_buffer
                    else
@@ -106,7 +106,7 @@ module ActiveFedora
       end
 
       def read_to_buffer(amount, stream)
-        if !read_finished?
+        unless read_finished?
           bytes = read_bytes(amount)
           stream << bytes
         end
@@ -117,11 +117,10 @@ module ActiveFedora
       def read_bytes(count)
         total_slices = @buffer.slice(@pos..)
         slices = if count > total_slices.length - 1
-                    total_slices
-                  else
-                    #@buffer.slice(@pos..count - 1)
-                    @buffer.slice(@pos, count)
-                  end
+                   total_slices
+                 else
+                   @buffer.slice(@pos, count)
+                 end
 
         @pos += count
         slices
@@ -136,7 +135,7 @@ module ActiveFedora
           # Ruby Net library doesn't seem to like it if we modify the returned
           # chunk in any way, hence dup.
           bytes = @stream_fiber.try(:resume).try(:dup)
-          if !bytes.nil?
+          unless bytes.nil?
             @buffer = if @buffer.nil?
                         bytes
                       else
