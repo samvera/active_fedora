@@ -1,3 +1,4 @@
+require 'fiber'
 
 module ActiveFedora
   ##

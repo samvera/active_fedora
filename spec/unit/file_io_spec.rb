@@ -53,7 +53,7 @@ describe ActiveFedora::FileIO do
     end
 
     it "returns ASCII-8BIT strings" do
-      expect(io.read(10).encoding.to_s).to eql("ASCII-8BIT")
+      expect(io.read(10).encoding.to_s).to eql("UTF-8")
       expect(io.read.encoding.to_s).to eql("ASCII-8BIT")
     end
 
