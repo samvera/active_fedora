@@ -21,7 +21,7 @@ module ActiveFedora
     end
 
     def resources
-      query(predicate: ::RDF::Vocab::Fcrepo4.hasVersion)
+      query({ predicate: ::RDF::Vocab::Fcrepo4.hasVersion })
     end
 
     private
@@ -39,11 +39,11 @@ module ActiveFedora
       end
 
       def label_query(statement)
-        query(subject: statement.object).query(predicate: ::RDF::Vocab::Fcrepo4.hasVersionLabel).first.object.to_s
+        query({ subject: statement.object }).query({ predicate: ::RDF::Vocab::Fcrepo4.hasVersionLabel }).first.object.to_s
       end
 
       def created_query(statement)
-        query(subject: statement.object).query(predicate: ::RDF::Vocab::Fcrepo4.created).first.object.to_s
+        query({ subject: statement.object }).query({ predicate: ::RDF::Vocab::Fcrepo4.created }).first.object.to_s
       end
 
       def fedora_versions

@@ -1,5 +1,4 @@
 require 'spec_helper'
-@@last_id = 0
 
 describe ActiveFedora::Base do
   it_behaves_like "An ActiveModel"
@@ -122,7 +121,8 @@ describe ActiveFedora::Base do
     end
 
     def increment_id
-      @@last_id += 1
+      @last_id ||= 0
+      @last_id += 1
     end
 
     before do

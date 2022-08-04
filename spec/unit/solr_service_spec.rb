@@ -19,11 +19,11 @@ describe ActiveFedora::SolrService do
 
   describe '#conn' do
     it "takes a n-arg constructor and configure for localhost" do
-      expect(RSolr).to receive(:connect).with(timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr')
+      expect(RSolr).to receive(:connect).with({ timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr' })
       described_class.register.conn
     end
     it "clobbers options" do
-      expect(RSolr).to receive(:connect).with(timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr', autocommit: :off, foo: :bar)
+      expect(RSolr).to receive(:connect).with({ timeout: 120, open_timeout: 120, url: 'http://localhost:8080/solr', autocommit: :off, foo: :bar })
       described_class.register(autocommit: :off, foo: :bar).conn
     end
   end

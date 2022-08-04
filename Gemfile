@@ -11,8 +11,8 @@ if ENV['RAILS_VERSION']
   gem 'activemodel', ENV['RAILS_VERSION']
   gem 'rails', ENV['RAILS_VERSION']
 else
-  gem 'activemodel', '~> 6.0.4', '< 7'
-  gem 'rails', '~> 6.0.4', '< 7'
+  gem 'activemodel', '>= 6.0', '< 8'
+  gem 'rails', '>= 6.0', '< 8'
 end
 
 group :test do

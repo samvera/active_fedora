@@ -54,7 +54,7 @@ module ActiveFedora
 
         # @return [Array<RDF::Statement>]
         def rdf_query
-          owner.resource.query(subject: owner.rdf_subject, predicate: reflection.predicate).enum_statement
+          owner.resource.query({ subject: owner.rdf_subject, predicate: reflection.predicate }).enum_statement
         end
 
         # @return [Array<RDF::URI>]

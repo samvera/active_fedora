@@ -179,21 +179,21 @@ describe ActiveFedora::Base do
 
     it "returns a count" do
       expect(ActiveFedora::SolrService).to receive(:get)
-        .with(model_query, rows: 0)
+        .with(model_query, { rows: 0 })
         .and_return(mock_result)
       expect(SpecModel::Basic.count).to eq 7
     end
 
     it "allows conditions" do
       expect(ActiveFedora::SolrService).to receive(:get)
-        .with("#{model_query} AND (foo:bar)", rows: 0)
+        .with("#{model_query} AND (foo:bar)", { rows: 0 })
         .and_return(mock_result)
       expect(SpecModel::Basic.count(conditions: 'foo:bar')).to eq 7
     end
 
     it "counts without a class specified" do
       expect(ActiveFedora::SolrService).to receive(:get)
-        .with("(foo:bar)", rows: 0)
+        .with("(foo:bar)", { rows: 0 })
         .and_return(mock_result)
       expect(described_class.count(conditions: 'foo:bar')).to eq 7
     end
@@ -248,7 +248,7 @@ describe ActiveFedora::Base do
 
     before do
       expect(ActiveFedora::SolrService).to receive(:query)
-        .with(expected_query, sort: [sort_query]).and_return(mock_result)
+        .with(expected_query, { sort: [sort_query] }).and_return(mock_result)
     end
 
     context "with a hash of conditions" do

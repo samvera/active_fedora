@@ -134,7 +134,7 @@ describe ActiveFedora::WithMetadata do
     let(:reloaded_file) { SampleBook.new(file.uri) }
 
     it "persists the configured type" do
-      expect(reloaded_file.metadata_node.query(predicate: ::RDF.type).map(&:object)).to include book
+      expect(reloaded_file.metadata_node.query({ predicate: ::RDF.type }).map(&:object)).to include book
     end
   end
 

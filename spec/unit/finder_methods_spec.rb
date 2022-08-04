@@ -21,14 +21,13 @@ RSpec.describe ActiveFedora::FinderMethods do
     this = self
     Class.new do
       include ActiveFedora::FinderMethods
-      @@klass = this.object_class
-      def initialize
-        @klass = @@klass
+      def initialize(object_class:)
+        @klass = object_class
       end
     end
   end
 
-  let(:finder) { finder_class.new }
+  let(:finder) { finder_class.new(object_class: object_class) }
 
   describe '#equivalent_class?' do
     let(:child_class) { Class.new(object_class) }
@@ -107,7 +106,7 @@ RSpec.describe ActiveFedora::FinderMethods do
     let(:select_handler) { 'select' }
     let(:connection) { instance_double(RSolr::Client) }
     before do
-      expect(finder).to receive(:create_query).with('age_t' => '21').and_return('dummy query')
+      expect(finder).to receive(:create_query).with({ 'age_t' => '21' }).and_return('dummy query')
       allow(ActiveFedora::SolrService.instance).to receive(:conn).and_return(connection)
       allow(ActiveFedora::SolrService).to receive(:select_path).and_return(select_handler)
       expect(connection).to receive(:paginate) \

@@ -8,9 +8,9 @@ module ActiveFedora
 
     def model_type
       if respond_to?(:metadata)
-        metadata.ldp_source.graph.query(predicate: ::RDF.type).objects
+        metadata.ldp_source.graph.query({ predicate: ::RDF.type }).objects
       else
-        resource.query(subject: resource.rdf_subject, predicate: ::RDF.type).objects
+        resource.query({ subject: resource.rdf_subject, predicate: ::RDF.type }).objects
       end
     end
 
