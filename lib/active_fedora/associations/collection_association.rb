@@ -342,7 +342,8 @@ module ActiveFedora
           raise("Couldn't find reflection") unless @reflection.is_a?(ActiveFedora::Reflection::AbstractReflection)
           raise("Couldn't find reflection") if @reflection.macro == :has_and_belongs_to_many
 
-          raise("No :inverse_of or :predicate attribute was set or could be inferred for #{@reflection.macro} #{@reflection.name.inspect} on #{@owner.class}") unless @reflection.inverse_of
+          # raise("No :inverse_of or :predicate attribute was set or could be inferred for #{@reflection.macro} #{@reflection.name.inspect} on #{@owner.class}") unless @reflection.inverse_of
+          return [] unless @reflection.inverse_of
 
           @reflection.inverse_of
         end

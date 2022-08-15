@@ -34,7 +34,7 @@ module ActiveFedora::Associations
         records = ids.map do |id|
           base_repository.find(id)
         end
-        RecordComposite.new(records:)
+        RecordComposite.new(records: records)
       end
     end
   end

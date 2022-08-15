@@ -123,13 +123,15 @@ module ActiveFedora
       #   Invoice._reflect_on_association(:line_items).macro  # returns :has_many
       #
       def _reflect_on_association(association)
-        val = reflections[association].is_a?(AssociationReflection) ? reflections[association] : nil
-        unless val
+        reflection = reflections[association]
+        if reflection.is_a?(AssociationReflection)
+          reflection
+        else
           # When a has_many is paired with a has_and_belongs_to_many the assocation will have a plural name
-          association = association.to_s.pluralize.to_sym
-          val = reflections[association].is_a?(AssociationReflection) ? reflections[association] : nil
+          plural_association = association.to_s.pluralize.to_sym
+          plural_reflection = reflections[plural_association]
+          plural_reflection if plural_reflection.is_a?(AssociationReflection)
         end
-        val
       end
 
       def reflect_on_all_autosave_associations
@@ -354,8 +356,19 @@ module ActiveFedora
         raise NotImplementedError
       end
 
-      VALID_AUTOMATIC_INVERSE_MACROS = [:has_many, :has_and_belongs_to_many, :belongs_to].freeze
-      INVALID_AUTOMATIC_INVERSE_OPTIONS = [:conditions, :through, :polymorphic, :foreign_key].freeze
+      VALID_AUTOMATIC_INVERSE_MACROS = [
+        :has_many,
+        :has_and_belongs_to_many,
+        :belongs_to,
+        :indirectly_contains
+      ].freeze
+
+      INVALID_AUTOMATIC_INVERSE_OPTIONS = [
+        :conditions,
+        :through,
+        :polymorphic,
+        :foreign_key
+      ].freeze
 
       # Returns +true+ if +self+ is a +belongs_to+ reflection.
       def belongs_to?
@@ -402,7 +415,14 @@ module ActiveFedora
         # returns either false or the inverse association name that it finds.
         def automatic_inverse_of
           if can_find_inverse_of_automatically?(self)
-            inverse_name = ActiveSupport::Inflector.underscore(options[:as] || active_fedora.name.demodulize).to_sym
+            inflected = if options[:as]
+                          ActiveSupport::Inflector.underscore(options[:as])
+                        else
+                          active_fedora_name = active_fedora.name
+                          ActiveSupport::Inflector.underscore(active_fedora_name.demodulize)
+                        end
+
+            inverse_name = inflected.to_sym
 
             begin
               reflection = klass._reflect_on_association(inverse_name)
@@ -428,11 +448,21 @@ module ActiveFedora
         #
         # Anything with a scope can additionally ruin our attempt at finding an
         # inverse, so we exclude reflections with scopes.
-        def can_find_inverse_of_automatically?(reflection)
-          reflection.options[:inverse_of] != false &&
-            VALID_AUTOMATIC_INVERSE_MACROS.include?(reflection.macro) &&
-            !INVALID_AUTOMATIC_INVERSE_OPTIONS.any? { |opt| reflection.options[opt] }
-          # && !reflection.scope
+        def can_find_inverse_of_automatically?(_reflection)
+          # false_inverse_of_option? && valid_inverse_macro? && invalid_inverse_options.empty?
+          false_inverse_of_option? && valid_inverse_macro?
+        end
+
+        def false_inverse_of_option?
+          options[:inverse_of] != false
+        end
+
+        def valid_inverse_macro?
+          VALID_AUTOMATIC_INVERSE_MACROS.include?(macro)
+        end
+
+        def invalid_inverse_options
+          INVALID_AUTOMATIC_INVERSE_OPTIONS.select { |k| options[k] }
         end
 
         def derive_foreign_key
