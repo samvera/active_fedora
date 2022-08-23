@@ -62,10 +62,10 @@ module ActiveFedora
       if amount.zero?
         new_out_buffer
       else
-        read_to_buffer(amount, out_buffer)
+        buffered = read_to_buffer(amount, out_buffer)
         # if amount was specified but we reached eof before reading anything
         # then we must return nil
-        out_buffer.empty? ? nil : out_buffer
+        buffered
       end
     end
 
@@ -110,10 +110,11 @@ module ActiveFedora
       def read_to_buffer(amount, stream)
         unless read_finished?
           bytes = read_bytes(amount)
-          stream << bytes
+          duplicated = stream.dup
+          duplicated << bytes
         end
 
-        stream
+        duplicated
       end
 
       def read_bytes(count)
