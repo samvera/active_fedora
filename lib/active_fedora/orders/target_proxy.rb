@@ -47,8 +47,16 @@ module ActiveFedora
         association.delete_at(0) while to_ary.present?
       end
 
+      def reader
+        @reader = association.reader
+      end
+
+      def targets
+        @targets = reader.map(&:target)
+      end
+
       def to_ary
-        association.reader.map(&:target).dup
+        @elements = targets.dup
       end
       alias to_a to_ary
 

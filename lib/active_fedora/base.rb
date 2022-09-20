@@ -48,6 +48,10 @@ module ActiveFedora
     include LoadableFromJson
     include Schema
     include Aggregation::BaseExtension
+
+    def self.find(*args)
+      super(*args)
+    end
   end
 
   ActiveSupport.run_load_hooks(:active_fedora, Base)

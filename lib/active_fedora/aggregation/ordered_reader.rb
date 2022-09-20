@@ -19,6 +19,16 @@ module ActiveFedora::Aggregation
       end
     end
 
+    def to_a
+      elements = []
+
+      each do |proxy|
+        elements << proxy
+      end
+
+      elements
+    end
+
     private
 
       def first_head

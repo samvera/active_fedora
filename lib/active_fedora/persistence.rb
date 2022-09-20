@@ -185,7 +185,9 @@ module ActiveFedora
       def _create_record(_options = {})
         assign_rdf_subject
         serialize_attached_files
+
         @ldp_source = @ldp_source.create
+
         assign_uri_to_contained_resources
         save_contained_resources
         refresh

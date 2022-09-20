@@ -53,6 +53,9 @@ module ActiveFedora::Associations
     # Append a target node to the end of the order.
     # @param [ActiveFedora::Base] record Record to append
     def append_target(record, _skip_callbacks = false)
+      owner.save unless owner.persisted?
+      record.save unless record.persisted?
+
       unordered_association.concat(record) unless unordered_association.target.include?(record)
       target.append_target(record, proxy_in: owner)
     end

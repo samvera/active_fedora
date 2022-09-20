@@ -12,14 +12,23 @@ module ActiveFedora::Associations::Builder
 
     def self.define_readers(mixin, name)
       super
-      mixin.redefine_method(target_accessor(name)) do
-        association(name).target_reader
+
+      new_method_name = target_accessor(name)
+      mixin.redefine_method(new_method_name) do
+        target_association = association(name)
+        target_association.target_reader.targets
       end
-      mixin.redefine_method("#{target_accessor(name, pluralize: false)}_ids") do
-        association(name).target_ids_reader
+
+      new_ids_method_name = "#{target_accessor(name, pluralize: false)}_ids"
+      mixin.redefine_method(new_ids_method_name) do
+        target_association = association(name)
+        target_association.target_ids_reader
       end
-      mixin.redefine_method("#{target_accessor(name)}=") do |nodes|
-        association(name).target_writer(nodes)
+
+      new_mutate_method_name = "#{target_accessor(name)}="
+      mixin.redefine_method(new_mutate_method_name) do |nodes|
+        target_association = association(name)
+        target_association.target_writer(nodes)
       end
     end
 

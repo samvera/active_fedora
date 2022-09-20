@@ -34,7 +34,8 @@ module ActiveFedora
       return to_a.find { |*block_args| yield(*block_args) } if block_given?
       options = args.extract_options!
       options = options.dup
-      cast = if @klass == ActiveFedora::Base && !options.key?(:cast)
+      # cast = if @klass == ActiveFedora::Base && !options.key?(:cast)
+      cast = if (@klass == ActiveFedora::Base || @klass.ancestors.include?(ActiveFedora::Base)) && !options.key?(:cast)
                true
              else
                options.delete(:cast)
@@ -179,7 +180,9 @@ module ActiveFedora
         raise ActiveFedora::ObjectNotFoundError, "No ID provided for #{klass.name}." if id.empty?
         resource = ActiveFedora.fedora.ldp_resource_service.build(klass, id)
         raise_record_not_found_exception!(id) if resource.new?
-        class_to_load(resource, cast).allocate.init_with_resource(resource) # Triggers the find callback
+        new_class = class_to_load(resource, cast)
+        built = new_class.allocate
+        built.init_with_resource(resource) # Triggers the find callback
       end
 
       def raise_record_not_found_exception!(id)
@@ -190,7 +193,10 @@ module ActiveFedora
         if @klass == ActiveFedora::Base && cast == false
           ActiveFedora::Base
         else
-          resource_class = ActiveFedora.model_mapper.classifier(resource).best_model
+          return @klass if @klass.parents.include?(ActiveFedora::Aggregation)
+
+          model_classifier = ActiveFedora.model_mapper.classifier(resource)
+          resource_class = model_classifier.best_model
           raise ActiveFedora::ModelMismatch, "Expected #{@klass}. Got: #{resource_class}" unless equivalent_class?(resource_class)
           resource_class
         end

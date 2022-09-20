@@ -78,9 +78,12 @@ module ActiveFedora
       association = association_instance_get(name)
 
       if association.nil?
-        reflection  = self.class._reflect_on_association(name)
-        association = reflection.association_class.new(self, reflection) if reflection
-        association_instance_set(name, association) if association
+        reflection = self.class._reflect_on_association(name)
+
+        if reflection
+          association = reflection.association_class.new(self, reflection)
+          association_instance_set(name, association) if association
+        end
       end
 
       association

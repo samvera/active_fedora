@@ -77,9 +77,12 @@ module ActiveFedora
       # @option [::RDF::URI, ActiveFedora::Base] :proxy_in Proxy in to
       #   assert on the created node.
       def append_target(target, proxy_in: nil)
+        target.save unless target.persisted?
+
         node = build_node(new_node_subject)
         node.target = target
         node.proxy_in = proxy_in
+
         append_to(node, tail.prev)
       end
 
@@ -176,6 +179,10 @@ module ActiveFedora
         proxies.first
       end
 
+      def ordered_reader
+        ActiveFedora::Aggregation::OrderedReader.new(self)
+      end
+
       private
 
         attr_reader :node_cache
@@ -190,10 +197,6 @@ module ActiveFedora
           end
           append_node.next = source
           @changed = true
-        end
-
-        def ordered_reader
-          ActiveFedora::Aggregation::OrderedReader.new(self)
         end
 
         def build_node(subject = nil)

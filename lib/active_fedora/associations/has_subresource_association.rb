@@ -25,6 +25,7 @@ module ActiveFedora
         end
 
         def find_or_initialize_target(&block)
+          # If the reflection inherits from the ActiveFedora::File Class, build the association
           if reflection.klass < ActiveFedora::File
             reflection.build_association(id: target_uri, &block)
           else
