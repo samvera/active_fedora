@@ -209,6 +209,7 @@ module ActiveFedora
 
       def refresh
         @ldp_source = build_ldp_resource(id)
+        # binding.pry
         @resource = nil
       end
 

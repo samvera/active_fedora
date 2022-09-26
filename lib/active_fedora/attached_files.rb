@@ -40,14 +40,22 @@ module ActiveFedora
     # Load any undeclared relationships or has_subresource relationships.  These are non-idiomatic LDP
     # because we are going to find the subresource by knowing it's subpath ahead of time.
     # Does nothing if this object is using idiomatic basic containment, by declaring `is_a_container`
-    def load_attached_files
+    def load_contained_resources
       return if reflections[:contains] && reflections[:contains].macro == :is_a_container
-      contains_assertions.each do |file_uri|
-        path = file_uri.to_s.sub(uri + '/', '')
-        next if association(path.to_sym)
+
+      contains_assertions.each do |contained_uri|
+        path = contained_uri.to_s.sub(uri + '/', '')
+        #next if association(path.to_sym)
+        contained_assoc = association(path.to_sym)
+        if contained_assoc
+          #next unless contained_assoc.target.blank?
+          next
+        end
+
         create_singleton_association(path)
       end
     end
+    alias load_attached_files load_contained_resources
 
     # Add an ActiveFedora::File to the object.
     # @param [ActiveFedora::File] file
@@ -89,12 +97,32 @@ module ActiveFedora
       @undeclared_files ||= []
     end
 
+    def file_class_name
+      'ActiveFedora::File'
+    end
+
+    def build_subresource_reflection(uri, class_name)
+      Reflection::HasSubresourceReflection.new(uri, nil, { class_name: class_name }, self.class)
+    end
+
+    def build_subresource_association(uri, class_name)
+      reflection = build_subresource_reflection(uri, class_name)
+      Associations::HasSubresourceAssociation.new(self, reflection)
+    end
+
+    def build_sub_
+      Reflection::IndirectlyContainsReflection.new(uri, foo)
+    end
+
     private
 
-      def create_singleton_association(file_path)
+      def create_singleton_association(file_path, class_name = nil)
+        class_name ||= file_class_name
+
         undeclared_files << file_path.to_sym
 
-        association = Associations::HasSubresourceAssociation.new(self, Reflection::HasSubresourceReflection.new(file_path, nil, { class_name: 'ActiveFedora::File' }, self.class))
+        #association = Associations::HasSubresourceAssociation.new(self, Reflection::HasSubresourceReflection.new(file_path, nil, { class_name: class_name }, self.class))
+        association = build_subresource_association(file_path, class_name)
         @association_cache[file_path.to_sym] = association
 
         singleton_class.send :define_method, accessor_name(file_path) do

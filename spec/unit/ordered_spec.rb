@@ -233,9 +233,16 @@ describe ActiveFedora::Orders do
     end
     it "can add already persisted items" do
       member = Member.create
+      image.ordered_member_proxies
+      #binding.pry
       image.ordered_member_proxies.append_target member
       image.save
+      image.ordered_members
+      image.ordered_member_proxies.association.target
+      image.ordered_member_proxies.association.target.to_a.first.target
+      #binding.pry
       image.reload
+      #binding.pry
       expect(image.ordered_members).to eq [member]
     end
     it "can append to a pre-persisted item" do

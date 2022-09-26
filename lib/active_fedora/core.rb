@@ -53,6 +53,26 @@ module ActiveFedora
       @ldp_source = build_ldp_resource(self.class.uri_to_id(uri))
     end
 
+    def proxy_assertions
+      #resource.query(subject: resource, predicate: ::RDF::Vocab::LDP.contains).objects.map(&:to_s)
+      #image.list_source.resource.query([nil, ::RDF::Vocab::ORE.proxyIn, image.resource.rdf_subject])
+      #subjects = list_source.resource.query([nil, ::RDF::Vocab::ORE.proxyIn, resource.rdf_subject])
+      results = list_source.resource.query([nil, ::RDF::Vocab::ORE.proxyFor, nil])
+      results
+    end
+
+    def load_proxy_associations
+
+      proxy_assertions.each do |proxy_assertion|
+        proxied_uri = proxy_assertion.object
+
+        fedora_path = FedoraUriTranslator.call(proxied_uri)
+        proxy = ActiveFedora::Base.find(fedora_path)
+
+        proxy
+      end
+    end
+
     # Reloads the object from Fedora.
     def reload
       check_persistence unless persisted?
@@ -60,6 +80,8 @@ module ActiveFedora
       clear_attached_files
       refresh
       load_attached_files
+      # binding.pry
+      load_proxy_associations
       self
     rescue Ldp::Gone => err
       logger.error("Tried to reload an object that has been destroyed.\n\t#{err.message}")
