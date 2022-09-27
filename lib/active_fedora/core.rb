@@ -79,7 +79,10 @@ module ActiveFedora
             if child_reflection.klass == proxy.class
               ordered_association = association(r.name)
               #ordered_association.add_to_target(proxy)
-              ordered_association.target.append_target(proxy)
+              #binding.pry
+              if !ordered_association.target_reader.to_a.include?(proxy)
+                ordered_association.target.append_target(proxy)
+              end
             end
           end
         end

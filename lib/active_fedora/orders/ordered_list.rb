@@ -6,7 +6,7 @@ module ActiveFedora
     class OrderedList
       include Enumerable
       attr_reader :graph, :head_subject, :tail_subject
-      attr_writer :head, :tail
+      attr_writer :head, :tail, :changed
       delegate :each, to: :ordered_reader
       delegate :length, to: :to_a
       # @param [::RDF::Enumerable] graph Enumerable where ORE statements are
