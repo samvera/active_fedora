@@ -69,7 +69,20 @@ module ActiveFedora
         fedora_path = FedoraUriTranslator.call(proxied_uri)
         proxy = ActiveFedora::Base.find(fedora_path)
 
-        proxy
+        order_reflections = reflections.select { |k,r| r.is_a?(ActiveFedora::Reflection::OrdersReflection) }
+
+        order_reflections.each do |k, r|
+          child_options = r.options
+          child_reflections = child_options.select { |k, r| r.is_a?(ActiveFedora::Reflection::AssociationReflection) }
+
+          child_reflections.each_pair do |k, child_reflection|
+            if child_reflection.klass == proxy.class
+              ordered_association = association(r.name)
+              #ordered_association.add_to_target(proxy)
+              ordered_association.target.append_target(proxy)
+            end
+          end
+        end
       end
     end
 
