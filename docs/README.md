@@ -1,43 +1,45 @@
 # ActiveFedora
 
+## Relationships
+
 Relationships between fcrepo/LDP resources are maintained using the following:
 
-- Reflections (ActiveFedora::Reflections::AbstractReflection)
+- Reflections (`ActiveFedora::Reflections::AbstractReflection`)
   - Defines relationships between knowledge graph resource URIs and ActiveFedora models at the Class level
   - Supports the following types of relationships:
-    - HasManyReflection
-    - BelongsToReflection
-    - HasAndBelongsToManyReflection
-    - HasSubresourceReflection
-    - DirectlyContainsReflection
-    - DirectlyContainsOneReflection
-    - IndirectlyContainsReflection
-    - BasicContainsReflection
-    - RDFPropertyReflection
-    - SingularRDFPropertyReflection
-    - FilterReflection
-    - OrdersReflection
-- Associations (ActiveFedora::Associations::Association)
+    - `HasManyReflection`
+    - `BelongsToReflection`
+    - `HasAndBelongsToManyReflection`
+    - `HasSubresourceReflection`
+    - `DirectlyContainsReflection`
+    - `DirectlyContainsOneReflection`
+    - `IndirectlyContainsReflection`
+    - `BasicContainsReflection`
+    - `RDFPropertyReflection`
+    - `SingularRDFPropertyReflection`
+    - `FilterReflection`
+    - `OrdersReflection`
+- Associations (`ActiveFedora::Associations::Association`)
   - Structures the state of relationships between graph URIs for ActiveFedora LDP resources
   - Supports the following types of relationships:
-    - SingularAssociation
-    - RDF
-    - SingularRDF
-    - CollectionAssociation
-    - CollectionProxy
-    - ContainerProxy
-    - HasManyAssociation
-    - BelongsToAssociation
-    - HasAndBelongsToManyAssociation
-    - BasicContainsAssociation
-    - HasSubresourceAssociation
-    - DirectlyContainsAssociation
-    - DirectlyContainsOneAssociation
-    - IndirectlyContainsAssociation
-    - ContainsAssociation
-    - FilterAssociation
-    - OrdersAssociation
-- Properties (ActiveTriples::NodeConfig)
+    - `SingularAssociation`
+    - `RDF`
+    - `SingularRDF`
+    - `CollectionAssociation`
+    - `CollectionProxy`
+    - `ContainerProxy`
+    - `HasManyAssociation`
+    - `BelongsToAssociation`
+    - `HasAndBelongsToManyAssociation`
+    - `BasicContainsAssociation`
+    - `HasSubresourceAssociation`
+    - `DirectlyContainsAssociation`
+    - `DirectlyContainsOneAssociation`
+    - `IndirectlyContainsAssociation`
+    - `ContainsAssociation`
+    - `FilterAssociation`
+    - `OrdersAssociation`
+- Properties (`ActiveTriples::NodeConfig`)
   - This is used very closely with ActiveTriples
   - Provides integration with ActiveRecord/ActiveModel attributes and knowledge graph assertions in the RDF
 
@@ -60,6 +62,7 @@ end
 - `Collection#children`
 - `Collection#ordered_children`
 - `Collection#ordered_children_proxy`
+- `Collection#list_source`
 
 ### `Collection#children`
 
@@ -77,8 +80,6 @@ This method provides abstract access to the `Child` objects with a many-to-one r
 ### `Collection#ordered_children`
 
 ```ruby
-> owner.association(:list_source).class
-=> ActiveFedora::Associations::HasSubresourceAssociation
 ```
 
 ### `Collection#ordered_children_proxy`
@@ -94,11 +95,36 @@ This method provides abstract access to the `Child` objects with a many-to-one r
 
 ### `Collection#list_source`
 
+```ruby
+> collection.association(:list_source).class
+=> ActiveFedora::Associations::HasSubresourceAssociation
+> collection.association(:list_source).target.class
+=> ActiveFedora::Aggregation::ListSource
+> collection.association(:list_source).target.ordered_self.class
+=> ActiveFedora::Orders::OrderedList
+```
+
+`OrderedList` class is an implementation of the linked list data structure with the following instance variables and methods:
+
+- `OrderedList#head`
+- `OrderedList#tail`
+- `OrderedList#ordered_self`
+- `OrderedList#to_a`
+
+`OrderedList#head` and `OrderedList#tail` provide access to instances of `ActiveFedora::Orders::OrderedList::HeadSentinel` and  `ActiveFedora::Orders::OrderedList::TailSentinel`
+
+`OrderedList#to_a` delegates to the method `OrderedList#ordered_self`, which references an instance of `ActiveFedora::Aggregation::OrderedReader`:
+
+```ruby
+> collection.association(:list_source).target.ordered_self.ordered_reader.class
+=> ActiveFedora::Aggregation::OrderedReader
+```
+
+
+
 parent_uri > list_source_uri > proxy > proxy_head_uri > first_child_uri
 parent_uri > list_source_uri > proxy > proxy_tail_uri > last_child_uri
 
-# LDP
+## LDP
 
 Every ActiveFedora::Base Model contains, as a private member variable, a LDP Resource. This, in turn, provides access to the RDF Graph for the Resource.
-
-## 
