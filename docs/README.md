@@ -60,7 +60,6 @@ end
 ...yielding the following methods for the `Collection` objects:
 
 - `Collection#children`
-- `Collection#ordered_children`
 - `Collection#ordered_children_proxy`
 - `Collection#list_source`
 
@@ -77,20 +76,19 @@ This method provides abstract access to the `Child` objects with a many-to-one r
 => ActiveFedora::Associations::ContainerProxy
 ```
 
-### `Collection#ordered_children`
+#### `Collection#association`
 
-```ruby
-```
+Please note that the `Collection#association` method here is invoked in order to retrieve a `Hash` containing all `Association` objects referenced by the `Collection` (or in other cases, any class derived from `ActiveFedora::Base`)
 
 ### `Collection#ordered_children_proxy`
 
 ```ruby
-> collection.association(:ordered_children_proxy).class
+> collection.association(:ordered_child_proxies).class
 => ActiveFedora::Associations::ContainerProxy
-> collection.association(:ordered_children_proxy).target.class
-=> ActiveFedora::Associations::OrderedList
-> collection.association(:ordered_children_proxy).target.ordered_reader
-=> ActiveFedora::Associations::OrderedReader
+> collection.association(:ordered_child_proxies).target.class
+=> ActiveFedora::Orders::OrderedList
+> collection.association(:ordered_child_proxies).target.ordered_reader
+=> ActiveFedora::Aggregation::OrderedReader
 ```
 
 ### `Collection#list_source`
@@ -111,7 +109,25 @@ This method provides abstract access to the `Child` objects with a many-to-one r
 - `OrderedList#ordered_self`
 - `OrderedList#to_a`
 
-`OrderedList#head` and `OrderedList#tail` provide access to instances of `ActiveFedora::Orders::OrderedList::HeadSentinel` and  `ActiveFedora::Orders::OrderedList::TailSentinel`
+`OrderedList#head` and `OrderedList#tail` provide access to instances of `ActiveFedora::Orders::OrderedList::HeadSentinel` and  `ActiveFedora::Orders::OrderedList::TailSentinel`. These feature two methods of importance:
+
+- `HeadSentinel#prev`
+- `HeadSentinel#next`
+- `TailSentinel#prev`
+- `TailSentinel#next`
+
+Any of these access an instance of `ActiveFedora::Orders::ListNode`, which models the node in the linked list. These feature the following methods:
+
+- `ListNode#prev`
+- `ListNode#next`
+- `ListNode#target`
+
+`ListNode#prev` and `ListNode#next` provide the ability to traverse the list, while `ListNode#target` provides access to the `ActiveFedora` model:
+
+```ruby
+> collection.association(:list_source).target.ordered_self.head.next.next.class
+=> ActiveFedora::Orders::ListNode
+```
 
 `OrderedList#to_a` delegates to the method `OrderedList#ordered_self`, which references an instance of `ActiveFedora::Aggregation::OrderedReader`:
 
@@ -119,8 +135,6 @@ This method provides abstract access to the `Child` objects with a many-to-one r
 > collection.association(:list_source).target.ordered_self.ordered_reader.class
 => ActiveFedora::Aggregation::OrderedReader
 ```
-
-
 
 parent_uri > list_source_uri > proxy > proxy_head_uri > first_child_uri
 parent_uri > list_source_uri > proxy > proxy_tail_uri > last_child_uri
