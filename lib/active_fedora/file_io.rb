@@ -89,9 +89,7 @@ module ActiveFedora
     private
 
       def read_to_buf(amount, buf)
-        while (amount.nil? || buf.length < amount) && fill_buffer
-          buf << consume_buffer(amount.nil? ? nil : (amount - buf.length))
-        end
+        buf << consume_buffer(amount.nil? ? nil : (amount - buf.length)) while (amount.nil? || buf.length < amount) && fill_buffer
         buf
       end
 

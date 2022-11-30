@@ -5,8 +5,10 @@ describe ActiveFedora::Orders do
   before do
     class Member < ActiveFedora::Base
     end
+
     class BadClass < ActiveFedora::Base
     end
+
     class Image < ActiveFedora::Base
       ordered_aggregation :members, through: :list_source
     end
@@ -82,52 +84,52 @@ describe ActiveFedora::Orders do
     describe "#=" do
       it "sets ordered members" do
         member = Member.new
-        member_2 = Member.new
+        member2 = Member.new
         image.ordered_members << member
         expect(image.ordered_members).to eq [member]
-        image.ordered_members = [member_2, member_2]
-        expect(image.ordered_members).to eq [member_2, member_2]
+        image.ordered_members = [member2, member2]
+        expect(image.ordered_members).to eq [member2, member2]
         # Removing from ordering is not the same as removing from aggregation.
-        expect(image.members).to contain_exactly member, member_2
+        expect(image.members).to contain_exactly member, member2
       end
     end
     describe "+=" do
       it "appends ordered members" do
         member = Member.new
-        member_2 = Member.new
+        member2 = Member.new
         image.ordered_members << member
-        expect(image.ordered_members += [member, member_2]).to eq [member, member, member_2]
-        expect(image.ordered_members).to eq [member, member, member_2]
-        expect(image.ordered_member_proxies.map(&:target)).to eq [member, member, member_2]
+        expect(image.ordered_members += [member, member2]).to eq [member, member, member2]
+        expect(image.ordered_members).to eq [member, member, member2]
+        expect(image.ordered_member_proxies.map(&:target)).to eq [member, member, member2]
       end
     end
     describe "#delete_at" do
       it "deletes that position" do
         member = Member.new
-        member_2 = Member.new
-        image.ordered_members += [member, member_2]
+        member2 = Member.new
+        image.ordered_members += [member, member2]
 
         expect(image.ordered_members.delete_at(0)).to eq member
-        expect(image.ordered_members).to eq [member_2]
+        expect(image.ordered_members).to eq [member2]
       end
     end
 
     describe "#delete" do
       let(:member) { Member.create }
-      let(:member_2) { Member.create }
+      let(:member2) { Member.create }
       before do
-        image.ordered_members += [member, member_2, member]
+        image.ordered_members += [member, member2, member]
         image.save!
       end
 
       context "with an object found in the list" do
         it "deletes all occurences of the object" do
           expect(image.ordered_members.delete(member)).to eq member
-          expect(image.ordered_members.to_a).to eq [member_2]
+          expect(image.ordered_members.to_a).to eq [member2]
         end
         it "can delete all" do
           expect(image.ordered_members.delete(member)).to eq member
-          expect(image.ordered_members.delete(member_2)).to eq member_2
+          expect(image.ordered_members.delete(member2)).to eq member2
           image.save!
           expect(image.reload.ordered_members.to_a).to eq []
         end
@@ -136,7 +138,7 @@ describe ActiveFedora::Orders do
       context "with an object not found in the list" do
         it "returns nil" do
           expect(image.ordered_members.delete(Member.create)).to be_nil
-          expect(image.ordered_members.to_a).to eq [member, member_2, member]
+          expect(image.ordered_members.to_a).to eq [member, member2, member]
         end
       end
     end
@@ -144,45 +146,45 @@ describe ActiveFedora::Orders do
     describe "#insert_at" do
       it "adds at a given position" do
         member = Member.new
-        member_2 = Member.new
-        image.ordered_members += [member, member_2]
+        member2 = Member.new
+        image.ordered_members += [member, member2]
 
-        image.ordered_members.insert_at(0, member_2)
-        expect(image.ordered_members).to eq [member_2, member, member_2]
+        image.ordered_members.insert_at(0, member2)
+        expect(image.ordered_members).to eq [member2, member, member2]
       end
       it "adds a proxy_in statement" do
         member = Member.new
-        member_2 = Member.new
-        image.ordered_members += [member, member_2]
+        member2 = Member.new
+        image.ordered_members += [member, member2]
 
-        image.ordered_members.insert_at(0, member_2)
+        image.ordered_members.insert_at(0, member2)
         expect(image.ordered_member_proxies.map(&:proxy_in).uniq).to eq [image]
       end
     end
     describe "lazy loading" do
       it "does not instantiate every record on append" do
         member = Member.new
-        member_2 = Member.new
-        image.ordered_members += [member, member_2]
+        member2 = Member.new
+        image.ordered_members += [member, member2]
         image.save
         allow(ActiveFedora::Base).to receive(:find).and_call_original
 
         reloaded = image.class.find(image.id)
         reloaded.ordered_members << member
 
-        expect(ActiveFedora::Base).not_to have_received(:find).with(member_2.id)
+        expect(ActiveFedora::Base).not_to have_received(:find).with(member2.id)
       end
       it "does not instantiate every record on #insert_at" do
         member = Member.new
-        member_2 = Member.new
-        image.ordered_members += [member, member_2]
+        member2 = Member.new
+        image.ordered_members += [member, member2]
         image.save
         allow(ActiveFedora::Base).to receive(:find).and_call_original
 
         reloaded = image.class.find(image.id)
         reloaded.ordered_members.insert_at(0, member)
 
-        expect(ActiveFedora::Base).not_to have_received(:find).with(member_2.id)
+        expect(ActiveFedora::Base).not_to have_received(:find).with(member2.id)
       end
     end
   end
@@ -240,11 +242,11 @@ describe ActiveFedora::Orders do
       image.ordered_member_proxies.append_target member
       image.save
       image.reload
-      member_2 = Member.new
-      image.ordered_member_proxies.append_target member_2
+      member2 = Member.new
+      image.ordered_member_proxies.append_target member2
       image.save
       image.reload
-      expect(image.ordered_members).to eq [member, member_2]
+      expect(image.ordered_members).to eq [member, member2]
     end
   end
   describe "insert_target_at" do
@@ -297,9 +299,9 @@ describe ActiveFedora::Orders do
     end
     it "can remove proxies in the middle" do
       member = Member.new
-      member_2 = Member.new
+      member2 = Member.new
       image.ordered_member_proxies.append_target member
-      image.ordered_member_proxies.append_target member_2
+      image.ordered_member_proxies.append_target member2
       image.ordered_member_proxies.append_target member
       image.ordered_member_proxies -= [image.ordered_member_proxies[1]]
       expect(image.ordered_members).to eq [member, member]

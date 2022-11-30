@@ -147,8 +147,8 @@ module ActiveFedora
       # @param attrs [Hash] attributes read from Solr
       # @return [Hash] the adapted attributes
       def adapt_attributes(attrs)
-        self.class.attribute_names.each_with_object({}) do |attribute_name, new_attributes|
-          new_attributes[attribute_name] = adapt_attribute_value(attrs, attribute_name)
+        self.class.attribute_names.index_with do |attribute_name|
+          adapt_attribute_value(attrs, attribute_name)
         end
       end
 

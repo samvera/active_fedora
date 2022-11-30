@@ -13,12 +13,12 @@ module ActiveFedora
       end
     end
 
-    BLACKLISTED_CLASS_METHODS = %w(private public protected allocate new name parent superclass).freeze
+    BLACKLISTED_CLASS_METHODS = %w[private public protected allocate new name parent superclass].freeze
 
     class GeneratedAttributeMethods < Module; end # :nodoc:
 
     module ClassMethods
-      def inherited(child_class) #:nodoc:
+      def inherited(child_class) # :nodoc:
         child_class.initialize_generated_modules
         super
       end
@@ -46,9 +46,7 @@ module ActiveFedora
       #   Person.instance_method_already_implemented?(:name)
       #   # => false
       def instance_method_already_implemented?(method_name)
-        if dangerous_attribute_method?(method_name)
-          raise DangerousAttributeError, "#{method_name} is defined by Active Fedora. Check to make sure that you don't have an attribute or method with the same name."
-        end
+        raise DangerousAttributeError, "#{method_name} is defined by Active Fedora. Check to make sure that you don't have an attribute or method with the same name." if dangerous_attribute_method?(method_name)
 
         if superclass == Base
           super
@@ -148,8 +146,8 @@ module ActiveFedora
     #   person.attributes
     #   # => {"id"=>3, "created_at"=>Sun, 21 Oct 2012 04:53:04, "updated_at"=>Sun, 21 Oct 2012 04:53:04, "name"=>"Francesco", "age"=>22}
     def attributes
-      attribute_names.each_with_object({}) do |name, attrs|
-        attrs[name] = read_attribute(name)
+      attribute_names.index_with do |name|
+        read_attribute(name)
       end
     end
 

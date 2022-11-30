@@ -14,7 +14,7 @@ namespace :active_fedora do
 
     YARD::Rake::YardocTask.new(:doc) do |yt|
       yt.files   = Dir.glob(File.join(project_root, 'lib', '**', '*.rb')) +
-                   [ '-', File.join(project_root, 'README.md')]
+                   ['-', File.join(project_root, 'README.md')]
       yt.options = ['--output-dir', doc_destination, '--readme', 'README.md']
     end
   rescue LoadError

@@ -1,6 +1,6 @@
 module ActiveFedora
   module Associations
-    class HasManyAssociation < CollectionAssociation #:nodoc:
+    class HasManyAssociation < CollectionAssociation # :nodoc:
       def initialize(owner, reflection)
         super
       end

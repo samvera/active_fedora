@@ -15,6 +15,7 @@ describe ActiveFedora::Base do
       def before_validation_callback
         # no-op
       end
+
       def after_validation_callback
         # no-op
       end

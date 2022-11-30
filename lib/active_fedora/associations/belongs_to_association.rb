@@ -1,6 +1,6 @@
 module ActiveFedora
   module Associations
-    class BelongsToAssociation < SingularAssociation #:nodoc:
+    class BelongsToAssociation < SingularAssociation # :nodoc:
       def handle_dependency
         target.send(options[:dependent]) if load_target
       end

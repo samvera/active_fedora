@@ -84,6 +84,7 @@ module ActiveFedora
       super
     end
   end
+
   ##
   # Represents the result of merging two association hashes.
   # @note As the keys can come from multiple models, the attributes become

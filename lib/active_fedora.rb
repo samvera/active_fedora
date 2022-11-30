@@ -25,7 +25,7 @@ module RDF
         @string ||= begin
           # Show nanoseconds but remove trailing zeros
           nano = @object.strftime('%N').sub(/0+\Z/, EMPTY)
-          nano = DOT + nano unless nano.blank?
+          nano = DOT + nano if nano.present?
           @object.strftime(ALTERNATIVE_FORMAT) + nano + @object.strftime(TIMEZONE_FORMAT)
         end
       end
@@ -33,7 +33,7 @@ module RDF
   end
 end
 
-module ActiveFedora #:nodoc:
+module ActiveFedora # :nodoc:
   extend ActiveSupport::Autoload
 
   eager_autoload do
@@ -156,7 +156,7 @@ module ActiveFedora #:nodoc:
   end
 
   class << self
-    attr_reader :fedora_config, :solr_config, :config_options
+    attr_reader :solr_config, :config_options
     attr_accessor :configurator
 
     def fedora_config
@@ -174,9 +174,7 @@ module ActiveFedora #:nodoc:
       options = {} if options.nil?
       # For backwards compatibility, handle cases where config_path (a String) is passed in as the argument rather than a config_options hash
       # In all other cases, set config_path to config_options[:config_path], which is ok if it's nil
-      if options.is_a? String
-        raise ArgumentError, "Calling ActiveFedora.init with a path as an argument has been removed.  Use ActiveFedora.init(:fedora_config_path=>#{options})"
-      end
+      raise ArgumentError, "Calling ActiveFedora.init with a path as an argument has been removed.  Use ActiveFedora.init(:fedora_config_path=>#{options})" if options.is_a? String
       @fedora_config = nil
       SolrService.reset!
       configurator.init(options)
@@ -199,7 +197,7 @@ module ActiveFedora #:nodoc:
     def environment
       if config_options.fetch(:environment, nil)
         config_options[:environment]
-      elsif defined?(Rails.env) && !Rails.env.nil?
+      elsif defined?(Rails.env) && !Rails.env.nil? # rubocop:disable Rails/UnknownEnv
         Rails.env.to_s
       elsif defined?(ENV['environment']) && !ENV['environment'].nil?
         ENV['environment']

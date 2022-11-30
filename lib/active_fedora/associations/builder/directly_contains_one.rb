@@ -1,5 +1,5 @@
 module ActiveFedora::Associations::Builder
-  class DirectlyContainsOne < SingularAssociation #:nodoc:
+  class DirectlyContainsOne < SingularAssociation # :nodoc:
     def self.macro
       :directly_contains_one
     end

@@ -1,5 +1,5 @@
 module ActiveFedora::Associations::Builder
-  class Association #:nodoc:
+  class Association # :nodoc:
     class << self
       attr_accessor :extensions
     end
@@ -114,9 +114,7 @@ module ActiveFedora::Associations::Builder
     end
 
     def self.check_dependent_options(dependent)
-      unless valid_dependent_options.include? dependent
-        raise ArgumentError, "The :dependent option must be one of #{valid_dependent_options}, but is :#{dependent}"
-      end
+      raise ArgumentError, "The :dependent option must be one of #{valid_dependent_options}, but is :#{dependent}" unless valid_dependent_options.include? dependent
     end
 
     def self.add_destroy_callbacks(model, reflection)

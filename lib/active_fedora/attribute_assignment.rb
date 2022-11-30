@@ -29,9 +29,7 @@ module ActiveFedora
     #   cat.name # => 'Gorby'
     #   cat.status => 'sleeping'
     def assign_attributes(new_attributes)
-      unless new_attributes.respond_to?(:stringify_keys)
-        raise ArgumentError, "When assigning attributes, you must pass a hash as an argument."
-      end
+      raise ArgumentError, "When assigning attributes, you must pass a hash as an argument." unless new_attributes.respond_to?(:stringify_keys)
       return if new_attributes.nil? || new_attributes.empty?
 
       attributes = new_attributes.stringify_keys

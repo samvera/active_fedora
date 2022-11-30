@@ -77,7 +77,7 @@ module ActiveFedora
 
     ASSOCIATION_TYPES = [:has_many, :belongs_to, :has_and_belongs_to_many, :directly_contains, :indirectly_contains, :is_a_container].freeze
 
-    module AssociationBuilderExtension #:nodoc:
+    module AssociationBuilderExtension # :nodoc:
       def self.valid_options
         [:autosave]
       end

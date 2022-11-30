@@ -1,6 +1,6 @@
 module ActiveFedora
   module Associations
-    class CollectionAssociation < Association #:nodoc:
+    class CollectionAssociation < Association # :nodoc:
       attr_reader :proxy
 
       # Implements the reader method, e.g. foo.items for Foo.has_many :items

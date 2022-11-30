@@ -11,6 +11,7 @@ describe ActiveFedora::Base do
     class FileWithMetadata < ActiveFedora::File
       include ActiveFedora::WithMetadata
     end
+
     class AlternativeFileWithMetadata < ActiveFedora::File
       include ActiveFedora::WithMetadata
     end

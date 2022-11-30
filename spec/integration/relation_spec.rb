@@ -5,6 +5,7 @@ describe ActiveFedora::Base do
     class Library < ActiveFedora::Base
       has_many :books
     end
+
     class Book < ActiveFedora::Base
       belongs_to :library, predicate: ActiveFedora::RDF::Fcrepo::RelsExt.isPartOf
     end

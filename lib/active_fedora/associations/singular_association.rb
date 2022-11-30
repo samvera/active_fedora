@@ -1,6 +1,6 @@
 module ActiveFedora
   module Associations
-    class SingularAssociation < Association #:nodoc:
+    class SingularAssociation < Association # :nodoc:
       # Implements the reader method, e.g. foo.bar for Foo.has_one :bar
       def reader(force_reload = false)
         if force_reload

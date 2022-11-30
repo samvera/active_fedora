@@ -1,5 +1,5 @@
 module ActiveFedora::Attributes
-  class PropertyBuilder < ActiveTriples::PropertyBuilder #:nodoc:
+  class PropertyBuilder < ActiveTriples::PropertyBuilder # :nodoc:
     def self.define_accessors(model, reflection, options = {})
       if reflection.multiple?
         super

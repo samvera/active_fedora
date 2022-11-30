@@ -184,9 +184,7 @@ module ActiveFedora
 
       def check_validity_of_inverse!
         unless polymorphic?
-          if has_inverse? && inverse_of.nil?
-            raise InverseOfAssociationNotFoundError, self
-          end
+          raise InverseOfAssociationNotFoundError, self if has_inverse? && inverse_of.nil?
         end
       end
 
@@ -262,7 +260,7 @@ module ActiveFedora
 
     # Holds all the meta-data about an association as it was specified in the
     # Active Record class.
-    class AssociationReflection < MacroReflection #:nodoc:
+    class AssociationReflection < MacroReflection # :nodoc:
       attr_accessor :parent_reflection # Reflection
 
       def initialize(name, scope, options, active_fedora)
@@ -295,9 +293,7 @@ module ActiveFedora
       end
 
       def solr_key
-        @solr_key ||= begin
-          ActiveFedora.index_field_mapper.solr_name(predicate_for_solr, :symbol)
-        end
+        @solr_key ||= ActiveFedora.index_field_mapper.solr_name(predicate_for_solr, :symbol)
       end
 
       def check_validity!
@@ -314,7 +310,7 @@ module ActiveFedora
       def collect_join_chain
         [self]
       end
-      alias chain collect_join_chain # TODO Remove alias, See https://github.com/samvera/active_fedora/issues/1347
+      alias chain collect_join_chain # TODO: Remove alias, See https://github.com/samvera/active_fedora/issues/1347
 
       def has_inverse?
         inverse_name

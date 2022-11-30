@@ -1,5 +1,5 @@
 module ActiveFedora::Associations::Builder
-  class HasAndBelongsToMany < CollectionAssociation #:nodoc:
+  class HasAndBelongsToMany < CollectionAssociation # :nodoc:
     def self.macro
       :has_and_belongs_to_many
     end

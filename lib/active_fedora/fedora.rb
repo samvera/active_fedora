@@ -54,9 +54,7 @@ module ActiveFedora
     end
 
     def connection
-      @connection ||= begin
-        build_connection
-      end
+      @connection ||= build_connection
     end
 
     def clean_connection
@@ -99,9 +97,7 @@ module ActiveFedora
     end
 
     def validate_options
-      unless host.downcase.end_with?("/rest")
-        ActiveFedora::Base.logger.warn "Fedora URL (#{host}) does not end with /rest. This could be a problem. Check your fedora.yml config"
-      end
+      ActiveFedora::Base.logger.warn "Fedora URL (#{host}) does not end with /rest. This could be a problem. Check your fedora.yml config" unless host.downcase.end_with?("/rest")
     end
 
     def ntriples_connection

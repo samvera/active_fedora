@@ -8,8 +8,8 @@ module ActiveFedora
 
     # Returns only the attached_files that are declared with 'contains'
     def declared_attached_files
-      attached_files.reflections.keys.each_with_object({}) do |k, h|
-        h[k] = attached_files[k]
+      attached_files.reflections.keys.index_with do |k|
+        attached_files[k]
       end
     end
 

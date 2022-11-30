@@ -2,9 +2,7 @@ module ActiveFedora
   class VersionsGraph < ::RDF::Graph
     def all(opts = {})
       versions = fedora_versions
-      unless opts[:include_auto_save]
-        versions.reject! { |version| version.label =~ /auto/ }
-      end
+      versions.reject! { |version| version.label =~ /auto/ } unless opts[:include_auto_save]
       versions.sort_by { |version| DateTime.parse(version.created) }
     rescue ArgumentError, NoMethodError
       raise ActiveFedora::VersionLacksCreateDate

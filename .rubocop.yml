@@ -1,19 +1,11 @@
-require:
-- rubocop-performance
-- rubocop-rails
-- rubocop-rspec
+inherit_gem:
+  bixby: bixby_default.yml
 
 inherit_from:
 - .rubocop_todo.yml
 
-AllCops:
-  TargetRubyVersion: 2.5
-  DisplayCopNames: true
-  Include:
-    - '**/Rakefile'
-  Exclude:
-    - 'script/**/*'
-    - 'vendor/**/*'
+Style/FrozenStringLiteralComment:
+  Enabled: false
 
 Lint/SuppressedException:
   Exclude:
@@ -30,6 +22,10 @@ Layout/LineLength:
 
 Metrics/AbcSize:
   Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'lib/active_fedora.rb'
 
 Metrics/BlockNesting:
   Exclude:
@@ -241,6 +237,9 @@ Rails/Date:
   Enabled: false
 
 Rails/TimeZone:
+  Enabled: false
+
+Rails/FilePath:
   Enabled: false
 
 RSpec/AnyInstance:

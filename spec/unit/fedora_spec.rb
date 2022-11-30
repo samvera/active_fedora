@@ -11,7 +11,7 @@ describe ActiveFedora::Fedora do
           ssl: { ca_path: '/path/to/certs' } }
       }
       specify {
-        expect(Faraday).to receive(:new).with("https://example.com", { ssl: { ca_path: '/path/to/certs' }}).and_call_original
+        expect(Faraday).to receive(:new).with("https://example.com", { ssl: { ca_path: '/path/to/certs' } }).and_call_original
         fedora.authorized_connection
       }
     end
@@ -23,7 +23,7 @@ describe ActiveFedora::Fedora do
           request: { timeout: 600, open_timeout: 60 } }
       }
       specify {
-        expect(Faraday).to receive(:new).with("https://example.com", { request: { timeout: 600, open_timeout: 60 }}).and_call_original
+        expect(Faraday).to receive(:new).with("https://example.com", { request: { timeout: 600, open_timeout: 60 } }).and_call_original
         fedora.authorized_connection
       }
     end

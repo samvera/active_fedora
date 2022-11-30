@@ -52,9 +52,7 @@ module ActiveFedora::Associations
     # Append a target node to the end of the order.
     # @param [ActiveFedora::Base] record Record to append
     def append_target(record, _skip_callbacks = false)
-      unless unordered_association.target.include?(record)
-        unordered_association.concat(record)
-      end
+      unordered_association.concat(record) unless unordered_association.target.include?(record)
       target.append_target(record, proxy_in: owner)
     end
 
@@ -62,9 +60,7 @@ module ActiveFedora::Associations
     # @param [Integer] loc Position to insert record.
     # @param [ActiveFedora::Base] record Record to insert
     def insert_target_at(loc, record)
-      unless unordered_association.target.include?(record)
-        unordered_association.concat(record)
-      end
+      unordered_association.concat(record) unless unordered_association.target.include?(record)
       target.insert_at(loc, record, proxy_in: owner)
     end
 
@@ -73,9 +69,7 @@ module ActiveFedora::Associations
     # @param [String] id ID of record to insert.
     def insert_target_id_at(loc, id)
       raise ArgumentError, "ID can not be nil" if id.nil?
-      unless unordered_association.ids_reader.include?(id)
-        raise ArgumentError, "#{id} is not a part of #{unordered_association.reflection.name}"
-      end
+      raise ArgumentError, "#{id} is not a part of #{unordered_association.reflection.name}" unless unordered_association.ids_reader.include?(id)
       target.insert_proxy_for_at(loc, ActiveFedora::Base.id_to_uri(id), proxy_in: owner)
     end
 

@@ -132,9 +132,7 @@ module ActiveFedora
         # Returns a suitable string representation for :has_model
         # @deprecated use to_rdf_representation instead
         def to_class_uri(attrs = nil)
-          if attrs
-            Deprecation.warn ActiveFedora::Core, "to_class_uri no longer acceps an argument"
-          end
+          Deprecation.warn ActiveFedora::Core, "to_class_uri no longer acceps an argument" if attrs
           to_rdf_representation
         end
         deprecation_deprecate to_class_uri: "use 'to_rdf_representation()' instead"
