@@ -111,15 +111,6 @@ workflows:
           name: ruby2-6_rails5-2
           ruby_version: 2.6.9
           rails_version: 5.2.8.1
-      # Ruby 2.5 releases
-      - bundle_lint_test:
-          name: ruby2-5_rails6.0
-          ruby_version: 2.5.9
-          rails_version: 6.0.6
-      - bundle_lint_test:
-          name: ruby2-5_rails5-2
-          ruby_version: 2.5.9
-          rails_version: 5.2.8.1
 
   nightly:
     triggers:
@@ -193,13 +184,4 @@ workflows:
       - bundle_lint_test:
           name: ruby2-6_rails5-2
           ruby_version: 2.6.9
-          rails_version: 5.2.8.1
-      # Ruby 2.5 releases
-      - bundle_lint_test:
-          name: ruby2-5_rails6.0
-          ruby_version: 2.5.9
-          rails_version: 6.0.6
-      - bundle_lint_test:
-          name: ruby2-5_rails5-2
-          ruby_version: 2.5.9
           rails_version: 5.2.8.1
