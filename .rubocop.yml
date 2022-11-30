@@ -1,10 +1,13 @@
-require: rubocop-rspec
+require:
+- rubocop-performance
+- rubocop-rails
+- rubocop-rspec
 
 inherit_from:
 - .rubocop_todo.yml
 
 AllCops:
-  TargetRubyVersion: 2.2
+  TargetRubyVersion: 2.5
   DisplayCopNames: true
   Include:
     - '**/Rakefile'
@@ -12,7 +15,7 @@ AllCops:
     - 'script/**/*'
     - 'vendor/**/*'
 
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Exclude:
     - 'spec/unit/**/*'
     - 'spec/integration/**/*'
@@ -22,7 +25,7 @@ Lint/HandleExceptions:
 Lint/AssignmentInCondition:
   Enabled: false
 
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: false
 
 Metrics/AbcSize:
@@ -173,7 +176,7 @@ Style/Lambda:
     - 'spec/**/*'
 
 Layout/IndentationConsistency:
-  EnforcedStyle: rails
+  EnforcedStyle: indented_internal_methods
 
 Style/CollectionMethods:
   PreferredMethods:
