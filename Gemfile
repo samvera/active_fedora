@@ -4,6 +4,7 @@ source "https://rubygems.org"
 
 gemspec path: File.expand_path('..', __FILE__)
 
+gem 'ldp', github: 'samvera/ldp', branch: 'main'
 gem 'byebug' unless ENV['TRAVIS']
 gem 'pry-byebug' unless ENV['CI']
 
