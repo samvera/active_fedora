@@ -2,6 +2,7 @@ module ActiveFedora
   module Associations
     class SingularAssociation < Association # :nodoc:
       # Implements the reader method, e.g. foo.bar for Foo.has_one :bar
+      # rubocop:disable Style/GuardClause
       def reader(force_reload = false)
         if force_reload
           raise NotImplementedError, "Need to define the uncached method" # TODO
@@ -11,6 +12,7 @@ module ActiveFedora
         end
         target
       end
+      # rubocop:enable Style/GuardClause
 
       # Implements the writer method, e.g. foo.items= for Foo.has_many :items
       def writer(record)

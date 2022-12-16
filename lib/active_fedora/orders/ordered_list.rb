@@ -111,14 +111,14 @@ module ActiveFedora
       # @param [ListNode] node Node to delete
       def delete_node(node)
         node = ordered_reader.find { |x| x == node }
-        if node
-          prev_node = node.prev
-          next_node = node.next
-          node.prev.next = next_node
-          node.next.prev = prev_node
-          @changed = true
-          node
-        end
+        return unless node
+
+        prev_node = node.prev
+        next_node = node.next
+        node.prev.next = next_node
+        node.next.prev = prev_node
+        @changed = true
+        node
       end
 
       # @param [Integer] loc Index of node to delete.

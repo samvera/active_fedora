@@ -107,10 +107,10 @@ module ActiveFedora
 
       begin
         fedora_yml = if Gem::Version.new(Psych::VERSION) >= Gem::Version.new('3.1.0.pre1')
-          YAML.safe_load(config_erb, permitted_classes: [], permitted_symbols: [], aliases: true)
-        else
-          YAML.safe_load(config_erb, [], [], true) # allow YAML aliases
-        end
+                       YAML.safe_load(config_erb, permitted_classes: [], permitted_symbols: [], aliases: true)
+                     else
+                       YAML.safe_load(config_erb, [], [], true) # allow YAML aliases
+                     end
       rescue Psych::SyntaxError => e
         raise "fedora.yml was found, but could not be parsed. " \
               "Error #{e.message}"
@@ -135,10 +135,10 @@ module ActiveFedora
 
       begin
         solr_yml = if Gem::Version.new(Psych::VERSION) >= Gem::Version.new('3.1.0.pre1')
-          YAML.safe_load(config_erb, permitted_classes: [], permitted_symbols: [], aliases: true)
-        else
-          YAML.safe_load(config_erb, [], [], true) # allow YAML aliases
-        end
+                     YAML.safe_load(config_erb, permitted_classes: [], permitted_symbols: [], aliases: true)
+                   else
+                     YAML.safe_load(config_erb, [], [], true) # allow YAML aliases
+                   end
       rescue StandardError
         raise("solr.yml was found, but could not be parsed.\n")
       end
@@ -191,12 +191,10 @@ module ActiveFedora
 
       # Last choice, check for the default config file
       config_path = ::File.join(ActiveFedora.root, "config", "#{config_type}.yml")
-      if ::File.file? config_path
-        ActiveFedora::Base.logger.warn "Using the default #{config_type}.yml that comes with active-fedora.  If you want to override this, pass the path to #{config_type}.yml to ActiveFedora - ie. ActiveFedora.init(:#{config_type}_config_path => '/path/to/#{config_type}.yml') - or set Rails.root and put #{config_type}.yml into \#{Rails.root}/config."
-        config_path
-      else
-        raise ConfigurationError, "Couldn't load #{config_type} config file!"
-      end
+      raise ConfigurationError, "Couldn't load #{config_type} config file!" unless ::File.file?(config_path)
+
+      ActiveFedora::Base.logger.warn "Using the default #{config_type}.yml that comes with active-fedora.  If you want to override this, pass the path to #{config_type}.yml to ActiveFedora - ie. ActiveFedora.init(:#{config_type}_config_path => '/path/to/#{config_type}.yml') - or set Rails.root and put #{config_type}.yml into \#{Rails.root}/config."
+      config_path
     end
 
     # Checks the existing fedora_config.path to see if there is a solr.yml there

@@ -36,7 +36,7 @@ module ActiveFedora::Associations::Builder
     def self.build_scope(scope, extension)
       new_scope = scope
 
-      new_scope = proc { instance_exec(&scope) } if scope && scope.arity.zero?
+      new_scope = proc { instance_exec(&scope) } if scope&.arity&.zero?
 
       new_scope = wrap_scope new_scope, extension if extension
 

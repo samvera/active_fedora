@@ -282,14 +282,14 @@ describe ActiveFedora::Base do
         end
 
         it "has a count once it has been saved" do
-          @book_2 = Book.create
-          @library.books << @book << @book_2
+          @book2 = Book.create
+          @library.books << @book << @book2
           @library.save
 
           @library2 = Library.find(@library.id)
           expect(@library2.books.size).to eq 2
-          @book_2.reload
-          @book_2.delete
+          @book2.reload
+          @book2.delete
         end
 
         it "respects the :class_name parameter" do

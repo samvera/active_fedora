@@ -9,15 +9,13 @@ module ActiveFedora::Associations::Builder
     end
 
     def self.create_reflection(model, name, scope, options, extension = nil)
-      if options[:through]
-        inherit_options_from_association(model, options, options[:through])
-      else
-        raise ArgumentError, "you must specify a :through option on #{name}.  #{name} will use the container from that directly_contains association."
-      end
+      raise ArgumentError, "you must specify a :through option on #{name}.  #{name} will use the container from that directly_contains association." unless options[:through]
+      inherit_options_from_association(model, options, options[:through])
 
       super
     end
 
+    # rubocop:disable Style/GuardClause
     def self.validate_options(options)
       super
       if options[:class_name] == "ActiveFedora::File"
@@ -31,6 +29,7 @@ module ActiveFedora::Associations::Builder
       return if options[:type].is_a?(RDF::URI)
       raise ArgumentError, "You must specify a Type and it must be a kind of RDF::URI"
     end
+    # rubocop:enable Style/GuardClause
 
     # Inherits :has_member_relation from the association corresponding to association_name
     # @param [Symbol] association_name of the association to inherit from

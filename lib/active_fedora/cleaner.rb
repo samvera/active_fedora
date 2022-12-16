@@ -35,7 +35,7 @@ module ActiveFedora
     end
 
     def self.solr_connection
-      ActiveFedora::SolrService.instance && ActiveFedora::SolrService.instance.conn
+      ActiveFedora::SolrService.instance&.conn
     end
 
     def self.cleanout_solr

@@ -18,12 +18,9 @@ module ActiveFedora::Associations::Builder
 
     def self.validate_options(options)
       super
-      if !options[:has_member_relation] && !options[:is_member_of_relation]
-        raise ArgumentError, "You must specify a predicate for #{name}"
-      elsif !options[:has_member_relation].is_a?(RDF::URI) && !options[:is_member_of_relation].is_a?(RDF::URI)
-        raise ArgumentError, "Predicate must be a kind of RDF::URI"
-      end
 
+      raise ArgumentError, "You must specify a predicate for #{name}" if !options[:has_member_relation] && !options[:is_member_of_relation]
+      raise ArgumentError, "Predicate must be a kind of RDF::URI" if !options[:has_member_relation].is_a?(RDF::URI) && !options[:is_member_of_relation].is_a?(RDF::URI)
       raise ArgumentError, "Missing :through option" unless options[:through]
       raise ArgumentError, "Missing :foreign_key option" unless options[:foreign_key]
     end

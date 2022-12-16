@@ -141,7 +141,7 @@ module ActiveFedora
       opts[:q] = create_query(conditions)
       opts[:qt] = @klass.solr_query_handler
       # set default sort to created date ascending
-      opts[:sort] = @klass.default_sort_params unless opts[:sort].present?
+      opts[:sort] = @klass.default_sort_params if opts[:sort].blank?
 
       batch_size = opts.delete(:batch_size) || 1000
       select_path = ActiveFedora::SolrService.select_path

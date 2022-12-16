@@ -183,9 +183,8 @@ module ActiveFedora
       end
 
       def check_validity_of_inverse!
-        unless polymorphic?
-          raise InverseOfAssociationNotFoundError, self if has_inverse? && inverse_of.nil?
-        end
+        return if polymorphic?
+        raise InverseOfAssociationNotFoundError, self if has_inverse? && inverse_of.nil?
       end
 
       def alias_candidate(name)
@@ -212,6 +211,7 @@ module ActiveFedora
 
       attr_reader :active_fedora
 
+      # rubocop:disable Lint/MissingSuper
       def initialize(name, scope, options, active_fedora)
         @name = name
         @scope = scope
@@ -220,6 +220,7 @@ module ActiveFedora
         @klass         = options[:anonymous_class]
         @automatic_inverse_of = nil
       end
+      # rubocop:enable Lint/MissingSuper
 
       def autosave=(autosave)
         @options[:autosave] = autosave
@@ -441,7 +442,7 @@ module ActiveFedora
             "#{name.to_s.singularize}_ids"
           elsif options[:as]
             "#{options[:as]}_id"
-          elsif inverse_of && inverse_of.collection?
+          elsif inverse_of&.collection?
             # for a has_many that is the inverse of a has_and_belongs_to_many
             "#{options[:inverse_of].to_s.singularize}_ids"
           else

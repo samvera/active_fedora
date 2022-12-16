@@ -49,7 +49,7 @@ describe ActiveFedora::Base do
 
       it "does not reload" do
         expect_any_instance_of(ActiveFedora::Relation).to_not receive :find_each
-        libraries.each { |l| l.id }
+        libraries.each(&:id)
       end
     end
 

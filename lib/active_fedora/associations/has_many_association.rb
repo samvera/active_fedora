@@ -35,7 +35,7 @@ module ActiveFedora
           end
         elsif owner.persisted?
           inverse = reflection.inverse_of
-          if inverse && inverse.collection?
+          if inverse&.collection?
             record[inverse.foreign_key] ||= []
             record[inverse.foreign_key] += [owner.id]
           elsif inverse && inverse.klass == ActiveFedora::Base
@@ -88,6 +88,7 @@ module ActiveFedora
 
         # Deletes the records according to the <tt>:dependent</tt> option.
         def delete_records(records, method)
+          # rubocop:disable Style/GuardClause
           return records.each(&:destroy) if method == :destroy
           # Find all the records that point to this and nullify them
           # keys  = records.map { |r| r[reflection.association_primary_key] }
@@ -115,6 +116,7 @@ module ActiveFedora
           end
 
           # update_counter(-scope.update_all(reflection.foreign_key => nil))
+          # rubocop:enable Style/GuardClause
         end
     end
   end

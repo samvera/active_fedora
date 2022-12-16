@@ -26,6 +26,9 @@ Metrics/AbcSize:
 Metrics/BlockLength:
   Exclude:
     - 'lib/active_fedora.rb'
+    - 'lib/active_fedora/nested_attributes.rb'
+    - 'lib/active_fedora/rspec_matchers/**/*'
+    - 'lib/tasks/**/*'
 
 Metrics/BlockNesting:
   Exclude:
@@ -242,6 +245,12 @@ Rails/TimeZone:
 Rails/FilePath:
   Enabled: false
 
+Rails/ActiveRecordAliases:
+  Enabled: false
+
+Rails/SkipsModelValidations:
+  Enabled: false
+
 RSpec/AnyInstance:
   Enabled: false
 
@@ -272,4 +281,7 @@ RSpec/NotToNot:
   Enabled: false
 
 RSpec/MessageSpies:
+  Enabled: false
+
+Security/MarshalLoad:
   Enabled: false

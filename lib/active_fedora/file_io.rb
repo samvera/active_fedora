@@ -49,7 +49,7 @@ module ActiveFedora
 
       if amount.nil?
         read_to_buf(nil, buf) # read the entire file, returns buf
-      elsif amount < 0
+      elsif amount.negative?
         raise(ArgumentError, "negative length #{amount} given")
       elsif amount.zero?
         ''

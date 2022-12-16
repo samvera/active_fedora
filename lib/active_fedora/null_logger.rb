@@ -1,6 +1,8 @@
 module ActiveFedora
   class NullLogger < Logger
+    # rubocop:disable Lint/MissingSuper
     def initialize(*); end
+    # rubocop:enable Lint/MissingSuper
 
     # allows all the usual logger method calls (warn, info, error, etc.)
     def add(*); end

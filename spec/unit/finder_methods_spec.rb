@@ -18,7 +18,7 @@ RSpec.describe ActiveFedora::FinderMethods do
   end
 
   let(:finder_class) do
-    this = self
+    # this = self
     Class.new do
       include ActiveFedora::FinderMethods
       def initialize(object_class:)

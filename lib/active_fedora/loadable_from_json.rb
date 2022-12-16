@@ -194,7 +194,7 @@ module ActiveFedora
       # @return [Object] the adapted value
       def adapt_single_attribute_value(value, attribute_name)
         if value && date_attribute?(attribute_name)
-          return nil unless value.present?
+          return nil if value.blank?
           DateTime.parse(value)
         else
           value

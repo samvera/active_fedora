@@ -192,16 +192,14 @@ module ActiveFedora
         elsif !reject_new_record?(association_name, attributes)
           assignable_attributes = attributes.except(*UNASSIGNABLE_KEYS)
 
-          if existing_record && existing_record.new_record?
+          if existing_record&.new_record?
             existing_record.assign_attributes(assignable_attributes)
             association(association_name).initialize_attributes(existing_record)
           else
             method = "build_#{association_name}"
-            if respond_to?(method)
-              send(method, assignable_attributes)
-            else
-              raise ArgumentError, "Cannot build association `#{association_name}'. Are you trying to build a polymorphic one-to-one association?"
-            end
+            raise ArgumentError, "Cannot build association `#{association_name}'. Are you trying to build a polymorphic one-to-one association?" unless respond_to?(method)
+
+            send(method, assignable_attributes)
           end
         end
       end
