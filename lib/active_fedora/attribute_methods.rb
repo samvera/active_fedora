@@ -146,9 +146,11 @@ module ActiveFedora
     #   person.attributes
     #   # => {"id"=>3, "created_at"=>Sun, 21 Oct 2012 04:53:04, "updated_at"=>Sun, 21 Oct 2012 04:53:04, "name"=>"Francesco", "age"=>22}
     def attributes
-      attribute_names.index_with do |name|
-        read_attribute(name)
+      result = {}
+      attribute_names.each do |name|
+        result[name] = read_attribute(name)
       end
+      result
     end
 
     # Returns an <tt>#inspect</tt>-like string for the value of the

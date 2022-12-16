@@ -147,9 +147,11 @@ module ActiveFedora
       # @param attrs [Hash] attributes read from Solr
       # @return [Hash] the adapted attributes
       def adapt_attributes(attrs)
-        self.class.attribute_names.index_with do |attribute_name|
-          adapt_attribute_value(attrs, attribute_name)
+        result = {}
+        self.class.attribute_names.each do |attribute_name|
+          result[attribute_name] = adapt_attribute_value(attrs, attribute_name)
         end
+        result
       end
 
       # Adapts a single attribute from the given attributes hash to fit the data
