@@ -61,10 +61,9 @@ describe ActiveFedora::Indexing do
     end
 
     it "adds id, system_create_date, system_modified_date from object attributes" do
-      expect(test_object).to receive(:create_date).and_return(DateTime.parse("2012-03-04T03:12:02Z")).twice
-      expect(test_object).to receive(:modified_date).and_return(DateTime.parse("2012-03-07T03:12:02Z")).twice
+      expect(test_object).to receive(:create_date).and_return(DateTime.parse("2012-03-04T03:12:02Z"))
+      expect(test_object).to receive(:modified_date).and_return(DateTime.parse("2012-03-07T03:12:02Z"))
       allow(test_object).to receive(:id).and_return('changeme:123')
-      solr_doc = test_object.to_solr
       expect(solr_doc[ActiveFedora.index_field_mapper.solr_name("system_create", :stored_sortable, type: :date)]).to eql("2012-03-04T03:12:02Z")
       expect(solr_doc[ActiveFedora.index_field_mapper.solr_name("system_modified", :stored_sortable, type: :date)]).to eql("2012-03-07T03:12:02Z")
       expect(solr_doc[:id]).to eql("changeme:123")
