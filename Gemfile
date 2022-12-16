@@ -6,7 +6,6 @@ gemspec path: File.expand_path('..', __FILE__)
 
 gem 'active-triples', github: 'samvera-labs/activetriples', branch: 'merge-gitlab-upstream'
 gem 'byebug' unless ENV['TRAVIS']
-gem 'ldp', github: 'samvera/ldp', branch: 'main'
 gem 'pry-byebug' unless ENV['CI']
 
 if ENV['RAILS_VERSION']
