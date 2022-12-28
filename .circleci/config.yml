@@ -50,41 +50,19 @@ workflows:
       # Ruby 2.7 releases
       - bundle_lint_test:
           name: ruby2-7_rails7-0
-          ruby_version: 2.7.5
+          ruby_version: 2.7.7
           rails_version: 7.0.3.1
       - bundle_lint_test:
           name: ruby2-7_rails6-1
-          ruby_version: 2.7.5
+          ruby_version: 2.7.7
           rails_version: 6.1.6.1
       - bundle_lint_test:
           name: ruby2-7_rails6-0
-          ruby_version: 2.7.5
+          ruby_version: 2.7.7
           rails_version: 6.0.4.7
       - bundle_lint_test:
           name: ruby2-7_rails5-2
-          ruby_version: 2.7.5
-          rails_version: 5.2.4
-      # Ruby 2.6 releases
-      - bundle_lint_test:
-          name: ruby2-6_rails6-1
-          ruby_version: 2.6.9
-          rails_version: 6.1.6.1
-      - bundle_lint_test:
-          name: ruby2-6_rails6-0
-          ruby_version: 2.6.9
-          rails_version: 6.0.4.7
-      - bundle_lint_test:
-          name: ruby2-6_rails5-2
-          ruby_version: 2.6.9
-          rails_version: 5.2.4
-      # Ruby 2.5 releases
-      - bundle_lint_test:
-          name: ruby2-5_rails6.0
-          ruby_version: 2.5.9
-          rails_version: 6.0.4.7
-      - bundle_lint_test:
-          name: ruby2-5_rails5-2
-          ruby_version: 2.5.9
+          ruby_version: 2.7.7
           rails_version: 5.2.4
 
   nightly:
@@ -99,39 +77,17 @@ workflows:
       # Ruby 2.7 releases
       - bundle_lint_test:
           name: ruby2-7_rails7-0
-          ruby_version: 2.7.5
+          ruby_version: 2.7.7
           rails_version: 7.0.3.1
       - bundle_lint_test:
           name: ruby2-7_rails6-1
-          ruby_version: 2.7.5
+          ruby_version: 2.7.7
           rails_version: 6.1.6.1
       - bundle_lint_test:
           name: ruby2-7_rails6-0
-          ruby_version: 2.7.5
+          ruby_version: 2.7.7
           rails_version: 6.0.4.7
       - bundle_lint_test:
           name: ruby2-7_rails5-2
-          ruby_version: 2.7.5
-          rails_version: 5.2.4
-      # Ruby 2.6 releases
-      - bundle_lint_test:
-          name: ruby2-6_rails6-1
-          ruby_version: 2.6.9
-          rails_version: 6.1.6.1
-      - bundle_lint_test:
-          name: ruby2-6_rails6-0
-          ruby_version: 2.6.9
-          rails_version: 6.0.4.7
-      - bundle_lint_test:
-          name: ruby2-6_rails5-2
-          ruby_version: 2.6.9
-          rails_version: 5.2.4
-      # Ruby 2.5 releases
-      - bundle_lint_test:
-          name: ruby2-5_rails6.0
-          ruby_version: 2.5.9
-          rails_version: 6.0.4.7
-      - bundle_lint_test:
-          name: ruby2-5_rails5-2
-          ruby_version: 2.5.9
+          ruby_version: 2.7.7
           rails_version: 5.2.4
