@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 gemspec path: File.expand_path('..', __FILE__)
 
-gem 'active-triples', github: 'samvera-labs/activetriples', branch: 'merge-gitlab-upstream'
+gem 'active-triples', git: 'https://gitlab.com/cjcolvar/ActiveTriples.git', branch: 'ruby3'
 gem 'byebug' unless ENV['TRAVIS']
 gem 'pry-byebug' unless ENV['CI']
 
