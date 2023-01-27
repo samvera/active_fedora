@@ -26,6 +26,7 @@ module ActiveFedora::RDF
            subClassOf: "info:fedora/fedora-system:def/model#FedoraObject".freeze,
            type: "info:fedora/fedora-system:def/model#FedoraObject".freeze
     end
+
     class Model < ::RDF::StrictVocabulary("info:fedora/fedora-system:def/model#")
       # Class definitions
       term :FedoraObject,
@@ -176,6 +177,7 @@ module ActiveFedora::RDF
                range: "xsd:boolean".freeze,
                type: "rdf:Property".freeze
     end
+
     class RelsExt < ::RDF::StrictVocabulary("info:fedora/fedora-system:def/relations-external#")
       # Property definitions
       property :fedoraRelationship,
@@ -293,6 +295,7 @@ module ActiveFedora::RDF
                "owl:inverseOf" => %(info:fedora/fedora-system:def/relations-external#hasSubset).freeze,
                type: "rdf:Property".freeze
     end
+
     class View < ::RDF::StrictVocabulary("info:fedora/fedora-system:def/view#")
       property :disseminates,
                comment: %(A property used to indicate that an object contains a datastream).freeze,

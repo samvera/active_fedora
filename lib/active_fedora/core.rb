@@ -47,11 +47,9 @@ module ActiveFedora
     #   to.
     # @note This can only be run on an unpersisted resource.
     def uri=(uri)
-      if persisted?
-        raise AlreadyPersistedError, "You can not set a URI for a persisted ActiveFedora object."
-      else
-        @ldp_source = build_ldp_resource(self.class.uri_to_id(uri))
-      end
+      raise AlreadyPersistedError, "You can not set a URI for a persisted ActiveFedora object." if persisted?
+
+      @ldp_source = build_ldp_resource(self.class.uri_to_id(uri))
     end
 
     # Reloads the object from Fedora.
@@ -132,9 +130,7 @@ module ActiveFedora
         # Returns a suitable string representation for :has_model
         # @deprecated use to_rdf_representation instead
         def to_class_uri(attrs = nil)
-          if attrs
-            Deprecation.warn ActiveFedora::Core, "to_class_uri no longer acceps an argument"
-          end
+          Deprecation.warn ActiveFedora::Core, "to_class_uri no longer acceps an argument" if attrs
           to_rdf_representation
         end
         deprecation_deprecate to_class_uri: "use 'to_rdf_representation()' instead"
@@ -159,11 +155,8 @@ module ActiveFedora
       end
 
       def check_persistence
-        if destroyed?
-          raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that has been destroyed"
-        else
-          raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved"
-        end
+        raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that has been destroyed" if destroyed?
+        raise ActiveFedora::ObjectNotFoundError, "Can't reload an object that hasn't been saved"
       end
   end
 end

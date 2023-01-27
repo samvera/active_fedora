@@ -10,7 +10,7 @@ module ActiveFedora
 
     def default_sort_params
       [ActiveFedora.index_field_mapper.solr_name('system_create', :stored_sortable, type: :date) +
-       ' asc']
+        ' asc']
     end
   end
 end

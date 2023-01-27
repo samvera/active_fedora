@@ -4,8 +4,10 @@ describe ActiveFedora::ModelClassifier do
   module ParentClass
     class SiblingClass
     end
+
     class OtherSiblingClass
     end
+
     class SubclassClass < SiblingClass
     end
   end

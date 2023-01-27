@@ -11,11 +11,11 @@ module ActiveFedora
     end
 
     def [](name)
-      association(name).reader if association(name)
+      association(name)&.reader
     end
 
     def []=(name, object)
-      association(name).writer(object) if association(name)
+      association(name)&.writer(object)
     end
 
     def association(name)
@@ -84,6 +84,7 @@ module ActiveFedora
       super
     end
   end
+
   ##
   # Represents the result of merging two association hashes.
   # @note As the keys can come from multiple models, the attributes become
@@ -91,11 +92,13 @@ module ActiveFedora
   class Merged < AssociationHash
     attr_reader :first, :second
 
+    # rubocop:disable Lint/MissingSuper
     def initialize(first, second)
       @first = first
       @base = first.base
       @second = second
     end
+    # rubocop:enable Lint/MissingSuper
 
     def [](name)
       first[name] || second[name]

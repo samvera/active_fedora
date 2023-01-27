@@ -23,11 +23,11 @@ RSpec.describe ActiveFedora::Orders::OrderedList do
     context "with two nodes" do
       it "is the last node" do
         member = instance_double(ActiveFedora::Base)
-        member_2 = instance_double(ActiveFedora::Base)
+        member2 = instance_double(ActiveFedora::Base)
         ordered_list.append_target member
-        ordered_list.append_target member_2
+        ordered_list.append_target member2
 
-        expect(ordered_list.last.target).to eq member_2
+        expect(ordered_list.last.target).to eq member2
       end
     end
   end
@@ -106,16 +106,16 @@ RSpec.describe ActiveFedora::Orders::OrderedList do
     end
     context "with two nodes" do
       let(:member) { instance_double(ActiveFedora::Base) }
-      let(:member_2) { instance_double(ActiveFedora::Base) }
+      let(:member2) { instance_double(ActiveFedora::Base) }
       before do
         ordered_list.append_target member
-        ordered_list.append_target member_2
+        ordered_list.append_target member2
       end
       it "can return the first" do
         expect(ordered_list[0].target).to eq member
       end
       it "can return the last" do
-        expect(ordered_list[1].target).to eq member_2
+        expect(ordered_list[1].target).to eq member2
       end
       it "returns nil for out of bounds values" do
         expect(ordered_list[3]).to eq nil
@@ -199,35 +199,35 @@ RSpec.describe ActiveFedora::Orders::OrderedList do
   describe "#insert_at" do
     it "can insert in the middle" do
       member = instance_double(ActiveFedora::Base)
-      member_2 = instance_double(ActiveFedora::Base)
+      member2 = instance_double(ActiveFedora::Base)
       3.times do
         ordered_list.append_target member
       end
 
-      ordered_list.insert_at(1, member_2)
+      ordered_list.insert_at(1, member2)
 
-      expect(ordered_list.to_a.map(&:target)).to eq [member, member_2, member, member]
+      expect(ordered_list.to_a.map(&:target)).to eq [member, member2, member, member]
       expect(ordered_list).to be_changed
     end
     it "can insert at the beginning" do
       member = instance_double(ActiveFedora::Base)
-      member_2 = instance_double(ActiveFedora::Base)
+      member2 = instance_double(ActiveFedora::Base)
       2.times do
         ordered_list.append_target member
       end
 
-      ordered_list.insert_at(0, member_2)
+      ordered_list.insert_at(0, member2)
 
-      expect(ordered_list.to_a.map(&:target)).to eq [member_2, member, member]
+      expect(ordered_list.to_a.map(&:target)).to eq [member2, member, member]
     end
   end
 
   describe "#delete_node" do
     it "can delete a node in the middle" do
       member = instance_double(ActiveFedora::Base)
-      member_2 = instance_double(ActiveFedora::Base)
+      member2 = instance_double(ActiveFedora::Base)
       ordered_list.append_target member
-      ordered_list.append_target member_2
+      ordered_list.append_target member2
       ordered_list.append_target member
 
       ordered_list.delete_node(ordered_list.to_a[1])
@@ -236,8 +236,8 @@ RSpec.describe ActiveFedora::Orders::OrderedList do
     end
     it "can delete a node at the start" do
       member = instance_double(ActiveFedora::Base)
-      member_2 = instance_double(ActiveFedora::Base)
-      ordered_list.append_target member_2
+      member2 = instance_double(ActiveFedora::Base)
+      ordered_list.append_target member2
       ordered_list.append_target member
       ordered_list.append_target member
 
@@ -247,10 +247,10 @@ RSpec.describe ActiveFedora::Orders::OrderedList do
     end
     it "can delete a node at the end" do
       member = instance_double(ActiveFedora::Base)
-      member_2 = instance_double(ActiveFedora::Base)
+      member2 = instance_double(ActiveFedora::Base)
       ordered_list.append_target member
       ordered_list.append_target member
-      ordered_list.append_target member_2
+      ordered_list.append_target member2
 
       ordered_list.delete_node(ordered_list.to_a[2])
 
@@ -261,9 +261,9 @@ RSpec.describe ActiveFedora::Orders::OrderedList do
   describe "#delete_at" do
     it "can delete a node in the middle" do
       member = instance_double(ActiveFedora::Base)
-      member_2 = instance_double(ActiveFedora::Base)
+      member2 = instance_double(ActiveFedora::Base)
       ordered_list.append_target member
-      ordered_list.append_target member_2
+      ordered_list.append_target member2
       ordered_list.append_target member
 
       ordered_list.delete_at(1)
@@ -272,8 +272,8 @@ RSpec.describe ActiveFedora::Orders::OrderedList do
     end
     it "can delete a node at the start" do
       member = instance_double(ActiveFedora::Base)
-      member_2 = instance_double(ActiveFedora::Base)
-      ordered_list.append_target member_2
+      member2 = instance_double(ActiveFedora::Base)
+      ordered_list.append_target member2
       ordered_list.append_target member
       ordered_list.append_target member
 
@@ -283,10 +283,10 @@ RSpec.describe ActiveFedora::Orders::OrderedList do
     end
     it "can delete a node at the end" do
       member = instance_double(ActiveFedora::Base)
-      member_2 = instance_double(ActiveFedora::Base)
+      member2 = instance_double(ActiveFedora::Base)
       ordered_list.append_target member
       ordered_list.append_target member
-      ordered_list.append_target member_2
+      ordered_list.append_target member2
 
       ordered_list.delete_at(2)
 
@@ -294,15 +294,15 @@ RSpec.describe ActiveFedora::Orders::OrderedList do
     end
     it "does not delete nodes if the loc is out of bounds" do
       member = instance_double(ActiveFedora::Base)
-      member_2 = instance_double(ActiveFedora::Base)
+      member2 = instance_double(ActiveFedora::Base)
       ordered_list.append_target member
       ordered_list.append_target member
-      ordered_list.append_target member_2
+      ordered_list.append_target member2
 
       ordered_list.delete_at(3)
       ordered_list.delete_at(nil)
 
-      expect(ordered_list.map(&:target)).to eq [member, member, member_2]
+      expect(ordered_list.map(&:target)).to eq [member, member, member2]
     end
   end
 

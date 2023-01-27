@@ -1,6 +1,6 @@
 module ActiveFedora
   module Associations
-    class DirectlyContainsAssociation < ContainsAssociation #:nodoc:
+    class DirectlyContainsAssociation < ContainsAssociation # :nodoc:
       def insert_record(record, force = true, validate = true)
         container.save!
         super
@@ -20,18 +20,16 @@ module ActiveFedora
       end
 
       def container
-        @container ||= begin
-          DirectContainer.find_or_initialize(ActiveFedora::Base.uri_to_id(uri)).tap do |container|
-            container.parent = @owner
-            container.has_member_relation = Array(options[:has_member_relation])
-            container.is_member_of_relation = Array(options[:is_member_of_relation])
-          end
+        @container ||= DirectContainer.find_or_initialize(ActiveFedora::Base.uri_to_id(uri)).tap do |container|
+          container.parent = @owner
+          container.has_member_relation = Array(options[:has_member_relation])
+          container.is_member_of_relation = Array(options[:is_member_of_relation])
         end
       end
 
       protected
 
-        def initialize_attributes(record) #:nodoc:
+        def initialize_attributes(record) # :nodoc:
           record.uri = ActiveFedora::Base.id_to_uri(container.mint_id)
           set_inverse_instance(record)
         end

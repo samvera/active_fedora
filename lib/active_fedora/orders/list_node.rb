@@ -1,8 +1,7 @@
 module ActiveFedora::Orders
   class ListNode
     attr_reader :rdf_subject
-    attr_accessor :prev, :next, :target
-    attr_writer :next_uri, :prev_uri
+    attr_writer :prev, :next, :target, :next_uri, :prev_uri
     attr_accessor :proxy_in, :proxy_for
     def initialize(node_cache, rdf_subject, graph = RDF::Repository.new)
       @rdf_subject = rdf_subject
@@ -120,7 +119,7 @@ module ActiveFedora::Orders
     end
 
     def new_record?
-      @target && @target.new_record?
+      @target&.new_record?
     end
 
     private

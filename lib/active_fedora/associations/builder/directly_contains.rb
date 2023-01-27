@@ -1,5 +1,5 @@
 module ActiveFedora::Associations::Builder
-  class DirectlyContains < CollectionAssociation #:nodoc:
+  class DirectlyContains < CollectionAssociation # :nodoc:
     def self.macro
       :directly_contains
     end
@@ -10,11 +10,9 @@ module ActiveFedora::Associations::Builder
 
     def self.validate_options(options)
       super
-      if !options[:has_member_relation] && !options[:is_member_of_relation]
-        raise ArgumentError, "You must specify a :has_member_relation or :is_member_of_relation predicate for #{name}"
-      elsif !options[:has_member_relation].is_a?(RDF::URI) && !options[:is_member_of_relation].is_a?(RDF::URI)
-        raise ArgumentError, "Predicate must be a kind of RDF::URI"
-      end
+
+      raise ArgumentError, "You must specify a :has_member_relation or :is_member_of_relation predicate for #{name}" if !options[:has_member_relation] && !options[:is_member_of_relation]
+      raise ArgumentError, "Predicate must be a kind of RDF::URI" if !options[:has_member_relation].is_a?(RDF::URI) && !options[:is_member_of_relation].is_a?(RDF::URI)
     end
   end
 end

@@ -1,4 +1,4 @@
-module ActiveFedora #:nodoc:
+module ActiveFedora # :nodoc:
   # = Active Fedora Serialization
   module Serialization
     extend ActiveSupport::Concern

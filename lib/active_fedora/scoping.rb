@@ -10,11 +10,11 @@ module ActiveFedora
     end
 
     module ClassMethods
-      def current_scope #:nodoc:
+      def current_scope # :nodoc:
         ScopeRegistry.value_for(:current_scope, self)
       end
 
-      def current_scope=(scope) #:nodoc:
+      def current_scope=(scope) # :nodoc:
         ScopeRegistry.set_value_for(:current_scope, self, scope)
       end
 

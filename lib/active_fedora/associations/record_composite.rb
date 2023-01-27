@@ -18,6 +18,7 @@ module ActiveFedora::Associations
     def delete
       each(&:delete)
     end
+
     ##
     # A Repository which returns a composite from #find instead of a single
     # record. Delegates find to a base repository.

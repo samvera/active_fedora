@@ -49,7 +49,7 @@ module ActiveFedora
 
       if amount.nil?
         read_to_buf(nil, buf) # read the entire file, returns buf
-      elsif amount < 0
+      elsif amount.negative?
         raise(ArgumentError, "negative length #{amount} given")
       elsif amount.zero?
         ''
@@ -89,9 +89,7 @@ module ActiveFedora
     private
 
       def read_to_buf(amount, buf)
-        while (amount.nil? || buf.length < amount) && fill_buffer
-          buf << consume_buffer(amount.nil? ? nil : (amount - buf.length))
-        end
+        buf << consume_buffer(amount.nil? ? nil : (amount - buf.length)) while (amount.nil? || buf.length < amount) && fill_buffer
         buf
       end
 

@@ -1,6 +1,6 @@
 module ActiveFedora
   module Associations
-    class CollectionAssociation < Association #:nodoc:
+    class CollectionAssociation < Association # :nodoc:
       attr_reader :proxy
 
       # Implements the reader method, e.g. foo.items for Foo.has_many :items
@@ -336,11 +336,8 @@ module ActiveFedora
 
         def find_reflection
           return reflection if @reflection.options[:predicate]
-          if @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base' && @reflection.macro != :has_and_belongs_to_many
-            @reflection.inverse_of || raise("No :inverse_of or :predicate attribute was set or could be inferred for #{@reflection.macro} #{@reflection.name.inspect} on #{@owner.class}")
-          else
-            raise "Couldn't find reflection"
-          end
+          raise "Couldn't find reflection" unless @reflection.class_name && @reflection.class_name != 'ActiveFedora::Base' && @reflection.macro != :has_and_belongs_to_many
+          @reflection.inverse_of || raise("No :inverse_of or :predicate attribute was set or could be inferred for #{@reflection.macro} #{@reflection.name.inspect} on #{@owner.class}")
         end
 
         def _create_record(attributes, raise = false)

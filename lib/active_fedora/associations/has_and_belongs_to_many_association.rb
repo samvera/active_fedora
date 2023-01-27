@@ -1,7 +1,7 @@
 module ActiveFedora
   # = Active Fedora Has And Belongs To Many Association
   module Associations
-    class HasAndBelongsToManyAssociation < CollectionAssociation #:nodoc:
+    class HasAndBelongsToManyAssociation < CollectionAssociation # :nodoc:
       def initialize(owner, reflection)
         super
       end
