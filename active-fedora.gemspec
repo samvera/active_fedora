@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.summary     = 'A convenience libary for manipulating documents in the Fedora Repository.'
   s.description = 'ActiveFedora provides for creating and managing objects in the Fedora Repository Architecture.'
   s.license = "Apache-2.0"
-  s.metadata      = { "rubygems_mfa_required" => "true" }
+  s.metadata = { "rubygems_mfa_required" => "true" }
   s.required_ruby_version = '>= 2.6'
 
   s.add_dependency "activemodel", '>= 5.1'
