@@ -1,18 +1,13 @@
-require: rubocop-rspec
+inherit_gem:
+  bixby: bixby_default.yml
 
 inherit_from:
 - .rubocop_todo.yml
 
-AllCops:
-  TargetRubyVersion: 2.2
-  DisplayCopNames: true
-  Include:
-    - '**/Rakefile'
-  Exclude:
-    - 'script/**/*'
-    - 'vendor/**/*'
+Style/FrozenStringLiteralComment:
+  Enabled: false
 
-Lint/HandleExceptions:
+Lint/SuppressedException:
   Exclude:
     - 'spec/unit/**/*'
     - 'spec/integration/**/*'
@@ -22,11 +17,18 @@ Lint/HandleExceptions:
 Lint/AssignmentInCondition:
   Enabled: false
 
-Metrics/LineLength:
+Layout/LineLength:
   Enabled: false
 
 Metrics/AbcSize:
   Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'lib/active_fedora.rb'
+    - 'lib/active_fedora/nested_attributes.rb'
+    - 'lib/active_fedora/rspec_matchers/**/*'
+    - 'lib/tasks/**/*'
 
 Metrics/BlockNesting:
   Exclude:
@@ -173,7 +175,7 @@ Style/Lambda:
     - 'spec/**/*'
 
 Layout/IndentationConsistency:
-  EnforcedStyle: rails
+  EnforcedStyle: indented_internal_methods
 
 Style/CollectionMethods:
   PreferredMethods:
@@ -240,6 +242,15 @@ Rails/Date:
 Rails/TimeZone:
   Enabled: false
 
+Rails/FilePath:
+  Enabled: false
+
+Rails/ActiveRecordAliases:
+  Enabled: false
+
+Rails/SkipsModelValidations:
+  Enabled: false
+
 RSpec/AnyInstance:
   Enabled: false
 
@@ -270,4 +281,7 @@ RSpec/NotToNot:
   Enabled: false
 
 RSpec/MessageSpies:
+  Enabled: false
+
+Security/MarshalLoad:
   Enabled: false

@@ -3,7 +3,7 @@ module ActiveFedora
     # TODO: we may want to split this into two subclasses, one for has_member_relation
     # and the other for is_member_of_relation
     # See https://github.com/samvera/active_fedora/issues/1332
-    class IndirectlyContainsAssociation < ContainsAssociation #:nodoc:
+    class IndirectlyContainsAssociation < ContainsAssociation # :nodoc:
       # Add +records+ to this association.  Returns +self+ so method calls may be chained.
       # Since << flattens its argument list and inserts each record, +push+ and +concat+ behave identically.
       def concat(*records)
@@ -49,19 +49,17 @@ module ActiveFedora
       end
 
       def container
-        @container ||= begin
-          IndirectContainer.find_or_initialize(ActiveFedora::Base.uri_to_id(uri)).tap do |container|
-            container.parent = @owner
-            container.has_member_relation = Array(options[:has_member_relation])
-            container.is_member_of_relation = Array(options[:is_member_of_relation])
-            container.inserted_content_relation = Array(options[:inserted_content_relation])
-          end
+        @container ||= IndirectContainer.find_or_initialize(ActiveFedora::Base.uri_to_id(uri)).tap do |container|
+          container.parent = @owner
+          container.has_member_relation = Array(options[:has_member_relation])
+          container.is_member_of_relation = Array(options[:is_member_of_relation])
+          container.inserted_content_relation = Array(options[:inserted_content_relation])
         end
       end
 
       protected
 
-        def initialize_attributes(_record) #:nodoc:
+        def initialize_attributes(_record) # :nodoc:
           # record.uri = ActiveFedora::Base.id_to_uri(container.mint_id)
           # set_inverse_instance(record)
         end

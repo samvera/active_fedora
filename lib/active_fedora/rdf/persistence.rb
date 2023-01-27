@@ -19,7 +19,7 @@ module ActiveFedora
 
       # Overrides ActiveTriples::Resource
       def persist!
-        return false unless datastream && datastream.respond_to?(:save)
+        return false unless datastream&.respond_to?(:save)
         @persisted ||= datastream.save
       end
 

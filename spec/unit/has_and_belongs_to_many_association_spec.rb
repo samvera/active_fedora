@@ -5,6 +5,7 @@ describe ActiveFedora::Associations::HasAndBelongsToManyAssociation do
     before do
       class Book < ActiveFedora::Base
       end
+
       class Page < ActiveFedora::Base
       end
 

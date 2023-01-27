@@ -74,10 +74,12 @@ describe ActiveFedora::Base do
           rdf_label ::RDF::Vocab::FOAF.name
           property :foaf_name, predicate: ::RDF::Vocab::FOAF.name
         end
+
         class Person < Agent
           rdf_label ::RDF::URI('http://example.com/foo')
           property :job, predicate: ::RDF::URI('http://example.com/foo')
         end
+
         class Creator < Person
         end
       end

@@ -147,9 +147,11 @@ module ActiveFedora
       # @param attrs [Hash] attributes read from Solr
       # @return [Hash] the adapted attributes
       def adapt_attributes(attrs)
-        self.class.attribute_names.each_with_object({}) do |attribute_name, new_attributes|
-          new_attributes[attribute_name] = adapt_attribute_value(attrs, attribute_name)
+        result = {}
+        self.class.attribute_names.each do |attribute_name|
+          result[attribute_name] = adapt_attribute_value(attrs, attribute_name)
         end
+        result
       end
 
       # Adapts a single attribute from the given attributes hash to fit the data
@@ -194,7 +196,7 @@ module ActiveFedora
       # @return [Object] the adapted value
       def adapt_single_attribute_value(value, attribute_name)
         if value && date_attribute?(attribute_name)
-          return nil unless value.present?
+          return nil if value.blank?
           DateTime.parse(value)
         else
           value

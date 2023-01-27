@@ -23,7 +23,7 @@ module ActiveFedora
       HAS_MODEL_PREDICATE = ActiveFedora::RDF::Fcrepo::Model.hasModel
 
       class_attribute :default_priority_models, instance_accessor: false
-      self.default_priority_models = %w(Hydra::AccessControl Hydra::AccessControl::Permissions).freeze
+      self.default_priority_models = %w[Hydra::AccessControl Hydra::AccessControl::Permissions].freeze
 
       attr_reader :uri, :priority_models
 

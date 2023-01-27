@@ -21,9 +21,9 @@ describe ActiveFedora::Base do
 
       it "queries solr for all objects with has_model_ssim of self.class" do
         expect(relation).to receive(:load_from_fedora).with("changeme:30", nil)
-          .and_return("Fake Object1")
+                                                      .and_return("Fake Object1")
         expect(relation).to receive(:load_from_fedora).with("changeme:22", nil)
-          .and_return("Fake Object2")
+                                                      .and_return("Fake Object2")
         mock_docs = [{ "id" => "changeme:30" }, { "id" => "changeme:22" }]
         expect(mock_docs).to receive(:has_next?).and_return(false)
         expect(ActiveFedora::SolrService.instance.conn).to receive(:paginate)
@@ -38,9 +38,9 @@ describe ActiveFedora::Base do
       let(:relation) { ActiveFedora::Relation.new(described_class) }
       it "specifies a q parameter" do
         expect(relation).to receive(:load_from_fedora).with("changeme:30", true)
-          .and_return("Fake Object1")
+                                                      .and_return("Fake Object1")
         expect(relation).to receive(:load_from_fedora).with("changeme:22", true)
-          .and_return("Fake Object2")
+                                                      .and_return("Fake Object2")
         mock_docs = [{ "id" => "changeme:30" }, { "id" => "changeme:22" }]
         expect(mock_docs).to receive(:has_next?).and_return(false)
         expect(ActiveFedora::SolrService.instance.conn).to receive(:paginate)
@@ -104,13 +104,13 @@ describe ActiveFedora::Base do
 
     it "adds options" do
       expect(relation).to receive(:load_from_fedora).with("changeme:30", nil)
-        .and_return("Fake Object1")
+                                                    .and_return("Fake Object1")
       expect(relation).to receive(:load_from_fedora).with("changeme:22", nil)
-        .and_return("Fake Object2")
+                                                    .and_return("Fake Object2")
 
       expect(mock_docs).to receive(:has_next?).and_return(false)
       expect(solr).to receive(:paginate).with(1, 1000, 'select', expected_sort_params)
-        .and_return('response' => { 'docs' => mock_docs })
+                                        .and_return('response' => { 'docs' => mock_docs })
       expect(SpecModel::Basic.where(foo: 'bar', baz: ['quix', 'quack'])
                                 .order('title_t desc')).to eq ["Fake Object1", "Fake Object2"]
     end
@@ -128,9 +128,9 @@ describe ActiveFedora::Base do
         .and_return('response' => { 'docs' => mock_docs })
 
       allow(relation).to receive(:load_from_fedora).with("changeme-30", nil)
-        .and_return(SpecModel::Basic.new(id: 'changeme-30'))
+                                                   .and_return(SpecModel::Basic.new(id: 'changeme-30'))
       allow(relation).to receive(:load_from_fedora).with("changeme-22", nil)
-        .and_return(SpecModel::Basic.new(id: 'changeme-22'))
+                                                   .and_return(SpecModel::Basic.new(id: 'changeme-22'))
       SpecModel::Basic.find_each { |obj| obj.class == SpecModel::Basic }
     end
 

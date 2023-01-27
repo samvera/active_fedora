@@ -46,7 +46,7 @@ module ActiveFedora
           super || default_scopes.any? || respond_to?(:default_scope)
         end
 
-        def before_remove_const #:nodoc:
+        def before_remove_const # :nodoc:
           self.current_scope = nil
         end
 
@@ -110,9 +110,7 @@ module ActiveFedora
           def build_default_scope(base_rel = nil) # :nodoc:
             return if abstract_class?
 
-            if default_scope_override.nil?
-              self.default_scope_override = !Base.is_a?(method(:default_scope).owner)
-            end
+            self.default_scope_override = !Base.is_a?(method(:default_scope).owner) if default_scope_override.nil?
 
             if default_scope_override
               # The user has defined their own default scope method, so call that

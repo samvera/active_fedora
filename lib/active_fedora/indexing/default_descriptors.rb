@@ -104,11 +104,9 @@ module ActiveFedora
         def dateable_converter
           lambda do |_type|
             lambda do |val|
-              begin
-                iso8601_date(Date.parse(val))
-              rescue ArgumentError
-                nil
-              end
+              iso8601_date(Date.parse(val))
+            rescue ArgumentError
+              nil
             end
           end
         end

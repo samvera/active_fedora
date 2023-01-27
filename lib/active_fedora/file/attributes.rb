@@ -37,7 +37,7 @@ module ActiveFedora::File::Attributes
   end
 
   def has_content?
-    size && size > 0
+    size&.positive?
   end
 
   def empty?
@@ -46,12 +46,12 @@ module ActiveFedora::File::Attributes
 
   def create_date
     created = metadata.attributes["http://fedora.info/definitions/v4/repository#created"]
-    created && created.first
+    created&.first
   end
 
   def modified_date
     modified = metadata.attributes["http://fedora.info/definitions/v4/repository#lastModified"]
-    modified && modified.first
+    modified&.first
   end
 
   private

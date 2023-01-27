@@ -103,9 +103,7 @@ module ActiveFedora
     def search_by_id(id, opts = {})
       opts[:rows] = 1
       result = search_with_conditions({ id: id }, opts)
-      if result.empty?
-        raise ActiveFedora::ObjectNotFoundError, "Object '#{id}' not found in solr"
-      end
+      raise ActiveFedora::ObjectNotFoundError, "Object '#{id}' not found in solr" if result.empty?
       result.first
     end
 
@@ -118,11 +116,9 @@ module ActiveFedora
       cast = opts.delete(:cast)
       search_in_batches(conditions, opts.merge(fl: ActiveFedora.id_field)) do |group|
         group.each do |hit|
-          begin
-            yield(load_from_fedora(hit[ActiveFedora.id_field], cast))
-          rescue Ldp::Gone, ActiveFedora::ObjectNotFoundError
-            ActiveFedora::Base.logger.error "Although #{hit[ActiveFedora.id_field]} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch."
-          end
+          yield(load_from_fedora(hit[ActiveFedora.id_field], cast))
+        rescue Ldp::Gone, ActiveFedora::ObjectNotFoundError
+          ActiveFedora::Base.logger.error "Although #{hit[ActiveFedora.id_field]} was found in Solr, it doesn't seem to exist in Fedora. The index is out of synch."
         end
       end
     end
@@ -145,7 +141,7 @@ module ActiveFedora
       opts[:q] = create_query(conditions)
       opts[:qt] = @klass.solr_query_handler
       # set default sort to created date ascending
-      opts[:sort] = @klass.default_sort_params unless opts[:sort].present?
+      opts[:sort] = @klass.default_sort_params if opts[:sort].blank?
 
       batch_size = opts.delete(:batch_size) || 1000
       select_path = ActiveFedora::SolrService.select_path
@@ -194,9 +190,7 @@ module ActiveFedora
           ActiveFedora::Base
         else
           resource_class = ActiveFedora.model_mapper.classifier(resource).best_model
-          unless equivalent_class?(resource_class)
-            raise ActiveFedora::ModelMismatch, "Expected #{@klass}. Got: #{resource_class}"
-          end
+          raise ActiveFedora::ModelMismatch, "Expected #{@klass}. Got: #{resource_class}" unless equivalent_class?(resource_class)
           resource_class
         end
       end

@@ -1,5 +1,5 @@
 module ActiveFedora::Associations::Builder
-  class SingularAssociation < Association #:nodoc:
+  class SingularAssociation < Association # :nodoc:
     def self.valid_options(options)
       super + [:dependent, :inverse_of, :required]
     end

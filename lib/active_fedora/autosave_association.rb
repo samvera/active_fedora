@@ -77,7 +77,7 @@ module ActiveFedora
 
     ASSOCIATION_TYPES = [:has_many, :belongs_to, :has_and_belongs_to_many, :directly_contains, :indirectly_contains, :is_a_container].freeze
 
-    module AssociationBuilderExtension #:nodoc:
+    module AssociationBuilderExtension # :nodoc:
       def self.valid_options
         [:autosave]
       end
@@ -199,7 +199,7 @@ module ActiveFedora
       # unless the parent is/was a new record itself.
       def associated_records_to_validate_or_save(association, new_record, autosave)
         if new_record
-          association && association.target
+          association&.target
         elsif autosave
           association.target.find_all(&:changed_for_autosave?)
         else
@@ -220,7 +220,7 @@ module ActiveFedora
       # turned on for the association.
       def validate_single_association(reflection)
         association = association_instance_get(reflection.name)
-        record      = association && association.target
+        record      = association&.target
         association_valid?(reflection, record) if record
       end
 
@@ -306,7 +306,7 @@ module ActiveFedora
       # In addition, it will destroy the association if it was marked for destruction.
       def save_belongs_to_association(reflection)
         association = association_instance_get(reflection.name)
-        record      = association && association.load_target
+        record      = association&.load_target
         if record && !record.destroyed?
           autosave = reflection.options[:autosave]
 

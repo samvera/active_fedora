@@ -48,9 +48,7 @@ module ActiveFedora
         objects.each do |object|
           graph.query({ subject: object }).each do |statement|
             # Have to filter out Fedora triples.
-            unless FedoraStatement.new(statement).internal?
-              child_graphs << statement
-            end
+            child_graphs << statement unless FedoraStatement.new(statement).internal?
           end
         end
         child_graphs

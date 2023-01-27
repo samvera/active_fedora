@@ -1,6 +1,6 @@
 require 'active_fedora/associations'
 module ActiveFedora::Associations::Builder
-  class CollectionAssociation < Association #:nodoc:
+  class CollectionAssociation < Association # :nodoc:
     CALLBACKS = [:before_add, :after_add, :before_remove, :after_remove].freeze
 
     def self.valid_options(options)
@@ -15,11 +15,11 @@ module ActiveFedora::Associations::Builder
     end
 
     def self.define_extensions(model, name)
-      if block_given?
-        extension_module_name = "#{model.name.demodulize}#{name.to_s.camelize}AssociationExtension"
-        extension = Module.new(&Proc.new)
-        model.parent.const_set(extension_module_name, extension)
-      end
+      return unless block_given?
+
+      extension_module_name = "#{model.name.demodulize}#{name.to_s.camelize}AssociationExtension"
+      extension = Module.new(&Proc.new)
+      model.parent.const_set(extension_module_name, extension)
     end
 
     def self.define_callback(model, callback_name, name, options)
@@ -44,7 +44,7 @@ module ActiveFedora::Associations::Builder
 
     def self.wrap_scope(scope, mod)
       if scope
-        if scope.arity > 0
+        if scope.arity.positive?
           proc { |owner| instance_exec(owner, &scope).extending(mod) }
         else
           proc { instance_exec(&scope).extending(mod) }

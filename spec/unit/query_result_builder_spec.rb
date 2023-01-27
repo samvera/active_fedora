@@ -19,6 +19,7 @@ describe ActiveFedora::QueryResultBuilder do
         described_class.reify_solr_results(@sample_solr_hits)
       end
     end
+    # rubocop:disable Lint/Void
     describe ".lazy_reify_solr_results" do
       it "lazilies reify solr results" do
         expect(AudioRecord).to receive(:find).with("my:_ID1_", cast: true)
@@ -27,5 +28,6 @@ describe ActiveFedora::QueryResultBuilder do
         described_class.lazy_reify_solr_results(@sample_solr_hits).each { |r| r }
       end
     end
+    # rubocop:enable Lint/Void
   end
 end

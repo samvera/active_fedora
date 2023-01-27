@@ -18,6 +18,7 @@ describe "nested hash resources" do
         parent
       end
     end
+
     class ExampleOwner < ActiveFedora::Base
       property :relation, predicate: ::RDF::Vocab::DC.relation, class_name: NestedResource
       accepts_nested_attributes_for :relation

@@ -111,7 +111,7 @@ module ActiveFedora
     end
 
     def content_changed?
-      return true if new_record? && !local_or_remote_content(false).blank?
+      return true if new_record? && local_or_remote_content(false).present?
       local_or_remote_content(false) != @ds_content
     end
 

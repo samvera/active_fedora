@@ -37,7 +37,7 @@ module ActiveFedora
         end
 
         def converter(field_type)
-          @converter.call(field_type) if @converter
+          @converter&.call(field_type)
         end
     end
   end

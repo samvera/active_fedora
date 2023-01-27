@@ -47,13 +47,13 @@ module ActiveFedora
     protected
 
       def c_time
-        c_time = object.create_date.present? ? object.create_date : DateTime.now
+        c_time = object.create_date.presence || DateTime.now
         c_time = DateTime.parse(c_time) unless c_time.is_a?(DateTime)
         c_time
       end
 
       def m_time
-        m_time = object.modified_date.present? ? object.modified_date : DateTime.now
+        m_time = object.modified_date.presence || DateTime.now
         m_time = DateTime.parse(m_time) unless m_time.is_a?(DateTime)
         m_time
       end

@@ -43,6 +43,7 @@ describe ActiveFedora::Associations::BasicContainsAssociation do
       class Thing < ActiveFedora::Base
         property :title, predicate: ::RDF::Vocab::DC.title
       end
+
       class Source < ActiveFedora::Base
         is_a_container class_name: 'Thing'
       end

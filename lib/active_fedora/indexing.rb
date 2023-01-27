@@ -47,9 +47,11 @@ module ActiveFedora
     end
 
     # Updates Solr index with self.
+    # rubocop:disable Naming/VariableName
     def update_index
       SolrService.add(to_solr, softCommit: true)
     end
+    # rubocop:enable Naming/VariableName
 
     protected
 
@@ -91,6 +93,7 @@ module ActiveFedora
                             end
         end
 
+        # rubocop:disable Naming/VariableName
         # @param [Integer] batch_size - The number of Fedora objects to process for each SolrService.add call. Default 50.
         # @param [Boolean] softCommit - Do we perform a softCommit when we add the to_solr objects to SolrService. Default true.
         # @param [Boolean] progress_bar - If true output progress bar information. Default false.
@@ -113,7 +116,7 @@ module ActiveFedora
               batch.clear
             end
 
-            progress_bar_controller.increment if progress_bar_controller
+            progress_bar_controller&.increment
           end
 
           if batch.present?
@@ -121,11 +124,12 @@ module ActiveFedora
             batch.clear
           end
 
-          if final_commit
-            logger.debug "Solr hard commit..."
-            SolrService.commit
-          end
+          return unless final_commit
+
+          logger.debug "Solr hard commit..."
+          SolrService.commit
         end
+        # rubocop:enable Naming/VariableName
 
         def descendant_uris(uri, exclude_uri: false)
           DescendantFetcher.new(uri, exclude_self: exclude_uri).descendant_and_self_uris

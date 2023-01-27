@@ -32,9 +32,7 @@ module ActiveFedora
       def instance
         # Register Solr
 
-        unless ActiveFedora::RuntimeRegistry.solr_service
-          register(ActiveFedora.solr_config)
-        end
+        register(ActiveFedora.solr_config) unless ActiveFedora::RuntimeRegistry.solr_service
 
         ActiveFedora::RuntimeRegistry.solr_service
       end
