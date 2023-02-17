@@ -243,10 +243,9 @@ module ActiveFedora
 
         unless valid = record.valid?
           if reflection.options[:autosave]
-            record.errors.each do |attribute, message|
+            record.errors.messages.each do |attribute, messages|
               attribute = "#{reflection.name}.#{attribute}"
-              errors[attribute] << message
-              errors[attribute].uniq!
+              messages.map { |message| errors.add(attribute, message: message) }
             end
           else
             errors.add(reflection.name)

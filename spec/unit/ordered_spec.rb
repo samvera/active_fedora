@@ -366,4 +366,27 @@ describe ActiveFedora::Orders do
       expect(image.ordered_members).to eq [member, member]
     end
   end
+
+  describe ".valid" do
+    before do
+      class Container < ActiveFedora::Base
+        ordered_aggregation :members, through: :list_source
+        accepts_nested_attributes_for :members
+      end
+    end
+
+    after do
+      Object.send(:remove_const, :Container)
+    end
+
+    it "records errors" do
+      container = Container.new
+      member = Member.new
+      member.errors.add(:foo, "bar")
+      allow(member).to receive(:valid?).and_return(false)
+      container.ordered_members << member
+      expect(container.valid?).to eq false
+      expect(container.errors.include?("members.foo")).to eq true
+    end
+  end
 end
