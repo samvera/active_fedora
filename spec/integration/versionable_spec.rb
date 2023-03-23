@@ -170,12 +170,12 @@ describe ActiveFedora::Versionable do
 
           context "with fixity checking" do
             let(:results) do
-              content.versions.all.collect { |version| ActiveFedora.fedora.connection.head(version.uri.to_s) {|req| req.headers["Want-Digest"]="sha-512"}.response.headers["Digest"].gsub("sha-512=","")}
+              content.versions.all.collect { |version| ActiveFedora.fedora.connection.head(version.uri.to_s) { |req| req.headers["Want-Digest"] = "sha-512" }.response.headers["Digest"].gsub("sha-512=", "") }
             end
-	    let(:file_checksums) { [Digest::SHA512.hexdigest(File.read(first_file)), Digest::SHA512.hexdigest(File.read(second_file))] }
+            let(:file_checksums) { [Digest::SHA512.hexdigest(File.read(first_file)), Digest::SHA512.hexdigest(File.read(second_file))] }
 
             it "reports on the fixity of each version" do
-	      expect(results).to eq file_checksums
+              expect(results).to eq file_checksums
             end
           end
         end

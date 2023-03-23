@@ -30,12 +30,15 @@ module ActiveFedora
         graph_class.new(subject_uri, data: resp.graph.data)
       end
   end
+
   class LdpResource < Ldp::Resource::RdfSource
     include LdpResourceAddons
   end
+
   class IndirectContainerResource < Ldp::Container::Indirect
     include LdpResourceAddons
   end
+
   class DirectContainerResource < Ldp::Container::Direct
     include LdpResourceAddons
   end

@@ -28,7 +28,7 @@ module ActiveFedora
     def has_versions?
       resp = ActiveFedora.fedora.connection.get(versions_uri)
       graph = ::RDF::Graph.new << resp.reader
-      !graph.query(predicate: ::RDF::Vocab::LDP.contains).blank?
+      graph.query(predicate: ::RDF::Vocab::LDP.contains).present?
     rescue Ldp::NotFound
       false
     end

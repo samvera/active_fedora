@@ -1,6 +1,5 @@
 module ActiveFedora::File::External
-
-  HANDLING_TYPES = ['redirect', 'proxy', 'copy']
+  HANDLING_TYPES = ['redirect', 'proxy', 'copy'].freeze
 
   def external_uri
     @external_uri ||= fetch_external_uri
