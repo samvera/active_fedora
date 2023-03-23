@@ -209,15 +209,15 @@ describe ActiveFedora::File do
         context "when there are more than 3 requests because of redirects" do
           before do
             external_uri1 = test_object.attached_files[path].uri.clone
-	    external_uri1.user = 'fedoraAdmin'
+            external_uri1.user = 'fedoraAdmin'
             external_uri1.password = 'fedoraAdmin'
             test_object.add_file('', path: 'one', external_uri: external_uri1, external_handling: 'redirect')
             external_uri2 = test_object.one.uri.clone
-	    external_uri2.user = 'fedoraAdmin'
+            external_uri2.user = 'fedoraAdmin'
             external_uri2.password = 'fedoraAdmin'
             test_object.add_file('', path: 'two', external_uri: external_uri2, external_handling: 'redirect')
             external_uri3 = test_object.two.uri.clone
-	    external_uri3.user = 'fedoraAdmin'
+            external_uri3.user = 'fedoraAdmin'
             external_uri3.password = 'fedoraAdmin'
             test_object.add_file('', path: 'three', external_uri: external_uri3, external_handling: 'redirect')
             test_object.save!

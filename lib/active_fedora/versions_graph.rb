@@ -1,6 +1,6 @@
 module ActiveFedora
   class VersionsGraph < ::RDF::Graph
-    def all(opts = {})
+    def all(_opts = {})
       versions = fedora_versions
       versions.sort_by { |version| DateTime.parse(version.created) }
     rescue ArgumentError, NoMethodError
