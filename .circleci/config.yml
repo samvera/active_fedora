@@ -21,7 +21,7 @@ jobs:
         type: string
         default: '8983'
     docker:
-      - image: circleci/<< parameters.ruby_type >>:<< parameters.ruby_version >>-node-browsers-legacy
+      - image: cimg/<< parameters.ruby_type >>:<< parameters.ruby_version >>-browsers
         environment:
           BUNDLE_PATH: vendor/bundle
           BUNDLE_JOBS: 4
