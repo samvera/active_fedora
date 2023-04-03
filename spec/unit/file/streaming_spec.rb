@@ -9,15 +9,19 @@ describe ActiveFedora::File::Streaming do
   let(:streamer) do
     streamer = test_class.new
     allow(streamer).to receive(:uri).and_return(uri)
-    allow(streamer).to receive(:authorization_key).and_return("authorization_key")
     streamer
+  end
+  let(:http_client) { instance_double("Faraday::Connection") }
+
+  before do
+    allow(http_client).to receive(:get).and_return(nil)
   end
 
   context "without ssl" do
     let(:uri) { "http://localhost/file/1" }
 
     it do
-      expect(Net::HTTP).to receive(:start).with('localhost', 80, use_ssl: false).and_return(nil)
+      expect(Faraday).to receive(:new).with(ActiveFedora.fedora.host, {}).and_return(http_client)
       streamer.stream.each
     end
   end
@@ -25,8 +29,12 @@ describe ActiveFedora::File::Streaming do
   context "with ssl" do
     let(:uri) { "https://localhost/file/1" }
 
+    before do
+      allow(ActiveFedora.fedora).to receive(:ssl_options).and_return(true)
+    end
+
     it do
-      expect(Net::HTTP).to receive(:start).with('localhost', 443, use_ssl: true).and_return(nil)
+      expect(Faraday).to receive(:new).with(ActiveFedora.fedora.host, hash_including(ssl: true)).and_return(http_client)
       streamer.stream.each
     end
   end
