@@ -33,7 +33,7 @@ jobs:
           FCREPO_PORT: 8080
           FCREPO_REST_PATH: fcrepo/rest
           SOLR_TEST_PORT: << parameters.solr_port >>
-      - image: fcrepo/fcrepo:6.1.0
+      - image: fcrepo/fcrepo:6.4.0
         environment:
           JAVA_OPTS: -Dfcrepo.autoversioning.enabled=false -Dfcrepo.external.content.allowed=/fcrepo_allow.txt
         command: |
