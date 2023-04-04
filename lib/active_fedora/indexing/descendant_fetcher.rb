@@ -55,7 +55,7 @@ module ActiveFedora
       def descendant_and_self_uris_partitioned_by_model
         # GET could be slow if it's a big resource, we're using HEAD to avoid this problem,
         # but this causes more requests to Fedora.
-        return partitioned_uris unless rdf_resource.head.rdf_source?
+        return partitioned_uris unless rdf_source?
 
         add_self_to_partitioned_uris unless @exclude_self
 
@@ -75,6 +75,12 @@ module ActiveFedora
       end
 
       protected
+
+        # Fcrepo 6.4 returns a 406 for file objects when returning ntriples
+        # so use the standard connection just for the head request
+        def rdf_source?
+          Ldp::Resource.new(ActiveFedora.fedora.connection, uri).head.rdf_source?
+        end
 
         def rdf_resource
           @rdf_resource ||= Ldp::Resource::RdfSource.new(ActiveFedora.fedora.build_ntriples_connection, uri)
