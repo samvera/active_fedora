@@ -1,17 +1,17 @@
+require 'faraday/follow_redirects'
+
 module ActiveFedora::File::Streaming
   # @param range [String] the Range HTTP header
   # @return [Stream] an object that responds to each
   def stream(range = nil)
     uri = URI.parse(self.uri)
-    FileBody.new(uri, headers(range, authorization_key))
+    FileBody.new(uri, headers(range, nil))
   end
 
   # @param range [String] from #stream
-  # @param key [String] from #authorization_key
   # @return [Hash]
-  def headers(range, key, result = {})
+  def headers(range, _key, result = {})
     result["Range"] = range if range
-    result["Authorization"] = key if key
     result
   end
 
@@ -22,32 +22,35 @@ module ActiveFedora::File::Streaming
       @headers = headers
     end
 
-    def each(no_of_requests_limit = 3, &block)
-      raise ArgumentError, 'HTTP redirect too deep' if no_of_requests_limit.zero?
-      Net::HTTP.start(uri.host, uri.port, use_ssl: (uri.scheme == 'https')) do |http|
-        request = Net::HTTP::Get.new uri, headers
-        http.request request do |response|
-          case response
-          when Net::HTTPSuccess
-            response.read_body do |chunk|
-              yield chunk
-            end
-          when Net::HTTPRedirection
-            no_of_requests_limit -= 1
-            @uri = URI(response["location"])
-            each(no_of_requests_limit, &block)
+    def each(no_of_requests_limit = 3)
+      redirecting_connection(no_of_requests_limit).get(uri.to_s, nil, headers) do |req|
+        req.options.on_data = proc do |chunk, overall_received_bytes, _env|
+          yield chunk unless overall_received_bytes.zero? # Don't yield when redirecting
+        end
+      end
+    rescue Faraday::FollowRedirects::RedirectLimitReached
+      raise ArgumentError, 'HTTP redirect too deep'
+    rescue Faraday::Error => ex
+      raise "Couldn't get data from Fedora (#{uri}). Response: #{ex.response_status}"
+    end
+
+    private
+
+      # Create a new faraday connection with follow_redirects enabled and configured using passed value
+      def redirecting_connection(redirection_limit)
+        options = {}
+        options[:ssl] = ActiveFedora.fedora.ssl_options if ActiveFedora.fedora.ssl_options
+        options[:request] = ActiveFedora.fedora.request_options if ActiveFedora.fedora.request_options
+        Faraday.new(ActiveFedora.fedora.host, options) do |conn|
+          conn.response :encoding # use Faraday::Encoding middleware
+          conn.adapter Faraday.default_adapter # net/http
+          if Gem::Version.new(Faraday::VERSION) < Gem::Version.new('2')
+            conn.request :basic_auth, ActiveFedora.fedora.user, ActiveFedora.fedora.password
           else
-            raise "Couldn't get data from Fedora (#{uri}). Response: #{response.code}"
+            conn.request :authorization, :basic, ActiveFedora.fedora.user, ActiveFedora.fedora.password
+            conn.response :follow_redirects, limit: redirection_limit - 1 # Need to reduce by one to retain same behavior as before
           end
         end
       end
-    end
   end
-
-  private
-
-    # @return [String] current authorization token from Ldp::Client
-    def authorization_key
-      ldp_source.client.http.headers.fetch("Authorization", nil)
-    end
 end
