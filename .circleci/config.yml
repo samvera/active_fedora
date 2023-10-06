@@ -71,6 +71,10 @@ workflows:
     jobs:
       # Ruby 3.2 releases
       - bundle_lint_test:
+          name: ruby3-2_rails7-1
+          ruby_version: 3.2.2
+          rails_version: 7.1.0
+      - bundle_lint_test:
           name: ruby3-2_rails7-0
           ruby_version: 3.2.0
           rails_version: 7.0.4.1
@@ -145,6 +149,10 @@ workflows:
                 - main
     jobs:
       # Ruby 3.2 releases
+      - bundle_lint_test:
+          name: ruby3-2_rails7-1
+          ruby_version: 3.2.2
+          rails_version: 7.1.0
       - bundle_lint_test:
           name: ruby3-2_rails7-0
           ruby_version: 3.2.0
