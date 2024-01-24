@@ -1,4 +1,4 @@
-require 'active_support/per_thread_registry'
+require 'active_support/core_ext/module'
 
 module ActiveFedora
   module Scoping
@@ -66,37 +66,35 @@ module ActiveFedora
     #   ActiveFedora::Scoping::ScopeRegistry.set_value_for(:current_scope,
     #       Board, some_new_scope)
     class ScopeRegistry # :nodoc:
-      extend ActiveSupport::PerThreadRegistry
-
       VALID_SCOPE_TYPES = [:current_scope, :ignore_default_scope].freeze
 
-      def initialize
-        @registry = Hash.new { |hash, key| hash[key] = {} }
+      thread_mattr_accessor :_registry
+      def self.registry
+        self._registry ||= Hash.new { |hash, key| hash[key] = {} }
       end
 
       # Obtains the value for a given +scope_type+ and +model+.
-      def value_for(scope_type, model)
+      def self.value_for(scope_type, model)
         raise_invalid_scope_type!(scope_type)
         klass = model
         base = model.base_class
         while klass <= base
-          value = @registry[scope_type][klass.name]
+          value = registry[scope_type][klass.name]
           return value if value
           klass = klass.superclass
         end
       end
 
       # Sets the +value+ for a given +scope_type+ and +model+.
-      def set_value_for(scope_type, model, value)
+      def self.set_value_for(scope_type, model, value)
         raise_invalid_scope_type!(scope_type)
-        @registry[scope_type][model.name] = value
+        registry[scope_type][model.name] = value
       end
 
-      private
-
-        def raise_invalid_scope_type!(scope_type)
-          raise ArgumentError, "Invalid scope type '#{scope_type}' sent to the registry. Scope types must be included in VALID_SCOPE_TYPES" unless VALID_SCOPE_TYPES.include?(scope_type)
-        end
+      # @api private
+      def self.raise_invalid_scope_type!(scope_type)
+        raise ArgumentError, "Invalid scope type '#{scope_type}' sent to the registry. Scope types must be included in VALID_SCOPE_TYPES" unless VALID_SCOPE_TYPES.include?(scope_type)
+      end
     end
   end
 end
