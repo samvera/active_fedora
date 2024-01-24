@@ -17,6 +17,7 @@ jobs:
     executor:
       name: 'samvera/ruby_fcrepo_solr'
       ruby_version: << parameters.ruby_version >>
+      solr_version: "9"
     environment:
       RAILS_VERSION: << parameters.rails_version >>
     steps:
@@ -37,8 +38,13 @@ jobs:
           bundler_version: << parameters.bundler_version >>
           project: 'active-fedora'
 
-      - samvera/install_solr_core:
-          solr_config_path: << parameters.solr_config_path >>
+      - run:
+          name: Install solr core
+          command: |
+            cd << parameters.solr_config_path >>
+            zip -1 -r solr_conf.zip ./*
+            curl -H "Content-type:application/octet-stream" --data-binary @solr_conf.zip "http://solr:SolrRocks@127.0.0.1:8985/solr/admin/configs?action=UPLOAD&name=solrconfig"
+            curl "http://solr:SolrRocks@127.0.0.1:8985/solr/admin/collections?action=CREATE&name=hydra-test&numShards=1&collection.configName=solrconfig"
 
       - samvera/rubocop
 
