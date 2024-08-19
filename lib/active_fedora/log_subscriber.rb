@@ -5,6 +5,7 @@ module ActiveFedora
       @odd = false
     end
 
+    # rubocop:disable Style/IfInsideElse
     def ldp(event)
       return unless logger.debug?
 
@@ -13,15 +14,25 @@ module ActiveFedora
       name = "#{payload[:name]} (#{event.duration.round(1)}ms)"
       id = payload[:id] || "[no id]"
 
-      if odd?
-        name = color(name, CYAN, true)
-        id = color(id, nil, true)
+      if ActiveSupport.version >= Gem::Version.new('7.1.0')
+        if odd?
+          name = color(name, CYAN, bold: true)
+          id = color(id, nil, bold: true)
+        else
+          name = color(name, MAGENTA, bold: true)
+        end
       else
-        name = color(name, MAGENTA, true)
+        if odd?
+          name = color(name, CYAN, true)
+          id = color(id, nil, true)
+        else
+          name = color(name, MAGENTA, true)
+        end
       end
 
       debug "  #{name} #{id} Service: #{payload[:ldp_service]}"
     end
+    # rubocop:enable Style/IfInsideElse
 
     def odd?
       @odd = !@odd
