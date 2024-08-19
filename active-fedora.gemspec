@@ -23,6 +23,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'faraday', '>= 1.0'
   s.add_dependency 'faraday-encoding', '>= 0.0.5'
   s.add_dependency "ldp", '>= 0.7.0', '< 2'
+  s.add_dependency "mutex_m"
   s.add_dependency 'rsolr', '>= 1.1.2', '< 3'
   s.add_dependency "ruby-progressbar", '~> 1.0'
 
