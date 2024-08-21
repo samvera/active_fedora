@@ -16,18 +16,11 @@ module ActiveFedora
                     "  write_attribute(#{attr_name_expr}, value)" <<
                     "end"
                 end
-              elsif ActiveModel.version >= Gem::Version.new('6.1.0')
+              else
                 owner <<
                   "def #{temp_method_name}(value)" <<
                   "  write_attribute(#{attr_name_expr}, value)" <<
                   "end"
-              else
-                generated_attribute_methods.module_eval <<-RUBY, __FILE__, __LINE__ + 1
-                  def #{temp_method_name}(value)
-                    name = #{attr_name_expr}
-                    write_attribute(name, value)
-                  end
-                RUBY
               end
               # rubocop:enable Style/LineEndConcatenation
             end

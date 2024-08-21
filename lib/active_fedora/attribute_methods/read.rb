@@ -16,18 +16,11 @@ module ActiveFedora
                     "  _read_attribute(#{attr_name_expr}) { |n| missing_attribute(n, caller) }" <<
                     "end"
                 end
-              elsif ActiveModel.version >= Gem::Version.new('6.1.0')
+              else
                 owner <<
                   "def #{temp_method_name}" <<
                   "  _read_attribute(#{attr_name_expr}) { |n| missing_attribute(n, caller) }" <<
                   "end"
-              else
-                generated_attribute_methods.module_eval <<-RUBY, __FILE__, __LINE__ + 1
-                  def #{temp_method_name}
-                    name = #{attr_name_expr}
-                    _read_attribute(name) { |n| missing_attribute(n, caller) }
-                  end
-                RUBY
               end
               # rubocop:enable Style/LineEndConcatenation
             end

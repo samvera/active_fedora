@@ -16,8 +16,8 @@ Gem::Specification.new do |s|
   s.metadata = { "rubygems_mfa_required" => "true" }
   s.required_ruby_version = '>= 2.6'
 
-  s.add_dependency "activemodel", '>= 5.1'
-  s.add_dependency "activesupport", '>= 5.1'
+  s.add_dependency "activemodel", '>= 6.1'
+  s.add_dependency "activesupport", '>= 6.1'
   s.add_dependency "active-triples", '>= 0.11.0', '< 2.0.0'
   s.add_dependency "deprecation"
   s.add_dependency 'faraday', '>= 1.0'
