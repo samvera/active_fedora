@@ -4,19 +4,33 @@ module ActiveFedora
       module ClassMethods
         protected
 
-          def define_method_attribute=(name, owner: nil, as: name) # rubocop:disable Lint/UnusedMethodArgument
-            name = name.to_s
-            safe_name = name.unpack('h*'.freeze).first
-            ActiveFedora::AttributeMethods::AttrNames.set_name_cache safe_name, name
-
-            generated_attribute_methods.module_eval <<-STR, __FILE__, __LINE__ + 1
-              def __temp__#{safe_name}=(value)
-                name = ::ActiveRecord::AttributeMethods::AttrNames::ATTR_#{safe_name}
-                write_attribute(name, value)
+          def define_method_attribute=(canonical_name, owner: nil, as: canonical_name)
+            ActiveModel::AttributeMethods::AttrNames.define_attribute_accessor_method(
+              owner, canonical_name, writer: true
+            ) do |temp_method_name, attr_name_expr|
+              # rubocop:disable Style/LineEndConcatenation
+              if ActiveModel.version >= Gem::Version.new('7.0.0')
+                owner.define_cached_method(temp_method_name, as: "#{as}=", namespace: :active_fedora) do |batch|
+                  batch <<
+                    "def #{temp_method_name}(value)" <<
+                    "  write_attribute(#{attr_name_expr}, value)" <<
+                    "end"
+                end
+              elsif ActiveModel.version >= Gem::Version.new('6.1.0')
+                owner <<
+                  "def #{temp_method_name}(value)" <<
+                  "  write_attribute(#{attr_name_expr}, value)" <<
+                  "end"
+              else
+                generated_attribute_methods.module_eval <<-RUBY, __FILE__, __LINE__ + 1
+                  def #{temp_method_name}(value)
+                    name = #{attr_name_expr}
+                    write_attribute(name, value)
+                  end
+                RUBY
               end
-              alias_method #{(name + '=').inspect}, :__temp__#{safe_name}=
-              undef_method :__temp__#{safe_name}=
-            STR
+              # rubocop:enable Style/LineEndConcatenation
+            end
           end
       end
 
