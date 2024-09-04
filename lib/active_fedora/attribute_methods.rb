@@ -14,7 +14,7 @@ module ActiveFedora
       end
     end
 
-    BLACKLISTED_CLASS_METHODS = %w[private public protected allocate new name parent superclass].freeze
+    RESTRICTED_CLASS_METHODS = %w[private public protected allocate new name parent superclass].freeze
 
     class GeneratedAttributeMethods < Module; end # :nodoc:
 
@@ -81,7 +81,7 @@ module ActiveFedora
       # A class method is 'dangerous' if it is already (re)defined by Active Record, but
       # not by any ancestors. (So 'puts' is not dangerous but 'new' is.)
       def dangerous_class_method?(method_name)
-        BLACKLISTED_CLASS_METHODS.include?(method_name.to_s) || class_method_defined_within?(method_name, Base)
+        RESTRICTED_CLASS_METHODS.include?(method_name.to_s) || class_method_defined_within?(method_name, Base)
       end
 
       def class_method_defined_within?(name, klass, superklass = klass.superclass) # :nodoc:
