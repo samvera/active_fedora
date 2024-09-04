@@ -1,5 +1,6 @@
 require 'active_support/core_ext/object'
 require 'active_support/core_ext/class/attribute'
+require 'mutex_m'
 
 module ActiveFedora
   module AttributeMethods
