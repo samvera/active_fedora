@@ -177,7 +177,7 @@ module ActiveFedora
       if value.is_a?(String) && value.length > 50
         "#{value[0, 50]}...".inspect
       elsif value.is_a?(Date) || value.is_a?(Time)
-        %("#{value.to_s(:db)}")
+        %("#{value.to_formatted_s(:db)}")
       elsif value.is_a?(Array) && value.size > 10
         inspected = value.first(10).inspect
         %(#{inspected[0...-1]}, ...])
