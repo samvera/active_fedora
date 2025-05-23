@@ -81,6 +81,11 @@ jobs:
 workflows:
   ci:
     jobs:
+      # Ruby 3.4 releases
+      - bundle_lint_test:
+          name: ruby3-4_rails8-0
+          ruby_version: 3.4.4
+          rails_version: 8.0.2
       # Ruby 3.3 releases
       - bundle_lint_test:
           name: ruby3-3_rails7-2
@@ -134,6 +139,11 @@ workflows:
               only:
                 - main
     jobs:
+      # Ruby 3.4 releases
+      - bundle_lint_test:
+          name: ruby3-4_rails8-0
+          ruby_version: 3.4.4
+          rails_version: 8.0.2
       # Ruby 3.3 releases
       - bundle_lint_test:
           name: ruby3-3_rails7-2
