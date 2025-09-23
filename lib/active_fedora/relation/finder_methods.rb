@@ -149,7 +149,12 @@ module ActiveFedora
       counter = 0
       loop do
         counter += 1
-        response = ActiveFedora::SolrService.instance.conn.paginate counter, batch_size, select_path, params: opts
+        # Put params into data if doing a post request
+        response = if opts[:method] == :post || ActiveFedora::SolrService.default_http_method
+                     ActiveFedora::SolrService.instance.conn.paginate counter, batch_size, select_path, data: opts
+                   else
+                     ActiveFedora::SolrService.instance.conn.paginate counter, batch_size, select_path, params: opts
+                   end
         docs = response["response"]["docs"]
         yield docs
         break unless docs.has_next?
