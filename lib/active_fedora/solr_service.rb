@@ -49,7 +49,7 @@ module ActiveFedora
 
       def query(query, args = {})
         Base.logger.warn "Calling ActiveFedora::SolrService.get without passing an explicit value for ':rows' is not recommended. You will end up with Solr's default (usually set to 10)\nCalled by #{caller[0]}" unless args.key?(:rows)
-        method = args.delete(:method) || :get
+        method = args.delete(:method) || default_http_method
 
         result = case method
                  when :get
@@ -64,6 +64,23 @@ module ActiveFedora
         end
       end
 
+      def paginate(query, args = {})
+        args = args.merge(q: query)
+        args[:qt] ||= 'standard'
+        batch_size = args.delete(:batch_size) || 1000
+        counter = args.delete(:page) || 0
+        args[:method] ||= default_http_method
+
+        case args[:method]
+        when :get
+          SolrService.instance.conn.paginate counter, batch_size, select_path, params: args
+        when :post
+          SolrService.instance.conn.paginate counter, batch_size, select_path, data: args
+        else
+          raise "Unsupported HTTP method for querying SolrService (#{method.inspect})"
+        end
+      end
+
       def delete(id)
         SolrService.instance.conn.delete_by_id(id, params: { 'softCommit' => true })
       end
@@ -74,7 +91,18 @@ module ActiveFedora
       # @return [Integer] number of records matching
       def count(query, args = {})
         args = args.merge(rows: 0)
-        SolrService.get(query, args)['response']['numFound'].to_i
+        method = args.delete(:method) || default_http_method
+
+        result = case method
+                 when :get
+                   get(query, args)
+                 when :post
+                   post(query, args)
+                 else
+                   raise "Unsupported HTTP method for querying SolrService (#{method.inspect})"
+                 end
+
+        result['response']['numFound'].to_i
       end
 
       # @param [Hash] doc the document to index, or an array of docs
@@ -87,6 +115,10 @@ module ActiveFedora
 
       def commit
         SolrService.instance.conn.commit
+      end
+
+      def default_http_method
+        ActiveFedora.solr_config.fetch(:http_method, :get).to_sym
       end
     end
   end # SolrService

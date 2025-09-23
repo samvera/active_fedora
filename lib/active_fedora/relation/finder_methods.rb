@@ -143,19 +143,10 @@ module ActiveFedora
       # set default sort to created date ascending
       opts[:sort] = @klass.default_sort_params if opts[:sort].blank?
 
-      batch_size = opts.delete(:batch_size) || 1000
-      select_path = ActiveFedora::SolrService.select_path
-
       counter = 0
       loop do
         counter += 1
-        # Put params into data if doing a post request
-        response = if opts[:method] == :post || ActiveFedora::SolrService.default_http_method
-                     ActiveFedora::SolrService.instance.conn.paginate counter, batch_size, select_path, data: opts
-                   else
-                     ActiveFedora::SolrService.instance.conn.paginate counter, batch_size, select_path, params: opts
-                   end
-        docs = response["response"]["docs"]
+        docs = ActiveFedora::SolrService.paginate(opts[:q], opts.merge(page: counter))
         yield docs
         break unless docs.has_next?
       end
