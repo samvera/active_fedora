@@ -22,3 +22,6 @@ group :test do
 end
 
 gem 'jruby-openssl', platform: :jruby
+
+# rdf-tabular has a dependency on csv but it was removed from the ruby standard library starting in 3.4
+gem "csv", "~> 3.0" if Gem::Version.new(RUBY_VERSION) >= Gem::Version.new('3.3')
