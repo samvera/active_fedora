@@ -48,4 +48,5 @@ Gem::Specification.new do |s|
     "README.md"
   ]
   s.require_paths = ["lib"]
+  s.post_install_message = "ActiveFedora 16+ is built for Fedora 6+.  See Upgrading.md for important changes from ActiveFedora 15 and hints for using the Fedora upgrade tools to migrate from Fedora 4."
 end
