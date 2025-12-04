@@ -19,7 +19,7 @@ namespace :active_fedora do
     end
   rescue LoadError
     desc "Generate YARD Documentation"
-    task doc: :environment do
+    task :doc do
       abort "Please install the YARD gem to generate rdoc."
     end
   end
@@ -42,7 +42,7 @@ namespace :active_fedora do
   end
 
   desc "CI build"
-  task ci: :environment do
+  task :ci do
     Rake::Task['active_fedora:rubocop'].invoke unless ENV['NO_RUBOCOP']
     ENV['environment'] = "test"
     with_test_server do
@@ -51,7 +51,7 @@ namespace :active_fedora do
   end
 
   desc "Execute specs with coverage"
-  task coverage: :environment do
+  task :coverage do
     # Put spec opts in a file named .rspec in root
     ruby_engine = defined?(RUBY_ENGINE) ? RUBY_ENGINE : "ruby"
     ENV['COVERAGE'] = 'true' unless ruby_engine == 'jruby'
@@ -59,7 +59,7 @@ namespace :active_fedora do
   end
 
   desc "Execute specs with coverage"
-  task spec: :environment do
+  task :spec do
     with_test_server do
       Rake::Task["active_fedora:rspec"].invoke
     end

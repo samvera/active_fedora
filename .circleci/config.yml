@@ -4,6 +4,9 @@ orbs:
 jobs:
   bundle_lint_test:
     parameters:
+      ruby_type:
+        type: string
+        default: 'ruby'
       ruby_version:
         type: string
       bundler_version:
@@ -14,23 +17,22 @@ jobs:
       solr_config_path:
         type: string
         default: lib/generators/active_fedora/config/solr/templates/solr/conf
-      ruby_type:
-        type: string
-        default: 'ruby'
       solr_port:
         type: string
         default: '8985'
       fcrepo_version:
         type: string
-        default: "4.7.5"
+        default: "5.1.0"
       solr_version:
         type: string
         default: "9"
     docker:
       - image: cimg/<< parameters.ruby_type >>:<< parameters.ruby_version >>-browsers
-      - image: samvera/fcrepo4:<< parameters.fcrepo_version >>
+      - image: fcrepo/fcrepo:6.5-tomcat9
         environment:
-          CATALINA_OPTS: "-Djava.awt.headless=true -Dfile.encoding=UTF-8 -server -Xms512m -Xmx1024m -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=256m -XX:MaxPermSize=256m -XX:+DisableExplicitGC"
+          JAVA_OPTS: -Dfcrepo.autoversioning.enabled=false -Dfcrepo.external.content.allowed=/fcrepo_allow.txt
+        command: |
+          /bin/bash -c "echo 'http://fedoraAdmin:fedoraAdmin@localhost:8080/' > /fcrepo_allow.txt && catalina.sh run"
       - image: zookeeper:3.9
         environment:
           ZOO_ADMINSERVER_ENABLED: false
@@ -49,6 +51,8 @@ jobs:
       FCREPO_TEST_PORT: 8080
       SPEC_OPTS: --profile 10 --format RspecJunitFormatter --out /tmp/test-results/rspec.xml --format progress
       RAILS_VERSION: << parameters.rails_version >>
+      FCREPO_PORT: 8080
+      FCREPO_REST_PATH: fcrepo/rest
     steps:
       - samvera/cached_checkout
       - checkout

@@ -13,6 +13,7 @@ module ActiveFedora
 
       def omit_uris
         [
+          "http://fedora.info/definitions/fcrepo#ServerManaged",
           ::RDF::Vocab::Fcrepo4.ServerManaged,
           ::RDF::Vocab::LDP.PreferContainment,
           ::RDF::Vocab::LDP.PreferEmptyContainer,

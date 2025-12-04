@@ -248,6 +248,9 @@ Rails/FilePath:
 Rails/ActiveRecordAliases:
   Enabled: false
 
+Rails/RakeEnvironment:
+  Enabled: false
+
 Rails/SkipsModelValidations:
   Enabled: false
 
