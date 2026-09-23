@@ -21,6 +21,7 @@ describe ActiveFedora::Attributes, ".new" do
           duplicate.instance_variable_set :@permitted, @permitted
         end
       end
+      alias stringify_keys dup
     end
 
     class Person < ActiveFedora::Base

@@ -3,6 +3,7 @@ orbs:
   samvera: samvera/circleci-orb@1.0
 jobs:
   bundle_lint_test:
+    resource_class: medium+
     parameters:
       ruby_version:
         type: string
@@ -37,6 +38,7 @@ jobs:
       - image: solr:<< parameters.solr_version >>
         environment:
           VERBOSE: yes
+          SOLR_OPTS: "-Dsolr.config.lib.enabled=true"
           SECURITY_JSON: '{"authentication":{"blockUnknown": false, "class":"solr.BasicAuthPlugin", "credentials":{"solr":"IV0EHq1OnNrj6gvRCwvFwTrZ1+z1oBbnQdiVC3otuq0= Ndd7LKvVBAaZIF0QAVi1ekCfAJXr1GGfLtRUXhgrF8c="}, "realm":"My Solr users", "forwardCredentials": false}, "authorization":{ "class":"solr.RuleBasedAuthorizationPlugin", "permissions":[{"name":"security-edit", "role":"admin"}], "user-role":{"solr":"admin"}}}'
         command: sh -c "server/scripts/cloud-scripts/zkcli.sh -zkhost localhost:2181 -cmd put /security.json \"${SECURITY_JSON}\" && solr-fg -cloud -noprompt  -p << parameters.solr_port >> -z localhost:2181"
     environment:
@@ -81,49 +83,45 @@ jobs:
 workflows:
   ci:
     jobs:
+      # Ruby 4.0 releases
+      - bundle_lint_test:
+          name: ruby4-0_rails8-1
+          ruby_version: 4.0.7
+          rails_version: 8.1.3.1
+      - bundle_lint_test:
+          name: ruby4-0_rails8-0
+          ruby_version: 4.0.7
+          rails_version: 8.0.5.1
+      - bundle_lint_test:
+          name: ruby_4-0_rails7-2
+          ruby_version: 4.0.7
+          rails_version: 7.2.3.2
+      # Ruby 3.4 releases
+      - bundle_lint_test:
+          name: ruby3-4_rails8-1
+          ruby_version: 3.4.10
+          rails_version: 8.1.3.1
+      - bundle_lint_test:
+          name: ruby3-4_rails8-0
+          ruby_version: 3.4.10
+          rails_version: 8.0.5.1
+      - bundle_lint_test:
+          name: ruby_3-4_rails7-2
+          ruby_version: 3.4.10
+          rails_version: 7.2.3.2
       # Ruby 3.3 releases
       - bundle_lint_test:
-          name: ruby3-3_rails7-2
-          ruby_version: 3.3.4
-          rails_version: 7.2.0
+          name: ruby3-3_rails8-1
+          ruby_version: 3.3.12
+          rails_version: 8.1.3.1
       - bundle_lint_test:
-          name: ruby3-3_rails7-1
-          ruby_version: 3.3.4
-          rails_version: 7.1.3.4
+          name: ruby3-3_rails8-0
+          ruby_version: 3.3.12
+          rails_version: 8.0.5.1
       - bundle_lint_test:
-          name: ruby3-3_rails7-0
-          ruby_version: 3.3.4
-          rails_version: 7.0.8.4
-      - bundle_lint_test:
-          name: ruby3-3_rails6-1
-          ruby_version: 3.3.4
-          rails_version: 6.1.7.8
-      # Ruby 3.2 releases
-      - bundle_lint_test:
-          name: ruby3-2_rails7-1
-          ruby_version: 3.2.5
-          rails_version: 7.1.3.4
-      - bundle_lint_test:
-          name: ruby3-2_rails7-0
-          ruby_version: 3.2.5
-          rails_version: 7.0.8.4
-      - bundle_lint_test:
-          name: ruby3-2_rails6-1
-          ruby_version: 3.2.5
-          rails_version: 6.1.7.8
-      # Ruby 3.1 releases
-      - bundle_lint_test:
-          name: ruby3-1_rails7-1
-          ruby_version: 3.1.6
-          rails_version: 7.1.3.4
-      - bundle_lint_test:
-          name: ruby3-1_rails7-0
-          ruby_version: 3.1.6
-          rails_version: 7.0.8.4
-      - bundle_lint_test:
-          name: ruby3-1_rails6-1
-          ruby_version: 3.1.6
-          rails_version: 6.1.7.8
+          name: ruby_3-3_rails7-2
+          ruby_version: 3.3.12
+          rails_version: 7.2.3.2
 
   nightly:
     triggers:
@@ -134,46 +132,42 @@ workflows:
               only:
                 - main
     jobs:
+      # Ruby 4.0 releases
+      - bundle_lint_test:
+          name: ruby4-0_rails8-1
+          ruby_version: 4.0.7
+          rails_version: 8.1.3.1
+      - bundle_lint_test:
+          name: ruby4-0_rails8-0
+          ruby_version: 4.0.7
+          rails_version: 8.0.5.1
+      - bundle_lint_test:
+          name: ruby_4-0_rails7-2
+          ruby_version: 4.0.7
+          rails_version: 7.2.3.2
+      # Ruby 3.4 releases
+      - bundle_lint_test:
+          name: ruby3-4_rails8-1
+          ruby_version: 3.4.10
+          rails_version: 8.1.3.1
+      - bundle_lint_test:
+          name: ruby3-4_rails8-0
+          ruby_version: 3.4.10
+          rails_version: 8.0.5.1
+      - bundle_lint_test:
+          name: ruby_3-4_rails7-2
+          ruby_version: 3.4.10
+          rails_version: 7.2.3.2
       # Ruby 3.3 releases
       - bundle_lint_test:
-          name: ruby3-3_rails7-2
-          ruby_version: 3.3.4
-          rails_version: 7.2.0
+          name: ruby3-3_rails8-1
+          ruby_version: 3.3.12
+          rails_version: 8.1.3.1
       - bundle_lint_test:
-          name: ruby3-3_rails7-1
-          ruby_version: 3.3.4
-          rails_version: 7.1.3.4
+          name: ruby3-3_rails8-0
+          ruby_version: 3.3.12
+          rails_version: 8.0.5.1
       - bundle_lint_test:
-          name: ruby3-3_rails7-0
-          ruby_version: 3.3.4
-          rails_version: 7.0.8.4
-      - bundle_lint_test:
-          name: ruby3-3_rails6-1
-          ruby_version: 3.3.4
-          rails_version: 6.1.7.8
-      # Ruby 3.2 releases
-      - bundle_lint_test:
-          name: ruby3-2_rails7-1
-          ruby_version: 3.2.5
-          rails_version: 7.1.3.4
-      - bundle_lint_test:
-          name: ruby3-2_rails7-0
-          ruby_version: 3.2.5
-          rails_version: 7.0.8.4
-      - bundle_lint_test:
-          name: ruby3-2_rails6-1
-          ruby_version: 3.2.5
-          rails_version: 6.1.7.8
-      # Ruby 3.1 releases
-      - bundle_lint_test:
-          name: ruby3-1_rails7-1
-          ruby_version: 3.1.6
-          rails_version: 7.1.3.4
-      - bundle_lint_test:
-          name: ruby3-1_rails7-0
-          ruby_version: 3.1.6
-          rails_version: 7.0.8.4
-      - bundle_lint_test:
-          name: ruby3-1_rails6-1
-          ruby_version: 3.1.6
-          rails_version: 6.1.7.8
+          name: ruby_3-3_rails7-2
+          ruby_version: 3.3.12
+          rails_version: 7.2.3.2
