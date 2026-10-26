@@ -26,7 +26,7 @@ jobs:
         default: "5.1.0"
       solr_version:
         type: string
-        default: "9"
+        default: "9.10.1"
     docker:
       - image: cimg/<< parameters.ruby_type >>:<< parameters.ruby_version >>-browsers
       - image: fcrepo/fcrepo:6.5-tomcat9
